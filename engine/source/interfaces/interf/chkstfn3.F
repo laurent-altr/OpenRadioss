@@ -744,8 +744,10 @@ C
                 ENDDO
               ELSE
                 IF ((R2R_SIU == 1).AND.(TAGEL(IE) > -1)) THEN
+#ifndef WITHOUT_R2R
                   CALL R2R_TAGEL(NTAGEL_R2R_SEND,IXS(11,NFT+I),ITAB(IXS(2,NFT+I)),ITY,
      .                           OFUR,TAGEL_SIZE) 
+#endif
                 ENDIF
                 TAGEL(IE)=-1
                 DO K=2,9
@@ -868,8 +870,10 @@ C
                 ENDDO
               ELSE
                 IF ((R2R_SIU == 1).AND.(TAGEL(IE) > -1)) THEN
+#ifndef WITHOUT_R2R
                   CALL R2R_TAGEL(NTAGEL_R2R_SEND,IXQ(7,NFT+I),ITAB(IXQ(2,NFT+I)),ITY,
      .                           OFUR,TAGEL_SIZE)
+#endif
                 ENDIF
                 TAGEL(IE)=-1
                 DO K=2,5
@@ -900,8 +904,10 @@ C
                 ENDDO
               ELSE
                 IF ((R2R_SIU == 1).AND.(TAGEL(IE) > -1)) THEN
+#ifndef WITHOUT_R2R
                   CALL R2R_TAGEL(NTAGEL_R2R_SEND,IXC(7,NFT+I),ITAB(IXC(2,NFT+I)),ITY,
      .                           OFUR,TAGEL_SIZE)                                     
+#endif
                 ENDIF 
                 TAGEL(IE)=-1
                 DO K=2,5
@@ -937,8 +943,11 @@ C
                 ENDDO
               ELSE
                 IF ((R2R_SIU == 1).AND.(TAGEL(IE) > -1)) THEN
+#ifndef WITHOUT_R2R
                   CALL R2R_TAGEL(NTAGEL_R2R_SEND,IXT(5,NFT+I),ITAB(IXT(2,NFT+I)),ITY,
      .                           OFUR,TAGEL_SIZE)                                      
+#endif
+
                 ENDIF
                 TAGEL(IE)=-1
                 DO K=2,3
@@ -963,8 +972,10 @@ C
                 ENDDO
               ELSE
                 IF ((R2R_SIU == 1).AND.(TAGEL(IE) > -1)) THEN
+#ifndef WITHOUT_R2R
                   CALL R2R_TAGEL(NTAGEL_R2R_SEND,IXP(6,NFT+I),ITAB(IXP(2,NFT+I)),ITY,
      .                           OFUR,TAGEL_SIZE)                                      
+#endif
                 ENDIF
                 TAGEL(IE)=-1
                 DO K=2,3
@@ -993,8 +1004,10 @@ C
                 ENDIF
               ELSE
                 IF ((R2R_SIU == 1).AND.(TAGEL(IE) > -1)) THEN
+#ifndef WITHOUT_R2R
                  CALL R2R_TAGEL(NTAGEL_R2R_SEND,IXR(NIXR,NFT+I),ITAB(IXR(2,NFT+I)),ITY,
      .                          OFUR,TAGEL_SIZE)                                       
+#endif
                 ENDIF
                 TAGEL(IE)=-1
                 DO K=2,3
@@ -1031,8 +1044,10 @@ C
                 ENDDO
               ELSE
                 IF ((R2R_SIU == 1).AND.(TAGEL(IE) > -1)) THEN
+#ifndef WITHOUT_R2R
                 CALL R2R_TAGEL(NTAGEL_R2R_SEND,IXTG(6,NFT+I),ITAB(IXTG(2,NFT+I)),ITY,
      .                         OFUR,TAGEL_SIZE)                                      
+#endif
                 ENDIF
                 TAGEL(IE)=-1
                 DO K=2,4
@@ -1097,8 +1112,10 @@ C
                 ENDDO
               ELSE
                 IF ((R2R_SIU == 1).AND.(TAGEL(IE) > -1)) THEN
+#ifndef WITHOUT_R2R
                   CALL R2R_TAGEL(NTAGEL_R2R_SEND,IXUR(7,NFT+I),ITAB(IXUR(2,NFT+I)),ITY,
      .                           OFUR,TAGEL_SIZE)
+#endif
                 ENDIF
                 TAGEL(IE)=-1
                 DO K=2,5
@@ -1150,6 +1167,7 @@ C-------------------------------
 C Partie non parallele
 !$OMP SINGLE
       IF (R2R_SIU == 1.AND.IDEL7NOK.EQ.1) THEN
+#ifndef WITHOUT_R2R
 C-----------------------------------------------------------------
 C       Envoi de ITAG et TAGEL pour multidomaines
 C-----------------------------------------------------------------
@@ -1241,6 +1259,7 @@ C       RAZ de IDEL7NOK_R2R et NTAGEL_R2R_RECV
           IF(ALLOCATED(TAGEL_R2R_RECV)) DEALLOCATE(TAGEL_R2R_RECV)
         ENDIF
 C--------------------------------------------------------
+#endif
       ENDIF
 C Fin Partie non parallele
 !$OMP END SINGLE

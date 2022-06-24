@@ -549,6 +549,8 @@ C Initialisation du common pour les tailles des fichiers
       BCSFILESIZE = 0
       MUMPSFILESIZE = 0
       H3DTOTALSIZE = 0
+      CALL INIPAR(ITID,1,NNODES,INPUTNAM,GOT_INPUT,NBTASK)
+
 C--------------------------------------------------
       IF (GOT_INPUT == 1) THEN
 C On cherche a connaitre le numero de l input et du run
@@ -558,7 +560,7 @@ C On cherche a connaitre le numero de l input et du run
      *                          RUNN,FVERS)
 
 C On ouvre le fichier input en lecture
-         ISTDI = 80
+         ISTDI = 80 + ISPMD 
          INPUTNAM(1:LENINPUT)=INPUT(1:LENINPUT)
          IF (GOT_PATH==1)THEN
            FNAME=PATH(1:LENPATH)//INPUTNAM(1:LENINPUT)
@@ -585,7 +587,7 @@ c
      .                         LEN_TMP_NAME2,TMP_NAME2)
 
         IF (IERR == 0) THEN
-                ISTDI = 80
+                ISTDI = 80 + ISPMD
                 OPEN(UNIT=ISTDI,FORM='FORMATTED',FILE=INAME(1:LFNAME),
      .               ACTION='READ',STATUS='OLD',IOSTAT=IO_ERR)
         ELSE 
@@ -604,10 +606,11 @@ C--------------------------------------------------
       CALL COQINI
 C--------------------------------------------------
 C RECUPERATION DES CARACTERISTIQUES HARDWARE AVANT INIT // (system incompatible avec infiniband)
-      CALL PRINTCPU(1)
+C     CALL PRINTCPU(1)
 C INITIALISE INFORMATIQUEMENT LES NTHREAD(=NPROC)   TACHES
-      CALL INIPAR(ITID,1,NNODES,INPUTNAM,GOT_INPUT,NBTASK)
+C     CALL INIPAR(ITID,1,NNODES,INPUTNAM,GOT_INPUT,NBTASK)
 C Hardcode KMP_STACKSIZE Environment variable
+      IIN = 8+100*ISPMD
       CALL SET_STACK_VALUES()
 C--------------------------------------------------
       HELAS=HALF
@@ -925,7 +928,7 @@ C
       ENDIF
 
 C appel a fopen peut bloquer avec Intel MPI et kernel linux < 2.6.18
-      CALL PRINTCPU(2)
+C      CALL PRINTCPU(2)
 
       IF(ISPMD.EQ.0)
      *  CALL PRINTCENTER(" ",0,IOUT,1)

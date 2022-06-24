@@ -4449,6 +4449,7 @@ C===============================================================================
 C-----------------------------------------------
 C Multidomains : synchro proc of flag_activation
 C----------------------------------------------
+#ifndef WITHOUT_R2R
       IF (NSPMD.GT.1) THEN
         IF ((SDD_R2R_ELEM.GT.0).AND.(FLG_SPHINOUT_R2R.GT.0)) THEN
           LENR = IAD_ELEM(1,NSPMD+1)-IAD_ELEM(1,1)
@@ -4458,6 +4459,7 @@ C----------------------------------------------
           CALL SPMD_EXCH_R2R_SPH(V,IAD_ELEM,FR_ELEM,DD_R2R,DD_R2R_ELEM,LENR)
         ENDIF
       ENDIF
+#endif
 
 
         IF(NVOLU.NE.0)THEN
@@ -5141,9 +5143,11 @@ C recuperation IDEL7NOK global
         ENDIF
         IDEL7NOK_SAV = IDEL7NOK
         IF (R2R_SIU.EQ.1.AND.IDEL7NG.GE.1) THEN
+#ifndef WITHOUT_R2R
            CALL GET_SHMBUF_C(IDEL7NOK_R2R,2)
            IDEL7NOK = IDEL7NOK+IDEL7NOK_R2R
            IDEL7NOK = MIN(1,IDEL7NOK)
+#endif
         ENDIF
 C Attention WA utilise sur 2*NUMNOD (NUMNOD + NUMNOD SPECIFIQUE SPMD)
         IF ((IDEL7NG.GE.1.AND.IDEL7NOK.EQ.1).OR.PDEL.GT.0) THEN
@@ -5607,6 +5611,7 @@ C===============================================================================
 C                                     SECTION PARALLELE SMP
 C========================================================================================
 C--- COUPLAGE RADIOSS 2 RADIOSS
+#ifndef WITHOUT_R2R
         IF (IRAD2R /= 0) THEN      
           IF (NSPMD.GT.1) CALL SPMD_BARRIER()
             CALL R2R_EXCHANGE(
@@ -5626,7 +5631,7 @@ C
           ENDIF
 C
         ENDIF
-
+#endif
 C========================================================================================
 C                                     SECTION NON PARALLELE SMP
 C========================================================================================
@@ -6190,6 +6195,7 @@ C-----------------------------
 C      COUPLAGE RADIOSS 2 RADIOSS
 C-----------------------------
         IF (IRAD2R /= 0 .AND. R2R_ACTIV == 1) THEN 
+#ifndef WITHOUT_R2R
         CALL R2R_SENDKINE(IEXLNK,IGRNOD,MS,IN)                      
         IF (NSPMD.GT.1) CALL SPMD_BARRIER()
 C--------------------------------------------------------------C 
@@ -6251,6 +6257,7 @@ C--------------------------------------------------------------C
            CALL R2R_UNLOCK_THREADS_C(NTHREAD*NSPMD)           
          ENDIF         
 !$OMP END MASTER
+
          CALL R2R_BLOCK_C()        
 C--------------------------------------------------------------C 
 C--------------------------------------------------------------C                       
@@ -6263,6 +6270,7 @@ C--------------------------------------------------------------C
      .                    XDP     ,D       ,R2R_ON  ,DD_R2R  ,WEIGHT  ,
      .                    IAD_ELEM,FR_ELEM ,STIFN   ,STIFR   ,DD_R2R_ELEM  ,
      .                    SDD_R2R_ELEM)
+#endif
 
          IF (IMONM > 0) CALL STOPTIME(54,1)  
         
@@ -6866,12 +6874,14 @@ C--- //0 ----------------
 C-----------------------------------------------
 C Multidomains : resynchro des accelerations en SPH
 C----------------------------------------------
+#ifndef WITHOUT_R2R
         IF (NSPMD.GT.1) THEN
           IF ((SDD_R2R_ELEM.GT.0).AND.(NUMSPH_GLO_R2R.GT.0)) THEN
             LENR = IAD_ELEM(1,NSPMD+1)-IAD_ELEM(1,1)
             CALL SPMD_EXCH_R2R_SPH(A,IAD_ELEM,FR_ELEM,DD_R2R,DD_R2R_ELEM,LENR)
           ENDIF
         ENDIF
+#endif
 
 C========================================================================================
 C                                     SECTION PARALLELE SMP
@@ -9478,9 +9488,11 @@ C-------------------------------
         PARALLEL_SECTION = 0
 C Multidomaines -> fermeture des sockets
         IF (IRAD2R.EQ.1) THEN
+#ifndef WITHOUT_R2R
           DO ITSK=1,NTHREAD
             CALL CLOSE_SOCK_C(SOCKET(ITSK))
           END DO
+#endif
         ENDIF
 C /KILL
         IF((NCYCLE/NCRST)*NCRST.NE.NCYCLE.AND.

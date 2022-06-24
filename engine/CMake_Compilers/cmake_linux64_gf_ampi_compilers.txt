@@ -1,0 +1,6 @@
+# Fixed compiler switches for linux64 Gfortran binary
+set ( CMAKE_Fortran_COMPILER "/work/lberenguer/charm/mpi-linux-x86_64-gfortran-gcc/bin/mpif90.ampi" )
+set ( CMAKE_C_COMPILER "/work/lberenguer/charm/mpi-linux-x86_64-gfortran-gcc/bin/mpicc.ampi" )
+set ( CMAKE_CXX_COMPILER "/work/lberenguer/charm/mpi-linux-x86_64-gfortran-gcc/bin/mpicxx.ampi" )
+set ( CMAKE_CPP_COMPILER "/work/lberenguer/charm/mpi-linux-x86_64-gfortran-gcc/bin/mpicxx.ampi" )
+

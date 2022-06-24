@@ -21,8 +21,6 @@ if ( DEFINED MPI )
      set (mpi_suf "" )
   elseif ( mpiver STREQUAL "ompi")
 
-      set (mpi_inc "-I/opt/openmpi/include/")
-      set (mpi_lib "-L/opt/openmpi/lib -lmpi -lmpi_mpifh" )
 
     if (mpi_os STREQUAL "1")
       
@@ -48,6 +46,10 @@ if ( DEFINED MPI )
 
     set (mpi_suf "_${mpiver}" )
     set (mpi_flag "-DMPI ${mpi_inc}")
+  elseif ( mpiver STREQUAL "ampi")
+    set (mpi_suf "_${mpiver}" )
+    set (mpi_flag "-DMPI")
+
   else()
     message( FATAL_ERROR "\n ERROR : -mpi=${mpiver} not available for this platform\n\n" )
   endif()
@@ -88,6 +90,9 @@ message (STATUS "modules: ${CMAKE_Fortran_MODULE_DIRECTORY}")
 if ( NOT DEFINED WITH_LINEAR_ALGEBRA) 
 set ( wo_linalg "-DWITHOUT_LINALG" )
 endif()
+if ( mpiver STREQUAL "ampi")
+set( wo_linalg  "-DWITHOUT_LINALG -DADAPTIVE_MPI -DWITHOUT_R2R") 
+endif()
 
 set ( opt_flag "  ${wo_linalg} -DCOMP_GFORTRAN=1 -ffp-contract=off -frounding-math -fopenmp" )
 
@@ -110,7 +115,6 @@ set_source_files_properties(${cpp_source_files} PROPERTIES COMPILE_FLAGS "${FSAN
 else ()
 
 # Fortran
-
 
 set_source_files_properties( ${source_files}  PROPERTIES COMPILE_FLAGS " -O3 -fdec-math ${opt_flag} ${precision_flag} ${cppmach} ${cpprel} -DCPP_comp=f90 -ffixed-line-length-none  ${mpi_flag} ${ADF} " )
 

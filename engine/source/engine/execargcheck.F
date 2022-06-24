@@ -129,10 +129,18 @@ C-----------------------------------------------
         SEPARATOR='/'
 #endif
 
+#ifdef ADAPTIVE_MPI
+       CALL AMPI_COMMAND_ARGUMENT_COUNT(ARGN) 
+#else
        ARGN = COMMAND_ARGUMENT_COUNT()!IARGC()
+#endif
 
        DO I=1,ARGN
+#ifdef ADAPTIVE_MPI
+        CALL AMPI_GET_COMMAND_ARGUMENT(I, ARGS, 128, ERR) 
+#else
         CALL GETARG(I,ARGS)
+#endif
         STRL=LEN_TRIM(ARGS)
 
         ARGS2(1:2096) = ''
@@ -215,7 +223,11 @@ C Lignes de commande qui ne sont pas definies
              IF (I == 1)THEN
                ERR = 1
              ELSE
+#ifdef ADAPTIVE_MPI
+               CALL AMPI_GET_COMMAND_ARGUMENT(I-1, ARGP, 128, ERR) 
+#else 
                CALL GETARG(I-1,ARGP)
+#endif
                CALL UPCASE(ARGP)
                STRLN=LEN_TRIM(ARGP)
 C Check if argument string is a variable to an argument
@@ -237,9 +249,11 @@ C Specificife Radioss Madymo
                ENDIF
              ENDIF
              IF (ERR == 1)THEN
+#ifndef ADAPTIVE_MPI
                CALL GETARG(I,ARGP)
                STRLN=LEN_TRIM(ARGP) 
                CALL PHELPINFO(2,ARGP,STRLN)
+#endif
                CALL ARRET(7)
              ENDIF
 C------------------------------------------------
@@ -305,13 +319,22 @@ C------------------------------------------------
 
 C          Case -I is last argument in the list.
 
+#ifdef ADAPTIVE_MPI
+           CALL AMPI_GET_COMMAND_ARGUMENT(IERRMSG, ARGP, 128, ERR)  
+#else
            CALL GETARG(IERRMSG,ARGP)
+#endif
            STRLN=LEN_TRIM(ARGP) 
            MSG = ARGP
            CALL PHELPINFO(1,MSG,STRLN)
            CALL ARRET(7)
          ELSE
+#ifdef ADAPTIVE_MPI
+           CALL AMPI_GET_COMMAND_ARGUMENT(IERRMSG-1, INPUTR, 128, ERR) 
+#else 
            CALL GETARG(IERRMSG+1,INPUTR)
+#endif
+
            LENI=LEN_TRIM(INPUTR)
 
 C check if -i has got an argument or if the next string is an input command
@@ -321,7 +344,11 @@ C check if -i has got an argument or if the next string is an input command
            ISIN = 0
            CALL ISANARGUMENT(ARGLIST,LENLIST,INPUTC,ISIN)
            IF ( ISIN==1 )THEN
+#ifdef ADAPTIVE_MPI
+               CALL AMPI_GET_COMMAND_ARGUMENT(PINPUTI, ARGP, 128, ERR) 
+#else 
                CALL GETARG(PINPUTI,ARGP)
+#endif
                STRLN=LEN_TRIM(ARGP) 
                MSG=ARGP
                CALL PHELPINFO(1,MSG,STRLN)
@@ -339,14 +366,21 @@ C------------------------------------------------
          IF (PINPUTI+1  > ARGN) THEN
 
 C          Case -I is last argument in the list.
-
+#ifdef ADAPTIVE_MPI
+           CALL AMPI_GET_COMMAND_ARGUMENT(PINPUTI, ARGP, 128, ERR) 
+#else 
            CALL GETARG(PINPUTI,ARGP)
+#endif
            STRLN=LEN_TRIM(ARGP) 
            MSG = ARGP
            CALL PHELPINFO(1,MSG,STRLN)
            CALL ARRET(7)
          ELSE
+#ifdef ADAPTIVE_MPI
+           CALL AMPI_GET_COMMAND_ARGUMENT(PINPUTI+1, ARGP, 128, ERR) 
+#else 
            CALL GETARG(PINPUTI+1,INPUTR)
+#endif
            LENI=LEN_TRIM(INPUTR)
            GOT_INPUT = 1
 
@@ -357,7 +391,11 @@ C check if -i has got an argument or if the next string is an input command
            ISIN = 0
            CALL ISANARGUMENT(ARGLIST,LENLIST,INPUTC,ISIN)
            IF ( ISIN==1 )THEN
+#ifdef ADAPTIVE_MPI
+               CALL AMPI_GET_COMMAND_ARGUMENT(PINPUTI, ARGP, 128, ERR) 
+#else 
                CALL GETARG(PINPUTI,ARGP)
+#endif
                STRLN=LEN_TRIM(ARGP) 
                MSG=ARGP
                CALL PHELPINFO(1,MSG,STRLN)
@@ -393,19 +431,34 @@ C------------------------------------------------
        IF (PNTHI .NE. 0)THEN
          IF (PNTHI+1  > ARGN) THEN
 C case -nt is last argument in the list.
+#ifdef ADAPTIVE_MPI
+           CALL AMPI_GET_COMMAND_ARGUMENT(PNTHI, ARGP, 128, ERR) 
+#else 
+
            CALL GETARG(PNTHI,ARGP)
+#endif
            STRLN=LEN_TRIM(ARGP)
            MSG = ARGP
            CALL PHELPINFO(1,MSG,STRLN)
            CALL ARRET(7)
          ELSE
+#ifdef ADAPTIVE_MPI
+           CALL AMPI_GET_COMMAND_ARGUMENT(PNTHI+1, ARGP, 128, ERR) 
+#else 
+
            CALL GETARG(PNTHI+1,STRING)
+#endif
 C check if -nt has got an argument or if the next string is an input command
            CALL UPCASE(STRING)
            ISIN = 0
            CALL ISANARGUMENT(ARGLIST,LENLIST,STRING,ISIN)
            IF ( ISIN==1 )THEN
+#ifdef ADAPTIVE_MPI
+           CALL AMPI_GET_COMMAND_ARGUMENT(PNTHI, ARGP, 128, ERR) 
+#else 
+
              CALL GETARG(PNTHI,ARGP)
+#endif
              STRLN=LEN_TRIM(ARGP) 
              MSG=ARGP
              CALL PHELPINFO(1,MSG,STRLN)
@@ -413,7 +466,12 @@ C check if -nt has got an argument or if the next string is an input command
            END IF
            GOT_NTH = 1
 C convert the argument to an Integer
+#ifdef ADAPTIVE_MPI
+           CALL AMPI_GET_COMMAND_ARGUMENT(PNTHI+1, STRING, 128, ERR) 
+#else 
+
            CALL GETARG(PNTHI+1,STRING)
+#endif
            READ(STRING,'(I10)',ERR=1999) NTH
 C Read converting was OK goto 2000
            GOTO 2000
@@ -435,12 +493,21 @@ C------------------------------------------------
 
 C          Case -DYLIB is last argument in the list.
 
+#ifdef ADAPTIVE_MPI
+           CALL AMPI_GET_COMMAND_ARGUMENT(PUSERLNAMI, ARGP, 128, ERR) 
+#else 
+
            CALL GETARG(PUSERLNAMI,ARGP)
+#endif
            STRLN=LEN_TRIM(ARGP) 
            CALL PHELPINFO(1,ARGP,STRLN)
  
          ELSE
+#ifdef ADAPTIVE_MPI
+           CALL AMPI_GET_COMMAND_ARGUMENT(PUSERLNAMI+1, USERL_ALTNAME, 128, ERR) 
+#else 
            CALL GETARG(PUSERLNAMI+1,USERL_ALTNAME)
+#endif
            LEN_USERL_ALTNAME=LEN_TRIM(USERL_ALTNAME)
            GOT_USERL_ALTNAME = 1
 C check if -dylib has got an argument or if the next string is an input command
@@ -450,7 +517,11 @@ C check if -dylib has got an argument or if the next string is an input command
            ISIN = 0
            CALL ISANARGUMENT(ARGLIST,LENLIST,ULIBC,ISIN)
            IF ( ISIN==1 )THEN
+#ifdef ADAPTIVE_MPI
+           CALL AMPI_GET_COMMAND_ARGUMENT(PUSERLNAMI, ARGP, 128, ERR) 
+#else 
                CALL GETARG(PUSERLNAMI,ARGP)
+#endif
                STRLN=LEN_TRIM(ARGP) 
                CALL PHELPINFO(1,ARGP,STRLN)
                CALL ARRET(7)
@@ -485,9 +556,9 @@ C check if -mds has got an argument or if the next string is an input command
 
            IF ( ISIN==1 )THEN
                CALL GETARG(MDS_PATHI,ARGP)
-               STRLN=LEN_TRIM(ARGP) 
-               CALL PHELPINFO(1,ARGP,STRLN)
-               CALL ARRET(7)
+C              STRLN=LEN_TRIM(ARGP) 
+C              CALL PHELPINFO(1,ARGP,STRLN)
+C              CALL ARRET(7)
            ENDIF 
 
          ENDIF     !         IF (MDS_PATHI+1  > ARGN) THEN
@@ -577,7 +648,7 @@ C-----------------------------------------------
 
 
 
-	SUBROUTINE PEXECINFO(IDUM)
+        SUBROUTINE PEXECINFO(IDUM)
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -622,7 +693,7 @@ C-----------------------------------------------
         CALL MY_EXIT(0)
         END
 
-	SUBROUTINE PREXECINFO(IDUM)
+        SUBROUTINE PREXECINFO(IDUM)
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -667,7 +738,7 @@ C-----------------------------------------------
 
         END
 
-	SUBROUTINE PHELPINFO(ERRN,EMSG,SMSG)
+        SUBROUTINE PHELPINFO(ERRN,EMSG,SMSG)
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------

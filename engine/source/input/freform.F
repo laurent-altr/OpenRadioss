@@ -2068,7 +2068,9 @@ C--------------------
         ELSEIF(KEY2.EQ.'ON')THEN
           IRAD2R = 1
 C     Connection initale avec rad2rad  C
+#ifndef WITHOUT_R2R
           IF (ISPMD.EQ.0) CALL CONNECTION_SOCK_INIT_C(SOCK0)
+#endif
         ENDIF
         K=K+1
         DO 680 I=1,NBC

@@ -24,7 +24,11 @@ else()
 set (cdir "_c" )
 endif()
 
+if( mpiver STREQUAL "ampi")
 include (CMake_Compilers${cdir}/cmake_${arch}_compilers.txt)
+else()
+include (CMake_Compilers${cdir}/cmake_${arch}_ampi_compilers.txt)
+endif()
 
 # source files & include directories
 # -------------------------------------
@@ -184,7 +188,7 @@ message (STATUS "MPI: ${mpiver} ")
 if ( mpi_os STREQUAL "1")
    message (STATUS "MPI in default OS installation : ${mpi_os} ")
 endif()
-message (STATUS "MPI libraries : ${mpi_lib} ")
+message (STATUS "MPI libraries: ${mpi_lib} ")
 message (STATUS "MPI include directory : ${mpi_inc} ")
 
 message (STATUS "Flags release: ${CMAKE_Fortran_FLAGS_RELEASE} ")

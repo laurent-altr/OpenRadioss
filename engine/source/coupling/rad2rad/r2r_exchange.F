@@ -94,7 +94,7 @@ C-----------------------------------------------
 C
       INTEGER, DIMENSION(:), POINTER :: GRNOD
 C=======================================================================
-
+#ifndef WITHOUT_R2R
 C------------------------------------------------------
 C------------ Stock force and stifness for exch -------
 C------------------------------------------------------
@@ -105,8 +105,8 @@ C------------------------------------------------------
           IDP  = IEXLNK(2,IEX)                                  
           NNG  = IGRNOD(IDG)%NENTITY
           GRNOD => IGRNOD(IDG)%ENTITY
-	  IF (IRESP.EQ.1) THEN
-C----------simple precision : on remplace DX par XDP--------------	                                    
+          IF (IRESP.EQ.1) THEN
+C----------simple precision : on remplace DX par XDP--------------                                          
              CALL SEND_DATA_C(
      .        IDP    ,NNG    ,GRNOD  ,A      ,AR     ,     
      .        STX    ,STR    ,V      ,VR     ,MS     ,IN     ,     
@@ -120,8 +120,8 @@ C---------double precision---------------------------------------
      .        STX    ,STR    ,V      ,VR     ,MS     ,IN     ,     
      .        DX     ,X      ,TYPLNK(IEX),NCYCLE,RBY,TAG_RBY,
      .        ADD_RBY(IEX) ,RBYLNK(IEX),KINLNK(IEX),R2R_KINE,DT1,IEX,
-     .        OFF_SPH_R2R  ,NUMSPH_GLO_R2R, NRBY)	  
-	  ENDIF                                     
+     .        OFF_SPH_R2R  ,NUMSPH_GLO_R2R, NRBY)         
+          ENDIF                                     
         END DO
       ELSE
         DO IEX = 1, NR2RLNK
@@ -129,21 +129,21 @@ C---------double precision---------------------------------------
           IDP  = IEXLNK(2,IEX)                                  
           NNG  = IGRNOD(IDG)%NENTITY                                    
           GRNOD => IGRNOD(IDG)%ENTITY
-	  IF (IRESP.EQ.1) THEN
-C----------simple precision : on remplace DX par XDP-------------	  	                                      
+          IF (IRESP.EQ.1) THEN
+C----------simple precision : on remplace DX par XDP-------------                                                     
              CALL SEND_DATA_SPMD(
      .           IDP,NNG,GRNOD        ,A                    ,AR     ,     
      .           STX,STR,V            ,VR                   ,MS     ,     
      .           IN ,XDP ,DD_R2R(1,IEX),DD_R2R(NSPMD+1,IEX),WEIGHT,
      .           TYPLNK(IEX),ROTLNK(IEX),RBYLNK(IEX),RBY,IEX)
-	  ELSE     
-C----------double precision -------------------------------------  	                                      
+          ELSE     
+C----------double precision -------------------------------------                                             
              CALL SEND_DATA_SPMD(
      .           IDP,NNG,GRNOD        ,A                    ,AR     ,     
      .           STX,STR,V            ,VR                   ,MS     ,     
      .           IN ,DX ,DD_R2R(1,IEX),DD_R2R(NSPMD+1,IEX),WEIGHT,
      .           TYPLNK(IEX),ROTLNK(IEX),RBYLNK(IEX),RBY,IEX)
-	  ENDIF
+          ENDIF
         END DO                  
       ENDIF
       
@@ -190,7 +190,7 @@ C------------------------------------------------------
       IF(NSPMD.GT.1)THEN
         CALL SPMD_IBCAST(R2R_ACTIV,R2R_ACTIV,1,1,0,2)
         CALL SPMD_IBCAST(I7KGLO,I7KGLO,1,1,0,2)
-        IF (R2R_ACTIV == 1) CALL SPMD_IBCAST(R2R_ON,R2R_ON,1,1,0,2)	
+        IF (R2R_ACTIV == 1) CALL SPMD_IBCAST(R2R_ON,R2R_ON,1,1,0,2)     
       END IF
       IF (R2R_ACTIV == -1) THEN        
         TT = TSTOP
@@ -253,11 +253,11 @@ C--------------------------------------------------------------------
           NNG  = IGRNOD(IDG)%NENTITY
           GRNOD => IGRNOD(IDG)%ENTITY
           NB = DD_R2R(NSPMD+1,IEX)
-	  IF (ISPMD.EQ.0) THEN
-	    NGLOB=DD_R2R(NSPMD+1,IEX)+DBNO(IEX)	    	    
-	  ELSE
-	    NGLOB=NNG	    
-	  ENDIF
+          IF (ISPMD.EQ.0) THEN
+            NGLOB=DD_R2R(NSPMD+1,IEX)+DBNO(IEX)             
+          ELSE
+            NGLOB=NNG       
+          ENDIF
           CALL GET_STIFF_SPMD(
      .      IDP     ,NNG    ,GRNOD        ,MS   ,IN    ,
      .      STX     ,STR    ,DD_R2R(1,IEX),NGLOB,WEIGHT,
@@ -268,6 +268,7 @@ C--------------------------------------------------------------------
 
 C-----------------------------------------------------------------
       RETURN
+#endif
       END SUBROUTINE R2R_EXCHANGE
 C
 Chd|====================================================================
@@ -325,6 +326,8 @@ C-----------------------------------------------
      .        BUFR4(NGLOB), BUFR5(3,NGLOB), BUFR6(3,NGLOB),
      .        BUFR8(NGLOB), BUFR9(NGLOB),BUF_RBY(9,NGLOB)
       DOUBLE PRECISION BUFR7(3,NGLOB)       
+
+#ifndef WITHOUT_R2R
 C
 C******************************************************************************C
 
@@ -346,7 +349,7 @@ C******************************************************************************C
       IF(FLAG_ROT /= 0)
      .  CALL SPMD_R2R_RGET(IN,NNG,GRNOD,DD_R2R,WEIGHT,BUFR9)
         IF (FLAG_RBY.EQ.1)
-     .    CALL SPMD_R2R_RBY(RBY,NNG,GRNOD,DD_R2R,WEIGHT,IEX,BUF_RBY)                	
+     .    CALL SPMD_R2R_RBY(RBY,NNG,GRNOD,DD_R2R,WEIGHT,IEX,BUF_RBY)                    
       ENDIF
 
       IF(ISPMD.EQ.0) THEN      
@@ -356,6 +359,7 @@ C******************************************************************************C
       ENDIF
 C-----------------------------------------------------------------
       RETURN
+#endif
       END
 C
 Chd|====================================================================
@@ -406,13 +410,14 @@ C-----------------------------------------------
      .        BUFR1(NGLOB), BUFR2(NGLOB), BUFR3(NGLOB), BUFR4(NGLOB)
 C
 C******************************************************************************C
+#ifndef WITHOUT_R2R
       IF(ISPMD == 0) THEN
       CALL GET_STIFF_SPMD_C(IDP,NB,BUFR1,BUFR2,BUFR3,BUFR4,
-     .                      TYP,NCYCLE,IEX,NGLOB)	               		
+     .                      TYP,NCYCLE,IEX,NGLOB)                               
       ENDIF
 
       IF (TYP.EQ.5) THEN     
-      LRBUF = 2*2*(IAD_ELEM(1,NSPMD+1)-IAD_ELEM(1,1))+2*NSPMD	
+      LRBUF = 2*2*(IAD_ELEM(1,NSPMD+1)-IAD_ELEM(1,1))+2*NSPMD   
 
       IF (NCYCLE.EQ.0) THEN
       CALL SPMD_R2R_RSET(MS   ,NNG     ,GRNOD,DD_R2R,WEIGHT,
@@ -431,6 +436,7 @@ C******************************************************************************C
       END IF
 
 C-----------------------------------------------------------------
+#endif
       RETURN
       END
 C
@@ -460,6 +466,7 @@ C-----------------------------------------------
       INTEGER I,N,TAGEL_SIZE_OLD
       INTEGER, DIMENSION(:),ALLOCATABLE :: TAGEL_TEMP
 C=======================================================================
+#ifndef WITHOUT_R2R
 
       N = 3*NTAGEL_R2R_SEND
       NTAGEL_R2R_SEND = NTAGEL_R2R_SEND + 1
@@ -491,6 +498,7 @@ C------------------------------------------------------------------
 
 C-----------------------------------------------------------------
       RETURN
+#endif
       END
 
 Chd|====================================================================
@@ -526,6 +534,7 @@ C-----------------------------------------------
 C
       INTEGER, DIMENSION(:), POINTER :: GRNOD
 C=======================================================================
+#ifndef WITHOUT_R2R
 
        OFF = 0
 
@@ -541,5 +550,6 @@ C----------Echange itag ( 0 reception / 1 emission) --------------
          END DO
        ENDIF
 C-----------------------------------------------------------------
+#endif
       RETURN
       END

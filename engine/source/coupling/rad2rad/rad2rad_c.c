@@ -20,6 +20,9 @@
 //Copyright>    As an alternative to this open-source version, Altair also offers Altair Radioss 
 //Copyright>    software under a commercial license.  Contact Altair to discuss further if the 
 //Copyright>    commercial version may interest you: https://www.altair.com/radioss/.    
+//
+//
+#ifndef WITHOUT_R2R
 #include "hardware.inc"
 #if CPP_mach != CPP_wnt
 #include "pipes_c.inc"
@@ -3477,3 +3480,6 @@ void get_name_c__(name)
 char *name;
 {get_name_c(name);}
 #endif
+#else
+#endif
+

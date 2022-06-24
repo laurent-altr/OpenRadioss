@@ -117,6 +117,7 @@ C-----------------------------------------------
 C
       INTEGER, DIMENSION(:), POINTER :: GRNOD
 C******************************************************************************C
+#ifndef WITHOUT_R2R
       INFO=NUMELS+NUMELQ+NUMELC
       NBK = 0
       SIZE_TAG_RBY = 0
@@ -150,29 +151,29 @@ C------Cas SMP initialization---------------c
        ALLOCATE(SOCKET(NTHREAD))
        DO I = 1, ROOTLEN
            IROOT(I) = ICHAR(ROOTNAM(I:I))
-       END DO	
+       END DO   
 C----- Connection premiere socket-----------c
        IF (ISPMD.EQ.0) THEN
          SOCKET(1)=SOCK0 
          CALL SEND_SOCK_INIT_C(IROOT,ROOTLEN,ISPMD,
-     .        	SOCKET(1),NTHREAD,NSPMD)
+     .          SOCKET(1),NTHREAD,NSPMD)
        ENDIF
 C----- Synchronisation of the process - transfer of hostname     
        IF (NSPMD.GT.1) CALL SPMD_R2R_SYNC(ADDR)       
 C----- Connection socket des threads--------c
-       IF(ISPMD.EQ.0) THEN     	      
+       IF(ISPMD.EQ.0) THEN            
          DO ITSK=2,NTHREAD
            CALL GET_NAME_C(ADDR)
            ADDR=trim(ADDR)  
-           CALL CONNECTION_SOCK_C(ITSK-1,SOCKET(ITSK),ADDR)	 
+           CALL CONNECTION_SOCK_C(ITSK-1,SOCKET(ITSK),ADDR)      
          END DO
        ELSE
          DO ITSK=1,NTHREAD
            NUM_SOCK = NTHREAD*ISPMD+ITSK
            CALL CONNECTION_SOCK_C(NUM_SOCK-1,SOCKET(ITSK),ADDR)
          END DO       
-       ENDIF                            	       
-C----- Initialize Fifos        		       
+       ENDIF                                           
+C----- Initialize Fifos                        
        CALL OPENFIFO_C(IROOT,ROOTLEN,FDW,FDR,SOCKET(1),ISPMD,NTHREAD,PPID)       
 C----- set signal catch  
        CALL GET_IBUF_C(IPID,1)
@@ -206,21 +207,21 @@ C-----
         IDG  = IEXLNK(1,IEX)
         IDP  = IEXLNK(2,IEX)
         NNG  = IGRNOD(IDG)%NENTITY
-	NFTC = 0
+        NFTC = 0
 !
         GRNOD => IGRNOD(IDG)%ENTITY
 !
-        IF (IDP.GT.NBK) NBK = IDP	
-C------	determination of the type of the interface
-	CALL SEND_IBUF_C(IDP,1)
-	CALL GET_IBUF_C(TYPLNK(IEX),1)
-	CALL GET_IBUF_C(MAIN_SIDE,1)
-	CALL GET_IBUF_C(RBYLNK(IEX),1)
-	CALL GET_IBUF_C(KINLNK(IEX),1)    
-	IF (RBYLNK(IEX).EQ.1) THEN
-	   ADD_RBY(IEX) = SIZE_TAG_RBY
-	   SIZE_TAG_RBY = SIZE_TAG_RBY + NNG
-	ENDIF
+        IF (IDP.GT.NBK) NBK = IDP       
+C------ determination of the type of the interface
+        CALL SEND_IBUF_C(IDP,1)
+        CALL GET_IBUF_C(TYPLNK(IEX),1)
+        CALL GET_IBUF_C(MAIN_SIDE,1)
+        CALL GET_IBUF_C(RBYLNK(IEX),1)
+        CALL GET_IBUF_C(KINLNK(IEX),1)    
+        IF (RBYLNK(IEX).EQ.1) THEN
+           ADD_RBY(IEX) = SIZE_TAG_RBY
+           SIZE_TAG_RBY = SIZE_TAG_RBY + NNG
+        ENDIF
 
 C--------------Mise a zero de weight2 pour les noeuds dupliqus--------        
         IF ((TYPLNK(IEX).EQ.5).AND.(MAIN_SIDE.EQ.1)) THEN
@@ -233,16 +234,16 @@ C--------------Initialisation des tableaux pour rlinks/cyljoints------
         IF ((TYPLNK(IEX).EQ.5).AND.(KINLNK(IEX).EQ.1)) THEN        
            ALLOCATE(R2R_KINE(3,NNG))
            R2R_KINE(:,:)=0                      
-	ENDIF        
-C----------------------------------------------------------------------              	
-C------	
+        ENDIF        
+C----------------------------------------------------------------------                 
+C------ 
         CALL INIT_LINK_C(IDP,NNG,ITAB,GRNOD,X,ADDCNEL,CNEL,IXC,
-     .        	OFC,INFO,TYPLNK(IEX),ICODT,ICODR,NCPRI,IRODDL,NBK,DX)
+     .          OFC,INFO,TYPLNK(IEX),ICODT,ICODR,NCPRI,IRODDL,NBK,DX)
        END DO
 !
        CALL INIT_ACTIV_C(R2R_ACTIV)
 C       CALL CHECK_RODDL_C()
-C----- Initialize Shared Memory        		       
+C----- Initialize Shared Memory                        
        CALL OPENSHM_C()
 C       
        CALL GET_FBUF_C(TSTOP,1)
@@ -253,17 +254,17 @@ C----- Actualize  mass and inertia
 C
         R2RFX1 = ZERO
         R2RFX2 = ZERO
-	ALLOCATE (TAG_RBY(SIZE_TAG_RBY))
+        ALLOCATE (TAG_RBY(SIZE_TAG_RBY))
         DO IEX = 1, NR2RLNK
           IDG  = IEXLNK(1,IEX)
           IDP  = IEXLNK(2,IEX)
           NNG  = IGRNOD(IDG)%NENTITY
           GRNOD => IGRNOD(IDG)%ENTITY
-	  IF (RBYLNK(IEX).EQ.0) THEN
+          IF (RBYLNK(IEX).EQ.0) THEN
              CALL SEND_MASS_C(IDP,NNG,GRNOD,MS,IN)
-	  ELSE 
+          ELSE 
              CALL SEND_MASS_RBY_C(IDP,NNG,GRNOD,MS,IN,NPBY,
-     .        	NRBODY,RBY,TAG_RBY,ADD_RBY(IEX),NNPBY,NRBY)
+     .          NRBODY,RBY,TAG_RBY,ADD_RBY(IEX),NNPBY,NRBY)
           ENDIF     
         END DO
 C        
@@ -273,13 +274,13 @@ C
             IDP  = IEXLNK(2,IEX)
             NNG  = IGRNOD(IDG)%NENTITY
             GRNOD => IGRNOD(IDG)%ENTITY
-	    IF (RBYLNK(IEX).EQ.0) THEN
+            IF (RBYLNK(IEX).EQ.0) THEN
               CALL GET_MASS_C(IDP,NNG,GRNOD,MS,IN)
-	    ELSE   
+            ELSE   
               CALL GET_MASS_RBY_C(IDP,NNG,GRNOD,MS,IN,X,NPBY,
-     .        	NRBODY,RBY,NNPBY,NRBY)
+     .          NRBODY,RBY,NNPBY,NRBY)
               CALL R2R_RBY(NNG,ITAB,GRNOD,X,MS,IN,NPBY,RBY,
-     .        	XDP,1,WEIGHT)     
+     .          XDP,1,WEIGHT)     
             ENDIF     
           END DO        
 C
@@ -319,7 +320,7 @@ C
        ENDIF
    
        ELSE
-            	                                 
+                                                 
 C------Allocation des Tableaux Communs
        ALLOCATE(TYPLNK(NR2RLNK),ROTLNK(NR2RLNK))          
        ALLOCATE(DBN(NR2RLNK,NSPMD),NBEL(NR2RLNK,NSPMD))
@@ -334,10 +335,10 @@ C---------------------------------------
          IROOT(I) = ICHAR(ROOTNAM(I:I))
        END DO 
  
-       IF(ISPMD.EQ.0) THEN      	 
+       IF(ISPMD.EQ.0) THEN               
 C----- Initialize Sockets
        ALLOCATE(SOCKET(NTHREAD))
-       SOCKET(1)=SOCK0	   
+       SOCKET(1)=SOCK0     
        CALL SEND_SOCK_INIT_C(IROOT,ROOTLEN,ISPMD,SOCKET(1),
      1    NTHREAD,NSPMD)
        ENDIF
@@ -352,8 +353,8 @@ C----- Initialize Fifos
         CALL OPENFIFO_C(IROOT,ROOTLEN,FDW,FDR,SOCKET(1),ISPMD,NTHREAD,PPID)
         CALL OPENSEM_C(IROOT,ROOTLEN,ISPMD,NTHREAD,PPID)
 C----- set signal catch
-        CALL GET_IBUF_C(IPID,1)	
-        CALL CATCH_SIG_C(IPID)	
+        CALL GET_IBUF_C(IPID,1) 
+        CALL CATCH_SIG_C(IPID)  
 C----- send link interface data
         CALL SEND_IBUF_C(NR2RLNK,1)
         CALL SEND_IBUF_C(IRODDL,1)
@@ -363,7 +364,7 @@ C----- send link interface data
         CALL SEND_IBUF_C(IDEL7NG,1)
         CALL SEND_IBUF_C(FLG_SPHINOUT_R2R,1) 
         CALL SEND_IBUF_C(IRUN,1)
-        CALL SPMD_IBCAST(PPID,PPID,1,1,0,2)   			
+        CALL SPMD_IBCAST(PPID,PPID,1,1,0,2)                     
        ELSE
 C----- Connect Sockets
        ALLOCATE(SOCKET(NTHREAD))
@@ -372,31 +373,31 @@ C----- Connect Sockets
          CALL CONNECTION_SOCK_C(NUM_SOCK-1,SOCKET(ITSK),ADDR)
        END DO
        CALL SPMD_IBCAST(PPID,PPID,1,1,0,2)
-       CALL OPENSEM_C(IROOT,ROOTLEN,ISPMD,NTHREAD,PPID)	                         
+       CALL OPENSEM_C(IROOT,ROOTLEN,ISPMD,NTHREAD,PPID)                          
        ENDIF
         
-C----- ----- ----- ----- ----- -----         	       
+C----- ----- ----- ----- ----- -----                   
        DO IEX = 1, NR2RLNK
          IDG  = IEXLNK(1,IEX)
          IDP  = IEXLNK(2,IEX)
          NNG  = IGRNOD(IDG)%NENTITY
          GRNOD => IGRNOD(IDG)%ENTITY
-C------	determination of the type of interface and link
+C------ determination of the type of interface and link
         IF (IDP.GT.NBK) NBK = IDP
         IF(ISPMD.EQ.0) THEN
-	  CALL SEND_IBUF_C(IDP,1)
-	  CALL GET_IBUF_C(TYPLNK(IEX),1)
-	  CALL GET_IBUF_C(MAIN_SIDE,1)            
-	  CALL GET_IBUF_C(RBYLNK(IEX),1)
-   	  CALL GET_IBUF_C(KINLNK(IEX),1)              	  	  
-	ENDIF
-c------		
-	IF(NSPMD.GT.1) THEN
+          CALL SEND_IBUF_C(IDP,1)
+          CALL GET_IBUF_C(TYPLNK(IEX),1)
+          CALL GET_IBUF_C(MAIN_SIDE,1)            
+          CALL GET_IBUF_C(RBYLNK(IEX),1)
+          CALL GET_IBUF_C(KINLNK(IEX),1)                          
+        ENDIF
+c------         
+        IF(NSPMD.GT.1) THEN
           CALL SPMD_IBCAST(TYPLNK(IEX),TYPLNK(IEX),1,1,0,2)
           CALL SPMD_IBCAST(MAIN_SIDE,MAIN_SIDE,1,1,0,2)          
           CALL SPMD_IBCAST(RBYLNK(IEX),RBYLNK(IEX),1,1,0,2)
           CALL SPMD_IBCAST(KINLNK(IEX),KINLNK(IEX),1,1,0,2)            
-	ENDIF
+        ENDIF
 C--------------Mise a zero de weight2 pour les noeuds dupliqus--------        
         IF ((TYPLNK(IEX).EQ.5).AND.(MAIN_SIDE.EQ.1)) THEN
           DO NN=1,NNG
@@ -404,12 +405,12 @@ C--------------Mise a zero de weight2 pour les noeuds dupliqus--------
             WEIGHT_MD(N) = 0
           END DO
         ENDIF
-C       	
-	IF (RBYLNK(IEX).EQ.1) THEN
-	  ADD_RBY(IEX) = SIZE_TAG_RBY
-	  SIZE_TAG_RBY = SIZE_TAG_RBY + NNG	  
-	ENDIF        			
-c------		 
+C               
+        IF (RBYLNK(IEX).EQ.1) THEN
+          ADD_RBY(IEX) = SIZE_TAG_RBY
+          SIZE_TAG_RBY = SIZE_TAG_RBY + NNG       
+        ENDIF                           
+c------          
         CALL INIT_LINK_SPMD(
      1    IDP          ,NNG                  ,ITAB  ,GRNOD,X,
      2    DD_R2R(1,IEX),DD_R2R(NSPMD+1,IEX),WEIGHT,ADDCNEL,CNEL,IXC,
@@ -419,7 +420,7 @@ c------
        IF(ISPMD.EQ.0) THEN
 !
          CALL INIT_ACTIV_C(R2R_ACTIV)
-C----- Initialize Shared Memory        		       
+C----- Initialize Shared Memory                        
          CALL OPENSHM_C()       
 C----- CALL CHECK_RODDL_C()
          CALL GET_FBUF_C(TSTOP,1)
@@ -427,7 +428,7 @@ C----- CALL CHECK_RODDL_C()
          IDEL7NG = MAX(IDEL7NG,IDEL_LOC)          
        END IF
        CALL SPMD_IBCAST(IDEL7NG,IDEL7NG,1,1,0,2)
-       IF (IDEL7NG.GE.1) IDEL7NOK = 1        	
+       IF (IDEL7NG.GE.1) IDEL7NOK = 1           
 C----- Actualize  mass and inertia
 C       IF (TT.EQ.ZERO) THEN
         R2RFX1 = ZERO
@@ -437,12 +438,12 @@ C       IF (TT.EQ.ZERO) THEN
           IDP  = IEXLNK(2,IEX)
           NNG  = IGRNOD(IDG)%NENTITY
           GRNOD => IGRNOD(IDG)%ENTITY
-	  IF (RBYLNK(IEX).EQ.0) THEN
+          IF (RBYLNK(IEX).EQ.0) THEN
             CALL SEND_MASS_SPMD(
      1         IDP,NNG,GRNOD,MS,IN,
      2         DD_R2R(1,IEX),DD_R2R(NSPMD+1,IEX),WEIGHT,ROTLNK(IEX))
           ELSE
-	    ALLOCATE (TAG_RBY(SIZE_TAG_RBY))	   	    
+            ALLOCATE (TAG_RBY(SIZE_TAG_RBY))                
             CALL SEND_MASS_RBY_SPMD(
      1         IDP,NNG,GRNOD,MS,IN,
      2         DD_R2R(1,IEX),DD_R2R(NSPMD+1,IEX),WEIGHT,ROTLNK(IEX),
@@ -457,12 +458,12 @@ C
             IDP  = IEXLNK(2,IEX)
             NNG  = IGRNOD(IDG)%NENTITY
             GRNOD => IGRNOD(IDG)%ENTITY
-	    IF (RBYLNK(IEX).EQ.0) THEN
+            IF (RBYLNK(IEX).EQ.0) THEN
               CALL GET_MASS_SPMD(
      1         IDP,NNG,GRNOD,MS      ,IN     ,
      2         DD_R2R(1,IEX),DD_R2R(NSPMD+1,IEX),WEIGHT,IAD_ELEM,
-     3         FR_ELEM,ROTLNK(IEX)) 	  
-	    ELSE	  
+     3         FR_ELEM,ROTLNK(IEX))       
+            ELSE          
               CALL GET_MASS_RBY_SPMD(
      1         IDP,NNG,GRNOD,MS      ,IN     ,
      2         DD_R2R(1,IEX),DD_R2R(NSPMD+1,IEX),WEIGHT,IAD_ELEM,
@@ -474,6 +475,7 @@ C
       END IF
 C-----------------------------------------------------------------
       RETURN
+#endif
       END
 Chd|====================================================================
 Chd|  INIT_LINK_SPMD                source/coupling/rad2rad/r2r_init.F
@@ -551,39 +553,39 @@ C..........LEL : Liste des id ( numerotation locale + offset) des elements inter
 C..........LELNBNOD : nombre de noeuds d'interface attach  chaque element de l'interface ------------------> IBUFELNBNOD             NBELT_R2R(IEX)
 C..........LELNOD : Liste des noeuds d'interface attachs aux elements de LEL -------------------------------> IBUFELNOD               NBELTN_R2R(IEX)
 C*******************************************************************************************************************************************************C
-
+#ifndef WITHOUT_R2R
       NNGDB = 0
 
       DO K = 1, NNG
         N=GRNOD(K)
         IF(WEIGHT(N).EQ.1)THEN
-	  BCS(K) = 10*ICODT(N)
-	  IF (IRODDL.EQ.1) BCS(K) = BCS(K) + ICODR(N)  
-	ELSE
+          BCS(K) = 10*ICODT(N)
+          IF (IRODDL.EQ.1) BCS(K) = BCS(K) + ICODR(N)  
+        ELSE
           NNGDB = NNGDB + 1
-        END IF	
+        END IF  
       END DO
       
 C      DO J = 1, NFXVEL
 C       DO K = 1, NNG
 C         IF ((IBFV(1,J).EQ.GRNOD(K)).AND.(IBFV(2,J).GT.0)) THEN
-C	  BCS(K) =  BCS(K) +100 ;
-C	 ENDIF
+C         BCS(K) =  BCS(K) +100 ;
+C        ENDIF
 C       END DO 
 C      END DO
-            	 
+                 
 C--------------------Recherche des connectivits noeuds/elements ( interfaces type 1,2)---C       
       IF (TYP.LT.4) THEN
       ALLOCATE(CNELEMDB(9*NNGDB))
       CALL INIT_BUF_SPMD_C(IDP,NNG,ITAB,GRNOD,X,ADDCNEL,CNEL,IXC,
-     .        	OFC,TLEL,LEL,LELNBNOD,TLELN,LELNOD,NBELEM,TCNEL,CNELEM,
-     .        	WEIGHT,TCNELDB,CNELEMDB,INFO,TYP,NGLOB)     
+     .          OFC,TLEL,LEL,LELNBNOD,TLELN,LELNOD,NBELEM,TCNEL,CNELEM,
+     .          WEIGHT,TCNELDB,CNELEMDB,INFO,TYP,NGLOB)     
       ENDIF
                  
 C-----------------------------------------------------------------------------------------C 
     
       CALL SPMD_R2R_IDEF(NNG,GRNOD,WEIGHT,IEX,TLEL,TLELN,TCNEL,
-     .        	TCNELDB)          
+     .          TCNELDB)          
       CALL SPMD_R2R_RGET3(X,NNG,GRNOD,DD_R2R,WEIGHT,BUFR2)
       CALL SPMD_R2R_RGET3(DX,NNG,GRNOD,DD_R2R,WEIGHT,BUFR)
       CALL SPMD_R2R_IGET(ITAB,NNG,GRNOD,DD_R2R,WEIGHT,IBUF,1)
@@ -652,6 +654,7 @@ C------------------------------------------------------------------------C
       ENDIF
       
       RETURN
+#endif
       END
 C
 Chd|====================================================================
@@ -699,6 +702,7 @@ C-----------------------------------------------
      .        BUFR1(NGLOB), BUFR2(NGLOB)
 C
 C******************************************************************************C
+#ifndef WITHOUT_R2R
       CALL SPMD_R2R_RGET(MS,NNG,GRNOD,DD_R2R,WEIGHT,BUFR1)
       IF(IRODDL /= 0)THEN
       CALL SPMD_R2R_RGET(IN,NNG,GRNOD,DD_R2R,WEIGHT,BUFR2)
@@ -707,6 +711,7 @@ C******************************************************************************C
      .  CALL SEND_MASS_SPMD_C(IDP,NGLOB,BUFR1,BUFR2,FLAG_ROT)
 C-----------------------------------------------------------------
       RETURN
+#endif
       END
 C
 Chd|====================================================================
@@ -756,6 +761,7 @@ C-----------------------------------------------
      .        BUFR1(NGLOB), BUFR2(NGLOB)
 C
 C******************************************************************************C
+#ifndef WITHOUT_R2R
       IF(ISPMD.EQ.0)
      .  CALL GET_MASS_SPMD_C(IDP,NGLOB,BUFR1,BUFR2)
       LRBUF = 2*2*(IAD_ELEM(1,NSPMD+1)-IAD_ELEM(1,1))+2*NSPMD
@@ -767,6 +773,7 @@ C******************************************************************************C
       ENDIF
 C-----------------------------------------------------------------
       RETURN
+#endif
       END
 C
 Chd|====================================================================
@@ -824,6 +831,7 @@ C-----------------------------------------------
      .        BUFR5(9*NGLOB)
 C
 C******************************************************************************C
+#ifndef WITHOUT_R2R
       CALL SPMD_R2R_RGET(MS,NNG,GRNOD,DD_R2R,WEIGHT,BUFR1)
       IF(IRODDL /= 0)THEN
       CALL SPMD_R2R_RGET(IN,NNG,GRNOD,DD_R2R,WEIGHT,BUFR2)
@@ -832,33 +840,34 @@ C******************************************************************************C
 C-----------------------------------------------------------------------            
       DO I=1,NNG
         N=GRNOD(I)
-	DO J = 1,NRBODY
-	  IF ((N.EQ.NPBY(NNPBY*(J-1)+1)).AND.(N.GT.0)) THEN
-	     IDRBY(I) = J
-	     TAG_RBY(ADDR+I) = J
-	  ENDIF    
-	END DO
+        DO J = 1,NRBODY
+          IF ((N.EQ.NPBY(NNPBY*(J-1)+1)).AND.(N.GT.0)) THEN
+             IDRBY(I) = J
+             TAG_RBY(ADDR+I) = J
+          ENDIF    
+        END DO
       END DO
       
       CALL SPMD_R2R_IGET(IDRBY,NNG,GRNOD,DD_R2R,WEIGHT,IBUF,0)     
 C----------------------------------------------------------------------- 
       
       IF(ISPMD.EQ.0) THEN
-C-----------------------------------------------------------------------      	
-	DO I = 1, NGLOB	    
-	    N = IBUF(I)
+C-----------------------------------------------------------------------        
+        DO I = 1, NGLOB     
+            N = IBUF(I)
             BUFR3(I)= NPBY(NNPBY*(N-1)+3)
-            BUFR4(I)= RBY(15,N)    	    
-	    DO J = 1,9
-              BUFR5(9*(I-1)+J)= RBY(16+J,N)	      
-	    END DO			
-        END DO	  	    	    	  
-C-----------------------------------------------------------------------	  	
+            BUFR4(I)= RBY(15,N)             
+            DO J = 1,9
+              BUFR5(9*(I-1)+J)= RBY(16+J,N)           
+            END DO                      
+        END DO                            
+C-----------------------------------------------------------------------                
         CALL SEND_MASS_RBY_SPMD_C(IDP,NGLOB,BUFR1,BUFR2,BUFR3,
-     .        BUFR4,BUFR5,FLAG_ROT)	
-      ENDIF	  
+     .        BUFR4,BUFR5,FLAG_ROT)     
+      ENDIF       
 C-----------------------------------------------------------------
       RETURN
+#endif
       END
 C
 Chd|====================================================================
@@ -910,6 +919,7 @@ C     REAL
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
+#ifndef WITHOUT_R2R
       INTEGER LRBUF,I,N,J,IDRBY(NNG),IBUF(NGLOB),IBUF2(NGLOB),
      .        ID_RB
       my_real
@@ -922,63 +932,64 @@ C--------------> Calcul de RBY sur le proc 0----------------------------
 C-----------------------------------------------------------------------            
       DO I=1,NNG
         N=GRNOD(I)
-	DO J = 1,NRBODY
-	  IF ((N.EQ.NPBY(NNPBY*(J-1)+1)).AND.(N.GT.0)) IDRBY(I) = J 
-	END DO
+        DO J = 1,NRBODY
+          IF ((N.EQ.NPBY(NNPBY*(J-1)+1)).AND.(N.GT.0)) IDRBY(I) = J 
+        END DO
       END DO      
       CALL SPMD_R2R_IGET(IDRBY,NNG,GRNOD,DD_R2R,WEIGHT,IBUF,0)
       CALL SPMD_R2R_IGET(ITAB,NNG,GRNOD,DD_R2R,WEIGHT,IBUF2,1)
                  
 C----------------------------------------------------------------------- 
             
-      IF(ISPMD.EQ.0) THEN	
+      IF(ISPMD.EQ.0) THEN       
         CALL GET_MASS_RBY_SPMD_C(IDP,NGLOB,BUFR1,BUFR2,BUFR3,BUFR4)     
         DO I = 1, NGLOB
-          IF(ISPMD.EQ.0) THEN	    
-	      N = IBUF(I)		    	    
-	      DO J = 1,3
-                 RBY_X(J,N)=BUFR3(3*(I-1)+J) 	      
-	      END DO	    	       	    
-	      DO J = 1,9
-                 RBY(16+J,N)=BUFR4(9*(I-1)+J) 	      
-	      END DO
-	   ENDIF 		    	    	    			
+          IF(ISPMD.EQ.0) THEN       
+              N = IBUF(I)                           
+              DO J = 1,3
+                 RBY_X(J,N)=BUFR3(3*(I-1)+J)          
+              END DO                        
+              DO J = 1,9
+                 RBY(16+J,N)=BUFR4(9*(I-1)+J)         
+              END DO
+           ENDIF                                                        
         END DO
         CALL R2R_RBY(NGLOB,IBUF2,IBUF,BUFR3,BUFR1,BUFR2,NPBY,RBY,
-     .        	XDP,NSPMD,WEIGHT)		 	   
+     .          XDP,NSPMD,WEIGHT)                          
       ENDIF
       
 C--------------> Echange RBY entre les procs-----------------------------
 
       DO I = 1, NGLOB
-         IF(ISPMD.EQ.0) N = IBUF(I)   		    	 
-	 CALL SPMD_IBCAST(N,N,1,1,0,2)
-         CALL SPMD_RBCAST(RBY_X(1,N),RBY_X(1,N),3,1,0,2)	  
-         CALL SPMD_RBCAST(RBY(1,N),RBY(1,N),NRBY,1,0,2)  		    	    	    			
+         IF(ISPMD.EQ.0) N = IBUF(I)                      
+         CALL SPMD_IBCAST(N,N,1,1,0,2)
+         CALL SPMD_RBCAST(RBY_X(1,N),RBY_X(1,N),3,1,0,2)          
+         CALL SPMD_RBCAST(RBY(1,N),RBY(1,N),NRBY,1,0,2)                                                         
       END DO
       
 C--------> Affectation de X,M et I sur chaque proc qui voie le noeud main-------
 
       DO I = 1,NNG
          N = GRNOD(I)
-	 DO J = 1,NRBODY
-	   IF ((N.EQ.NPBY(NNPBY*(J-1)+1)).AND.(N.GT.0)) ID_RB = J 
-	 END DO
-	 X(1,N) = RBY_X(1,ID_RB)
-	 X(2,N) = RBY_X(2,ID_RB)
-	 X(3,N) = RBY_X(3,ID_RB)
-	 IF (IRESP.EQ.1) THEN
+         DO J = 1,NRBODY
+           IF ((N.EQ.NPBY(NNPBY*(J-1)+1)).AND.(N.GT.0)) ID_RB = J 
+         END DO
+         X(1,N) = RBY_X(1,ID_RB)
+         X(2,N) = RBY_X(2,ID_RB)
+         X(3,N) = RBY_X(3,ID_RB)
+         IF (IRESP.EQ.1) THEN
 C-------Simple precision -> on met  jour XDP-----
-	   XDP(1,N)=X(1,N)
-	   XDP(2,N)=X(2,N)
-	   XDP(3,N)=X(3,N)
-	 ENDIF	 
-	 MS(N) = RBY(14,ID_RB)
-	 IN(N) = MIN(RBY(10,ID_RB),RBY(11,ID_RB),RBY(12,ID_RB))	       	 	 	 
+           XDP(1,N)=X(1,N)
+           XDP(2,N)=X(2,N)
+           XDP(3,N)=X(3,N)
+         ENDIF   
+         MS(N) = RBY(14,ID_RB)
+         IN(N) = MIN(RBY(10,ID_RB),RBY(11,ID_RB),RBY(12,ID_RB))                          
       END DO    
      
 C-----------------------------------------------------------------
       RETURN
+#endif
       END
 C
 Chd|====================================================================
@@ -1025,59 +1036,60 @@ C-----------------------------------------------
       my_real
      .        RBYL(NRBY),XIIN
 C
+#ifndef WITHOUT_R2R
 C******************************************************************************C
       TAG(:) = 0   
       
       DO I=1,NNOD 
         RBYL = 0
-	IF (NPROC.LT.2) THEN
+        IF (NPROC.LT.2) THEN
           N = IBUF(I)
           DO J=1,NRBODY
-	    IF (N.EQ.NPBY(NNPBY*(J-1)+1)) ID = J
-	  END DO
-	ELSE
-	  N = I
-	  ID = IBUF(I)		
-	ENDIF
-	DO J=1,9
-	  RBYL(J)=RBY(16+J,ID)
-	END DO
-C---------Calcul des inerties principales-------------------------	
-	CALL INEPRI(RBYL(10),RBYL)
-C---------Cas de l'inertie spherique------------------------------	
-	IF (NPBY(NNPBY*(ID-1)+5).EQ.1) THEN
-	  XIIN = (RBYL(10)+RBYL(11)+RBYL(12))* THIRD
-	  RBYL(10)=XIIN
-	  RBYL(11)=XIIN
-	  RBYL(12)=XIIN	  	  
-	ENDIF
-C-----------------------------------------------------------------	
-	DO J=1,12
-	  RBY(J,ID) = RBYL(J) 
-	END DO	
-	RBY(14,ID) = MS(N)
-	IF (NPROC.LT.2) IN(N) = MIN(RBYL(10),RBYL(11),RBYL(12))
-	TAG(ID)=N
+            IF (N.EQ.NPBY(NNPBY*(J-1)+1)) ID = J
+          END DO
+        ELSE
+          N = I
+          ID = IBUF(I)          
+        ENDIF
+        DO J=1,9
+          RBYL(J)=RBY(16+J,ID)
+        END DO
+C---------Calcul des inerties principales-------------------------      
+        CALL INEPRI(RBYL(10),RBYL)
+C---------Cas de l'inertie spherique------------------------------      
+        IF (NPBY(NNPBY*(ID-1)+5).EQ.1) THEN
+          XIIN = (RBYL(10)+RBYL(11)+RBYL(12))* THIRD
+          RBYL(10)=XIIN
+          RBYL(11)=XIIN
+          RBYL(12)=XIIN           
+        ENDIF
+C-----------------------------------------------------------------      
+        DO J=1,12
+          RBY(J,ID) = RBYL(J) 
+        END DO  
+        RBY(14,ID) = MS(N)
+        IF (NPROC.LT.2) IN(N) = MIN(RBYL(10),RBYL(11),RBYL(12))
+        TAG(ID)=N
       END DO
 
 C---------Impression des nouvelles donnees des RBODY----------------  
       DO ID=1,NRBODY
         N = TAG(ID)
-	IF (N.NE.0) THEN 	
+        IF (N.NE.0) THEN        
         IF (WEIGHT(N).EQ.1) WRITE(IOUT,1000)
-	NOD = ITAB(N)
-	IF ((IRESP.EQ.1).AND.(NPROC.EQ.1)) THEN
-C-------Simple precision + monoproc -> on met  jour XDP----------	
-	  XDP(1,N)=X(3*(N-1)+1)
-	  XDP(2,N)=X(3*(N-1)+2)
-	  XDP(3,N)=X(3*(N-1)+3)
-	ENDIF        
+        NOD = ITAB(N)
+        IF ((IRESP.EQ.1).AND.(NPROC.EQ.1)) THEN
+C-------Simple precision + monoproc -> on met  jour XDP----------       
+          XDP(1,N)=X(3*(N-1)+1)
+          XDP(2,N)=X(3*(N-1)+2)
+          XDP(3,N)=X(3*(N-1)+3)
+        ENDIF        
         IF (WEIGHT(N).EQ.1) THEN
-	IF (NPBY(NNPBY*(ID-1)+5).EQ.1) THEN
+        IF (NPBY(NNPBY*(ID-1)+5).EQ.1) THEN
 C-------Inertie spherique -> on affiche pas la matrice globale-----
         WRITE(IOUT,1100) ID,NOD,X(3*(N-1)+1),X(3*(N-1)+2),X(3*(N-1)+3),
-     .       2*MS(N)	
-	ELSE
+     .       2*MS(N)    
+        ELSE
         WRITE(IOUT,1100) NPBY(NNPBY*(ID-1)+6),NOD,X(3*(N-1)+1),
      .       X(3*(N-1)+2),X(3*(N-1)+3),2*MS(N)
         WRITE(IOUT,1300) 2*RBY(17,ID),2*RBY(21,ID),2*RBY(25,ID),
@@ -1085,7 +1097,7 @@ C-------Inertie spherique -> on affiche pas la matrice globale-----
         ENDIF
         WRITE(IOUT,1200) 2*RBY(10,ID),2*RBY(11,ID),2*RBY(12,ID)
         ENDIF
-	ENDIF	     
+        ENDIF        
       END DO
  
 C-----------------------------------------------------------------
@@ -1099,5 +1111,6 @@ C
 1300  FORMAT(10X,'NEW INERTIA xx yy zz ',3G14.7
      .       /10X,'NEW INERTIA xy yz zx ',3G14.7)
 1200  FORMAT(10X,'PRINCIPAL INERTIA',1P3G20.13,/)        
+#endif
       END
 C

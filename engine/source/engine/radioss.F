@@ -25,10 +25,51 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 ! OpenRadioss                                            ____E_N_G_I_N_E
 !_______________________________________________________________________
 
+#ifdef ADAPTIVE_MPI
+      SUBROUTINE MPI_Main
+      IMPLICIT NONE
+#include "mpif.h"
+      INTEGER ISV_KEY
+      PARAMETER (ISV_KEY=195118620)
+C-----------------------------------------------
+C   L o c a l  V a r i a b l e s
+C-----------------------------------------------
+      INTEGER IERR,KEY,HINTS,NNODES,MYRANK
+      KEY = ISV_KEY
+
+      WRITE(6,*) __FILE__,__LINE__
+      CALL FLUSH(6)
+
+      CALL MPI_INITIALIZED(KEY,IERR)
+      CALL MPI_INIT(IERR) 
+
+      WRITE(6,*) __FILE__,__LINE__,MPI_COMM_WORLD
+      CALL FLUSH(6)
+
+      
+      CALL MPI_COMM_SIZE(MPI_COMM_WORLD, NNODES, IERR)
+
+      WRITE(6,*) __FILE__,__LINE__
+      CALL FLUSH(6)
+
+      CALL MPI_COMM_RANK(MPI_COMM_WORLD, MYRANK, IERR)
+
+      IF (MYRANK.EQ.0) CALL AMPI_SET_MIGRATABLE(0,IERR)
+
+      CALL MPI_INFO_CREATE(HINTS,IERR)
+      CALL MPI_INFO_SET(HINTS,"ampi_load_balance","sync",IERR)
+
+      CALL RADIOSS0(HINTS)
+
+      CALL MPI_INFO_FREE(HINTS,IERR)
+      STOP
+      END SUBROUTINE MPI_Main
+#else
       PROGRAM RADIOSS
 
         CALL RADIOSS0()
 
       CALL MY_EXIT(0)
       END
+#endif
 !_______________________________________________________________________

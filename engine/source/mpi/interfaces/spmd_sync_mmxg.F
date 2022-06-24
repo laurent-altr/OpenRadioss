@@ -84,7 +84,11 @@ C
 !      need to validate the Type_contiguous
        call MPI_Type_commit(type_reduc,ierror)
 
+#ifdef ADAPTIVE_MPI
+       call MPI_Op_create(REDUCE_MMX, .FALSE., myop, ierror)
+#else
        call MPI_Op_create(REDUCE_MMX, .TRUE., myop, ierror)
+#endif
 
 C Pack original data      
        L = 0

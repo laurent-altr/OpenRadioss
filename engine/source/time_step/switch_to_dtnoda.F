@@ -289,7 +289,8 @@ C
         END IF        
       END DO
 C------------------------------------------
-      IF(NSPMD > 0)THEN
+#ifndef ADAPTIVE_MPI
+      IF(NSPMD > 1)THEN
 #ifdef MPI
       CALL MPI_ALLREDUCE(MPI_IN_PLACE,IERR,1,MPI_INTEGER,MPI_MAX,MPI_COMM_WORLD,IERROR)
 #endif
@@ -301,6 +302,7 @@ C------------------------------------------
           CALL ANCMSG(MSGID=286,ANMODE=ANINFO_BLIND_1)
         END IF
       END IF
+#endif
 C------------------------------------------
       RETURN
       END      
