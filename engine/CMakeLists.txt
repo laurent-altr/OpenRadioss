@@ -24,11 +24,7 @@ else()
 set (cdir "_c" )
 endif()
 
-if( mpiver STREQUAL "ampi")
 include (CMake_Compilers${cdir}/cmake_${arch}_compilers.txt)
-else()
-include (CMake_Compilers${cdir}/cmake_${arch}_ampi_compilers.txt)
-endif()
 
 # source files & include directories
 # -------------------------------------
