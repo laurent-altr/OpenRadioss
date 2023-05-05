@@ -39,6 +39,7 @@ C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
       USE MESSAGE_MOD
+      USE NEW_SEATBELT_MOD
       USE SEATBELT_MOD
       USE SENSOR_MOD
 C-----------------------------------------------
@@ -417,20 +418,28 @@ C
 C--                 Loop on belt elements
                     NB_BRANCH = 0
                     BRANCH_CPT = 0
-                    CALL NEW_SEATBELT(IXR,ITAB,KNOD2EL1D,NOD2EL1D,NOD_START,
-     .                                  ELEM_CUR,TAG_RES,TAG_NOD,SEATBELT_ID,FLAG,
-     .                                  NNOD,IPM,NB_ELEM_1D,NB_BRANCH,BRANCH_TAB,
-     .                                  BRANCH_CPT)
+                    CALL NEW_SEATBELT(
+     1   IXR,        ITAB,       KNOD2EL1D,  NOD2EL1D,
+     2   NOD_START,  ELEM_CUR,   TAG_RES,    TAG_NOD,
+     3   SEATBELT_ID,FLAG,       NNOD,       IPM,
+     4   NB_ELEM_1D, NB_BRANCH,  BRANCH_TAB, BRANCH_CPT,
+     5   NUMELT,     NUMELP,     NUMELR,     NUMMAT,
+     6   SIXX,       NUMNOD,     NRETRACTOR, NSLIPRING,
+     7   NPROPMI)
 
 C--                 Loop on subranch (only if no sliprings and no retractors)
                     DO WHILE(NB_BRANCH > 0)
                       NOD_START = BRANCH_TAB(2*(BRANCH_CPT-NB_BRANCH)+1) 
                       ELEM_CUR = BRANCH_TAB(2*(BRANCH_CPT-NB_BRANCH)+2) 
                       NB_BRANCH = NB_BRANCH -1
-                      CALL NEW_SEATBELT(IXR,ITAB,KNOD2EL1D,NOD2EL1D,NOD_START,
-     .                                  ELEM_CUR,TAG_RES,TAG_NOD,SEATBELT_ID,FLAG,
-     .                                  NNOD,IPM,NB_ELEM_1D,NB_BRANCH,BRANCH_TAB,
-     .                                  BRANCH_CPT)
+                      CALL NEW_SEATBELT(
+     1   IXR,        ITAB,       KNOD2EL1D,  NOD2EL1D,
+     2   NOD_START,  ELEM_CUR,   TAG_RES,    TAG_NOD,
+     3   SEATBELT_ID,FLAG,       NNOD,       IPM,
+     4   NB_ELEM_1D, NB_BRANCH,  BRANCH_TAB, BRANCH_CPT,
+     5   NUMELT,     NUMELP,     NUMELR,     NUMMAT,
+     6   SIXX,       NUMNOD,     NRETRACTOR, NSLIPRING,
+     7   NPROPMI)
                     ENDDO
 C
                   ENDIF
@@ -786,7 +795,7 @@ C
 1200  FORMAT(/
      . '      2D SEATBELTS SECTION COMPUTATION '/
      . '      ---------------------------------- '/
-     . '         MAT ID   SEATBELT SECTION      E11              E22              G12'/)
-C
-      END SUBROUTINE CREATE_SEATBELT
-
+     . '         MAT ID   SEATBELT SECTION      E11              E22   
+     .  G12'/)
+ 
+      END 

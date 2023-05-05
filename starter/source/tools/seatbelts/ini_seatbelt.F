@@ -41,6 +41,7 @@ C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
       USE MESSAGE_MOD
+      USE NEW_SEATBELT_MOD
       USE SEATBELT_MOD
       USE ELBUFDEF_MOD  
 C-----------------------------------------------
@@ -196,10 +197,14 @@ C
               MTYP = IPM(2,MID)
               IF (((IXR(2,ELEM_CUR)==N2).OR.(IXR(3,ELEM_CUR)==N2)).AND.(MTYP == 114)) THEN
 C--             Loop on belt inside the retractor
-                CALL NEW_SEATBELT(IXR,ITAB,KNOD2EL1D,NOD2EL1D,N1,
-     .                            ELEM_CUR,TAG_RETRACTOR,TAGN_RETRACTOR,I,FLAG,
-     .                            NOT_USED,IPM,NOT_USED,NOT_USED,NOT_USED,
-     .                            NOT_USED)
+                CALL NEW_SEATBELT(
+     1   IXR,           ITAB,          KNOD2EL1D,     NOD2EL1D,
+     2   N1,            ELEM_CUR,      TAG_RETRACTOR, TAGN_RETRACTOR,
+     3   I,             FLAG,          NOT_USED,      IPM,
+     4   NOT_USED,      NOT_USED,      NOT_USED,      NOT_USED,
+     5   NUMELT,        NUMELP,        NUMELR,        NUMMAT,
+     6   SIXX,          NUMNOD,        NRETRACTOR,    NSLIPRING,
+     7   NPROPMI)
               ENDIF
             ENDIF
           ENDIF
