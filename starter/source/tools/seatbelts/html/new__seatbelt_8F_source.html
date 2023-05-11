@@ -91,7 +91,7 @@ $(function() {
 <div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;<span class="comment">!//Encapsulating each routine in a module should be made mandatory</span></div>
 <div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;<span class="comment">!// - in order to follow Fortran 90 standard when explicit interfaces are required </span></div>
 <div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;<span class="comment">!// - in order to have more checks at compile time, and decrease the need for static analysis tools</span></div>
-<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;<span class="comment">!//     (here, Radioss will NOT compile, because one of caller of this subroutines is passing scalars</span></div>
+<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;<span class="comment">!//     (here, Radioss will NOT compile, because one caller of this subroutines is passing scalars</span></div>
 <div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;<span class="comment">!//      instead of arrays. Argument that are not used should be made optional, instead of passing </span></div>
 <div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;<span class="comment">!//      variables of the wrong type/dimension)</span></div>
 <div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;      <span class="keyword">CONTAINS</span></div>

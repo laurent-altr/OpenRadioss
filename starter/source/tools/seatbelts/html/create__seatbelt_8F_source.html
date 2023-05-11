@@ -98,8 +98,8 @@ $(function() {
 <div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;<span class="comment">Chd|        SEATBELT_MOD                  ../common_source/modules/seatbelt_mod.F</span></div>
 <div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;<span class="comment">Chd|        SENSOR_MOD                    share/modules1/sensor_mod.F   </span></div>
 <div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;<span class="comment">Chd|====================================================================</span></div>
-<div class="line"><a name="l00034"></a><span class="lineno"><a class="line" href="create__seatbelt_8F.html#a1f080761a7a4f9edb9bfa5948d5cfa52">   34</a></span>&#160;      <span class="keyword">SUBROUTINE </span><a class="code" href="create__seatbelt_8F.html#a1f080761a7a4f9edb9bfa5948d5cfa52">create_seatbelt</a>(IXR,ITAB,KNOD2EL1D,NOD2EL1D,IPM,</div>
-<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;     .                           X,SENSOR_TAB,BUFMAT,PM,GEO,</div>
+<div class="line"><a name="l00034"></a><span class="lineno"><a class="line" href="create__seatbelt_8F.html#a912651f1024a024bbc16603dd27bd832">   34</a></span>&#160;      <span class="keyword">SUBROUTINE </span><a class="code" href="create__seatbelt_8F.html#a912651f1024a024bbc16603dd27bd832">create_seatbelt</a>(IXR,ITAB,KNOD2EL1D,NOD2EL1D,IPM,</div>
+<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;     .                           X,SENSORS,BUFMAT,PM,GEO,</div>
 <div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;     .                           IDDLEVEL,KNOD2ELC,NOD2ELC,IXC,IGEO,</div>
 <div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;     .                           ISKN    )</div>
 <div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;<span class="comment">C-----------------------------------------------</span></div>
@@ -129,7 +129,7 @@ $(function() {
 <div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;<span class="comment">     .        KNOD2ELC(*),NOD2ELC(*),IXC(NIXC,*)</span></div>
 <div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;<span class="comment">      </span><span class="keywordtype">INTEGER</span>, <span class="keywordtype">INTENT(INOUT)</span> :: IGEO(NPROPGI,NUMGEO),ISKN(SISKWN)</div>
 <div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;      my_real x(3,*),bufmat(*),pm(npropm,*),geo(npropg,*)</div>
-<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;      <span class="keywordtype">TYPE</span> (SENSOR_STR_) ,<span class="keywordtype">DIMENSION(NSENSOR)</span> :: SENSOR_TAB</div>
+<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;      <span class="keywordtype">TYPE</span> (SENSORS_) ,<span class="keywordtype">INTENT(IN)</span> :: SENSORS</div>
 <div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;<span class="comment">C-----------------------------------------------</span></div>
 <div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;<span class="comment">C   L o c a l   V a r i a b l e s</span></div>
 <div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;<span class="comment">C-----------------------------------------------</span></div>
@@ -160,8 +160,8 @@ $(function() {
 <div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;        <span class="keywordflow">DO</span> i=1,nslipring</div>
 <div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;          isens_loc(1) = 0</div>
 <div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;          <span class="keywordflow">IF</span>(slipring(i)%SENSID &gt; 0)<span class="keywordflow">THEN</span></div>
-<div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;            <span class="keywordflow">DO</span> k=1,nsensor</div>
-<div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160;              <span class="keywordflow">IF</span>(slipring(i)%SENSID == sensor_tab(k)%SENS_ID) isens_loc(<span class="comment">1) = k</span></div>
+<div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;            <span class="keywordflow">DO</span> k=1,sensors%NSENSOR</div>
+<div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160;              <span class="keywordflow">IF</span>(slipring(i)%SENSID == sensors%SENSOR_TAB(k)%SENS_ID) isens_loc<span class="comment">(1) = k</span></div>
 <div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160;<span class="comment"></span><span class="keywordflow">            ENDDO</span></div>
 <div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160;            <span class="keywordflow">IF</span>(isens_loc(1) == 0) <span class="keywordflow">THEN</span></div>
 <div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160;              <span class="keyword">CALL </span>ancmsg(msgid=2002,</div>
@@ -179,8 +179,8 @@ $(function() {
 <div class="line"><a name="l00112"></a><span class="lineno">  112</span>&#160;          isens_loc(1:2) = 0</div>
 <div class="line"><a name="l00113"></a><span class="lineno">  113</span>&#160;          <span class="keywordflow">DO</span> j=1,2</div>
 <div class="line"><a name="l00114"></a><span class="lineno">  114</span>&#160;            <span class="keywordflow">IF</span>(retractor(i)%ISENS(j) &gt; 0)<span class="keywordflow">THEN</span></div>
-<div class="line"><a name="l00115"></a><span class="lineno">  115</span>&#160;              <span class="keywordflow">DO</span> k=1,nsensor</div>
-<div class="line"><a name="l00116"></a><span class="lineno">  116</span>&#160;                <span class="keywordflow">IF</span>(retractor(i)%ISENS(j) == sensor_tab(k)%SENS_ID) isens_loc<span class="comment">(j) = k</span></div>
+<div class="line"><a name="l00115"></a><span class="lineno">  115</span>&#160;              <span class="keywordflow">DO</span> k=1,sensors%NSENSOR</div>
+<div class="line"><a name="l00116"></a><span class="lineno">  116</span>&#160;                <span class="keywordflow">IF</span>(retractor(i)%ISENS(j) == sensors%SENSOR_TAB(k)%SENS_ID<span class="comment">) isens_loc(j) = k</span></div>
 <div class="line"><a name="l00117"></a><span class="lineno">  117</span>&#160;<span class="comment"></span><span class="keywordflow">              ENDDO</span></div>
 <div class="line"><a name="l00118"></a><span class="lineno">  118</span>&#160;              <span class="keywordflow">IF</span>(isens_loc(j) == 0) <span class="keywordflow">THEN</span></div>
 <div class="line"><a name="l00119"></a><span class="lineno">  119</span>&#160;                <span class="keyword">CALL </span>ancmsg(msgid=2028,</div>
@@ -866,7 +866,7 @@ $(function() {
 <div class="line"><a name="l00799"></a><span class="lineno">  799</span>&#160;<span class="stringliteral"></span><span class="stringliteral">     .  G12&#39;</span>/)</div>
 <div class="line"><a name="l00800"></a><span class="lineno">  800</span>&#160; </div>
 <div class="line"><a name="l00801"></a><span class="lineno">  801</span>&#160;      <span class="keyword">END </span></div>
-<div class="ttc" id="acreate__seatbelt_8F_html_a1f080761a7a4f9edb9bfa5948d5cfa52"><div class="ttname"><a href="create__seatbelt_8F.html#a1f080761a7a4f9edb9bfa5948d5cfa52">create_seatbelt</a></div><div class="ttdeci">subroutine create_seatbelt(IXR, ITAB, KNOD2EL1D, NOD2EL1D, IPM, X, SENSOR_TAB, BUFMAT, PM, GEO, IDDLEVEL, KNOD2ELC, NOD2ELC, IXC, IGEO, ISKN)</div><div class="ttdef"><b>Definition:</b> <a href="create__seatbelt_8F_source.html#l00034">create_seatbelt.F:38</a></div></div>
+<div class="ttc" id="acreate__seatbelt_8F_html_a912651f1024a024bbc16603dd27bd832"><div class="ttname"><a href="create__seatbelt_8F.html#a912651f1024a024bbc16603dd27bd832">create_seatbelt</a></div><div class="ttdeci">subroutine create_seatbelt(IXR, ITAB, KNOD2EL1D, NOD2EL1D, IPM, X, SENSORS, BUFMAT, PM, GEO, IDDLEVEL, KNOD2ELC, NOD2ELC, IXC, IGEO, ISKN)</div><div class="ttdef"><b>Definition:</b> <a href="create__seatbelt_8F_source.html#l00034">create_seatbelt.F:38</a></div></div>
 <div class="ttc" id="anamespacenew__seatbelt__mod_html"><div class="ttname"><a href="namespacenew__seatbelt__mod.html">new_seatbelt_mod</a></div><div class="ttdef"><b>Definition:</b> <a href="new__seatbelt_8F_source.html#l00023">new_seatbelt.F:23</a></div></div>
 <div class="ttc" id="anamespacenew__seatbelt__mod_html_a3a7d9f9531c71aa83c0eea719d459d6e"><div class="ttname"><a href="namespacenew__seatbelt__mod.html#a3a7d9f9531c71aa83c0eea719d459d6e">new_seatbelt_mod::new_seatbelt</a></div><div class="ttdeci">subroutine new_seatbelt(IXR, ITAB, KNOD2EL1D, NOD2EL1D, NOD_START, ELEM_CUR, TAG_RES, TAG_NOD, ID, FLAG, NNOD, IPM, NB_ELEM_1D, NB_BRANCH, BRANCH_TAB, BRANCH_CPT, NUMELT, NUMELP, NUMELR, NUMMAT, SIXX, NUMNOD, NRETRACTOR, NSLIPRING, NPROPMI)</div><div class="ttdoc">This routine does something.</div><div class="ttdef"><b>Definition:</b> <a href="new__seatbelt_8F_source.html#l00048">new_seatbelt.F:56</a></div></div>
 </div><!-- fragment --></div><!-- contents -->

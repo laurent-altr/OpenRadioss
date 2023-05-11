@@ -28,9 +28,9 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !//      instead of arrays. Argument that are not used should be made optional, instead of passing 
 !//      variables of the wrong type/dimension)
       CONTAINS
-!> @brief This routine does something 
+!> \brief This routine does something 
 !!
-!! Here is a longer description of the purpose of the routine                                                                             
+!! \details Here is a longer description of the purpose of the routine                                                                             
 !! Do not hesitate to provide details.
 !! A better name could be coined: this routine does not create/allocate new seatblets
 !! but rather tag the nodes that belong to a given seatbelt with the seatblet ID
