@@ -53,6 +53,10 @@ if ( DEFINED MPI )
   endif()
 endif ()
 
+message (STATUS "MPI libraries : ${mpi_lib} ")
+message (STATUS "MPI include directory : ${mpi_inc} ")
+
+
 set ( RELNAME ${arch}${mpi_suf}  )
 
 # Third party libraries
@@ -109,7 +113,7 @@ set(CMAKE_Fortran_MODULE_DIRECTORY ${CMAKE_BINARY_DIR}/CMakeFiles/modules )
 set(CMAKE_Fortran_MODDIR_FLAG "-J" )
 
 message (STATUS "modules: ${CMAKE_Fortran_MODULE_DIRECTORY}")
-
+message (STATUS "Precice: ${precice}")
 #Generic Compilation flags
 ###########################
 
@@ -121,7 +125,11 @@ if ( CMAKE_C_COMPILER_VERSION VERSION_GREATER 10)
 set( portability "-fallow-argument-mismatch -fallow-invalid-boz -std=legacy")
 endif()
 
-set ( opt_flag "  ${wo_linalg} -DCOMP_GFORTRAN=1 -ffp-contract=off -frounding-math -fopenmp " )
+set ( opt_flag "  ${wo_linalg} -DCOMP_GFORTRAN=1 -ffp-contract=off -frounding-math -fopenmp ")
+
+if( precice STREQUAL "1")
+set(opt_flag "${opt_flag} -DWITH_PRECICE")
+endif()
 
 if ( sanitize STREQUAL "1" )
 set( FSANITIZE "-fsanitize=address -fsanitize=undefined  -fsanitize=bounds-strict -DSANITIZE") 

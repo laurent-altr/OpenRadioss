@@ -584,10 +584,11 @@ Chd|====================================================================
      L  XCELL, XFACE, NE_NERCVOIS, NE_NESDVOIS, NE_LERCVOIS, NE_LESDVOIS,IBCSCYC  ,LBCSCYC,
      M  T_MONVOL,ID_GLOBAL_VOIS,FACE_VOIS,TAGSLV_RBY,DYNAIN_DATA,FCONT_MAX,EBCS_TAB,DIFFUSION,
      N  KLOADPINTER,LOADPINTER,IN0 ,DGAPLOADINT,DRAPEG,USER_WINDOWS,OUTPUT,INTERFACES,
-     O  DT         ,LOADS     )
+     O  DT         ,LOADS    ,PRECICE_COUPLING )
 C-----------------------------------------------
 C   M o d u l e s
 C----------------------------------------------- 
+      USE PRECICE_ADAPTER
       USE DSGRAPH_MOD
       USE ERROR_MOD
       USE RESOLSAV_MOD
@@ -892,8 +893,10 @@ c
       TYPE(USER_WINDOWS_),INTENT(INOUT)                  :: USER_WINDOWS
       TYPE(OUTPUT_),INTENT(INOUT)                        :: OUTPUT
       TYPE (INTERFACES_) ,INTENT(INOUT)                  :: INTERFACES
-      TYPE (DT_) ,INTENT(INOUT)                          :: DT
+      TYPE(DT_) ,INTENT(INOUT)                           :: DT
       TYPE(MAT_ELEM_)   ,INTENT(INOUT)                   :: MAT_ELEM
+      type(precice_type), intent(inout)                  :: precice_coupling
+
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
@@ -1208,6 +1211,19 @@ C-------------------------------------------------------------------------------
         LOGICAL :: GLOBAL_ACTIVE_ALE_ELEMENT
 
         INTEGER :: SIZE_NPBY
+
+        logical :: ongoing
+        character(len=50) :: config_file
+        character(len=50) :: participant_name
+        character(len=50) :: data_name
+        character(len=50) :: mesh_name
+        character(len=50) :: data_name2
+        integer :: nb_coupling_nodes
+        integer, dimension(:), allocatable :: node_ids
+        double precision, dimension(:,:), allocatable :: displ,X_prev,forces
+        double precision :: dt2max_coupling
+
+
       DATA IUN/1/
 C-----------------------------------------------------------------------------------       
 C Uncomment for Debug - ITAB is copied in Debug Module.
@@ -2070,6 +2086,14 @@ C
 C========================================================================================
 C                                  NON PARALLEL SECTION (SMP)
 C========================================================================================
+
+
+C             Precice coupling initialization
+
+
+
+
+
        CALL SPLIT_ASSPAR4(ADSKY,NUMNOD,NTHREAD,NODFT_ASSPAR,NODLT_ASSPAR,SADSKY)
        ! Allocation & initialization of /INT18 + LAW151
        CALL INT18_LAW151_ALLOC(MULTI_FVM,IPARI)
@@ -2940,7 +2964,25 @@ C First: try with reduced bounding box
       ENDIF
       ! ----------------------
 
-C=======================================================================
+       IF(PRECICE_AVAILABLE) THEN
+       ! ALLOCATION AND INITIALIZATION OF PRECICE COUPLING
+         ALLOCATE(DISPL(3,NUMNOD))
+         ALLOCATE(X_PREV(3,NUMNOD))
+         ALLOCATE(FORCES(3,NUMNOD))
+         FORCES = ZERO
+         DO I = 1,NUMNOD
+           DISPL(1,I) = X(3*(I-1)+1)
+           DISPL(2,I) = X(3*(I-1)+2)
+           DISPL(3,I) = X(3*(I-1)+3)
+           X_PREV(1,I) = X(3*(I-1)+1)
+           X_PREV(2,I) = X(3*(I-1)+2)
+           X_PREV(3,I) = X(3*(I-1)+3)
+         ENDDO
+         CALL PRECICE_SET_NODES(PRECICE_COUPLING, IGRNOD, NGRNOD)
+         CALL PRECICE_INITIALIZE(PRECICE_COUPLING,X,NUMNOD,ISPMD,NSPMD)
+         CALL PRECICE_ONGOING(ONGOING)
+       ENDIF
+
 
 C----------------------------------------
 C     BEGINNING OF EXPLICIT ITERATION LOOP
@@ -3484,6 +3526,7 @@ C----------------------------------------
         ELSE
             NATIV_SMS_SIZ = 0
         ENDIF
+        IF(PRECICE_AVAILABLE .AND. TT > ZERO) DT2T = MIN(DT2T,PRECICE_COUPLING%DT_LIMIT)
 
 C========================================================================================
 C                                     PARALLEL SECTION (SMP)
@@ -4798,7 +4841,9 @@ C
 C--- //------------------------------
 C       FORCE ASSEMBLY                          
 C-------------------------------------
-
+      IF(PRECICE_AVAILABLE) THEN
+        FORCES(1:3,1:NUMNOD) = A(1:3,1:NUMNOD)
+      ENDIF
 C========================================================================================
 C                                     PARALLEL SECTION (SMP)
 C========================================================================================
@@ -5908,6 +5953,9 @@ C
 C
         ENDIF
 
+
+
+
 C========================================================================================
 C                                     NON PARALLEL SECTION (SMP)
 C========================================================================================
@@ -6925,9 +6973,7 @@ C Init var parallel SMP
 
           CALL ASSPART(
      2       PARTFTSK,PARTLTSK,PARTSAV,GREFTSK,GRELTSK,GRESAV)
-     
 !$OMP     END PARALLEL
-
         ENDIF  ! (NUMSPH/=0).OR.(SOL2SPH_FLAG==1)
 C========================================================================================
 C                                     NON PARALLEL SECTION (SMP)
@@ -6948,6 +6994,18 @@ C===============================================================================
         IF(IPARIT == 0.AND.NSPMD > 1.AND. NLOC_DMG%IMOD > 0)THEN
             CALL SPMD_EXCH_SUB_POFF(NLOC_DMG)
         ENDIF
+
+        IF(PRECICE_AVAILABLE) THEN
+          ! FORCES WAS INITIALIZED TO THE ACCELERTION, BEFORE ASSEMBLY
+          ! BEFORE THE CALL TO ACCELE, A CONTAINS THE FORCES
+          ! AFTER THE CALL TO ACCELE, A CONTAINS THE ACCELERATION
+          FORCES(1:3,1:NUMNOD) = A(1:3,1:NUMNOD) - FORCES(1:3,1:NUMNOD) 
+          !FORCES ARE ADDED TO ACCELERATION
+          CALL PRECICE_READ(PRECICE_COUPLING,DT2,A,NUMNOD,2,PRECICE_FORCES)
+          CALL PRECICE_WRITE(PRECICE_COUPLING,DT2,FORCES,NUMNOD,PRECICE_FORCES)
+        ENDIF
+
+
 C========================================================================================
 C                                     PARALLEL SECTION (SMP)
 C========================================================================================
@@ -7013,6 +7071,8 @@ C
      2                 PINCH_DATA%STIFPINCH, NODFTSK,            NODLTSK,
      3                                 DT2T,   DTFAC)
        ENDIF
+
+
 C
 C---
 C--- //  ---------------------------------------
@@ -8502,6 +8562,10 @@ C
         CALL TRACE_OUT(5)
 C-------ADYREL----
        IF (ISTAT==3) CALL ENER_W0
+
+        IF(PRECICE_AVAILABLE) CALL PRECICE_ADVANCE(PRECICE_COUPLING,DT2)
+
+
 C------------
 C       TEMPS
 C------------
@@ -8613,6 +8677,9 @@ C------------
         ENDIF
        ENDIF
       ENDIF
+
+
+
 C----------------------------------
 C       IMPLICITE SOLVER
 C----------------------------------
@@ -8808,8 +8875,8 @@ C----------------------------------------------------------------
           ENDIF
         ENDIF
 C------------------------------------------
-C         SYNCHRONISATION SUR V TT ET NCYCLE (implicite)
-C----------------------------
+C         SYNCHRONISATION  V, TT, NCYCLE (implicite)
+C------------------------------------------
 
         IF(IMON>0) CALL STARTIME(5,1)
 
@@ -8822,7 +8889,7 @@ C===============================================================================
         NODFTSK   = 1+ITSK*NUMNOD/ NTHREAD
         NODLTSK   = (ITSK+1)*NUMNOD/NTHREAD
 C-----------------
-C         VITESSES
+C         VELOCITIES 
 C-----------------
           CALL VITESSE(
      1                 A      , AR     , V   , VR   , FZERO,
@@ -8875,12 +8942,18 @@ c for smp parallel is not parit on
 C
         IF(IMON>0) CALL STOPTIME(5,1)
 
+
         IF(IALE+IEULER==0) THEN
 C----------------------
 C          LAGRANGE PUR
 C----------------------
 
+
+
          IF(IMON>0) CALL STARTIME(5,1)
+
+        
+
 
 C========================================================================================
 C                                     PARALLEL SECTION (SMP)
@@ -8981,6 +9054,25 @@ C===============================================================================
         ENDIF
       ENDIF
 
+
+      IF(PRECICE_AVAILABLE) THEN
+        DT2MAX_COUPLING = DT2 
+        DO I = 1, NUMNOD
+          DISPL(1,I) = X((I-1)*3+1) - X_PREV(1,I)
+          DISPL(2,I) = X((I-1)*3+2) - X_PREV(2,I)
+          DISPL(3,I) = X((I-1)*3+3) - X_PREV(3,I)
+        ENDDO
+        CALL PRECICE_WRITE(PRECICE_COUPLING,DT2,X,NUMNOD,PRECICE_POSITIONS)
+        CALL PRECICE_WRITE(PRECICE_COUPLING,DT2,DISPL,NUMNOD,PRECICE_DISPLACEMENTS)
+
+        CALL PRECICE_READ(PRECICE_COUPLING,DT2,X,NUMNOD,1,PRECICE_POSITIONS)
+        CALL PRECICE_READ(PRECICE_COUPLING,DT2,X,NUMNOD,2,PRECICE_DISPLACEMENTS) ! X = X + DISPL
+        DO I = 1, NUMNOD
+          X_PREV(1,I) = X((I-1)*3+1)
+          X_PREV(2,I) = X((I-1)*3+2)
+          X_PREV(3,I) = X((I-1)*3+3)
+        ENDDO
+      ENDIF
 
 C========================================================================================
 C                                   NON PARALLEL SECTION (SMP)
@@ -9464,7 +9556,7 @@ C mass & velocity
          DEALLOCATE(DRETRI)
          DEALLOCATE(XSEC)
          DEALLOCATE(IRBKIN_L)
-         DEALLOCATE (ICODT0,ICODR0)
+         DEALLOCATE(ICODT0,ICODR0)
          DEALLOCATE(ISENDP)
          DEALLOCATE(IRECVP)
          DEALLOCATE(IRECVP_PXFEM)
@@ -9833,6 +9925,18 @@ C /KILL
      7       ISLEN20E,IKINE  ,DIAG_SMS,SENSORS%SENSOR_TAB,INTBUF_TAB,INT24E2EUSE,
      8       FORNEQS ,MULTI_FVM,INTERFACES)
         ENDIF
+
+        IF(PRECICE_AVAILABLE) THEN
+          CALL PRECICE_ONGOING(ONGOING)
+          ! FAKE TIME STEPS TO FINALIZE PRECICE
+          DO WHILE (ONGOING)
+            DT2 = HUGE(DT2)
+            CALL PRECICE_ADVANCE(PRECICE_COUPLING,DT2)
+            CALL PRECICE_ONGOING(ONGOING)
+          END DO
+          CALL PRECICE_FINALIZE(PRECICE_COUPLING)
+        ENDIF
+
         
         DEALLOCATE(ISENDTO, IRCVFROM)
         DEALLOCATE(INTLIST25)

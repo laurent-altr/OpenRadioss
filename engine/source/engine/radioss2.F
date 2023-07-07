@@ -208,6 +208,7 @@ C-----------------------------------------------
       USE INTERFACES_MOD
       USE DT_MOD
       USE LOADS_MOD
+      USE PRECICE_ADAPTER
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -355,6 +356,7 @@ C MDS Table
 #endif
       TYPE(T_DIFFUSION) :: DIFFUSION
       TYPE(t_segvar) :: SEGVAR
+      TYPE(PRECICE_TYPE) :: PRECICE_COUPLING
 C------------------------------------------------------------------
 C to build a IBM PARALLEL version
 C In starter : define install parameter nspmd 
@@ -649,8 +651,17 @@ C redirect IOUT to tmp file  fichier temporaire when SPMD on pi <> 0
 C------------------------------------------------
 C     Standard input reading
 C------------------------------------------------
-      CALL LECINP(IRUNN,IRFL,IRFE,H3D_DATA,FLAG_CST_AMS,DYNAIN_DATA,
+       CALL LECINP(IRUNN,IRFL,IRFE,H3D_DATA,FLAG_CST_AMS,DYNAIN_DATA,
      .            SENSORS,DT,OUTPUT)
+
+
+      IF(PRECICE_AVAILABLE) THEN
+         FILNAM=ROOTNAM(1:ROOTLEN)//'_'//CHRUN//'.cpl'
+         CALL PRECICE_READ_FILE(PRECICE_COUPLING,TRIM(FILNAM))
+      endif
+
+
+
       NFSKYI=5
       IF(KDTINT==0 )NFSKYI=4
       
@@ -2238,7 +2249,8 @@ C---------------------------------------------------------------------
      .                   FORNEQS      ,MATPARAM_TAB    ,GROUP_PARAM_TAB ,PINCH_DATA ,ALE_CONNECTIVITY,
      .                   DRAPE_SH4N   ,DRAPE_SH3N      ,T_MONVOL        ,SENSORS    ,EBCS_TAB        ,
      .                   DIFFUSION    ,SEGVAR          ,DYNAIN_DATA     ,DRAPEG     ,USER_WINDOWS    ,
-     .                   OUTPUT       ,INTERFACES      ,DT              ,LOADS      ,MAT_ELEM  )
+     .                   OUTPUT       ,INTERFACES      ,DT              ,LOADS      ,MAT_ELEM  ,
+     .                   PRECICE_COUPLING)
 C---------------------------------------------------------------------
       CURRENT_RUN = GLOBAL_COMP_TIME%RUN_NBR
       CALL SPMD_REDUCE_DB(GLOBAL_COMP_TIME%ENGINE_TIME(CURRENT_RUN),RESULT,1,0,"MAX ")

@@ -33,7 +33,7 @@ Chd|        SENSOR_MOD                    share/modules/sensor_mod.F
 Chd|        STATE_MOD                     ../common_source/modules/state_mod.F
 Chd|====================================================================
       SUBROUTINE LECINP(IRUN,IRFL,IRFE,H3D_DATA,FLAG_CST_AMS,DYNAIN_DATA,
-     .                  SENSORS ,DT, OUTPUT )
+     .                  SENSORS ,DT, OUTPUT)
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
@@ -55,7 +55,6 @@ C-----------------------------------------------
       TYPE(SENSORS_), INTENT(INOUT) :: SENSORS
       TYPE (DT_), INTENT(INOUT) :: DT
       TYPE(OUTPUT_), INTENT(INOUT) :: OUTPUT !< output structure
-
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
 C-----------------------------------------------

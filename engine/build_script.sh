@@ -45,6 +45,7 @@ function my_help()
   echo " -mumps_root=[path_to_mumps]          : path_to_mumps/lib/libdmumps.a must exist"
   echo " -scalapack_root=[path to scalapack]  : path_to_scalapack/libscalapack.a must exist" 
   echo " -lapack_root=[path to lapack]  : path_to_lapack/liblapack.a must exist" 
+  echo " -preCICE" 
   echo " " 
   echo " " 
 }
@@ -83,6 +84,8 @@ verbose=""
 mumps_root=""
 scalapack_root=""
 lapack_root=""
+precice="0"
+precice_exe=""
 com=0
 
 if [ $number_of_arguments = 0 ]
@@ -165,6 +168,12 @@ else
        then
         scalapack_root=`echo $var|awk -F '=' '{print $2}'`
         scalapack_root="-Dscalapack_root=${scalapack_root}"
+       fi
+
+       if [ "$arg" == "-preCICE" ]
+       then
+        precice="1"
+        precice_exe="_precice"
        fi
 
        if [ "$arg" == "-addflag" ]
@@ -251,7 +260,7 @@ else
 fi
 
 
-build_directory=cbuild_${arch}${dmpi}${suffix}${cf}${ddebug}
+build_directory=cbuild_${arch}${dmpi}${suffix}${cf}${precice_exe}${ddebug}
 
 if [ $clean = 1 ]
 then
@@ -278,7 +287,7 @@ then
    mkdir ${build_directory}
 fi
 
-engine_exec=${eng_vers}_${arch}${dmpi}${suffix}${ddebug}
+engine_exec=${eng_vers}_${arch}${dmpi}${suffix}${precice_exe}${ddebug}
 echo " " 
 
 if [ -f ${build_directory}/${engine_exec} ]
@@ -337,9 +346,9 @@ then
   C_path_w=`cygpath.exe -m "${C_path}"`
   CPP_path_w=`cygpath.exe -m "${CPP_path}"`
   CXX_path_w=`cygpath.exe -m "${CXX_path}"`
-  cmake.exe -G "Unix Makefiles"  -Darch=${arch} -Dprecision=${prec} ${MPI} -Ddebug=${debug} -Dstatic_link=$static_link -Dmpi_os=${mpi_os} ${mpi_root} ${mpi_libdir} ${mpi_incdir} ${dc} ${mumps_root} ${scalapack_root} ${lapack_root} -DCMAKE_BUILD_TYPE=Release   -Dstatic_link=$static_link -DCMAKE_BUILD_TYPE=Release -DCMAKE_Fortran_COMPILER="${Fortran_path_w}" -DCMAKE_C_COMPILER="${C_path_w}" -DCMAKE_CPP_COMPILER="${CPP_path_w}" -DCMAKE_CXX_COMPILER="${CXX_path_w}" ${la} .. 
+  cmake.exe -G "Unix Makefiles"  -Darch=${arch} -Dprecision=${prec} ${MPI} -Ddebug=${debug} -Dstatic_link=$static_link -Dmpi_os=${mpi_os} ${mpi_root} ${mpi_libdir} ${mpi_incdir} ${dc} ${mumps_root} ${scalapack_root} ${lapack_root} -DCMAKE_BUILD_TYPE=Release   -Dstatic_link=$static_link -DCMAKE_BUILD_TYPE=Release -DCMAKE_Fortran_COMPILER="${Fortran_path_w}" -DCMAKE_C_COMPILER="${C_path_w}" -DCMAKE_CPP_COMPILER="${CPP_path_w}" -DCMAKE_CXX_COMPILER="${CXX_path_w}" ${la}  -DEXEC_NAME=$engine_exec .. 
 else
-  cmake -Darch=${arch} -Dprecision=${prec} ${MPI} -Ddebug=${debug} -Dstatic_link=$static_link -Dmpi_os=${mpi_os} -Dsanitize=${sanitize} ${mpi_root} ${mpi_libdir} ${mpi_incdir} ${dc} ${mumps_root} ${scalapack_root} ${lapack_root}   -Dstatic_link=$static_link -DCMAKE_BUILD_TYPE=Release -DCMAKE_Fortran_COMPILER=${Fortran_path} -DCMAKE_C_COMPILER=${C_path} -DCMAKE_CPP_COMPILER=${CPP_path} -DCMAKE_CXX_COMPILER=${CXX_path}  ${la} .. 
+  cmake -Darch=${arch} -Dprecision=${prec} ${MPI} -Ddebug=${debug} -Dstatic_link=$static_link -Dmpi_os=${mpi_os} -Dsanitize=${sanitize} ${mpi_root} ${mpi_libdir} ${mpi_incdir} ${dc} ${mumps_root} ${scalapack_root} ${lapack_root}   -Dstatic_link=$static_link -DCMAKE_BUILD_TYPE=Release -DCMAKE_Fortran_COMPILER=${Fortran_path} -DCMAKE_C_COMPILER=${C_path} -DCMAKE_CPP_COMPILER=${CPP_path} -DCMAKE_CXX_COMPILER=${CXX_path} ${la} -Dprecice=${precice} -DEXEC_NAME=$engine_exec .. 
 fi
 
 return_value=$?

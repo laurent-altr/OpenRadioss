@@ -82,7 +82,7 @@ Chd|        STATE_MOD                     ../common_source/modules/state_mod.F
 Chd|        TH_MOD                        share/modules/th_mod.F        
 Chd|====================================================================
       SUBROUTINE FREFORM(IRUNN,IRFL,IRFE,H3D_DATA,FLAG_CST_AMS,DYNAIN_DATA,
-     .                   SENSORS,DT,OUTPUT)
+     .                   SENSORS,DT,OUTPUT )
 C-----------------------------------------------
 C   D e s c r i p t i o n
 C-----------------------------------------------
@@ -169,7 +169,7 @@ C-----------------------------------------------
      .   NFVMESH,KSTATF,KSHVER,KABF,KDTSDE,
      .   KAABF,KBABF,KCABF,KDABF,KEABF,KFABF,KGABF,KHABF,KIABF,NFVMODI,
      .   KUPWIND,KTHERMAL,KH3D,KREPORT,KNEGVOL,KADYREL,KDT1TET10,KPERF,
-     .   KDYNAIN,KDTTSH,KMASS
+     .   KDYNAIN,KDTTSH,KMASS,KPRECICE
       INTEGER
      .   IKEY, I, II, I1, J1, J2, K,KK, M, N, NCT, IKOLD, NBC, K3, K4,
      .   NUBCS1,NUBCS2, IR,IDT,NELTGOF,
@@ -230,7 +230,7 @@ C-----------------------------------------------
      .     KRFILE/6/  ,KVERS/7/     ,                           KALE/10/   ,
      .     KDEL/11/   ,KVEL/12/     ,KBCS/13/     ,KBCSR/14/   ,KINTER/15/ ,
      .     KDTIX/16/  ,KIMPL/17/    ,KFUNC/18/    ,KFLSEC/19/  ,KDYREL/20/ ,
-     .     KKEREL/21/ ,KRBODY/22/   ,KANIM/23/                 ,KDEBUG/25/ ,
+     .     KKEREL/21/ ,KRBODY/22/   ,KANIM/23/    ,KDEBUG/25/ ,
      .     KOUTP/26/  ,              KALESUB/28/  ,KPROC/29/   ,
      .     KNOISE/31/ ,KDELIN/32/   ,              KPARIT/34/  ,KINIV/35/  ,
      .     KUPWM/36/  ,KMON/37/     ,              KDT1/39/    ,KINCMP/40/ ,
@@ -2386,12 +2386,15 @@ C-----------------------
 C     /OUTP (OUTPUT FILES)
 C-----------------------
       CALL FREOUTP(IKAD(0),KEY0,KOUTP,SENSORS)
-      
+C-----------------------
+C     /PRECICE
+C-----------------------
+C     CALL FREPRECICE(IKAD(0),KEY0,KPRECICE,PRECICE_COUPLING)
+     
 C-----------------------
 C     /DEBUG
 C-----------------------
       CALL FREDEBUG(IKAD(0),KEY0,KDEBUG)
-      
 C--------------------
 C     /NOISE
 C--------------------

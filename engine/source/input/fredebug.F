@@ -69,6 +69,7 @@ C-----------------------------------------------
 C-------  DEBUG(12) is free, can be used--- 
       DEBUG(1:MX_DEBUG) = 0 
       K=0 
+C Loop over 
       DO WHILE(IKAD(IKEY)+K/=IKAD(IKEY+1)) 
         READ(IUSC1,REC=IKAD(IKEY)+K,FMT='(7X,A,1X,I5)',ERR=9990)KEY2,NN 
         K=K+1 
