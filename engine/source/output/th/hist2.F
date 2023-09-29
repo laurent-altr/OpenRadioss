@@ -186,7 +186,9 @@ C-----------------------------------------------
       my_real, DIMENSION(1) :: WA_LOCAL      
       REAL(KIND=8) :: THIS0_DOUBLE,TT_DOUBLE
       REAL(KIND=8) :: DTHIS0_DOUBLE,DT1_DOUBLE,THISC_DOUBLE
-C=======================================================================
+C-----------------------------------------------
+C   S o u r c e   L i n e s
+C-----------------------------------------------
       ID_HIST = ITHFLAG
       THISC = THIS0
       THISC_DOUBLE = THIS0
@@ -208,9 +210,11 @@ C--------Multidomains : control of time history for subdomains-----------
             SIZE_MES = 1
           ENDIF
         ENDIF
-      ENDIF      
+      ENDIF   
+      TT_DOUBLE = TT
+
 C-----------------------------------------------------------------------    
-      IF (TT>=THISC) THEN
+      IF (TT>=THISC_DOUBLE) THEN
         NEED_TO_REINIT_FSAV = .TRUE.
 C---------------------------
         IF (IDDOM == 0) R2R_TH_MAIN(SEEK_ID) = 1
@@ -218,7 +222,6 @@ C---------------------------
 C---------------------------
         THIS0_DOUBLE = THIS0
         DTHIS0_DOUBLE = DTHIS0
-        TT_DOUBLE = TT
         IF (IMPL_S>0) THEN
           DT1_DOUBLE = DT1
           THIS0_DOUBLE=MAX(TT_DOUBLE,THIS0_DOUBLE+MAX(DTHIS0_DOUBLE,DT1_DOUBLE))
@@ -228,7 +231,7 @@ C---------------------------
           THIS0_DOUBLE=MAX(TT_DOUBLE,THIS0_DOUBLE+DTHIS0_DOUBLE)
           THIS0_DOUBLE=MIN(TSTOP,THIS0_DOUBLE)
           THIS0 = THIS0_DOUBLE
-        ENDIF    
+        ENDIF 
 C---------------------------                  
         IF(ITTYP==3) CALL CUR_FIL_C(IFIL)
 C Heat Outputs
@@ -238,7 +241,7 @@ C Heat Outputs
         ARRAY(4) =  HEAT_RADIA
         ARRAY(5) =  HEAT_MECA
         IF(NSPMD > 1) CALL SPMD_GLOB_RSUM_POFF(ARRAY,5)
-C       dans version spmd seul process 0 ecrit
+C       SPMD: only process 0 is writing
         IF (ISPMD==0) THEN
 C--------Multidomains : offset for th file------------------------------
           IF ((IRAD2R==1).AND.(R2R_SIU==1)) THEN
@@ -275,11 +278,10 @@ C         NGLOBTH depends on /TH/VERS
           IF(IUNIT==IUHIS) CALL WRTDES(WA,WA,NGLOBTH,ITTYP,1)
         ENDIF  ! ISPMD==0
 C-----------------------------
-C       VARIABLES PAR PART
+C       VARIABLES FOR EACH PART
 C-----------------------------
         IF(NPART>0) THEN
-         IF(NSPMD > 1 .AND. NTHPART > 0)
-     .       CALL SPMD_GLOB_DSUM9(GRESAV,NPSAV*NGPE)
+         IF(NSPMD > 1 .AND. NTHPART > 0) CALL SPMD_GLOB_DSUM9(GRESAV,NPSAV*NGPE)
          IF(NSPMD>1) CALL SPMD_GLOB_DSUM9(PARTSAV,NPSAV*(NPART+NTHPART))
          IF(ISPMD/=0) THEN
            DO M=1,NPSAV                                  
@@ -303,9 +305,9 @@ C-----------------------------
             IF(NVAR>0)THEN
               IF(NPSAV>=22)THEN
 C---------------------------------------
-C               CALCUL DU CG
-C               CALCUL DES QUANTITES DE MOUVEMENT / CG
-C               CALCUL DES INERTIES / CG
+C               GRAVITY CENTER
+C               MOMENTUM / CG
+C               INERTIA / CG
 C---------------------------------------
                 AA  = ONE/MAX(EM20,PARTSAV(6,I))
                 XCG = PARTSAV(9,I)*AA
@@ -393,8 +395,8 @@ C                                    [Izx Iyz Izz]   {ZZMOM}
                   DET =  ONE/ MAX(EM20,
      .                        IXX * JXX + IXY * JXY + IZX * JZX)
                   WA(II)=DET *
-     .         (HALF*(JXX*XXMOM*XXMOM+JYY*YYMOM*YYMOM+JZZ*ZZMOM*ZZMOM)
-     .             + JXY*XXMOM*YYMOM+JYZ*YYMOM*ZZMOM+JZX*XXMOM*ZZMOM )
+     .                        (HALF*(JXX*XXMOM*XXMOM+JYY*YYMOM*YYMOM+JZZ*ZZMOM*ZZMOM)
+     .                             + JXY*XXMOM*YYMOM+JYZ*YYMOM*ZZMOM+JZX*XXMOM*ZZMOM )
                 ELSEIF(K==24)THEN
                   WA(II)=PARTSAV(22,I)
                 ELSEIF(K==25) THEN 
@@ -417,7 +419,7 @@ C                                    [Izx Iyz Izz]   {ZZMOM}
          ENDIF         !  ISPMD/=0
         ENDIF          !  NPART>0
 C-----------------------------
-C     VARIABLES PAR SUBSET
+C     VARIABLES FOR EACH SUBSET
 C-----------------------------
        IF(NSUBS>0.AND.ISPMD==0) THEN
          II=0
@@ -548,7 +550,7 @@ C                                    [Izx Iyz Izz]   {ZZMOM}
        ENDIF
 C-------------------------------------------------------
 C      TH GROUP KINE SPMD
-C       Comment : FSAV(NTHVKI,*), avec NTHVKI = 18
+C       (  FSAV(NTHVKI,*), with NTHVKI = 18  )
 C-------------------------------------------------------
        FSAVMAX = NVOLU+NRBAG+NJOINT+NSECT+NRBODY+NRWALL+NINTER+NINTSUB
 
@@ -587,7 +589,7 @@ C
        END IF
        IF(NVENTTOT>0)THEN
 C
-C        vide les donnees de Volmon dans Buffer Fsavvent.
+C        Volmon dumped into Fsavvent.
          DO I=1,NVENTTOT
            DO J=1,5
              FSAVVENT(J,I) = ZERO
@@ -615,7 +617,7 @@ C-----------------------------------
             ENDIF
          ENDDO
 C---------------------------------------------------------
-C      CALCUL DE LA MASSE TRAVERSANT LES SURFACES (FVMBAG)
+C      MASS FLOW (FVMBAG)
 C---------------------------------------------------------
          CALL SURF_MASS_MONV(FSAVSURF,IGRSURF,MONVOL,VOLMON,FR_MV)
 C
@@ -635,12 +637,12 @@ C
         ENDIF
        ENDIF
 C--------------------------------------------
-C      PRE TRAITEMENT RIVETS SPMD ONLY
+C      PRE-TREATMENT RIVETS (SPMD ONLY)
 C--------------------------------------------
        IF(NRIVF>1.AND.NSPMD > 1.AND.NRIVET>0) THEN
         DO K = 1, NRIVET
           I = ABS(LRIVET(2,K))
-C sauvegarde flag off
+C beckup : flag off
           RIVOFF(K) = RIVET(1,K)
           RIVET_BOOL=.FALSE.
           IF(LRIVET(2,K) <1)  RIVET_BOOL=.TRUE.
@@ -654,27 +656,27 @@ C sauvegarde flag off
           ENDIF
         END DO
         CALL SPMD_GLOB_DSUM9(RIVET,NRIVF*NRIVET)
-C restitution flag off
+C retrieve : flag off
         DO K = 1, NRIVET
           RIVET(1,K) = RIVOFF(K)
         END DO
        ENDIF
 C--------------------------------------------
-C      PRE TRAITEMENT ACCELEROMETRES SPMD ONLY
+C      PRE-TREATMENT ACCELEROMETERS (SPMD ONLY)
 C--------------------------------------------
        IF(NACCELM>0 .AND. NSPMD > 1)THEN
 C gather sur p0 des valeurs a jour pour les accelerometres
          CALL SPMD_SD_ACC(ACCELM,IACCP,NACCP)
        END IF
 C--------------------------------------------
-C      PRE TRAITEMENT GAUGES SPMD ONLY
+C      PRE-TREATMENT GAUGES (SPMD ONLY)
 C--------------------------------------------
        IF(NBGAUGE>0 .AND. NSPMD > 1)THEN
 C gather sur p0 des valeurs a jour pour les gauges
          CALL SPMD_SD_GAU(GAUGE,IGAUP,NGAUP)
        END IF
 C--------------------------------------------
-C      PRE TRAITEMENT SEATBELTS
+C      PRE-TREATMENT SEATBELTS
 C--------------------------------------------
        IF(NSLIPRING_G + NRETRACTOR_G > 0) THEN
 C
@@ -752,10 +754,11 @@ C-------------------------------------------------------
 !   TH optimization for solid elements
         !   initialization of local array
         WA_SOL(ID_HIST)%WA_REAL( 1:WA_SOL_SIZE(ID_HIST) ) = ZERO
-        CALL THSOL(ELBUF_TAB,NTHGRP2 ,ITHGRP , 
-     .                 IPARG   ,ITHBUF   ,WA_SOL(ID_HIST)%WA_REAL ,
-     .                 IXS     ,X        ,IPM    ,PM     ,IGEO    ,
-     .                 MULTI_FVM,V       ,W      )
+        CALL THSOL(    ELBUF_TAB, NTHGRP2, ITHGRP                  ,
+     .                 IPARG    , ITHBUF , WA_SOL(ID_HIST)%WA_REAL ,
+     .                 IXS      , X      , IPM                     ,PM     ,IGEO    ,
+     .                 MULTI_FVM, V      , W                       ,
+     .                 NUMELS   , NUMMAT , NUMGEO                  , NUMNOD,SITHBUF)
 
         !   send WA_SOL to PROC0
         IF(NSPMD>1) THEN
@@ -772,10 +775,11 @@ C-------------------------------------------------------
 !   TH optimization for quad/tria elements
         !   initialization of local array
         WA_QUAD(ID_HIST)%WA_REAL( 1:WA_QUAD_SIZE(ID_HIST) ) = ZERO
-        CALL THQUAD(ELBUF_TAB,NTHGRP2 , ITHGRP , 
+        CALL THQUAD(ELBUF_TAB,NTHGRP2  ,ITHGRP    ,
      1              IPARG    ,ITHBUF   ,WA_QUAD(ID_HIST)%WA_REAL      ,
      2              IPM      ,IXQ      ,IXTG      ,X       ,MULTI_FVM ,
-     3              V        ,W        )
+     3              V        ,W        ,
+     .              NUMELQ   ,NUMMAT   ,NUMNOD    ,SITHBUF   ,NUMELTG)
         !   send WA_QUAD to PROC0
         IF(NSPMD>1) THEN
             CALL SPMD_GATHERV(WA_QUAD(ID_HIST)%WA_REAL,WA_QUAD_P0(ID_HIST)%WA_REAL,0,
@@ -976,7 +980,7 @@ C-----------------------------
 C-----------------------------
 C           ACCELEROMETRE
 C-----------------------------
-Cel en spmd seul p0 ecrit accelerometres
+C   en spmd seul p0 ecrit accelerometres
             IF (ISPMD==0) THEN
               II = 0
               DO J=IAD,IAD+NN-1
@@ -1436,9 +1440,7 @@ C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
       INTEGER IVOLU(NIMV,*),FR_MV(NSPMD+2,NVOLU)
-C     REAL
-      my_real
-     .   FSAVVENT(5,*),RBAGHOL(*)
+      my_real FSAVVENT(5,*),RBAGHOL(*)
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------

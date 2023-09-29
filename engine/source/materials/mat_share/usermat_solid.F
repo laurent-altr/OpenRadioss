@@ -71,8 +71,8 @@ Chd|        SREPLOC3                      source/elements/solid/solide/sreploc3.
 Chd|        STARTIME                      source/system/timer.F         
 Chd|        STOPTIME                      source/system/timer.F         
 Chd|        VISCMAIN                      source/materials/visc/viscmain.F
-Chd|        ELBUFDEF_MOD                  ../common_source/modules/mat_elem/elbufdef_mod.F
 Chd|        LAW_USERSO                    source/user_interface/law_userso.F
+Chd|        MAT_ELEM_MOD                  ../common_source/modules/mat_elem/mat_elem_mod.F
 Chd|        MESSAGE_MOD                   share/message_module/message_mod.F
 Chd|        NLOCAL_REG_MOD                ../common_source/modules/nlocal_reg_mod.F
 Chd|        TABLE_MOD                     share/modules/table_mod.F     
@@ -115,13 +115,13 @@ Chd|====================================================================
      Z   EPSTH,    SVISC,    NEL,      ETOTSH,
      1   ISELECT,  TSTAR,    MUOLD,    AMU2,
      2   DPDM,     RHOREF,   RHOSP,    NLOC_DMG,
-     3   ITY,      JTUR)
+     3   ITY,      JTUR  ,   MAT_ELEM  )
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
       USE LAW_USERSO
       USE TABLE_MOD
-      USE ELBUFDEF_MOD            
+      USE MAT_ELEM_MOD            
       USE MESSAGE_MOD
       USE NLOCAL_REG_MOD
 C-----------------------------------------------
@@ -186,13 +186,14 @@ C
       TYPE (TTABLE), DIMENSION(NTABLE) ::  TABLE
       TYPE (ELBUF_STRUCT_), TARGET, DIMENSION(NGROUP) :: ELBUF_TAB
       TYPE (NLOCAL_STR_) :: NLOC_DMG 
+      TYPE (MAT_ELEM_)  ,INTENT(INOUT) :: MAT_ELEM
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
       INTEGER NV46, NUMEL, INLOC, JSMS
       INTEGER I,NPAR,IADBUF,NFUNC,NUMTABL,ISRATE,SIZNUL,MX,IPG,NPTR,NPTS,
      .  IBID,IBIDON1,IBIDON2,IBIDON3,IBIDON4 ,N48,NIX,ILAW_USER,IGTYP,
-     .  NVARF,IR,IP,IRUPT,IMAT,ISVIS,IVISC,NUVARV,ISEQ,IADRUPBUF,IDEV
+     .  NVARF,NVARVIS,IR,IP,IRUPT,IMAT,ISVIS,IVISC,NUVARV,ISEQ,IADRUPBUF,IDEV
       my_real 
      .E1,E2,E3,E4,E5,E6,BID1,BID2,BID3,Q1,Q2,Q3,SS1,SS2,SS3,SS4,SS5,
      .SS6,WXXF,WYYF,WZZF,P2,EPSP,DAV,ASRATE,C1(MVSIZ),
@@ -255,6 +256,7 @@ C=======================================================================
       ISEQ   = ELBUF_TAB(NG)%BUFLY(ILAY)%L_SEQ
       INLOC  = IPARG(78,NG)
       DMG_FLAG = ELBUF_TAB(NG)%BUFLY(ILAY)%L_DMGSCL
+      NVARVIS  = ELBUF_TAB(NG)%BUFLY(ILAY)%NVAR_VISC
       ! Make sure that the non-local variable increment is positive
       IF (INLOC > 0) THEN 
         DO I = LFT,LLT
@@ -1438,7 +1440,7 @@ C---- strain tension
      5             S1  ,S2  ,S3  ,S4   ,S5   ,S6      ,
      6             EPSP1,UVARF,OFF ,IP   ,DFMAX,TDEL  ,
      7             MFXX   ,MFXY   ,MFXZ   ,MFYX    ,MFYY   ,MFYZ   ,                 
-     8             MFZX   ,MFZY   ,MFZZ   )
+     8             MFZX   ,MFZY   ,MFZZ   ,DMG_SCALE)
           ELSEIF (IRUPT == 11)THEN                                        
 C---- energy failure  
               CALL FAIL_ENERGY_S(LLT ,NPAR,NUVARR,NFUNC,IFUNC       ,
@@ -1451,10 +1453,10 @@ C---- energy failure
 C---- tabulated failure model
                CALL FAIL_TAB_S(
      1         LLT      ,NVARF    ,NPF      ,TF       ,TT       ,        
-     2         UPARAMF  ,NGL      ,IPM      ,MAT      ,EL_LEN   ,        
+     2         UPARAMF  ,NGL      ,EL_LEN   ,        
      3         S1       ,S2       ,S3       ,S4       ,S5       ,S6,    
-     4         DEFP     ,DPLA     ,EPSP1    ,TSTAR    ,UVARF ,             
-     5         OFF      ,IP       ,TABLE    ,DFMAX    ,TDEL  ,
+     4         DPLA     ,EPSP1    ,TSTAR    ,UVARF ,             
+     5         OFF      ,TABLE    ,DFMAX    ,TDEL  ,
      6         NFUNC    ,IFUNC )                                      
           ELSEIF (IRUPT == 24) THEN                                      
 c   --- Orthotropic strain failure
@@ -1624,9 +1626,8 @@ C     viscous stress (/VISC models)
 C-----------------------------------------------------------------------
       IVISC = IPM(222,MX)
       IF (IVISC > 0) THEN
-         CALL VISCMAIN(
-     .        LLT     ,MX  ,IVISC   ,IPM     ,BUFMAT  ,
-     .        VBUF%VAR,RHO0    ,VIS     ,SSP     ,DT1     , 
+         CALL VISCMAIN(MAT_ELEM%MAT_PARAM(MAT(1))%VISC    ,NEL     ,
+     .        NVARVIS ,VBUF%VAR,RHO0    ,VIS     ,SSP     ,DT1     , 
      .        EP1     ,EP2     ,EP3     ,EP4     ,EP5     ,EP6     ,
      .        SV1     ,SV2     ,SV3     ,SV4     ,SV5     ,SV6     ,
      .        MFXX    ,MFXY    ,MFXZ    ,MFYX    ,MFYY    ,MFYZ    ,
@@ -1638,7 +1639,7 @@ C
 C  calcul of viscosity ( Navier-Stokes)
 C
       IF (ISVIS > 0) THEN
-      CALL NSVISUL(LLT     ,PM      ,OFF     ,RHO     ,GEO    ,
+      CALL NSVISUL(LLT     ,OFF     ,RHO     ,GEO    ,
      2             PID     ,SSP     ,AIRE    ,VOLN    ,EP1    ,
      3             EP2     ,EP3     ,EP4     ,EP5     ,EP6    ,
      4             SV1     ,SV2     ,SV3     ,SV4     ,SV5    ,
@@ -1730,7 +1731,7 @@ C-----------------------
      9   FACQ0,    CONDE,    GBUF%DT,  GBUF%G_DT,
      A   IPM,      RHOREF,   RHOSP,    NEL,
      B   ITY,      ISMSTR,   JTUR,     JTHE,
-     C   JSMS)
+     C   JSMS,     NPG )
 !------------------------------------------------
       ELSE
         CALL MDTSPH(

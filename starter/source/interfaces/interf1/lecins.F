@@ -43,6 +43,7 @@ Chd|        INSURFIGEO                    source/interfaces/interf1/insurfigeo.F
 Chd|        NSEGMT                        source/interfaces/interf1/nsegmt.F
 Chd|        GROUPDEF_MOD                  ../common_source/modules/groupdef_mod.F
 Chd|        INTBUFDEF_MOD                 ../common_source/modules/intbufdef_mod.F
+Chd|        INTERFACES_MOD                ../common_source/modules/interfaces/interfaces_mod.F
 Chd|        MESSAGE_MOD                   share/message_module/message_mod.F
 Chd|        MULTI_FVM_MOD                 ../common_source/modules/ale/multi_fvm_mod.F
 Chd|====================================================================
@@ -53,7 +54,7 @@ Chd|====================================================================
      .                  IXC     ,IXTG       ,KNOD2ELC ,KNOD2ELTG ,NOD2ELC ,
      .                  NOD2ELTG,INTBUF_TAB ,KNOD2ELS ,NOD2ELS   ,IXS10   ,
      .                  IXS16   ,IXS20      ,NIGE,RIGE,XIGE      ,VIGE    ,
-     .                  IGRBRIC ,MULTI_FVM  ,NALE     ,IGEO)
+     .                  IGRBRIC ,MULTI_FVM  ,NALE     ,IGEO      ,INTERFACES)
 C============================================================================
 C-----------------------------------------------
 C   M o d u l e s
@@ -62,6 +63,7 @@ C-----------------------------------------------
       USE INTBUFDEF_MOD
       USE GROUPDEF_MOD
       USE MULTI_FVM_MOD
+      USE INTERFACES_MOD
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -96,7 +98,8 @@ C-----------------------------------------------
       TYPE (GROUP_)  , DIMENSION(NGRBRIC) :: IGRBRIC
       TYPE (SURF_)   , DIMENSION(NSURF) ,TARGET  :: IGRSURF
       TYPE (SURF_)   , DIMENSION(NSLIN) ,TARGET  :: IGRSLIN
-      TYPE(MULTI_FVM_STRUCT)                     :: MULTI_FVM      
+      TYPE(MULTI_FVM_STRUCT)                     :: MULTI_FVM    
+      TYPE (INTERFACES_) ,INTENT(INOUT):: INTERFACES  
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
@@ -203,7 +206,7 @@ C
             IF(ISU1>0)THEN
               IF(IPRI>=1) WRITE(IOUT,'(//,A)')' SECONDARY SURFACE'
               NBRIC=IGRBRIC(ISU1)%NENTITY
-              CALL INGRBRIC(NSN,   NOINT,   IGRBRIC(ISU1)%ENTITY,   ITAB,  INTBUF_TAB(NI)%NSV,
+              CALL INGRBRIC(NSN,   IGRBRIC(ISU1)%ENTITY, INTBUF_TAB(NI)%NSV,
      +                      IXS,   NBRIC,   PM, INTBUF_TAB(NI)%S_NSV,IGEO)
            ENDIF
 C--------------------------------------------
@@ -260,11 +263,11 @@ c            END IF
               !INTER18 + GRBRIC_ID
               NBRIC = IGRBRIC(GRBRIC_ID)%NENTITY              
               IF (MULTI_FVM%IS_USED)THEN
-               CALL INGRBRIC_CENTROIDS(NOINT, IGRBRIC(GRBRIC_ID)%ENTITY, ITAB, INTBUF_TAB(NI)%NSV,
+               CALL INGRBRIC_CENTROIDS(IGRBRIC(GRBRIC_ID)%ENTITY, INTBUF_TAB(NI)%NSV,
      .                       IXS, NBRIC)                            
               ELSE
-               CALL INGRBRIC_NODES(    NSN_FE, NOINT, IGRBRIC(GRBRIC_ID)%ENTITY, ITAB, INTBUF_TAB(NI)%NSV,
-     .                       IXS, NBRIC, 2, NALE, IPM, BUFMAT, INTBUF_TAB(NI)%S_NSV)              
+               CALL INGRBRIC_NODES(NSN_FE, IGRBRIC(GRBRIC_ID)%ENTITY, ITAB, INTBUF_TAB(NI)%NSV,
+     .                       IXS, NBRIC, NALE, IPM, BUFMAT, INTBUF_TAB(NI)%S_NSV)
               ENDIF
             ENDIF
             IF (NTYP==3) THEN
@@ -607,7 +610,7 @@ C           necessaire au 2eme passage (cf IDDLEVEL)
      6      IXTG                   ,KNOD2ELC               ,KNOD2ELTG                ,NOD2ELC                ,
      7      NOD2ELTG               ,KNOD2ELS               ,NOD2ELS                  ,IXS                    ,
      8      IXS10                  ,IXS16                  ,IXS20                    ,INTBUF_TAB(NI)%IRTSE   ,
-     9      INTBUF_TAB(NI)%IS2SE   ,INTBUF_TAB(NI)%IS2PT   ,INTBUF_TAB(NI)%IS2ID     )
+     9      INTBUF_TAB(NI)%IS2SE   ,INTBUF_TAB(NI)%IS2PT   ,INTBUF_TAB(NI)%IS2ID     ,INTERFACES%PARAMETERS  )
 C------initialization of doubler M_seg pour shells ---> move inside I24SURFI
         ENDIF
 C

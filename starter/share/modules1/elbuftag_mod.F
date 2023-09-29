@@ -66,6 +66,7 @@ Chd|        HM_READ_MAT11_K_EPS           source/materials/mat/mat011/hm_read_ma
 Chd|        HM_READ_MAT12                 source/materials/mat/mat012/hm_read_mat12.F
 Chd|        HM_READ_MAT120                source/materials/mat/mat120/hm_read_mat120.F
 Chd|        HM_READ_MAT121                source/materials/mat/mat121/hm_read_mat121.F
+Chd|        HM_READ_MAT122                source/materials/mat/mat122/hm_read_mat122.F
 Chd|        HM_READ_MAT124                source/materials/mat/mat124/hm_read_mat124.F
 Chd|        HM_READ_MAT13                 source/materials/mat/mat013/hm_read_mat13.F
 Chd|        HM_READ_MAT14                 source/materials/mat/mat014/hm_read_mat14.F
@@ -93,6 +94,7 @@ Chd|        HM_READ_MAT36                 source/materials/mat/mat036/hm_read_ma
 Chd|        HM_READ_MAT37                 source/materials/mat/mat037/hm_read_mat37.F
 Chd|        HM_READ_MAT38                 source/materials/mat/mat038/hm_read_mat38.F
 Chd|        HM_READ_MAT40                 source/materials/mat/mat040/hm_read_mat40.F
+Chd|        HM_READ_MAT41                 source/materials/mat/mat041/hm_read_mat41.F
 Chd|        HM_READ_MAT43                 source/materials/mat/mat043/hm_read_mat43.F
 Chd|        HM_READ_MAT44                 source/materials/mat/mat044/hm_read_mat44.F
 Chd|        HM_READ_MAT46                 source/materials/mat/mat046/hm_read_mat46.F
@@ -437,10 +439,5 @@ C
         INTEGER ::   LF_OFF
         INTEGER ::   LF_DIR
       END TYPE FAIL_TAG_               
- 
-C
-      TYPE VISC_TAG_   
-        INTEGER ::   NUVAR
-      END TYPE VISC_TAG_               
 c---------------
       END MODULE ELBUFTAG_MOD

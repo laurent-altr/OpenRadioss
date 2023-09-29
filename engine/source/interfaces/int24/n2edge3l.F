@@ -21,47 +21,57 @@ Copyright>        As an alternative to this open-source version, Altair also off
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
 Chd|====================================================================
-Chd|  INI_MATPARAM                  source/materials/mat/ini_matparam.F
+Chd|  N2EDGE3L                      source/interfaces/int24/n2edge3l.F
 Chd|-- called by -----------
-Chd|        READ_MATERIAL_MODELS          source/materials/read_material_models.F
+Chd|        INTERSECSH                    source/interfaces/int24/i24dst3.F
 Chd|-- calls ---------------
-Chd|        MATPARAM_DEF_MOD              ../common_source/modules/mat_elem/matparam_def_mod.F
 Chd|====================================================================
-      SUBROUTINE INI_MATPARAM(MAT_PARAM,NUMMAT)
+        SUBROUTINE N2EDGE3L(
+     1                           XXI    ,YYI      ,ZZI    ,
+     2                           XXJ    ,YYJ      ,ZZJ    ,
+     3                           NX     ,NY       ,NZ     ,
+     4                           XI     ,YI       ,ZI     ,BBB )
 C-----------------------------------------------
-C   M o d u l e s
-C-----------------------------------------------
-      USE MATPARAM_DEF_MOD
-C============================================================================
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
-      INTEGER NUMMAT
-      TYPE(MATPARAM_STRUCT_) , DIMENSION(NUMMAT) :: MAT_PARAM
+C     REAL
+      my_real , INTENT(IN)     :: 
+     1                           XXI    ,YYI      ,ZZI    ,
+     2                           XXJ    ,YYJ      ,ZZJ    ,
+     3                           NX     ,NY       ,NZ     ,
+     4                           XI     ,YI       ,ZI     
+      my_real , INTENT(OUT)    :: BBB
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER IMAT
-C=======================================================================
-      DO IMAT=1,NUMMAT
-        MAT_PARAM(IMAT)%ILAW    = 0
-        MAT_PARAM(IMAT)%MAT_ID  = 0
-        MAT_PARAM(IMAT)%NUPARAM = 0              ! number of real value material paraameters
-        MAT_PARAM(IMAT)%NIPARAM = 0              ! number of int value material parameters
-        MAT_PARAM(IMAT)%NFUNC   = 0              ! number of local functions in material
-        MAT_PARAM(IMAT)%NTABLE  = 0              ! number of local function tables
-        MAT_PARAM(IMAT)%NSUBMAT = 0              ! number of submaterials (multi-mat law51)
-        MAT_PARAM(IMAT)%NFAIL   = 0              !
-c
-        MAT_PARAM(IMAT)%COMPRESSIBILITY    = 3   ! elsto_plastic
-        MAT_PARAM(IMAT)%SMSTR              = 2   ! large strain
-        MAT_PARAM(IMAT)%STRAIN_FORMULATION = 1   ! incremental
-        MAT_PARAM(IMAT)%IPRES              = 1   ! hydrostatic using AMU
-        MAT_PARAM(IMAT)%ORTHOTROPY         = 1   ! isotropic
-      END DO
-c-----------
+        INTEGER I
+      my_real
+     .     XMIJ(3),NIJ(3),DI(3),AA,NORM
+C-----------------------------------------------
+             XMIJ(1)=XXJ-XXI
+             XMIJ(2)=YYJ-YYI
+             XMIJ(3)=ZZJ-ZZI
+             NIJ(1)= NY*XMIJ(3) - NZ*XMIJ(2)
+             NIJ(2)= NZ*XMIJ(1) - NX*XMIJ(3)
+             NIJ(3)= NX*XMIJ(2) - NY*XMIJ(1)
+             AA = NIJ(1)*NIJ(1)+NIJ(2)*NIJ(2)+NIJ(3)*NIJ(3)
+             NORM=MAX(EM20,SQRT(AA))
+             DI(1)=HALF*(XXI+XXJ)-XI
+             DI(2)=HALF*(YYI+YYJ)-YI
+             DI(3)=HALF*(ZZI+ZZJ)-ZI
+             BBB = (DI(1)*NIJ(1)+DI(2)*NIJ(2)+DI(3)*NIJ(3))/NORM
+             IF (ABS(BBB)<EM3) then
+               XMIJ(1)=XXJ-XI
+               XMIJ(2)=YYJ-YI
+               XMIJ(3)=ZZJ-ZI
+               AA = DI(1)*XMIJ(1)+DI(2)*XMIJ(2)+DI(3)*XMIJ(3)
+               IF (AA>ABS(BBB)) BBB = AA
+             END IF
+C
       RETURN
-      END 
+      END
+    

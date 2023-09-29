@@ -49,6 +49,7 @@ Chd|        CEPSINI                       starter/source/elements/shell/coque/ce
 Chd|        CFAILINI                      starter/source/elements/shell/coque/cfailini.F
 Chd|        CFAILINI4                     starter/source/elements/shell/coque/cfailini.F
 Chd|        CFINT_REG_INI                 starter/source/elements/shell/coque/cfint_reg_ini.F
+Chd|        CHECK_PTHICKFAIL              starter/source/materials/fail/check_pthickfail.F
 Chd|        CHK_DTTSH                     starter/source/elements/thickshell/solidec/scdtchk3.F
 Chd|        CINIT3                        starter/source/elements/shell/coque/cinit3.F
 Chd|        CINMAS                        starter/source/elements/shell/coque/cinmas.F
@@ -69,7 +70,6 @@ Chd|        CSIGINI4                      starter/source/elements/shell/coqueba/
 Chd|        CUSERINI                      starter/source/elements/shell/coque/cuserini.F
 Chd|        CUSERINI4                     starter/source/elements/shell/coqueba/cuserini4.F
 Chd|        C_SEATBELTS                   starter/source/restart/ddsplit/c_seatbelts.F
-Chd|        DDSPLIT                       starter/source/restart/ddsplit/ddsplit.F
 Chd|        DEALLOCATE_ELBUF              starter/source/elements/elbuf_init/deallocate_buffer.F
 Chd|        DEALLOCATE_ONE_ELEMENT_GROUP  starter/source/elements/elbuf_init/deallocate_one_element_group.F
 Chd|        DFUNC0                        starter/source/output/anim/dfunc0.F
@@ -81,7 +81,6 @@ Chd|        DMASANIC                      starter/source/output/anim/dmasanic.F
 Chd|        DMASANIF                      starter/source/output/anim/dmasanif.F
 Chd|        DMASANIS                      starter/source/output/anim/dmasanis.F
 Chd|        DTMAIN                        starter/source/materials/time_step/dtmain.F
-Chd|        ELBUF_INI                     starter/source/elements/elbuf_init/elbuf_ini.F
 Chd|        FAILINI                       starter/source/elements/solid/solide/failini.F
 Chd|        FAIL_WINDSHIELD_INIT          starter/source/materials/fail/windshield_alter/fail_windshield_init.F
 Chd|        GENANI1                       starter/source/output/anim/genani1.F
@@ -288,7 +287,6 @@ Chd|        EIG1                          engine/stub/eig1.F
 Chd|        EIGCOND                       engine/stub/eigcond.F         
 Chd|        EIGOFF                        engine/source/output/anim/generate/eigoff.F
 Chd|        EIGP                          engine/stub/eigp.F            
-Chd|        ELBUF_INI                     engine/source/elements/elbuf/elbuf_ini.F
 Chd|        ELOFF                         engine/source/elements/eloff.F
 Chd|        ENRICHC_INI                   engine/source/elements/xfem/enrichc_ini.F
 Chd|        ENRICHTG_INI                  engine/source/elements/xfem/enrichtg_ini.F
@@ -482,7 +480,6 @@ Chd|        R23LAW114                     engine/source/elements/spring/r23law11
 Chd|        R4KE3                         engine/source/elements/spring/r4ke3.F
 Chd|        R8KE3                         engine/source/elements/spring/r8ke3.F
 Chd|        RADIATOFF                     engine/source/constraints/thermic/radiatoff.F
-Chd|        RADIOSS2                      engine/source/engine/radioss2.F
 Chd|        RBYONF                        engine/source/constraints/general/rbody/rbyonf.F
 Chd|        RBYPID                        engine/source/constraints/general/rbody/rbypid.F
 Chd|        RBYSENS                       engine/source/constraints/general/rbody/rbyonf.F
@@ -532,6 +529,8 @@ Chd|        SIGEPS112                     engine/source/materials/mat/mat112/sig
 Chd|        SIGEPS112C                    engine/source/materials/mat/mat112/sigeps112c.F
 Chd|        SIGEPS121                     engine/source/materials/mat/mat121/sigeps121.F
 Chd|        SIGEPS121C                    engine/source/materials/mat/mat121/sigeps121c.F
+Chd|        SIGEPS122                     engine/source/materials/mat/mat122/sigeps122.F
+Chd|        SIGEPS122C                    engine/source/materials/mat/mat122/sigeps122c.F
 Chd|        SIGEPS22G                     engine/source/materials/mat/mat022/sigeps22g.F
 Chd|        SIGEPS37_SINGLE_CELL          engine/source/interfaces/int22/sigeps37_single_cell.F
 Chd|        SIGEPS51                      engine/source/materials/mat/mat051/sigeps51.F
@@ -650,7 +649,6 @@ Chd|        UPOFFTG                       engine/source/elements/xfem/upofftg.F
 Chd|        UPXFEM1                       engine/source/elements/xfem/upxfem1.F
 Chd|        UPXFEM_TAGXP                  engine/source/elements/xfem/upxfem_tagxp.F
 Chd|        USERMAT_SHELL                 engine/source/materials/mat_share/usermat_shell.F
-Chd|        USERMAT_SOLID                 engine/source/materials/mat_share/usermat_solid.F
 Chd|        VELVECC22                     engine/source/output/anim/generate/velvec.F
 Chd|        VELVECZ22                     engine/source/output/anim/generate/velvecz22.F
 Chd|        VOLN22                        engine/source/interfaces/int22/voln22.F
@@ -660,7 +658,6 @@ Chd|        WRITE_CUT_CELL_BUFFER         engine/source/interfaces/int22/write_c
 Chd|        W_ELBUF_STR                   engine/source/elements/elbuf/w_elbuf_str.F
 Chd|        XFEOFF                        engine/source/elements/xfem/xfeoff.F
 Chd|        XFORC3                        engine/source/elements/xelem/xforc3.F
-Chd|        ELBUF_MOD                     engine/share/modules/elbuf_mod.F
 Chd|        ALE51_GRADIENT_RECONSTRUCTION2engine/source/ale/alemuscl/ale51_gradient_reconstruction2.F
 Chd|        MULTI_MUSCL_FLUXES_COMPUTATIONengine/source/multifluid/multi_muscl_fluxes_computation.F
 Chd|-- calls ---------------

@@ -47,10 +47,11 @@ Chd|====================================================================
      6       IPART  ,SH4TREE ,NOD2ELC   ,ISHEOFF ,
      7       SH4TRIM ,TAGPRT_SMS,LGAUGE  ,IWORKSH ,
      8       STACK   ,DRAPE    ,RNOISE  ,MATPARAM_TAB,
-     9       SH4ANG, IDDLEVEL , DRAPEG,PRINT_FLAG)
+     9       SH4ANG, IDDLEVEL , DRAPEG,PRINT_FLAG,PTSHEL)
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
+      USE MY_ALLOC_MOD
       USE MESSAGE_MOD
       USE R2R_MOD 
       USE STACK_MOD     
@@ -95,7 +96,6 @@ C-----------------------------------------------
 #include      "sms_c.inc"
 #include      "r2r_c.inc"
 #include      "drape_c.inc"
-#include      "my_allocate.inc"
 C-----------------------------------------------
 C   D U M M Y   A R G U M E N T S
 C-----------------------------------------------
@@ -108,6 +108,7 @@ C-----------------------------------------------
      .    NOD2ELC(*),IWORKSH(3,*)
       INTEGER, INTENT(IN) :: IDDLEVEL
       INTEGER, INTENT(IN) :: PRINT_FLAG !< flag to print the element group data
+      INTEGER , DIMENSION(NUMELC) , INTENT(INOUT):: PTSHEL
       MY_REAL
      .    PM(NPROPM,*), GEO(NPROPG,*), XNUM(*),THK(*),RNOISE(NPERTURB,*),
      .    SH4ANG(*)
@@ -136,7 +137,7 @@ C-----------------------------------------------
      .   NSLICE,KK,NPT_DRP, IDRAPE, JJ,IEL,IEL0,ISHEL
       my_real
      .  ANGLE(NUMELC)
-      INTEGER, DIMENSION(:), ALLOCATABLE :: INDEXS2
+      INTEGER, DIMENSION(:), ALLOCATABLE :: INDEXS2,INUM_PTSHEL
 
       INTEGER MODE,WORK(70000)
       INTEGER, DIMENSION(:,:), ALLOCATABLE :: ISTOR,INUM_WORKSH
@@ -157,7 +158,7 @@ C---+----1----+----2----+----3----+----4----+----5----+----6----+----7--
         ALLOCATE( ISTOR(0,0) )
       ENDIF
 
-      MY_ALLOCATE(INDEXS2,NUMELC)
+      CALL MY_ALLOC(INDEXS2,NUMELC)
       INDEXS2(1:NUMELC)=PERMUTATION%SHELL(1:NUMELC)
 C
       IF (NPERTURB > 0) THEN
@@ -288,6 +289,12 @@ C
              ANGLE(I) = SH4ANG(NFT+I)          
            ENDDO          
         ENDIF   
+        IF(ABS(ISIGI) == 3  .OR. ABS(ISIGI) == 4 .OR. ABS(ISIGI) == 5) THEN
+          ALLOCATE(INUM_PTSHEL(NEL))
+          DO I = 1, NEL
+            INUM_PTSHEL(I)=PTSHEL(NFT+I)
+          ENDDO
+         ENDIF    
 C
         IF(NADMESH/=0)THEN
           DO  K=1,KSH4TREE
@@ -395,7 +402,13 @@ C
                SH4ANG(NFT+I) = ANGLE(INDEX(I))
             ENDDO
         ENDIF   ! NDRAPE  
-
+        
+        IF(ABS(ISIGI)==3.OR.ABS(ISIGI)== 4.OR.ABS(ISIGI)==5)THEN
+         DO I=1,NEL
+           PTSHEL(NFT+I) = INUM_PTSHEL(INDEX(I))
+         ENDDO  
+          DEALLOCATE(INUM_PTSHEL)
+        ENDIF
         IF(NADMESH/=0)THEN
             DO  K=1,KSH4TREE
                 DO  I=1,NEL
@@ -862,7 +875,7 @@ C-------------
               IF(IPM(220,IMATLY) >  0)THEN                         
                  IPARG(43,NGROUP) = 1                              
               ENDIF                                                
-              IF (IPM(222,IMATLY) > 0 ) IVISC =  1                 
+              IF (MATPARAM_TAB(IMATLY)%IVISC > 0 ) IVISC =  1                 
               IF (IPM(254,IMATLY) > 0)  IFWV = 1                         
            ENDDO                                                   
 C-------------
@@ -879,7 +892,7 @@ C-------------
                 IF(IPM(220,IMATLY) >  0)THEN
                  IPARG(43,NGROUP) = 1
                 ENDIF
-                IF( IPM(222,IMATLY) > 0 ) IVISC =  1  
+                IF( MATPARAM_TAB(IMATLY)%IVISC > 0 ) IVISC =  1  
                ENDDO 
 C---
 C new shell property (variable NPT through each layer)
@@ -893,7 +906,7 @@ C---
                  IF (IPM(220,IMATLY) >  0) THEN
                    IPARG(43,NGROUP) = 1
                  ENDIF
-                 IF (IPM(222,IMATLY) > 0) IVISC =  1  
+                 IF (MATPARAM_TAB(IMATLY)%IVISC > 0) IVISC =  1  
                  IF (IPM(254,IMATLY) > 0) IFWV = 1                         
 C --- PID 51 combined with LAW58 ---
                  IF (NINT(PM(19,IMATLY)) == 58) NB_LAW58 = NB_LAW58 + 1
@@ -909,7 +922,7 @@ C-------------
             IF(IPM(220 ,MID) > 0.AND.MLN /= 0 .AND. MLN /=13)THEN
               IPARG(43,NGROUP) = 1
             ENDIF
-            IF (IPM(222,MID) > 0 ) IVISC =  1  
+            IF (MATPARAM_TAB(MID)%IVISC > 0 ) IVISC =  1  
             IF (IPM(254,MID) > 0)  IFWV = 1                         
          ENDIF ! IGTYP 
 C-------------

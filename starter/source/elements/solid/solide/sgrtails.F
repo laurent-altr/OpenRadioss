@@ -53,6 +53,7 @@ Chd|====================================================================
 C-----------------------------------------------
 C   A n a l y s e   M o d u l e
 C-----------------------------------------------
+      USE MY_ALLOC_MOD
       USE MESSAGE_MOD
       USE R2R_MOD
       USE REORDER_MOD
@@ -97,7 +98,6 @@ C-----------------------------------------------
 #include      "r2r_c.inc"
 #include      "sphcom.inc"
 #include      "boltpr_c.inc"
-#include      "my_allocate.inc"
 C-----------------------------------------------
 C   D U M M Y   A R G U M E N T S
 C-----------------------------------------------
@@ -144,7 +144,7 @@ C-----------------------------------------------
 C--------------------------------------------------------------
 C         BORNAGE DES GROUPES DE MVSIZ
 C--------------------------------------------------------------
-      MY_ALLOCATE(INDEXS2,NUMELS)
+      CALL MY_ALLOC(INDEXS2,NUMELS)
       nullify(MATPARAM)
       INDEXS2(1:NUMELS)=PERMUTATION%SOLID(1:NUMELS)
       NGR1 = NGROUP + 1
@@ -508,8 +508,8 @@ c
 C   is a material flag   IVISC  = IGEO(34,PID)
             IPARTSPH=IGEO(38,PID)          
 C            
-            IF (ISSN == 10.OR.ISSN == 11) THEN
-               IF ((IKSNOD0/=4 .AND. IKSNOD0/=8.AND. IKSNOD0/=10) .OR. JHBE == 15 ) THEN
+            IF ((ISSN == 10.OR.ISSN == 11).AND.(IGT == 14.OR.IGT == 6)) THEN
+               IF (IKSNOD0/=4 .AND. IKSNOD0/=8.AND. IKSNOD0/=10 ) THEN
                   CALL ANCMSG(MSGID=1159,
      .                    MSGTYPE=MSGERROR,
      .                    ANMODE=ANINFO_BLIND_2,
@@ -609,7 +609,7 @@ c
             IF(MLN /= 14 .AND. MLN /= 12 .AND. MLN /= 25  .AND.
      .         MLN /= 28 .AND. MLN /= 50 .AND. MLN /= 68  .AND. 
      .         MLN /= 53 .AND. MLN /= 93 .AND. MLN /= 107 .AND.
-     .         MLN /= 112) THEN
+     .         MLN /= 112.AND. MLN /= 122) THEN
             CALL ANCMSG(MSGID=1225,
      .                  MSGTYPE=MSGWARNING,
      .                  ANMODE=ANINFO_BLIND_2,
@@ -744,6 +744,14 @@ C--------message out
      .                      C1=TITR,
      .                      I2=ICPRE,
      .                      PRMOD=MSG_CUMU)
+            IF (ISSN >= 10) THEN
+                  CALL ANCMSG(MSGID=3027,
+     .                    MSGTYPE=MSGERROR,
+     .                    ANMODE=ANINFO_BLIND_2,
+     .                    I1=ID,
+     .                    C1=TITR,
+     .                    I2=ISSN)
+            ENDIF
           END IF !IF (ITSH == 1 )
 C          
           IF (IGT == 14 .OR. IGT == 6) THEN
@@ -833,6 +841,7 @@ C-------uncompressible
 C--------elasto-plastic       
               CASE(3)                                             
                ICPRE = 2
+               IF (ICPT10==3) ICPRE = 3 
              END SELECT 
 C--------message out       
              IF (ICPRE ==1 .OR. ICPRE ==2)  CALL ANCMSG(

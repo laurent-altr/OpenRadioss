@@ -37,9 +37,8 @@ Chd|====================================================================
      .                   DR      ,FINI    ,FSAV    ,FNCONT  ,NSN     ,
      .                   STFN    ,STFR    ,VISC    ,PENFLAG ,IROTB   ,
      .                   NOINT   ,NODNX_SMS,DMINT2 ,SAV_FOR_PENA,IRECT,
-     .                   DT2T    ,NELTST   ,ITYPTST,
-     .                   INDXP   ,MINER   ,H3D_DATA,MSEGTYP2,
-     .                   FNCONTP ,FTCONTP)
+     .                   DT2T    ,NELTST  ,ITYPTST ,INDXP   ,SAV_INER_POFF,
+     .                   H3D_DATA,MSEGTYP2,FNCONTP ,FTCONTP)
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
@@ -68,7 +67,7 @@ C     REAL
      .   CRST(2,*),FSAV(*),FNCONT(3,*),
      .   DMINT2(4,*),SAV_FOR_PENA(8,*),FNCONTP(3,*)   ,FTCONTP(3,*) 
       my_real
-     .   MINER(*)
+     .   SAV_INER_POFF(*)
       TYPE (H3D_DATABASE) :: H3D_DATA
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
@@ -133,13 +132,14 @@ C
           IX3(K) = IRECT(3,L)                                       
           IX4(K) = IRECT(4,L)
 C
-          IF ((MSEGTYP2(L)==1).AND.(IN(I)>EM20)) THEN
-C-- shell main segment --
-            IROT = ONE
-          ELSE
 C-- solid main segment --
-            IROT = ZERO
-          ENDIF 
+          IROT = ZERO
+          IF ((MSEGTYP2(L)==1)) THEN
+C-- shell main segment --
+            IF(SAV_INER_POFF(I) > EM20) THEN
+              IROT = ONE
+            ENDIF 
+          ENDIF
 C
           IF (IX3(K) == IX4(K)) THEN
 C--        Shape functions of triangles
@@ -461,18 +461,19 @@ C
 C
 C--   Secnd node shell of  spring 
 C
-          IF(IN(I)==ZERO.OR.MINER(IX1(K))==ZERO.OR.
-     .                      MINER(IX2(K))==ZERO.OR.
-     .                      MINER(IX3(K))==ZERO.OR.
-     .                      MINER(IX4(K))==ZERO)THEN
+          IF(SAV_INER_POFF(I)==ZERO.OR.SAV_INER_POFF(IX1(K))==ZERO.OR.
+     .                      SAV_INER_POFF(IX2(K))==ZERO.OR.
+     .                      SAV_INER_POFF(IX3(K))==ZERO.OR.
+     .                      SAV_INER_POFF(IX4(K))==ZERO)THEN
             INHARM = ZERO
           ELSEIF(NIR==4)THEN
-            INHARM = ONE/IN(I) + 
-     .              ONE/MINER(IX1(K)) + ONE/MINER(IX2(K)) + ONE/MINER(IX3(K)) + ONE/MINER(IX4(K))
+            INHARM = ONE/SAV_INER_POFF(I) + 
+     .               ONE/SAV_INER_POFF(IX1(K)) + ONE/SAV_INER_POFF(IX2(K)) +
+     .               ONE/SAV_INER_POFF(IX3(K)) + ONE/SAV_INER_POFF(IX4(K))
             INHARM = ONE/INHARM
           ELSE
-            INHARM = ONE/IN(I) + 
-     .              ONE/MINER(IX1(K)) + ONE/MINER(IX2(K)) + ONE/MINER(IX3(K))
+            INHARM = ONE/SAV_INER_POFF(I) + 
+     .               ONE/SAV_INER_POFF(IX1(K)) + ONE/SAV_INER_POFF(IX2(K)) + ONE/SAV_INER_POFF(IX3(K))
             INHARM = ONE/INHARM
           END IF
 C

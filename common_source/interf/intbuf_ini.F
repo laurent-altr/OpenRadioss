@@ -55,7 +55,6 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   M y  A l l o c a t e                         
 C-----------------------------------------------
-#include      "my_allocate.inc"
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
@@ -322,7 +321,13 @@ C---------will be cleaned after
         INTBUF_TAB(NI)%S_KREMNODE_E2S = INTBUF_SIZE(N)
         N = N+1
         INTBUF_TAB(NI)%S_REMNODE_E2S  = INTBUF_SIZE(N)
-
+        N = N+1
+        INTBUF_TAB(NI)%S_IELEM_M  = INTBUF_SIZE(N)        
+        N = N+1
+        INTBUF_TAB(NI)%S_PROC_ELEM_M  = INTBUF_SIZE(N)
+        N = N+1
+        INTBUF_TAB(NI)%S_PROC_MVOISIN  = INTBUF_SIZE(N)
+      
 C=======================================================================
 c READ REAL SIZES
 C=======================================================================
@@ -1138,7 +1143,7 @@ C----------to be cleaned later
         ENDIF
 
         SIZ = INTBUF_TAB(NI)%S_ISPT2
-        MY_ALLOCATE(INTBUF_TAB(NI)%ISPT2,SIZ)
+        ALLOCATE(INTBUF_TAB(NI)%ISPT2(SIZ))
         IF(SIZ>0)THEN
           CALL READ_I_C(INTBUF_TAB(NI)%ISPT2,SIZ)
         ENDIF
@@ -1307,6 +1312,24 @@ c          INTBUF_TAB(NI)%IFPEN_E2S(1:SIZ) = 0
         ALLOCATE(INTBUF_TAB(NI)%E2S_ACTNOR(SIZ))
         IF(SIZ>0)THEN
           INTBUF_TAB(NI)%E2S_ACTNOR(1:SIZ) = 0
+        ENDIF
+
+        SIZ = INTBUF_TAB(NI)% S_IELEM_M
+        ALLOCATE(INTBUF_TAB(NI)%IELEM_M(SIZ))
+        IF(SIZ>0)THEN
+          CALL READ_I_C(INTBUF_TAB(NI)%IELEM_M,SIZ)
+        ENDIF
+
+        SIZ = INTBUF_TAB(NI)% S_PROC_ELEM_M
+        ALLOCATE(INTBUF_TAB(NI)%PROC_ELEM_M(SIZ))
+        IF(SIZ>0)THEN
+          CALL READ_I_C(INTBUF_TAB(NI)%PROC_ELEM_M,SIZ)
+        ENDIF
+
+        SIZ = INTBUF_TAB(NI)% S_PROC_MVOISIN
+        ALLOCATE(INTBUF_TAB(NI)%PROC_MVOISIN(SIZ))
+        IF(SIZ>0)THEN
+          CALL READ_I_C(INTBUF_TAB(NI)%PROC_MVOISIN,SIZ)
         ENDIF
 C=======================================================================
 c READ REAL ARRAYS

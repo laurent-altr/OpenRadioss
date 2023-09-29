@@ -634,6 +634,7 @@ C     solids
       SOLMAT(117)= 1
       SOLMAT(120)= 1
       SOLMAT(121)= 1
+      SOLMAT(122)= 1
       SOLMAT(124)= 1
       SOLMAT(151)= 1
       SOLMAT(187)= 1
@@ -699,6 +700,7 @@ C     shells
       COQMAT(112) = 1
       COQMAT(119) = 1
       COQMAT(121) = 1
+      COQMAT(122) = 1
       COQMAT(151) = 1
       COQMAT(158) = 1
       COQMAT(200) = 1
@@ -3655,6 +3657,7 @@ C-------this is done in ENGINE, should be done in Starter
           NPT =IPARG(6,NG)
           IINT = IPARG(36,NG)
           IF (IHBE==17.AND.IINT==2) IHBE=18 
+          IF (IHBE==1.AND.IINT==3) IHBE=5 
           ISMSTR=IPARG(9,NG)
           ICPRE = IPARG(10,NG)
           IF (ICPRE==0.AND.ISOLNOD==8) ICPRE=3 

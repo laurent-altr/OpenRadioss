@@ -32,7 +32,7 @@ set ( mpiver "${MPI}" )
     # Intel MPI version
     ####################
 
-    set (cpprel  "-DCPP_rel=00" )
+    set (cpprel  "-DCPP_rel=20" )
     set (mpi_suf "_${mpiver}" )
 
     #MPI     
@@ -52,12 +52,6 @@ set ( mpiver "${MPI}" )
   endif()
 
 set ( RELNAME ${arch}${mpi_suf})
-
-#
-# executable name
-# ---------------------------------
-set ( EXEC_NAME "${ex_version}_${RELNAME}${exec_prec}${exec_deb}"  )
-
 
 # Third party libraries
 # ---------------------

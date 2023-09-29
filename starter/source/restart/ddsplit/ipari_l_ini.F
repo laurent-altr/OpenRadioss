@@ -358,6 +358,36 @@ c             ENDIF
               IF (FLAGREMNODE == 2)  NREMNODE_L = NREMNODE_L + 
      .            INTBUF_TAB(NI)%KREMNODE(K+1)-INTBUF_TAB(NI)%KREMNODE(K)
             ENDIF
+            IF (ITY==25) THEN 
+              IF(INTERCEP(2,NI)%P(K) > 0.AND.INTERCEP(2,NI)%P(K)/=INTERCEP(1,NI)%P(K)) THEN
+                IF(INTERCEP(2,NI)%P(K)==PROC+1)THEN
+                  N1 = INTBUF_TAB(NI)%IRECTM(4*(K-1)+1)
+                  N2 = INTBUF_TAB(NI)%IRECTM(4*(K-1)+2)
+                  N3 = INTBUF_TAB(NI)%IRECTM(4*(K-1)+3)
+                  N4 = INTBUF_TAB(NI)%IRECTM(4*(K-1)+4)
+                  NRTM_L = NRTM_L + 1
+                  TAGE(K) = NRTM_L
+                  IF (TAG(N1)==0) THEN
+                    NMN_L = NMN_L + 1
+                    TAG(N1) = 1     
+                  ENDIF
+                  IF (TAG(N2)==0) THEN
+                    NMN_L = NMN_L + 1
+                    TAG(N2) = 1
+                  ENDIF
+                  IF (TAG(N3)==0) THEN
+                    NMN_L = NMN_L + 1
+                    TAG(N3) = 1
+                  ENDIF
+                  IF (TAG(N4)==0) THEN
+                    NMN_L = NMN_L + 1
+                    TAG(N4) = 1
+                  ENDIF
+                  IF (FLAGREMNODE == 2)  NREMNODE_L = NREMNODE_L + 
+     .            INTBUF_TAB(NI)%KREMNODE(K+1)-INTBUF_TAB(NI)%KREMNODE(K)
+                ENDIF 
+              ENDIF    
+            ENDIF 
           ENDDO
 C
           DO K=1,NRTM
@@ -376,6 +406,20 @@ C
               TAG(N2) = 0
               TAG(N3) = 0
               TAG(N4) = 0
+            ENDIF
+            IF (ITY==25) THEN 
+              IF(INTERCEP(2,NI)%P(K) > 0.AND.INTERCEP(2,NI)%P(K)/=INTERCEP(1,NI)%P(K)) THEN
+                IF(INTERCEP(2,NI)%P(K)==PROC+1)THEN
+                  N1 = INTBUF_TAB(NI)%IRECTM(4*(K-1)+1)
+                  N2 = INTBUF_TAB(NI)%IRECTM(4*(K-1)+2)
+                  N3 = INTBUF_TAB(NI)%IRECTM(4*(K-1)+3)
+                  N4 = INTBUF_TAB(NI)%IRECTM(4*(K-1)+4)
+                  TAG(N1) = 0
+                  TAG(N2) = 0
+                  TAG(N3) = 0
+                  TAG(N4) = 0                  
+                ENDIF 
+              ENDIF    
             ENDIF
           ENDDO
 C
@@ -575,7 +619,7 @@ C
           ELSEIF(ITY==24)THEN
 C
 C----NLS1_L,NLS2_L, NLN_L will be calculated after MBINFLG in w_ipari
-Cmis a jour dans w_ipari          
+C  s a jour dans w_ipari          
 c          IPARI_L(35,NI) = NLN_L
 c          IPARI_L(51,NI) = NLINS_L
 c          IPARI_L(52,NI) = NLINM_L
@@ -665,6 +709,30 @@ C compute IPARI_L(42,NI) = NRTM_SH_L
                   TAG_SM(N4)=NADMSR_L
                 END IF
               ENDIF
+              IF(INTERCEP(2,NI)%P(K) > 0.AND.INTERCEP(2,NI)%P(K)/=INTERCEP(1,NI)%P(K)) THEN
+                IF(INTERCEP(2,NI)%P(K)==PROC+1)THEN
+                  N1 = INTBUF_TAB(NI)%ADMSR(4*(K-1)+1)
+                  N2 = INTBUF_TAB(NI)%ADMSR(4*(K-1)+2)
+                  N3 = INTBUF_TAB(NI)%ADMSR(4*(K-1)+3)
+                  N4 = INTBUF_TAB(NI)%ADMSR(4*(K-1)+4) 
+                  IF(TAG_SM(N1)==0)THEN
+                    NADMSR_L=NADMSR_L+1
+                    TAG_SM(N1)=NADMSR_L
+                  END IF
+                  IF(TAG_SM(N2)==0)THEN
+                    NADMSR_L=NADMSR_L+1
+                    TAG_SM(N2)=NADMSR_L
+                  END IF
+                  IF(TAG_SM(N3)==0)THEN
+                    NADMSR_L=NADMSR_L+1
+                    TAG_SM(N3)=NADMSR_L
+                  END IF
+                  IF(TAG_SM(N4)==0)THEN
+                    NADMSR_L=NADMSR_L+1
+                    TAG_SM(N4)=NADMSR_L
+                  END IF
+                ENDIF
+              ENDIF                  
             ENDDO 
 
             TAG_SM(1:NADMSR)=0
@@ -1398,18 +1466,18 @@ C-----------------
           IPARI_L(18,NI) = NCONT
           IPARI_L(23,NI)= MULTIMP
           IPARI_L(24,NI) = 0
-Cmis a jour dans w_ipari          IF(INACTI==5.OR.INACTI==6.OR.INACTI==7)
-Cmis a jour dans w_ipari     .      IPARI_L(24,NI)= NSNR
-Cmis a jour dans w_ipari          IPARI_L(25,NI) = 0
+C  s a jour dans w_ipari          IF(INACTI==5.OR.INACTI==6.OR.INACTI==7)
+C  s a jour dans w_ipari     .      IPARI_L(24,NI)= NSNR
+C  s a jour dans w_ipari          IPARI_L(25,NI) = 0
           IPARI_L(35,NI) = NLN_L
           IPARI_L(51,NI) = NLINS_L
           IPARI_L(52,NI) = NLINM_L
-Cmis a jour dans w_ipari          IPARI_L(53,NI) = NLINSA_L
-Cmis a jour dans w_ipari          IPARI_L(54,NI) = NLINMA_L
+C  s a jour dans w_ipari          IPARI_L(53,NI) = NLINSA_L
+C  s a jour dans w_ipari          IPARI_L(54,NI) = NLINMA_L
           IPARI_L(55,NI) = NSNE_L
           IPARI_L(56,NI) = NMNE_L
-Cmis a jour dans w_ipari          IF(INACTI==5.OR.INACTI==6.OR.INACTI==7)
-Cmis a jour dans w_ipari     .      IPARI_L(57,NI)= NLINSR
+C  s a jour dans w_ipari          IF(INACTI==5.OR.INACTI==6.OR.INACTI==7)
+C  s a jour dans w_ipari     .      IPARI_L(57,NI)= NLINSR
           IF(NISUB>0) THEN
             IPARI_L(37,NI)= NISUBS_L
             IPARI_L(38,NI)= NISUBM_L

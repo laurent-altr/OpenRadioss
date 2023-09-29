@@ -48,10 +48,11 @@ Chd|====================================================================
      6       IPART   ,SH3TREE,NOD2ELTG,ITRIOFF,
      7       SH3TRIM,TAGPRT_SMS,IWORKSH, STACK,
      8       DRAPE  ,RNOISE,INIVOL,
-     9       SH3ANG,DRAPEG,PRINT_FLAG)
+     9       SH3ANG,DRAPEG,PRINT_FLAG, PTSH3N)
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
+      USE MY_ALLOC_MOD
       USE MESSAGE_MOD
       USE R2R_MOD
       USE STACK_MOD
@@ -94,7 +95,6 @@ C-----------------------------------------------
 #include      "sms_c.inc"
 #include      "r2r_c.inc"
 #include      "drape_c.inc"
-#include      "my_allocate.inc"
 
 C-----------------------------------------------
 C   D U M M Y   A R G U M E N T S
@@ -107,6 +107,7 @@ C-----------------------------------------------
      .        IPART(LIPART1,*), SH3TREE(KSH3TREE,*), NOD2ELTG(*) ,
      .        TAGPRT_SMS(*),IWORKSH(3,*)
       INTEGER, INTENT(IN) :: PRINT_FLAG !< flag to print the element group data
+      INTEGER , DIMENSION(NUMELTG) , INTENT(INOUT):: PTSH3N
       TYPE (INIVOL_) , DIMENSION(NINIVOL) :: INIVOL
       MY_REAL :: PM(NPROPM,NUMMAT), GEO(NPROPG,NUMGEO),THK(*),XNUM(*),RNOISE(NPERTURB,*),SH3ANG(*)
 C-----------------------------------------------
@@ -137,11 +138,11 @@ C-----------------------------------------------
       CHARACTER*nchartitle,
      .   TITR,TITR1
       my_real, DIMENSION(:,:), ALLOCATABLE :: XNUM_RNOISE
-      INTEGER, DIMENSION(:), ALLOCATABLE :: INDEX2
+      INTEGER, DIMENSION(:), ALLOCATABLE :: INDEX2, INUM_PTSH3N
       INTEGER, DIMENSION(:,:), ALLOCATABLE :: INUM_WORKSH
       LOGICAL lFOUND
 C-----------------------------------------------
-      MY_ALLOCATE(INDEX2,NUMELTG)
+      CALL MY_ALLOC(INDEX2,NUMELTG)
       INDEX2(1:NUMELTG)=PERMUTATION%TRIANGLE(1:NUMELTG)
 
       IF(NADMESH/=0)THEN
@@ -278,6 +279,12 @@ C
          ENDDO
         ENDIF 
 C
+        IF(ABS(ISIGI) == 3  .OR. ABS(ISIGI) == 4 .OR. ABS(ISIGI) == 5) THEN
+          ALLOCATE(INUM_PTSH3N(NEL))
+          DO I = 1, NEL
+            INUM_PTSH3N(I)=PTSH3N(NFT+I)
+          ENDDO
+        ENDIF 
         IF(NADMESH/=0)THEN
           DO  K=1,KSH3TREE
             DO  I=1,NEL
@@ -364,7 +371,12 @@ C
             SH3ANG(NFT+I) = ANGLE(INDEX(I))
           ENDDO
         ENDIF 
-
+        IF(ABS(ISIGI)==3.OR.ABS(ISIGI)== 4.OR.ABS(ISIGI)==5)THEN
+          DO I=1,NEL
+           PTSH3N(NFT+I) = INUM_PTSH3N(INDEX(I))
+          ENDDO  
+           DEALLOCATE(INUM_PTSH3N)
+        ENDIF
        	IF(NADMESH/=0)THEN
        	  DO  K=1,KSH3TREE
        	    DO  I=1,NEL

@@ -173,6 +173,7 @@ C-----------------------------------------------
       USE TABLE_MOD
       USE LOADS_MOD
       USE MATPARAM_DEF_MOD
+      USE MY_ALLOC_MOD
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -233,7 +234,7 @@ C-----------------------------------------------
      .   TEMP(*), THKE(*), ERR_THK_SH4(*), ERR_THK_SH3(*), DIAG_SMS(*),
      .   FNCONT2(3,*), DR(3,*),DXANCG(3,*),ZI_PLY(*),VGAZ(*),
      .   FCONTG(*), FNCONTG(*), FTCONTG(*),FANREAC(6,*),PDAMA2(2,*),
-     .   RES_SMS(*),FCLUSTER(3,*),MCLUSTER(3,*),W(3*NUMNOD),
+     .   RES_SMS(*),FCLUSTER(3,*),MCLUSTER(3,*),W(SW),
      .   WIGE(*),KNOT(*),STIFN(*),STIFR(*),PSKIDS(*),TF(*),FCONT_MAX(*),
      .   FNCONTP2(3,*) ,FTCONTP2(3,*)
       INTEGER IPARG(NPARG,NGROUP),NSTRF(*),LPBY(*),
@@ -540,46 +541,46 @@ c
 C----- same size of skin than quad
       NIXSKIN = NIXQ
 
-      MY_ALLOCATE(X_P,8*NUMNODG0)
-      MY_ALLOCATE(ITAB_P,NUMNODG0)
+      ALLOCATE(X_P(8*NUMNODG0))
+      ALLOCATE(ITAB_P(NUMNODG0))
 
-      MY_ALLOCATE2D( IXTG_P       ,NIXTG,NUMELTGG*IP0)
-      MY_ALLOCATE2D( IXS_P        ,NIXS,(NUMELSG-NUMELS10G-NUMELS16G-NUMELS20G)*IP0)
-      MY_ALLOCATE2D( IXP_P        ,NIXP,NUMELPG*IP0)
-      MY_ALLOCATE2D( IXR_P        ,NIXR,NUMELRG*IP0)
-      MY_ALLOCATE2D( KXSP_P       ,NISP,NUMSPHG*IP0)
-      MY_ALLOCATE2D( IXT_P        ,NIXT,NUMELTRG*IP0) !!
-      MY_ALLOCATE2D( IXC_P        ,NIXC,NUMELCG*IP0)
-      MY_ALLOCATE2D( IXS10_P      ,11,NUMELS10G*IP0)
-      MY_ALLOCATE2D( IXS16_P      ,17,NUMELS16G*IP0)
-      MY_ALLOCATE2D( IXS20_P      ,21,NUMELS20G*IP0)
-      MY_ALLOCATE  ( IPARTC_P     ,NUMELCG*IP0)
-      MY_ALLOCATE  ( IPARTTG_P    ,NUMELTGG*IP0)
-      MY_ALLOCATE  ( IPARTQ_P     ,NUMELQG*IP0)
-      MY_ALLOCATE  ( IPARTS_P     ,(NUMELSG-NUMELS10G-NUMELS16G-NUMELS20G)*IP0)
-      MY_ALLOCATE  ( IPARTR_P     ,NUMELRG*IP0)
-      MY_ALLOCATE  ( IPARTP_P     ,NUMELPG*IP0)
-      MY_ALLOCATE  ( IPARTT_P     ,NUMELTRG*IP0)
-      MY_ALLOCATE  ( IPARTSP_P    ,NUMSPHG*IP0)
-      MY_ALLOCATE  ( IPARTS10_P   ,NUMELS10G*IP0)
-      MY_ALLOCATE  ( IPARTS16_P   ,NUMELS16G*IP0)
-      MY_ALLOCATE  ( IPARTS20_P   ,NUMELS20G*IP0)
-      MY_ALLOCATE2D( IXQ_P        ,NIXQ,NUMELQG*IP0)
-      MY_ALLOCATE2D( IXC_TMP      ,NIXC,NUMELC)
-      MY_ALLOCATE2D( IXTG_TMP     ,NIXTG,NUMELTG)
-      MY_ALLOCATE2D( IXR_TMP      ,NIXR,NUMELR)
-      MY_ALLOCATE2D( IXP_TMP      ,NIXP,NUMELP)
-      MY_ALLOCATE2D( KXSP_TMP     ,NISP,NUMSPH)
-      MY_ALLOCATE2D( IXT_TMP      ,NIXT,NUMELT)
-      MY_ALLOCATE2D( IXS10_TMP    ,11,NUMELS10)
-      MY_ALLOCATE2D( IXS16_TMP    ,17,NUMELS16)
-      MY_ALLOCATE2D( IXS20_TMP    ,21,NUMELS20)
-      MY_ALLOCATE2D( IXQ_TMP      ,NIXQ,NUMELQ)
-      MY_ALLOCATE2D( IXSKIN_TMP   ,NIXSKIN,NUMSKIN)
-      MY_ALLOCATE2D( IXSKIN_P     ,NIXSKIN,NUMSKING*IP0)
-      MY_ALLOCATE  ( IPARTSKIN_P  ,NUMSKING*IP0)
+      CALL MY_ALLOC( IXTG_P       ,NIXTG,NUMELTGG*IP0)
+      CALL MY_ALLOC( IXS_P        ,NIXS,(NUMELSG-NUMELS10G-NUMELS16G-NUMELS20G)*IP0)
+      CALL MY_ALLOC( IXP_P        ,NIXP,NUMELPG*IP0)
+      CALL MY_ALLOC( IXR_P        ,NIXR,NUMELRG*IP0)
+      CALL MY_ALLOC( KXSP_P       ,NISP,NUMSPHG*IP0)
+      CALL MY_ALLOC( IXT_P        ,NIXT,NUMELTRG*IP0) !!
+      CALL MY_ALLOC( IXC_P        ,NIXC,NUMELCG*IP0)
+      CALL MY_ALLOC( IXS10_P      ,11,NUMELS10G*IP0)
+      CALL MY_ALLOC( IXS16_P      ,17,NUMELS16G*IP0)
+      CALL MY_ALLOC( IXS20_P      ,21,NUMELS20G*IP0)
+      ALLOCATE( IPARTC_P     (NUMELCG*IP0))
+      ALLOCATE( IPARTTG_P    (NUMELTGG*IP0))
+      ALLOCATE( IPARTQ_P     (NUMELQG*IP0))
+      ALLOCATE( IPARTS_P     ((NUMELSG-NUMELS10G-NUMELS16G-NUMELS20G)*IP0))
+      ALLOCATE( IPARTR_P     (NUMELRG*IP0))
+      ALLOCATE( IPARTP_P     (NUMELPG*IP0))
+      ALLOCATE( IPARTT_P     (NUMELTRG*IP0))
+      ALLOCATE( IPARTSP_P    (NUMSPHG*IP0))
+      ALLOCATE( IPARTS10_P   (NUMELS10G*IP0))
+      ALLOCATE( IPARTS16_P   (NUMELS16G*IP0))
+      ALLOCATE( IPARTS20_P   (NUMELS20G*IP0))
+      CALL MY_ALLOC( IXQ_P        ,NIXQ,NUMELQG*IP0)
+      CALL MY_ALLOC( IXC_TMP      ,NIXC,NUMELC)
+      CALL MY_ALLOC( IXTG_TMP     ,NIXTG,NUMELTG)
+      CALL MY_ALLOC( IXR_TMP      ,NIXR,NUMELR)
+      CALL MY_ALLOC( IXP_TMP      ,NIXP,NUMELP)
+      CALL MY_ALLOC( KXSP_TMP     ,NISP,NUMSPH)
+      CALL MY_ALLOC( IXT_TMP      ,NIXT,NUMELT)
+      CALL MY_ALLOC( IXS10_TMP    ,11,NUMELS10)
+      CALL MY_ALLOC( IXS16_TMP    ,17,NUMELS16)
+      CALL MY_ALLOC( IXS20_TMP    ,21,NUMELS20)
+      CALL MY_ALLOC( IXQ_TMP      ,NIXQ,NUMELQ)
+      CALL MY_ALLOC( IXSKIN_TMP   ,NIXSKIN,NUMSKIN)
+      CALL MY_ALLOC( IXSKIN_P     ,NIXSKIN,NUMSKING*IP0)
+      ALLOCATE( IPARTSKIN_P  (NUMSKING*IP0))
 c
-      MY_ALLOCATE(D_P,NUMNODG0*8)
+      ALLOCATE(D_P(NUMNODG0*8))
 
       IF(NSPMD > 1) THEN
         CALL STARTIME(MACRO_TIMER_SPMDH3D,1)
@@ -2212,8 +2213,8 @@ c          IF(ISPMD == 0) print *,'H3D_DATA%OUTPUT_LIST(I)%PART',H3D_DATA%OUTPUT
      .                   FNCONTP2          ,FTCONTP2                 , AR            ,IPARTSP                     ,IPARTR          ,
      .                   IPARTP            ,IPARTT                   , IPARTS        ,IPARTQ                      ,KXSP            ,
      .                   IXR               ,IXP                      , IXT           ,N_H3D_PART_LIST             ,NODAL_VECTOR_FVM,
-     .                   IS_WRITEN_NODE_FVM,AIRBAGS_TOTAL_FVM_IN_H3D_G,SMONVOL      ,SVOLMON                     ,ISPMD         ,
-     .                   FVDATA_P          ,USER_NOD_ID%FVMBAG_SHIFT)
+     .                   IS_WRITEN_NODE_FVM,AIRBAGS_TOTAL_FVM_IN_H3D_G,SMONVOL       ,SVOLMON                     ,ISPMD         ,
+     .                   FVDATA_P          ,USER_NOD_ID%FVMBAG_SHIFT ,W              ,SW)
 
 c
           IF (NSPMD > 1 ) THEN
@@ -2840,6 +2841,7 @@ c-----
           IUVAR = H3D_DATA%OUTPUT_LIST(I)%IUVAR
           N_OUTP_DATA = H3D_DATA%OUTPUT_LIST(I)%N_OUTP
           KEYWORD = H3D_DATA%OUTPUT_LIST(I)%KEYWORD
+          OBJECT_ID = H3D_DATA%OUTPUT_LIST(I)%OBJECT_ID
 c          IF(ISPMD == 0)  print *,'SPH scalar',N_OUTP_DATA,'IFUNC',IFUNC,'INFO1',INFO1,'INFO2',INFO2
 
           CALL H3D_SPH_SCALAR(
@@ -2851,7 +2853,8 @@ c          IF(ISPMD == 0)  print *,'SPH scalar',N_OUTP_DATA,'IFUNC',IFUNC,'INFO1
      .                    INVERT    ,X         ,V             ,W            ,
      .                    NV46      ,NERCVOIS  ,NESDVOIS      ,LERCVOIS     ,LESDVOIS   ,
      .                    STACK     ,SPH_ID  ,IPARTSP      ,IUVAR      ,
-     .                    H3D_DATA%OUTPUT_LIST(I)%PART,IS_WRITEN_SPH,INFO1,KEYWORD,SPBUF  )
+     .                    H3D_DATA%OUTPUT_LIST(I)%PART,IS_WRITEN_SPH,INFO1,KEYWORD,SPBUF,
+     .                    OBJECT_ID )
 c
           IF (NSPMD > 1 ) THEN
             CALL STARTIME(MACRO_TIMER_SPMDH3D,1)

@@ -61,6 +61,7 @@ Chd|        CHECKMP                       source/elements/initia/initia.F
 Chd|        CHECKRBY                      source/constraints/general/rbody/checkrby.F
 Chd|        CHECK_DYNAIN                  source/starter/check_dynain.F 
 Chd|        CHECK_ELTYP                   source/model/sets/check_eltyp.F
+Chd|        CHECK_PTHICKFAIL              source/materials/fail/check_pthickfail.F
 Chd|        CHECK_SURF                    source/groups/check_surf.F    
 Chd|        CHEKMP2                       source/elements/initia/initia.F
 Chd|        CHKFUNCT                      source/tools/curve/lecfun.F   
@@ -282,6 +283,7 @@ Chd|        HM_READ_MAT119                source/materials/mat/mat119/hm_read_ma
 Chd|        HM_READ_MAT11_K_EPS           source/materials/mat/mat011/hm_read_mat11_k_eps.F
 Chd|        HM_READ_MAT12                 source/materials/mat/mat012/hm_read_mat12.F
 Chd|        HM_READ_MAT121                source/materials/mat/mat121/hm_read_mat121.F
+Chd|        HM_READ_MAT122                source/materials/mat/mat122/hm_read_mat122.F
 Chd|        HM_READ_MAT124                source/materials/mat/mat124/hm_read_mat124.F
 Chd|        HM_READ_MAT13                 source/materials/mat/mat013/hm_read_mat13.F
 Chd|        HM_READ_MAT14                 source/materials/mat/mat014/hm_read_mat14.F
@@ -742,6 +744,7 @@ Chd|        RIVET0                        source/elements/reader/rivet0.F
 Chd|        RKINI3                        source/elements/spring/rkini3.F
 Chd|        RM_CAND24                     source/interfaces/inter3d1/i7remnode.F
 Chd|        S10DERI3                      source/elements/solid/solide10/s10deri3.F
+Chd|        S10EDG_RLINK                  source/elements/solid/solide10/s10edg_rlink.F
 Chd|        S10INIT3                      source/elements/solid/solide10/s10init3.F
 Chd|        S16DERI3                      source/elements/thickshell/solide16/s16deri3.F
 Chd|        S16INIT3                      source/elements/thickshell/solide16/s16init3.F

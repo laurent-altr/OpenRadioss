@@ -101,6 +101,7 @@ Chd|        SSTRA3                        source/elements/solid/solide/sstra3.F
 Chd|        STARTIME                      source/system/timer.F         
 Chd|        STHERM                        source/elements/solid/solide/stherm.F
 Chd|        STOPTIME                      source/system/timer.F         
+Chd|        S_HG5                         source/elements/solid/solide/s_hg5.F
 Chd|        VOLN22                        source/interfaces/int22/voln22.F
 Chd|        ALE_CONNECTIVITY_MOD          ../common_source/modules/ale/ale_connectivity_mod.F
 Chd|        ALE_MOD                       ../common_source/modules/ale/ale_mod.F
@@ -111,30 +112,35 @@ Chd|        NLOCAL_REG_MOD                ../common_source/modules/nlocal_reg_mo
 Chd|        SENSOR_MOD                    share/modules/sensor_mod.F    
 Chd|        TABLE_MOD                     share/modules/table_mod.F     
 Chd|====================================================================
-      SUBROUTINE SFORC3(ELBUF_TAB,NG       ,
-     2                  PM       ,GEO      ,IXS      ,X       ,NV46    ,
-     3                  A        ,V        ,MS       ,W       ,FLUX    ,
-     4                  FLU1     ,VEUL     ,FV       ,ALE_CONNECT   ,IPARG   ,
-     5                  TF       ,NPF      ,BUFMAT   ,PARTSAV ,ITAB    ,
-     6                  DT2T     ,NELTST   ,ITYPTST  ,STIFN   ,FSKY    ,
-     7                  IADS     ,OFFSET   ,EANI     ,IPARTS   ,
-     8                  F11      ,F21      ,F31      ,F12     ,F22     ,
-     9                  F32      ,F13      ,F23      ,F33     ,F14     ,
-     A                  F24      ,F34      ,F15      ,F25     ,F35     ,
-     B                  F16      ,F26      ,F36      ,F17     ,F27     ,
-     C                  F37      ,F18      ,F28      ,F38     ,NEL     ,
-     D                  FSKYM    ,MSNF     ,ISKY     ,FSKYI   ,
-     E                  NVC      ,IPM      ,IGEO     ,AR      ,VR      ,
-     F                  IN       ,FR_WAVE  ,DR       ,BUFVOIS ,
-     G                  ITASK    ,QMV      ,ISTRAIN  ,TEMP    ,FTHE    ,
-     H                  FTHESKY  ,IEXPAN   ,GRESAV   ,GRTH    ,IGRTH   ,
-     I                  MSSA     ,DMELS    ,TABLE    ,PHI1    ,PHI2    ,
-     J                  VF       ,AF       ,DF       ,WF      ,FFSKY   ,
-     K                  AFGLOB   ,MSF      ,IPARG1   ,XDP     ,
-     M                  POR      ,ICONTACT ,IFOAM    ,VOLN    ,CONDN   ,
-     N                  CONDNSKY ,AGRAV    ,IGRV     ,LGRAV   ,SENSORS ,
-     O                  SKEW     ,NALE     ,D        ,IOUTPRT ,NLOC_DMG,
-     Q                  MAT_ELEM ,H3D_STRAIN,DT   )     
+      SUBROUTINE SFORC3(
+     1   ELBUF_TAB,  NG,         PM,         GEO,
+     2   IXS,        X,          NV46,       A,
+     3   V,          MS,         W,          FLUX,
+     4   FLU1,       VEUL,       FV,         ALE_CONNECT,
+     5   IPARG,      TF,         NPF,        BUFMAT,
+     6   PARTSAV,    ITAB,       DT2T,       NELTST,
+     7   ITYPTST,    STIFN,      FSKY,       IADS,
+     8   OFFSET,     EANI,       IPARTS,     F11,
+     9   F21,        F31,        F12,        F22,
+     A   F32,        F13,        F23,        F33,
+     B   F14,        F24,        F34,        F15,
+     C   F25,        F35,        F16,        F26,
+     D   F36,        F17,        F27,        F37,
+     E   F18,        F28,        F38,        NEL,
+     F   FSKYM,      MSNF,       ISKY,       FSKYI,
+     G   NVC,        IPM,        IGEO,       AR,
+     H   VR,         IN,         FR_WAVE,    DR,
+     I   BUFVOIS,    ITASK,      QMV,        ISTRAIN,
+     J   TEMP,       FTHE,       FTHESKY,    IEXPAN,
+     K   GRESAV,     GRTH,       IGRTH,      MSSA,
+     L   DMELS,      TABLE,      PHI1,       PHI2,
+     M   VF,         AF,         DF,         WF,
+     N   FFSKY,      AFGLOB,     MSF,        IPARG1,
+     O   XDP,        POR,        ICONTACT,   IFOAM,
+     P   VOLN,       CONDN,      CONDNSKY,   AGRAV,
+     Q   IGRV,       LGRAV,      SENSORS,    SKEW,
+     R   NALE,       D,          IOUTPRT,    NLOC_DMG,
+     S   MAT_ELEM,   H3D_STRAIN, DT,         IDEL7NOK)
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
@@ -168,9 +174,11 @@ C-----------------------------------------------
 #include      "timeri_c.inc"
 #include      "inter22.inc"
 #include      "scr18_c.inc"
+#include      "comlock.inc"
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
+      INTEGER, INTENT(INOUT) :: IDEL7NOK
       INTEGER, DIMENSION(*), INTENT(IN) :: IPARG,IPARTS,NPF,NALE
       INTEGER,INTENT(IN) :: NG,NEL
       INTEGER IXS(NIXS,*), IADS(8,*),IPM(NPROPMI,*),
@@ -380,6 +388,8 @@ C
       my_real :: DT2T_lay(2)
       my_real :: CONDE(MVSIZ),AMU(MVSIZ),DIVDE(MVSIZ),L_MAX(MVSIZ)
       my_real, DIMENSION(:), POINTER :: EINT
+      my_real :: ELEM_MASS
+      my_real :: SUM_EPS(9),SUM_M
 C
       TYPE(G_BUFEL_) ,POINTER :: GBUF
       TYPE(L_BUFEL_) ,POINTER :: LBUF     
@@ -706,7 +716,7 @@ C Compute strain rates Dij
      E   DYY,     DYZ,     DZX,     DZY,
      F   DZZ,     D4,      D5,      D6,
      G   WXX,     WYY,     WZZ,     VXR,
-     H   VYR,     VZR,     IXS,     NEL,
+     H   VYR,     VZR,     NEL,
      I   NFT,     ISMSTR,  JEUL,    JHBE,
      J   JCVT,    ISROT)
 C
@@ -996,7 +1006,7 @@ C
      5   Z1,      Z2,      Z3,      Z4,      
      6   Z5,      Z6,      Z7,      Z8,      
      7   NEL)
-       CALL SGEODEL3(NGL,GBUF%OFF,VOLN,DELTAX,GBUF%VOL,GEO(1,NGEO(1)),L_MAX,DT,NEL )
+       CALL SGEODEL3(NGL,GBUF%OFF,VOLN,DELTAX,GBUF%VOL,GEO(1,NGEO(1)),L_MAX,DT,NEL,IDEL7NOK )
       END IF
 C Small Strain
       CALL SMALLB3(
@@ -1085,9 +1095,67 @@ C
       IALEFVM_MAT = IPM(251,IXS(1,NF1))
       IFVM_SKIP=0
       IF(IALEFVM_MAT > 1)IFVM_SKIP=1
+
+      !---------------------------------------------
+      ! /ALE/GRID/MASSFLOW - BUFFER UPDATED
+      !---------------------------------------------
+      ! this grid formulation needs an averaged tensor (E=GRAD U)
+      IF(ALE%GRID%NWALE == 7)THEN
+        SUM_EPS(1:9) = ZERO
+        SUM_M = ZERO
+        DO I=1,NEL
+          ELEM_MASS = GBUF%RHO(I)*GBUF%VOL(I)
+          SUM_EPS(1) = SUM_EPS(1) + ELEM_MASS*DXX(I)
+          SUM_EPS(2) = SUM_EPS(2) + ELEM_MASS*DYY(I)
+          SUM_EPS(3) = SUM_EPS(3) + ELEM_MASS*DZZ(I)
+          SUM_EPS(4) = SUM_EPS(4) + ELEM_MASS*DXY(I)
+          SUM_EPS(5) = SUM_EPS(5) + ELEM_MASS*DXZ(I)
+          SUM_EPS(6) = SUM_EPS(6) + ELEM_MASS*DYZ(I)
+          SUM_EPS(7) = SUM_EPS(7) + ELEM_MASS*DYX(I)
+          SUM_EPS(8) = SUM_EPS(8) + ELEM_MASS*DZX(I)
+          SUM_EPS(9) = SUM_EPS(9) + ELEM_MASS*DZY(I)
+          SUM_M = SUM_M + ELEM_MASS
+        ENDDO
+#include "lockon.inc"
+      ALE%GRID%MASSFLOW_DATA%EP(1) = ALE%GRID%MASSFLOW_DATA%EP(1) + SUM_EPS(1)
+      ALE%GRID%MASSFLOW_DATA%EP(2) = ALE%GRID%MASSFLOW_DATA%EP(2) + SUM_EPS(2)
+      ALE%GRID%MASSFLOW_DATA%EP(3) = ALE%GRID%MASSFLOW_DATA%EP(3) + SUM_EPS(3)
+      ALE%GRID%MASSFLOW_DATA%EP(4) = ALE%GRID%MASSFLOW_DATA%EP(4) + SUM_EPS(4)
+      ALE%GRID%MASSFLOW_DATA%EP(5) = ALE%GRID%MASSFLOW_DATA%EP(5) + SUM_EPS(5)
+      ALE%GRID%MASSFLOW_DATA%EP(6) = ALE%GRID%MASSFLOW_DATA%EP(6) + SUM_EPS(6)
+      ALE%GRID%MASSFLOW_DATA%EP(7) = ALE%GRID%MASSFLOW_DATA%EP(7) + SUM_EPS(7)
+      ALE%GRID%MASSFLOW_DATA%EP(8) = ALE%GRID%MASSFLOW_DATA%EP(8) + SUM_EPS(8)
+      ALE%GRID%MASSFLOW_DATA%EP(9) = ALE%GRID%MASSFLOW_DATA%EP(9) + SUM_EPS(9)
+      ALE%GRID%MASSFLOW_DATA%SUM_M = ALE%GRID%MASSFLOW_DATA%SUM_M + SUM_M
+#include "lockoff.inc"
+      ENDIF!(ALE%GRID%NWALE == 7)
+
 C
 C Anti hourglass forces
-      CALL SHVIS3(
+      IF (IINT==3) THEN
+         CALL S_HG5(
+     1   PM, GBUF%RHO,     OFF,     VX1,
+     2   VX2,     VX3,     VX4,     VX5,
+     3   VX6,     VX7,     VX8,     VY1,
+     4   VY2,     VY3,     VY4,     VY5,
+     5   VY6,     VY7,     VY8,     VZ1,
+     6   VZ2,     VZ3,     VZ4,     VZ5,
+     7   VZ6,     VZ7,     VZ8,     F11,
+     8   F21,     F31,     F12,     F22,
+     9   F32,     F13,     F23,     F33,
+     A   F14,     F24,     F34,     F15,
+     B   F25,     F35,     F16,     F26,
+     C   F36,     F17,     F27,     F37,
+     D   F18,     F28,     F38,     PX1H1,
+     E   PX1H2,   PX1H3,   PX2H1,   PX2H2,
+     F   PX2H3,   PX3H1,   PX3H2,   PX3H3,
+     G   PX4H1,   PX4H2,   PX4H3,   VOLN,
+     I   GBUF%HOURG,PARTSAV,IPARTS, NFT,
+     J   MTN,     JLAG,    EANI   , NGEO ,
+     K   IVECTOR ,DT1 ,    MXT,     GEO,
+     L   NEL)
+      ELSE
+        CALL SHVIS3(
      1   PM,       GBUF%RHO, OFF,      VX1,
      2   VX2,      VX3,      VX4,      VX5,
      3   VX6,      VX7,      VX8,      VY1,
@@ -1109,6 +1177,7 @@ C Anti hourglass forces
      J   PARTSAV,  IPARTS,   GBUF%OFF, GBUF%VOL,
      K   IPARG1,   IFVM_SKIP,NEL,      NFT,
      L   MTN,      ISMSTR,   JLAG,     JHBE)
+      END IF !(IINT==3) THEN
 C
       IF (JALE == 3) THEN   ! law 77
         CALL FHVIS3(

@@ -230,13 +230,11 @@ Chd|        CLUSTER_MOD                   share/modules1/cluster_mod.F
 Chd|        DRAPE_MOD                     share/modules1/drape_mod.F    
 Chd|        DSGRAPH_MOD                   share/modules1/dsgraph_mod.F  
 Chd|        EBCS_MOD                      ../common_source/modules/boundary_conditions/ebcs_mod.F
-Chd|        ELBUFDEF_MOD                  ../common_source/modules/mat_elem/elbufdef_mod.F
 Chd|        FAILWAVE_MOD                  ../common_source/modules/failwave_mod.F
 Chd|        FRONT_MOD                     share/modules1/front_mod.F    
 Chd|        FVBAG_MOD                     share/modules1/fvbag_mod.F    
 Chd|        FVMBAG_MESHCONTROL_MOD        ../common_source/modules/airbag/fvmbag_meshcontrol_mod.F
 Chd|        GROUPDEF_MOD                  ../common_source/modules/groupdef_mod.F
-Chd|        GROUP_PARAM_MOD               ../common_source/modules/mat_elem/group_param_mod.F
 Chd|        INOUTFILE_MOD                 ../common_source/modules/inoutfile_mod.F
 Chd|        INT8_MOD                      ../common_source/modules/interfaces/int8_mod.F
 Chd|        INTBUFDEF_MOD                 ../common_source/modules/intbufdef_mod.F
@@ -245,7 +243,7 @@ Chd|        INTERFACES_MOD                ../common_source/modules/interfaces/in
 Chd|        INTSTAMP_MOD                  share/modules1/intstamp_mod.F 
 Chd|        JOINT_MOD                     share/modules1/joint_mod.F    
 Chd|        LOADS_MOD                     ../common_source/modules/loads/loads_mod.F
-Chd|        MATPARAM_DEF_MOD              ../common_source/modules/mat_elem/matparam_def_mod.F
+Chd|        MAT_ELEM_MOD                  ../common_source/modules/mat_elem/mat_elem_mod.F
 Chd|        MESSAGE_MOD                   share/message_module/message_mod.F
 Chd|        MID_PID_MOD                   share/modules1/mid_pid_mod.F  
 Chd|        MONVOL_STRUCT_MOD             share/modules1/monvol_struct_mod.F
@@ -267,7 +265,7 @@ Chd|        USER_WINDOWS_MOD              ../common_source/modules/user_windows_
 Chd|        XFEM2DEF_MOD                  ../common_source/modules/xfem2def_mod.F
 Chd|====================================================================
       SUBROUTINE DDSPLIT(
-     1   P            ,CEP          ,CEL           ,IGEO         ,MATPARAM_TAB,
+     1   P            ,CEP          ,CEL           ,IGEO          ,MAT_ELEM    ,
      2   IPM          ,ICODE        ,ISKEW          ,ISKN         ,INSEL       ,
      3   IBCSLAG      ,IPART        ,IPARTS         ,IPARTQ       ,IPARTC      ,
      4   IPARTT       ,IPARTP       ,IPARTR         ,IPARTTG     ,
@@ -369,7 +367,7 @@ C-----------------------------------------------
       USE FVBAG_MOD
       USE INTSTAMP_MOD
       USE TABLE_MOD
-      USE ELBUFDEF_MOD
+      USE MAT_ELEM_MOD
       USE MESSAGE_MOD
       USE FRONT_MOD
       USE CLUSTER_MOD
@@ -388,8 +386,6 @@ C-----------------------------------------------
       USE FAILWAVE_MOD
       USE NLOCAL_REG_MOD
       USE SKEW_MOD
-      USE MATPARAM_DEF_MOD
-      USE GROUP_PARAM_MOD
       USE SPLIT_CFD_MOD
       USE PINCHTYPE_MOD
       USE INOUTFILE_MOD
@@ -770,7 +766,7 @@ C-----------------------------------------------
       INTEGER, DIMENSION(:),ALLOCATABLE :: NODGLOBXFE
 
       TYPE(INTBUF_STRUCT_),DIMENSION(:),ALLOCATABLE :: INTBUF_TAB_L
-      TYPE(MATPARAM_STRUCT_)  ,DIMENSION(NUMMAT)    :: MATPARAM_TAB
+      TYPE(MAT_ELEM_) ,INTENT(IN) :: MAT_ELEM
       TYPE(GROUP_PARAM_)      ,DIMENSION(NGROUP)    :: GROUP_PARAM_TAB
 C-----------------------------------------------
 C     For Meshgems
@@ -2731,7 +2727,7 @@ C--------------------------------------------
       CALL WRITE_DB(PM,NPROPM*NUMMAT)
       LEN_AM = LEN_AM + NPROPM*NUMMAT
 c
-      CALL WRITE_MATPARAM(MATPARAM_TAB,NUMMAT,LEN)
+      CALL WRITE_MATPARAM(MAT_ELEM,LEN)
       LEN_AM = LEN_AM + LEN
 C--------------------------------------
 C ELGROUP_PARAM

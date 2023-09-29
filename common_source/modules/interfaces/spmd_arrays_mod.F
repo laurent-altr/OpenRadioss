@@ -21,19 +21,32 @@ Copyright>        As an alternative to this open-source version, Altair also off
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
 Chd|====================================================================
-Chd|  ELBUF_MOD                     share/modules/elbuf_mod.F     
+Chd|  SPMD_ARRAYS_MOD               modules/interfaces/spmd_arrays_mod.F
 Chd|-- called by -----------
-Chd|        ELBUF_INI                     source/elements/elbuf/elbuf_ini.F
-Chd|        RADIOSS2                      source/engine/radioss2.F      
+Chd|        INTERFACES_MOD                common_source/modules/interfaces/interfaces_mod.F
+Chd|        CHECK_NEIGHBOURS_SURFACE_STATEengine/source/interfaces/interf/check_neighbours_surface_state.F
 Chd|-- calls ---------------
-Chd|        ELBUFDEF_MOD                  ../common_source/modules/mat_elem/elbufdef_mod.F
 Chd|====================================================================
-      MODULE ELBUF_MOD
+        MODULE SPMD_ARRAYS_MOD
+C-----------------------------------------------
+C   m y _ r e a l
+C-----------------------------------------------
+#include      "my_real.inc"
+       implicit  none
+!   -----------------------------------------------
+!   D e r i v e d   T y p e   D e f i n i t i o n s
+!   -----------------------------------------------
 
-        USE ELBUFDEF_MOD      
+!   -------------------------
 
-        TYPE(ELBUF_STRUCT_),TARGET,DIMENSION(:),ALLOCATABLE :: ELBUF_TAB
+C----------------------------------------------
+C   Global SPMD_ARRAYS activated by Contact
+C---------------------------------------------
 
-        TYPE(ELBUF_STRUCT_),TARGET,DIMENSION(:,:),ALLOCATABLE :: XFEM_TAB
+          TYPE SPMD_ARRAYS_
+             INTEGER , DIMENSION(:), ALLOCATABLE :: FR_EDG      ! List of frontier edges of main segments of int25 contacts
+             INTEGER , DIMENSION(:), ALLOCATABLE :: IAD_FREDG   ! Adress of frontier edges of main segments of int25 contacts per proc spmd
+          END TYPE SPMD_ARRAYS_
 
-      END MODULE ELBUF_MOD
+C
+        END MODULE SPMD_ARRAYS_MOD

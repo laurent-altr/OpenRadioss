@@ -143,8 +143,8 @@ c-----------------------------------------------------------------------
               MTAG%G_DMG = 1
             ELSE IF (IRUP == 28) THEN  ! Alter
               MTAG%G_DMG = 2
-            ELSE IF (IRUP == 41 .OR. IRUP == 42 .OR. IRUP == 44 .OR. 
-     .               IRUP == 45 .OR. IRUP == 46 .OR. IRUP == 47) THEN 
+            ELSE IF (IRUP == 10 .OR. IRUP == 11 .OR. IRUP == 41 .OR. IRUP == 42 .OR.
+     .               IRUP == 44 .OR. IRUP == 45 .OR. IRUP == 46 .OR.IRUP == 47) THEN             
               MTAG%L_DMGSCL = 1
             ENDIF
           ENDDO
@@ -260,7 +260,7 @@ c-------------------------
 c------------------
 c
             CALL LAW88_UPD(IOUT,TITR,UPARAM,NPC,PLD,
-     .                     NFUNC,IFUNC,MAT_ID,FUNC_ID)
+     .                     NFUNC,IFUNC,MAT_ID,FUNC_ID,PM(1,IMAT))
 c------------------
           CASE (90) 
 c------------------

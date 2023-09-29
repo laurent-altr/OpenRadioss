@@ -54,6 +54,7 @@ Chd|        S10THERM                      source/elements/solid/solide10/s10ther
 Chd|        S10UPD11T12                   source/elements/solid/solide10/s10upd11t12.F
 Chd|        S10_ICP                       source/elements/solid/solide4_sfem/s10_icp.F
 Chd|        S4THERM_ITET1                 source/elements/solid/solide4/s4therm-itet1.F
+Chd|        S8E_SIGP                      source/elements/solid/solide8e/s8e_sig.F
 Chd|        SGCOOR10                      source/elements/solid/solide10/sgcoor10.F
 Chd|        SGEODEL3                      source/elements/solid/solide/sgeodel3.F
 Chd|        SMALLB3                       source/elements/solid/solide/smallb3.F
@@ -77,22 +78,24 @@ Chd|        NLOCAL_REG_MOD                ../common_source/modules/nlocal_reg_mo
 Chd|        SENSOR_MOD                    share/modules/sensor_mod.F    
 Chd|        TABLE_MOD                     share/modules/table_mod.F     
 Chd|====================================================================
-      SUBROUTINE S10FORC3(ELBUF_TAB,NG     ,
-     1                   PM       ,GEO     ,IXS     ,X       ,
-     2                   A        ,V       ,MS      ,W       ,FLUX    ,
-     3                   FLU1     ,VEUL    ,FV      ,ALE_CONNECT   ,IPARG   ,
-     4                   TF       ,NPF     ,BUFMAT  ,PARTSAV ,NLOC_DMG,
-     5                   DT2T     ,NELTST  ,ITYPTST ,STIFN   ,FSKY    ,
-     6                   IADS     ,OFFSET  ,EANI    ,IPARTS  ,
-     7                   IXS10    ,IADS10  ,NEL     ,FX      ,
-     8                   FY       ,FZ      ,AR      ,VR      ,DR      ,
-     9                   IPM      ,ISTRAIN ,ISOLNOD ,
-     A                   ITASK    ,TEMP    ,FTHE    ,FTHESKY ,IEXPAN  ,
-     B                   STIFR    ,D       ,GRESAV  ,GRTH    ,IGRTH   ,
-     C                   TABLE    ,MSSA    ,DMELS   ,IGEO    ,XDP     ,
-     D                   VOLN     ,CONDN   ,CONDNSKY,VARNOD  ,
-     E                   ITAGDN   ,SENSORS ,IOUTPRT ,MAT_ELEM ,H3D_STRAIN,
-     F                   DT )
+      SUBROUTINE S10FORC3(
+     1   ELBUF_TAB,  NG,         PM,         GEO,
+     2   IXS,        X,          A,          V,
+     3   MS,         W,          FLUX,       FLU1,
+     4   VEUL,       FV,         ALE_CONNECT,IPARG,
+     5   TF,         NPF,        BUFMAT,     PARTSAV,
+     6   NLOC_DMG,   DT2T,       NELTST,     ITYPTST,
+     7   STIFN,      FSKY,       IADS,       OFFSET,
+     8   EANI,       IPARTS,     IXS10,      IADS10,
+     9   NEL,        FX,         FY,         FZ,
+     A   AR,         VR,         DR,         IPM,
+     B   ISTRAIN,    ISOLNOD,    ITASK,      TEMP,
+     C   FTHE,       FTHESKY,    IEXPAN,     STIFR,
+     D   D,          GRESAV,     GRTH,       IGRTH,
+     E   TABLE,      MSSA,       DMELS,      IGEO,
+     F   XDP,        VOLN,       CONDN,      CONDNSKY,
+     G   VARNOD,     ITAGDN,     SENSORS,    IOUTPRT,
+     H   MAT_ELEM,   H3D_STRAIN, DT,         IDEL7NOK)
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
@@ -131,6 +134,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
+      INTEGER, INTENT(INOUT) :: IDEL7NOK
       INTEGER IXS(NIXS,*),IPARG(NPARG,NGROUP),NPF(*),IADS(8,*),
      .        IPARTS(*),IXS10(6,*),IADS10(6,*),IPM(*),ITASK,GRTH(*),
      .        IGRTH(*),IGEO(NPROPGI,*),IOUTPRT,H3D_STRAIN
@@ -218,7 +222,7 @@ C
      .    MFYY(MVSIZ,5),MFYZ(MVSIZ,5),MFZY(MVSIZ,5),
      .    MFZZ(MVSIZ,5),MFZX(MVSIZ,5),MFXZ(MVSIZ,5),DIVDE(MVSIZ),
      .    NU(MVSIZ),FAC(MVSIZ),FACP(MVSIZ),E0(MVSIZ),C1,DVM(MVSIZ),
-     .    VISP(MVSIZ),FACDB,RBID(MVSIZ)
+     .    VISP(MVSIZ),FACDB,RBID(MVSIZ),SIGP(NEL,6)
 c
       my_real VARNL(NEL),DELTAX4(MVSIZ)
 c     Flag Bolt Preloading
@@ -302,7 +306,11 @@ C
         NU(LFT:LLT)=MIN(HALF,PM(21,MX))
         C1 =PM(32,MX)
         E0(LFT:LLT) =THREE*(ONE-TWO*NU(LFT:LLT))*C1
-        CALL S10SIGP3(GBUF%SIG,E0 ,GBUF%PLA,FACP ,GBUF%G_PLA,NEL )
+        SIGP=ZERO   
+        IF (GBUF%G_PLA>0) THEN
+          CALL S8E_SIGP(ELBUF_TAB(NG),SIGP,         NEL)
+        END IF 
+        CALL S10SIGP3(SIGP,E0 ,GBUF%PLA,FACP ,GBUF%G_PLA,NEL )
       END IF
 C-----------
       CALL S10COOR3(
@@ -715,7 +723,7 @@ c
      .                       TX , TY , TZ ,DELTAX4,GEO(1,NGEO(1)),
      .                       NEL,NPT,ISMSTR,ISROT,DT)
         RBID(LFT:LLT)=ZERO
-        CALL SGEODEL3(NGL,GBUF%OFF,VOLG,DELTAX4,GBUF%VOL,GEO(1,NGEO(1)),RBID,DT,NEL )
+        CALL SGEODEL3(NGL,GBUF%OFF,VOLG,DELTAX4,GBUF%VOL,GEO(1,NGEO(1)),RBID,DT,NEL,IDEL7NOK)
         CALL SMALLB3(GBUF%OFF,OFF,NEL,ISMSTR)
         CALL SMALLGEO3(NGL, GBUF%OFF ,VOLG ,DELTAX4, GBUF%VOL ,ITET, NEL, ISMSTR,DT)
 C-----------!!!-seperate LBUF%SIGL=LBUF%SIG,w/ npt>0 ISM12_11

@@ -158,6 +158,7 @@ Chd|        SPLIT_REMNODE_I25_E2S         starter/source/restart/ddsplit/inter_t
 Chd|        SPLIT_REMNODE_I25_EDGE        starter/source/restart/ddsplit/inter_tools.F
 Chd|        SPLIT_REMNODE_I7              starter/source/restart/ddsplit/inter_tools.F
 Chd|        SPLIT_SEGEDGE_NODLOC_I24      starter/source/restart/ddsplit/inter_tools.F
+Chd|        SPLIT_SEG_IELEM               starter/source/restart/ddsplit/split_seg_ielem.F
 Chd|        SPLIT_SEG_IVAL2               starter/source/restart/ddsplit/inter_tools.F
 Chd|        SPLIT_SEG_IVAL_I20            starter/source/restart/ddsplit/inter_tools.F
 Chd|        SPLIT_SEG_IVAL_I20_2          starter/source/restart/ddsplit/inter_tools.F
@@ -504,6 +505,7 @@ Chd|        WRITE_INTBUF                  engine/source/output/restart/write_int
 Chd|        WRRESTP                       engine/source/output/restart/wrrestp.F
 Chd|        IMP_INTBUF                    engine/share/modules/imp_mod_def.F
 Chd|        INTBUF_MOD                    engine/share/modules/restart_mod.F
+Chd|        CHECK_NEIGHBOURS_SURFACE_STATEengine/source/interfaces/interf/check_neighbours_surface_state.F
 Chd|-- calls ---------------
 Chd|        INT8_MOD                      modules/interfaces/int8_mod.F 
 Chd|        METRIC_MOD                    modules/metric_mod.F          
@@ -640,7 +642,11 @@ c					  ! =2 edge to surface candidate
         integer ::   S_ISEG_PXFEM !  ISEG_PXFEM:       :      24
         integer ::   S_ISEG_PLY   !  ISEG_PLY          :      24
 
-        integer ::   S_ICONT_I    !  NSN not detected pene_ini <0 :   24
+        integer ::   S_ICONT_I    !  NSN not detected pene_ini <0 :   24, 25
+        integer ::   S_IELEM_M    !  2*NRTM element connected to main segment :   25
+        integer ::   S_PROC_ELEM_M!  2*NRTM proc of element connected to main segment :   25
+        integer ::   S_PROC_MVOISIN!  4*NRTM proc of neighbhoor segment :   25
+
 C---- edge        
         integer ::   S_IRTSE      !  (5,NRTSE)
         integer ::   S_IS2SE      !  (2,NSNE)
@@ -943,7 +949,10 @@ C--------to be cleaned later
         integer, DIMENSION(:) , POINTER ::  CANDM_E2S  
         integer, DIMENSION(:) , POINTER ::  CANDS_E2S
         integer, DIMENSION(:) , POINTER ::  IFPEN_E   
-        integer, DIMENSION(:) , POINTER ::  IFPEN_E2S       
+        integer, DIMENSION(:) , POINTER ::  IFPEN_E2S    
+        integer, DIMENSION(:) , POINTER ::  IELEM_M    
+        integer, DIMENSION(:) , POINTER ::  PROC_ELEM_M    
+        integer, DIMENSION(:) , POINTER ::  PROC_MVOISIN   
 C---- INTER FRICTION PARTS
         integer, DIMENSION(:) , POINTER ::  IPARTFRICS 
         integer, DIMENSION(:) , POINTER ::  IPARTFRICM

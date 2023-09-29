@@ -136,7 +136,7 @@ C       IF(ANIM_K == 0.AND.IPARG(8,NG) == 1)GOTO 490
           JJ(I) = NEL*(I-1)
         ENDDO
 !
-        DO I=LFT,LLT          
+        DO I=1,MVSIZ        
           DO J=1,5            
             SIGE(I,J) = ZERO  
           ENDDO               
@@ -777,7 +777,7 @@ c
                   IL  = 1
                 END IF
                 IMAT  = ELBUF_TAB(NG)%BUFLY(IL)%IMAT                          
-                IVISC = IPM(222,IMAT)    
+                IVISC = IPM(222,IMAT)
                 DO I=1,NEL  
                   DO IR=1,NPTR                
                     DO IS=1,NPTS 
@@ -1398,7 +1398,7 @@ C-----------------------------------------------
             CALL WRITE_R_C(R4,3)
           ENDDO
         ELSEIF (ISPMD == 0) THEN
-Cel verifier l'interet de ce qui est fait ci-dessus  !!!!!!!!!!!!!!
+C   verifier l'interet de ce qui est fait ci-dessus  !!!!!!!!!!!!!!
           DO I=1,NELCUT
             CALL WRITE_R_C(WA(3*NBF_L-2),3)
           ENDDO

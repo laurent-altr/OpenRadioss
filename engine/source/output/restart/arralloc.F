@@ -45,6 +45,7 @@ Chd|        H3D_MOD                       share/modules/h3d_mod.F
 Chd|        INTBUFFRIC_MOD                share/modules/restart_mod.F   
 Chd|        INTBUFMOD                     share/modules/restart_mod.F   
 Chd|        INTBUF_MOD                    share/modules/restart_mod.F   
+Chd|        INTERFACES_MOD                ../common_source/modules/interfaces/interfaces_mod.F
 Chd|        INTSTAMP_GLOB_MOD             share/modules/intstamp_glob_mod.F
 Chd|        MESSAGE_MOD                   share/message_module/message_mod.F
 Chd|        MULTI_FVM_MOD                 ../common_source/modules/ale/multi_fvm_mod.F
@@ -59,7 +60,7 @@ Chd|        SPH_MOD                       share/modules/sph_mod.F
 Chd|        STACK_MOD                     share/modules/stack_mod.F     
 Chd|        TRIMAT_MOD                    share/modules/trimat.F        
 Chd|====================================================================
-      SUBROUTINE RESTALLOC(MULTI_FVM,H3D_DATA,PINCH_DATA,ALE_CONNECTIVITY,SEGVAR)
+      SUBROUTINE RESTALLOC(MULTI_FVM,H3D_DATA,PINCH_DATA,ALE_CONNECTIVITY,SEGVAR,INTERFACES)
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
@@ -91,6 +92,7 @@ C-----------------------------------------------
       USE OUTMAX_MOD
       USE OUTPUTS_MOD
       USE ALE_MOD
+      USE INTERFACES_MOD
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -128,6 +130,8 @@ C-----------------------------------------------
       TYPE(PINCH) :: PINCH_DATA
       TYPE(t_ale_connectivity), INTENT(INOUT) :: ALE_CONNECTIVITY
       TYPE(t_SEGVAR) :: SEGVAR
+      TYPE(INTERFACES_) :: INTERFACES
+
 C----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
@@ -555,13 +559,13 @@ C
         IF (IERR/=0) GOTO 1000
         IAD_FRNOR = 0
 C          
-        ALLOCATE (FR_EDG(2*NBDDEDGT),STAT=IERR)
+        ALLOCATE (INTERFACES%SPMD_ARRAYS%FR_EDG(2*NBDDEDGT),STAT=IERR)
         IF (IERR/=0) GOTO 1000
-        FR_EDG = 0
+        INTERFACES%SPMD_ARRAYS%FR_EDG = 0
 C          
-        ALLOCATE (IAD_FREDG((NSPMD+1)*NINTER25),STAT=IERR)
+        ALLOCATE (INTERFACES%SPMD_ARRAYS%IAD_FREDG((NSPMD+1)*NINTER25),STAT=IERR)
         IF (IERR/=0) GOTO 1000
-        IAD_FREDG = 0
+        INTERFACES%SPMD_ARRAYS%IAD_FREDG = 0
 C          
         ALLOCATE (FR_NOR(NBDDNORT),STAT=IERR)
         IF (IERR/=0) GOTO 1000
@@ -1752,27 +1756,27 @@ C----Frictional energy output  when it is coming from restart
 C
          IF(S_EFRICINT > 0)THEN
            IF(NINEFRIC > 0) THEN 
-            MY_ALLOCATE2D(EFRIC,NINEFRIC,NUMNOD)
+            ALLOCATE(EFRIC(NINEFRIC,NUMNOD))
            ELSE 
-            MY_ALLOCATE2D(EFRIC,0,0)
+            ALLOCATE(EFRIC(0,0))
            ENDIF
            IF(NINEFRIC_STAMP > 0) THEN
-              MY_ALLOCATE2D(EFRIC_STAMP,NINEFRIC_STAMP,NUMNODG)
+             ALLOCATE(EFRIC_STAMP(NINEFRIC_STAMP,NUMNODG))
            ELSE
-            MY_ALLOCATE2D(EFRIC_STAMP,0,0)
+             ALLOCATE(EFRIC_STAMP(0,0))
            ENDIF
          END IF 
 C
          IF(H3D_DATA%N_SCAL_CSE_FRIC >0.OR.S_EFRIC > 0)THEN
-            MY_ALLOCATE(EFRICG,NUMNOD)
+            ALLOCATE(EFRICG(NUMNOD))
             IF(NINTSTAMP/=0) THEN
-              MY_ALLOCATE(EFRICG_STAMP,NUMNODG)
+              ALLOCATE(EFRICG_STAMP(NUMNODG))
             ELSE
-              MY_ALLOCATE(EFRICG_STAMP,0)
+              ALLOCATE(EFRICG_STAMP(0))
             ENDIF
          ELSE
-            MY_ALLOCATE(EFRICG,0)
-            MY_ALLOCATE(EFRICG_STAMP,0)
+            ALLOCATE(EFRICG(0))
+            ALLOCATE(EFRICG_STAMP(0))
          ENDIF
 C
          IF(NINTSTAMP/=0.AND.(ANIM_V(12)+OUTP_V(12)+H3D_DATA%N_VECT_PCONT>0.OR.
@@ -2107,17 +2111,17 @@ C--------2D Mass----------------------------
         ENDIF
 C-------shell pinching----------------------
 C       IF(NPINCH > 0) THEN
-          MY_ALLOCATE2D(PINCH_DATA%XPINCH,3,MAX(1,NPINCH))
+          ALLOCATE(PINCH_DATA%XPINCH(3,MAX(1,NPINCH)))
           PINCH_DATA%XPINCH = ZERO
-          MY_ALLOCATE2D(PINCH_DATA%DPINCH,3,MAX(1,NPINCH))
+          ALLOCATE(PINCH_DATA%DPINCH(3,MAX(1,NPINCH)))
           PINCH_DATA%DPINCH = ZERO
-          MY_ALLOCATE2D(PINCH_DATA%VPINCH,3,MAX(1,NPINCH))
+          ALLOCATE(PINCH_DATA%VPINCH(3,MAX(1,NPINCH)))
           PINCH_DATA%VPINCH = ZERO
-          MY_ALLOCATE2D(PINCH_DATA%APINCH,3,MAX(1,PINCH_DATA%SAPINCH))
+          ALLOCATE(PINCH_DATA%APINCH(3,MAX(1,PINCH_DATA%SAPINCH)))
           PINCH_DATA%APINCH = ZERO
-          MY_ALLOCATE(PINCH_DATA%STIFPINCH,MAX(1,PINCH_DATA%SAPINCH))
+          ALLOCATE(PINCH_DATA%STIFPINCH(MAX(1,PINCH_DATA%SAPINCH)))
           PINCH_DATA%STIFPINCH = ZERO 
-          MY_ALLOCATE(PINCH_DATA%MSPINCH,MAX(1,PINCH_DATA%SAPINCH))
+          ALLOCATE(PINCH_DATA%MSPINCH(MAX(1,PINCH_DATA%SAPINCH)))
           PINCH_DATA%MSPINCH = 0   
 C       ENDIF
 C------end shell pinching-------------------

@@ -70,6 +70,7 @@ Chd|        INIMAP1D_MOD                  share/modules1/inimap1d_mod.F
 Chd|        INIMAP2D_MOD                  share/modules1/inimap2d_mod.F 
 Chd|        INTBUFDEF_MOD                 ../common_source/modules/intbufdef_mod.F
 Chd|        INTBUF_FRIC_MOD               share/modules1/intbuf_fric_mod.F
+Chd|        MAT_ELEM_MOD                  ../common_source/modules/mat_elem/mat_elem_mod.F
 Chd|        MONVOL_STRUCT_MOD             share/modules1/monvol_struct_mod.F
 Chd|        MULTI_FVM_MOD                 ../common_source/modules/ale/multi_fvm_mod.F
 Chd|        OPTIONDEF_MOD                 ../common_source/modules/optiondef_mod.F
@@ -92,7 +93,7 @@ Chd|====================================================================
      A                             IBOX        ,IPMAS      ,IBFVEL          ,FBFVEL         ,NIMPACC          ,
      B                             LACCELM      ,ACCELM    ,NOM_SECT        ,NSTRF          ,SECBUF           ,
      C                             SKEW        ,ISKWN      ,XFRAME          ,T_MONVOL       ,T_MONVOL_METADATA,
-     D                             I2RUPT      ,AREASL     ,INTBUF_FRIC_TAB ,NPFRICORTH     ,
+     D                             I2RUPT      ,AREASL     ,INTBUF_FRIC_TAB ,NPFRICORTH     ,MAT_ELEM         ,
      E                             PFRICORTH   ,IREPFORTH  ,PHIFORTH        ,VFORTH         ,XREFC            ,
      F                             XREFTG      ,XREFS      ,TAGXREF         ,IXS            ,IXC              ,
      G                             IXTG        ,RWBUF      ,NPRW            ,LPRW           ,ITHVAR           ,
@@ -149,6 +150,7 @@ C-----------------------------------------------
       USE INIMAP2D_MOD
       USE USER_WINDOWS_MOD
       USE OUTPUT_MOD
+      USE MAT_ELEM_MOD
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -219,7 +221,8 @@ C-----------------------------------------------
       my_real, INTENT(IN) :: MERGE_NODE_TOL(*)
       INTEGER,INTENT(IN) :: IPARG(NPARG,NGROUP)
       TYPE(USER_WINDOWS_),INTENT(IN)      :: USER_WINDOWS
-      TYPE(OUTPUT_),INTENT(IN)            :: OUTPUT
+      TYPE(OUTPUT_)      ,INTENT(IN)      :: OUTPUT
+      TYPE(MAT_ELEM_)    ,INTENT(IN)      :: MAT_ELEM
 C-----------------------------------------------
 C      NOM_OPT(LNOPT1,SNOM_OPT1) 
 C         * Possibly, NOM_OPT(1) = ID
@@ -388,7 +391,7 @@ C-----------------------------------------------
       
       IF ( doqa /= 1  ) RETURN
 
-      CALL ST_QAPRINT_MATERIALS(IPM       ,PM        ,BUFMAT    )
+      CALL ST_QAPRINT_MATERIALS(MAT_ELEM   ,IPM       ,PM        ,BUFMAT    )
 
       CALL ST_QAPRINT_PROPERTIES(IGEO      ,GEO       ,BUFGEO    ,
      .                           PM_STACK  ,GEO_STACK ,IGEO_STACK)

@@ -30,7 +30,7 @@ Chd|        VALPVEC_V                     source/materials/mat/mat033/sigeps33.F
 Chd|====================================================================
       SUBROUTINE SIGEPS124(
      1     NEL     ,NGL     ,NUPARAM ,NUVAR   ,TIMESTEP,TIME    ,
-     2     UPARAM  ,UVAR    ,RHO     ,PLA     ,DPLA    ,UELR    ,
+     2     UPARAM  ,UVAR    ,RHO     ,PLA     ,DPLA    ,
      3     SOUNDSP ,EPSD    ,OFF     ,LOFF    ,IPG     ,NPG     ,
      4     DEPSXX  ,DEPSYY  ,DEPSZZ  ,DEPSXY  ,DEPSYZ  ,DEPSZX  ,
      5     EPSXX   ,EPSYY   ,EPSZZ   ,EPSXY   ,EPSYZ   ,EPSZX   ,
@@ -64,14 +64,14 @@ Chd|====================================================================
       my_real,DIMENSION(NEL) ::
      .   SIGY,ET
       my_real ,DIMENSION(NEL), INTENT(INOUT)       :: 
-     .   PLA,DPLA,EPSD,LOFF,OFF,DMG,UELR
+     .   PLA,DPLA,EPSD,LOFF,OFF,DMG
       my_real ,DIMENSION(NEL,NUVAR), INTENT(INOUT) :: 
      .   UVAR
       !=======================================================================
       !      Local Variables
       !=======================================================================
       INTEGER I,J,II,ITER,NITER,NINDX,INDX(NEL),NINDX2,INDX2(NEL),
-     .        IRATE,DTYPE,DFLAG,IREG,INDX3(NEL),NINDX3,FAILIP
+     .        IRATE,DTYPE,DFLAG,IREG,INDX3(NEL),NINDX3,IDEL
       my_real 
      .   YOUNG,BULK,G,NU,LAM,G2,AFILTR,AH,BH,CH,DH,HP,AS,QH0,
      .   M0,ECC,DF,BS,EPSI,EPST0,EPSTMAX,DELTAS,BETAS,EPSC0,
@@ -140,10 +140,9 @@ c
       EPSC0      = UPARAM(32)       ! Reference tensile strain rate
       EPSCMAX    = UPARAM(33)       ! Maximum compressive strain rate threshold
       ALPHAS     = UPARAM(34)       ! Compressive strain rate effect parameter 1
-      GAMMAS     = UPARAM(35)       ! Compressive strain rate effect parameter 2           
-      !  -> Flag for element deletion
-      FAILIP     = NINT(UPARAM(36)) ! Number of failed integration points
-      FAILIP     = MIN(FAILIP,NPG)
+      GAMMAS     = UPARAM(35)       ! Compressive strain rate effect parameter 2
+      !  -> Element deletion flag
+      IDEL       = NINT(UPARAM(36)) ! Element deletion flag
 c
       !--------------------------------------------------------------------
       ! Recovering internal variables
@@ -192,7 +191,7 @@ c
         DPYZ(I)   = ZERO ! Initialization of the YZ plastic strain increment
         DPZX(I)   = ZERO ! Initialization of the ZX plastic strain increment
         ! Regularization factor
-        IF (IREG > 0) THEN 
+        IF (IREG > 1) THEN 
           IF (UVAR(I,18) == ZERO) UVAR(I,18) = LE(I)
           H(I) = UVAR(I,18)
         ELSE
@@ -224,7 +223,7 @@ c
       ENDDO
 c
       ! Strain rate effects
-      IF (IRATE > 0) THEN 
+      IF (IRATE > 1) THEN 
         ! Computation of principal stresses and vectors
         DO I = 1,NEL
           SIGTENS(I,1) = SIGNXX(I)
@@ -907,15 +906,14 @@ c
             SIGNXY(I) = ZERO
             SIGNYZ(I) = ZERO
             SIGNZX(I) = ZERO  
-            DMG(I)  = ONE
-            LOFF(I) = FOUR_OVER_5       
-            UELR(I) = UELR(I) + ONE
-            IF (NINT(UELR(I)) == FAILIP)THEN 
-              NINDX3 = NINDX3 + 1
+            DMG(I)    = ONE
+            LOFF(I)   = FOUR_OVER_5
+            IF (IDEL > 1) THEN 
+              NINDX3   = NINDX3 + 1
               INDX3(NINDX3) = I
               IDEL7NOK = 1
-              OFF(I) = ZERO   
-            ENDIF
+              OFF(I)   = ZERO 
+            ENDIF  
           ENDIF
 c
         ENDDO
@@ -946,7 +944,7 @@ c
         SOUNDSP(I) = SQRT((BULK + FOUR_OVER_3*G)/RHO(I))
       ENDDO
 c
-      IF (IRATE > 0) THEN 
+      IF (IRATE > 1) THEN 
 #include "vectorize.inc" 
         DO II = 1,NINDX
           I = INDX(II)

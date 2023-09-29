@@ -28,23 +28,27 @@ Chd|-- calls ---------------
 Chd|        PRONY_MODELC                  source/materials/mat/mat066/prony_modelc.F
 Chd|        VINTER                        source/tools/curve/vinter.F   
 Chd|        FINTER                        source/tools/curve/finter.F   
+Chd|        MATPARAM_DEF_MOD              ../common_source/modules/mat_elem/matparam_def_mod.F
 Chd|====================================================================
       SUBROUTINE SIGEPS66C(
-     1     NEL    ,NUPARAM,NUVAR   ,MFUNC   ,KFUNC  ,
-     2     NPF    ,NPT0    ,IPT     ,IFLAG   ,
-     2     TF     ,TIME   ,TIMESTEP,UPARAM  ,RHO0   ,
-     3     AREA   ,EINT   ,THKLY   ,
-     4     EPSPXX ,EPSPYY ,EPSPXY  ,EPSPYZ  ,EPSPZX ,
-     5     DEPSXX ,DEPSYY ,DEPSXY  ,DEPSYZ  ,DEPSZX ,
-     6     EPSXX  ,EPSYY  ,EPSXY   ,EPSYZ   ,EPSZX  ,
-     7     SIGOXX ,SIGOYY ,SIGOXY  ,SIGOYZ  ,SIGOZX ,
-     8     SIGNXX ,SIGNYY ,SIGNXY  ,SIGNYZ  ,SIGNZX ,
-     9     SIGVXX ,SIGVYY ,SIGVXY  ,SIGVYZ  ,SIGVZX ,
-     A     SOUNDSP,VISCMAX,THK     ,PLA     ,UVAR   ,
-     B     OFF    ,NGL    ,IPM     ,MAT     ,ETSE   ,
-     C     GS     ,YLD    ,EPSP    ,ISRATE  ,INLOC  ,
-     D     DPLANL )
-
+     1     NEL    ,NUPARAM  ,NUVAR   ,MFUNC   ,KFUNC  ,
+     2     NPF    ,NPT0     ,IPT     ,IFLAG   ,
+     2     TF     ,TIME     ,TIMESTEP,UPARAM  ,RHO0   ,
+     3     AREA   ,EINT     ,THKLY   ,
+     4     EPSPXX ,EPSPYY   ,EPSPXY  ,EPSPYZ  ,EPSPZX ,
+     5     DEPSXX ,DEPSYY   ,DEPSXY  ,DEPSYZ  ,DEPSZX ,
+     6     EPSXX  ,EPSYY    ,EPSXY   ,EPSYZ   ,EPSZX  ,
+     7     SIGOXX ,SIGOYY   ,SIGOXY  ,SIGOYZ  ,SIGOZX ,
+     8     SIGNXX ,SIGNYY   ,SIGNXY  ,SIGNYZ  ,SIGNZX ,
+     9     SIGVXX ,SIGVYY   ,SIGVXY  ,SIGVYZ  ,SIGVZX ,
+     A     SOUNDSP,VISCMAX  ,THK     ,PLA     ,UVAR   ,
+     B     OFF    ,NGL      ,IPM     ,MAT     ,ETSE   ,
+     C     GS     ,YLD      ,EPSP    ,ISRATE  ,INLOC  ,
+     D     DPLANL ,MAT_PARAM,NUVARV  ,UVARV   )
+C-----------------------------------------------
+C   M o d u l e s
+C-----------------------------------------------
+      USE MATPARAM_DEF_MOD
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -105,7 +109,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I N P U T   A r g u m e n t s
 C-----------------------------------------------
-C
+      INTEGER ,INTENT(IN) :: NUVARV
       INTEGER NEL, NUPARAM, NUVAR, NPT0, IPT,IFLAG(*),
      .   NGL(NEL),MAT(NEL),ISRATE,IPM(NPROPMI,*),INLOC
       my_real
@@ -121,6 +125,7 @@ C
      .   SIGOXX(NEL),SIGOYY(NEL),
      .   SIGOXY(NEL),SIGOYZ(NEL),SIGOZX(NEL),
      .   GS(*),EPSP(NEL),DPLANL(NEL)
+      TYPE(MATPARAM_STRUCT_) ,INTENT(IN) :: MAT_PARAM
 C-----------------------------------------------
 C   O U T P U T   A r g u m e n t s
 C-----------------------------------------------
@@ -134,8 +139,8 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I N P U T   O U T P U T   A r g u m e n t s 
 C-----------------------------------------------
-      my_real
-     .    UVAR(NEL,NUVAR), OFF(NEL),THK(NEL),YLD(NEL)
+      my_real ,DIMENSION(NEL,NUVARV) ,INTENT(INOUT) :: UVARV
+      my_real ,INTENT(INOUT) :: UVAR(NEL,NUVAR), OFF(NEL),THK(NEL),YLD(NEL)
 C-----------------------------------------------
 C   VARIABLES FOR FUNCTION INTERPOLATION 
 C-----------------------------------------------
@@ -154,7 +159,7 @@ C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
       INTEGER I,J,N,NINDX,NMAX,IRATE,NCC,NCT,NFUNC,
-     .        J1,J2,NPRONY,NV,IADBUF,NUVARV,
+     .        J1,J2,NPRONY,IADBUF,
      .        IAD1(NEL),IPOS1(NEL),ILEN1(NEL),
      .        IAD2(NEL),IPOS2(NEL),ILEN2(NEL),
      .        INDEX(NEL),JJC(NEL),JJT(NEL),IFUNC(MFUNC)
@@ -552,9 +557,6 @@ C 1 + cp*ln(epep/epsp0)
 C-------------------
 C     PROJECTION
 C-------------------
-C-------------------
-C     PROJECTION
-C-------------------
        IF(IFLAG(1) == 0)THEN
          NU31 = ONE-NNU11
 C projection radiale 
@@ -782,27 +784,23 @@ C
         ENDDO
        ENDIF       
 C
-C  visco elastic model 
+C  visco elastic model (prony)
 C             
-       IF(IPM(222,MAT(1)) > 0) THEN   
-         IADBUF = IPM(223,MAT(1))
-         NUVARV = IPM(225,MAT(1))
-C         
-         KV =  UPARAM(IADBUF )
-         NPRONY =  UPARAM(IADBUF + 1)
+       IF (MAT_PARAM%IVISC == 1) THEN   
+         NPRONY = MAT_PARAM%VISC%IPARAM(1)
+         KV     = MAT_PARAM%VISC%UPARAM(1)
 c              
         DO I=1,NPRONY
-         GV(I)    = UPARAM(IADBUF + 1 + I)
-         BETA(I)  = UPARAM(IADBUF + 1 + NPRONY + I)
-        ENDDO
+          GV(I)   = MAT_PARAM%VISC%UPARAM(1 + I)         
+          BETA(I) = MAT_PARAM%VISC%UPARAM(1 + NPRONY + I)
+        ENDDO 
 C
-        NV =  NUVAR - NUVARV
         CALL PRONY_MODELC( 
-     1     NEL    ,NUPARAM,NUVAR   , NV,TIME   ,TIMESTEP , 
-     2     NPRONY    , KV   , GV    ,BETA  ,RHO0   ,   
+     1     NEL    ,NUPARAM,NUVARV  ,TIME    ,TIMESTEP , 
+     2     NPRONY , KV   , GV   ,BETA    ,RHO0   ,   
      3     EPSPXX ,EPSPYY ,EPSPXY  ,EPSPYZ  ,EPSPZX ,
      4     SIGVXX ,SIGVYY ,SIGVXY  ,SIGVYZ  ,SIGVZX ,
-     5     VISCMAX,SOUNDSP,UVAR    ,OFF)        
+     5     VISCMAX,SOUNDSP,UVARV   ,OFF)        
         ENDIF
 C
 C--------------------------------

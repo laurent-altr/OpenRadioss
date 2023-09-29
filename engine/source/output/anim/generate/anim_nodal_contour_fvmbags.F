@@ -31,6 +31,7 @@ Chd|        NODALT                        source/output/anim/generate/nodalt.F
 Chd|        NODALVOL                      source/output/anim/generate/nodalvol.F
 Chd|-- calls ---------------
 Chd|        FVBAG_MOD                     share/modules/fvbag_mod.F     
+Chd|        GROUPDEF_MOD                  ../common_source/modules/groupdef_mod.F
 Chd|====================================================================
       SUBROUTINE ANIM_NODAL_CONTOUR_FVMBAGS(KEY, WA4, MONVOL,VOLMON, FVDATA_P, NFVBAG, SMONVOL, SVOLMON, AIRBAGS_TOTAL_FVM,
      .                                      IS_WRITTEN_NODE_FVM, AIRBAGS_NODE_ID_SHIFT)
@@ -51,7 +52,7 @@ C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
       USE FVBAG_MOD , only:FVBAG_DATA !data structure definition
-      USEGROUPDEF_MOD , only:GROUP_
+      USE GROUPDEF_MOD , only:GROUP_
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------

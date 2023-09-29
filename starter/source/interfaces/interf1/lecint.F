@@ -44,6 +44,7 @@ Chd|        NINTRI                        source/system/nintrr.F
 Chd|        ALE_MOD                       ../common_source/modules/ale/ale_mod.F
 Chd|        GROUPDEF_MOD                  ../common_source/modules/groupdef_mod.F
 Chd|        INTBUF_FRIC_MOD               share/modules1/intbuf_fric_mod.F
+Chd|        INTERFACES_MOD                ../common_source/modules/interfaces/interfaces_mod.F
 Chd|        MESSAGE_MOD                   share/message_module/message_mod.F
 Chd|        MULTI_FVM_MOD                 ../common_source/modules/ale/multi_fvm_mod.F
 Chd|        R2R_MOD                       share/modules1/r2r_mod.F      
@@ -61,7 +62,7 @@ Chd|====================================================================
      .                  IXS16   ,IXS20   ,DEF_INTER,MAXNSNE,
      .                  NPC1    ,MULTI_FVM,NOM_OPTFRIC,INTBUF_FRIC_TAB,
      .                  IGRBRIC,IGRSH3N ,IGRTRUSS ,MAXRTM_T2,NSN_MULTI_CONNEC,T2_NB_CONNEC,
-     .                  IDDLEVEL,NALE)
+     .                  IDDLEVEL,NALE   ,INTERFACES)
 C============================================================================
 C   M o d u l e s
 C-----------------------------------------------
@@ -72,6 +73,7 @@ C-----------------------------------------------
       USE INTBUF_FRIC_MOD
       USE GROUPDEF_MOD
       USE ALE_MOD
+      USE INTERFACES_MOD
 C-----------------------------------------------      
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -120,6 +122,7 @@ C-----------------------------------------------
       TYPE (GROUP_)  , DIMENSION(NGRTRUS) :: IGRTRUSS
       TYPE (SURF_)   , DIMENSION(NSURF) ,TARGET   :: IGRSURF
       TYPE (SURF_)   , DIMENSION(NSLIN) ,TARGET   :: IGRSLIN
+      TYPE (INTERFACES_) ,INTENT(INOUT):: INTERFACES
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
@@ -436,7 +439,7 @@ C
      6      IXTG         ,KNOD2ELC     ,KNOD2ELTG   ,NOD2ELC      ,
      7      NOD2ELTG     ,KNOD2ELS     ,NOD2ELS     ,IXS          ,
      8      IXS10        ,IXS16        ,IXS20       ,IBID         ,
-     9      IBID         ,IBID         ,IBID        )
+     9      IBID         ,IBID         ,IBID        ,INTERFACES%PARAMETERS)
             IPARI(66,NI) = INTPLY
             IF(INTPLY > 0) INTPLYXFEM = 1          
 C----------NRTS,NRTM is calculated in I25SURFI     
@@ -679,8 +682,8 @@ C--------------------------------------------
               NSN_FE = NBRIC  
             ELSE
               NBRIC=IGRBRIC(ISU1)%NENTITY
-              CALL INGRBRIC_NODES(NSN_FE ,NOINT  ,IGRBRIC(GRBRIC_ID)%ENTITY   ,ITAB   ,NSV   , 
-     .                       IXS  , NBRIC, 1, NALE ,IPM, BUFMAT,S_NSV)                         
+              CALL INGRBRIC_NODES(NSN_FE ,IGRBRIC(GRBRIC_ID)%ENTITY   ,ITAB   ,NSV   ,
+     .                       IXS  , NBRIC, NALE ,IPM, BUFMAT,S_NSV)
             ENDIF
           ELSE
             NBRIC = 0
@@ -692,9 +695,9 @@ C--------------------------------------------
         
           IF(GRBRIC_ID > 0)THEN
             IS_GAP_COMPUTED = .FALSE.
-            CALL INGRBRIC_DX(NBRIC   , IGRBRIC(GRBRIC_ID)%ENTITY, FRIGAP(2,NI)   , IXS        , X,
-     .                       NOINT   , TITR                     , IS_GAP_COMPUTED, PM         ,  
-     .                       IDDLEVEL, ISTIFF                   , AUTO_RHO       , AUTO_LENGTH, IGAP    ,
+            CALL INGRBRIC_DX(NBRIC   , IGRBRIC(GRBRIC_ID)%ENTITY, FRIGAP(2,NI)   , IXS        , X     ,
+     .                       NOINT   , TITR                     , IS_GAP_COMPUTED, PM         , IPM   ,
+     .                       IDDLEVEL, ISTIFF                   , AUTO_RHO       , AUTO_LENGTH,
      .                       MULTI_FVM)
             IF(IS_GAP_COMPUTED)THEN
               WRITE(IOUT,1000)NOINT
@@ -734,7 +737,7 @@ C--------------------------------------------
               
             ELSEIF(IS1==5) THEN
                NBRIC = IGRBRIC(ISU1)%NENTITY
-               CALL INGRBRIC(NSN, NOINT, IGRBRIC(ISU1)%ENTITY, ITAB, NSV,
+               CALL INGRBRIC(NSN, IGRBRIC(ISU1)%ENTITY, NSV,
      .                       IXS, NBRIC, PM,S_NSV, IGEO)
             ENDIF
           ENDIF
@@ -748,7 +751,7 @@ C--------------------------------------------
         ELSEIF(NTYP==22) THEN
           IF(ISU1 > 0)THEN
             NBRIC=IGRBRIC(ISU1)%NENTITY
-            CALL INGRBRIC(NSN   ,NOINT  ,IGRBRIC(ISU1)%ENTITY   ,ITAB   ,NSV   , 
+            CALL INGRBRIC(NSN  , IGRBRIC(ISU1)%ENTITY ,NSV   ,
      .                    IXS  , NBRIC  ,PM, S_NSV, IGEO)
           ELSE
             NBRIC = 0

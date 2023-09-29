@@ -84,6 +84,7 @@ Chd|        SIGEPS112                     source/materials/mat/mat112/sigeps112.
 Chd|        SIGEPS115                     source/materials/mat/mat115/sigeps115.F
 Chd|        SIGEPS120                     source/materials/mat/mat120/sigeps120.F
 Chd|        SIGEPS121                     source/materials/mat/mat121/sigeps121.F
+Chd|        SIGEPS122                     source/materials/mat/mat122/sigeps122.F
 Chd|        SIGEPS124                     source/materials/mat/mat124/sigeps124.F
 Chd|        SIGEPS187                     source/materials/mat/mat187/sigeps187.F
 Chd|        SIGEPS190                     source/materials/mat/mat190/sigeps190.F
@@ -291,7 +292,7 @@ C-----------------------------------------------
       my_real, DIMENSION(NEL), TARGET  :: LE_MAX
 C----
       my_real, DIMENSION(:), POINTER   :: UPARAM,UPARAMF,UPARVIS,UVARF,DFMAX,
-     .                                    TDEL,EL_TEMP,YLDFAC,DAM,EL_LEN,DMG_SCALE,
+     .                                    TDEL,EL_TEMP,YLDFAC,DAM,EL_LEN,
      .                                    EL_PLA,DAMINI
       my_real, DIMENSION(:), ALLOCATABLE ,TARGET  :: BUFZERO
       TYPE(L_BUFEL_)  ,POINTER         :: LBUF
@@ -305,12 +306,17 @@ C----
       INTEGER                          :: DMG_FLAG
 !
       CHARACTER OPTION*256
-      INTEGER SIZE,NVAREOS
+      INTEGER SIZE,NVAREOS,NVARVIS
+      INTEGER :: NRATE
+      my_real :: FISOKIN
+      my_real, DIMENSION(NEL), TARGET :: VECNUL
+      my_real, DIMENSION(:), POINTER  :: SIGBXX,SIGBYY,SIGBZZ,SIGBXY,SIGBYZ,SIGBZX
 C=======================================================================
       GBUF   => ELBUF_TAB(NG)%GBUF           
       LBUF   => ELBUF_TAB(NG)%BUFLY(ILAY)%LBUF(IPTR,IPTS,IPTT)
       EBUF   => ELBUF_TAB(NG)%BUFLY(ILAY)%EOS(IPTR,IPTS,IPTT)
       NVAREOS = ELBUF_TAB(NG)%BUFLY(ILAY)%NVAR_EOS
+      NVARVIS = ELBUF_TAB(NG)%BUFLY(ILAY)%NVAR_VISC
       LOGICAL_USERL_AVAIL=.FALSE.
       IF (USERL_AVAIL>0) LOGICAL_USERL_AVAIL=.TRUE.
       NPTR   = ELBUF_TAB(NG)%NPTR
@@ -345,16 +351,6 @@ C=======================================================================
       UPARAM => BUFMAT(IADBUF:IADBUF+NPAR) 
       IFUNC  => IPM(10+1:10+NFUNC,MX)      
       ITABLE => IPM(226+1:226+NUMTABL,MX)
-      IVISC  = IPM(222,MX)
-      NUPARV = IPM(224,MX)
-      NUVARV = IPM(225,MX)
-      IADVIS = IPM(223,MX)
-      IF (IVISC > 0) THEN
-        UPARVIS => BUFMAT(IADVIS:IADVIS+NUPARV)
-      ELSE
-        ALLOCATE (BUFZERO(0))
-        UPARVIS => BUFZERO
-      END IF
       MATPARAM => MAT_ELEM%MAT_PARAM(MX)
       !==================================================  
       ! Recovering data from MATPARAM data structure
@@ -780,15 +776,15 @@ c
 c--------------------------------------------------------
 c     COMPUTE UNDAMAGED EFFECTIVE STRESSES
 c---------------------------------------------------------
-      DMG_SCALE => LBUF%DMGSCL
+      !DMG_SCALE => LBUF%DMGSCL
       IF (DMG_FLAG > 0) THEN 
         DO I = 1,NEL
-          SO1(I) = SO1(I)/MAX(DMG_SCALE(I),EM20)
-          SO2(I) = SO2(I)/MAX(DMG_SCALE(I),EM20)
-          SO3(I) = SO3(I)/MAX(DMG_SCALE(I),EM20)
-          SO4(I) = SO4(I)/MAX(DMG_SCALE(I),EM20)
-          SO5(I) = SO5(I)/MAX(DMG_SCALE(I),EM20)
-          SO6(I) = SO6(I)/MAX(DMG_SCALE(I),EM20)
+          SO1(I) = SO1(I)/MAX(LBUF%DMGSCL(I),EM20)
+          SO2(I) = SO2(I)/MAX(LBUF%DMGSCL(I),EM20)
+          SO3(I) = SO3(I)/MAX(LBUF%DMGSCL(I),EM20)
+          SO4(I) = SO4(I)/MAX(LBUF%DMGSCL(I),EM20)
+          SO5(I) = SO5(I)/MAX(LBUF%DMGSCL(I),EM20)
+          SO6(I) = SO6(I)/MAX(LBUF%DMGSCL(I),EM20)
         ENDDO
       ENDIF
 c
@@ -846,17 +842,35 @@ c---------------------------------------------------------
         CALL MSTRAIN_RATE(NEL    ,ISRATE ,ASRATE ,EPSD   ,IDEV   ,
      .                    EP1    ,EP2    ,EP3    ,EP4    ,EP5    ,EP6)
 c
-        CALL SIGEPS36(NEL    ,NPAR   ,NUVAR  ,NFUNC  ,IFUNC  ,
-     2                NPF    ,TF     ,TT     ,DT1    ,UPARAM ,
-     3                RHO0   ,RHO    ,VOLN   ,EINT   ,
+        NRATE = NINT(UPARAM(1))
+        FISOKIN = UPARAM(6+2*NRATE+8)
+        IF(FISOKIN>0) THEN
+          SIGBXX => LBUF%SIGB(1      :  NEL) 
+          SIGBYY => LBUF%SIGB(NEL+1  :2*NEL)
+          SIGBZZ => LBUF%SIGB(2*NEL+1:3*NEL)
+          SIGBXY => LBUF%SIGB(3*NEL+1:4*NEL)
+          SIGBYZ => LBUF%SIGB(4*NEL+1:5*NEL)
+          SIGBZX => LBUF%SIGB(5*NEL+1:6*NEL)
+        ELSE
+          VECNUL(1:NEL) = ZERO
+          SIGBXX => VECNUL(1:NEL)
+          SIGBYY => VECNUL(1:NEL)
+          SIGBZZ => VECNUL(1:NEL)
+          SIGBXY => VECNUL(1:NEL)
+          SIGBYZ => VECNUL(1:NEL)
+          SIGBZX => VECNUL(1:NEL)
+        ENDIF
+        CALL SIGEPS36(NEL    ,NUVAR  ,NFUNC  ,IFUNC  ,NPF ,
+     2                TF     ,TT     ,DT1    ,UPARAM ,RHO0,
      4                DE1    ,DE2    ,DE3    ,DE4    ,DE5    ,DE6   ,
      5                ES1    ,ES2    ,ES3    ,ES4    ,ES5    ,ES6   ,
      6                SO1    ,SO2    ,SO3    ,SO4    ,SO5    ,SO6   ,
      7                S1     ,S2     ,S3     ,S4     ,S5     ,S6    ,
-     8                SSP    ,VIS    ,UVAR   ,OFF    ,NGL    ,0     ,
+     8                SSP    ,VIS    ,UVAR   ,OFF    ,NGL    ,
      9                IPM    ,MAT    ,EPSD   ,IPLA   ,SIGY   ,DEFP  ,
      A                DPLA   ,ET     ,AL_IMP ,SIGNOR ,AMU    ,YLDFAC,
-     B                NVARTMP,VARTMP ,LBUF%SIGB,LBUF%DMG,INLOC,LBUF%PLANL)
+     B                NVARTMP,VARTMP ,LBUF%DMG,INLOC,LBUF%PLANL,
+     C                SIGBXX,SIGBYY,SIGBZZ,SIGBXY,SIGBYZ,SIGBZX )
 
       ELSEIF (MTN == 37) THEN
           IF (N2D == 0) THEN
@@ -912,7 +926,8 @@ c
      .                  SO1 ,SO2 ,SO3 ,SO4  ,SO5  ,SO6 ,
      .                  S1  ,S2  ,S3  ,S4   ,S5   ,S6  ,
      .                  SV1 ,SV2 ,SV3 ,SV4  ,SV5  ,SV6 ,
-     .                  SSP ,VIS ,UVAR,OFF  ,DVOL )
+     .                  SSP ,VIS ,UVAR,OFF  ,DVOL ,LBUF%BFRAC,
+     .                  LBUF%TEMP)
       ELSEIF (MTN == 42) THEN
           CALL SIGEPS42(
      1         NEL     ,NPAR    ,NUVAR   ,NFUNC   ,IFUNC   ,NPF     ,
@@ -1155,6 +1170,17 @@ c
      .                  IPM ,MAT ,AMU   )
 c
       ELSEIF (MTN == 69) THEN
+          IVISC  = IPM(222,MX)
+          NUPARV = IPM(224,MX)
+          NUVARV = IPM(225,MX)
+          IADVIS = IPM(223,MX)
+          IF (IVISC > 0) THEN
+            UPARVIS => BUFMAT(IADVIS:IADVIS+NUPARV)
+          ELSE
+            ALLOCATE (BUFZERO(0))
+            UPARVIS => BUFZERO
+          END IF
+
           CALL SIGEPS69(NEL  ,NPAR,NUVAR,NFUNC,IFUNC,NPF  ,
      .                  TF   ,TT,DT1,UPARAM,RHO0 ,RHO  ,
      .                  VOLN ,EINT,IVISC,NUPARV,UPARVIS ,
@@ -1387,16 +1413,13 @@ C
 C-------------------
 C     visco-hypereslatic law defined by stress strain curve
 C-------------------       
-        CALL SIGEPS90(NEL ,NPAR,NUVAR,NFUNC,IFUNC,
-     2                  NPF ,TF  ,TT,DT1,UPARAM,
-     3                  RHO0,RHO ,VOLN,EINT,
-     4                  EP1 ,EP2 ,EP3 ,EP4  ,EP5  ,EP6 ,
-     5                  DE1 ,DE2 ,DE3 ,DE4  ,DE5  ,DE6 ,
-     6                  ES1 ,ES2 ,ES3 ,ES4  ,ES5  ,ES6 ,
-     7                  SO1 ,SO2 ,SO3 ,SO4  ,SO5  ,SO6 ,
-     8                  S1  ,S2  ,S3  ,S4   ,S5   ,S6  ,
-     A                  SSP ,VIS ,UVAR,OFF  ,NGL  ,ISMSTR,
-     B                  ISRATE,ASRATE, GBUF%OFF ,IHET ,ET ,EPSD  ) 
+        CALL SIGEPS90(NEL ,NUVAR,NFUNC,IFUNC,NPF ,                       
+     2                  TF  ,TT,UPARAM,RHO0,
+     3                  EP1 ,EP2 ,EP3 ,EP4  ,EP5  ,EP6 ,
+     4                  ES1 ,ES2 ,ES3 ,ES4  ,ES5  ,ES6 ,
+     5                  S1  ,S2  ,S3  ,S4   ,S5   ,S6  ,
+     6                  SSP ,VIS ,UVAR,ISMSTR,
+     7                  ISRATE,ASRATE, GBUF%OFF ,IHET ,ET ,EPSD  ) 
 C      
       ELSEIF (MTN == 92) THEN 
           CALL SIGEPS92(NEL ,NPAR,NUVAR,NFUNC,IFUNC,
@@ -1478,20 +1501,20 @@ c
             N48 = 4
             NIX = NIXQ
           ENDIF
-          CALL SIGEPS97(NEL       ,NPAR   ,NUVAR    ,NFUNC  ,IFUNC           ,LBUF%TB   ,
-     .                  NPF       ,TF     ,TT       ,DT1    ,UPARAM  ,LBUF%BFRAC,
-     .                  RHO0      ,RHO    ,VOL      ,EINT   ,SIGY            ,DELTAX    , 
-     .                  EP1       ,EP2    ,EP3      ,EP4    ,EP5             ,EP6       ,
-     .                  DE1       ,DE2    ,DE3      ,DE4    ,DE5             ,DE6       ,
-     .                  ES1       ,ES2    ,ES3      ,ES4    ,ES5             ,ES6       ,
-     .                  SO1       ,SO2    ,SO3      ,SO4    ,SO5             ,SO6       ,
-     .                  S1        ,S2     ,S3       ,S4     ,S5              ,S6        ,
-     .                  SV1       ,SV2    ,SV3      ,SV4    ,SV5             ,SV6       ,
-     .                  SSP       ,VIS    ,UVAR     ,OFF    ,NFT             ,V         ,
-     .                  W         ,X      ,IX       ,N48    ,NIX             ,JTHE      ,
-     .                  GEO       ,PID    ,ILAY     ,NG     ,ELBUF_TAB       ,PM        , 
-     .                  IPARG     ,BUFVOIS  ,IPM    ,BUFMAT          ,STIFN     ,
-     .                  VD2       ,VDX    ,VDY      ,VDZ    ,MAT             ,VOLN      ,
+          CALL SIGEPS97(NEL       ,NPAR   ,NUVAR    ,NFUNC  ,IFUNC     ,LBUF%TB   ,
+     .                  NPF       ,TF     ,TT       ,DT1    ,UPARAM    ,LBUF%BFRAC,
+     .                  RHO0      ,RHO    ,VOL      ,EINT   ,SIGY      ,DELTAX    ,
+     .                  EP1       ,EP2    ,EP3      ,EP4    ,EP5       ,EP6       ,
+     .                  DE1       ,DE2    ,DE3      ,DE4    ,DE5       ,DE6       ,
+     .                  ES1       ,ES2    ,ES3      ,ES4    ,ES5       ,ES6       ,
+     .                  SO1       ,SO2    ,SO3      ,SO4    ,SO5       ,SO6       ,
+     .                  S1        ,S2     ,S3       ,S4     ,S5        ,S6        ,
+     .                  SV1       ,SV2    ,SV3      ,SV4    ,SV5       ,SV6       ,
+     .                  SSP       ,VIS    ,UVAR     ,OFF    ,NFT       ,V         ,
+     .                  W         ,X      ,IX       ,N48    ,NIX       ,JTHE      ,
+     .                  GEO       ,PID    ,ILAY     ,NG     ,ELBUF_TAB ,PM        ,
+     .                  IPARG     ,BUFVOIS  ,IPM    ,BUFMAT ,STIFN     ,
+     .                  VD2       ,VDX    ,VDY      ,VDZ    ,MAT       ,VOLN      ,
      .                  GBUF%QVIS ,DVOL   ,QOLD     )   
       ELSEIF (MTN == 100) THEN 
         IADRUPBUF =1
@@ -1722,7 +1745,7 @@ c       TAPO (toughened adhesive polymer)
      .                 DE1    ,DE2    ,DE3    ,DE4    ,DE5    ,DE6    ,
      .                 SO1    ,SO2    ,SO3    ,SO4    ,SO5    ,SO6    ,
      .                 S1     ,S2     ,S3     ,S4     ,S5     ,S6     ,
-     .                 JTHE   ,INLOC  ,VARNL  ,LBUF%DMG     ,DMG_SCALE)
+     .                 JTHE   ,INLOC  ,VARNL  ,LBUF%DMG     ,LBUF%DMGSCL)
 c
       ELSEIF (MTN == 121) THEN 
 c 
@@ -1737,13 +1760,28 @@ c
      .                 SIGY   ,ET     ,VARNL  ,INLOC  ,GBUF%DT,
      .                 IPG    ,NPG    ,ELBUF_TAB(NG))
 c
+      ELSEIF (MTN == 122) THEN 
+c 
+        IDEV = 0
+        CALL MSTRAIN_RATE(NEL    ,ISRATE ,ASRATE ,EPSD   ,IDEV   ,
+     .                    EP1    ,EP2    ,EP3    ,EP4    ,EP5    ,EP6)
+c 
+        CALL SIGEPS122(NEL    ,NPAR   ,NUVAR  ,UPARAM ,UVAR   ,RHO0   ,
+     .                 ES1    ,ES2    ,ES3    ,DEFP   ,DPLA   ,      
+     .                 DE1    ,DE2    ,DE3    ,DE4    ,DE5    ,DE6    ,
+     .                 SO1    ,SO2    ,SO3    ,SO4    ,SO5    ,SO6    ,
+     .                 S1     ,S2     ,S3     ,S4     ,S5     ,S6     ,
+     .                 OFF    ,SIGY   ,ET     ,LBUF%DMG,LBUF%SEQ,EPSD ,
+     .                 SSP    ,NFUNC  ,IFUNC  ,NPF    ,TF     ,NVARTMP,
+     .                 VARTMP )
+c
       ELSEIF (MTN == 124) THEN 
 c 
         IDEV = 0
         CALL MSTRAIN_RATE(NEL    ,ISRATE ,ASRATE ,EPSD   ,IDEV   ,
      .                    EP1    ,EP2    ,EP3    ,EP4    ,EP5    ,EP6)
         CALL SIGEPS124(NEL    ,NGL    ,NPAR   ,NUVAR  ,DT1    ,TT     ,
-     .                 UPARAM ,UVAR   ,RHO    ,DEFP   ,DPLA   ,GBUF%UELR,
+     .                 UPARAM ,UVAR   ,RHO    ,DEFP   ,DPLA   ,
      .                 SSP    ,EPSD   ,OFF    ,LBUF%OFF,IPG   ,NPG    ,
      .                 DE1    ,DE2    ,DE3    ,DE4    ,DE5    ,DE6    ,
      .                 ES1    ,ES2    ,ES3    ,ES4    ,ES5    ,ES6    ,
@@ -1980,7 +2018,7 @@ C---- strain tension
      5             S1  ,S2  ,S3  ,S4   ,S5   ,S6      ,
      6             EPSP1,UVARF,OFF ,IP   ,DFMAX,TDEL  ,
      7             MFXX     ,MFXY     ,MFXZ     ,MFYX     ,MFYY     , MFYZ    ,                 
-     8             MFZX     ,MFZY     ,MFZZ     )
+     8             MFZX     ,MFZY     ,MFZZ     ,LBUF%DMGSCL)
           ELSEIF (IRUPT == 11) THEN                                        
 C---- energy failure  
               CALL FAIL_ENERGY_S(NEL ,NPAR,NUVARR,NFUNC,IFUNC       ,
@@ -1993,11 +2031,11 @@ C---- energy failure
 C---- tabulated failure model
                CALL FAIL_TAB_S(
      1         NEL      ,NVARF    ,NPF      ,TF       ,TT       ,        
-     2         UPARAMF  ,NGL      ,IPM      ,MAT      ,EL_LEN   ,         
+     2         UPARAMF  ,NGL      ,EL_LEN   ,         
      3         S1       ,S2       ,S3       ,S4       ,S5       ,S6      ,    
-     4         EL_PLA   ,DPLA     ,EPSP1    ,TSTAR    ,UVARF    ,             
-     5         OFF      ,IP       ,TABLE    ,DFMAX    ,TDEL     ,
-     6         NFUNC    ,IFUNC    )                                      
+     4         DPLA     ,EPSP1    ,TSTAR    ,UVARF    ,             
+     5         OFF      ,TABLE    ,DFMAX    ,TDEL     ,
+     6         NFUNC    ,IFUNC    )                               
           ELSEIF (IRUPT == 24) THEN                                      
 c   --- Orthotropic strain failure
               CALL FAIL_ORTHSTRAIN(
@@ -2102,8 +2140,8 @@ C---- Tabulated failure model version 2
      2          NPF      ,TABLE    ,TF       ,TT       ,UPARAMF  , 
      3          NGL      ,EL_LEN   ,DPLA     ,EPSP1    ,UVARF    ,     
      5          S1       ,S2       ,S3       ,S4       ,S5       ,S6       ,               
-     6          EL_TEMP  ,OFF      ,DFMAX    ,TDEL     ,DMG_SCALE,
-     7          GBUF%UELR,IPG      ,NPG      ,LBUF%OFF )   
+     6          EL_TEMP  ,OFF      ,DFMAX    ,TDEL     ,LBUF%DMGSCL,
+     7          GBUF%UELR,IPG      ,NPG      ,LBUF%OFF )
 c
           ELSEIF (IRUPT == 42) THEN                                      
 C---- Inievo failure model
@@ -2113,7 +2151,7 @@ C---- Inievo failure model
      3          NGL      ,EL_LEN   ,DPLA     ,EPSP1    ,UVARF    ,     
      5          S1       ,S2       ,S3       ,S4       ,S5       ,S6       ,               
      6          EL_PLA   ,EL_TEMP  ,SIGY     ,OFF      ,DFMAX    ,
-     7          TDEL     ,DMG_SCALE,GBUF%UELR,IPG      ,NPG      ,
+     7          TDEL     ,LBUF%DMGSCL,GBUF%UELR,IPG      ,NPG      ,
      8          LBUF%OFF ,DAMINI   ,GBUF%VOL ,INLOC    )  
 c
           ELSEIF (IRUPT == 43) THEN                                      
@@ -2130,7 +2168,7 @@ C---- Tsai-Wu failure model
      1          NEL      ,NVARF    ,IPG      ,ILAY     ,NPG      ,TT       ,         
      2          DT1      ,UPARAMF  ,NGL      ,OFF      ,LBUF%OFF ,GBUF%UELR,
      3          S1       ,S2       ,S3       ,S4       ,S5       ,S6       ,
-     4          UVARF    ,NPAR     ,DFMAX    ,TDEL     ,DMG_SCALE)
+     4          UVARF    ,NPAR     ,DFMAX    ,TDEL     ,LBUF%DMGSCL)
 c
           ELSEIF (IRUPT == 45) THEN                                      
 C---- Tsai-Hill failure model
@@ -2138,7 +2176,7 @@ C---- Tsai-Hill failure model
      1          NEL      ,NVARF    ,IPG      ,ILAY     ,NPG      ,TT       ,         
      2          DT1      ,UPARAMF  ,NGL      ,OFF      ,LBUF%OFF ,GBUF%UELR,
      3          S1       ,S2       ,S3       ,S4       ,S5       ,S6       ,
-     4          UVARF    ,NPAR     ,DFMAX    ,TDEL     ,DMG_SCALE)
+     4          UVARF    ,NPAR     ,DFMAX    ,TDEL     ,LBUF%DMGSCL)
 c 
           ELSEIF (IRUPT == 46) THEN                                      
 C---- Hoffman failure model
@@ -2146,7 +2184,7 @@ C---- Hoffman failure model
      1          NEL      ,NVARF    ,IPG      ,ILAY     ,NPG      ,TT       ,         
      2          DT1      ,UPARAMF  ,NGL      ,OFF      ,LBUF%OFF ,GBUF%UELR,
      3          S1       ,S2       ,S3       ,S4       ,S5       ,S6       ,
-     4          UVARF    ,NPAR     ,DFMAX    ,TDEL     ,DMG_SCALE)
+     4          UVARF    ,NPAR     ,DFMAX    ,TDEL     ,LBUF%DMGSCL)
 c
           ELSEIF (IRUPT == 47) THEN                                      
 C---- Maximum strain failure model
@@ -2154,33 +2192,37 @@ C---- Maximum strain failure model
      1          NEL      ,NVARF    ,IPG      ,ILAY     ,NPG      ,TT       ,         
      2          DT1      ,UPARAMF  ,NGL      ,OFF      ,LBUF%OFF ,GBUF%UELR,
      3          ES1      ,ES2      ,ES3      ,ES4      ,ES5      ,ES6      ,
-     4          UVARF    ,NPAR     ,DFMAX    ,TDEL     ,DMG_SCALE)
+     4          UVARF    ,NPAR     ,DFMAX    ,TDEL     ,LBUF%DMGSCL)
 c 
           ENDIF
         ENDDO ! IR = 1,NFAIL
       ENDIF   ! NFAIL
       IF ((ITASK==0).AND.(IMON_MAT==1))CALL STOPTIME(121,1)
-C     viscous stress (/VISC models)  !!!
-      IVISC = IPM(222,MX)
-      IF ((IVISC ==1 .OR. (IVISC == 2 .AND.(ISMSTR== 10 .OR. ISMSTR== 12))) 
-     .                                   .AND. MTN /= 24) THEN
-         CALL VISCMAIN(
-     .        NEL     ,MX      ,IVISC   ,IPM     ,BUFMAT  ,
-     .        VBUF%VAR,RHO0    ,VIS     ,SSP     ,DT1     , 
+c----------------------------------
+c     viscous stress (/VISC models) 
+c----------------------------------
+
+      IF (MATPARAM%IVISC == 1 .or. 
+     .   (MATPARAM%IVISC == 2 .and. (ISMSTR == 10 .or. ISMSTR == 12))) THEN
+c
+         CALL VISCMAIN(MATPARAM%VISC    ,NEL     ,
+     .        NVARVIS ,VBUF%VAR,RHO0    ,VIS     ,SSP     ,DT1     , 
      .        EP1     ,EP2     ,EP3     ,EP4     ,EP5     ,EP6     ,
      .        SV1     ,SV2     ,SV3     ,SV4     ,SV5     ,SV6     ,
      .        MFXX    ,MFXY    ,MFXZ    ,MFYX    ,MFYY    ,MFYZ    ,
      .        MFZX    ,MFZY    ,MFZZ    ,
      .        S1      ,S2      ,S3      ,S4      ,S5      ,S6      )
        ENDIF 
-C  viscosity ( Navier-Stokes)
+c
+c     viscosity (Navier-Stokes)
+c
       IF (ISVIS > 0) THEN
-        VOLG(1:NEL)=NPG*VOLN(1:NEL)
-      CALL NSVISUL(NEL     ,PM      ,OFF     ,RHO     ,GEO    ,
-     2             PID     ,SSP     ,AIRE    ,VOLG    ,EP1    ,
-     3             EP2     ,EP3     ,EP4     ,EP5     ,EP6    ,
-     4             SV1     ,SV2     ,SV3     ,SV4     ,SV5    ,
-     5             SV6     ,S3      ,ES3     ,RHO0    ,RHOREF )
+        VOLG(1:NEL) = NPG*VOLN(1:NEL)
+        CALL NSVISUL(NEL     ,OFF     ,RHO     ,GEO    ,
+     2               PID     ,SSP     ,AIRE    ,VOLG    ,EP1    ,
+     3               EP2     ,EP3     ,EP4     ,EP5     ,EP6    ,
+     4               SV1     ,SV2     ,SV3     ,SV4     ,SV5    ,
+     5               SV6     ,S3      ,ES3     ,RHO0    ,RHOREF )
       ENDIF 
 C=======================================================================
 c--------------------------------------------------------
@@ -2188,12 +2230,12 @@ c     DAMAGED STRESSES
 c---------------------------------------------------------
       IF (DMG_FLAG > 0) THEN 
         DO I = 1,NEL
-          S1(I) = S1(I)*DMG_SCALE(I)
-          S2(I) = S2(I)*DMG_SCALE(I)
-          S3(I) = S3(I)*DMG_SCALE(I)
-          S4(I) = S4(I)*DMG_SCALE(I)
-          S5(I) = S5(I)*DMG_SCALE(I)
-          S6(I) = S6(I)*DMG_SCALE(I)
+          S1(I) = S1(I)*LBUF%DMGSCL(I)
+          S2(I) = S2(I)*LBUF%DMGSCL(I)
+          S3(I) = S3(I)*LBUF%DMGSCL(I)
+          S4(I) = S4(I)*LBUF%DMGSCL(I)
+          S5(I) = S5(I)*LBUF%DMGSCL(I)
+          S6(I) = S6(I)*LBUF%DMGSCL(I)
         ENDDO
       ENDIF
 c---------------------------------------------------------
@@ -2330,15 +2372,15 @@ C
             SIGV(I,6) = SVIS(I,6)
           ENDDO
       ENDIF 
-       IF (IVISC > 0) THEN
-         DO I=1,NEL  
-           SVISC(I,1) = SVIS(I,1)
-           SVISC(I,2) = SVIS(I,2)
-           SVISC(I,3) = SVIS(I,3)
-           SVISC(I,4) = SVIS(I,4)
-           SVISC(I,5) = SVIS(I,5)
-           SVISC(I,6) = SVIS(I,6)
-        ENDDO    
+      IF (MATPARAM%IVISC > 0) THEN
+        DO I=1,NEL  
+          SVISC(I,1) = SVIS(I,1)
+          SVISC(I,2) = SVIS(I,2)
+          SVISC(I,3) = SVIS(I,3)
+          SVISC(I,4) = SVIS(I,4)
+          SVISC(I,5) = SVIS(I,5)
+          SVISC(I,6) = SVIS(I,6)
+       ENDDO    
       ENDIF  
 C------------------------------------------------------------
 C     Variable to regularize with Non-local
@@ -2375,7 +2417,7 @@ C
      9   FACQ0,    CONDE,    GBUF%DT,  GBUF%G_DT,
      A   IPM,      RHOREF,   RHOSP,    NEL,
      B   ITY,      ISMSTR,   JTUR,     JTHE,
-     C   JSMS)
+     C   JSMS,     NPG )
 !------------------------------------------------
       ELSE
         CALL MDTSPH(

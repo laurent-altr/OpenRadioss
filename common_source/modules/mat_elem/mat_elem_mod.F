@@ -24,9 +24,15 @@ Chd|====================================================================
 Chd|  MAT_ELEM_MOD                  modules/mat_elem/mat_elem_mod.F
 Chd|-- called by -----------
 Chd|        CONTRL                        starter/source/starter/contrl.F
+Chd|        DDSPLIT                       starter/source/restart/ddsplit/ddsplit.F
+Chd|        ELBUF_INI                     starter/source/elements/elbuf_init/elbuf_ini.F
+Chd|        INI_MAT_ELEM                  starter/source/materials/mat/ini_mat_elem.F
 Chd|        LECTUR                        starter/source/starter/lectur.F
 Chd|        READ_MATERIAL_MODELS          starter/source/materials/read_material_models.F
 Chd|        STARTER0                      starter/source/starter/starter0.F
+Chd|        ST_QAPRINT_DRIVER             starter/source/output/qaprint/st_qaprint_driver.F
+Chd|        ST_QAPRINT_MATERIALS          starter/source/output/qaprint/st_qaprint_materials.F
+Chd|        WRITE_MATPARAM                starter/source/materials/mat/write_matparam.F
 Chd|        ALEMAIN                       engine/source/ale/alemain.F   
 Chd|        BFORC2                        engine/source/ale/bimat/bforc2.F
 Chd|        C3FORC3                       engine/source/elements/sh3n/coque3n/c3forc3.F
@@ -39,6 +45,7 @@ Chd|        CFORC3_CRK                    engine/source/elements/xfem/cforc3_crk
 Chd|        CMAIN3                        engine/source/materials/mat_share/cmain3.F
 Chd|        CZFORC3                       engine/source/elements/shell/coquez/czforc3.F
 Chd|        CZFORC3_CRK                   engine/source/elements/xfem/czforc3_crk.F
+Chd|        ELBUF_INI                     engine/source/elements/elbuf/elbuf_ini.F
 Chd|        FORINT                        engine/source/elements/forint.F
 Chd|        FORINTC                       engine/source/elements/forintc.F
 Chd|        FORINTP                       engine/source/elements/forintp.F
@@ -52,6 +59,7 @@ Chd|        RADIOSS2                      engine/source/engine/radioss2.F
 Chd|        RDCOMI                        engine/source/output/restart/rdcomm.F
 Chd|        RDRESA                        engine/source/output/restart/rdresa.F
 Chd|        RDRESB                        engine/source/output/restart/rdresb.F
+Chd|        READ_ELGROUP_PARAM            engine/source/output/restart/read_elgroup_param.F
 Chd|        READ_MATPARAM                 engine/source/output/restart/read_matparam.F
 Chd|        RESOL                         engine/source/engine/resol.F  
 Chd|        RESOL_HEAD                    engine/source/engine/resol_head.F
@@ -68,6 +76,8 @@ Chd|        SCFORC3                       engine/source/elements/thickshell/soli
 Chd|        SFORC3                        engine/source/elements/solid/solide/sforc3.F
 Chd|        SPSTRES                       engine/source/elements/sph/spstres.F
 Chd|        SZFORC3                       engine/source/elements/solid/solidez/szforc3.F
+Chd|        USERMAT_SOLID                 engine/source/materials/mat_share/usermat_solid.F
+Chd|        WRITE_MATPARAM                engine/source/output/restart/write_matparam.F
 Chd|        WRRESTP                       engine/source/output/restart/wrrestp.F
 Chd|-- calls ---------------
 Chd|        ELBUFDEF_MOD                  modules/mat_elem/elbufdef_mod.F

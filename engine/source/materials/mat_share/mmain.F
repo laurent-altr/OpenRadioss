@@ -263,7 +263,7 @@ C-----------------------------------------------
       INTEGER I,IPG,NUVAR,NPARAM,NFUNC,IFUNC_ALPHA,ILAW,
      .   NVARF,NFAIL,IR,IP,IRUPT,IVISC,EOSTYP,NPTS,NPTT,NPTR,NPG,ISVIS,
      .   MX,NVARTMP,NLAY,INLOC
-      INTEGER IFUNC(MAXFUNC),ISELECT,IBPRELD,NVAREOS
+      INTEGER IFUNC(MAXFUNC),ISELECT,IBPRELD,NVAREOS,NVARVIS
       my_real
      .   FACQ0,E1,E2,E3,E4,E5,E6,ALPHA,T0,TM
       my_real
@@ -419,6 +419,7 @@ C compatibility with deprecated law 20
       NLAY  = ELBUF_TAB(NG)%NLAY
       NPG   = NPTS*NPTT*NPTR
       NVAREOS = ELBUF_TAB(NG)%BUFLY(ILAY)%NVAR_EOS 
+      NVARVIS = ELBUF_TAB(NG)%BUFLY(ILAY)%NVAR_VISC
       IPG   = IPTR + ((IPTS-1) + (IPTT-1)*NPTS)*NPTR
 
       DMG_FLAG = ELBUF_TAB(NG)%BUFLY(ILAY)%L_DMGSCL
@@ -644,7 +645,7 @@ C-----------------------------------
      C   AMU,        VOL_AVG,    GBUF%DT,    GBUF%G_DT,
      D   OFF,        IPM,        RHOREF,     RHOSP,
      E   LBUF%VOL0DP,ISMSTR,     JSPH,       JTUR,
-     F   ITY,        JTHE,       JSMS)
+     F   ITY,        JTHE,       JSMS,       NPG )
       ELSE IF (MTN == 1) THEN
 C
         IF (JHBE==17.AND.IINT==3.AND.ISMSTR == 1) THEN
@@ -663,7 +664,7 @@ C
      C   VOL_AVG,  GBUF%DT,  GBUF%G_DT,NEL,
      D   IPM,      RHOREF,   RHOSP,    ITY,
      E   JTUR,     JTHE,     JSPH,     ISMSTR,
-     F   JSMS)
+     F   JSMS,     NPG )
         ELSE IF(ISMSTR >= 10.AND.ISMSTR <= 12)THEN
           CALL M1LAWTOT(
      1   PM,         OFF,        LBUF%SIG,   LBUF%EINT,
@@ -683,7 +684,8 @@ C
      F   GBUF%DT,    GBUF%G_DT,  NEL,        GBUF%ETOTSH,
      G   ISELECT,    IPM,        RHOREF,     RHOSP,
      H   LBUF%SIGL,  ITY,        ISMSTR,     JTUR,
-     I   JTHE,       JCVT,       JSPH,       JSMS)
+     I   JTHE,       JCVT,       JSPH,       JSMS,
+     J   NPG )
         ELSE 
           CALL M1LAW(
      1   PM,       OFF,      LBUF%SIG, LBUF%EINT,
@@ -700,7 +702,7 @@ C
      C   VOL_AVG,  GBUF%DT,  GBUF%G_DT,NEL,
      D   IPM,      RHOREF,   RHOSP,    ITY,
      E   JTUR,     JTHE,     JSPH,     ISMSTR,
-     F   JSMS)
+     F   JSMS,     NPG )
         END IF
 C
       ELSEIF (MTN == 2) THEN
@@ -724,7 +726,7 @@ C
      G   NEL,      IPM,      RHOREF,   RHOSP,
      H   IPG,      LBUF%DMG, ITY,      JTUR,
      I   JTHE,     JSPH,     ISMSTR,   JSMS,
-     J   LBUF%EPSQ)
+     J   LBUF%EPSQ,NPG )
 !----------------
         IF (ISTRAIN > 0 .AND.
      .    (H3D_STRAIN == 1 .OR. TH_STRAIN == 1 )) THEN
@@ -852,7 +854,7 @@ C---------------------------
      9   FACQ0,    CONDE,    GBUF%DT,  GBUF%G_DT,
      A   IPM,      RHOREF,   RHOSP,    NEL,
      B   ITY,      ISMSTR,   JTUR,     JTHE,
-     C   JSMS)
+     C   JSMS,     NPG )
         ELSE
           CALL MDTSPH(
      1   PM,       OFF,      LBUF%RHO, LBUF%RK,
@@ -897,7 +899,7 @@ C
      9   FACQ0,    CONDE,    GBUF%DT,  GBUF%G_DT,
      A   IPM,      RHOREF,   RHOSP,    NEL,
      B   ITY,      ISMSTR,   JTUR,     JTHE,
-     C   JSMS)
+     C   JSMS,     NPG )
         ELSE
           CALL MDTSPH(
      1   PM,       OFF,      LBUF%RHO, LBUF%RK,
@@ -1045,7 +1047,7 @@ C
      9   FACQ0,    CONDE,    GBUF%DT,  GBUF%G_DT,
      A   IPM,      RHOREF,   RHOSP,    NEL,
      B   ITY,      ISMSTR,   JTUR,     JTHE,
-     C   JSMS)
+     C   JSMS,     NPG )
         ELSE
           CALL MDTSPH(
      1   PM,       OFF,      LBUF%RHO, LBUF%RK,
@@ -1089,7 +1091,7 @@ C
      9   FACQ0,    CONDE,    GBUF%DT,  GBUF%G_DT,
      A   IPM,      RHOREF,   RHOSP,    NEL,
      B   ITY,      ISMSTR,   JTUR,     JTHE,
-     C   JSMS)
+     C   JSMS,     NPG )
         ELSE
           CALL MDTSPH(
      1   PM,       OFF,      LBUF%RHO, LBUF%RK,
@@ -1151,7 +1153,7 @@ c     .             LBUF%QVIS,LBUF%VOL,MBUF%VAR,STIFN   )
      9   FACQ0,    CONDE,    GBUF%DT,  GBUF%G_DT,
      A   IPM,      RHOREF,   RHOSP,    NEL,
      B   ITY,      ISMSTR,   JTUR,     JTHE,
-     C   JSMS)
+     C   JSMS,     NPG )
         ELSE
           CALL MDTSPH(
      1   PM,       OFF,      LBUF%RHO, LBUF%RK,
@@ -1220,7 +1222,7 @@ C       TSAI 3D Complet
      9   FACQ0,    CONDE,    GBUF%DT,  GBUF%G_DT,
      A   IPM,      RHOREF,   RHOSP,    NEL,
      B   ITY,      ISMSTR,   JTUR,     JTHE,
-     C   JSMS)
+     C   JSMS,     NPG )
         ELSE
           CALL MDTSPH(
      1   PM,       OFF,      LBUF%RHO, LBUF%RK,
@@ -1264,7 +1266,7 @@ C       TSAI 3D Complet
      9   FACQ0,    CONDE,    GBUF%DT,  GBUF%G_DT,
      A   IPM,      RHOREF,   RHOSP,    NEL,
      B   ITY,      ISMSTR,   JTUR,     JTHE,
-     C   JSMS)
+     C   JSMS,     NPG )
         ELSE
           CALL MDTSPH(
      1   PM,       OFF,      LBUF%RHO, LBUF%RK,
@@ -1306,7 +1308,7 @@ C       TSAI 3D Complet
      9   FACQ0,    CONDE,    GBUF%DT,  GBUF%G_DT,
      A   IPM,      RHOREF,   RHOSP,    NEL,
      B   ITY,      ISMSTR,   JTUR,     JTHE,
-     C   JSMS)
+     C   JSMS,     NPG )
         ELSE
           CALL MDTSPH(
      1   PM,       OFF,      LBUF%RHO, LBUF%RK,
@@ -1348,7 +1350,7 @@ c
      9   FACQ0,    CONDE,    GBUF%DT,  GBUF%G_DT,
      A   IPM,      RHOREF,   RHOSP,    NEL,
      B   ITY,      ISMSTR,   JTUR,     JTHE,
-     C   JSMS)
+     C   JSMS,     NPG )
         ELSE
           CALL MDTSPH(
      1   PM,       OFF,      LBUF%RHO, LBUF%RK,
@@ -1409,7 +1411,7 @@ c
      9   FACQ0,    CONDE,    GBUF%DT,  GBUF%G_DT,
      A   IPM,      RHOREF,   RHOSP,    NEL,
      B   ITY,      ISMSTR,   JTUR,     JTHE,
-     C   JSMS)
+     C   JSMS,     NPG )
         ELSE
           CALL MDTSPH(
      1   PM,       OFF,      LBUF%RHO, LBUF%RK,
@@ -1451,7 +1453,7 @@ c
      E   GBUF%DT,  GBUF%G_DT,NEL,      IPM,
      F   RHOREF,   RHOSP,    NFT,      JSPH,
      G   ITY,      JTUR,     JTHE,     ISMSTR,
-     H   JSMS)
+     H   JSMS,     NPG )
       ELSEIF (MTN == 23) THEN
         CALL M22LAW(
      1   PM,       OFF,      LBUF%SIG, LBUF%EINT,
@@ -1470,7 +1472,7 @@ c
      E   GBUF%DT,  GBUF%G_DT,NEL,      IPM,
      F   RHOREF,   RHOSP,    NFT,      JSPH,
      G   ITY,      JTUR,     JTHE,     ISMSTR,
-     H   JSMS)
+     H   JSMS,     NPG )
       ELSEIF (MTN == 24) THEN
         CALL M24LAW(
      1   LBUF,     PM,       OFF,      LBUF%SIG,
@@ -1490,7 +1492,7 @@ c
      F   GBUF%G_DT,IPM,      RHOREF,   RHOSP,
      G   LBUF%EPSD,ITY,      JTUR,     JTHE,
      H   JHBE,     JCVT,     JSPH,     ISMSTR,
-     I   JSMS)
+     I   JSMS,     NPG )
 C     like law25 for shell + S33 = EPS33*E33
       ELSEIF (MTN == 25) THEN
         CALL M25LAW(
@@ -1520,7 +1522,7 @@ C     like law25 for shell + S33 = EPS33*E33
      9   FACQ0,    CONDE,    GBUF%DT,  GBUF%G_DT,
      A   IPM,      RHOREF,   RHOSP,    NEL,
      B   ITY,      ISMSTR,   JTUR,     JTHE,
-     C   JSMS)
+     C   JSMS,     NPG )
         ELSE
           CALL MDTSPH(
      1   PM,       OFF,      LBUF%RHO, LBUF%RK,
@@ -1593,7 +1595,7 @@ C     like law25 for shell + S33 = EPS33*E33
      E   VOL_AVG,  GBUF%DT,  GBUF%G_DT,NEL,
      F   D4,       D5,       D6,       RHOREF,
      G   RHOSP,    ISMSTR,   ITY,      JSMS,
-     H   JTUR,     JTHE)
+     H   JTUR,     JTHE,     NPG )
 C
       ELSEIF (MTN == 49) THEN
         CALL M49LAW (MAT      ,PM       ,OFF     ,LBUF%SIG,LBUF%PLA,
@@ -1614,7 +1616,7 @@ C
      9   FACQ0,    CONDE,    GBUF%DT,  GBUF%G_DT,
      A   IPM,      RHOREF,   RHOSP,    NEL,
      B   ITY,      ISMSTR,   JTUR,     JTHE,
-     C   JSMS)
+     C   JSMS,     NPG )
         ELSE
           CALL MDTSPH(
      1   PM,       OFF,      LBUF%RHO, LBUF%RK,
@@ -1681,7 +1683,7 @@ c
      Z   LBUF%FORTH, LBUF%VISC,  NEL,        GBUF%ETOTSH,
      1   ISELECT,    TSTAR,      LBUF%MU,    AMU2,
      2   DPDM,       RHOREF,     RHOSP,      NLOC_DMG,
-     3   ITY,        JTUR)
+     3   ITY,        JTUR,       MAT_ELEM    )
 c
       ELSE   ! 'user type' Radioss material laws 
 C---
@@ -1836,9 +1838,8 @@ C-----------------------------------------------------------------------
           ENDDO
         ENDIF
 c---        
-         CALL VISCMAIN(
-     .        NEL     ,MAT(1)  ,IVISC   ,IPM     ,BUFMAT  ,
-     .        VBUF%VAR,RHO0    ,VIS     ,CXX     ,DT1     , 
+         CALL VISCMAIN(MAT_ELEM%MAT_PARAM(MAT(1))%VISC    ,NEL     ,
+     .        NVARVIS ,VBUF%VAR,RHO0    ,VIS     ,CXX     ,DT1     , 
      .        EP1     ,EP2     ,EP3     ,EP4     ,EP5     ,EP6     ,
      .        SV1     ,SV2     ,SV3     ,SV4     ,SV5     ,SV6     ,
      .        MFXX    ,MFXY    ,MFXZ    ,MFYX    ,MFYY    ,MFYZ    ,
@@ -2170,7 +2171,7 @@ c---- strain tension
      5             SS1 ,SS2 ,SS3 ,SS4  ,SS5  ,SS6     ,
      6             EPSP,UVARF,OFF,IP   ,DFMAX,TDEL    ,
      7             MFXX   ,MFXY   ,MFXZ   ,MFYX    ,MFYY   ,MFYZ   ,                 
-     8             MFZX   ,MFZY   ,MFZZ   )
+     8             MFZX   ,MFZY   ,MFZZ   ,DMG_SCALE)
 c
           ELSEIF(IRUPT == 11)THEN                                                          
 c---- energy failure  
@@ -2211,11 +2212,11 @@ c --- ladeveze delamination damage model
 c ---   tabulated failure model
               CALL FAIL_TAB_S(
      1        LLT      ,NVARF    ,NPF      ,TF       ,TT       ,         
-     2        BUFMAT(IADBUF)     ,NGL      ,IPM      ,MAT      ,EL_LEN  ,         
+     2        BUFMAT(IADBUF)     ,NGL      ,EL_LEN  ,         
      3        SS1      ,SS2      ,SS3      ,SS4      ,SS5      ,SS6     ,    
-     4        EL_PLA   ,DPLA     ,EPSP     ,TSTAR    ,UVARF    ,           
-     5        OFF      ,IP       ,TABLE    ,DFMAX    ,TDEL     ,
-     6        NFUNC    ,IFUNC )                                       
+     4        DPLA     ,EPSP     ,TSTAR    ,UVARF    ,           
+     5        OFF      ,TABLE    ,DFMAX    ,TDEL     ,
+     6        NFUNC    ,IFUNC )                                     
           ELSEIF (IRUPT == 24) THEN                                      
 c   --- Orthotropic strain failure
               CALL FAIL_ORTHSTRAIN(
@@ -2497,9 +2498,9 @@ c          IF(OFFOLD(I)>=1.AND.OFF(I)/=OFFOLD(I).AND.OFF(I)>=0.AND.OFF(I)<1)THEN
       END IF
 C-----------  
 C-----------------------------------------------------------------  
-C  ALE/EULER  POST-TREATMENT
-C-----------------------------------------------------------------  
-        IF(IPARG(7,NG)+IPARG(11,NG) > 0 ) THEN
+C  SOUND SPEED (SSP)  POST-TREATMENT
+C-----------------------------------------------------------------
+        IF(ELBUF_TAB(NG)%BUFLY(ILAY)%L_SSP /=0 )THEN
           LBUF%SSP(1:NEL) = CXX(1:NEL)
         ENDIF
 

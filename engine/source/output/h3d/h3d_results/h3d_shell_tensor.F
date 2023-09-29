@@ -216,7 +216,7 @@ C
                 DO J=1,NLAY
                   ID_PLY = 0
                   IF (IGTYP == 51) THEN
-	                   ID_PLY = IGEO(1,STACK%IGEO(2+J,ISUBSTACK))
+	             ID_PLY = IGEO(1,STACK%IGEO(2+J,ISUBSTACK))
                   ELSEIF (IGTYP == 52) THEN
                     ID_PLY = PLY_INFO(1,STACK%IGEO(2+J,ISUBSTACK)-NUMSTACK) 
                   ENDIF
@@ -320,15 +320,12 @@ c               /TENS/STRESS/PLY=.../NPT=...
                   ELSE IF (IGTYP == 52) THEN
                     ID_PLY = PLY_INFO(1,STACK%IGEO(2+J,ISUBSTACK) - NUMSTACK)
                   END IF
-                  
-                  IF (ID_PLY == IPLY) THEN
-                    ILAY  = J
+                  ILAY  = J
+                  IF (ID_PLY == IPLY .AND. IPT <= ELBUF_TAB(NG)%BUFLY(ILAY)%NPTT) THEN
                     IMAT  = ELBUF_TAB(NG)%BUFLY(ILAY)%IMAT                          
-                    IVISC = IPM(222,IMAT)    
-
-                    IF (IPT <= ELBUF_TAB(NG)%BUFLY(ILAY)%NPTT) THEN 
-                      ISELECT = 1
-                      DO I=1,NEL  
+                    IVISC = IPM(222,IMAT)
+                    ISELECT = 1
+                    DO I=1,NEL  
                         DO IR=1,NPTR                
                           DO IS=1,NPTS 
                             LBUF => ELBUF_TAB(NG)%BUFLY(ILAY)%LBUF(IR,IS,IPT) 
@@ -337,8 +334,8 @@ c               /TENS/STRESS/PLY=.../NPT=...
                             SIGE(I,3) = SIGE(I,3) + LBUF%SIG(JJ(3) + I) / NPG
                           ENDDO                 
                         ENDDO
-                      ENDDO
-                      IF (IVISC > 0) THEN
+                    ENDDO
+                    IF (IVISC > 0) THEN
                         DO I=1,NEL  
                           DO IR=1,NPTR                
                             DO IS=1,NPTS 
@@ -349,29 +346,27 @@ c               /TENS/STRESS/PLY=.../NPT=...
                             ENDDO                 
                           ENDDO
                         ENDDO
-                      END IF
-                    ENDIF   
-                    MAT_ORTH = MATPARAM_TAB(IMAT)%ORTHOTROPY
-                    IF (MAT_ORTH > 0) THEN                 
-                      IF (IDRAPE > 0 ) THEN
-                        DIR_A => ELBUF_TAB(NG)%BUFLY(ILAY)%LBUF_DIR(IPT)%DIRA
-                        DIR_B => ELBUF_TAB(NG)%BUFLY(ILAY)%LBUF_DIR(IPT)%DIRB
-                      ELSE                                            
-                        DIR_A => ELBUF_TAB(NG)%BUFLY(ILAY)%DIRA
-                        DIR_B => ELBUF_TAB(NG)%BUFLY(ILAY)%DIRB
-                      ENDIF                       
-                    END IF
-                    IF (MAT_ORTH == 2) THEN                 
-                      CALL UROTO_TENS2D(NEL,SIGE,DIR_A)
-                    ELSE IF (MAT_ORTH == 3) THEN   ! anisotropic (law 58,158 only)
-                      CALL UROTO_TENS2D_ANISO(NEL,SIGE,DIR_A,DIR_B)
-                    END IF
-c
-                    EXIT 
-                  ENDIF  ! ID_PLY
+                   END IF 
+                   MAT_ORTH = MATPARAM_TAB(IMAT)%ORTHOTROPY
+                   IF (MAT_ORTH > 0) THEN                 
+                        IF (IDRAPE > 0 ) THEN
+                          DIR_A => ELBUF_TAB(NG)%BUFLY(ILAY)%LBUF_DIR(IPT)%DIRA
+                          DIR_B => ELBUF_TAB(NG)%BUFLY(ILAY)%LBUF_DIR(IPT)%DIRB
+                        ELSE                                            
+                          DIR_A => ELBUF_TAB(NG)%BUFLY(ILAY)%DIRA
+                          DIR_B => ELBUF_TAB(NG)%BUFLY(ILAY)%DIRB
+                        ENDIF                       
+                   END IF
+                   IF (MAT_ORTH == 2) THEN                 
+                        CALL UROTO_TENS2D(NEL,SIGE,DIR_A)
+                   ELSE IF (MAT_ORTH == 3) THEN   ! anisotropic (law 58,158 only)
+                        CALL UROTO_TENS2D_ANISO(NEL,SIGE,DIR_A,DIR_B)
+                   END IF  
+                   EXIT 
+                  ENDIF  ! ID_PLY & ipt
                 ENDDO    ! NLAY
 c
-              ELSEIF (ILAY > 0 .AND. ILAY <= NLAY .AND. IPLY == -1 .AND. IPT == -1) THEN  
+              ELSEIF (ILAY > 0 .AND. ILAY <= NLAY .AND. IPLY == -1) THEN  
 c               /TENS/STRESS/LAYER=
                 IF (IGTYP == 10 .OR. IGTYP == 11 .OR. IGTYP == 16) THEN   ! shells type 10,11,16 only   
                   ISELECT = 1
@@ -391,7 +386,7 @@ c               /TENS/STRESS/LAYER=
                     DO I=1,NEL  
                       DO IR=1,NPTR                
                         DO IS=1,NPTS 
-                          LBUF => ELBUF_TAB(NG)%BUFLY(ILAY)%LBUF(IR,IS,IPT) 
+                          LBUF => ELBUF_TAB(NG)%BUFLY(ILAY)%LBUF(IR,IS,1) 
                           SIGE(I,1) = SIGE(I,1) + LBUF%VISC(JJ(1) + I) / NPG
                           SIGE(I,2) = SIGE(I,2) + LBUF%VISC(JJ(2) + I) / NPG
                           SIGE(I,3) = SIGE(I,3) + LBUF%VISC(JJ(3) + I) / NPG

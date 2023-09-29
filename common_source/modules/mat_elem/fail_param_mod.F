@@ -24,33 +24,42 @@ Chd|====================================================================
 Chd|  FAIL_PARAM_MOD                modules/mat_elem/fail_param_mod.F
 Chd|-- called by -----------
 Chd|        MATPARAM_DEF_MOD              common_source/modules/mat_elem/matparam_def_mod.F
+Chd|        WRITE_FAILPARAM               starter/source/materials/fail/write_failparam.F
+Chd|        READ_FAILPARAM                engine/source/output/restart/read_failparam.F
+Chd|        WRITE_FAILPARAM               engine/source/output/restart/write_failparam.F
 Chd|-- calls ---------------
+Chd|        NAMES_AND_TITLES_MOD          modules/names_and_titles_mod.F
 Chd|        TABLE_MOD                     starter/share/modules1/table_mod.F
 Chd|        TABLE_MOD                     engine/share/modules/table_mod.F
 Chd|====================================================================
       MODULE FAIL_PARAM_MOD
+c
       USE TABLE_MOD
+      USE NAMES_AND_TITLES_MOD
 C----------------------------------------------------------------------- 
 #include "my_real.inc"
-#include "nchar_c.inc"
 c=======================================================================      
 c define type FAIL_ for general failure model data storage
 c=======================================================================      
       
       TYPE FAIL_PARAM_
-        integer     :: IRUPT                  ! failure model type (number)
-        character(len=nchartitle) :: TITLE    ! failure model input name
         character(len=nchartitle) :: KEYWORD  ! failure model type name
-        integer     :: NUPARAM
-        integer     :: NIPARAM
-        integer     :: NFUNC
-        integer     :: NTABLE
-        integer     :: NMOD                   !number of rupture/damage modes
+        INTEGER     :: IRUPT                  ! failure model type (number)
+        INTEGER     :: FAIL_ID
+        INTEGER     :: NUPARAM
+        INTEGER     :: NIPARAM
+        INTEGER     :: NUVAR
+        INTEGER     :: NFUNC
+        INTEGER     :: NTABLE
+        INTEGER     :: NMOD                   !number of rupture/damage modes
+
+        INTEGER     :: FAIL_IP                
+        my_real     :: PTHK
         
-        character(len=nchartitle) ,DIMENSION(:) ,ALLOCATABLE :: MODES   ! size NMOD
-        integer       ,DIMENSION(:) ,ALLOCATABLE :: IPARAM  ! NIPARAM
+        character(len=nchartitle) ,DIMENSION(:) ,ALLOCATABLE :: MODE   ! size NMOD
         my_real       ,DIMENSION(:) ,ALLOCATABLE :: UPARAM  ! NUPARAM
-        integer       ,DIMENSION(:) ,ALLOCATABLE :: IFUNC   ! NFUNC
+        INTEGER       ,DIMENSION(:) ,ALLOCATABLE :: IPARAM  ! NIPARAM
+        INTEGER       ,DIMENSION(:) ,ALLOCATABLE :: IFUNC   ! function adress table
         TYPE (TTABLE) ,DIMENSION(:) ,ALLOCATABLE :: TABLE   ! NTABLE
       
       END TYPE FAIL_PARAM_   

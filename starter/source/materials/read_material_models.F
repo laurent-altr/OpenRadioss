@@ -35,7 +35,7 @@ Chd|        HM_READ_THERM                 source/materials/therm/hm_read_therm.F
 Chd|        HM_READ_THERM_STRESS          source/materials/therm/hm_read_therm_stress.F
 Chd|        HM_READ_VISC                  source/materials/visc/hm_read_visc.F
 Chd|        INI_EOS_VARS                  source/elements/elbuf_init/ini_eos_vars.F
-Chd|        INI_MATPARAM                  source/materials/mat/ini_matparam.F
+Chd|        INI_MAT_ELEM                  source/materials/mat/ini_mat_elem.F
 Chd|        INI_MLAW_VARS                 source/elements/elbuf_init/ini_mlaw_vars.F
 Chd|        MULTI_CHECK_EOS               source/multifluid/multi_check_eos.F
 Chd|        MULTI_CHECK_PSH               source/multifluid/multi_check_psh.F
@@ -53,7 +53,7 @@ Chd|        SUBMODEL_MOD                  share/modules1/submodel_mod.F
 Chd|        TABLE_MOD                     share/modules1/table_mod.F    
 Chd|====================================================================
       SUBROUTINE READ_MATERIAL_MODELS(
-     .             MAT_ELEM    ,MLAW_TAG ,FAIL_TAG ,VISC_TAG ,EOS_TAG  ,
+     .             MAT_ELEM    ,MLAW_TAG ,FAIL_TAG ,EOS_TAG  ,
      .             BUFMAT      ,BUFLEN   ,IPM      ,PM       ,UNITAB   ,
      .             MULTI_FVM   ,MAXEOS   ,FAILWAVE ,NLOC_DMG ,LSUBMODEL,
      .             TABLE       ,NPC      )
@@ -61,10 +61,10 @@ C-----------------------------------------------
 C   D e s c r i p t i o n
 C-----------------------------------------------
 C This subroutine is managing all readers related to material model :
-C    - Constitutive Laws : /MAT
+C    - Constitutive Laws  : /MAT
 C    - Equations of State : /EOS
-C    - Failure models : /FAIL
-C    - viscosity : /VISC
+C    - Failure models     : /FAIL
+C    - viscosity          : /VISC
 C    - thermal parameters : /HEAT
 C    - etc ...
 C-----------------------------------------------
@@ -96,7 +96,6 @@ C-----------------------------------------------
 #include      "scr19_c.inc"
 #include      "tabsiz_c.inc"
 #include      "submod_c.inc"
-#include      "my_allocate.inc"
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
@@ -104,12 +103,11 @@ C-----------------------------------------------
       INTEGER,INTENT(IN) :: NPC(SNPC)
       INTEGER ,DIMENSION(NPROPMI,NUMMAT), INTENT(INOUT) :: IPM
       my_real ,DIMENSION(NPROPM ,NUMMAT), INTENT(INOUT) :: PM
-      my_real ,DIMENSION(SBUFMAT), INTENT(INOUT),TARGET :: BUFMAT
+      my_real ,DIMENSION(SBUFMAT)       , INTENT(INOUT) :: BUFMAT
       TYPE (UNIT_TYPE_),INTENT(IN) :: UNITAB 
       TYPE(MLAW_TAG_) , DIMENSION(NUMMAT  ) , INTENT(INOUT) :: MLAW_TAG
       TYPE(EOS_TAG_)  ,DIMENSION(0:MAXEOS) , INTENT(INOUT) :: EOS_TAG
       TYPE(FAIL_TAG_) ,DIMENSION(0:MAXFAIL), INTENT(INOUT) :: FAIL_TAG
-      TYPE(VISC_TAG_) ,DIMENSION(0:MAXVISC), INTENT(INOUT) :: VISC_TAG
       TYPE(MULTI_FVM_STRUCT) :: MULTI_FVM
       TYPE(FAILWAVE_STR_) :: FAILWAVE 
       TYPE(NLOCAL_STR_) :: NLOC_DMG 
@@ -133,10 +131,10 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   S o u r c e   L i n e s
 C=======================================================================
-      CALL INI_MATPARAM (MAT_ELEM%MAT_PARAM, MAT_ELEM%NUMMAT)
+      CALL INI_MAT_ELEM (MAT_ELEM)
     
       !Set default parameters used in material laws
-      CALL INI_MLAW_VARS(MLAW_TAG ,FAIL_TAG ,VISC_TAG ,NUMMAT)  ! attention ca ne marchera pas
+      CALL INI_MLAW_VARS(MLAW_TAG ,FAIL_TAG ,NUMMAT)  ! attention ca ne marchera pas
       CALL INI_EOS_VARS (EOS_TAG,  MAXEOS )
 c----------      
       ILAW    = 0
@@ -164,7 +162,7 @@ c-------------------------------------------------------------------
 c     /MAT : Material laws (Constitutive law : sigma,epsilon)
 c-------------------------------------------------------------------      
       CALL HM_READ_MAT(
-     .     MAT_ELEM%MAT_PARAM ,MLAW_TAG    ,FAIL_TAG    ,EOS_TAG     ,BUFMAT      ,
+     .     MAT_ELEM%MAT_PARAM       ,MLAW_TAG    ,FAIL_TAG    ,EOS_TAG     ,BUFMAT      ,
      .     BUFLEN      ,IADBUF      ,MAXEOS      ,IPM         ,PM          ,
      .     MULTI_FVM   ,UNITAB      ,LSUBMODEL   ,TABLE)
 
@@ -184,7 +182,8 @@ c-------------------------------------------------------------------
 c-------------------------------------------------------------------
 c     /VISC : Visco elastic  Models
 c-------------------------------------------------------------------    
-      CALL HM_READ_VISC(VISC_TAG, IPM, PM, BUFMAT, BUFLEN, IADBUF, UNITAB, LSUBMODEL, TABLE)
+      CALL HM_READ_VISC(MAT_ELEM%MAT_PARAM ,IPM     ,BUFMAT, 
+     .                  UNITAB  ,LSUBMODEL ,TABLE   )
 
 c-------------------------------------------------------------------
 c     /LEAK : Fabric Leakage Models

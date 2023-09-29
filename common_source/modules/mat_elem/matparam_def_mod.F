@@ -26,7 +26,7 @@ Chd|-- called by -----------
 Chd|        MAT_ELEM_MOD                  common_source/modules/mat_elem/mat_elem_mod.F
 Chd|        C3GRTAILS                     starter/source/elements/sh3n/coque3n/c3grtails.F
 Chd|        CGRTAILS                      starter/source/elements/shell/coque/cgrtails.F
-Chd|        DDSPLIT                       starter/source/restart/ddsplit/ddsplit.F
+Chd|        FAIL_INIT                     starter/source/materials/fail/fail_init.F
 Chd|        FILL_BUFFER_51_0              starter/source/materials/mat/mat051/fill_buffer_51_0.F
 Chd|        FUNC_COMP                     starter/source/materials/mat/mat076/law76_upd.F
 Chd|        HM_READ_MAT                   starter/source/materials/mat/hm_read_mat.F
@@ -49,6 +49,7 @@ Chd|        HM_READ_MAT119                starter/source/materials/mat/mat119/hm
 Chd|        HM_READ_MAT12                 starter/source/materials/mat/mat012/hm_read_mat12.F
 Chd|        HM_READ_MAT120                starter/source/materials/mat/mat120/hm_read_mat120.F
 Chd|        HM_READ_MAT121                starter/source/materials/mat/mat121/hm_read_mat121.F
+Chd|        HM_READ_MAT122                starter/source/materials/mat/mat122/hm_read_mat122.F
 Chd|        HM_READ_MAT124                starter/source/materials/mat/mat124/hm_read_mat124.F
 Chd|        HM_READ_MAT13                 starter/source/materials/mat/mat013/hm_read_mat13.F
 Chd|        HM_READ_MAT14                 starter/source/materials/mat/mat014/hm_read_mat14.F
@@ -69,7 +70,7 @@ Chd|        HM_READ_MAT36                 starter/source/materials/mat/mat036/hm
 Chd|        HM_READ_MAT37                 starter/source/materials/mat/mat037/hm_read_mat37.F
 Chd|        HM_READ_MAT38                 starter/source/materials/mat/mat038/hm_read_mat38.F
 Chd|        HM_READ_MAT40                 starter/source/materials/mat/mat040/hm_read_mat40.F
-Chd|        HM_READ_MAT41                 starter/source/materials/mat/mat041/hm_read_mat41.F.F
+Chd|        HM_READ_MAT41                 starter/source/materials/mat/mat041/hm_read_mat41.F
 Chd|        HM_READ_MAT42                 starter/source/materials/mat/mat042/hm_read_mat42.F
 Chd|        HM_READ_MAT43                 starter/source/materials/mat/mat043/hm_read_mat43.F
 Chd|        HM_READ_MAT46                 starter/source/materials/mat/mat046/hm_read_mat46.F
@@ -109,15 +110,14 @@ Chd|        HM_READ_MAT93                 starter/source/materials/mat/mat093/hm
 Chd|        HM_READ_MAT94                 starter/source/materials/mat/mat094/hm_read_mat94.F
 Chd|        HM_READ_MAT95                 starter/source/materials/mat/mat095/hm_read_mat95.F
 Chd|        HM_READ_MAT97                 starter/source/materials/mat/mat097/hm_read_mat97.F
+Chd|        HM_READ_VISC                  starter/source/materials/visc/hm_read_visc.F
 Chd|        INIT_MAT_KEYWORD              starter/source/materials/mat/init_mat_keyword.F
-Chd|        INI_MATPARAM                  starter/source/materials/mat/ini_matparam.F
 Chd|        LAW104_UPD                    starter/source/materials/mat/mat104/law104_upd.F
 Chd|        LAW190_UPD                    starter/source/materials/mat/mat190/law190_upd.F
 Chd|        LAW76_UPD                     starter/source/materials/mat/mat076/law76_upd.F
 Chd|        MATPARAM_R2R_VOID             starter/source/elements/elbuf_init/matparam_r2r_void.F
 Chd|        SGRTAILS                      starter/source/elements/solid/solide/sgrtails.F
 Chd|        UPDMAT                        starter/source/materials/updmat.F
-Chd|        WRITE_MATPARAM                starter/source/materials/mat/write_matparam.F
 Chd|        EIG                           engine/stub/eig.F             
 Chd|        EIG1                          engine/stub/eig1.F            
 Chd|        EIGP                          engine/stub/eigp.F            
@@ -128,21 +128,24 @@ Chd|        HIST2                         engine/source/output/th/hist2.F
 Chd|        IMP_BUCK                      engine/source/implicit/imp_buck.F
 Chd|        S4VOLN_M                      engine/source/elements/solid/solide4_sfem/s4voln_m.F
 Chd|        SIGEPS190                     engine/source/materials/mat/mat190/sigeps190.F
+Chd|        SIGEPS25C                     engine/source/materials/mat/mat025/sigeps25c.F
+Chd|        SIGEPS66C                     engine/source/materials/mat/mat066/sigeps66c.F
 Chd|        SIGEPS76                      engine/source/materials/mat/mat076/sigeps76.F
 Chd|        SIGEPS76C                     engine/source/materials/mat/mat076/sigeps76c.F
 Chd|        SORTIE_MAIN                   engine/source/output/sortie_main.F
 Chd|        TENSORC                       engine/source/output/anim/generate/tensorc.F
 Chd|        THCOQ                         engine/source/output/th/thcoq.F
-Chd|        WRITE_MATPARAM                engine/source/output/restart/write_matparam.F
 Chd|-- calls ---------------
 Chd|        FAIL_PARAM_MOD                modules/mat_elem/fail_param_mod.F
 Chd|        NAMES_AND_TITLES_MOD          modules/names_and_titles_mod.F
 Chd|        TABLE_MOD                     starter/share/modules1/table_mod.F
 Chd|        TABLE_MOD                     engine/share/modules/table_mod.F
+Chd|        VISC_PARAM_MOD                modules/mat_elem/visc_param_mod.F
 Chd|====================================================================
       MODULE MATPARAM_DEF_MOD
 c
       USE TABLE_MOD
+      USE VISC_PARAM_MOD
       USE FAIL_PARAM_MOD
       USE NAMES_AND_TITLES_MOD
 C----------------------------------------------------------------------- 
@@ -153,19 +156,16 @@ c allocatable dimension : NUMMAT
 c=======================================================================      
 c
       ! list of index values for IPM   (integer array)
-!      INTEGER ,PARAMETER  :: IPM_ISRATE = 3
-!      INTEGER ,PARAMETER  :: IPM_EXPAN  = 218
-!      INTEGER ,PARAMETER  :: IPM_VISC   = 222
-!      INTEGER ,PARAMETER  :: IPM_MATVIS = 222
-!      INTEGER ,PARAMETER  :: IPM_THE    = 21
-!      INTEGER ,PARAMETER  :: IPM_EOS    =
-!      INTEGER ,PARAMETER  :: IPM_TUR    =
-!      INTEGER ,PARAMETER  :: IPM_ALE    =
-!      INTEGER ,PARAMETER  :: IPM_NLOC   =
-!      INTEGER ,PARAMETER  :: IPM_FAILWAVE=
-!      INTEGER ,PARAMETER  :: IPM_XFEM   =
-!      INTEGER ,PARAMETER  :: IPM_ALEFVM =
-!      INTEGER ,PARAMETER  :: IPM_FORMDT =
+!      INTEGER ,PARAMETER  :: IPM_ISRATE  = 3
+!      INTEGER ,PARAMETER  :: IPM_EXPAN   = 218
+!      INTEGER ,PARAMETER  :: IPM_VISC    = 222
+!      INTEGER ,PARAMETER  :: IPM_MATVIS  = 222
+!      INTEGER ,PARAMETER  :: IPM_THE     = 21
+!      INTEGER ,PARAMETER  :: IPM_EOS     =
+!      INTEGER ,PARAMETER  :: IPM_TUR     =
+!      INTEGER ,PARAMETER  :: IPM_ALE     =
+!      INTEGER ,PARAMETER  :: IPM_ALEFVM  =
+!      INTEGER ,PARAMETER  :: IPM_FORMDT  =
 c      
       ! list of index values for PM   (real array)
 !      INTEGER ,PARAMETER  :: PM_RHO    = 1
@@ -184,22 +184,23 @@ c
 !      INTEGER ,PARAMETER  :: PM_G      =
 !      INTEGER ,PARAMETER  :: PM_NU1    =
 !      INTEGER ,PARAMETER  :: PM_STIFF  =
-!      ! size of PM and IPM arrays 
-!      INTEGER ,PARAMETER  :: NPROPM  = 
-!      INTEGER ,PARAMETER  :: NPROPMI = 
+c
 c-----------------------------------------------------------------------      
 c
       TYPE MATPARAM_STRUCT_
       
+        CHARACTER(LEN=NCHARTITLE) :: TITLE  ! Material law title
         INTEGER     :: ILAW                 ! Material law number (type)    
         INTEGER     :: MAT_ID               ! Material law ID   
-        CHARACTER(LEN=NCHARTITLE) :: TITLE  ! Material law title
-        INTEGER     :: NUPARAM
-        INTEGER     :: NIPARAM
-        INTEGER     :: NFUNC
-        INTEGER     :: NTABLE
-        INTEGER     :: NSUBMAT
-        INTEGER     :: NFAIL
+        INTEGER     :: NUPARAM              ! number of real value material paraameters
+        INTEGER     :: NIPARAM              ! number of int value material parameters
+        INTEGER     :: NFUNC                ! number of local functions in material
+        INTEGER     :: NTABLE               ! number of local function tables
+        INTEGER     :: NSUBMAT              ! number of submaterials (multi-mat law51)
+        INTEGER     :: NFAIL                ! number of failure models
+        INTEGER     :: IVISC                ! viscosity model number
+        INTEGER     :: IEOS                 ! eos model number
+        INTEGER     :: ITHERM               ! therm model number                       
         ! -------  material characteristics flags
         INTEGER     :: COMPRESSIBILITY      ! "compressible","incompressible","elasto_plastic"
         INTEGER     :: SMSTR                ! "small_strain", "large_strain"
@@ -207,23 +208,20 @@ c
         INTEGER     :: IPRES                ! "hydrostatic",hydro_eos","hook"
         INTEGER     :: ORTHOTROPY           ! "isotropic", "orthotropic", "anisotropic"
         ! --------------------------------- !  
+        INTEGER     :: NLOC                 ! non-local variable regularization flag
+        INTEGER     :: IFAILWAVE            ! failwave propagation flag
+        INTEGER     :: IXFEM                ! XFEM flag
 c                        
-        my_real  ,DIMENSION(:) ,ALLOCATABLE :: UPARAM           ! NUPARAM
-        my_real  ,DIMENSION(:) ,ALLOCATABLE :: PM               ! NPROPM
-
-        INTEGER  ,DIMENSION(:) ,ALLOCATABLE :: IPARAM           ! NIPARAM
-        INTEGER  ,DIMENSION(:) ,ALLOCATABLE :: IPM              ! NPROPMI
-c
-        INTEGER       ,DIMENSION(:) ,ALLOCATABLE :: IFUNC       ! local functions
+        my_real       ,DIMENSION(:) ,ALLOCATABLE :: UPARAM      ! NUPARAM
+        INTEGER       ,DIMENSION(:) ,ALLOCATABLE :: IPARAM      ! NIPARAM
         TYPE (TTABLE) ,DIMENSION(:) ,ALLOCATABLE :: TABLE       ! local function tables
 c                
-        TYPE (FAIL_PARAM_) ,DIMENSION(:) ,ALLOCATABLE :: FAIL   ! NFAIL
+        TYPE (FAIL_PARAM_) ,DIMENSION(:) ,ALLOCATABLE :: FAIL   ! failure models (NFAIL)
+        TYPE (VISC_PARAM_)                            :: VISC   ! viscosity model          
 
 c        TYPE (EOS_PARAM_)    :: EOS      ! to be defined      
-c        TYPE (VISC_PARAM_)   :: VISC     ! to be defined           
 c        TYPE (THERM_PARAM_)  :: THERM    ! to be defined          
-
-        ! TYPE (SUBMAT_)     ,DIMENSION(:) ,ALLOCATABLE :: SUBMAT  ! multi materials
+c        TYPE (SUBMAT_)  ,DIMENSION(:) ,ALLOCATABLE :: SUBMAT   ! multi materials
 
       END TYPE MATPARAM_STRUCT_
 c

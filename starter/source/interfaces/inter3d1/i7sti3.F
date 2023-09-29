@@ -59,7 +59,8 @@ Chd|====================================================================
      J              IPARTT     ,IPARTP ,IPARTR        )
 C-----------------------------------------------
 C   M o d u l e s
-C----------------------------------------------- 
+C-----------------------------------------------
+      USE MY_ALLOC_MOD 
       USE MESSAGE_MOD
       USE INTBUF_FRIC_MOD
       USE GROUPDEF_MOD
@@ -78,7 +79,6 @@ C-----------------------------------------------
 #include      "scr08_c.inc"
 #include      "scr17_c.inc"
 #include      "units_c.inc"
-#include      "my_allocate.inc"
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
@@ -121,7 +121,7 @@ C-----------------------------------------------
       my_real
      .   DXM, GAPMX, GAPMN, AREA, VOL, DX, GAPM, DDX, 
      .   GAPTMP, GAPSCALE,SX1,SY1,SZ1,SX2,SY2,SZ2,SX3,SY3,SZ3,
-     .   SLSFAC,XL
+     .   SLSFAC,XL,IELEM(2)
       my_real, dimension(:), allocatable :: GAP_S_L_TMP
       INTEGER, DIMENSION(:),ALLOCATABLE  :: TAGELEMS,INDEXE
       DATA JPERM/2,3,4,1/
@@ -392,9 +392,9 @@ C------------------------------------
 C     GAP STIFF FACES MAIN
 C------------------------------------
       IF(NUMELS > 0) THEN
-        MY_ALLOCATE(TAGELEMS,NUMELS)
+        CALL MY_ALLOC(TAGELEMS,NUMELS)
         TAGELEMS = 0
-        MY_ALLOCATE(INDEXE,NUMELS)
+        CALL MY_ALLOC(INDEXE,NUMELS)
         INDEXE = 0
       ENDIF
       NINV = 0
@@ -642,7 +642,7 @@ C       SOLID ELEMENTS
 C----------------------
         CALL INSOL3D(X     ,IRECT ,IXS      ,NINT    ,NELS,INRT,
      .               AREA  ,NOINT ,KNOD2ELS ,NOD2ELS ,0   ,
-     .               IXS10 ,IXS16 ,IXS20    ,TAGELEMS,INDEXE,NINV)
+     .               IXS10 ,IXS16 ,IXS20    ,TAGELEMS,INDEXE,NINV,IELEM)
         !----------------!
         !  NELS > 0      !
         !----------------!
@@ -1265,6 +1265,7 @@ Chd|====================================================================
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
+      USE MY_ALLOC_MOD
 
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s

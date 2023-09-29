@@ -151,7 +151,7 @@ C-----------------------------------------------
      .        IV_LOC, NW_L, ILW, NIMP, ILP, NBE, NAD, NRTS, NRTM,
      .        NNG, IADD, NOD,
      .        ISHIFT, LSHIFT, NADMSR, NADMSR_L, NI, NTY, NI25, NBDDNOR,
-     .        LCSRECT_L, NBDDEDG, NRTM_L, IC, IK0, IKN, IK,IJK
+     .        LCSRECT_L, NBDDEDG, NRTM_L, IC, IK0, IKN, IK,IJK,NB
       LOGICAL PSEARCH
      
       INTEGER SPLIST
@@ -326,7 +326,7 @@ C---------------------------------------------------------------------
       ALLOCATE(NESDVOIS(NSPMD+1))
       ALLOCATE(NPORGEO(NUMGEO))
       ALLOCATE(NPSEGCOM(NSPMD+1))
-      ALLOCATE(PROCNOR(ADDCSRECT(NUMNOR+1)))
+      ALLOCATE(PROCNOR(NBCCNOR))
       ALLOCATE(PROC_REM(NBDDACC+NBDDKIN))
       ALLOCATE(PROC_REM1(NBDDNRBYM))
       ALLOCATE(RG_CUT(NNODL_L))
@@ -781,7 +781,7 @@ C
             ENDIF
           ENDIF
         ENDDO
-Cel tag DD_RBY(3) a negatif pour reperage des rb sans echange.
+C   tag DD_RBY(3) a negatif pour reperage des rb sans echange.
         IF(ISLOCAL==0) DD_RBY2(3,N) = -PMAIN
 C
         K = K + NSL
@@ -887,7 +887,7 @@ C
           ENDIF
         ENDDO
 
-Cel tag DD_RBY(3) a negatif pour reperage des r material sans echange.
+C   tag DD_RBY(3) a negatif pour reperage des r material sans echange.
         IF(ISLOCAL==0) DD_RBYM2(3,N) = -PMAIN
         K = K + NSL
       ENDDO
@@ -1176,7 +1176,7 @@ C
             ENDIF
           ENDIF
         ENDDO
-Cel tag DD_RBY(3) a negatif pour reperage des rb sans echange.
+C   tag DD_RBY(3) a negatif pour reperage des rb sans echange.
         IF(ISLOCAL==0) DD_RBM2(3,N) = -PMAIN
 C
         K = K + NSL
@@ -1703,19 +1703,19 @@ C
         DO NG=1,NGROUP
           JTUR=IPARG(12,NG)
           JTHE=IPARG(13,NG)
-Cel test agrad0
+C   test agrad0
           IF(IPARG(32,NG)+1==PROC) THEN
             NEL = IPARG(2,NG)
             NFT = IPARG(3,NG)
             ITY = IPARG(5,NG)
-Cel voir autres types solides
+C   voir autres types solides
             ISOLNOD = IPARG(28,NG)
-Cel 3D
+C   3D
             IF(ITY==1) THEN
               DO I = 1, NEL
                 IE = I+NFT
                 IE_LOC = CEL(IE)
-Cel IVOIS
+C   IVOIS
                 IAD1 = ALE_CONNECTIVITY%ee_connect%iad_connect(IE)
                 LGTH = ALE_CONNECTIVITY%ee_connect%iad_connect(IE+1)-ALE_CONNECTIVITY%ee_connect%iad_connect(IE)
                 DO J = 1, LGTH
@@ -1753,14 +1753,14 @@ C IV < 0 : SEGMENT INT12
                   END IF
                 END DO
               END DO
-Cel 2D
+C   2D
             ELSEIF(ITY==2) THEN
               DO I = 1, NEL
                 IE = I+NFT
                 IE_LOC = CEL(IE)
                 IAD1 = ALE_CONNECTIVITY%ee_connect%iad_connect(IE)
                 LGTH = ALE_CONNECTIVITY%ee_connect%iad_connect(IE+1)-ALE_CONNECTIVITY%ee_connect%iad_connect(IE)
-Cel IVOIS
+C   IVOIS
                 DO J = 1, LGTH
                   IV = ALE_CONNECTIVITY%ee_connect%connected(IAD1 + J - 1)
                   IF (IV>0) THEN
@@ -1787,14 +1787,14 @@ C no elt frontiere > no elt interne
                   END IF
                 END DO
               END DO
-Cel 2D -> triangles
+C   2D -> triangles
             ELSEIF(ITY==7 .AND. (N2D /= 0 .AND. MULTI_FVM%IS_USED)) THEN
               DO I = 1, NEL
                 IE = I+NFT
                 IE_LOC = CEL(IE)
                 IAD1 = ALE_CONNECTIVITY%ee_connect%iad_connect(IE)
                 LGTH = ALE_CONNECTIVITY%ee_connect%iad_connect(IE+1)-ALE_CONNECTIVITY%ee_connect%iad_connect(IE)
-Cel IVOIS
+C   IVOIS
                 DO J = 1, LGTH
                   IV = ALE_CONNECTIVITY%ee_connect%connected(IAD1 + J - 1)
                   IF (IV>0) THEN
@@ -1829,13 +1829,13 @@ C
             ITY = IPARG(5,NG)
             P = IPARG(32,NG)+1
             IF(P/=PROC) THEN
-Cel voir autres types solides
+C   voir autres types solides
              ISOLNOD = IPARG(28,NG)
-Cel 3D
+C   3D
              IF(ITY==1) THEN
               DO I = 1, NEL
                 IE = I+NFT
-Cel IVOIS
+C   IVOIS
                 IAD1 = ALE_CONNECTIVITY%ee_connect%iad_connect(IE)
                 LGTH = ALE_CONNECTIVITY%ee_connect%iad_connect(IE+1)-ALE_CONNECTIVITY%ee_connect%iad_connect(IE)
                 DO J = 1, LGTH
@@ -2208,7 +2208,7 @@ C
             NRTS  = IPARI(3,N)
             NRTM  = IPARI(4,N)
             DO K=1,NRTM
-Cel TAGE flag servant pour inacti
+C   TAGE flag servant pour inacti
               N1 = INTBUF_TAB(N)%IRECTM(4*(K-1)+1)
               N2 = INTBUF_TAB(N)%IRECTM(4*(K-1)+2)
               N3 = INTBUF_TAB(N)%IRECTM(4*(K-1)+3)
@@ -2471,6 +2471,30 @@ C     Frontiers vs vertices
                 TAG_SM(N4)=NADMSR_L
               END IF
             ENDIF
+            IF(INTERCEP(2,NI)%P(K) > 0.AND.INTERCEP(2,NI)%P(K)/=INTERCEP(1,NI)%P(K)) THEN
+              IF(INTERCEP(2,NI)%P(K)==PROC)THEN
+                N1 = INTBUF_TAB(NI)%ADMSR(4*(K-1)+1)
+                N2 = INTBUF_TAB(NI)%ADMSR(4*(K-1)+2)
+                N3 = INTBUF_TAB(NI)%ADMSR(4*(K-1)+3)
+                N4 = INTBUF_TAB(NI)%ADMSR(4*(K-1)+4) 
+                IF(TAG_SM(N1)==0)THEN
+                  NADMSR_L=NADMSR_L+1
+                  TAG_SM(N1)=NADMSR_L
+                END IF
+                IF(TAG_SM(N2)==0)THEN
+                  NADMSR_L=NADMSR_L+1
+                  TAG_SM(N2)=NADMSR_L
+                END IF
+                IF(TAG_SM(N3)==0)THEN
+                  NADMSR_L=NADMSR_L+1
+                  TAG_SM(N3)=NADMSR_L
+                END IF
+                IF(TAG_SM(N4)==0)THEN
+                  NADMSR_L=NADMSR_L+1
+                  TAG_SM(N4)=NADMSR_L
+                END IF
+              ENDIF 
+            ENDIF      
           ENDDO 
           
           
@@ -2484,9 +2508,7 @@ C     Frontiers vs vertices
           DO I = 1, NADMSR_L         
             N = TAG_MS(I) + ISHIFT
 
-            ADDCSRECT_L(NL+1)=ADDCSRECT_L(NL)+ADDCSRECT(N+1)-ADDCSRECT(N)
-            NL = NL + 1
-
+            NB = 0
             TAGP(1:NSPMD)=0
             DO J = ADDCSRECT(N), ADDCSRECT(N+1)-1
                K = CSRECT(J)
@@ -2499,7 +2521,23 @@ C     Frontiers vs vertices
                ENDIF
                LCSRECT_L = LCSRECT_L + 1
                PROCNOR(LCSRECT_L)=P
+               NB = NB +1
+C
+               P = INTERCEP(2,NI)%P(K)
+               IF(P /=0.AND.P /= INTERCEP(1,NI)%P(K)) THEN
+                 IF(P /= PROC.AND.TAGP(P)==0) THEN
+                   NBDDNOR = NBDDNOR + 1
+                   FR_NOR(LSHIFT+NBDDNOR) = TAG_MS(I)
+                   PROC_REM25(NBDDNOR) = P
+                   TAGP(P)=1
+                 ENDIF
+                 LCSRECT_L = LCSRECT_L + 1
+                 PROCNOR(LCSRECT_L)=P
+                 NB = NB +1
+                ENDIF
             ENDDO
+            ADDCSRECT_L(NL+1)=ADDCSRECT_L(NL)+NB
+            NL = NL + 1
           ENDDO
 C
           DO I = 1, NBDDNOR
@@ -2558,6 +2596,12 @@ C     Frontiers vs edges
               NRTM_L=NRTM_L+1
               TAG_SM(K)=NRTM_L
             ENDIF
+            IF(INTERCEP(2,NI)%P(K) > 0.AND.INTERCEP(2,NI)%P(K)/=INTERCEP(1,NI)%P(K)) THEN
+              IF(INTERCEP(2,NI)%P(K)==PROC)THEN
+                NRTM_L = NRTM_L + 1
+                TAG_SM(K) = NRTM_L
+              ENDIF 
+            ENDIF  
           ENDDO 
                     
           DO I = 1, NRTM 
@@ -2701,7 +2745,7 @@ C
       CALL WRITE_I_C(DD_R2R_ELEM,SDD_R2R_ELEM)
       LEN_IA = LEN_IA + SDD_R2R_ELEM        
       ENDIF
-Csm
+C  
       CALL WRITE_I_C(DD_RBYM,NBDDNRBYM)
       LEN_IA = LEN_IA + NBDDNRBYM
       CALL WRITE_I_C(DD_RBYM2,3*NRBYM)
@@ -2719,7 +2763,7 @@ C
       CALL WRITE_I_C(FR_EDG,2*NBDDEDGT)
       LEN_IA = LEN_IA + 2*NBDDEDGT
       CALL WRITE_I_C(IAD_FREDG,(NSPMD+1)*NINTER25)
-      LEN_IA = LEN_IA + (NSPMD+1)*NINTER25
+      LEN_IA = LEN_IA + (NSPMD+1)*NINTER25      
 C
       IF(NUMSKW>0)THEN
         CALL WRITE_I_C(ISKWP,NUMSKW+1)

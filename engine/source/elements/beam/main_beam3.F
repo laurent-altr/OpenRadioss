@@ -28,7 +28,6 @@ Chd|-- calls ---------------
 Chd|        FAIL_BEAM3                    source/elements/beam/fail_beam3.F
 Chd|        M1LAWP                        source/materials/mat/mat001/m1lawp.F
 Chd|        M2LAWP                        source/materials/mat/mat002/m2lawp.F
-Chd|        PDAMP3                        source/elements/beam/pdamp3.F 
 Chd|        SIGEPS44P                     source/materials/mat/mat044/sigeps44p.F
 Chd|        ELBUFDEF_MOD                  ../common_source/modules/mat_elem/elbufdef_mod.F
 Chd|====================================================================
@@ -42,7 +41,7 @@ Chd|====================================================================
      .       BUFMAT   ,NPROPG   ,NPROPMI  ,NPROPM   ,NUMMAT   ,
      .       NUMGEO   ,SBUFMAT  ,SNPC     ,STF      ,IOUT     ,
      .       ISTDO    ,NUVAR    ,UVAR     ,EPSD     ,IMAT     ,
-     .       FOR      ,MOM      ,EINT     )
+     .       FOR      ,MOM      ,EINT     ,ISMSTR)
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
@@ -70,6 +69,7 @@ C-----------------------------------------------
       INTEGER ,INTENT(IN) :: IOUT
       INTEGER ,INTENT(IN) :: ISTDO
       INTEGER ,INTENT(IN) :: NUVAR
+      INTEGER ,INTENT(IN) :: ISMSTR
       INTEGER ,DIMENSION(SNPC) ,INTENT(IN) :: NPF
       INTEGER ,DIMENSION(NPROPMI,NUMMAT) ,INTENT(IN) :: IPM
       INTEGER ,DIMENSION(NEL) ,INTENT(IN) :: MAT
@@ -119,7 +119,7 @@ c
 c-------------------
 c     STRAIN
 c-------------------
-      DO I=1,NEL
+      DO I=1,NEL       
         EXX(I) = EXX(I) * DTIME
         EXY(I) = EXY(I) * DTIME
         EXZ(I) = EXZ(I) * DTIME
@@ -201,24 +201,28 @@ c
      .              TEMPEL  ,NGL     ,PM      ,IPM     ,
      .              OFF     ,EPSD    ,BUFMAT  ,NPF     ,TF      ,
      .              TIME    ,IOUT    ,ISTDO   ,
-     .              SVM     ,PRESSURE)
+     .              SVM     ,PRESSURE,EINT    ,AREA    ,AL      ,
+     .              F1      ,F2      ,F3      ,M1      ,M2      ,
+     .              M3      ,ISMSTR  ,EXX      )
       END IF
 C-------------------------------------
-      DO I = 1,NEL
-        FOR(I,1) = FOR(I,1)*OFF(I)
-        FOR(I,2) = FOR(I,2)*OFF(I)
-        FOR(I,3) = FOR(I,3)*OFF(I)
-        MOM(I,1) = MOM(I,1)*OFF(I)
-        MOM(I,2) = MOM(I,2)*OFF(I)
-        MOM(I,3) = MOM(I,3)*OFF(I)
+      DO I=1,NEL
+        FOR(I,1)=F1(I)*OFF(I)
+        FOR(I,2)=FOR(I,2)*OFF(I)
+        FOR(I,3)=FOR(I,3)*OFF(I)
+        MOM(I,1)=M1(I)*OFF(I)
+        MOM(I,2)=M2(I)*OFF(I)
+        MOM(I,3)=M3(I)*OFF(I)
       ENDDO
-c---------------------------
-c     element damping
-c---------------------------
-      CALL PDAMP3(PM      ,GEO     ,OFF     ,IMAT    ,IPID ,
-     .            NEL     ,NGL     ,EXX     ,EXY     ,EXZ  ,
-     .            KXX     ,KYY     ,KZZ     ,AL      ,F1   ,
-     .            F2      ,F3      ,M1      ,M2      ,M3   )
+C
+      DO I=1,NEL
+        F1(I) =  FOR(I,1)
+        F2(I) =  FOR(I,2) 
+        F3(I) =  FOR(I,3)  
+        M1(I) =  MOM(I,1) 
+        M2(I) =  MOM(I,2) 
+        M3(I) =  MOM(I,3) 
+      ENDDO               
 C-----------------------------------------------
       RETURN
       END SUBROUTINE MAIN_BEAM3

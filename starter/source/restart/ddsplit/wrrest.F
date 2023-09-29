@@ -57,10 +57,12 @@ Chd|        TABLE_WRESTR_MAT              source/tools/curve/table_tools.F
 Chd|        THCWREST                      source/restart/ddsplit/wrrest.F
 Chd|        WRITE_DB_DEBUG                source/output/tools/write_debug.F
 Chd|        WRITE_ELGROUP_PARAM           source/restart/ddsplit/write_elgroup_param.F
+Chd|        WRITE_FAILPARAM               source/materials/fail/write_failparam.F
 Chd|        WRITE_MATPARAM                source/materials/mat/write_matparam.F
 Chd|        WRITE_NLOC_STRUCT             source/restart/ddsplit/write_nloc_struct.F
 Chd|        WRITE_PCYL                    source/loads/general/load_pcyl/write_pcyl.F
 Chd|        WRITE_SENSORS                 source/tools/sensor/write_sensors.F
+Chd|        WRITE_VISCPARAM               source/materials/mat/write_viscparam.F
 Chd|        W_ALELAG                      source/restart/ddsplit/w_alelag.F
 Chd|        W_ANIM_CRK                    source/restart/ddsplit/w_anim_crk.F
 Chd|        W_AVUPLY                      source/restart/ddsplit/w_avuply.F

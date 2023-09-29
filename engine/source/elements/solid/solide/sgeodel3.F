@@ -35,7 +35,10 @@ Chd|-- calls ---------------
 Chd|        DT_MOD                        share/modules/dt_mod.F        
 Chd|        MESSAGE_MOD                   share/message_module/message_mod.F
 Chd|====================================================================
-      SUBROUTINE SGEODEL3(NGL, OFFG ,VOLG ,DELTAX, VOLG0 ,GEO ,L_MAX,DT,NEL)
+      SUBROUTINE SGEODEL3(
+     1   NGL,     OFFG,    VOLG,    DELTAX,
+     2   VOLG0,   GEO,     L_MAX,   DT,
+     3   NEL,     IDEL7NOK)
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
@@ -55,6 +58,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
+      INTEGER, INTENT(INOUT) :: IDEL7NOK
       INTEGER ,INTENT(IN)  :: NEL
       INTEGER ,DIMENSION(MVSIZ) ,INTENT(IN)  :: NGL
       my_real, DIMENSION(NPROPG) , INTENT(IN)  :: GEO 
@@ -110,7 +114,7 @@ C
          OFFG(I) = ZERO
          ICOUNT=ICOUNT+1
          LIST(ICOUNT)=I
-        END IF	
+        END IF
        END DO
        IF (ICOUNT > 0) THEN
 #include "lockon.inc"
@@ -124,6 +128,7 @@ C
          WRITE(IOUT,*)
          WRITE(ISTDO,*)
 #include "lockoff.inc"
+         IDEL7NOK = 1
        END IF !(ICOUNT > 0) THEN
       END IF 
 C       
@@ -135,7 +140,7 @@ C
          OFFG(I) = ZERO
          ICOUNT=ICOUNT+1
          LIST(ICOUNT)=I
-        END IF	
+        END IF
        END DO
         IF (ICOUNT > 0) THEN
 #include "lockon.inc"
@@ -149,6 +154,7 @@ C
          WRITE(IOUT,*)
          WRITE(ISTDO,*)
 #include "lockoff.inc"
+         IDEL7NOK = 1
         END IF !(ICOUNT > 0) THEN
       END IF 
 C--- Hexa : APS_r=lmax/lmin lmax~sqrt(Amax); lmin~lc & V~ lc*Amax -> 
@@ -177,7 +183,7 @@ C---        APS_r~sqrt(Amax/lc^2)=sqrt(V/lc^3) ; now we compute L_max for Hexa
             OFFG(I) = ZERO
             ICOUNT=ICOUNT+1
             LIST(ICOUNT)=I
-           END IF	
+           END IF
           END DO
           IF (ICOUNT > 0) THEN
 #include "lockon.inc"
@@ -191,6 +197,7 @@ C---        APS_r~sqrt(Amax/lc^2)=sqrt(V/lc^3) ; now we compute L_max for Hexa
              WRITE(IOUT,*)
              WRITE(ISTDO,*)
 #include "lockoff.inc"
+            IDEL7NOK = 1
           END IF !(ICOUNT > 0) THEN
         END IF
 C
@@ -205,7 +212,7 @@ C---        TET_c =1/ASP_r
             OFFG(I) = ZERO
             ICOUNT=ICOUNT+1
             LIST(ICOUNT)=I
-           END IF	
+           END IF
           END DO
           IF (ICOUNT > 0) THEN
 #include "lockon.inc"
@@ -219,6 +226,7 @@ C---        TET_c =1/ASP_r
             WRITE(IOUT,*)
             WRITE(ISTDO,*)
 #include "lockoff.inc"
+            IDEL7NOK = 1
           END IF !(ICOUNT > 0) THEN
         END IF
 C

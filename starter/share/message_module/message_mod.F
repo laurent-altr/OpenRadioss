@@ -26,6 +26,9 @@ Chd|-- called by -----------
 Chd|        INTBUF_INI                    ../common_source/interf/intbuf_ini.F
 Chd|        PBLAST_DEALLOCATE             ../common_source/modules/loads/pblast_mod.F
 Chd|        PBLAST_LOAD                   ../common_source/modules/loads/pblast_mod.F
+Chd|        PBLAST_PARAMETERS__AIR_BURST  ../common_source/modules/loads/pblast_mod.F
+Chd|        PBLAST_PARAMETERS__FREE_AIR   ../common_source/modules/loads/pblast_mod.F
+Chd|        PBLAST_PARAMETERS__SURFACE_BURST../common_source/modules/loads/pblast_mod.F
 Chd|        PBLAST_WRITE_ENGINE           ../common_source/modules/loads/pblast_mod.F
 Chd|        PBLAST_WRITE_STARTER          ../common_source/modules/loads/pblast_mod.F
 Chd|        PLOT_CURVE                    ../common_source/sortie/plot_curve.F
@@ -89,6 +92,7 @@ Chd|        CHECKMP                       source/elements/initia/initia.F
 Chd|        CHECKRBY                      source/constraints/general/rbody/checkrby.F
 Chd|        CHECK_DYNAIN                  source/starter/check_dynain.F 
 Chd|        CHECK_ELTYP                   source/model/sets/check_eltyp.F
+Chd|        CHECK_PTHICKFAIL              source/materials/fail/check_pthickfail.F
 Chd|        CHECK_SURF                    source/groups/check_surf.F    
 Chd|        CHEKMP2                       source/elements/initia/initia.F
 Chd|        CHKFUNCT                      source/tools/curve/lecfun.F   
@@ -470,6 +474,7 @@ Chd|        HM_READ_MAT11_K_EPS           source/materials/mat/mat011/hm_read_ma
 Chd|        HM_READ_MAT12                 source/materials/mat/mat012/hm_read_mat12.F
 Chd|        HM_READ_MAT120                source/materials/mat/mat120/hm_read_mat120.F
 Chd|        HM_READ_MAT121                source/materials/mat/mat121/hm_read_mat121.F
+Chd|        HM_READ_MAT122                source/materials/mat/mat122/hm_read_mat122.F
 Chd|        HM_READ_MAT124                source/materials/mat/mat124/hm_read_mat124.F
 Chd|        HM_READ_MAT13                 source/materials/mat/mat013/hm_read_mat13.F
 Chd|        HM_READ_MAT14                 source/materials/mat/mat014/hm_read_mat14.F
@@ -1045,6 +1050,7 @@ Chd|        R_YLD2000                     source/materials/mat/mat087/law87_upd.
 Chd|        S10COOR3                      source/elements/solid/solide10/s10coor3.F
 Chd|        S10COOR3_OLD                  source/elements/solid/solide10/s10coor3.F
 Chd|        S10DERI3                      source/elements/solid/solide10/s10deri3.F
+Chd|        S10EDG_RLINK                  source/elements/solid/solide10/s10edg_rlink.F
 Chd|        S10INIT3                      source/elements/solid/solide10/s10init3.F
 Chd|        S16COOR3                      source/elements/thickshell/solide16/s16coor3.F
 Chd|        S16DERI3                      source/elements/thickshell/solide16/s16deri3.F

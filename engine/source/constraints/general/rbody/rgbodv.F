@@ -105,8 +105,8 @@ C
         AM1 = A(1,M)
         AM2 = A(2,M)
         AM3 = A(3,M)
-Cel vectorisation si nsn>=10 ou si p/on active
-Cel sinon attention aux differences en mode vectoriel !
+C   vectorisation si nsn>=10 ou si p/on active
+C   sinon attention aux differences en mode vectoriel !
         IF (NSN>=10.OR.IPARIT>0) THEN
           DO I=1,NSN
             N = NOD(I)
@@ -167,8 +167,8 @@ C
         AM1 = ZERO
         AM2 = A(2,M)
         AM3 = A(3,M)
-Cel vectorisation si nsn>=10 ou si p/on active
-Cel sinon attention aux differences en mode vectoriel !
+C   vectorisation si nsn>=10 ou si p/on active
+C   sinon attention aux differences en mode vectoriel !
         IF (NSN>=10.OR.IPARIT>0) THEN
          DO I=1,NSN
            N = NOD(I)
@@ -208,8 +208,8 @@ C
         AM1 = ZERO
         AM2 = A(2,M)
         AM3 = A(3,M)
-Cel vectorisation si nsn>=10 ou si p/on active
-Cel sinon attention aux differences en mode vectoriel !
+C   vectorisation si nsn>=10 ou si p/on active
+C   sinon attention aux differences en mode vectoriel !
         IF (NSN>=10.OR.IPARIT>0) THEN
          DO I=1,NSN
            N = NOD(I)
@@ -257,8 +257,8 @@ C-----------------------------------------------
 C     Reaction forces and/or failure
 C       Note : At this stage, Freac contains Fint+Fext+Fcont (Freac has not been finalized yet)
 C-----------------------------------------------
-      MY_ALLOCATE2D(R ,3,NSN)
-      MY_ALLOCATE2D(RR,3,NSN)
+      ALLOCATE(R (3,NSN))
+      ALLOCATE(RR(3,NSN))
 C
       DO I=1,NSN
         N = NOD(I)

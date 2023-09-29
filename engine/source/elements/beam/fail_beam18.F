@@ -25,15 +25,18 @@ Chd|  FAIL_BEAM18                   source/elements/beam/fail_beam18.F
 Chd|-- called by -----------
 Chd|        MAIN_BEAM18                   source/elements/beam/main_beam18.F
 Chd|-- calls ---------------
+Chd|        FAIL_ENERGY_IB                source/materials/fail/energy/fail_energy_ib.F
 Chd|        FAIL_JOHNSON_IB               source/materials/fail/johnson_cook/fail_johnson_ib.F
+Chd|        FAIL_TENSSTRAIN_IB            source/materials/fail/tensstrain/fail_tensstrain_ib.F
 Chd|        ELBUFDEF_MOD                  ../common_source/modules/mat_elem/elbufdef_mod.F
 Chd|====================================================================
       SUBROUTINE FAIL_BEAM18(ELBUF_STR,NUMMAT   ,NUMGEO   ,NPROPM   ,
      .                       NPROPMI  ,NPROPG   ,SBUFMAT  ,SNPC     ,STF     ,
      .                       NEL      ,NPT      ,IMAT     ,IPROP    ,JTHE    ,
      .                       TEMPEL   ,NGL      ,PM       ,IPM      ,GEO     ,
-     .                       OFF      ,EPSP     ,BUFMAT   ,NPF      ,TF      ,
-     .                       DPLA     ,EINT     ,TIME     ,IOUT     ,ISTDO    )
+     .                       OFF      ,EPSD     ,BUFMAT   ,NPF      ,TF      ,
+     .                       DPLA     ,EINT     ,TIME     ,IOUT     ,ISTDO   ,
+     .                       AL       ,AREA     ,ISMSTR)
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
@@ -64,6 +67,7 @@ C-----------------------------------------------
       INTEGER ,INTENT(IN) :: STF   
       INTEGER ,INTENT(IN) :: IOUT       ! output file unit
       INTEGER ,INTENT(IN) :: ISTDO      ! output file unit
+      INTEGER ,INTENT(IN) :: ISMSTR 
       INTEGER ,DIMENSION(SNPC) ,INTENT(IN) :: NPF
       INTEGER ,DIMENSION(NEL)  ,INTENT(IN) :: NGL   ! table of element identifiers
       INTEGER ,DIMENSION(NPROPMI,NUMMAT) ,INTENT(IN)    :: IPM
@@ -71,11 +75,14 @@ C-----------------------------------------------
       my_real ,DIMENSION(NPROPM ,NUMMAT) ,INTENT(IN)    :: PM
       my_real ,DIMENSION(NPROPG ,NUMGEO) ,INTENT(IN)    :: GEO
       my_real ,DIMENSION(SBUFMAT)        ,INTENT(IN)    :: BUFMAT
-      my_real ,DIMENSION(NEL)            ,INTENT(IN)    :: EPSP
+      my_real ,DIMENSION(NEL)            ,INTENT(IN)    :: EPSD
+      my_real ,DIMENSION(NEL)            ,INTENT(IN)    :: AL
+      my_real ,DIMENSION(NEL)            ,INTENT(IN)    :: AREA
       my_real ,DIMENSION(NEL)            ,INTENT(IN)    :: TEMPEL
       my_real ,DIMENSION(NEL,2)          ,INTENT(IN)    :: EINT
       my_real ,DIMENSION(STF)            ,INTENT(IN)    :: TF
       my_real ,DIMENSION(NEL)            ,INTENT(INOUT) :: OFF
+
       my_real ,DIMENSION(NEL,NPT) ,INTENT(IN) :: DPLA
 C
       TYPE (ELBUF_STRUCT_), INTENT(INOUT) :: ELBUF_STR
@@ -132,6 +139,7 @@ C---------------------------------------
         DFMAX  => FBUF%FLOC(IFL)%DAMMX 
         TDEL   => FBUF%FLOC(IFL)%TDEL   
         FOFF   => FBUF%FLOC(IFL)%OFF
+        
 c
 C---    Coordinates of integration points
         DO I=1,NEL                                 
@@ -156,6 +164,7 @@ c------------------------------------
         SELECT CASE (IRUPT)                                            
 c------------------------------------            
 c
+c--------------- 
         CASE (1)     !    Johnson-Cook                                                   
           !  Tstar computation for Jhonson-Cook failure : T* = (T-T0)/(TM-T0)
           IF (JTHE > 0) THEN
@@ -167,18 +176,46 @@ c
           ELSE
             TSTAR(1:NEL) = ZERO
           ENDIF
-
           CALL FAIL_JOHNSON_IB(
      .         NEL       ,NGL       ,IPT       ,NPARAM    ,UPARAMF   ,
      .         TIME      ,TSTAR     ,SIGNXX    ,SIGNXY    ,SIGNXZ    ,
-     .         DPLA      ,EPSP      ,OFF       ,FOFF      ,DFMAX     ,
+     .         DPLA      ,EPSD      ,OFF       ,FOFF      ,DFMAX     ,
      .         TDEL      ,IOUT      ,ISTDO     )
-c
           DO I= 1,NEL
             IF (FOFF(I) == 0) COUNT(I) = COUNT(I) + 1
           END DO
+c---------------          
+        CASE (10)     !    Tension Strain failure model
+          IF (JTHE > 0) THEN
+            T0 = PM(79, IMAT) 
+            TM = PM(80, IMAT) 
+            DO I=1,NEL  
+              TSTAR(I) = MAX(ZERO,(TEMPEL(I)-T0)/(TM-T0))
+            ENDDO
+          ELSE
+            TSTAR(1:NEL) = ZERO
+          ENDIF
+
+          CALL FAIL_TENSSTRAIN_IB(                                         
+     .          NEL      ,NGL      ,NPARAM   ,UPARAMF ,
+     .          TIME     ,EPSD     ,OFF      ,DFMAX,                        
+     .          TDEL     ,IOUT     ,ISTDO    ,IFUNC   ,
+     .          EPSXX    ,AL       ,TSTAR    ,LBUF%DMGSCL ,
+     .          SNPC     ,NPF      ,STF      ,UVARF  ,NVARF,
+     .          TF       ,IPT      ,FOFF   ,ISMSTR)
+c---------------  
+        CASE (11)     ! Energy failure model                                           
+          CALL FAIL_ENERGY_IB(
+     .          NEL      ,NGL      ,NPARAM   ,UPARAMF ,
+     .          TIME     ,EPSD     ,OFF      ,DFMAX,                        
+     .          TDEL     ,IOUT     ,ISTDO    ,IFUNC   ,
+     .          EINT     ,AREA     ,AL       ,LBUF%DMGSCL ,
+     .          SNPC     ,NPF      ,STF     ,
+     .          TF,IPT)
+
 c-------------
         END SELECT
+
 C-------------------------------------
       ENDDO   ! IPT = 1,NPT :  END LOOP OVER INTEGRATION POINTS
 c-------------------------------------

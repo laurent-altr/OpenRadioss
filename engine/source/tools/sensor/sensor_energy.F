@@ -65,30 +65,29 @@ C----------------------------------------------------------
 C Local Variables
 C----------------------------------------------------------
       INTEGER :: I,J,IPART,ISUBS,NBR_GROUP,NP,INDX,ITSK,IFLAG,ICONST,
-     .           NI,NK,ICRIT,ICRIT1,ICRIT2
+     .           NI,NK,ICRIT,ICRIT1,ICRIT2,ISELECT
       my_real :: TMIN,TDELAY,TSTART,TSTOPS,IEMIN,TCRIT,
      .   EINT,EKIN,IEMAX,KEMIN,KEMAX,IETOL,IETIME,KETOL,KETIME,
-     .   AVG_EI1,AVG_EI2,AVG_EK1,AVG_EK2,FAC_EI,FAC_EK,
-     .   EMA_INT,EMVAR_INT,EMA_KIN,EMVAR_KIN,DIFF,
-     .   INCR,MEAN,EVAR_INT,EVAR_KIN,ALPHAI,BETAI,ALPHAK,BETAK,INFINITY
+     .   AVG_EI,AVG_EK,ALPHAI,ALPHAK,INFINITY
       PARAMETER (INFINITY = 1.0E20)
 c----------------------------------------------------------
 c    SENSOR%VAR(1)   = TCRIT1 
 c    SENSOR%VAR(2)   = TSTART1
 c    SENSOR%VAR(3)   = TCRIT2 
 c    SENSOR%VAR(4)   = TSTART2
-c    SENSOR%VAR(5)   = ALPHA_I
-c    SENSOR%VAR(6)   = Mean  EI
-c    SENSOR%VAR(7)   = Stdev EI
-c    SENSOR%VAR(8)   = ALPHA_K
-c    SENSOR%VAR(9)   = Mean  EK
-c    SENSOR%VAR(10)  = Stdev EK
+c    SENSOR%VAR(5)   = Mean  EI
+c    SENSOR%VAR(6)   = Mean  EK
+c    SENSOR%VAR(7)   = Alphai
+c    SENSOR%VAR(8)   = Alphak
+c    SENSOR%VAR(9)   = current total internal energy
+c    SENSOR%VAR(10)  = current total kinetic energy
 C=======================================================================
       IF (SENSOR%STATUS == 1) RETURN   ! already activated
 c
-      IPART  = SENSOR%IPARAM(1)    ! LSENS1(4)
-      ISUBS  = SENSOR%IPARAM(2)    ! LSENS1(5)
+      IPART  = SENSOR%IPARAM(1)
+      ISUBS  = SENSOR%IPARAM(2)
       ICONST = SENSOR%IPARAM(3)
+      ISELECT= SENSOR%IPARAM(4)  ! Iselect == 2 => sensor will take total system energy
 c      
       TDELAY = SENSOR%TDELAY
       TMIN   = SENSOR%TMIN
@@ -110,50 +109,56 @@ c
       ICRIT2 = 0
       IFLAG  = 0
 c---------------------------------------------------------
-c     PARITH ON
+c     Fetch current energy values
 c---------------------------------------------------------
-      IF (IPARIT > 0) THEN
-        EINT = ZERO
-        EKIN = ZERO
-        NBR_GROUP = SENSOR_STRUCT(ISENS)%NUM_GROUP_PART
-        DO ITSK=2,NTHREAD
-          SENSOR_STRUCT(ISENS)%FBSAV6_SENS(1,1:6,1) = 
-     .    SENSOR_STRUCT(ISENS)%FBSAV6_SENS(1,1:6,1) + 
-     .    SENSOR_STRUCT(ISENS)%FBSAV6_SENS(1,1:6,ITSK)
-          SENSOR_STRUCT(ISENS)%FBSAV6_SENS(2,1:6,1) = 
-     .    SENSOR_STRUCT(ISENS)%FBSAV6_SENS(2,1:6,1) + 
-     .    SENSOR_STRUCT(ISENS)%FBSAV6_SENS(2,1:6,ITSK)
-        ENDDO     
-
-        DO J=2,6
-          SENSOR_STRUCT(ISENS)%FBSAV6_SENS(1,1,1) = 
-     .    SENSOR_STRUCT(ISENS)%FBSAV6_SENS(1,1,1) + SENSOR_STRUCT(ISENS)%FBSAV6_SENS(1,J,1)
-          SENSOR_STRUCT(ISENS)%FBSAV6_SENS(2,1,1) = 
-     .    SENSOR_STRUCT(ISENS)%FBSAV6_SENS(2,1,1) + SENSOR_STRUCT(ISENS)%FBSAV6_SENS(2,J,1)
-        ENDDO 
-        EINT = SENSOR_STRUCT(ISENS)%FBSAV6_SENS(1,1,1)
-        EKIN = SENSOR_STRUCT(ISENS)%FBSAV6_SENS(2,1,1)
       
-        DO ITSK=1,NTHREAD
-          DO J=1,6
-            SENSOR_STRUCT(ISENS)%FBSAV6_SENS(1,J,ITSK) = ZERO    
-            SENSOR_STRUCT(ISENS)%FBSAV6_SENS(2,J,ITSK) = ZERO        
+      IF (ISELECT == 2) THEN  ! total system energy
+        EINT = SENSOR%VAR(9)
+        EKIN = SENSOR%VAR(10)
+      ELSE                    ! PART / SUBSET energy
+        IF (IPARIT > 0) THEN
+          EINT = ZERO
+          EKIN = ZERO
+          NBR_GROUP = SENSOR_STRUCT(ISENS)%NUM_GROUP_PART
+          DO ITSK=2,NTHREAD
+            SENSOR_STRUCT(ISENS)%FBSAV6_SENS(1,1:6,1) = 
+     .      SENSOR_STRUCT(ISENS)%FBSAV6_SENS(1,1:6,1) + 
+     .      SENSOR_STRUCT(ISENS)%FBSAV6_SENS(1,1:6,ITSK)
+            SENSOR_STRUCT(ISENS)%FBSAV6_SENS(2,1:6,1) = 
+     .      SENSOR_STRUCT(ISENS)%FBSAV6_SENS(2,1:6,1) + 
+     .      SENSOR_STRUCT(ISENS)%FBSAV6_SENS(2,1:6,ITSK)
+          ENDDO     
+
+          DO J=2,6
+            SENSOR_STRUCT(ISENS)%FBSAV6_SENS(1,1,1) = 
+     .      SENSOR_STRUCT(ISENS)%FBSAV6_SENS(1,1,1) + SENSOR_STRUCT(ISENS)%FBSAV6_SENS(1,J,1)
+            SENSOR_STRUCT(ISENS)%FBSAV6_SENS(2,1,1) = 
+     .      SENSOR_STRUCT(ISENS)%FBSAV6_SENS(2,1,1) + SENSOR_STRUCT(ISENS)%FBSAV6_SENS(2,J,1)
+          ENDDO 
+          EINT = SENSOR_STRUCT(ISENS)%FBSAV6_SENS(1,1,1)
+          EKIN = SENSOR_STRUCT(ISENS)%FBSAV6_SENS(2,1,1)
+      
+          DO ITSK=1,NTHREAD
+            DO J=1,6
+              SENSOR_STRUCT(ISENS)%FBSAV6_SENS(1,J,ITSK) = ZERO    
+              SENSOR_STRUCT(ISENS)%FBSAV6_SENS(2,J,ITSK) = ZERO        
+            ENDDO
           ENDDO
-        ENDDO
-      ELSE    ! PARTTH/OFF
-        EINT = ZERO
-        EKIN = ZERO
-        IF (IPART > 0) THEN
-          EINT = PARTSAV2(1,IPART)
-          EKIN = PARTSAV2(2,IPART)
-        ELSEIF (ISUBS > 0) THEN
-          NP = SUBSET(ISUBS)%NTPART
-          DO J=1,NP
-            IPART= SUBSET(ISUBS)%TPART(J)
-            EINT = EINT + PARTSAV2(1,IPART)
-            EKIN = EKIN + PARTSAV2(2,IPART)
-          ENDDO
-        ENDIF ! IF (IPART > 0)
+        ELSE    ! PARTTH/OFF
+          EINT = ZERO
+          EKIN = ZERO
+          IF (IPART > 0) THEN
+            EINT = PARTSAV2(1,IPART)
+            EKIN = PARTSAV2(2,IPART)
+          ELSEIF (ISUBS > 0) THEN
+            NP = SUBSET(ISUBS)%NTPART
+            DO J=1,NP
+              IPART= SUBSET(ISUBS)%TPART(J)
+              EINT = EINT + PARTSAV2(1,IPART)
+              EKIN = EKIN + PARTSAV2(2,IPART)
+            ENDDO
+          ENDIF ! IF (IPART > 0)
+        ENDIF
       ENDIF
 c---------------------------------------------------------
 c     TEST of principal criterion (Emax, Emin)
@@ -204,43 +209,32 @@ c---------------------------------------------------------
 c     TEST of constant internal energy criterion
 c---------------------------------------------------------
       IF (ICONST == 1) THEN
-        FAC_EI = INFINITY
-        FAC_EK = INFINITY
         IF (TT == ZERO) THEN
           NI = NINT(IETIME / DT2) + 1
           NK = NINT(KETIME / DT2) + 1
-          SENSOR%VAR(5) = MAX(ZERO ,MIN(ONE ,TWO / NI))   ! ALPHAI
-          SENSOR%VAR(8) = MAX(ZERO ,MIN(ONE ,TWO / NK))   ! ALPHAK
           SENSOR%VAR(1) = INFINITY   ! TACT1
           SENSOR%VAR(2) = INFINITY   ! TSTART1
           SENSOR%VAR(3) = INFINITY   ! TACT2
           SENSOR%VAR(4) = INFINITY   ! TSTART2
+          SENSOR%VAR(7) = MAX(ZERO ,MIN(ONE ,TWO / NI))
+          SENSOR%VAR(8) = MAX(ZERO ,MIN(ONE ,TWO / NK))
         END IF
 c
         IF (EINT > ZERO .and. IETOL > ZERO) THEN
-          ALPHAI   = SENSOR%VAR(5)
-          EMA_INT  = SENSOR%VAR(6)
-          EVAR_INT = SENSOR%VAR(7)
-          BETAI  = (ONE - ALPHAI)
-          DIFF = EINT - EMA_INT
-c        
-          EMA_INT  = ALPHAI*EINT + BETAI*EMA_INT
-          EVAR_INT = BETAI*(EVAR_INT + ALPHAI*DIFF**2)
-          FAC_EI = SQRT(EVAR_INT) / EMA_INT
-c
-          SENSOR%VAR(6) = EMA_INT
-          SENSOR%VAR(7) = EVAR_INT
+          ALPHAI = SENSOR%VAR(7)
+          AVG_EI = ALPHAI*EINT + (ONE - ALPHAI) * SENSOR%VAR(5)
+          SENSOR%VAR(5) = AVG_EI
         END IF
 c
 c       Test sensor activation on constant internal energy criterion
 c
-        IF (FAC_EI < IETOL) ICRIT1 = 1
+        IF (EINT > ZERO .and. EINT < AVG_EI + IETOL .and. EINT > AVG_EI - IETOL) ICRIT1 = 1
 c
         IF (SENSOR%VAR(1) > TT) THEN
           IF (ICRIT1 == 0) THEN
             SENSOR%VAR(1) = INFINITY
           ELSE IF (SENSOR%VAR(1) == INFINITY) THEN
-            SENSOR%VAR(1) = MIN(SENSOR%VAR(1), TT)
+            SENSOR%VAR(1) = TT + IETIME
           END IF
         ELSE IF (SENSOR%VAR(2) == INFINITY) THEN
           SENSOR%VAR(2) = SENSOR%VAR(1) + TDELAY
@@ -254,7 +248,7 @@ c
 #include "lockon.inc"
           WRITE (ISTDO,1000 ) SENSOR%SENS_ID,TT
           WRITE (IOUT ,1000 ) SENSOR%SENS_ID,TT
-          WRITE (IOUT ,2100)  EINT,EMA_INT,SQRT(EVAR_INT)
+          WRITE (IOUT ,2100)  EINT,AVG_EI
 #include "lockoff.inc"
         END IF
 c
@@ -262,27 +256,20 @@ c---------------------------------------------------------
 c       Test sensor activation on constant kinetic energy criterion
 c---------------------------------------------------------
         IF (EKIN > ZERO .and. KETOL > ZERO) THEN
-          ALPHAK   = SENSOR%VAR(8)
-          EMA_KIN  = SENSOR%VAR(9)
-          EVAR_KIN = SENSOR%VAR(10)
-          BETAK  = (ONE - ALPHAK)
-          DIFF = EKIN - EMA_KIN
-c       
-          EMA_KIN  = ALPHAK*EKIN + BETAK*EMA_KIN
-          EVAR_KIN = BETAK*(EVAR_KIN + ALPHAK*DIFF**2)
-          FAC_EK = SQRT(EVAR_KIN) / EMA_KIN
-c
-          SENSOR%VAR(9)  = EMA_KIN
-          SENSOR%VAR(10) = EVAR_KIN
+          ALPHAK = SENSOR%VAR(8)
+          AVG_EK = ALPHAK*EKIN + (ONE - ALPHAK) * SENSOR%VAR(6)
+          SENSOR%VAR(6) = AVG_EK
         END IF
 
-        IF (FAC_EK < KETOL) ICRIT2 = 1
+        IF (EKIN > ZERO .and. EKIN < AVG_EK + KETOL .and. EKIN > AVG_EK - KETOL) THEN
+          ICRIT2 = 1
+        END IF
 c
         IF (SENSOR%VAR(3) > TT) THEN
           IF (ICRIT2 == 0) THEN
             SENSOR%VAR(3) = INFINITY
           ELSE IF (SENSOR%VAR(3) == INFINITY) THEN
-            SENSOR%VAR(3) = MIN(SENSOR%VAR(3), TT)
+            SENSOR%VAR(3) = TT + KETIME
           END IF
         ELSE IF (SENSOR%VAR(4) == INFINITY) THEN
           SENSOR%VAR(4) = SENSOR%VAR(3) + TDELAY
@@ -296,7 +283,7 @@ c
 #include "lockon.inc"
           WRITE (ISTDO,1000 ) SENSOR%SENS_ID,TT
           WRITE (IOUT ,1000 ) SENSOR%SENS_ID,TT
-          WRITE (IOUT ,2200)  EKIN,EMA_KIN,SQRT(EVAR_KIN)
+          WRITE (IOUT ,2200)  EKIN,AVG_EK
 #include "lockoff.inc"
         END IF
 c
@@ -311,8 +298,8 @@ c-----------------------------------------------------------------------
      .       '      CURRENT INTERNAL ENERGY AFTER TMIN and TDELAY = ',1PE12.5)
 1400  FORMAT('      TARGET MAX KINETIC ENERGY = ',1PE12.5,/
      .       '      CURRENT INTERNAL ENERGY AFTER TMIN and TDELAY = ',1PE12.5)
-2100  FORMAT('      CONSTANT INT ENERGY = ',1PE12.5,', MEAN = ',1PE12.5,' ,STDEV = ',1PE12.5)           
-2200  FORMAT('      CONSTANT KIN ENERGY = ',1PE12.5,', MEAN = ',1PE12.5,' ,STDEV = ',1PE12.5)           
+2100  FORMAT('      CONSTANT INT ENERGY = ',1PE12.5,', MEAN = ',1PE12.5)           
+2200  FORMAT('      CONSTANT KIN ENERGY = ',1PE12.5,', MEAN = ',1PE12.5)           
 c----------------------------------------------------------
       RETURN
       END SUBROUTINE SENSOR_ENERGY

@@ -108,7 +108,7 @@ Chd|====================================================================
      F       IXEL     ,ITHK     ,F_DEF    ,ISHPLYXFEM,                        
      G       ITASK    ,PM_STACK , ISUBSTACK,STACK    ,TSTAR    ,ALPE     ,
      H       PLY_EXX  ,PLY_EYY  ,PLY_EXY  ,PLY_EXZ   ,PLY_EYZ  ,PLY_F    ,
-     I       VARNL    ,NLOC_DMG )
+     I       VARNL    ,NLOC_DMG ,NLAY_MAX ,LAYNPT_MAX)
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
@@ -150,6 +150,7 @@ C-----------------------------------------------
       INTEGER MAT(*),MATLY(*),PID(*),NPF(*),NGL(MVSIZ),INDX(MVSIZ),
      .   IGEO(NPROPGI,*),IPM(NPROPMI,*),ELCRKINI(NXLAYMAX,*),
      .   IPARG(*),FWAVE_EL(NEL)
+      INTEGER, INTENT(IN) :: NLAY_MAX, LAYNPT_MAX
       my_real DM
       my_real FOR(NEL,5),MOM(NEL,3),GSTR(NEL,8),THK(*),EINT(JLT,2),OFF(*),
      .   DIR_A(*),DIR_B(*),VISCMX(*),PM(NPROPM,*),THK_LY(NEL,*),
@@ -221,7 +222,7 @@ c
       my_real TT_LOCAL
       my_real, DIMENSION(:) ,POINTER  :: EL_TEMP,YLDFAC,CRKLEN,CRKDIR,DADV,TFAIL,EL_LEN,
      .                                   EL_PLA
-      my_real, DIMENSION(NLAY,10)  :: PTHKF
+      my_real, DIMENSION(NLAY,100)  :: PTHKF
       TARGET :: TEMPEL,BUFMAT,EPSXX,EPSYY,DEPSXX,DEPSYY,SCALE1,POSLY,THKLY
 C
       INTEGER , DIMENSION(MVSIZ) :: ADDITIONAL_INT_PARAMETERS
@@ -1454,10 +1455,10 @@ c
                 ENDDO
                 IF (IXFEM == 0) THEN
                   CALL FAIL_FLD_C(
-     1            NEL       ,NUPAR     ,NVARF     ,NFUNC1   ,IFUNC1     ,
-     2            NPF       ,TF        ,TT        ,DT1C     ,UPARAMF    ,   
-     3            UVAR      ,NGL       ,IPG       ,ILAYER   ,IT         ,
-     4            EPSXX     ,EPSYY     ,EPSXY     ,EPSYZ    ,EPSZX      ,
+     1            NEL       ,NUPAR     ,NFUNC1   ,IFUNC1     ,
+     2            NPF       ,TF        ,TT        ,UPARAMF    ,   
+     3            NGL       ,IPG       ,ILAYER   ,IT         ,
+     4            EPSXX     ,EPSYY     ,EPSXY     ,
      5            ZT        ,OFF       ,FOFF    ,PTHKF(ILAYER,IFL),TDEL ,
      6            FLD_IDX   ,DAM       ,DFMAX     )
                 ELSE
@@ -1533,7 +1534,7 @@ c
      1                NEL       ,NUPAR     ,NVARF     ,UPARAMF   ,UVARF     ,
      2                NFUNC1    ,IFUNC1    ,TABLE     ,NPF       ,TF        ,
      3                TT        ,NGL       ,IPG       ,ILAYER    ,IT        , 
-     4                SIGNXX    ,SIGNYY    ,SIGNXY    ,SIGNYZ    ,SIGNZX    ,      
+     4                SIGNXX    ,SIGNYY    ,SIGNXY    ,   
      5                DPLA      ,EPSPL     ,THKN      ,EL_LEN    ,TSTAR     ,
      6                PTHKF(ILAYER,IFL),DMG_FLAG,DMG_LOC_SCALE ,OFF  ,FOFF      ,
      7                DFMAX     ,TDEL      ,IGTYP     ,INLOC     )
@@ -1957,14 +1958,16 @@ c--------------------------------------------------
           CALL FAIL_SETOFF_C(ELBUF_STR,GEO      ,PID(1)   ,NGL      ,
      .                       NEL      ,NLAY     ,NPTTOT   ,PTHKF    ,
      .                       THK_LY   ,THKLY    ,OFF      ,STACK    ,
-     .                       ISUBSTACK,IGTYP    ,FAILWAVE ,FWAVE_EL )
+     .                       ISUBSTACK,IGTYP    ,FAILWAVE ,FWAVE_EL ,
+     .                       NLAY_MAX ,LAYNPT_MAX,NUMGEO  )
         ELSE
           CALL FAIL_SETOFF_NPG_C(
      .                       ELBUF_STR,GEO      ,PID(1)   ,NGL      ,
      .                       NEL      ,IR       ,IS       ,NLAY     ,
      .                       NPTTOT   ,PTHKF    ,THK_LY   ,THKLY    ,
      .                       OFF      ,NPG      ,STACK    ,ISUBSTACK, 
-     .                       IGTYP    ,FAILWAVE ,FWAVE_EL )
+     .                       IGTYP    ,FAILWAVE ,FWAVE_EL ,NLAY_MAX ,
+     .                       LAYNPT_MAX,NUMGEO  ,IPG      )
         ENDIF
       ENDIF  
 c---

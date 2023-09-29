@@ -30,6 +30,7 @@ Chd|        MAIN_BEAM3                    source/elements/beam/main_beam3.F
 Chd|        PBILAN                        source/elements/beam/pbilan.F 
 Chd|        PCOOR3                        source/elements/beam/pcoor3.F 
 Chd|        PCURV3                        source/elements/beam/pcurv3.F 
+Chd|        PDAMP3                        source/elements/beam/pdamp3.F 
 Chd|        PDEFO3                        source/elements/beam/pdefo3.F 
 Chd|        PDLEN3                        source/elements/beam/pdlen3.F 
 Chd|        PEVEC3                        source/elements/beam/pevec3.F 
@@ -229,7 +230,7 @@ C---
      .       BUFMAT   ,NPROPG   ,NPROPMI  ,NPROPM   ,NUMMAT   ,
      .       NUMGEO   ,SBUFMAT  ,SNPC     ,STF      ,IOUT     ,
      .       ISTDO    ,NUVAR    ,UVAR     ,GBUF%EPSD,MAT(1)   ,
-     .       GBUF%FOR ,GBUF%MOM ,GBUF%EINT)
+     .       GBUF%FOR ,GBUF%MOM ,GBUF%EINT,ISMSTR)
 C----
       ELSEIF (IGTYP == 18) THEN  
         ! beams type 18 (integration points in the section)
@@ -243,9 +244,17 @@ C----
      7       M1        ,M2          ,M3        ,JTHE     ,TEMPEL  ,       
      8       IFAIL     ,SBUFMAT     ,SNPC      ,STF      ,NUMMAT  ,       
      9       NUMGEO    ,IOUT        ,ISTDO     ,NPROPMI  ,NPROPM  ,
-     A       NPROPG    ,TT          ,DT1       ,IDEL7NOK ,IMPL_S  ,
-     B       ISIGI     ,IDYNA       ,IMCONV    )                                               
+     A       NPROPG    ,TT          ,DT1       ,IDEL7NOK ,ISIGI   ,
+     B       IMCONV    ,ISMSTR)                                               
       ENDIF
+c---------------------------
+c     element damping
+c---------------------------
+      CALL PDAMP3(PM      ,GEO     ,OFF     ,MAT(1)  ,PID(1),
+     .            NEL     ,NGL     ,EXX     ,EXY     ,EXZ  ,
+     .            KXX     ,KYY     ,KZZ     ,AL      ,F1   ,
+     .            F2      ,F3      ,M1      ,M2      ,M3   ,
+     .            IMPL_S  ,IDYNA   ,DT1     )
 c-----------------------------------------------------------------------  
 c     Thermal expansion
 c-----------------------------------------------------------------------  
@@ -314,7 +323,7 @@ C
           FPHI(I,1) = HALF * DIE(I) + PHIX ! 
           FPHI(I,2) = HALF * DIE(I) - PHIX
          ENDDO
-       ENDIF
+      ENDIF     
 C-------------------------
 C     ASSEMBLAGE
 C-------------------------

@@ -70,6 +70,7 @@ Chd|        CFIELD_1                      source/loads/general/load_centri/cfiel
 Chd|        CHECK_ALE_COMM                source/ale/check_ale_comm.F   
 Chd|        CHECK_EDGE_STATE              source/interfaces/interf/check_edge_state.F
 Chd|        CHECK_NAN_ACC                 source/output/outfile/check_nan_acc.F
+Chd|        CHECK_NEIGHBOURS_SURFACE_STATEsource/interfaces/interf/check_neighbours_surface_state.F
 Chd|        CHECK_NODAL_STATE             source/interfaces/interf/check_nodal_state.F
 Chd|        CHECK_REMOTE_SURFACE_STATE    source/interfaces/interf/check_remote_surface_state.F
 Chd|        CHECK_SURFACE_STATE           source/interfaces/interf/check_surface_state.F
@@ -507,7 +508,7 @@ Chd|====================================================================
      1  ICODE  ,ISKEW  ,ISKWN   ,NETH   ,IPART  ,NOM_OPT,KXX    ,IXX    ,
      2  IXTG   ,IXS     ,IXQ    ,IXC    ,IXT    ,IXP    ,IXR    ,
      3          ITAB   ,ITABM1  ,IFILL  ,MAT_ELEM,
-     4  IMS    ,NPC    ,IBCL    ,MATPARAM_TAB   ,GROUP_PARAM_TAB,
+     4  IMS    ,NPC    ,IBCL    ,
      5  IBFV   ,IDUM   ,LAS     ,LACCELM,NNLINK ,LNLINK ,
      6  IPARG  ,DD_IAD  ,IGRV   ,IEXLNK ,KINET  ,
      7  IPARI  ,        NPRW    ,ICONX  ,NPBY   ,
@@ -794,7 +795,6 @@ C-----------------------------------------------
       my_real, DIMENSION(3*NUMNOD), TARGET :: X
       my_real
      .   D(3,*)      ,V(3,*)   ,VR(3,*),DAMP(*),
-c     .   X(3,*)    ,D(3,*)      ,V(3,*)   ,VR(3,*),DAMP(*),
      .   MS(*)   ,IN(*)   ,PM(NPROPM,*),SKEW(LSKEW,*),GEO(NPROPG,*),
      .   BUFMAT(*) ,W(3,*)    ,VEUL(*),FILL(NUMNOD,*),DFILL(NUMNOD,*),
      .   ALPH(*)   ,WB(3,*)   ,TF(*)       ,FORC(*)  ,VEL(*),
@@ -873,8 +873,6 @@ C     Mat + Prop timers
       TYPE(SURF_)   ,DIMENSION(NSURF)   :: IGRSURF
 c
       TYPE(NLOCAL_STR_)  :: NLOC_DMG
-      TYPE(MATPARAM_STRUCT_)  ,DIMENSION(NUMMAT) :: MATPARAM_TAB
-      TYPE(GROUP_PARAM_)      ,DIMENSION(NGROUP) :: GROUP_PARAM_TAB
       TYPE(PINCH) :: PINCH_DATA
       TYPE(t_ale_connectivity), INTENT(IN) :: ALE_CONNECTIVITY
       INTEGER, INTENT(IN) :: NE_NERCVOIS(*), NE_NESDVOIS(*), NE_LERCVOIS(*), NE_LESDVOIS(*)
@@ -1302,8 +1300,7 @@ C
         LISENDP_CRK = 0
         LIRECVP_CRK = 0
 C
-        T0INF_PBLAST = EP20
-        IDT_PBLAST   = 0
+        PBLAST_DT%IDT   = 0
 C
         NUMSPH_GLO_R2R = 0
         FLG_SPHINOUT_R2R = 0  
@@ -1384,7 +1381,7 @@ C
         ENDIF
 C----------------------------------------------------------
         IF(INTERFACES%PARAMETERS%INTCAREA>0) THEN
-           MY_ALLOCATE(INTERFACES%PARAMETERS%INTAREAN,NUMNOD)
+           ALLOCATE(INTERFACES%PARAMETERS%INTAREAN(NUMNOD))
         ELSE
            ALLOCATE(INTERFACES%PARAMETERS%INTAREAN(0))   
         ENDIF
@@ -1392,8 +1389,8 @@ C
 C       ! /TH/SURF output
 
         IF(NSURF > 0) THEN
-           MY_ALLOCATE(FSAVSURF,5*NSURF) 
-           MY_ALLOCATE(NSEG_LOADP,NSURF) 
+           ALLOCATE(FSAVSURF(5*NSURF)) 
+           ALLOCATE(NSEG_LOADP(NSURF)) 
            NSEG_LOADP (1:NSURF)= 0          
            FSAVSURF(1:5*NSURF)=ZERO
         ELSE
@@ -1688,8 +1685,8 @@ C       Error estimation / not on Restart file.
 C--------------------------------------------
           IF(ANIM_CE(2156)/=0 .OR. IADMERRT/=0 .OR. 
      .         H3D_DATA%SH_SCAL_ERR_THK /= 0)THEN
-             MY_ALLOCATE(ERR_THK_SH4,NUMELC)
-             MY_ALLOCATE(ERR_THK_SH3,NUMELTG)
+             ALLOCATE(ERR_THK_SH4(NUMELC))
+             ALLOCATE(ERR_THK_SH3(NUMELTG))
              ERR_THK_SH4(1:NUMELC) = ZERO
              ERR_THK_SH3(1:NUMELTG) = ZERO
           ELSE
@@ -2171,7 +2168,7 @@ C ---------------------
       CALL INIT_NODAL_STATE( IPARI,SHOOT_STRUCT,INTBUF_TAB,IAD_ELEM,FR_ELEM,
      .                       ITAB,ITABM1,GEO,ADDCNEL,CNEL,
      .                       IXS,IXC,IXT,IXP,IXR,IXTG,
-     .                       SIZE_ADDCNEL,SIZE_CNEL )
+     .                       SIZE_ADDCNEL,SIZE_CNEL ,INTERFACES)
       ! -------------------------
 C========================================================================================
 C                                     NON PARALLEL SECTION (SMP)
@@ -2202,7 +2199,7 @@ C
         COMPTREAC = 0
         CALL NEED_FOR_REACTIONS(NPBY,H3D_DATA,COMPTREAC) ! Look for options for anim, ... and rbody with failure
         IF(COMPTREAC == 1)THEN
-          MY_ALLOCATE(FREAC,6*NUMNOD) 
+          ALLOCATE(FREAC(6*NUMNOD)) 
           FREAC(1:6*NUMNOD)=ZERO
         ELSE
           ALLOCATE(FREAC(0))
@@ -2284,7 +2281,8 @@ C Init var parallel SMP
           ! ---------------------
           ! check if a surface/edge must be deactivated and save the surface/edge id 
           IF(ITSK==0) THEN 
-                CALL FIND_SURFACE_INTER( ITAB,SHOOT_STRUCT,IXS,IXS(L1),IXC,IXTG )
+                CALL FIND_SURFACE_INTER( ITAB  ,SHOOT_STRUCT  ,IXS  ,IXS(L1)  ,IXC  ,
+     .                                   IXTG  ,INTERFACES    ,INTBUF_TAB,SHOOT_STRUCT%SHIFT_INTERFACE )
                 CALL FIND_EDGE_INTER( ITAB,SHOOT_STRUCT,IXS,IXS(L1),
      1                                IXC,IXTG,IXQ,IXT,IXP,
      2                                IXR,GEO )
@@ -2296,10 +2294,11 @@ C Init var parallel SMP
           ! exchange of surfaces (ie. 4 nodes) to deactivate and deactivation
           ! ONLY FOR LOCAL SURFACE / REMOTE ELEMENT
           IF(NSPMD>1) THEN 
-            IF(ITSK==0) CALL SPMD_EXCH_DELETED_SURF_EDGE( IAD_ELEM,ITABM1,SHOOT_STRUCT,INTBUF_TAB,NEWFRONT,
-     .                           IPARI,GEO,
-     .                           IXS,IXC,IXT,IXP,IXR,IXTG,
-     .                           ADDCNEL,CNEL,WA(NWAFTSK),TAGEL )
+            IF(ITSK==0) CALL SPMD_EXCH_DELETED_SURF_EDGE( 
+     .                           IAD_ELEM ,ITABM1 ,SHOOT_STRUCT ,INTBUF_TAB ,NEWFRONT ,
+     .                           IPARI    ,GEO    ,IXS          ,IXC        ,IXT      ,
+     .                           IXP     ,IXR     ,IXTG         ,ADDCNEL    ,CNEL     ,
+     .                           WA(NWAFTSK),TAGEL,INTERFACES )
             CALL MY_BARRIER()
           ENDIF
           ! ---------------------
@@ -2307,11 +2306,11 @@ C Init var parallel SMP
           ! ---------------------
           ! loop over the surface id and deactivate the surface
           ! ONLY FOR LOCAL SURFACE / LOCAL ELEMENT
-          CALL CHECK_SURFACE_STATE( ITSK,SHOOT_STRUCT%SAVE_SURFACE_NB,SHOOT_STRUCT%SAVE_SURFACE,
-     .                              SHOOT_STRUCT%SHIFT_INTERFACE,INTBUF_TAB,
-     .                              IPARI,GEO,
-     .                              IXS,IXC,IXT,IXP,IXR,IXTG,
-     .                              ADDCNEL,CNEL,WA(NWAFTSK),TAGEL,SHOOT_STRUCT )
+          CALL CHECK_SURFACE_STATE( ITSK   ,SHOOT_STRUCT%SAVE_SURFACE_NB,SHOOT_STRUCT%SAVE_SURFACE,
+     .                                                     SHOOT_STRUCT%SHIFT_INTERFACE,INTBUF_TAB,
+     .                              IPARI     ,GEO      ,IXS         ,IXC      ,IXT      ,
+     .                              IXP        ,IXR     ,IXTG        ,ADDCNEL  ,CNEL     ,
+     .                              WA(NWAFTSK),TAGEL   ,SHOOT_STRUCT,INTERFACES )
 
           ! loop over the edge id and deactivate the edge
           ! ONLY FOR LOCAL EDGE / LOCAL ELEMENT
@@ -2330,6 +2329,17 @@ C Init var parallel SMP
      .                                                   SHOOT_STRUCT%SHIFT_INTERFACE,INTBUF_TAB,
      .                                                   IPARI,IAD_ELEM,SHOOT_STRUCT )
            CALL MY_BARRIER()
+            IF(NINTER25/=0.AND.INTERFACES%PARAMETERS%INT25_EROSION_SOLID > 0) THEN
+              IF(ITSK==0) CALL CHECK_NEIGHBOURS_SURFACE_STATE( 
+     .                                                SHOOT_STRUCT%SAVE_SURFACE_NB_EXT ,SHOOT_STRUCT%SAVE_SURFACE_EXT,
+     .                                                                        SHOOT_STRUCT%SHIFT_INTERFACE,INTBUF_TAB,
+     .                                                IPARI     ,IAD_ELEM   ,SHOOT_STRUCT          ,X                ,
+     .                                                IXS       ,ITAB       ,ITABM1                ,NBINTC           ,
+     .                                                INTLIST   ,NEWFRONT   ,INTERFACES%SPMD_ARRAYS,NBDDEDGT         ,
+     .                                                NBDDEDG_MAX )
+
+                    CALL MY_BARRIER()
+            ENDIF
           ENDIF
           ! ---------------------
 
@@ -2780,7 +2790,7 @@ C------ one routine for EIG
      6                   PM          , GEO         , FANI     , ICUT      , SKEW    ,
      7                   XCUT        ,FANI(1,1+NFIA), ITAB    ,FANI(1,1+NFEA),FANI(1,1+NFOA),
      8                   ANIN        , LPBY        , NPBY     , NSTRF     , RWBUF   ,
-     9                   NPRW        , TANI        , ELBUF_TAB ,MATPARAM_TAB, DD_IAD  ,
+     9                   NPRW        , TANI        , ELBUF_TAB ,MAT_ELEM%MAT_PARAM, DD_IAD  ,
      A                   IAD_ELEM    , FR_ELEM     , WEIGHT   , EANI      , IPART   ,
      B                   RBY         , NOM_OPT     , IGRSURF  ,
      C                   BUFSF       , IDATA       , RDATA    , BUFMAT    , BUFGEO  ,
@@ -3293,19 +3303,18 @@ C----------------------------------
           IF (IMONM > 0) CALL STARTIME(41,1)
           CALL PBLAST(ILOADP     ,LOADP      ,A          ,V       ,X      ,
      1                IADS(I87M) ,FSKY       ,FSKY       ,LLOADP  ,FEXT   ,
-     2                ITAB       ,H3D_DATA   ,OUTPUT%TH%TH_SURF,FSAVSURF,NSEG_LOADP) 
+     2                ITAB       ,H3D_DATA   ,OUTPUT%TH%TH_SURF,FSAVSURF,NSEG_LOADP)
           IF (IMONM > 0) CALL STOPTIME(41,1)
           IF (IMON>0) CALL STOPTIME(4,1)
           CALL TRACE_OUT(10)
-          IF(DT_PBLAST<DT2T)THEN
+          IF(PBLAST_DT%DT<DT2T)THEN
             !inter22 kinematic time step
-              DT2T         = DT_PBLAST  
-              ITYPTST      = 12
-              NELTST       = IDT_PBLAST
-              DT_PBLAST    = EP20
-              T0INF_PBLAST = EP20       
-         ENDIF    
-        ENDIF    
+            DT2T         = PBLAST_DT%DT
+            ITYPTST      = 12
+            NELTST       = PBLAST_DT%IDT
+            PBLAST_DT%DT = EP20
+         ENDIF
+        ENDIF
 C-------------------------------------------------------------------
 C       LOAD PCYL
 C----------------------------------
@@ -3515,7 +3524,7 @@ C===============================================================================
      H     IXTG      ,SENSORS,DELTA_PMAX_GAP,INTBUF_TAB,
      I     DELTA_PMAX_GAP_NODE,IAD_FRNOR,FR_NOR,
      J     NB25_CANDT,NB25_IMPCT,NB25_DST1,NB25_DST2,INTLIST25,
-     K     IAD_FREDG,FR_EDG,MAIN_PROC,NATIV_SMS,I_OPT_STOK ,
+     K     INTERFACES%SPMD_ARRAYS%IAD_FREDG,INTERFACES%SPMD_ARRAYS%FR_EDG,MAIN_PROC,NATIV_SMS,I_OPT_STOK ,
      L     MULTI_FVM,IPARG  ,ELBUF_TAB, H3D_DATA, T2MAIN_SMS,
      M     LSKYI_SMS_NEW    ,FORNEQS  ,INT7ITIED,IDEL7NOK_SAV,MAXDGAP,
      N     T2FAC_SMS,ICODT,ISKEW ,FSKYN25  ,ADDCSRECT,PROCNOR,
@@ -4392,7 +4401,7 @@ C Init var parallel SMP
      8   IPARG        ,NPC             ,IXC             ,IXTG           ,NELTSTT      , 
      9   IPARI        ,ITYPTSTT        ,NSTRF           ,        
      A   IPART        ,IPART(K3)       ,IPART(K8)       ,SECFCUM        ,                  
-     B   FSAVD        ,GROUP_PARAM_TAB , 
+     B   FSAVD        ,MAT_ELEM%GROUP_PARAM , 
      E   FZERO        ,IXTG1           ,IADS(LLT1)      ,IGEO           ,IPM          ,
      F   MADFAIL      ,XSEC            ,FSAVSAV         ,ITSK           ,MCP          ,
      G   TEMP         ,FTHE(IDX_FTHE)       ,FTHESKY         ,
@@ -5401,7 +5410,8 @@ C WA local  : utilise de 1 a NUMNOD
           ! ---------------------
           ! check if a surface/edge must be deactivated and save the surface/edge id 
           IF(ITSK==0) THEN 
-                CALL FIND_SURFACE_INTER( ITAB,SHOOT_STRUCT,IXS,IXS(L1),IXC,IXTG )
+                CALL FIND_SURFACE_INTER( ITAB  ,SHOOT_STRUCT  ,IXS  ,IXS(L1)  ,IXC  ,
+     .                                   IXTG  ,INTERFACES    ,INTBUF_TAB,SHOOT_STRUCT%SHIFT_INTERFACE )
                 CALL FIND_EDGE_INTER( ITAB,SHOOT_STRUCT,IXS,IXS(L1),
      1                                IXC,IXTG,IXQ,IXT,IXP,
      2                                IXR,GEO )
@@ -5413,10 +5423,11 @@ C WA local  : utilise de 1 a NUMNOD
           ! exchange of surfaces (ie. 4 nodes) to deactivate and deactivation
           ! ONLY FOR LOCAL SURFACE / REMOTE ELEMENT
           IF(NSPMD>1) THEN 
-            IF(ITSK==0) CALL SPMD_EXCH_DELETED_SURF_EDGE( IAD_ELEM,ITABM1,SHOOT_STRUCT,INTBUF_TAB,NEWFRONT,
-     .                           IPARI,GEO,
-     .                           IXS,IXC,IXT,IXP,IXR,IXTG,
-     .                           ADDCNEL,CNEL,WA(NWAFTSK),TAGEL )
+            IF(ITSK==0) CALL SPMD_EXCH_DELETED_SURF_EDGE( 
+     .                           IAD_ELEM ,ITABM1 ,SHOOT_STRUCT ,INTBUF_TAB ,NEWFRONT ,
+     .                           IPARI    ,GEO    ,IXS          ,IXC        ,IXT      ,
+     .                           IXP     ,IXR     ,IXTG         ,ADDCNEL    ,CNEL     ,
+     .                           WA(NWAFTSK),TAGEL,INTERFACES )
             CALL MY_BARRIER()
           ENDIF
           ! ---------------------
@@ -5424,11 +5435,12 @@ C WA local  : utilise de 1 a NUMNOD
           ! ---------------------
           ! loop over the surface id and deactivate the surface
           ! ONLY FOR LOCAL SURFACE / LOCAL ELEMENT
-          CALL CHECK_SURFACE_STATE( ITSK,SHOOT_STRUCT%SAVE_SURFACE_NB,SHOOT_STRUCT%SAVE_SURFACE,
-     .                              SHOOT_STRUCT%SHIFT_INTERFACE,INTBUF_TAB,
-     .                              IPARI,GEO,
-     .                              IXS,IXC,IXT,IXP,IXR,IXTG,
-     .                              ADDCNEL,CNEL,WA(NWAFTSK),TAGEL,SHOOT_STRUCT )
+
+          CALL CHECK_SURFACE_STATE( ITSK   ,SHOOT_STRUCT%SAVE_SURFACE_NB,SHOOT_STRUCT%SAVE_SURFACE,
+     .                                                     SHOOT_STRUCT%SHIFT_INTERFACE,INTBUF_TAB,
+     .                              IPARI     ,GEO      ,IXS         ,IXC      ,IXT      ,
+     .                              IXP        ,IXR     ,IXTG        ,ADDCNEL  ,CNEL     ,
+     .                              WA(NWAFTSK),TAGEL   ,SHOOT_STRUCT,INTERFACES )
 
           ! loop over the edge id and deactivate the edge
           ! ONLY FOR LOCAL EDGE / LOCAL ELEMENT
@@ -5445,9 +5457,18 @@ C WA local  : utilise de 1 a NUMNOD
           IF(INT24USE>0.OR.NINTER25/=0) THEN 
             IF(ITSK==0) CALL CHECK_REMOTE_SURFACE_STATE( SHOOT_STRUCT%NUMBER_REMOTE_SURF,SHOOT_STRUCT%REMOTE_SURF,
      .                                                   SHOOT_STRUCT%SHIFT_INTERFACE,INTBUF_TAB,
-     .                                                   IPARI,IAD_ELEM,SHOOT_STRUCT )
-           CALL MY_BARRIER()
-          ENDIF
+     .                                                   IPARI,IAD_ELEM,SHOOT_STRUCT  )
+            CALL MY_BARRIER()
+            IF(NINTER25/=0.AND.INTERFACES%PARAMETERS%INT25_EROSION_SOLID > 0) THEN
+                IF(ITSK==0) CALL CHECK_NEIGHBOURS_SURFACE_STATE( 
+     .                                                SHOOT_STRUCT%SAVE_SURFACE_NB_EXT,SHOOT_STRUCT%SAVE_SURFACE_EXT,
+     .                                                SHOOT_STRUCT%SHIFT_INTERFACE,INTBUF_TAB,
+     .                                                IPARI,IAD_ELEM,SHOOT_STRUCT,X,IXS,ITAB,ITABM1,NBINTC,INTLIST,NEWFRONT,
+     .                                                INTERFACES%SPMD_ARRAYS,NBDDEDGT,NBDDEDG_MAX )
+
+                ENDIF
+              CALL MY_BARRIER()
+            ENDIF
           ! ---------------------
         ENDIF
 
@@ -7505,7 +7526,7 @@ C-----------------------------------------------
 
 !$OMP SINGLE
           CALL DAMPING44(
-     .                 NODFT   ,NODLT            ,3+IRODDL*3,V       ,
+     .                 3+IRODDL*3,V       ,
      .                 VR      ,A       ,AR      ,MS        ,IN      ,
      .                 DAMPR   ,DAMP    ,IGRNOD  ,WEIGHT    ,TAGSLV_RBY)
 !$OMP END SINGLE
@@ -7515,16 +7536,16 @@ C-----------------------------------------------
 !$OMP SINGLE
          IF (NS10E>0) THEN
            CALL DAMPING51(
-     .                 NODFT   ,NODLT            ,3+IRODDL*3,VMD     ,
+     .                 3+IRODDL*3,VMD     ,
      .                 VR      ,A       ,AR      ,MS        ,IN      ,
      .                 DAMPR   ,DAMP    ,IGRNOD  ,WEIGHT    ,TAGSLV_RBY,
-     .                 SKEW    ,ICONTACT,IDAMP_RDOF_TAB ,NODXI_SMS)
+     .                 SKEW    ,ICONTACT,IDAMP_RDOF_TAB)
          ELSE
            CALL DAMPING51(
-     .                 NODFT   ,NODLT            ,3+IRODDL*3,V       ,
+     .                 3+IRODDL*3,V       ,
      .                 VR      ,A       ,AR      ,MS        ,IN      ,
      .                 DAMPR   ,DAMP    ,IGRNOD  ,WEIGHT    ,TAGSLV_RBY,
-     .                 SKEW    ,ICONTACT,IDAMP_RDOF_TAB ,NODXI_SMS)
+     .                 SKEW    ,ICONTACT,IDAMP_RDOF_TAB)
          END IF
 !$OMP END SINGLE
 
@@ -8455,7 +8476,7 @@ C Regular animation
      B   FSAV          ,SKEW           ,ELBUF_TAB      ,CLUSTER        ,
      C   VR            ,IN             ,WEIGHT         ,FCLUSTER       ,MCLUSTER      ,
      D   DD_IAD        ,DMAS           ,ACCELM         ,GAUGE         ,
-     E   IPARI         ,EANI           ,IPART          ,MATPARAM_TAB   ,
+     E   IPARI         ,EANI           ,IPART          ,MAT_ELEM%MAT_PARAM   ,
      F   IGRNOD        ,SUBSETS        ,
      G   NOM_OPT       ,AR             ,IGRSURF        ,BUFSF          ,IDATA         ,
      H   RDATA         ,KXX            ,IXX            ,BUFMAT         ,BUFGEO        ,
@@ -8731,7 +8752,7 @@ C
      Y XEDGE3N        ,SPH2SOL        ,STIFN_TMP  ,STIFR_TMP ,     DRAPE_SH4N , 
      Z DRAPE_SH3N     ,H3D_DATA       ,SUBSETS    ,IGRNOD    ,     FCONT_MAX,
      A FANI(1,NFNCA2+1),FANI(1,NFTCA2+1),NDDL0    ,NNZK0     ,IMPBUF_TAB ,
-     B DRAPEG         ,MATPARAM_TAB   )
+     B DRAPEG         ,MAT_ELEM%MAT_PARAM   )
 #else 
         WRITE(6,*) __LINE__,"Fatal error: MUMPS required"
         CALL FLUSH(6)
@@ -8931,27 +8952,28 @@ C                                     PARALLEL SECTION (SMP)
 C========================================================================================
 
 !$OMP PARALLEL PRIVATE(ITSK,NODFTSK,NODLTSK)
+!$OMP+ SHARED (MS,V)
 
           ITSK = OMP_GET_THREAD_NUM()
           NODFTSK   = 1+ITSK*NUMNOD/ NTHREAD
           NODLTSK   = (ITSK+1)*NUMNOD/NTHREAD
              CALL ALEWDX(
-     1         GEO           ,X             ,D           ,V           ,VR         ,   
-     2         W             ,WA            ,WB          ,RBY         ,SKEW       ,   
-     3         PM            ,XLAS          ,MS          ,FSAV        ,               
-     4         A             ,AR            ,TF          ,RWBUF       ,   
-     5         IN            ,DT2SAVE        ,                                        
-     6         IPARG         ,IXS           ,IXQ         ,NODPOR       ,              
-     7         ISKEW         ,ICODT       ,ELBUF_TAB  ,   
-     8         NPC           ,LINALE        ,NPRW        ,LAS        ,   
-     9         IPARI         ,NODFTSK       ,NODLTSK     ,ITSK        ,               
-     A         IAD_ELEM      ,FR_ELEM       ,NBRCVOIS    ,NBSDVOIS    ,LNRCVOIS   ,   
-     B         LNSDVOIS      ,WEIGHT        ,ADSKY       ,FSKY        ,IADS       ,   
-     C         FR_WALL     ,NPORGEO     ,PROCNE     ,   
-     D         FR_NBCC       ,IADS(I87B)  ,XDP         ,IGRNOD     ,   
-     E         DR            ,INTBUF_TAB    ,ITAB        ,MULTI_FVM   ,            
-     F         ALE_CONNECTIVITY,DDP         ,NE_NERCVOIS ,NE_NESDVOIS, 
-     G         NE_LERCVOIS   ,NE_LESDVOIS   ,XCELL       ,XFACE)
+     1         GEO             ,X             ,D           ,V           ,VR         ,
+     2         W               ,WA            ,WB          ,RBY         ,SKEW       ,
+     3         PM              ,XLAS          ,MS          ,FSAV        ,
+     4         A               ,TF            ,RWBUF       ,
+     5         DT2SAVE         ,
+     6         IPARG           ,IXS           ,IXQ         ,NODPOR      ,
+     7         ISKEW           ,ICODT         ,ELBUF_TAB   ,
+     8         NPC             ,LINALE        ,NPRW        ,LAS         ,
+     9         IPARI           ,NODFTSK       ,NODLTSK     ,ITSK        ,
+     A         IAD_ELEM        ,FR_ELEM       ,NBRCVOIS    ,NBSDVOIS    ,LNRCVOIS   ,
+     B         LNSDVOIS        ,WEIGHT        ,ADSKY       ,FSKY        ,IADS       ,
+     C         FR_WALL         ,NPORGEO       ,PROCNE      ,
+     D         FR_NBCC         ,IADS(I87B)    ,XDP         ,IGRNOD      ,
+     E         DR              ,INTBUF_TAB    ,ITAB        ,MULTI_FVM   ,
+     F         ALE_CONNECTIVITY,DDP           ,NE_NERCVOIS ,NE_NESDVOIS ,
+     G         NE_LERCVOIS     ,NE_LESDVOIS   ,XCELL       ,XFACE      )
 
 !$OMP END PARALLEL
 
@@ -9299,7 +9321,7 @@ C--------------------------------------------------------
           IF (RESTART_FILE==1) THEN
           CALL WRRESTP(AF        , IAF        ,XDP        ,ICH        ,ADSKY          ,
      .                 ELBUF_TAB , XFEM_TAB   ,INTBUF_TAB , MULTI_FVM ,MAT_ELEM       ,
-     .                 H3D_DATA  , INTBUF_FRIC_TAB,SUBSETS,MATPARAM_TAB,GROUP_PARAM_TAB,
+     .                 H3D_DATA  , INTBUF_FRIC_TAB,SUBSETS,
      .                 PINCH_DATA, ALE_CONNECTIVITY, T_MONVOL,
      .                 SENSORS   , EBCS_TAB   ,DYNAIN_DATA ,USER_WINDOWS,OUTPUT        ,
      .                 INTERFACES, LOADS      )
@@ -9569,7 +9591,7 @@ C--------------------------------------------------------
 
           CALL WRRESTP(AF         ,IAF             ,XDP       ,ICH         ,ADSKY          ,
      .                 ELBUF_TAB  ,XFEM_TAB        ,INTBUF_TAB, MULTI_FVM  ,MAT_ELEM       ,
-     .                 H3D_DATA   ,INTBUF_FRIC_TAB ,SUBSETS   ,MATPARAM_TAB,GROUP_PARAM_TAB,
+     .                 H3D_DATA   ,INTBUF_FRIC_TAB ,SUBSETS   ,
      .                 PINCH_DATA ,ALE_CONNECTIVITY, T_MONVOL ,
      .                 SENSORS    ,EBCS_TAB        ,DYNAIN_DATA,USER_WINDOWS,OUTPUT        ,
      .                 INTERFACES ,LOADS           )
@@ -9707,7 +9729,7 @@ C--------------------------------------------------------
               ICH = 1
               CALL WRRESTP(AF        ,IAF            ,XDP          ,ICH        ,ADSKY          ,
      .                    ELBUF_TAB  ,XFEM_TAB       ,INTBUF_TAB   ,MULTI_FVM  ,MAT_ELEM       ,
-     .                    H3D_DATA   ,INTBUF_FRIC_TAB,SUBSETS     ,MATPARAM_TAB,GROUP_PARAM_TAB,
+     .                    H3D_DATA   ,INTBUF_FRIC_TAB,SUBSETS     ,
      .                    PINCH_DATA ,ALE_CONNECTIVITY, T_MONVOL ,
      .                    SENSORS    ,EBCS_TAB      ,DYNAIN_DATA ,USER_WINDOWS,OUTPUT         ,
      .                    INTERFACES ,LOADS         )

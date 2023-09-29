@@ -86,7 +86,7 @@ Chd|====================================================================
      F   ISORTH,  ET,      MSSA,    DMELS,
      G   TABLE,   IHET,    SSP,     ITASK,
      H   NEL,     ITY,     JSMS,    JSPH,
-     I   JTHE,    JTUR)
+     I   JTHE,    JTUR, IMPL_S)
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
@@ -118,6 +118,7 @@ C-----------------------------------------------
       INTEGER, INTENT(IN) :: JSPH
       INTEGER, INTENT(IN) :: JTHE
       INTEGER, INTENT(IN) :: JTUR
+      INTEGER, INTENT(IN) :: IMPL_S !< 0 for explicit solution / 1 for implicit solution
       INTEGER LFT,LLT,NFT,NPT,MTN,ISORTH,IPLA,ISMSTR,NUVARR,NUVAR,NVARTMP,
      .  NELTST,ITYPTST,IHET,ITASK,NEL
       INTEGER NPF(*),MAT(MVSIZ),NC(8,MVSIZ),NGL(MVSIZ),
@@ -144,7 +145,7 @@ C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
       INTEGER NPAR,IADBUF,NFUNC,I,J,II,IPT,JPT,IR,IP,ISRATE,
      .  IFUNC(MAXFUNC),IDUM1,IFAIL(MVSIZ),MATF(MVSIZ),IC,IFLAG,
-     .  NVARF,NVARF_MAX,MX, IEXPAN8,JJ(6),INLOC
+     .  NVARF,NVARF_MAX,MX, IEXPAN8,JJ(6),INLOC,DMG_FLAG
       my_real 
      .C1(MVSIZ),PNEW(MVSIZ),PP(MVSIZ),DEFP(MVSIZ),
      .EP1(MVSIZ),EP2(MVSIZ),EP3(MVSIZ),EP4(MVSIZ),EP5(MVSIZ),EP6(MVSIZ),
@@ -174,6 +175,11 @@ C-----------------------------------------------
       CHARACTER OPTION*256
       INTEGER SIZE
       CHARACTER IUSER_KEY*ncharline
+
+      INTEGER :: NRATE
+      my_real :: FISOKIN
+      my_real, DIMENSION(NEL), TARGET :: VECNUL
+      my_real, DIMENSION(:), POINTER  :: SIGBXX,SIGBYY,SIGBZZ,SIGBXY,SIGBYZ,SIGBZX
 C=======================================================================
       MX = MAT(LFT)
       INLOC  = IPM(253,MX)
@@ -183,6 +189,7 @@ C=======================================================================
       NUVAR  = BUFLY%NVAR_MAT
       NVARTMP= BUFLY%NVARTMP
       UPARAM => BUFMAT(IADBUF:IADBUF+NPAR)
+      DMG_FLAG = BUFLY%L_DMGSCL
 C
       DO J=1,6
         JJ(J) = NEL*(J-1)
@@ -396,6 +403,20 @@ C------Compute of AMU as in mmain after thermal expansion computation ----------
         ENDDO 
       ENDIF
       IEXPAN8 = 0
+C
+C--------------------------------------------------------
+C     COMPUTE UNDAMAGED EFFECTIVE STRESSES
+C---------------------------------------------------------
+      IF (DMG_FLAG > 0) THEN 
+        DO I = LFT,LLT
+          SO1(I) = SO1(I)/MAX(LBUF%DMGSCL(I),EM20)
+          SO2(I) = SO2(I)/MAX(LBUF%DMGSCL(I),EM20)
+          SO3(I) = SO3(I)/MAX(LBUF%DMGSCL(I),EM20)
+          SO4(I) = SO4(I)/MAX(LBUF%DMGSCL(I),EM20)
+          SO5(I) = SO5(I)/MAX(LBUF%DMGSCL(I),EM20)
+          SO6(I) = SO6(I)/MAX(LBUF%DMGSCL(I),EM20)
+        ENDDO
+      ENDIF
 C---------------------------------------------------------------------------------
       IF(MTN == 28)THEN
         IDUM1 = 0
@@ -530,18 +551,38 @@ C-------------------
             EPSD(I)=EPSP
           ENDIF
         ENDDO
+
+        NRATE = NINT(UPARAM(1))
+        FISOKIN = UPARAM(6+2*NRATE+8)
+        IF(FISOKIN>0) THEN
+          SIGBXX => LBUF%SIGB(1      :  NEL) 
+          SIGBYY => LBUF%SIGB(NEL+1  :2*NEL)
+          SIGBZZ => LBUF%SIGB(2*NEL+1:3*NEL)
+          SIGBXY => LBUF%SIGB(3*NEL+1:4*NEL)
+          SIGBYZ => LBUF%SIGB(4*NEL+1:5*NEL)
+          SIGBZX => LBUF%SIGB(5*NEL+1:6*NEL)
+        ELSE
+          VECNUL(1:NEL) = ZERO
+          SIGBXX => VECNUL(1:NEL)
+          SIGBYY => VECNUL(1:NEL)
+          SIGBZZ => VECNUL(1:NEL)
+          SIGBXY => VECNUL(1:NEL)
+          SIGBYZ => VECNUL(1:NEL)
+          SIGBZX => VECNUL(1:NEL)
+        ENDIF
+
         CALL SIGEPS36(
-     2    LLT      ,NPAR     ,NUVAR    ,NFUNC    ,IFUNC    ,
-     3    NPF      ,TF       ,TT       ,DT1      ,UPARAM   ,
-     4    RHO0     ,RHO      ,VOLN     ,EINT     ,
+     2    LLT      ,NUVAR    ,NFUNC    ,IFUNC    ,NPF ,
+     3    TF       ,TT       ,DT1      ,UPARAM   ,RHO0,
      5    DE1      ,DE2      ,DE3      ,DE4      ,DE5      ,DE6   ,
      6    ES1      ,ES2      ,ES3      ,ES4      ,ES5      ,ES6   ,
      7    SO1      ,SO2      ,SO3      ,SO4      ,SO5      ,SO6   ,
      8    S1       ,S2       ,S3       ,S4       ,S5       ,S6    ,
-     9    SSPP     ,VIS      ,UVAR     ,OFF      ,NGL      ,IPT   ,
+     9    SSPP     ,VIS      ,UVAR     ,OFF      ,NGL      ,
      A    IPM      ,MAT      ,EPSD     ,IPLA     ,SIGY     ,LBUF%PLA,
      B    DPLA     ,ET       ,BIDON    ,BIDON    ,AMU      ,CST1  ,
-     C    NVARTMP  ,VARTMP   ,LBUF%SIGB,LBUF%DMG ,INLOC    ,LBUF%PLANL)
+     C    NVARTMP  ,VARTMP   ,LBUF%DMG ,INLOC    ,LBUF%PLANL,
+     D    SIGBXX,SIGBYY,SIGBZZ,SIGBXY,SIGBYZ,SIGBZX )
 c
           DEFP(1:LLT)   =  LBUF%PLA(1:LLT)
 c
@@ -583,7 +624,8 @@ c
      8    SO1      ,SO2      ,SO3      ,SO4      ,SO5      ,SO6   ,
      9    S1       ,S2       ,S3       ,S4       ,S5       ,S6    ,
      A    SV1      ,SV2      ,SV3      ,SV4      ,SV5      ,SV6   ,
-     B    SSPP     ,VIS      ,UVAR     ,OFF      ,DVOL     )
+     B    SSPP     ,VIS      ,UVAR     ,OFF      ,DVOL     ,LBUF%BFRAC,
+     .    LBUF%TEMP)
       ELSEIF(MTN == 42)THEN
         CALL SIGEPS42(
      1       LLT     ,NPAR    ,NUVAR   ,NFUNC   ,IFUNC   ,NPF     ,
@@ -970,7 +1012,7 @@ C----strain tension
      5              S1  ,S2  ,S3  ,S4   ,S5   ,S6      ,
      6              EPSP1,UVARF   ,OFF  ,IP   ,DFMAX   ,TDELE,
      7              BIDON   ,BIDON   ,BIDON   ,BIDON    ,BIDON   ,BIDON   ,                 
-     8              BIDON   ,BIDON   ,BIDON   )
+     8              BIDON   ,BIDON   ,BIDON   ,LBUF%DMGSCL)
 c
 C----        energy failure          
               ELSEIF(IFAIL(II) == 11)THEN
@@ -984,10 +1026,10 @@ C----        energy failure
 C---- tabulated failure model
                 CALL FAIL_TAB_S(
      1          LLT      ,NVARF    ,NPF      ,TF       ,TT       ,       
-     2          BUFMAT(IADBUF)     ,NGL      ,IPM      ,MAT      ,DELTAX   ,       
+     2          BUFMAT(IADBUF)     ,NGL      ,DELTAX   ,       
      3          S1       ,S2       ,S3       ,S4       ,S5       ,S6,   
-     4          DEFP     ,DPLA     ,EPSP1    ,TSTAR    ,UVARF    ,       
-     5          OFF      ,IP       ,TABLE    ,DFMAX    ,TDELE    ,
+     4          DPLA     ,EPSP1    ,TSTAR    ,UVARF    ,       
+     5          OFF      ,TABLE    ,DFMAX    ,TDELE    ,
      6          NFUNC    ,IFUNC )                                     
 C---
               ELSEIF (IFAIL(II) == 27) THEN   
@@ -1053,6 +1095,21 @@ c---------
 c---------
          ENDDO
         ENDDO ! several failur model boucle ir  
+c---------
+c--------------------------------------------------------
+c     DAMAGED STRESSES
+c---------------------------------------------------------
+        IF (DMG_FLAG > 0) THEN 
+          DO I = LFT,LLT
+            S1(I) = S1(I)*LBUF%DMGSCL(I)
+            S2(I) = S2(I)*LBUF%DMGSCL(I)
+            S3(I) = S3(I)*LBUF%DMGSCL(I)
+            S4(I) = S4(I)*LBUF%DMGSCL(I)
+            S5(I) = S5(I)*LBUF%DMGSCL(I)
+            S6(I) = S6(I)*LBUF%DMGSCL(I)
+          ENDDO
+        ENDIF
+c---------------------------------------------------------
       IF ((ITASK==0).AND.(IMON_MAT==1))CALL STOPTIME(121,1)
 c----------
         IF (ISORTH /= 0) THEN
