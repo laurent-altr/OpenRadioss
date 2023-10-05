@@ -3066,6 +3066,7 @@ set_source_files_properties( ${source_directory}/share/modules/realloc_mod.F PRO
 set_source_files_properties( ${source_directory}/share/modules/user_interface_mod.F PROPERTIES COMPILE_FLAGS "${legacy_flags}" )
 set_source_files_properties( ${source_directory}/share/modules/dsgraph_mod.F PROPERTIES COMPILE_FLAGS "${legacy_flags}" )
 set_source_files_properties( ${source_directory}/share/modules/mpi_tools_mod.F PROPERTIES COMPILE_FLAGS "${legacy_flags}" )
+set_source_files_properties( ${source_directory}/share/modules/mpi_exch_load.F PROPERTIES COMPILE_FLAGS "${legacy_flags}" )
 set_source_files_properties( ${source_directory}/share/modules/icontact_mod.F PROPERTIES COMPILE_FLAGS "${legacy_flags}" )
 set_source_files_properties( ${source_directory}/share/modules/group_mod.F PROPERTIES COMPILE_FLAGS "${legacy_flags}" )
 set_source_files_properties( ${source_directory}/share/modules/intstamp_glob_mod.F PROPERTIES COMPILE_FLAGS "${legacy_flags}" )
