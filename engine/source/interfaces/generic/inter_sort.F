@@ -133,9 +133,9 @@ C-----------------------------------------------
             ! -----------------------------------------------------
             ! type 7
             IF((NTY==7.AND.TT>=TS).AND.(.NOT.TYPE18))THEN
-                NRTM_T = IPARI(4,N)/NTHREAD
-                ESHIFT = ITASK*NRTM_T
-                IF(ITASK==NTHREAD-1)NRTM_T=IPARI(4,N)-(NTHREAD-1)*NRTM_T
+                NRTM_T = IPARI(4,N)
+                ESHIFT = 0
+!               IF(ITASK==NTHREAD-1)NRTM_T=IPARI(4,N)-(NTHREAD-1)*NRTM_T
                 CALL INTER_SORT_07( IPARI,X,N,ITASK,ISENDTO,
      1                              IRECVFROM,RETRI,ITAB,NRTM_T,RENUM,RENUM_SIZ,
      2                              NSNFIOLD,ESHIFT,MULTI_FVM,INTBUF_TAB(N),H3D_DATA,

@@ -65,11 +65,12 @@ c     parameter setting the size for the vector (orig version is 128)
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
 C-----------------------------------------------
+! Nspmd
 #include      "com01_c.inc"
+!Numnod
 #include      "com04_c.inc"
 #include      "param_c.inc"
 #include      "task_c.inc"
-#include      "ige3d_c.inc"
 C-----------------------------------------------
 C   ROLE DE LA ROUTINE:
 C   ===================
@@ -311,29 +312,30 @@ C=======================================================================
 
       CALL MY_BARRIER ! Barrier to wait task0 treatment
 
-      IF(FIRST_TEST(NIN)) THEN
-!During the first sorting, we use the reduced box
-!If too many (>5 %) nodes are outside the reduced box
-!then the box is not reduced anymore
-        CALL MY_BARRIER
-        IF(ITASK == 0) THEN
-          IF(CPT_VOX0 > 5*(REMOTE_S_NODE + NSN)/100) TO_TRIM(NIN) = .FALSE.
-          FIRST_TEST(NIN) = .FALSE.
-        ENDIF
-        CALL MY_BARRIER
-      ENDIF
-
+C      IF(FIRST_TEST(NIN)) THEN
+C!During the first sorting, we use the reduced box
+C!If too many (>5 %) nodes are outside the reduced box
+C!then the box is not reduced anymore
+C        CALL MY_BARRIER
+C        IF(ITASK == 0) THEN
+C          IF(CPT_VOX0 > 5*(REMOTE_S_NODE + NSN)/100) TO_TRIM(NIN) = .FALSE.
+C          FIRST_TEST(NIN) = .FALSE.
+C        ENDIF
+C        CALL MY_BARRIER
+C      ENDIF
 
 C=======================================================================
 C 3   FACE RECOVERY AND ENUMERATION OF CANDIDATE COUPLES
 C=======================================================================
       J_STOK = 0
       IF(FLAGREMNODE == 2) THEN
-        ALLOCATE(TAGREMNODE(NUMNOD+NUMFAKENODIGEO))
-        DO I=1,NUMNOD+NUMFAKENODIGEO
+        ALLOCATE(TAGREMNODE(NUMNOD))
+        DO I=1,NUMNOD
           TAGREMNODE(I) = 0
         ENDDO
       ENDIF
+       call my_barrier
+!$OMP DO SCHEDULE(DYNAMIC)
       DO NE=1,NRTM
         IF(STF(NE) == ZERO)CYCLE ! on ne retient pas les facettes detruites
         IF(FLAGREMNODE == 2) THEN
@@ -420,12 +422,14 @@ C=======================================================================
         !nnr0pelem = 0
         !nnrpelem = 0
 
+       if(ispmd==0 .AND. NE == 1226) write(6,"(7I10)") __LINE__,IX1,IX2,IY1,IY2,IZ1,IZ2 
+
+
         DO IZ = IZ1,IZ2
           DO IY = IY1,IY2
             DO IX = IX1,IX2
-
+              IF(I_MEM==2) CYCLE
               ! nbpelem = nbpelem + 1
-
               JJ = VOXEL(IX,IY,IZ)
               DO WHILE(JJ /= 0)
                 DELNOD = 0
@@ -501,6 +505,7 @@ C=======================================================================
                 PROV_N(J_STOK) = JJ
                 PROV_E(J_STOK) = NE
                 IF(J_STOK == NVSIZ)THEN
+!$OMP CRITICAL
                   CALL I7STO(
      1               NVSIZ ,IRECT  ,X     ,NSV   ,II_STOK,
      2               CAND_N,CAND_E ,MULNSN,NOINT ,MARGE  ,
@@ -510,11 +515,13 @@ C=======================================================================
      6               GAP_M ,GAPMIN ,GAPMAX,CURV_MAX,NIN  ,
      7               GAP_S_L,GAP_M_L,INTTH,DRAD,ITIED    ,
      8               CAND_F ,DGAPLOAD)
-                  IF(I_MEM==2)GOTO 100
+!$OMP END CRITICAL
                   J_STOK = 0
+
                 ENDIF
   200           CONTINUE
                 JJ = NEXT_NOD(JJ)
+                IF(I_MEM==2) JJ = 0
               ENDDO ! WHILE(JJ /= 0)
             ENDDO ! X
           ENDDO  ! Y
@@ -527,9 +534,11 @@ C=======================================================================
           ENDDO
         ENDIF
       ENDDO
+!$OMP END DO
 C=======================================================================
 C 4   STORAGE
 C=======================================================================
+!$OMP CRITICAL
       IF(J_STOK/=0)CALL I7STO(
      1              J_STOK,IRECT  ,X     ,NSV   ,II_STOK,
      2              CAND_N,CAND_E ,MULNSN,NOINT ,MARGE  ,
@@ -539,7 +548,7 @@ C=======================================================================
      6              GAP_M ,GAPMIN ,GAPMAX,CURV_MAX,NIN  ,
      7              GAP_S_L,GAP_M_L,INTTH,DRAD  ,ITIED    ,
      8              CAND_F ,DGAPLOAD)
-
+!$OMP END CRITICAL
 C=======================================================================
 C 5   VOXEL CLUSTERING  RESET
 C=======================================================================

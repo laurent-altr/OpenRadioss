@@ -73,6 +73,8 @@ C     REAL
      .   Z1(MVSIZ), Z2(MVSIZ), Z3(MVSIZ), Z4(MVSIZ),
      .   XI(MVSIZ), YI(MVSIZ), ZI(MVSIZ), STIF(MVSIZ), 
      .   PENE(MVSIZ), GAPV(MVSIZ)
+       INTEGER :: INACTI_L, ITIED_L, IFQ_L 
+       INTEGER :: J_START, J_END
       DATA ITYPE/7/
 C-----------------------------------------------
         CALL I7COR3T(J_STOK  ,X    ,IRECT ,NSV   ,PROV_E  ,
@@ -104,13 +106,12 @@ C numerotation tris precedent pour les noeuds non locaux (SPMD)
                   N = OLDNUM(N-NSN)+NSN
                   IF(N==NSN) N = NSN+NSNROLD+1
                 END IF
-                J = CAND_A(N)
-                DO WHILE(J<=CAND_A(N+1)-1)
+                J_START = CAND_A(N)
+                J_END = CAND_A(N+1)-1
+                DO J = J_START, J_END
                   IF(CAND_E(J)==NE)THEN
                     PENE(I)=ZERO
-                    J=CAND_A(N+1)
-                  ELSE
-                    J=J+1
+                    EXIT
                   ENDIF
                 ENDDO
               ENDIF
@@ -133,85 +134,20 @@ C
           II_STOK   = I_STOK + K_STOK
 #include "lockoff.inc"
 C-----------------------------------------------
-      IF(IFQ > 0 .AND. 
-     .   (INACTI == 5 .OR. INACTI ==6 .OR. INACTI ==7).AND.ITIED /=0)THEN
-        DO I=1,J_STOK
-          IF(PENE(I)/=ZERO)THEN
-            I_STOK = I_STOK + 1
-            CAND_N(I_STOK) = PROV_N(I)
-            CAND_E(I_STOK) = PROV_E(I)+ESHIFT
-            IFPEN(I_STOK)  = 0
-            CAND_P(I_STOK) = ZERO
-            CAND_F(1:8,I_STOK)=ZERO
-          ENDIF
-        ENDDO
-      ELSEIF(IFQ > 0 .AND. 
-     .   (INACTI == 5 .OR. INACTI ==6 .OR. INACTI ==7))THEN
-        DO I=1,J_STOK
-          IF(PENE(I)/=0.0)THEN
-            I_STOK = I_STOK + 1
-            CAND_N(I_STOK) = PROV_N(I)
-            CAND_E(I_STOK) = PROV_E(I)+ESHIFT
-            IFPEN(I_STOK)   = 0
-            CAND_P(I_STOK) = ZERO
-          ENDIF
-        ENDDO
-      ELSEIF(IFQ > 0..AND. ITIED /=0)THEN
-        DO I=1,J_STOK
-          IF(PENE(I)/=ZERO)THEN
-            I_STOK = I_STOK + 1
-            CAND_N(I_STOK) = PROV_N(I)
-            CAND_E(I_STOK) = PROV_E(I)+ESHIFT
-            IFPEN(I_STOK)  = 0
-            CAND_F(1:8,I_STOK)=ZERO
-          ENDIF
-        ENDDO
-      ELSEIF(IFQ > 0)THEN
-        DO I=1,J_STOK
-          IF(PENE(I)/=ZERO)THEN
-            I_STOK = I_STOK + 1
-            CAND_N(I_STOK) = PROV_N(I)
-            CAND_E(I_STOK) = PROV_E(I)+ESHIFT
-            IFPEN(I_STOK)  = 0
-          ENDIF
-        ENDDO
-      ELSEIF((INACTI==5.OR.INACTI==6.OR.INACTI==7).AND.ITIED /= 0)THEN
-        DO I=1,J_STOK
-          IF(PENE(I)/=ZERO)THEN
-            I_STOK = I_STOK + 1
-            CAND_N(I_STOK) = PROV_N(I)
-            CAND_E(I_STOK) = PROV_E(I)+ESHIFT
-            CAND_P(I_STOK) = ZERO
-            CAND_F(1:8,I_STOK)=ZERO
-          ENDIF
-        ENDDO
-      ELSEIF(INACTI==5.OR.INACTI==6.OR.INACTI==7)THEN
-        DO I=1,J_STOK
-          IF(PENE(I)/=ZERO)THEN
-            I_STOK = I_STOK + 1
-            CAND_N(I_STOK) = PROV_N(I)
-            CAND_E(I_STOK) = PROV_E(I)+ESHIFT
-            CAND_P(I_STOK) = ZERO
-          ENDIF
-        ENDDO
-      ELSEIF(ITIED /= 0)THEN
-        DO I=1,J_STOK
-          IF(PENE(I)/=ZERO)THEN
-            I_STOK = I_STOK + 1
-            CAND_N(I_STOK) = PROV_N(I)
-            CAND_E(I_STOK) = PROV_E(I)+ESHIFT
-            CAND_F(1:8,I_STOK)=ZERO
-          ENDIF
-        ENDDO
-      ELSE
-        DO I=1,J_STOK
-          IF(PENE(I)/=ZERO)THEN
-            I_STOK = I_STOK + 1
-            CAND_N(I_STOK) = PROV_N(I)
-            CAND_E(I_STOK) = PROV_E(I)+ESHIFT
-          ENDIF
-        ENDDO
-      ENDIF
+C    Thread-local copy of shared variables
 C-----------------------------------------------
+        INACTI_L = INACTI
+        ITIED_L = ITIED
+        IFQ_L = IFQ
+        DO I=1,J_STOK
+          IF(PENE(I)/=ZERO)THEN
+            I_STOK = I_STOK + 1
+            CAND_N(I_STOK) = PROV_N(I)
+            CAND_E(I_STOK) = PROV_E(I)+ESHIFT
+            IF(IFQ_L > 0)IFPEN(I_STOK)  = 0
+            IF(INACTI_L==5 .OR. INACTI_L==6 .OR. INACTI_L==7) CAND_P(I_STOK) = ZERO
+            IF(ITIED_L /= 0) CAND_F(1:8,I_STOK)=ZERO
+          ENDIF
+        ENDDO
       RETURN
       END
