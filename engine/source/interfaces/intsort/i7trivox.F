@@ -422,9 +422,6 @@ C=======================================================================
         !nnr0pelem = 0
         !nnrpelem = 0
 
-       if(ispmd==0 .AND. NE == 1226) write(6,"(7I10)") __LINE__,IX1,IX2,IY1,IY2,IZ1,IZ2 
-
-
         DO IZ = IZ1,IZ2
           DO IY = IY1,IY2
             DO IX = IX1,IX2
