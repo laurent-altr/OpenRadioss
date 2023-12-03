@@ -573,10 +573,7 @@ C=======================================================================
       ! Barrier to avoid reinitialization before end of sorting
       CALL MY_BARRIER
       IF(TOTAL_NB_NRTM>0) THEN
-        NSNF = 1 + ITASK*NB_VOXEL_ON / NTHREAD
-        NSNL = (ITASK+1)*NB_VOXEL_ON / NTHREAD
-        IF(ITASK+1==NTHREAD) NSNL=NB_VOXEL_ON
-        DO JJ = NSNF, NSNL
+        DO JJ = 1, NB_VOXEL_ON
            J = LIST_NB_VOXEL_ON(JJ)
            K = J
 C         (IIX-1)*(NBY+2)*(NBZ+2)+(IIY-1)*(NBZ+2)+(IIZ-1)                          

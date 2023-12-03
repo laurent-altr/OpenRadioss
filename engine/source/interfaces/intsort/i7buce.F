@@ -367,7 +367,7 @@ C (en // SMP il y a possibilite de redondance de traitement mais no pb)
       DO I=INIVOXEL,(NBX+2)*(NBY+2)*(NBZ+2)
         VOXEL1(I)=0
       ENDDO
-      ALLOCATE(NEXT_NOD(NSN+NSNR))
+      IF(ITASK == 0) ALLOCATE(NEXT_NOD(NSN+NSNR))
       call MY_BARRIER
       INIVOXEL = MAX(INIVOXEL,(NBX+2)*(NBY+2)*(NBZ+2)+1)
        CALL I7TRIVOX(
@@ -384,7 +384,10 @@ C (en // SMP il y a possibilite de redondance de traitement mais no pb)
      B   DGAPLOAD,
      C   TOTAL_NB_NRTM, NSPMD, NUMNOD, XREM, SIZE(XREM,1), 
      D   IREM, size(irem,1), NEXT_NOD)
-         IF(ALLOCATED(NEXT_NOD)) DEALLOCATE(NEXT_NOD)
+
+        IF(ITASK==0)  THEN
+            IF(ALLOCATED(NEXT_NOD)) DEALLOCATE(NEXT_NOD)
+        ENDIF
  
  234  CONTINUE
 
