@@ -20,6 +20,9 @@ Copyright>
 Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
+       MODULE I7TRIVOX_MOD 
+
+        CONTAINS
 Chd|====================================================================
 Chd|  I7TRIVOX                      source/interfaces/intsort/i7trivox.F
 Chd|-- called by -----------
@@ -38,19 +41,20 @@ Chd|====================================================================
      2      IRECT  ,X           ,STF     ,STFN     ,XYZM     ,
      3      NSV    ,II_STOK     ,CAND_N  ,ESHIFT   ,CAND_E   ,
      4      MULNSN ,NOINT       ,TZINF   ,GAP_S_L  ,GAP_M_L  ,
-     5      VOXEL  ,NBX         ,NBY     ,NBZ      ,INTTH    ,
+     5      VOXEL  ,NBX         ,NBY     ,NBZ      ,
      6      INACTI ,IFQ         ,CAND_A  ,CAND_P   ,IFPEN    ,
      7      NRTM   ,NSNROLD     ,IGAP    ,GAP      ,GAP_S    ,
      8      GAP_M  ,GAPMIN      ,GAPMAX  ,MARGE    ,CURV_MAX ,
      9      NIN    ,ITASK       ,BGAPSMX ,KREMNOD  ,REMNOD   ,
      A      ITAB   ,FLAGREMNODE ,DRAD    ,ITIED    ,CAND_F   ,
-     B      DGAPLOAD,REMOTE_S_NODE,LIST_REMOTE_S_NODE,
-     C      TOTAL_NB_NRTM)
+     B      DGAPLOAD,
+     C      TOTAL_NB_NRTM, NSPMD, NUMNOD, XREM     ,s_xrem, 
+     E      IREM, s_irem, NEXT_NOD)
 C============================================================================
 C   M o d u l e s
 C-----------------------------------------------
       USE MESSAGE_MOD
-      USE TRI7BOX
+      USE I7STO_MOD
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -59,16 +63,9 @@ C-----------------------------------------------
 C   G l o b a l   P a r a m e t e r s
 C-----------------------------------------------
 #include      "mvsiz_p.inc"
-c     parameter setting the size for the vector (orig version is 128)
-      INTEGER NVECSZ
-      PARAMETER (NVECSZ = MVSIZ)
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
 C-----------------------------------------------
-! Nspmd
-#include      "com01_c.inc"
-!Numnod
-#include      "com04_c.inc"
 #include      "param_c.inc"
 #include      "task_c.inc"
 C-----------------------------------------------
@@ -109,20 +106,64 @@ C                       noeud au dernier
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
-      INTEGER I_MEM,ESHIFT,NSN,ISZNSNR,NSNROLD,NIN,ITASK,
-     .        MULNSN,NOINT,INACTI,IFQ,NSNR,IGAP,NBX,NBY,NBZ,
-     .        NSV(*),CAND_N(*),CAND_E(*),CAND_A(*),IFPEN(*),RENUM(*),
-     .        INTTH,IRECT(4,*), VOXEL(NBX+2,NBY+2,NBZ+2),II_STOK,
-     .        KREMNOD(*),REMNOD(*),ITAB(*),FLAGREMNODE,ITIED
-      INTEGER, INTENT(in) :: NRTM !< number of segments per threads
-      INTEGER, INTENT(in) :: TOTAL_NB_NRTM !< total number of segments
-      my_real
-     .   X(3,*),XYZM(12),CAND_P(*),STF(*),STFN(*),GAP_S(*),GAP_M(*),
-     .   TZINF,MARGE,GAP,GAPMIN,GAPMAX,BGAPSMX,
-     .   CURV_MAX(*),GAP_S_L(*),GAP_M_L(*),CAND_F(*)
-      my_real , INTENT(IN) :: DRAD,DGAPLOAD
-      INTEGER, INTENT(inout) :: REMOTE_S_NODE
-      INTEGER, DIMENSION(NSNR), INTENT(inout) :: LIST_REMOTE_S_NODE
+      integer, intent(inout) :: i_mem !< error code when not enough memory
+      integer, intent(in) :: eshift !< openmp shift for main segments 
+      integer, intent(in), value :: nsn !< number of secondary nodes
+      integer, intent(in), value :: nsnr !< current number of remote secondary nodes
+      integer, intent(in), value :: nsnrold !< old number of remote secondary nodes
+      integer, intent(in), value :: isznsnr !< size of oldnum
+      integer, intent(in), value :: nrtm !< number of segments per threads
+      integer, intent(in), value :: total_nb_nrtm !< total number of segments
+      integer, intent(in), value :: nin !< internal interface number
+      integer, intent(in), value :: noint !< user interface number
+      integer, intent(in), value :: itask !< id of the current task
+      integer, intent(in), value :: nbx !< number of voxels in x
+      integer, intent(in), value :: nby !< number of voxels in y
+      integer, intent(in), value :: nbz !< number of voxels in z
+      integer, intent(in), value :: inacti !< inactivation of initial penetrations
+      integer, intent(in), value :: ifq !< friction model ?
+      integer, intent(in), value :: igap !< gap model ?
+      integer, intent(in), value :: flagremnode !< flag for removed nodes?
+      integer, intent(in), value :: itied !< tied contact ?
+      integer, intent(in), value :: nspmd !< number of processors
+      integer, intent(in), value :: numnod !< number of nodes
+      integer, intent(in), value :: s_xrem !< size of xrem
+      integer, intent(in), value :: s_irem !< size of xrem
+      integer, intent(in) :: nsv(nsn) !< global secondary node numbers
+      integer, intent(in) :: renum(*) !< renumbering ? 
+      integer, intent(in) :: kremnod(*) !< list of removed nodes
+      integer, intent(in) :: remnod(*) !< list of removed nodes
+      integer, intent(in) :: itab(numnod) !< user id of nodes
+      integer, intent(in) :: irect(4,nrtm) !< list of node for each segment
+      integer, intent(inout) :: ii_stok !< number of candidates found
+      integer, intent(inout) :: mulnsn !< maximum numbrer of candidates (size of cand_n)
+      integer, intent(inout) :: cand_n(*) !< list of candidates (secodnary)
+      integer, intent(inout) :: cand_e(*) !< list of candidates (main)
+      integer, intent(inout) :: cand_a(*) !< ??
+      integer, intent(inout) :: ifpen(*) !< something related to friction??
+      integer, intent(inout) :: irem(s_irem,nsnr) !< list of remote
+      integer, intent(inout) :: voxel(nbx+2,nby+2,nbz+2)
+      integer, intent(inout) :: NEXT_NOD(nsn+nsnr)
+      my_real, intent(in) :: x(3,numnod) !< coordinates of nodes
+      my_real, intent(inout) :: cand_p(*) !< penetration ??
+      my_real, intent(in), value :: gap !< gap for
+      my_real, intent(in) :: gap_s(nsn) !< gap for secondary nodes
+      my_real, intent(in) :: gap_m(nrtm) !< gap for main nodes
+      my_real, intent(in) :: gap_s_l(nsn) !< gap for secondary nodes (???)
+      my_real, intent(in) :: gap_m_l(nrtm) !< gap for main nodes (???)
+      my_real, intent(in), value :: gapmin !< minimum gap
+      my_real, intent(in), value :: gapmax !< maximum gap
+      my_real, intent(in), value :: bgapsmx!< overestimation of gap_s
+      my_real, intent(in), value :: marge !< margin
+      my_real, intent(in), value :: tzinf !< some kind of length for "zone of influence" ?
+      my_real, intent(in) :: curv_max(nrtm) !< maximum curvature
+      my_real, intent(in) :: xyzm(12) !< bounding box
+      my_real, intent(in), value :: drad !< radiation distance (thermal analysis)
+      my_real, intent(in), value :: dgapload !< gap load (???)
+      my_real, intent(inout) :: cand_f(*) !< related to tied contact, cand force???
+      my_real, intent(inout) :: stf(nrtm) !< stiffness of segments
+      my_real, intent(inout) :: stfn(nsn) !< stiffness secondary nodes
+      my_real, intent(inout) :: xrem(s_xrem,nsnr) !< coordinates of remote secondary nodes
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
@@ -140,7 +181,7 @@ c provisoire
       INTEGER  LAST_NOD(NSN+NSNR)
       INTEGER  IX,IY,IZ,NEXT,M1,M2,M3,M4,
      .         IX1,IY1,IZ1,IX2,IY2,IZ2
-      INTEGER,  DIMENSION(:),ALLOCATABLE :: IIX,IIY,IIZ
+      INTEGER :: IIX,IIY,IIZ
       my_real
      .   XMINB,YMINB,ZMINB,XMAXB,YMAXB,ZMAXB,
      .   XMINE,YMINE,ZMINE,XMAXE,YMAXE,ZMAXE,AAA
@@ -148,23 +189,14 @@ c provisoire
       LOGICAL TEST_V0
       INTEGER FIRST,NEW,LAST,IERROR
       LOGICAL DBG_type18_fvm
-      SAVE IIX,IIY,IIZ
+      integer :: NB_VOXEL_ON !< number of remote nodes in the bounding box
+      INTEGER, dimension(:), allocatable :: LIST_NB_VOXEL_ON
+
 C-----------------------------------------------
+      allocate(LIST_NB_VOXEL_ON((NBX+2)*(NBY+2)*(NBZ+2)))
       IF(ITASK == 0)THEN
-        REMOTE_S_NODE = 0
+        NB_VOXEL_ON = 0
         CPT_VOX0 = 0
-        ALLOCATE(NEXT_NOD(NSN+NSNR),STAT=IERROR)
-        IF(IERROR/=0) THEN
-          CALL ANCMSG(MSGID=19,ANMODE=ANINFO,
-     .        C1='(/INTER/TYPE7)')
-          CALL ARRET(2)
-        ENDIF
-        ALLOCATE(IIX(NSN+NSNR),IIY(NSN+NSNR),IIZ(NSN+NSNR),STAT=IERROR)
-        IF(IERROR/=0) THEN
-          CALL ANCMSG(MSGID=19,ANMODE=ANINFO,
-     .        C1='(/INTER/TYPE7)')
-          CALL ARRET(2)
-        ENDIF
       END IF
 
       CALL MY_BARRIER !Barrier to wait init voxel and allocation NEX_NOD
@@ -178,27 +210,12 @@ C-----------------------------------------------
       YMAX = XYZM(5)
       ZMAX = XYZM(6)
 
-      !dev future: xminb plus grand que xmin...
-      IF( TO_TRIM(NIN) ) THEN
-        XMINB = XYZM(7)
-        YMINB = XYZM(8)
-        ZMINB = XYZM(9)
-        XMAXB = XYZM(10)
-        YMAXB = XYZM(11)
-        ZMAXB = XYZM(12)
-      ELSE
-! we use the global bounding box
-! the box reduction seemed inefficient
-! at the first sorting
-! because too many SECONDARY nodes were outside
-! the reduced box
-        XMINB = XMIN
-        YMINB = YMIN
-        ZMINB = ZMIN
-        XMAXB = XMAX
-        YMAXB = YMAX
-        ZMAXB = ZMAX
-      ENDIF
+      XMINB = XYZM(7)
+      YMINB = XYZM(8)
+      ZMINB = XYZM(9)
+      XMAXB = XYZM(10)
+      YMAXB = XYZM(11)
+      ZMAXB = XYZM(12)
 
       ! En SPMD, pour inacti ou IFQ, retrouve ancienne numerotation des candidats non locaux
       IF(NSPMD>1.AND.(INACTI==5.OR.INACTI==6.OR.INACTI==7.OR.IFQ>0.OR.ITIED/=0)) THEN
@@ -210,11 +227,11 @@ C 1   NODE CLUSTERING
 C=======================================================================
       IF(ITASK==0.AND.TOTAL_NB_NRTM>0)THEN
         !==========LAGRANGIAN and STAGGERED ALE==========!
-        TEST_V0 = FIRST_TEST(NIN)
+C       TEST_V0 = FIRST_TEST(NIN)
         DO I=1,NSN
-          IIX(I)=0
-          IIY(I)=0
-          IIZ(I)=0
+          IIX=0
+          IIY=0
+          IIZ=0
           IF(STFN(I) == ZERO)CYCLE
           J=NSV(I)
           !C Optimisation // recherche les noeuds compris dans xmin xmax des
@@ -225,23 +242,26 @@ C=======================================================================
           IF(X(2,J) > YMAX)  CYCLE
           IF(X(3,J) < ZMIN)  CYCLE
           IF(X(3,J) > ZMAX)  CYCLE
-          IIX(I)=INT(NBX*(X(1,J)-XMINB)/(XMAXB-XMINB))
-          IIY(I)=INT(NBY*(X(2,J)-YMINB)/(YMAXB-YMINB))
-          IIZ(I)=INT(NBZ*(X(3,J)-ZMINB)/(ZMAXB-ZMINB))
-          IIX(I)=MAX(1,2+MIN(NBX,IIX(I)))
-          IIY(I)=MAX(1,2+MIN(NBY,IIY(I)))
-          IIZ(I)=MAX(1,2+MIN(NBZ,IIZ(I)))
-          FIRST = VOXEL(IIX(I),IIY(I),IIZ(I))
-          IF(TEST_V0) THEN
+          IIX=INT(NBX*(X(1,J)-XMINB)/(XMAXB-XMINB))
+          IIY=INT(NBY*(X(2,J)-YMINB)/(YMAXB-YMINB))
+          IIZ=INT(NBZ*(X(3,J)-ZMINB)/(ZMAXB-ZMINB))
+          IIX=MAX(1,2+MIN(NBX,IIX))
+          IIY=MAX(1,2+MIN(NBY,IIY))
+          IIZ=MAX(1,2+MIN(NBZ,IIZ))
+          FIRST = VOXEL(IIX,IIY,IIZ)
+          IF(.FALSE.) THEN
 ! count the number of SECONDARY nodes outiside the reduced box
-            IF(IIX(I) ==  1    .OR.  IIY(I) ==  1    .OR. IIZ(I) == 1 .AND.
-     .         IIX(I) ==  NBX+2 .OR. IIY(I) == NBY+2 .OR. IIZ(I) == NBZ+2) THEN
+            IF(IIX ==  1    .OR.  IIY ==  1    .OR. IIZ == 1 .AND.
+     .         IIX ==  NBX+2 .OR. IIY == NBY+2 .OR. IIZ == NBZ+2) THEN
               CPT_VOX0 = CPT_VOX0 +1
             ENDIF
           ENDIF
           IF(FIRST == 0)THEN
             !empty cell
-            VOXEL(IIX(I),IIY(I),IIZ(I)) = I ! first
+            NB_VOXEL_ON = NB_VOXEL_ON + 1
+            ! 1D version of 3D potition, indexes starts at 1
+            LIST_NB_VOXEL_ON(NB_VOXEL_ON) = (IIX-1)*(NBY+2)*(NBZ+2)+(IIY-1)*(NBZ+2)+(IIZ-1)                          
+            VOXEL(IIX,IIY,IIZ) = I ! first
             NEXT_NOD(I)                 = 0 ! last one
             LAST_NOD(I)                 = 0 ! no last
           ELSEIF(LAST_NOD(FIRST) == 0)THEN
@@ -272,27 +292,29 @@ C=======================================================================
           IF(XREM(3,J) < ZMIN)  CYCLE
           IF(XREM(3,J) > ZMAX)  CYCLE
 
-          REMOTE_S_NODE = REMOTE_S_NODE + 1
-          LIST_REMOTE_S_NODE( REMOTE_S_NODE ) = J
-          IIX(NSN+J)=INT(NBX*(XREM(1,J)-XMINB)/(XMAXB-XMINB))
-          IIY(NSN+J)=INT(NBY*(XREM(2,J)-YMINB)/(YMAXB-YMINB))
-          IIZ(NSN+J)=INT(NBZ*(XREM(3,J)-ZMINB)/(ZMAXB-ZMINB))
-          IIX(NSN+J)=MAX(1,2+MIN(NBX,IIX(NSN+J)))
-          IIY(NSN+J)=MAX(1,2+MIN(NBY,IIY(NSN+J)))
-          IIZ(NSN+J)=MAX(1,2+MIN(NBZ,IIZ(NSN+J)))
+          IIX=INT(NBX*(XREM(1,J)-XMINB)/(XMAXB-XMINB))
+          IIY=INT(NBY*(XREM(2,J)-YMINB)/(YMAXB-YMINB))
+          IIZ=INT(NBZ*(XREM(3,J)-ZMINB)/(ZMAXB-ZMINB))
+          IIX=MAX(1,2+MIN(NBX,IIX))
+          IIY=MAX(1,2+MIN(NBY,IIY))
+          IIZ=MAX(1,2+MIN(NBZ,IIZ))
 
-          FIRST = VOXEL(IIX(NSN+J),IIY(NSN+J),IIZ(NSN+J))
+          FIRST = VOXEL(IIX,IIY,IIZ)
           IF(TEST_V0) THEN
 ! count the number of SECONDARY nodes outiside the reduced box
-            IF(IIX(J+NSN) ==  1     .OR. IIY(J+NSN) ==  1     .OR. IIZ(J+NSN) == 1 .AND.
-     .         IIX(J+NSN) ==  NBX+2 .OR. IIY(J+NSN) ==  NBY+2 .OR. IIZ(J+NSN) == NBZ+2) THEN
+            IF(IIX ==  1     .OR. IIY ==  1     .OR. IIZ == 1 .AND.
+     .         IIX ==  NBX+2 .OR. IIY ==  NBY+2 .OR. IIZ == NBZ+2) THEN
               CPT_VOX0 = CPT_VOX0 +1
             ENDIF
           ENDIF
 
           IF(FIRST == 0)THEN
             ! empty cell
-            VOXEL(IIX(NSN+J),IIY(NSN+J),IIZ(NSN+J)) = NSN+J ! first
+            NB_VOXEL_ON = NB_VOXEL_ON + 1
+            ! 1D version of 3D potition
+            LIST_NB_VOXEL_ON( NB_VOXEL_ON ) = (IIX-1) * (NBY+2) * (NBZ+2) + (IIY-1) * (NBZ+2) + (IIZ-1)                          
+
+            VOXEL(IIX,IIY,IIZ) = NSN+J ! first
             NEXT_NOD(NSN+J)     = 0 ! last one
             LAST_NOD(NSN+J)     = 0 ! no last
           ELSEIF(LAST_NOD(FIRST) == 0)THEN
@@ -318,7 +340,7 @@ C!If too many (>5 %) nodes are outside the reduced box
 C!then the box is not reduced anymore
 C        CALL MY_BARRIER
 C        IF(ITASK == 0) THEN
-C          IF(CPT_VOX0 > 5*(REMOTE_S_NODE + NSN)/100) TO_TRIM(NIN) = .FALSE.
+C          IF(CPT_VOX0 > 5*(NB_VOXEL_ON + NSN)/100) TO_TRIM(NIN) = .FALSE.
 C          FIRST_TEST(NIN) = .FALSE.
 C        ENDIF
 C        CALL MY_BARRIER
@@ -502,7 +524,6 @@ C=======================================================================
                 PROV_N(J_STOK) = JJ
                 PROV_E(J_STOK) = NE
                 IF(J_STOK == NVSIZ)THEN
-!$OMP CRITICAL
                   CALL I7STO(
      1               NVSIZ ,IRECT  ,X     ,NSV   ,II_STOK,
      2               CAND_N,CAND_E ,MULNSN,NOINT ,MARGE  ,
@@ -510,9 +531,8 @@ C=======================================================================
      4               IFQ   ,CAND_A ,CAND_P,IFPEN ,NSN    ,
      5               OLDNUM,NSNROLD,IGAP  ,GAP   ,GAP_S  ,
      6               GAP_M ,GAPMIN ,GAPMAX,CURV_MAX,NIN  ,
-     7               GAP_S_L,GAP_M_L,INTTH,DRAD,ITIED    ,
+     7               GAP_S_L,GAP_M_L,DRAD,ITIED    ,
      8               CAND_F ,DGAPLOAD)
-!$OMP END CRITICAL
                   J_STOK = 0
 
                 ENDIF
@@ -543,7 +563,7 @@ C=======================================================================
      4              IFQ   ,CAND_A ,CAND_P,IFPEN ,NSN    ,
      5              OLDNUM,NSNROLD,IGAP  ,GAP   ,GAP_S  ,
      6              GAP_M ,GAPMIN ,GAPMAX,CURV_MAX,NIN  ,
-     7              GAP_S_L,GAP_M_L,INTTH,DRAD  ,ITIED    ,
+     7              GAP_S_L,GAP_M_L,DRAD  ,ITIED    ,
      8              CAND_F ,DGAPLOAD)
 !$OMP END CRITICAL
 C=======================================================================
@@ -553,20 +573,29 @@ C=======================================================================
       ! Barrier to avoid reinitialization before end of sorting
       CALL MY_BARRIER
       IF(TOTAL_NB_NRTM>0) THEN
-        NSNF = 1 + ITASK*NSN / NTHREAD
-        NSNL = (ITASK+1)*NSN / NTHREAD
-        DO I=NSNF,NSNL
-            IF(IIX(I)/=0)THEN
-              VOXEL(IIX(I),IIY(I),IIZ(I))=0
-            ENDIF
-        ENDDO
-        NSNF = 1 + ITASK*REMOTE_S_NODE / NTHREAD
-        NSNL = (ITASK+1)*REMOTE_S_NODE / NTHREAD
-        IF(ITASK+1==NTHREAD) NSNL=REMOTE_S_NODE
+        NSNF = 1 + ITASK*NB_VOXEL_ON / NTHREAD
+        NSNL = (ITASK+1)*NB_VOXEL_ON / NTHREAD
+        IF(ITASK+1==NTHREAD) NSNL=NB_VOXEL_ON
         DO JJ = NSNF, NSNL
-            J = LIST_REMOTE_S_NODE(JJ)
-            VOXEL(IIX(NSN+J),IIY(NSN+J),IIZ(NSN+J))=0
+           J = LIST_NB_VOXEL_ON(JJ)
+           K = J
+C         (IIX-1)*(NBY+2)*(NBZ+2)+(IIY-1)*(NBZ+2)+(IIZ-1)                          
+C         (NBZ+2)*( (IIX-1)*(NBY+2) +(IIY-1) )+(IIZ-1)
+           IIZ =  MOD(K,NBZ+2) + 1 
+           ! IZ [1,NBZ+2]
+           K = (K-IIZ+1)/(NBZ+2)
+           IIY =  MOD(K,NBY+2) + 1 
+           K = (K-IIY+1)/(NBY+2)
+           IIX = MOD(K,NBX+2) + 1
+C          IF(VOXEL(IIX,IIY,IIZ) == 0) THEN
+C            write(6,*) 'ERROR in I7TRI: VOXEL(',IIX,',',IIY,',',IIZ,')=0'
+C            write(6,*)  "J=",J,"JJ=",JJ
+C            call flush(6)
+C            stop
+C          ENDIF
+           VOXEL(IIX,IIY,IIZ) = 0
         ENDDO
+C       VOXEL(1:NBX+2,1:NBY+2,1:NBZ+2)=0
       ENDIF
       CALL MY_BARRIER()
 
@@ -598,19 +627,16 @@ C=======================================================================
 C=======================================================================
 C 7   DEALLOCATE
 C=======================================================================
-      IF(ITASK == 0)THEN
-        DEALLOCATE(NEXT_NOD)
-        DEALLOCATE(IIX)
-        DEALLOCATE(IIY)
-        DEALLOCATE(IIZ)
-      ENDIF
       IF(FLAGREMNODE == 2) THEN
         IF(ALLOCATED(TAGREMNODE)) DEALLOCATE(TAGREMNODE)
       ENDIF
+      DEALLOCATE(LIST_NB_VOXEL_ON)
 
 
       RETURN
       END
+
+      END MODULE
 
 
 

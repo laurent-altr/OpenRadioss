@@ -146,7 +146,7 @@ C-----------------------------------------------
             ! ---------------------------
             ! timer of current interface N : end
             IF(IMONM > 0) THEN
-                IF(ITASK==0) CALL INT_STOPTIME(INTBUF_TAB(N)%METRIC,I_MAIN_TRI)   
+              IF(ITASK==0) CALL INT_STOPTIME(INTBUF_TAB(N)%METRIC,I_MAIN_TRI)   
             ENDIF
             ! ---------------------------
         ENDDO

@@ -29,6 +29,8 @@ Chd|-- calls ---------------
 Chd|        I7COR3T                       source/interfaces/int07/i7cor3t.F
 Chd|        I7PEN3                        source/interfaces/intsort/i7pen3.F
 Chd|====================================================================
+      MODULE I7STO_MOD
+        contains
       SUBROUTINE I7STO(
      1      J_STOK,IRECT  ,X     ,NSV   ,II_STOK,
      2      CAND_N,CAND_E ,MULNSN,NOINT ,MARGE  ,
@@ -36,7 +38,7 @@ Chd|====================================================================
      4      IFQ   ,CAND_A ,CAND_P,IFPEN ,NSN    ,
      5      OLDNUM,NSNROLD,IGAP  ,GAP   ,GAP_S  ,
      6      GAP_M ,GAPMIN ,GAPMAX,CURV_MAX,NIN  ,
-     7      GAP_S_L,GAP_M_L,INTTH,DRAD,ITIED    ,
+     7      GAP_S_L,GAP_M_L,DRAD,ITIED    ,
      8      CAND_F ,DGAPLOAD)
 C============================================================================
 C-----------------------------------------------
@@ -51,7 +53,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
-      INTEGER I_MEM, NSN, NSNROLD,IGAP,NIN,INTTH,ITIED
+      INTEGER I_MEM, NSN, NSNROLD,IGAP,NIN,ITIED
       INTEGER J_STOK,MULNSN,NOINT,INACTI,IFQ,ESHIFT
       INTEGER IRECT(4,*),NSV(*),CAND_N(*),CAND_E(*),CAND_A(*)
       INTEGER PROV_N(MVSIZ),PROV_E(MVSIZ),IFPEN(*), OLDNUM(*),
@@ -84,10 +86,10 @@ C-----------------------------------------------
      4               XI      ,YI   ,ZI    ,STIF  ,IX1     ,
      5               IX2     ,IX3  ,IX4   ,NSN   ,GAP_S   ,
      6               GAP_M   ,GAPV ,GAPMAX,GAPMIN,CURV_MAX,
-     7               ITYPE   ,NIN  ,GAP_S_L,GAP_M_L,INTTH ,
+     7               ITYPE   ,NIN  ,GAP_S_L,GAP_M_L,
      8               DRAD    ,DGAPLOAD)
 C-----------------------------------------------
-        CALL I7PEN3(J_STOK ,MARGE ,X1    ,X2     ,X3   ,
+        CALL I7_PENETRATION(J_STOK ,MARGE ,X1    ,X2     ,X3   ,
      .               X4    ,Y1    ,Y2    ,Y3     ,Y4   ,
      .               Z1    ,Z2    ,Z3    ,Z4     ,XI   ,
      .               YI    ,ZI    ,PENE  ,IX1    ,IX2  ,
@@ -151,3 +153,4 @@ C-----------------------------------------------
         ENDDO
       RETURN
       END
+      END MODULE I7STO_MOD

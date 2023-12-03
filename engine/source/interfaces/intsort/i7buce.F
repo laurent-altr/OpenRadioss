@@ -199,6 +199,7 @@ C============================================================================
 C   M o d u l e s
 C-----------------------------------------------
       USE TRI7BOX
+      USE I7TRIVOX_MOD , ONLY : I7TRIVOX
       USE MESSAGE_MOD
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
@@ -211,6 +212,7 @@ C-----------------------------------------------
 #include      "units_c.inc"
 #include      "warn_c.inc"
 #include      "com01_c.inc"
+#include      "com04_c.inc"
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
@@ -365,20 +367,24 @@ C (en // SMP il y a possibilite de redondance de traitement mais no pb)
       DO I=INIVOXEL,(NBX+2)*(NBY+2)*(NBZ+2)
         VOXEL1(I)=0
       ENDDO
+      ALLOCATE(NEXT_NOD(NSN+NSNR))
+      call MY_BARRIER
       INIVOXEL = MAX(INIVOXEL,(NBX+2)*(NBY+2)*(NBZ+2)+1)
        CALL I7TRIVOX(
      1   NSN     ,RENUM    ,NSNR     ,ISZNSNR  ,I_MEM   ,
      2   IRECT   ,X        ,STF      ,STFN     ,XYZM    ,
      3   NSV     ,II_STOK  ,CAND_N   ,ESHIFT   ,CAND_E  ,
      4   NCONTACT,NOINT    ,TZINF    ,GAP_S_L  ,GAP_M_L ,
-     5   VOXEL1  ,NBX      ,NBY      ,NBZ      ,INTTH   ,
+     5   VOXEL1  ,NBX      ,NBY      ,NBZ      ,
      6   INACTI  ,IFQ      ,MWAG(IP0),CAND_P   ,IFPEN   ,
      7   NRTM    ,NSNROLD  ,IGAP     ,GAP      ,GAP_S   ,
      8   GAP_M   ,GAPMIN   ,GAPMAX   ,MARGE    ,CURV_MAX,
      9   NIN     ,ITASK    ,BGAPSMX  ,KREMNOD  ,REMNOD  ,
      A   ITAB    ,FLAGREMNODE,DRAD   ,ITIED    ,CAND_F  ,
-     B   DGAPLOAD,REMOTE_S_NODE,LIST_REMOTE_S_NODE,
-     C   TOTAL_NB_NRTM)
+     B   DGAPLOAD,
+     C   TOTAL_NB_NRTM, NSPMD, NUMNOD, XREM, SIZE(XREM,1), 
+     D   IREM, size(irem,1), NEXT_NOD)
+         IF(ALLOCATED(NEXT_NOD)) DEALLOCATE(NEXT_NOD)
  
  234  CONTINUE
 
