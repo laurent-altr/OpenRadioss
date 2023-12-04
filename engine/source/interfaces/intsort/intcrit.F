@@ -289,7 +289,7 @@ c         D8 = XX+XY+XZP
 
          VX = MAX(VSLV(1,I)-VMSR(4,I),VMSR(1,I)-VSLV(4,I),ZERO)
          VY = MAX(VSLV(2,I)-VMSR(5,I),VMSR(2,I)-VSLV(5,I),ZERO)
-         VZ = MAX(VSLV(3,I)-VMSR(6,I),VMSR(3,I)-VSLV(6,I),ZERO)
+         VZ = MAX(VSLV(3,I)-VMSR(6,I),VMSR(3,I)-VSL/BV(6,I),ZERO)
          VV = SQRT(VX**2+VY**2+VZ**2)
 
          TZINFL = INTBUF_TAB(I)%VARIABLES(8)
@@ -302,10 +302,17 @@ c velocity between local main nodes and ALL secnd nodes
 c (no need to communicate VMAXDT in SPMD)
          VMAXDT = ONEP01*VV*DT1
          INTBUF_TAB(I)%VARIABLES(24) = VMAXDT
+         ! MARGE0 defined at starter I24BUC1  as BUMULT * DD 
+         ! where BUMULT is a an arbitrary parameter (0.2, 0.3 or 0.4)
+         ! DD =  average length of edges of main segments
          MARGE0 = INTBUF_TAB(I)%VARIABLES(25)
 
          PMAX_GAP = INTBUF_TAB(I)%VARIABLES(23)
 
+
+         ! D0 = maximum relative displacements between main and secondary
+         ! MARGE0 = some kind of safety margin, we already have the possible candidates within this margin
+         ! DELTA_PMAX_GAP = related to penetration 
          DIST0 = MARGE0 - ONEP01*(D0 + VMAXDT + DELTA_PMAX_GAP(I))
 
          INTBUF_TAB(I)%VARIABLES(5) = DIST0
@@ -342,9 +349,6 @@ c  deplacement relatif
          XX = MAX(XSLV(1,I)-XMSR(4,I),XMSR(1,I)-XSLV(4,I),ZERO)
          XY = MAX(XSLV(2,I)-XMSR(5,I),XMSR(2,I)-XSLV(5,I),ZERO)
          XZ = MAX(XSLV(3,I)-XMSR(6,I),XMSR(3,I)-XSLV(6,I),ZERO)
-c
-c        DEPLA_MAX + MAX(gap,pene-gap) < 
-c             min(D0+max(gapmax,penmax), max(D1,D2) , max(D3:D8))
 
          D0 = SQRT(XX**2+XY**2+XZ**2)
          VX = MAX(VSLV(1,I)-VMSR(4,I),VMSR(1,I)-VSLV(4,I),ZERO)
@@ -382,8 +386,6 @@ c (no need to communicate VMAXDT in SPMD)
      . LARGEST VELOCITY"
 C          IF(VMAXDT > HUNDRED * MARGE0) CALL ARRET(2)
          ENDIF
-
-
 
 
          IF(DIST0<=ZERO.OR.KFORSMS/=0) THEN
