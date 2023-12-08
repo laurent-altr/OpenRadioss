@@ -74,14 +74,6 @@ C--------------------------------------------------
         REAL = MPI_REAL
         IF(IR4R8==2) REAL = MPI_DOUBLE_PRECISION
 C
-        IF(ICRAY==1) THEN
-          INTSIZE = 8
-          IFLSIZE = 8
-        ELSE
-          INTSIZE = 4
-          IFLSIZE = 4*IR4R8
-        ENDIF
-C
         KEY = 0
         CALL MPI_INITIALIZED(KEY, IERR)
 
@@ -369,13 +361,7 @@ C
         REAL = 4
         IF(IR4R8==2) REAL = 8
 C
-        IF(ICRAY==1) THEN
-          INTSIZE = 8
-          IFLSIZE = 8
-        ELSE
-          INTSIZE = 4
-          IFLSIZE = 4*IR4R8
-        ENDIF
+        IFLSIZE = 4*IR4R8
 C
         NNODES= 1
         ISPMD = 0
