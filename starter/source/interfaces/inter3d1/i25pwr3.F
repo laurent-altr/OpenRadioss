@@ -52,7 +52,7 @@ C-----------------------------------------------
       INTEGER , INTENT(OUT) :: ICONT_I(NSN)
 C     REAL
       my_real
-     .   STFN(*),X(3,*),PENE_OLD(5,*)
+     .   STFN(*),X(3,*),PENE_OLD(8,*)
       INTEGER ID
       CHARACTER*nchartitle,
      .   TITR

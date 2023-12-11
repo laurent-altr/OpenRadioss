@@ -73,7 +73,7 @@ C-----------------------------------------------
      .        GAP,PMAX_GAP,
      .        X(3,*),GAP_S(*),GAP_M(*),STFN(*),STF(*),
      .        V(3,*),SECND_FR(6,*),TIME_S(*),
-     .        PENE_OLD(5,NSN),STIF_OLD(2,NSN),
+     .        PENE_OLD(8,NSN),STIF_OLD(2,NSN),
      .        GAP_S_L(*),GAP_M_L(*)
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s

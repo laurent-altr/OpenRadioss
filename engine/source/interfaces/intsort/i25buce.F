@@ -70,7 +70,7 @@ C     REAL
      .   GAP,PMAX_GAP,VMAXDT,
      .   BMINMA(6),CURV_MAX(NRTM),BGAPSMX, MARGE
       my_real
-     .   X(3,*), V(3,*), STFN(*),PENE_OLD(5,NSN),
+     .   X(3,*), V(3,*), STFN(*),PENE_OLD(8,NSN),
      .   STF(*), GAP_S(*), GAP_M(*), GAP_S_L(*), GAP_M_L(*)
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s

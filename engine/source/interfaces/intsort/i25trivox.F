@@ -108,7 +108,7 @@ C-----------------------------------------------
 C     REAL
       my_real
      .   X(3,*),V(3,*),XYZM(6),STF(*),STFN(*),GAP_S(*),GAP_M(*),
-     .   CURV_MAX(*),PENE_OLD(5,NSN),GAP_S_L(*),GAP_M_L(*),
+     .   CURV_MAX(*),PENE_OLD(8,NSN),GAP_S_L(*),GAP_M_L(*),
      .   MARGE,BGAPSMX,PMAX_GAP,VMAXDT
       my_real , INTENT(IN) :: DGAPLOAD ,DRAD
 C-----------------------------------------------

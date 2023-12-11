@@ -4404,9 +4404,6 @@ C
                  ALLOCATE(SECND_FRFI(I)%P(6,LENR),STAT=IERROR1)
                  SECND_FRFI(I)%P(1:6,1:LENR)=ZERO
                  IERROR = IERROR + IERROR1
-                 ALLOCATE(PENE_OLDFI(I)%P(5,LENR),STAT=IERROR1)
-                 PENE_OLDFI(I)%P(1:5,1:LENR)=ZERO
-                 IERROR = IERROR + IERROR1
                  ALLOCATE(STIF_OLDFI(I)%P(2,LENR),STAT=IERROR1)
                  STIF_OLDFI(I)%P(1:2,1:LENR)=ZERO
                  IERROR = IERROR + IERROR1
@@ -4422,6 +4419,19 @@ C
                    INTAREANFI(I)%P(1:LENR) =ZERO
                 ENDIF
                ENDIF
+
+               IF(ITYP == 24)THEN
+                 ALLOCATE(PENE_OLDFI(I)%P(5,LENR),STAT=IERROR1)
+                 PENE_OLDFI(I)%P(1:5,1:LENR)=ZERO
+                 IERROR = IERROR + IERROR1
+               ENDIF
+
+               IF(ITYP == 25)THEN
+                 ALLOCATE(PENE_OLDFI(I)%P(8,LENR),STAT=IERROR1)
+                 PENE_OLDFI(I)%P(1:8,1:LENR)=ZERO
+                 IERROR = IERROR + IERROR1
+               ENDIF
+
               ELSEIF(ITYP==11)THEN
 C type11
                ALLOCATE(ITAFI(I)%P(2*LENR),STAT=IERROR1)
@@ -5089,7 +5099,12 @@ C rajout partie edge
           END IF
           IF (ITYP==24.OR.ITYP==25)THEN
               CALL READ_DB(SECND_FRFI(I)%P(1,1),6*LENR)
-              CALL READ_DB(PENE_OLDFI(I)%P(1,1),5*LENR)
+              IF(ITYP==24) THEN
+                 CALL READ_DB(PENE_OLDFI(I)%P(1,1),5*LENR)
+              ENDIF
+              IF(ITYP==25) THEN
+                 CALL READ_DB(PENE_OLDFI(I)%P(1,1),8*LENR)
+              ENDIF
               CALL READ_DB(STIF_OLDFI(I)%P(1,1),2*LENR)
               IF(IPARI(97,I) > 0) THEN
                  CALL READ_DB(STIF_MSDT_FI(I)%P(1),LENR) ! stif based on mass and dt
@@ -5711,11 +5726,17 @@ C
               END IF
               IF (ITYP==24.OR.ITYP==25)THEN
                 CALL WRITE_DB(SECND_FRFI(I)%P(1,1),6*LENR)
-                CALL WRITE_DB(PENE_OLDFI(I)%P(1,1),5*LENR)
+                IF (ITYP==24)THEN
+                  CALL WRITE_DB(PENE_OLDFI(I)%P(1,1),5*LENR)
+                ENDIF
+                IF (ITYP==25)THEN
+                  CALL WRITE_DB(PENE_OLDFI(I)%P(1,1),8*LENR)
+                ENDIF  
                 CALL WRITE_DB(STIF_OLDFI(I)%P(1,1),2*LENR)
                 IF(IPARI(97,I) > 0) CALL WRITE_DB(STIF_MSDT_FI(I)%P(1),LENR) ! stif based on mass and dt
                 IF(PARAMETERS%INTCAREA > 0.AND.IPARI(36,I)>0) CALL WRITE_DB(INTAREANFI(I)%P(1),LENR) ! output carea th (only case NISUB)
               ENDIF  ! fin partie type 24 & 25
+
 C             
               IF (ITYP==24) THEN
                 IF(IDTMINS==2)THEN

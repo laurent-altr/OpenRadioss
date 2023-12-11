@@ -865,18 +865,27 @@ C         IF(ITYP==25)THEN
                  PENE_OLDFI(NIN)%P(3,K)= TMP%PENE_OLDFI%P(3,L)
                  PENE_OLDFI(NIN)%P(4,K)= TMP%PENE_OLDFI%P(4,L)
                  PENE_OLDFI(NIN)%P(5,K)= TMP%PENE_OLDFI%P(5,L)
+
+                 PENE_OLDFI(NIN)%P(6,K)= TMP%PENE_OLDFI%P(6,L)
+                 PENE_OLDFI(NIN)%P(7,K)= TMP%PENE_OLDFI%P(7,L)
+                 PENE_OLDFI(NIN)%P(8,K)= TMP%PENE_OLDFI%P(8,L)
                ELSEIF( I < 0 ) THEN
                  L = INDX_FOR_P(P)%P(-I)
                  TIME_SFI(NIN)%P(2*(K-1)+1) = XREM(RSHIFT+0,L)
                  TIME_SFI(NIN)%P(2*(K-1)+2) = XREM(RSHIFT+1,L)
-                 SECND_FRFI(NIN)%P(4,K)      = XREM(RSHIFT+2,L)
-                 SECND_FRFI(NIN)%P(5,K)      = XREM(RSHIFT+3,L)
-                 SECND_FRFI(NIN)%P(6,K)      = XREM(RSHIFT+4,L)
+                 SECND_FRFI(NIN)%P(4,K)     = XREM(RSHIFT+2,L)
+                 SECND_FRFI(NIN)%P(5,K)     = XREM(RSHIFT+3,L)
+                 SECND_FRFI(NIN)%P(6,K)     = XREM(RSHIFT+4,L)
                  PENE_OLDFI(NIN)%P(2,K)     = XREM(RSHIFT+5,L)
                  STIF_OLDFI(NIN)%P(2,K)     = XREM(RSHIFT+6,L)
                  PENE_OLDFI(NIN)%P(3,K)     = XREM(RSHIFT+7,L)
-                 PENE_OLDFI(NIN)%P(3,K)     = XREM(RSHIFT+8,L)
+                 PENE_OLDFI(NIN)%P(4,K)     = XREM(RSHIFT+8,L)
                  PENE_OLDFI(NIN)%P(5,K)     = XREM(RSHIFT+9,L)
+
+                 PENE_OLDFI(NIN)%P(6,K)   = XREM(RSHIFT+10,L)
+                 PENE_OLDFI(NIN)%P(7,K)   = XREM(RSHIFT+11,L)
+                 PENE_OLDFI(NIN)%P(8,K)   = XREM(RSHIFT+12,L)
+
                ELSEIF(I == 0) THEN
                  K = IAUX_K(J) 
                  L = IAUX_L(J) 
@@ -885,15 +894,18 @@ C         IF(ITYP==25)THEN
                  INTBUF_TAB%SECND_FR(6*(K-1)+4)  = XREM(RSHIFT+2,L)
                  INTBUF_TAB%SECND_FR(6*(K-1)+5)  = XREM(RSHIFT+3,L)
                  INTBUF_TAB%SECND_FR(6*(K-1)+6)  = XREM(RSHIFT+4,L)
-                 INTBUF_TAB%PENE_OLD(5*(K-1)+2) = XREM(RSHIFT+5,L)
+                 INTBUF_TAB%PENE_OLD(8*(K-1)+2) = XREM(RSHIFT+5,L)
                  INTBUF_TAB%STIF_OLD(2*(K-1)+2) = XREM(RSHIFT+6,L)
-                 INTBUF_TAB%PENE_OLD(5*(K-1)+3) = XREM(RSHIFT+7,L)
-                 INTBUF_TAB%PENE_OLD(5*(K-1)+4) = XREM(RSHIFT+8,L)
-                 INTBUF_TAB%PENE_OLD(5*(K-1)+5) = XREM(RSHIFT+9,L)
+                 INTBUF_TAB%PENE_OLD(8*(K-1)+3) = XREM(RSHIFT+7,L)
+                 INTBUF_TAB%PENE_OLD(8*(K-1)+4) = XREM(RSHIFT+8,L)
+                 INTBUF_TAB%PENE_OLD(8*(K-1)+5) = XREM(RSHIFT+9,L)
+                 INTBUF_TAB%PENE_OLD(8*(K-1)+6) = XREM(RSHIFT+10,L)
+                 INTBUF_TAB%PENE_OLD(8*(K-1)+7) = XREM(RSHIFT+11,L)
+                 INTBUF_TAB%PENE_OLD(8*(K-1)+8) = XREM(RSHIFT+12,L)
                  NBLOCAL = NBLOCAL+1
               END IF
             END DO          
-            RSHIFT = RSHIFT + 10 
+            RSHIFT = RSHIFT + 13 
 
             NBLOCAL = 0  
             DO J = 1, NN
@@ -1292,8 +1304,8 @@ C     WRITE(6,*) "NEW SIZE:",NEW_SIZE
       ALLOCATE(TIME_SFI(NIN)%P(2*NEW_SIZE))
       ALLOCATE(SECND_FRFI(NIN)%P(6,NEW_SIZE))
       SECND_FRFI(NIN)%P (1:6,1:NEW_SIZE)=ZERO
-      ALLOCATE(PENE_OLDFI(NIN)%P(5,NEW_SIZE))
-      PENE_OLDFI(NIN)%P(1:5,1:NEW_SIZE)=ZERO
+      ALLOCATE(PENE_OLDFI(NIN)%P(8,NEW_SIZE))
+      PENE_OLDFI(NIN)%P(1:8,1:NEW_SIZE)=ZERO
       ALLOCATE(STIF_OLDFI(NIN)%P(2,NEW_SIZE))
       STIF_OLDFI(NIN)%P(1:2,1:NEW_SIZE)=ZERO
       ALLOCATE(ICONT_I_FI(NIN)%P(NEW_SIZE))

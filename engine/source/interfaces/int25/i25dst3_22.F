@@ -74,7 +74,7 @@ C-----------------------------------------------
       my_real , INTENT(IN) :: DGAPLOAD ,DRAD
       my_real
      .     TIME_S(2,NSN), GAPS(*), GAPM(*), 
-     .     PENE_OLD(5,*),STIF_OLD(2,NSN), PENMIN, EPS0, MARGE
+     .     PENE_OLD(8,*),STIF_OLD(2,NSN), PENMIN, EPS0, MARGE
       my_real
      .     XX(MVSIZ,5),YY(MVSIZ,5),ZZ(MVSIZ,5), 
      .     XI(MVSIZ), YI(MVSIZ), ZI(MVSIZ), STIF(MVSIZ),

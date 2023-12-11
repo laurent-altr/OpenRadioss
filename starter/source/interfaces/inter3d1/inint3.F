@@ -2119,7 +2119,7 @@ C
             INTBUF_TAB(NIN)%IRTLM(I)=0
            END DO
 C 
-           INTBUF_TAB(NIN)%PENE_OLD(1:5*NSN)=ZERO
+           INTBUF_TAB(NIN)%PENE_OLD(1:8*NSN)=ZERO
            INTBUF_TAB(NIN)%TIME_S(1:NSN)=EP20
 C
            DO NG=1,NGROUS
@@ -2178,8 +2178,8 @@ C
          INPENE = IWPENE
          IF (INACTI==5.OR.INACTI==-1) THEN
            DO I=1,NSN
-            INTBUF_TAB(NIN)%PENE_OLD(5*(I-1)+1)=ZERO
-            INTBUF_TAB(NIN)%PENE_OLD(5*(I-1)+2)=ZERO
+            INTBUF_TAB(NIN)%PENE_OLD(8*(I-1)+1)=ZERO
+            INTBUF_TAB(NIN)%PENE_OLD(8*(I-1)+2)=ZERO
            END DO
 C
            INTBUF_TAB(NIN)%VARIABLES(23) = ZERO

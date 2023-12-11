@@ -156,7 +156,7 @@ C
      9      INTBUF_TAB%ICONT_I,NNX   ,NNY         ,NNZ         ,
      A      FAR               ,PENT  ,DIST        ,LB          ,LC          ,
      B      LBH               ,LCH   ,SUBTRIA     ,MVOISN      ,IBOUND      ,
-     C      INTBUF_TAB%VTX_BISECTOR  ,DRAD        ,DGAPLOAD    )
+     C      INTBUF_TAB%VTX_BISECTOR  ,DRAD        ,DGAPLOAD    ,INTBUF_TAB%PENE_OLD)
 C
           CALL I25GLOB_1(
      1      JLT    ,INTBUF_TAB%CAND_OPT_N(DEBUT+1),INTBUF_TAB%CAND_OPT_E(DEBUT+1),

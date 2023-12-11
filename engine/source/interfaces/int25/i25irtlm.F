@@ -97,7 +97,7 @@ C                 at the previous cycle => the node can not impact during THIS c
 C
             INTBUF_TAB%SECND_FR(6*(N-1)+1:6*N) = ZERO
             INTBUF_TAB%STIF_OLD(2*(N-1)+1:2*N)= ZERO
-            INTBUF_TAB%PENE_OLD(5*(N-1)+1:5*N)= ZERO
+            INTBUF_TAB%PENE_OLD(8*(N-1)+1:8*N)= ZERO
 C
                 ELSE
 C
@@ -110,8 +110,8 @@ C copy old friction forces
                   INTBUF_TAB%SECND_FR(6*(N-1)+4:6*N)=INTBUF_TAB%SECND_FR(6*(N-1)+1:6*(N-1)+3)
 C set new friction forces at 0
                   INTBUF_TAB%SECND_FR(6*(N-1)+1:6*(N-1)+3)=ZERO
-                  INTBUF_TAB%PENE_OLD(5*(N-1)+2) = INTBUF_TAB%PENE_OLD(5*(N-1)+1)
-                  INTBUF_TAB%PENE_OLD(5*(N-1)+1) = ZERO
+                  INTBUF_TAB%PENE_OLD(8*(N-1)+2) = INTBUF_TAB%PENE_OLD(8*(N-1)+1)
+                  INTBUF_TAB%PENE_OLD(8*(N-1)+1) = ZERO
                   INTBUF_TAB%STIF_OLD(2*(N-1)+2) = INTBUF_TAB%STIF_OLD(2*(N-1)+1) 
                   INTBUF_TAB%STIF_OLD(2*(N-1)+1) = ZERO
 C
@@ -124,11 +124,14 @@ C
 C               Seul le processeur qui a l ancien impact garde les informations correspondantes
                 INTBUF_TAB%SECND_FR(6*(N-1)+1:6*N) =ZERO
                 INTBUF_TAB%STIF_OLD(2*(N-1)+1:2*N)=ZERO
-                INTBUF_TAB%PENE_OLD(5*(N-1)+1)  =ZERO
-                INTBUF_TAB%PENE_OLD(5*(N-1)+2)  =ZERO
-                INTBUF_TAB%PENE_OLD(5*(N-1)+3)  =ZERO
-                INTBUF_TAB%PENE_OLD(5*(N-1)+4)  =ZERO
-                INTBUF_TAB%PENE_OLD(5*(N-1)+5)  =ZERO
+                INTBUF_TAB%PENE_OLD(8*(N-1)+1)  =ZERO
+                INTBUF_TAB%PENE_OLD(8*(N-1)+2)  =ZERO
+                INTBUF_TAB%PENE_OLD(8*(N-1)+3)  =ZERO
+                INTBUF_TAB%PENE_OLD(8*(N-1)+4)  =ZERO
+                INTBUF_TAB%PENE_OLD(8*(N-1)+5)  =ZERO
+                INTBUF_TAB%PENE_OLD(8*(N-1)+6)  =ZERO
+                INTBUF_TAB%PENE_OLD(8*(N-1)+7)  =ZERO
+                INTBUF_TAB%PENE_OLD(8*(N-1)+8)  =ZERO
 C
 C               se prepare a quitter le contact
                 INTBUF_TAB%TIME_S(2*(N-1)+1) = EP20
@@ -140,8 +143,8 @@ c              INTBUF_TAB%IRTLM(4*(N-1)+3)=0
 c              INTBUF_TAB%SECND_FR(6*(N-1)+1:6*N) =ZERO
 c              INTBUF_TAB%STIF_OLD(2*(N-1)+1:2*N)= ZERO
 c              INTBUF_TAB%PENE_OLD(5*(N-1)+1:5*N)= ZERO
-               INTBUF_TAB%PENE_OLD(5*(N-1)+3)  =ZERO
-               INTBUF_TAB%PENE_OLD(5*(N-1)+4)  =ZERO
+               INTBUF_TAB%PENE_OLD(8*(N-1)+3)  =ZERO
+               INTBUF_TAB%PENE_OLD(8*(N-1)+4)  =ZERO
                INTBUF_TAB%TIME_S(2*(N-1)+1) = -EP20
                INTBUF_TAB%TIME_S(2*(N-1)+2) =  EP20
             END IF
@@ -172,7 +175,7 @@ C                 at the previous cycle => the node can not impact during THIS c
                   TIME_SFI(NIN)%P(2*(N-1)+2) =  EP20
 C
             SECND_FRFI(NIN)%P (1:6,N)=ZERO
-            PENE_OLDFI(NIN)%P(1:5,N)=ZERO
+            PENE_OLDFI(NIN)%P(1:8,N)=ZERO
             STIF_OLDFI(NIN)%P(1:2,N)=ZERO
 C
                 ELSE
@@ -203,6 +206,9 @@ C               Seul le processeur qui a l ancien impact garde les informations 
                 PENE_OLDFI(NIN)%P(3,N)  =ZERO
                 PENE_OLDFI(NIN)%P(4,N)  =ZERO
                 PENE_OLDFI(NIN)%P(5,N)  =ZERO
+                PENE_OLDFI(NIN)%P(6,N)  =ZERO
+                PENE_OLDFI(NIN)%P(7,N)  =ZERO
+                PENE_OLDFI(NIN)%P(8,N)  =ZERO
 C
 C               se prepare a quitter le contact
                 TIME_SFI(NIN)%P(2*(N-1)+1) = EP20
@@ -249,7 +255,7 @@ C                 at the previous cycle => the node can not impact during THIS c
 C
             INTBUF_TAB%SECND_FR(6*(N-1)+1:6*N) = ZERO
             INTBUF_TAB%STIF_OLD(2*(N-1)+1:2*N)= ZERO
-            INTBUF_TAB%PENE_OLD(5*(N-1)+1:5*N)= ZERO
+            INTBUF_TAB%PENE_OLD(8*(N-1)+1:8*N)= ZERO
                   INTBUF_TAB%IF_ADH(N) = 0    
 C
                 ELSE
@@ -263,8 +269,8 @@ C copy old friction forces
                   INTBUF_TAB%SECND_FR(6*(N-1)+4:6*N)=INTBUF_TAB%SECND_FR(6*(N-1)+1:6*(N-1)+3)
 C set new friction forces at 0
                   INTBUF_TAB%SECND_FR(6*(N-1)+1:6*(N-1)+3)=ZERO
-                  INTBUF_TAB%PENE_OLD(5*(N-1)+2) = INTBUF_TAB%PENE_OLD(5*(N-1)+1)
-                  INTBUF_TAB%PENE_OLD(5*(N-1)+1) = ZERO
+                  INTBUF_TAB%PENE_OLD(8*(N-1)+2) = INTBUF_TAB%PENE_OLD(8*(N-1)+1)
+                  INTBUF_TAB%PENE_OLD(8*(N-1)+1) = ZERO
                   INTBUF_TAB%STIF_OLD(2*(N-1)+2) = INTBUF_TAB%STIF_OLD(2*(N-1)+1) 
                   INTBUF_TAB%STIF_OLD(2*(N-1)+1) = ZERO
 C
@@ -277,11 +283,14 @@ C
 C               Seul le processeur qui a l ancien impact garde les informations correspondantes
                 INTBUF_TAB%SECND_FR(6*(N-1)+1:6*N) =ZERO
                 INTBUF_TAB%STIF_OLD(2*(N-1)+1:2*N)=ZERO
-                INTBUF_TAB%PENE_OLD(5*(N-1)+1)  =ZERO
-                INTBUF_TAB%PENE_OLD(5*(N-1)+2)  =ZERO
-                INTBUF_TAB%PENE_OLD(5*(N-1)+3)  =ZERO
-                INTBUF_TAB%PENE_OLD(5*(N-1)+4)  =ZERO
-                INTBUF_TAB%PENE_OLD(5*(N-1)+5)  =ZERO
+                INTBUF_TAB%PENE_OLD(8*(N-1)+1)  =ZERO
+                INTBUF_TAB%PENE_OLD(8*(N-1)+2)  =ZERO
+                INTBUF_TAB%PENE_OLD(8*(N-1)+3)  =ZERO
+                INTBUF_TAB%PENE_OLD(8*(N-1)+4)  =ZERO
+                INTBUF_TAB%PENE_OLD(8*(N-1)+5)  =ZERO
+                INTBUF_TAB%PENE_OLD(8*(N-1)+6)  =ZERO
+                INTBUF_TAB%PENE_OLD(8*(N-1)+7)  =ZERO
+                INTBUF_TAB%PENE_OLD(8*(N-1)+8)  =ZERO
                 INTBUF_TAB%IF_ADH(N) = 0
 C
 C               se prepare a quitter le contact
@@ -324,7 +333,7 @@ C                 at the previous cycle => the node can not impact during THIS c
                   TIME_SFI(NIN)%P(2*(N-1)+2) =  EP20
 C
             SECND_FRFI(NIN)%P (1:6,N)=ZERO
-            PENE_OLDFI(NIN)%P(1:5,N)=ZERO
+            PENE_OLDFI(NIN)%P(1:8,N)=ZERO
             STIF_OLDFI(NIN)%P(1:2,N)=ZERO
                   IF_ADHFI(NIN)%P(N) = 0
 C
@@ -356,6 +365,9 @@ C               Seul le processeur qui a l ancien impact garde les informations 
                 PENE_OLDFI(NIN)%P(3,N)  =ZERO
                 PENE_OLDFI(NIN)%P(4,N)  =ZERO
                 PENE_OLDFI(NIN)%P(5,N)  =ZERO
+                PENE_OLDFI(NIN)%P(6,N)  =ZERO
+                PENE_OLDFI(NIN)%P(7,N)  =ZERO
+                PENE_OLDFI(NIN)%P(8,N)  =ZERO
                 IF_ADHFI(NIN)%P(N) = 0
 C
 C               se prepare a quitter le contact

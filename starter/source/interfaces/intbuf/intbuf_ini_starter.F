@@ -1546,7 +1546,7 @@ C----   size real arrays
           IF (IFQ/=0) INTBUF_TAB(NIN)%S_XFILTR    = 1 
           INTBUF_TAB(NIN)%S_SECND_FR  = 6*NSN 
           IF (INTTH > 0 .OR.IVIS2 == -1)INTBUF_TAB(NIN)%S_AREAS  = NSN
-          INTBUF_TAB(NIN)%S_PENE_OLD   = 5*NSN 
+          INTBUF_TAB(NIN)%S_PENE_OLD   = 8*NSN 
           INTBUF_TAB(NIN)%S_STIF_OLD   = 2*NSN 
           INTBUF_TAB(NIN)%S_TIME_S     = 2*NSN   
           INTBUF_TAB(NIN)%S_GAP_NM     = 4*NRTM   

@@ -159,7 +159,7 @@ C-----------------------------------------------
       my_real
      .     RCURVI(*), RCONTACT(*), ACONTACT(*),
      .     PCONTACT(*),PADM, ANGLMI(*),RSTIF,
-     .     PENE_OLD(5,NSN),STIF_OLD(2,NSN)
+     .     PENE_OLD(8,NSN),STIF_OLD(2,NSN)
       my_real  , INTENT(IN) :: DGAPLOADPMAX
       my_real  , INTENT(IN) :: DGAPLOADINT(S_LOADPINTER)
       my_real  , INTENT(INOUT) :: DIST(MVSIZ)
@@ -244,6 +244,7 @@ C     PENE Offset removed to i24dst3.F
 C-------------------------------------------
 C
       DO I=1,JLT
+c       if(itab(nsvg(i))==2420442.or.itab(ix1(i))==2420442.or.itab(ix2(i))==2420442.or.itab(ix3(i))==2420442.or.itab(ix4(i))==2420442) write(*,*) 'pene1',PENE(I)
         IF(PENE(I) == ZERO.AND.INTTH == 0.AND.(NINLOADP==0.OR.DGAPLOADPMAX==ZERO))THEN
           H1(I) = ZERO
           H2(I) = ZERO
@@ -280,6 +281,21 @@ C
           VZ(I) = VZI(I) - H1(I)*V(3,IX1(I)) - H2(I)*V(3,IX2(I))
      .                   - H3(I)*V(3,IX3(I)) - H4(I)*V(3,IX4(I))
           VN(I) = N1(I)*VX(I) + N2(I)*VY(I) + N3(I)*VZ(I)
+
+
+c          JG = NSVG(I)
+c          IF(JG > 0)THEN
+c            N  = CAND_N_N(I)
+c            PENE_OLD(6,N) = N1(I) 
+c            PENE_OLD(7,N) = N2(I) 
+c            PENE_OLD(8,N) = N3(I)           
+c          ELSE
+c            JG = -JG
+c            PENE_OLDFI(NIN)%P(6,JG) = N1(I) 
+c            PENE_OLDFI(NIN)%P(7,JG) = N2(I) 
+c            PENE_OLDFI(NIN)%P(8,JG) = N3(I) 
+c          END IF
+
 
         ENDIF
       ENDDO
@@ -378,6 +394,9 @@ C---------------------------------
       DO I=1,JLT
         IF(PENE(I) == ZERO)CYCLE
         ECONTT = ECONTT+HALF*STIF(I)*PENE(I)**2
+       if(itab(nsvg(i))==2420443.or.itab(ix1(i))==2420443.or.itab(ix2(i))==2420443.or.itab(ix3(i))==2420443.or.itab(ix4(i))==2420443) then
+       write(*,*) 'forc mx', NCYCLE,itab(nsvg(i)),itab(ix1(i)),itab(ix2(i)),itab(ix3(i)),itab(ix4(i)),STIF(I),PENE(I),HALF*STIF(I)*PENE(I)**2
+       endif
       END DO
 C---------------------------------
 C     DAMPING + FRIC

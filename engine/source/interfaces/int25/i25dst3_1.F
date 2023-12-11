@@ -38,7 +38,7 @@ Chd|====================================================================
      9                  ICONT_I,NNX     ,NNY   ,NNZ     ,
      A                  FAR     ,PENT  ,DIST    ,LB    ,LC    ,
      B                  LBP     ,LCP   ,SUBTRIA ,MVOISN,IBOUND,
-     C                  VTX_BISECTOR   ,DRAD    ,DGAPLOAD)
+     C                  VTX_BISECTOR   ,DRAD    ,DGAPLOAD,PENE_OLD)
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
@@ -62,7 +62,7 @@ C-----------------------------------------------
      .        INTTH,MSEGLO(*),IRTLM(4,NSN), SUBTRIA(MVSIZ), 
      .        MVOISN(MVSIZ,4), IBOUND(4,*)
       my_real
-     .     TIME_S(2,NSN), GAPS(*), GAPM(*), GAPMXL(MVSIZ)
+     .     TIME_S(2,NSN), GAPS(*), GAPM(*), GAPMXL(MVSIZ),PENE_OLD(8,*)
       my_real , INTENT(IN) :: DGAPLOAD ,DRAD
       my_real
      .     XX(MVSIZ,5),YY(MVSIZ,5),ZZ(MVSIZ,5), 
@@ -240,6 +240,8 @@ C
         ZN(I,4)=ZN(I,4)*NN
         LB(I,4) = -(XN(I,4)*SX1 + YN(I,4)*SY1 + ZN(I,4)*SZ1)*NN
         LC(I,4) =  (XN(I,4)*SX4 + YN(I,4)*SY4 + ZN(I,4)*SZ4)*NN
+
+c          write(*,*) 'XN YN ZN first',  XN(I,1:4),YN(I,1:4),ZN(I,1:4)
 C
       END DO
 C--------------------------------------------------------
@@ -809,6 +811,13 @@ c     .         ibound(1:4,i),itold,pent(i,itold),mvoisn(i,itold),far(i,itold),
 c     .        lb(i,itold),lc(i,itold),lb(i,itold)+lc(i,itold),
 c     .         it,pent(i,it1),bb(i,it1),far(i,it1),dist(i),ld(i),
 c     .         lb(i,it1),lc(i,it1),lb(i,it1)+lc(i,it1)
+
+          IF(IRTLM(2,N) <= 0) THEN
+              PENE_OLD(6,N) = XN(I,SUBTRIA_N(I))
+              PENE_OLD(7,N) = YN(I,SUBTRIA_N(I))
+              PENE_OLD(8,N) = ZN(I,SUBTRIA_N(I)) 
+c          write(*,*) 'XN YN ZN',  SUBTRIA_N(I),XN(I,IT),YN(I,IT),ZN(I,IT)
+          ENDIF
         ELSE
           IRTLM_FI(NIN)%P(2,N-NSN) = IT+5*SUBTRIA(I)
 C         IRTLM_FI(NIN)%P(3,N-NSN) = CAND_E(I)
@@ -834,6 +843,11 @@ c     .      print *,'dst1 rem',ispmd+1,IRTLM_FI(NIN)%P(1,n-nsn),cand_e(i),TIME_
 c     .           itafi(nin)%p(n-nsn),itab(ix1(i)),itab(ix2(i)),itab(ix3(i)),itab(ix4(i)),
 c     .           itold,pent(i,itold),far(i,itold),
 c     .           it,pent(i,it1),far(i,it1)
+          IF(IRTLM_FI(NIN)%P(2,N-NSN)  <= 0) THEN
+              PENE_OLDFI(NIN)%P(6,N-NSN) = XN(I,IT)
+              PENE_OLDFI(NIN)%P(7,N-NSN) = YN(I,IT)
+              PENE_OLDFI(NIN)%P(8,N-NSN) = ZN(I,IT)               
+          ENDIF
         END IF
       END DO
 C-----

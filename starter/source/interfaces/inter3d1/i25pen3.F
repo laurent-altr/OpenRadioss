@@ -64,7 +64,7 @@ C-----------------------------------------------
       INTEGER IX1(MVSIZ),IX2(MVSIZ),IX3(MVSIZ),IX4(MVSIZ),
      .        MVOISN(MVSIZ,4), IBOUND(4,MVSIZ)
       my_real
-     .   PENMAX,PENMIN,PENE_OLD(5,NSN),TIME_S(NSN)
+     .   PENMAX,PENMIN,PENE_OLD(8,NSN),TIME_S(NSN)
       my_real
      .     X1(MVSIZ), X2(MVSIZ), X3(MVSIZ), X4(MVSIZ), X0(MVSIZ),
      .     Y1(MVSIZ), Y2(MVSIZ), Y3(MVSIZ), Y4(MVSIZ), Y0(MVSIZ),

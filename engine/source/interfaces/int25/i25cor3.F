@@ -789,7 +789,7 @@ Chd|====================================================================
      K               Y3        ,Z3    ,X4      ,Y4     ,Z4          ,
      L               INTTH     ,TEMP  ,TEMPI   ,IELES  ,IELESI      ,
      M               IELEM     ,IELEMI,ISTIF_MSDT,DTSTIF,STIFMSDT_S ,
-     N               STIFMSDT_M,NRTM  ,PARAMETERS) 
+     N               STIFMSDT_M,NRTM  ,PARAMETERS,ISLIDE  ,KSLIDE) 
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
@@ -821,6 +821,7 @@ C-----------------------------------------------
      .        IREP_FRICM(*),IREP_FRICMI(MVSIZ),IELESI(MVSIZ),IELEMI(MVSIZ)
       INTEGER , INTENT(IN) :: ISTIF_MSDT
       INTEGER , INTENT(IN) :: NRTM
+      INTEGER , INTENT(INOUT) :: ISLIDE(4,*), KSLIDE(MVSIZ,4)
 C     REAL
       my_real
      .   X(3,*), STF(*), STFN(*), MS(*), V(3,*), 
@@ -851,11 +852,13 @@ C     REAL
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I ,J , L, NN, IG, JFT, IX,  NI, I1, I2, I3, I4, IT
+      INTEGER I ,J , L, NN, IG, JFT, IX,  NI, I1, I2, I3, I4, IT, NOR, K, 
+     .        II(4)
       my_real
      .        XN,DTS,STIF_MSDT(MVSIZ)
 C-----------------------------------------------
       IBOUND(1:4,1:JLT)=0
+      KSLIDE(1:MVSIZ,1:4)=0
       DO I=1,JLT
            NI = CAND_N(I)
            IF(NI<=NSN)THEN
@@ -941,9 +944,28 @@ C
 C
            GAPNM(1:4,I)=GAPN_M(1:4,L)
 C
+           II(1)=ABS(ADMSR(1,L))
+           II(2)=ABS(ADMSR(2,L))
+           II(3)=ABS(ADMSR(3,L))
+           II(4)=ABS(ADMSR(4,L))
            DO J=1,4
              MVOISN(I,J) =MVOISIN(J,L)
              IF(LBOUND(ADMSR(J,L))/=0)IBOUND(J,I)=ADMSR(J,L)
+
+             IF(NI<=NSN)THEN
+               NOR=ISLIDE(J,NI)
+             ELSE
+               NN = NI - NSN
+               NOR=ISLIDE_FI(NIN)%P(J,NN)
+             END IF
+             IF(NOR/=0)THEN
+               DO K=1,4
+                  IF(NOR==II(K))THEN
+                     KSLIDE(I,K)=1
+                     EXIT
+                  END IF
+               END DO
+             END IF
            END DO
 C
       END DO

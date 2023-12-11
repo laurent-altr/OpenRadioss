@@ -101,7 +101,7 @@ C     INTEGER :: NSNFIEOLD(*)
       my_real
      .        X(3,*), V(3,*), MS(*), BMINMAL(*), STIFN(*), GAP_S(*),
      .        AREAS(*),TEMP(*),GAP_S_L(*),I24_TIME_S(*),I24_FRFI(6,*),
-     .        I24_PENE_OLD(5,*),I24_STIF_OLD(2,*),STFM(*),
+     .        I24_PENE_OLD(8,*),I24_STIF_OLD(2,*),STFM(*),
      .        GAPE(*),
      .        GAP_E_L(*),
      .        STFE(*)
@@ -314,7 +314,7 @@ C-----for   NBINFLG
 
 c INT25     
       IF(ITYP==25)THEN
-        RSIZ = RSIZ + 3
+        RSIZ = RSIZ + 6
         ISIZ = ISIZ + 6
 C-----for   NBINFLG      
         IF (ILEV==2) ISIZ = ISIZ + 1
@@ -881,9 +881,12 @@ c INT25
                 RBUF(P)%p(L+RSHIFT)    =I24_TIME_S(2*(I-1)+1)
                 RBUF(P)%p(L+RSHIFT+1)  =I24_TIME_S(2*(I-1)+2)
                 RBUF(P)%p(L+RSHIFT+2)  =I24_PENE_OLD(5,I) !  used only at time=0
+                RBUF(P)%p(L+RSHIFT+3)  =I24_PENE_OLD(6,I) 
+                RBUF(P)%p(L+RSHIFT+4)  =I24_PENE_OLD(7,I)
+                RBUF(P)%p(L+RSHIFT+5 ) =I24_PENE_OLD(8,I)
                 L = L + RSIZ
               END DO          
-              RSHIFT = RSHIFT + 3 
+              RSHIFT = RSHIFT + 6 
                 
               L2 = 0      
               I24IREMP = ISHIFT 

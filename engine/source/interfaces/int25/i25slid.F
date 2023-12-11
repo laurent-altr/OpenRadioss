@@ -645,7 +645,7 @@ C-----------------------------------------------
      .        CAND_N(*),CAND_E(*), JTASK, ITAB(*), NSV(*)
       INTEGER MSEGLO(*), IRTLM(4,NSN)
       my_real
-     .     PENM(4,*), PENE_OLD(5,*), SECND_FR(6,*), TIME_S(2,*), STIF_OLD(2,*)
+     .     PENM(4,*), PENE_OLD(8,*), SECND_FR(6,*), TIME_S(2,*), STIF_OLD(2,*)
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
@@ -891,7 +891,7 @@ C     ENDIF
 C
 C INT25
       IF(ITYP==25)THEN
-        RSIZ = RSIZ + 10
+        RSIZ = RSIZ + 13
         ISIZ = ISIZ + 5
 C-----for   NBINFLG
         IF (ILEV==2) ISIZ = ISIZ + 1
@@ -1276,11 +1276,14 @@ C
                   RBUF(P,NI25)%p(LR+RSHIFT+2)  =INTBUF_TAB%SECND_FR(6*(I-1)+4)
                   RBUF(P,NI25)%p(LR+RSHIFT+3)  =INTBUF_TAB%SECND_FR(6*(I-1)+5)
                   RBUF(P,NI25)%p(LR+RSHIFT+4)  =INTBUF_TAB%SECND_FR(6*(I-1)+6)
-                  RBUF(P,NI25)%p(LR+RSHIFT+5)  =INTBUF_TAB%PENE_OLD(5*(I-1)+2)
+                  RBUF(P,NI25)%p(LR+RSHIFT+5)  =INTBUF_TAB%PENE_OLD(8*(I-1)+2)
                   RBUF(P,NI25)%p(LR+RSHIFT+6)  =INTBUF_TAB%STIF_OLD(2*(I-1)+2)
-                  RBUF(P,NI25)%p(LR+RSHIFT+7)  =INTBUF_TAB%PENE_OLD(5*(I-1)+3)
-                  RBUF(P,NI25)%p(LR+RSHIFT+8)  =INTBUF_TAB%PENE_OLD(5*(I-1)+4)
-                  RBUF(P,NI25)%p(LR+RSHIFT+9)  =INTBUF_TAB%PENE_OLD(5*(I-1)+5)
+                  RBUF(P,NI25)%p(LR+RSHIFT+7)  =INTBUF_TAB%PENE_OLD(8*(I-1)+3)
+                  RBUF(P,NI25)%p(LR+RSHIFT+8)  =INTBUF_TAB%PENE_OLD(8*(I-1)+4)
+                  RBUF(P,NI25)%p(LR+RSHIFT+9)  =INTBUF_TAB%PENE_OLD(8*(I-1)+5)
+                  RBUF(P,NI25)%p(LR+RSHIFT+10) =INTBUF_TAB%PENE_OLD(8*(I-1)+6)
+                  RBUF(P,NI25)%p(LR+RSHIFT+11) =INTBUF_TAB%PENE_OLD(8*(I-1)+7)
+                  RBUF(P,NI25)%p(LR+RSHIFT+12) =INTBUF_TAB%PENE_OLD(8*(I-1)+8)
                 ELSE
                   II = I-NSN
                   RBUF(P,NI25)%p(LR+RSHIFT)    =TIME_SFI(NIN)%P(2*(II-1)+1)
@@ -1293,10 +1296,13 @@ C
                   RBUF(P,NI25)%p(LR+RSHIFT+7)  =PENE_OLDFI(NIN)%P(3,II)
                   RBUF(P,NI25)%p(LR+RSHIFT+8)  =PENE_OLDFI(NIN)%P(4,II)
                   RBUF(P,NI25)%p(LR+RSHIFT+9)  =PENE_OLDFI(NIN)%P(5,II)
+                  RBUF(P,NI25)%p(LR+RSHIFT+10) =PENE_OLDFI(NIN)%P(6,II)
+                  RBUF(P,NI25)%p(LR+RSHIFT+11) =PENE_OLDFI(NIN)%P(7,II)
+                  RBUF(P,NI25)%p(LR+RSHIFT+12) =PENE_OLDFI(NIN)%P(8,II)
                 END IF
                 LR = LR + RSIZ
               END DO
-              RSHIFT = RSHIFT + 10
+              RSHIFT = RSHIFT + 13
 
               LI = 0
 #include      "vectorize.inc"

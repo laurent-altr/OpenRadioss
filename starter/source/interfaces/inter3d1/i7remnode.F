@@ -1455,7 +1455,7 @@ C-------  Reset IRTLM & PENE_OLD (cf INACTI)
                                     IF(INTBUF_TAB(N)%IRTLM(4*(NS-1)+1)==INTBUF_TAB(N)%MSEGLO(L))THEN
                                         INTBUF_TAB(N)%IRTLM(4*(NS-1)+1:4*(NS-1)+4)   =0
                                         INTBUF_TAB(N)%TIME_S(2*(NS-1)+1:2*(NS-1)+2)  =ZERO
-                                        INTBUF_TAB(N)%PENE_OLD(5*(NS-1)+1:5*(NS-1)+5)=ZERO
+                                        INTBUF_TAB(N)%PENE_OLD(8*(NS-1)+1:8*(NS-1)+8)=ZERO
                                     ENDIF
                                 ENDDO
                             ENDDO

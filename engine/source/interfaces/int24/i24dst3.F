@@ -101,6 +101,7 @@ C   C o m m o n   B l o c k s
 C-----------------------------------------------
 #include      "scr05_c.inc"
 #include      "com08_c.inc"
+#include      "com01_c.inc"
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
@@ -425,6 +426,11 @@ C--------------------------------------------------------
 
       DO I=1,JLT
        ISHEL(I)=0
+
+c      if(itab(nsvg(i))==2420443.or.itab(ix1(i))==2420443.or.itab(ix2(i))==2420443.or.itab(ix3(i))==2420443.or.itab(ix4(i))==2420443) THEN
+c           write(*,*) 'ISTEP',NCYCLE,ITAB(IX1(I)),ITAB(IX2(I)),ITAB(IX3(I)),ITAB(IX4(I)),
+c     . ITAB(nsvg(i)),ISTEP(I)
+c       endif
        IF(ISTEP(I) == 0)CYCLE
 
 c      write(iout,*)'i=',i,'i24dst3 21'
@@ -1323,19 +1329,40 @@ C
             NI2  = N1(I)*N1(I) + N2(I)*N2(I) + N3(I)*N3(I)
             IF(TWO*NNI*NNI < NI2)THEN
 c             scharp angle bound nodal normal to 45 from segment normal
+        IX1(I) = IXX(I,IC( 7,ITQ))
+        IX2(I) = IXX(I,IC( 8,ITQ))
+        IX3(I) = IXX(I,IC( 9,ITQ))
+        IX4(I) = IXX(I,IC(10,ITQ))
+c      if(itab(nsvg(i))==2420443.or.itab(ix1(i))==2420443.or.itab(ix2(i))==2420443.or.itab(ix3(i))==2420443.or.itab(ix4(i))==2420443) THEN
+           write(*,*) 'slide avant',NCYCLE,ITAB(IX1(I)),ITAB(IX2(I)),ITAB(IX3(I)),ITAB(IX4(I)),
+     . ITAB(nsvg(i)),NQX,NQY,NQZ,N1(I),N2(I),N3(I),NNI,NI2
+c       endif
               AAA = SQRT(NI2-NNI*NNI) - NNI
               N1(I) = N1(I) + AAA*NQX
               N2(I) = N2(I) + AAA*NQY
               N3(I) = N3(I) + AAA*NQZ
               NI2  = N1(I)*N1(I) + N2(I)*N2(I) + N3(I)*N3(I)
+c      if(itab(nsvg(i))==2420443.or.itab(ix1(i))==2420443.or.itab(ix2(i))==2420443.or.itab(ix3(i))==2420443.or.itab(ix4(i))==2420443) THEN
+           write(*,*) 'slide apres',NCYCLE,ITAB(IX1(I)),ITAB(IX2(I)),ITAB(IX3(I)),ITAB(IX4(I)),
+     . ITAB(nsvg(i)),N1(I),N2(I),N3(I)
+c      endif
              ENDIF
             S2 = ONE/MAX(EM30,SQRT(NI2))
             N1(I) = N1(I)*S2
             N2(I) = N2(I)*S2
             N3(I) = N3(I)*S2
+
 C-------special case, skew mesh------------            
             NNI = NQX*N1(I) + NQY*N2(I) + NQZ*N3(I)
            IF (NNI<EM20) THEN
+        IX1(I) = IXX(I,IC( 7,ITQ))
+        IX2(I) = IXX(I,IC( 8,ITQ))
+        IX3(I) = IXX(I,IC( 9,ITQ))
+        IX4(I) = IXX(I,IC(10,ITQ))
+      if(itab(nsvg(i))==2420443.or.itab(ix1(i))==2420443.or.itab(ix2(i))==2420443.or.itab(ix3(i))==2420443.or.itab(ix4(i))==2420443) THEN
+           write(*,*) 'skew',NCYCLE,ITAB(IX1(I)),ITAB(IX2(I)),ITAB(IX3(I)),ITAB(IX4(I)),
+     . ITAB(nsvg(i)),NQX,NQY,NQZ,N1(I),N2(I),N3(I),NNI
+       endif
             N1(I) = NQX
             N2(I) = NQY
             N3(I) = NQZ

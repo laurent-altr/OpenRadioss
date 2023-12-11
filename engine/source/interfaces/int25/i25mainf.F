@@ -183,7 +183,7 @@ C-----------------------------------------------
      .        NSMSE(4*MVSIZ), CS_LOC4(4*MVSIZ), CM_LOC4(4*MVSIZ),
      .        TYPEDGS(MVSIZ),
      .        IAM(MVSIZ),JAM(MVSIZ),IBM(MVSIZ),JBM(MVSIZ),     
-     .        IAS(MVSIZ),JAS(MVSIZ),IBS(MVSIZ),JBS(MVSIZ)
+     .        IAS(MVSIZ),JAS(MVSIZ),IBS(MVSIZ),JBS(MVSIZ),KSLIDE(MVSIZ,4)
 
       INTEGER, ALLOCATABLE, DIMENSION(:) :: INDEX2
 C     REAL
@@ -427,7 +427,7 @@ C           No more contact (Reset Irtlm & PENE_OLD)
 C
             INTBUF_TAB%SECND_FR(6*(N-1)+1:6*N) = ZERO
             INTBUF_TAB%STIF_OLD(2*(N-1)+1:2*N)= ZERO
-            INTBUF_TAB%PENE_OLD(5*(N-1)+1:5*N)= ZERO
+            INTBUF_TAB%PENE_OLD(8*(N-1)+1:8*N)= ZERO
 C       
           END IF    
         END DO
@@ -445,7 +445,7 @@ C           No more contact (Reset Irtlm & PENE_OLD)
             IRTLM_FI(NIN)%P(4,N)=0
 C
             SECND_FRFI(NIN)%P (1:6,N)=ZERO
-            PENE_OLDFI(NIN)%P(1:5,N)=ZERO
+            PENE_OLDFI(NIN)%P(1:8,N)=ZERO
             STIF_OLDFI(NIN)%P(1:2,N)=ZERO
 C     
           END IF    
@@ -465,7 +465,7 @@ C           No more contact (Reset Irtlm & PENE_OLD)
 C
             INTBUF_TAB%SECND_FR(6*(N-1)+1:6*N) = ZERO
             INTBUF_TAB%STIF_OLD(2*(N-1)+1:2*N)= ZERO
-            INTBUF_TAB%PENE_OLD(5*(N-1)+1:5*N)= ZERO
+            INTBUF_TAB%PENE_OLD(8*(N-1)+1:8*N)= ZERO
 C       
             INTBUF_TAB%IF_ADH(N) = 0
           END IF    
@@ -484,7 +484,7 @@ C           No more contact (Reset Irtlm & PENE_OLD)
             IRTLM_FI(NIN)%P(4,N)=0
 C
             SECND_FRFI(NIN)%P (1:6,N)=ZERO
-            PENE_OLDFI(NIN)%P(1:5,N)=ZERO
+            PENE_OLDFI(NIN)%P(1:8,N)=ZERO
             STIF_OLDFI(NIN)%P(1:2,N)=ZERO
 C
             IF_ADHFI(NIN)%P(N) = 0               
@@ -614,7 +614,7 @@ C         Extraction of global data to local arrays
      K  Y3         ,Z3       ,X4          ,Y4          ,Z4      ,
      L  INTTH      ,TEMP     ,TEMPI       ,INTBUF_TAB%IELES     ,IELESI      ,
      M  INTBUF_TAB%IELEM,IELEMI,ISTIF_MSDT,DTSTIF      ,INTBUF_TAB%STIFMSDT_S,
-     N  INTBUF_TAB%STIFMSDT_M,NRTM        ,INTERFACES%PARAMETERS)
+     N  INTBUF_TAB%STIFMSDT_M,NRTM        ,INTERFACES%PARAMETERS,INTBUF_TAB%ISLIDE,KSLIDE)
           IKNON(1:JLT) = 0
           CALL I_CORPFIT3(
      1               JLT      ,INTBUF_TAB%STFM  ,INTBUF_TAB%STFNS,STIF      ,NSN    ,
@@ -634,7 +634,7 @@ C
      7 INACTI      ,KINI        ,ITAB        ,LB          ,LC          ,
      8 PENMIN      ,EPS         ,PENE        ,INTBUF_TAB%PENE_OLD,SUBTRIA,
      9 GAPV        ,IVIS2       ,INTBUF_TAB%IF_ADH,IFADHI ,BASE_ADH      ,
-     A MVOISN      ,IBOUND      ,INTBUF_TAB%VTX_BISECTOR  ,DIST)
+     A MVOISN      ,IBOUND      ,INTBUF_TAB%VTX_BISECTOR  ,DIST,KSLIDE)
 C
           DO I = 1 ,JLT
 C
