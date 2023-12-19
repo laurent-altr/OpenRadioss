@@ -84,7 +84,7 @@ C-----------------------------------------------
      4               XI      ,YI    ,ZI    ,STIF  ,IX1    ,
      5               IX2     ,IX3   ,IX4   ,NSN   ,GAP_S  ,
      6               GAP_M   ,GAPV  ,GAPMAX,GAPMIN,BID    ,
-     7               10      ,NIN   ,RBID  ,RBID  ,IBID   ,
+     7               10      ,NIN   ,RBID  ,RBID  ,
      8               RBID    ,RBID  )
 C-----------------------------------------------
         CALL I7PEN3(J_STOK ,MARGE ,X1    ,X2     ,X3   ,

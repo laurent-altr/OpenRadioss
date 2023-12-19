@@ -190,10 +190,12 @@ c provisoire
       LOGICAL DBG_type18_fvm
       integer :: NB_VOXEL_ON !< number of remote nodes in the bounding box
       INTEGER, dimension(:), allocatable :: LIST_NB_VOXEL_ON
+      integer :: max_node_per_cell !< maximum number of nodes in a cell
+      integer :: node_per_cell !< number of nodes in a cell
 
 C-----------------------------------------------
-      allocate(LIST_NB_VOXEL_ON((NBX+2)*(NBY+2)*(NBZ+2)))
       IF(ITASK == 0)THEN
+        allocate(LIST_NB_VOXEL_ON((NBX+2)*(NBY+2)*(NBZ+2)))
         NB_VOXEL_ON = 0
         CPT_VOX0 = 0
       END IF
@@ -317,6 +319,27 @@ C=======================================================================
       END IF !ITASK == 0
 
       CALL MY_BARRIER ! Barrier to wait task0 treatment
+      max_node_per_cell = 0
+      IF(TOTAL_NB_NRTM>0 .AND. ITASK == 0) THEN
+        DO JJ = 1, NB_VOXEL_ON
+           k = LIST_NB_VOXEL_ON(JJ)
+           IIZ =  MOD(K,NBZ+2) + 1 
+           ! IZ [1,NBZ+2]
+           K = (K-IIZ+1)/(NBZ+2)
+           IIY =  MOD(K,NBY+2) + 1 
+           K = (K-IIY+1)/(NBY+2)
+           IIX = MOD(K,NBX+2) + 1
+           J = VOXEL(IIX,IIY,IIZ)
+           node_per_cell = 0
+           DO WHILE(J /= 0)
+              node_per_cell = node_per_cell + 1
+              J = NEXT_NOD(J)
+           ENDDO
+        ENDDO
+      ENDIF
+
+      CALL MY_BARRIER()
+
 
 C=======================================================================
 C 3   FACE RECOVERY AND ENUMERATION OF CANDIDATE COUPLES
@@ -544,7 +567,7 @@ C=======================================================================
   100 CONTINUE
       ! Barrier to avoid reinitialization before end of sorting
       CALL MY_BARRIER
-      IF(TOTAL_NB_NRTM>0) THEN
+      IF(TOTAL_NB_NRTM>0 .AND. ITASK == 0) THEN
         DO JJ = 1, NB_VOXEL_ON
            J = LIST_NB_VOXEL_ON(JJ)
            K = J
@@ -569,7 +592,7 @@ C=======================================================================
       IF(FLAGREMNODE == 2) THEN
         IF(ALLOCATED(TAGREMNODE)) DEALLOCATE(TAGREMNODE)
       ENDIF
-      DEALLOCATE(LIST_NB_VOXEL_ON)
+      If(itask == 0) DEALLOCATE(LIST_NB_VOXEL_ON)
 
 
       RETURN
