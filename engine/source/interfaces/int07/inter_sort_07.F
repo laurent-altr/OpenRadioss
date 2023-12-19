@@ -121,7 +121,6 @@ C-----------------------------------------------
         my_real :: DGAPLOADP
         REAL T1  !elapsed time in smp
         LOGICAL TYPE18
-        INTEGER :: FIRST, LAST,ijk
         INTEGER :: NSN,NMN,NTY,NRTM
 C-----------------------------------------------
         NUM_IMP = 0
@@ -188,10 +187,6 @@ C -------------------------------------------------------------
         RESULT = 0
         NMN_G = INTER_STRUCT(NIN)%NMN_G
 !$OMP END SINGLE
-        FIRST = 1 + ITASK*(NRTM/NTHREAD)
-        LAST = FIRST + NRTM_T - 1
-        IF(ITASK==NTHREAD-1) LAST=NRTM
-        CURV_MAX(1:NRTM_T) = INTER_STRUCT(NIN)%CURV_MAX(FIRST:LAST)
 
         IF(NSPMD > 1) THEN
         ! ---------------------------

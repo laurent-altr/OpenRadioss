@@ -289,7 +289,7 @@ c         D8 = XX+XY+XZP
 
          VX = MAX(VSLV(1,I)-VMSR(4,I),VMSR(1,I)-VSLV(4,I),ZERO)
          VY = MAX(VSLV(2,I)-VMSR(5,I),VMSR(2,I)-VSLV(5,I),ZERO)
-         VZ = MAX(VSLV(3,I)-VMSR(6,I),VMSR(3,I)-VSL/BV(6,I),ZERO)
+         VZ = MAX(VSLV(3,I)-VMSR(6,I),VMSR(3,I)-VSLV(6,I),ZERO)
          VV = SQRT(VX**2+VY**2+VZ**2)
 
          TZINFL = INTBUF_TAB(I)%VARIABLES(8)

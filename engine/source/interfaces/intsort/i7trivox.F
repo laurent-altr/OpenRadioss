@@ -167,26 +167,25 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER NB_NCN,NB_NCN1,NB_ECN,I,J,DIR,NB_NC,NB_EC,
-     .        N1,N2,N3,N4,NN,NE,K,L,NCAND_PROV,J_STOK,II,JJ,
+      INTEGER I,J,
+     .        NN,NE,K,L,J_STOK,II,JJ,
      .        PROV_N(MVSIZ),PROV_E(MVSIZ),
      .        OLDNUM(ISZNSNR), NSNF, NSNL,DELNOD,M
       INTEGER, DIMENSION(:), ALLOCATABLE :: TAGREMNODE
       my_real
-     .   DX,DY,DZ,XS,YS,ZS,XX,SX,SY,SZ,S2,
-     .   XMIN, XMAX,YMIN, YMAX,ZMIN, ZMAX, TZ, GAPSMX, GAPL,
+     .   XS,YS,ZS,XX,SX,SY,SZ,S2,
+     .   XMIN, XMAX,YMIN, YMAX,ZMIN, ZMAX,  
      .   XX1,XX2,XX3,XX4,YY1,YY2,YY3,YY4,ZZ1,ZZ2,ZZ3,ZZ4,
-     .   D1X,D1Y,D1Z,D2X,D2Y,D2Z,DD1,DD2,D2,A2,GS
+     .   D1X,D1Y,D1Z,D2X,D2Y,D2Z,DD1,DD2,D2,A2
 c provisoire
       INTEGER  LAST_NOD(NSN+NSNR)
-      INTEGER  IX,IY,IZ,NEXT,M1,M2,M3,M4,
+      INTEGER  IX,IY,IZ,M1,M2,M3,M4,
      .         IX1,IY1,IZ1,IX2,IY2,IZ2
       INTEGER :: IIX,IIY,IIZ
       my_real
      .   XMINB,YMINB,ZMINB,XMAXB,YMAXB,ZMAXB,
      .   XMINE,YMINE,ZMINE,XMAXE,YMAXE,ZMAXE,AAA
       INTEGER CPT_VOX0
-      LOGICAL TEST_V0
       INTEGER FIRST,NEW,LAST,IERROR
       LOGICAL DBG_type18_fvm
       integer :: NB_VOXEL_ON !< number of remote nodes in the bounding box
@@ -227,7 +226,6 @@ C 1   NODE CLUSTERING
 C=======================================================================
       IF(ITASK==0.AND.TOTAL_NB_NRTM>0)THEN
         !==========LAGRANGIAN and STAGGERED ALE==========!
-C       TEST_V0 = FIRST_TEST(NIN)
         DO I=1,NSN
           IIX=0
           IIY=0
@@ -249,13 +247,6 @@ C       TEST_V0 = FIRST_TEST(NIN)
           IIY=MAX(1,2+MIN(NBY,IIY))
           IIZ=MAX(1,2+MIN(NBZ,IIZ))
           FIRST = VOXEL(IIX,IIY,IIZ)
-          IF(.FALSE.) THEN
-! count the number of SECONDARY nodes outiside the reduced box
-            IF(IIX ==  1    .OR.  IIY ==  1    .OR. IIZ == 1 .AND.
-     .         IIX ==  NBX+2 .OR. IIY == NBY+2 .OR. IIZ == NBZ+2) THEN
-              CPT_VOX0 = CPT_VOX0 +1
-            ENDIF
-          ENDIF
           IF(FIRST == 0)THEN
             !empty cell
             NB_VOXEL_ON = NB_VOXEL_ON + 1
@@ -300,13 +291,6 @@ C=======================================================================
           IIZ=MAX(1,2+MIN(NBZ,IIZ))
 
           FIRST = VOXEL(IIX,IIY,IIZ)
-          IF(TEST_V0) THEN
-! count the number of SECONDARY nodes outiside the reduced box
-            IF(IIX ==  1     .OR. IIY ==  1     .OR. IIZ == 1 .AND.
-     .         IIX ==  NBX+2 .OR. IIY ==  NBY+2 .OR. IIZ == NBZ+2) THEN
-              CPT_VOX0 = CPT_VOX0 +1
-            ENDIF
-          ENDIF
 
           IF(FIRST == 0)THEN
             ! empty cell
@@ -333,18 +317,6 @@ C=======================================================================
       END IF !ITASK == 0
 
       CALL MY_BARRIER ! Barrier to wait task0 treatment
-
-C      IF(FIRST_TEST(NIN)) THEN
-C!During the first sorting, we use the reduced box
-C!If too many (>5 %) nodes are outside the reduced box
-C!then the box is not reduced anymore
-C        CALL MY_BARRIER
-C        IF(ITASK == 0) THEN
-C          IF(CPT_VOX0 > 5*(NB_VOXEL_ON + NSN)/100) TO_TRIM(NIN) = .FALSE.
-C          FIRST_TEST(NIN) = .FALSE.
-C        ENDIF
-C        CALL MY_BARRIER
-C      ENDIF
 
 C=======================================================================
 C 3   FACE RECOVERY AND ENUMERATION OF CANDIDATE COUPLES
@@ -451,7 +423,6 @@ C=======================================================================
               ! nbpelem = nbpelem + 1
               JJ = VOXEL(IX,IY,IZ)
               DO WHILE(JJ /= 0)
-                DELNOD = 0
 
                 !nnpelem = nnpelem + 1
                 IF(JJ<=NSN)THEN
@@ -463,7 +434,7 @@ C=======================================================================
                   IF(NN == M4)GOTO 200
 
                   IF(FLAGREMNODE == 2) THEN
-                    IF( TAGREMNODE(NSV(JJ)) == 1)GOTO 200
+                    IF( TAGREMNODE(NSV(JJ)) == 1) GOTO 200
                   ENDIF
                   XS = X(1,NN)
                   YS = X(2,NN)
@@ -473,6 +444,7 @@ C=======================================================================
                   ENDIF
                 ELSE
                   J=JJ-NSN
+                  DELNOD = 0
                   IF(FLAGREMNODE == 2) THEN
                     NN = IREM(1,J)
                     K = KREMNOD(2*(NE-1)+2) + 1
@@ -576,50 +548,20 @@ C=======================================================================
         DO JJ = 1, NB_VOXEL_ON
            J = LIST_NB_VOXEL_ON(JJ)
            K = J
-C         (IIX-1)*(NBY+2)*(NBZ+2)+(IIY-1)*(NBZ+2)+(IIZ-1)                          
-C         (NBZ+2)*( (IIX-1)*(NBY+2) +(IIY-1) )+(IIZ-1)
            IIZ =  MOD(K,NBZ+2) + 1 
            ! IZ [1,NBZ+2]
            K = (K-IIZ+1)/(NBZ+2)
            IIY =  MOD(K,NBY+2) + 1 
            K = (K-IIY+1)/(NBY+2)
            IIX = MOD(K,NBX+2) + 1
-C          IF(VOXEL(IIX,IIY,IIZ) == 0) THEN
-C            write(6,*) 'ERROR in I7TRI: VOXEL(',IIX,',',IIY,',',IIZ,')=0'
-C            write(6,*)  "J=",J,"JJ=",JJ
-C            call flush(6)
-C            stop
-C          ENDIF
            VOXEL(IIX,IIY,IIZ) = 0
         ENDDO
-C       VOXEL(1:NBX+2,1:NBY+2,1:NBZ+2)=0
       ENDIF
       CALL MY_BARRIER()
 
 C=======================================================================
 C 6   DEBUG OUTPUT
 C=======================================================================
-
-      DBG_type18_fvm=.false.
-      if(inacti==7 .AND. DBG_type18_fvm)then
-        write(*,FMT='(A)')"------------------------------------------"
-        write(*,*)"RESULT : Search Algorithm with VOXEL partitioning"
-        write(*,*)"  Number of couples =", II_STOK
-        if(II_STOK>0)then
-          write(*,FMT='(A,(I10))')"  --> SECONDARY Node ids: ", CAND_N(1:II_STOK)
-          write(*,FMT='(A,(I10))')"  --> Local Face ids: ", CAND_E(1:II_STOK)
-        endif
-        write(*,*)" Structure domain :"
-        write(*,FMT='(A,F30.16,A,F30.16)')" Xmin=",XMIN,"  Xmax=",XMAX
-        write(*,FMT='(A,F30.16,A,F30.16)')" Ymin=",YMIN,"  Ymax=",YMAX
-        write(*,FMT='(A,F30.16,A,F30.16)')" Zmin=",ZMIN,"  Zmax=",ZMAX
-        write(*,*)" Partitioning domain :"
-        write(*,*)"   TZINF,AAA=",TZINF,AAA
-        write(*,FMT='(A,F30.16,A,F30.16)')" Xmin=",XMIN-AAA,"  Xmax=",XMAX+AAA
-        write(*,FMT='(A,F30.16,A,F30.16)')" Ymin=",YMIN-AAA,"  Ymax=",YMAX+AAA
-        write(*,FMT='(A,F30.16,A,F30.16)')" Zmin=",ZMIN-AAA,"  Zmax=",ZMAX+AAA
-        write(*,FMT='(A)')"------------------------------------------"
-      endif
 
 C=======================================================================
 C 7   DEALLOCATE
