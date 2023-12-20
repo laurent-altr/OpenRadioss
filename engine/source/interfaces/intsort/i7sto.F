@@ -29,9 +29,9 @@ Chd|-- calls ---------------
 Chd|        I7COR3T                       source/interfaces/int07/i7cor3t.F
 Chd|        I7PEN3                        source/interfaces/intsort/i7pen3.F
 Chd|====================================================================
-      MODULE I7STO_MOD
+      MODULE INTER7_FILTER_CAND_MOD
         contains
-      SUBROUTINE I7STO(
+      SUBROUTINE INTER7_FILTER_CAND(
      1      J_STOK,IRECT  ,X     ,NSV   ,II_STOK,
      2      CAND_N,CAND_E ,MULNSN,NOINT ,MARGE  ,
      3      I_MEM ,PROV_N ,PROV_E,ESHIFT,INACTI ,
@@ -39,7 +39,15 @@ Chd|====================================================================
      5      OLDNUM,NSNROLD,IGAP  ,GAP   ,GAP_S  ,
      6      GAP_M ,GAPMIN ,GAPMAX,CURV_MAX,NIN  ,
      7      GAP_S_L,GAP_M_L,DRAD,ITIED    ,
-     8      CAND_F ,DGAPLOAD)
+     8      CAND_F ,DGAPLOAD,
+     .      X1, X2, X3, X4,
+     .      Y1, Y2, Y3, Y4,
+     .      Z1, Z2, Z3, Z4,
+     .      XI, YI, ZI, STIF, 
+     .      PENE, GAPV)
+
+        USE INTER7_GATHER_CAND_MOD, ONLY: INTER7_GATHER_CAND
+        USE I7_PENETRATION_MOD, ONLY: I7_PENETRATION
 C============================================================================
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
@@ -63,37 +71,39 @@ C-----------------------------------------------
      .        X(3,*), CAND_P(*), GAP_S(*), GAP_M(*),
      .        MARGE, GAP, GAPMIN, GAPMAX,CURV_MAX(*),
      .        GAP_S_L(*),GAP_M_L(*), CAND_F(8,*)
+      my_real
+     .   X1, X2, X3, X4, ! < coordinates of the 4 nodes of the quad
+     .   Y1, Y2, Y3, Y4, ! < coordinates of the 4 nodes of the quad
+     .   Z1, Z2, Z3, Z4, ! < coordinates of the 4 nodes of the quad
+     .   XI(J_STOK), YI(J_STOK), ZI(J_STOK), ! < coordinates of secondary node
+     .   STIF(J_STOK), PENE(J_STOK), GAPV(J_STOK) !< 
+
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
       INTEGER I,K_STOK,I_STOK,N,NE,J,ITYPE
-      INTEGER IX1(MVSIZ), IX2(MVSIZ), IX3(MVSIZ), IX4(MVSIZ)
-C     REAL
-      my_real
-     .   X1(MVSIZ), X2(MVSIZ), X3(MVSIZ), X4(MVSIZ),
-     .   Y1(MVSIZ), Y2(MVSIZ), Y3(MVSIZ), Y4(MVSIZ),
-     .   Z1(MVSIZ), Z2(MVSIZ), Z3(MVSIZ), Z4(MVSIZ),
-     .   XI(MVSIZ), YI(MVSIZ), ZI(MVSIZ), STIF(MVSIZ), 
-     .   PENE(MVSIZ), GAPV(MVSIZ)
-       INTEGER :: INACTI_L, ITIED_L, IFQ_L 
-       INTEGER :: J_START, J_END
+      INTEGER :: INACTI_L, ITIED_L, IFQ_L 
+      INTEGER :: J_START, J_END
+      integer :: I3N !< 0 for quad, 1 for triangle
+
       DATA ITYPE/7/
 C-----------------------------------------------
-        CALL I7COR3T(J_STOK  ,X    ,IRECT ,NSV   ,PROV_E  ,
+        I3N=0
+        IF(IRECT(3,PROV_E(1))==IRECT(4,PROV_E(1))) I3N=1
+
+        CALL INTER7_GATHER_CAND(J_STOK  ,X    ,IRECT ,NSV   ,PROV_E  ,
      1               PROV_N  ,IGAP ,GAP   ,X1    ,X2      ,
      2               X3      ,X4   ,Y1    ,Y2    ,Y3      ,
      3               Y4      ,Z1   ,Z2    ,Z3    ,Z4      ,
-     4               XI      ,YI   ,ZI    ,STIF  ,IX1     ,
-     5               IX2     ,IX3  ,IX4   ,NSN   ,GAP_S   ,
-     6               GAP_M   ,GAPV ,GAPMAX,GAPMIN,CURV_MAX,
-     7               ITYPE   ,NIN  ,GAP_S_L,GAP_M_L,
+     4               XI      ,YI   ,ZI    ,
+     5               NSN     ,GAP_S   ,
+     6               GAP_M   ,GAPV ,GAPMAX, GAPMIN, CURV_MAX,
+     7               ITYPE   ,GAP_S_L,GAP_M_L,
      8               DRAD    ,DGAPLOAD)
-C-----------------------------------------------
         CALL I7_PENETRATION(J_STOK ,MARGE ,X1    ,X2     ,X3   ,
      .               X4    ,Y1    ,Y2    ,Y3     ,Y4   ,
      .               Z1    ,Z2    ,Z3    ,Z4     ,XI   ,
-     .               YI    ,ZI    ,PENE  ,IX1    ,IX2  ,
-     .               IX3   ,IX4   ,IGAP  ,GAP    ,GAPV )
+     .               YI    ,ZI    ,PENE  ,GAPV, I3N)
 C-----------------------------------------------
 C SUPPRESSION DES ANCIENS CANDIDATS DEJE STOCKES (PENE INITIALE)
 C-----------------------------------------------
@@ -153,4 +163,4 @@ C-----------------------------------------------
         ENDDO
       RETURN
       END
-      END MODULE I7STO_MOD
+      END MODULE 

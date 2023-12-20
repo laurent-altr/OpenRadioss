@@ -45,7 +45,6 @@ C=======================================================================
 C   M o d u l e s
 C-----------------------------------------------
       USE TRI7BOX
-      USE I7STO_MOD , ONLY : I7STO
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -602,7 +601,7 @@ C
      4             IFQ   ,CAND_A ,CAND_P,IFPEN ,NSN    ,
      5             OLDNUM,NSNROLD,IGAP  ,GAP   ,GAP_S  ,
      6             GAP_M ,GAPMIN ,GAPMAX,CURV_MAX,NIN  ,
-     7             GAP_S_L,GAP_M_L,DRAD,ITIED    ,
+     7             GAP_S_L,GAP_M_L,INTTH,DRAD,ITIED    ,
      8             CAND_F,DGAPLOAD)
                IF(I_MEM==2) THEN
                  RETURN
@@ -648,7 +647,7 @@ C-------------------------------------------------------------------------
      4              IFQ   ,CAND_A ,CAND_P,IFPEN ,NSN    ,
      5              OLDNUM,NSNROLD,IGAP  ,GAP   ,GAP_S  ,
      6              GAP_M ,GAPMIN ,GAPMAX,CURV_MAX,NIN  ,
-     7              GAP_S_L,GAP_M_L,DRAD,ITIED    ,
+     7              GAP_S_L,GAP_M_L,INTTH,DRAD,ITIED    ,
      8              CAND_F ,DGAPLOAD)
 C-------------------------------------------------------------------------
       IF(FLAGREMNODE==2) THEN

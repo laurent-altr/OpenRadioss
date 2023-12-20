@@ -21,7 +21,7 @@ Copyright>        As an alternative to this open-source version, Altair also off
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
        MODULE I7TRIVOX_MOD 
-
+          integer :: max_node_per_cell !< maximum number of nodes in a cell
         CONTAINS
 Chd|====================================================================
 Chd|  I7TRIVOX                      source/interfaces/intsort/i7trivox.F
@@ -54,7 +54,7 @@ C============================================================================
 C   M o d u l e s
 C-----------------------------------------------
       USE MESSAGE_MOD
-      USE I7STO_MOD
+      USE INTER7_FILTER_CAND_MOD
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -169,7 +169,6 @@ C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
       INTEGER I,J,
      .        NN,NE,K,L,J_STOK,II,JJ,
-     .        PROV_N(MVSIZ),PROV_E(MVSIZ),
      .        OLDNUM(ISZNSNR), NSNF, NSNL,DELNOD,M
       INTEGER, DIMENSION(:), ALLOCATABLE :: TAGREMNODE
       my_real
@@ -190,8 +189,15 @@ c provisoire
       LOGICAL DBG_type18_fvm
       integer :: NB_VOXEL_ON !< number of remote nodes in the bounding box
       INTEGER, dimension(:), allocatable :: LIST_NB_VOXEL_ON
-      integer :: max_node_per_cell !< maximum number of nodes in a cell
       integer :: node_per_cell !< number of nodes in a cell
+      my_real ::  x1, x2, x3, x4,
+     .   y1, y2, y3, y4,
+     .   z1, z2, z3, z4
+      my_real, dimension(:), allocatable :: 
+     .   xi, yi, zi, stif, 
+     .   pene, gapv
+      integer, dimension(:), allocatable :: prov_n, prov_e
+
 
 C-----------------------------------------------
       IF(ITASK == 0)THEN
@@ -319,8 +325,8 @@ C=======================================================================
       END IF !ITASK == 0
 
       CALL MY_BARRIER ! Barrier to wait task0 treatment
-      max_node_per_cell = 0
       IF(TOTAL_NB_NRTM>0 .AND. ITASK == 0) THEN
+        max_node_per_cell = 0
         DO JJ = 1, NB_VOXEL_ON
            k = LIST_NB_VOXEL_ON(JJ)
            IIZ =  MOD(K,NBZ+2) + 1 
@@ -335,10 +341,20 @@ C=======================================================================
               node_per_cell = node_per_cell + 1
               J = NEXT_NOD(J)
            ENDDO
+           max_node_per_cell = MAX(max_node_per_cell, node_per_cell)
         ENDDO
       ENDIF
 
       CALL MY_BARRIER()
+      ALLOCATE(XI(max_node_per_cell))
+      ALLOCATE(YI(max_node_per_cell))
+      ALLOCATE(ZI(max_node_per_cell))
+      ALLOCATE(STIF(max_node_per_cell))
+      ALLOCATE(PENE(max_node_per_cell))
+      ALLOCATE(GAPV(max_node_per_cell))
+      ALLOCATE(PROV_N(max_node_per_cell))
+      ALLOCATE(PROV_E(max_node_per_cell))
+
 
 
 C=======================================================================
@@ -518,23 +534,26 @@ C=======================================================================
                 J_STOK = J_STOK + 1
                 PROV_N(J_STOK) = JJ
                 PROV_E(J_STOK) = NE
-                IF(J_STOK == NVSIZ)THEN
-                  CALL I7STO(
-     1               NVSIZ ,IRECT  ,X     ,NSV   ,II_STOK,
+  200           CONTINUE
+                JJ = NEXT_NOD(JJ)
+                IF(I_MEM==2) JJ = 0
+              ENDDO ! WHILE(JJ /= 0)
+              IF(J_STOK > 0) CALL INTER7_FILTER_CAND(
+     1               J_STOK,IRECT  ,X     ,NSV   ,II_STOK,
      2               CAND_N,CAND_E ,MULNSN,NOINT ,MARGE  ,
      3               I_MEM ,PROV_N ,PROV_E,ESHIFT,INACTI ,
      4               IFQ   ,CAND_A ,CAND_P,IFPEN ,NSN    ,
      5               OLDNUM,NSNROLD,IGAP  ,GAP   ,GAP_S  ,
      6               GAP_M ,GAPMIN ,GAPMAX,CURV_MAX,NIN  ,
      7               GAP_S_L,GAP_M_L,DRAD,ITIED    ,
-     8               CAND_F ,DGAPLOAD)
+     8               CAND_F ,DGAPLOAD,
+     .               X1, X2, X3, X4,
+     .               Y1, Y2, Y3, Y4,
+     .               Z1, Z2, Z3, Z4,
+     .               XI, YI, ZI, STIF, 
+     .               PENE, GAPV)
                   J_STOK = 0
 
-                ENDIF
-  200           CONTINUE
-                JJ = NEXT_NOD(JJ)
-                IF(I_MEM==2) JJ = 0
-              ENDDO ! WHILE(JJ /= 0)
             ENDDO ! X
           ENDDO  ! Y
         ENDDO   ! Z
@@ -547,20 +566,6 @@ C=======================================================================
         ENDIF
       ENDDO
 !$OMP END DO
-C=======================================================================
-C 4   STORAGE
-C=======================================================================
-!$OMP CRITICAL
-      IF(J_STOK/=0)CALL I7STO(
-     1              J_STOK,IRECT  ,X     ,NSV   ,II_STOK,
-     2              CAND_N,CAND_E ,MULNSN,NOINT ,MARGE  ,
-     3              I_MEM ,PROV_N ,PROV_E,ESHIFT,INACTI ,
-     4              IFQ   ,CAND_A ,CAND_P,IFPEN ,NSN    ,
-     5              OLDNUM,NSNROLD,IGAP  ,GAP   ,GAP_S  ,
-     6              GAP_M ,GAPMIN ,GAPMAX,CURV_MAX,NIN  ,
-     7              GAP_S_L,GAP_M_L,DRAD  ,ITIED    ,
-     8              CAND_F ,DGAPLOAD)
-!$OMP END CRITICAL
 C=======================================================================
 C 5   VOXEL CLUSTERING  RESET
 C=======================================================================
