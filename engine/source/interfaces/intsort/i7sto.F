@@ -33,38 +33,37 @@ Chd|====================================================================
         contains
       SUBROUTINE INTER7_FILTER_CAND(
      1      J_STOK,IRECT  ,X     ,NSV   ,II_STOK,
-     2      CAND_N,CAND_E ,MULNSN,NOINT ,MARGE  ,
+     2      CAND_N,CAND_E ,MULNSN,MARGE  ,
      3      I_MEM ,PROV_N ,PROV_E,ESHIFT,INACTI ,
      4      IFQ   ,CAND_A ,CAND_P,IFPEN ,NSN    ,
      5      OLDNUM,NSNROLD,IGAP  ,GAP   ,GAP_S  ,
-     6      GAP_M ,GAPMIN ,GAPMAX,CURV_MAX,NIN  ,
+     6      GAP_M ,GAPMIN ,GAPMAX,CURV_MAX,
      7      GAP_S_L,GAP_M_L,DRAD,ITIED    ,
      8      CAND_F ,DGAPLOAD,
      .      X1, X2, X3, X4,
      .      Y1, Y2, Y3, Y4,
      .      Z1, Z2, Z3, Z4,
-     .      XI, YI, ZI, STIF, 
-     .      PENE, GAPV)
+     .      XI, YI, ZI,  
+     .      PENE, GAPV, NSNR,
+     .      xrem ,s_xrem) 
+
 
         USE INTER7_GATHER_CAND_MOD, ONLY: INTER7_GATHER_CAND
-        USE I7_PENETRATION_MOD, ONLY: I7_PENETRATION
-C============================================================================
+        USE INTER7_PENETRATION_MOD, ONLY: INTER7_PENETRATION
+        USE CONSTANT_MOD
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
-#include      "implicit_f.inc"
-#include      "comlock.inc"
-C-----------------------------------------------
-C   G l o b a l   P a r a m e t e r s
-C-----------------------------------------------
-#include      "mvsiz_p.inc"
+        implicit none
+#include   "my_real.inc"
+#include   "comlock.inc"
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
-      INTEGER I_MEM, NSN, NSNROLD,IGAP,NIN,ITIED
-      INTEGER J_STOK,MULNSN,NOINT,INACTI,IFQ,ESHIFT
+      INTEGER I_MEM, NSN, NSNROLD,IGAP,ITIED
+      INTEGER J_STOK,MULNSN,INACTI,IFQ,ESHIFT
       INTEGER IRECT(4,*),NSV(*),CAND_N(*),CAND_E(*),CAND_A(*)
-      INTEGER PROV_N(MVSIZ),PROV_E(MVSIZ),IFPEN(*), OLDNUM(*),
+      INTEGER PROV_N(J_STOK),PROV_E(J_STOK),IFPEN(*), OLDNUM(*),
      *        II_STOK
       my_real , INTENT(IN) :: DRAD,DGAPLOAD
       my_real
@@ -77,16 +76,17 @@ C-----------------------------------------------
      .   Z1, Z2, Z3, Z4, ! < coordinates of the 4 nodes of the quad
      .   XI(J_STOK), YI(J_STOK), ZI(J_STOK), ! < coordinates of secondary node
      .   STIF(J_STOK), PENE(J_STOK), GAPV(J_STOK) !< 
-
+      integer, intent(in) :: nsnr
+      integer, intent(in) :: s_xrem
+      my_real, intent(in) :: xrem(s_xrem,nsnr)  !< remote (spmd) secondaray data       
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I,K_STOK,I_STOK,N,NE,J,ITYPE
+      INTEGER :: I,K_STOK,I_STOK,N,NE,J
       INTEGER :: INACTI_L, ITIED_L, IFQ_L 
       INTEGER :: J_START, J_END
       integer :: I3N !< 0 for quad, 1 for triangle
-
-      DATA ITYPE/7/
+      INTEGER, PARAMETER :: ITYPE = 7
 C-----------------------------------------------
         I3N=0
         IF(IRECT(3,PROV_E(1))==IRECT(4,PROV_E(1))) I3N=1
@@ -99,8 +99,9 @@ C-----------------------------------------------
      5               NSN     ,GAP_S   ,
      6               GAP_M   ,GAPV ,GAPMAX, GAPMIN, CURV_MAX,
      7               ITYPE   ,GAP_S_L,GAP_M_L,
-     8               DRAD    ,DGAPLOAD)
-        CALL I7_PENETRATION(J_STOK ,MARGE ,X1    ,X2     ,X3   ,
+     8               DRAD    ,DGAPLOAD, nsnr, 
+     .               s_xrem, xrem)
+        CALL INTER7_PENETRATION(J_STOK ,MARGE ,X1    ,X2     ,X3   ,
      .               X4    ,Y1    ,Y2    ,Y3     ,Y4   ,
      .               Z1    ,Z2    ,Z3    ,Z4     ,XI   ,
      .               YI    ,ZI    ,PENE  ,GAPV, I3N)
@@ -135,7 +136,7 @@ C-----------------------------------------------
           IF(PENE(I)/=ZERO) K_STOK = K_STOK + 1
         ENDDO
         IF(K_STOK==0)RETURN
-C
+C increment the number of kept candidates 
 #include "lockon.inc"
           I_STOK = II_STOK
           IF(I_STOK+K_STOK>MULNSN) THEN
@@ -145,9 +146,6 @@ C
           ENDIF
           II_STOK   = I_STOK + K_STOK
 #include "lockoff.inc"
-C-----------------------------------------------
-C    Thread-local copy of shared variables
-C-----------------------------------------------
         INACTI_L = INACTI
         ITIED_L = ITIED
         IFQ_L = IFQ

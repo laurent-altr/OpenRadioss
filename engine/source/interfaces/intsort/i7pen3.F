@@ -27,86 +27,84 @@ Chd|-- called by -----------
 Chd|        I7STO                         source/interfaces/intsort/i7sto.F
 Chd|-- calls ---------------
 Chd|====================================================================
-      MODULE I7_PENETRATION_MOD
+      MODULE INTER7_PENETRATION_MOD
         contains
-!< computes the penetration between a chuck of secondary nodes and a main surface
-      SUBROUTINE I7_PENETRATION(JLT   ,MARGE ,X1    ,X2     ,X3   ,
-     .                  X4    ,Y1    ,Y2    ,Y3     ,Y4   ,
-     .                  Z1    ,Z2    ,Z3    ,Z4     ,XI   ,
-     .                  YI    ,ZI    ,PENE  ,GAPV  ,I3N)
+!< computes the penetration between a chuck of secondary nodes and a main surface/segment
+      subroutine inter7_penetration(jlt   ,marge ,x1    ,x2     ,x3   ,
+     .                  x4    ,y1    ,y2    ,y3     ,y4   ,
+     .                  z1    ,z2    ,z3    ,z4     ,xi   ,
+     .                  yi    ,zi    ,pene  ,gapv  ,i3n)
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
-#include      "implicit_f.inc"
-C-----------------------------------------------
-C   G l o b a l   P a r a m e t e r s
-C-----------------------------------------------
-#include      "mvsiz_p.inc"
+        USE CONSTANT_MOD
+        implicit none
+#include "my_real.inc"
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
-      INTEGER JLT, IGAP
-      INTEGER, INTENT(in) :: I3N ! 0 QUAD, 1 TRIANGLE
+      integer jlt, igap
+      integer, intent(in) :: i3n ! 0 quad, 1 triangle
       my_real
-     .        GAPV(JLT), MARGE 
+     .        gapv(jlt), marge 
       my_real
-     .     X1, X2, X3, X4, !< X coordinates of the 4 nodes of the surface
-     .     Y1, Y2, Y3, Y4, !< Y coordinates of the 4 nodes of the surface
-     .     Z1, Z2, Z3, Z4, !< Z coordinates of the 4 nodes of the surface
-     .     XI(JLT), YI(JLT), ZI(JLT), PENE(JLT) !< secondary nodes and penetration
+     .     x1, x2, x3, x4, !< x coordinates of the 4 nodes of the surface
+     .     y1, y2, y3, y4, !< y coordinates of the 4 nodes of the surface
+     .     z1, z2, z3, z4, !< z coordinates of the 4 nodes of the surface
+     .     xi(jlt), yi(jlt), zi(jlt), pene(jlt) !< secondary nodes and penetration
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER I, IG
+      integer i, ig
       my_real
-     .     X0, Y0, Z0, GAP2(JLT),
-     .     NX1, NX2, NX3, NX4,
-     .     NY1, NY2, NY3, NY4,
-     .     NZ1, NZ2, NZ3, NZ4,
-     .     LB1(JLT), LB2(JLT), LB3(JLT), LB4(JLT),
-     .     LC1(JLT), LC2(JLT), LC3(JLT), LC4(JLT),
-     .     AL1(JLT), AL2(JLT), AL3(JLT), AL4(JLT),
-     .     P1,  P2,  P3,  P4,
-     .     X01,  X02,  X03, X04,
-     .     Y01,  Y02,  Y03, Y04,
-     .     Z01,  Z02,  Z03, Z04,
-     .     XI1(JLT),  XI2(JLT),  XI3(JLT), XI4(JLT),
-     .     YI1(JLT),  YI2(JLT),  YI3(JLT), YI4(JLT),
-     .     ZI1(JLT),  ZI2(JLT),  ZI3(JLT), ZI4(JLT),
-     .     HLB1(JLT), HLC1(JLT), HLB2(JLT),HLC2(JLT),
-     .     HLB3(JLT), HLC3(JLT), HLB4(JLT),HLC4(JLT)
+     .     x0, y0, z0, gap2(jlt),
+     .     nx1, nx2, nx3, nx4,
+     .     ny1, ny2, ny3, ny4,
+     .     nz1, nz2, nz3, nz4,
+     .     lb1(jlt), lb2(jlt), lb3(jlt), lb4(jlt),
+     .     lc1(jlt), lc2(jlt), lc3(jlt), lc4(jlt),
+     .     al1(jlt), al2(jlt), al3(jlt), al4(jlt),
+     .     p1,  p2,  p3,  p4,
+     .     x01,  x02,  x03, x04,
+     .     y01,  y02,  y03, y04,
+     .     z01,  z02,  z03, z04,
+     .     xi1(jlt),  xi2(jlt),  xi3(jlt), xi4(jlt),
+     .     yi1(jlt),  yi2(jlt),  yi3(jlt), yi4(jlt),
+     .     zi1(jlt),  zi2(jlt),  zi3(jlt), zi4(jlt),
+     .     hlb1(jlt), hlc1(jlt), hlb2(jlt),hlc2(jlt),
+     .     hlb3(jlt), hlc3(jlt), hlb4(jlt),hlc4(jlt)
       my_real
-     .     DTI, S2,A1,A2,A3,A4,D1,D2,D3,D4,
-     .     X12,X23,X34,X41,XI0,SX1,SX2,SX3,SX4,SX0,
-     .     Y12,Y23,Y34,Y41,YI0,SY1,SY2,SY3,SY4,SY0,
-     .     Z12,Z23,Z34,Z41,ZI0,SZ1,SZ2,SZ3,SZ4,SZ0,
-     .     LA, HLA, AAA, ZONEINF, ZONEINF2
-C-----------------------------------------------
-c GAPV(I)=GAP+CURV_MAX(CAND_E(I))
+     .     dti, s2,a1,a2,a3,a4,d1,d2,d3,d4,
+     .     x12,x23,x34,x41,xi0,sx1,sx2,sx3,sx4,sx0,
+     .     y12,y23,y34,y41,yi0,sy1,sy2,sy3,sy4,sy0,
+     .     z12,z23,z34,z41,zi0,sz1,sz2,sz3,sz4,sz0,
+     .     la, hla, aaa, zoneinf, zoneinf2
+c-----------------------------------------------
+c gapv(i)=gap+curv_max(cand_e(i))
 ! the aim is to compute the penetration between a chuck of secondary nodes and a main surface
 ! the candidate for penetration are couple of secondary nodes and the main surface
 ! we keep the nodes that are in the zone of influence of the main surface
 ! we will perform a new collision detection when a node has moved more than the zone of influence (relatively to the main surface)
-      DO I = 1, JLT
-          ZONEINF = GAPV(I)+MARGE !< zone of influence: gap of the element + margin 
-          GAP2(I)= ZONEINF*ZONEINF
-      END DO
-C
+      do i = 1, jlt
+          zoneinf = gapv(i)+marge !< zone of influence: gap of the element + margin 
+          gap2(i)= zoneinf*zoneinf
+      end do
+c
 C--------------------------------------------------------
 C   Quadrangle 
 C--------------------------------------------------------
-      IF(I3N==0) THEN
-         X0 = FOURTH*(X1+X2+X3+X4)
-         Y0 = FOURTH*(Y1+Y2+Y3+Y4)
-         Z0 = FOURTH*(Z1+Z2+Z3+Z4) 
+      if(i3n==0) then
+         x0 = fourth*(x1+x2+x3+x4)
+         y0 = fourth*(y1+y2+y3+y4)
+         z0 = fourth*(z1+z2+z3+z4) 
 C--------------------------------------------------------
 C  Triangle                      
 C--------------------------------------------------------
-      ELSE
-         X0 = X3
-         Y0 = Y3
-         Z0 = Z3
-      ENDIF
+      else
+         x0 = x3
+         y0 = y3
+         z0 = z3
+      endif
 c     write(6,*) "I3N=",I3N
 c     write(6,*) "X0=",X0,"Y0=",Y0,"Z0=",Z0
 c     write(6,*) "X1=",X1,"Y1=",Y1,"Z1=",Z1
@@ -114,352 +112,342 @@ c     write(6,*) "X2=",X2,"Y2=",Y2,"Z2=",Z2
 c     write(6,*) "X3=",X3,"Y3=",Y3,"Z3=",Z3
 c     write(6,*) "X4=",X4,"Y4=",Y4,"Z4=",Z4
 C--------------------------------------------------------
-C  UNIQUEMENT POUR PAQUET DE TRIANGLE
+C  Triangle
 C--------------------------------------------------------
-      IF(I3N==1) THEN
+      if(i3n==1) then
 
-       X01 = X1 - X3
-       Y01 = Y1 - Y3
-       Z01 = Z1 - Z3
-C
-       X02 = X2 - X3
-       Y02 = Y2 - Y3
-       Z02 = Z2 - Z3
+       x01 = x1 - x3
+       y01 = y1 - y3
+       z01 = z1 - z3
+c
+       x02 = x2 - x3
+       y02 = y2 - y3
+       z02 = z2 - z3
 
-       X12 = X2 - X1
-       Y12 = Y2 - Y1
-       Z12 = Z2 - Z1
+       x12 = x2 - x1
+       y12 = y2 - y1
+       z12 = z2 - z1
 
-       DO I=1,JLT
-         XI0 = X3 - XI(I)
-         YI0 = Y3 - YI(I)
-         ZI0 = Z3 - ZI(I)
-C      
-         XI1(I) = X1 - XI(I)
-         YI1(I) = Y1 - YI(I)
-         ZI1(I) = Z1 - ZI(I)
-C      
-         XI2(I) = X2 - XI(I)
-         YI2(I) = Y2 - YI(I)
-         ZI2(I) = Z2 - ZI(I)
-C      
-         SX1 = YI0*ZI1(I) - ZI0*YI1(I)
-         SY1 = ZI0*XI1(I) - XI0*ZI1(I)
-         SZ1 = XI0*YI1(I) - YI0*XI1(I)
-C      
-         SX2 = YI0*ZI2(I) - ZI0*YI2(I) !
-         SY2 = ZI0*XI2(I) - XI0*ZI2(I)
-         SZ2 = XI0*YI2(I) - YI0*XI2(I)
-C      
-         SX0 = Y01*Z02 - Z01*Y02
-         SY0 = Z01*X02 - X01*Z02
-         SZ0 = X01*Y02 - Y01*X02
-         S2 = 1./MAX(EM30,SX0*SX0 + SY0*SY0 + SZ0*SZ0)
-C      
-         LB1(I) = -(SX0*SX2 + SY0*SY2 + SZ0*SZ2) * S2
-         LC1(I) =  (SX0*SX1 + SY0*SY1 + SZ0*SZ1) * S2
-C      
-         AAA    = ONE/MAX(EM30,X01*X01+Y01*Y01+Z01*Z01)
-         HLC1(I)= LC1(I)*ABS(LC1(I))*AAA
-         AL1(I) = -(XI0*X01+YI0*Y01+ZI0*Z01)*AAA
-         AL1(I) = MAX(ZERO,MIN(ONE,AL1(I)))
-         AAA    = ONE/MAX(EM30,X02*X02+Y02*Y02+Z02*Z02)
-         HLB1(I)= LB1(I)*ABS(LB1(I))*AAA
-         AL2(I) = -(XI0*X02+YI0*Y02+ZI0*Z02)*AAA
-         AL2(I) = MAX(ZERO,MIN(ONE,AL2(I))) 
-       ENDDO
-C
-      DO I=1,JLT
-       LA = ONE - LB1(I) - LC1(I)
-        AAA = ONE / MAX(EM20,X12*X12+Y12*Y12+Z12*Z12)
-        HLA= LA*ABS(LA) * AAA
-        IF(LA<ZERO.AND.
-     +     HLA<=HLB1(I).AND.HLA<=HLC1(I))THEN
-         LB1(I) = (XI2(I)*X12+YI2(I)*Y12+ZI2(I)*Z12)*AAA
-         LB1(I) = MAX(ZERO,MIN(ONE,LB1(I)))
-         LC1(I) = ONE - LB1(I)
-        ELSEIF(LB1(I)<ZERO.AND.
-     +        HLB1(I)<=HLC1(I).AND.HLB1(I)<=HLA)THEN
-         LB1(I) = ZERO
-         LC1(I) = AL2(I)
-        ELSEIF(LC1(I)<ZERO.AND.
-     +        HLC1(I)<=HLA.AND.HLC1(I)<=HLB1(I))THEN
-         LC1(I) = ZERO
-         LB1(I) = AL1(I)
-        ENDIF
-      ENDDO
-C
-      DO I=1,JLT
-C
-       NX1 = XI(I)-(X3 + LB1(I)*X01 + LC1(I)*X02)
-       NY1 = YI(I)-(Y3 + LB1(I)*Y01 + LC1(I)*Y02)
-       NZ1 = ZI(I)-(Z3 + LB1(I)*Z01 + LC1(I)*Z02)
-       P1 = NX1*NX1 + NY1*NY1 +NZ1*NZ1
-C !!!!!!!!!!!!!!!!!!!!!!!
-C  PENE = GAP^2 - DIST^2 UTILISE POUR TESTER SI NON NUL
-C!!!!!!!!!!!!!!!!!!!!!!!!
-       PENE(I) = MAX(ZERO, GAP2(I) - P1)
-c      write(6,*) PENE(I)
-c      write(6,"(2Z20)") GAP2(I),P1
+       do i=1,jlt
+         xi0 = x3 - xi(i)
+         yi0 = y3 - yi(i)
+         zi0 = z3 - zi(i)
+c      
+         xi1(i) = x1 - xi(i)
+         yi1(i) = y1 - yi(i)
+         zi1(i) = z1 - zi(i)
+c      
+         xi2(i) = x2 - xi(i)
+         yi2(i) = y2 - yi(i)
+         zi2(i) = z2 - zi(i)
+c      
+         sx1 = yi0*zi1(i) - zi0*yi1(i)
+         sy1 = zi0*xi1(i) - xi0*zi1(i)
+         sz1 = xi0*yi1(i) - yi0*xi1(i)
+c      
+         sx2 = yi0*zi2(i) - zi0*yi2(i) 
+         sy2 = zi0*xi2(i) - xi0*zi2(i)
+         sz2 = xi0*yi2(i) - yi0*xi2(i)
+c      
+         sx0 = y01*z02 - z01*y02
+         sy0 = z01*x02 - x01*z02
+         sz0 = x01*y02 - y01*x02
+         s2 = 1./max(em30,sx0*sx0 + sy0*sy0 + sz0*sz0)
+c      
+         lb1(i) = -(sx0*sx2 + sy0*sy2 + sz0*sz2) * s2
+         lc1(i) =  (sx0*sx1 + sy0*sy1 + sz0*sz1) * s2
+c      
+         aaa    = one/max(em30,x01*x01+y01*y01+z01*z01)
+         hlc1(i)= lc1(i)*abs(lc1(i))*aaa
+         al1(i) = -(xi0*x01+yi0*y01+zi0*z01)*aaa
+         al1(i) = max(zero,min(one,al1(i)))
+         aaa    = one/max(em30,x02*x02+y02*y02+z02*z02)
+         hlb1(i)= lb1(i)*abs(lb1(i))*aaa
+         al2(i) = -(xi0*x02+yi0*y02+zi0*z02)*aaa
+         al2(i) = max(zero,min(one,al2(i))) 
+       enddo
+c
+      do i=1,jlt
+       la = one - lb1(i) - lc1(i)
+        aaa = one / max(em20,x12*x12+y12*y12+z12*z12)
+        hla= la*abs(la) * aaa
+        if(la<zero.and.
+     +     hla<=hlb1(i).and.hla<=hlc1(i))then
+         lb1(i) = (xi2(i)*x12+yi2(i)*y12+zi2(i)*z12)*aaa
+         lb1(i) = max(zero,min(one,lb1(i)))
+         lc1(i) = one - lb1(i)
+        elseif(lb1(i)<zero.and.
+     +        hlb1(i)<=hlc1(i).and.hlb1(i)<=hla)then
+         lb1(i) = zero
+         lc1(i) = al2(i)
+        elseif(lc1(i)<zero.and.
+     +        hlc1(i)<=hla.and.hlc1(i)<=hlb1(i))then
+         lc1(i) = zero
+         lb1(i) = al1(i)
+        endif
+      enddo
+c
+      do i=1,jlt
+       nx1 = xi(i)-(x3 + lb1(i)*x01 + lc1(i)*x02)
+       ny1 = yi(i)-(y3 + lb1(i)*y01 + lc1(i)*y02)
+       nz1 = zi(i)-(z3 + lb1(i)*z01 + lc1(i)*z02)
+       p1 = nx1*nx1 + ny1*ny1 +nz1*nz1
+       pene(i) = max(zero, gap2(i) - p1)
+      enddo
+c--------------------------------------------------------
+      else ! quad
 
-C
-      ENDDO
-C--------------------------------------------------------
-      ELSE ! quad
+        x01 = x1 - x0
+        y01 = y1 - y0
+        z01 = z1 - z0
+c
+        x02 = x2 - x0
+        y02 = y2 - y0
+        z02 = z2 - z0
+c
+        x03 = x3 - x0
+        y03 = y3 - y0
+        z03 = z3 - z0
+c
+        x04 = x4 - x0
+        y04 = y4 - y0
+        z04 = z4 - z0
+c
+        x12 = x2 - x1
+        y12 = y2 - y1
+        z12 = z2 - z1
 
-        X01 = X1 - X0
-        Y01 = Y1 - Y0
-        Z01 = Z1 - Z0
-C
-        X02 = X2 - X0
-        Y02 = Y2 - Y0
-        Z02 = Z2 - Z0
-C
-        X03 = X3 - X0
-        Y03 = Y3 - Y0
-        Z03 = Z3 - Z0
-C
-        X04 = X4 - X0
-        Y04 = Y4 - Y0
-        Z04 = Z4 - Z0
-C
-        X12 = X2 - X1
-        Y12 = Y2 - Y1
-        Z12 = Z2 - Z1
-
-        X23 = X3 - X2
-        Y23 = Y3 - Y2
-        Z23 = Z3 - Z2
+        x23 = x3 - x2
+        y23 = y3 - y2
+        z23 = z3 - z2
         
-        X34 = X4 - X3
-        Y34 = Y4 - Y3
-        Z34 = Z4 - Z3
+        x34 = x4 - x3
+        y34 = y4 - y3
+        z34 = z4 - z3
 
-        X41 = X1 - X4
-        Y41 = Y1 - Y4
-        Z41 = Z1 - Z4
-
-
-
-       DO I=1,JLT
-C
-        XI0 = X0 - XI(I)
-        YI0 = Y0 - YI(I)
-        ZI0 = Z0 - ZI(I)
-C
-        XI1(I) = X1 - XI(I)
-        YI1(I) = Y1 - YI(I)
-        ZI1(I) = Z1 - ZI(I)
-C
-        XI2(I) = X2 - XI(I)
-        YI2(I) = Y2 - YI(I)
-        ZI2(I) = Z2 - ZI(I)
-C
-        XI3(I) = X3 - XI(I)
-        YI3(I) = Y3 - YI(I)
-        ZI3(I) = Z3 - ZI(I)
-C
-        XI4(I) = X4 - XI(I)
-        YI4(I) = Y4 - YI(I)
-        ZI4(I) = Z4 - ZI(I)
-C
-        SX1 = YI0*ZI1(I) - ZI0*YI1(I)
-        SY1 = ZI0*XI1(I) - XI0*ZI1(I)
-        SZ1 = XI0*YI1(I) - YI0*XI1(I)
-C
-        SX2 = YI0*ZI2(I) - ZI0*YI2(I)
-        SY2 = ZI0*XI2(I) - XI0*ZI2(I)
-        SZ2 = XI0*YI2(I) - YI0*XI2(I)
-C
-        SX0 = Y01*Z02 - Z01*Y02
-        SY0 = Z01*X02 - X01*Z02
-        SZ0 = X01*Y02 - Y01*X02
-        S2 = ONE/MAX(EM30,SX0*SX0 + SY0*SY0 + SZ0*SZ0)
-C
-        LB1(I) = -(SX0*SX2 + SY0*SY2 + SZ0*SZ2) * S2
-        LC1(I) =  (SX0*SX1 + SY0*SY1 + SZ0*SZ1) * S2
-C
-        SX3 = YI0*ZI3(I) - ZI0*YI3(I)
-        SY3 = ZI0*XI3(I) - XI0*ZI3(I)
-        SZ3 = XI0*YI3(I) - YI0*XI3(I)
-C
-        SX0 = Y02*Z03 - Z02*Y03
-        SY0 = Z02*X03 - X02*Z03
-        SZ0 = X02*Y03 - Y02*X03
-        S2 = ONE/MAX(EM30,SX0*SX0 + SY0*SY0 + SZ0*SZ0)
-C
-        LB2(I) = -(SX0*SX3 + SY0*SY3 + SZ0*SZ3) * S2
-        LC2(I) =  (SX0*SX2 + SY0*SY2 + SZ0*SZ2) * S2
-C
-        SX4 = YI0*ZI4(I) - ZI0*YI4(I)
-        SY4 = ZI0*XI4(I) - XI0*ZI4(I)
-        SZ4 = XI0*YI4(I) - YI0*XI4(I)
-C
-        SX0 = Y03*Z04 - Z03*Y04
-        SY0 = Z03*X04 - X03*Z04
-        SZ0 = X03*Y04 - Y03*X04
-        S2 = ONE/MAX(EM30,SX0*SX0 + SY0*SY0 + SZ0*SZ0)
-C
-        LB3(I) = -(SX0*SX4 + SY0*SY4 + SZ0*SZ4) * S2
-        LC3(I) =  (SX0*SX3 + SY0*SY3 + SZ0*SZ3) * S2
-C
-        SX0 = Y04*Z01 - Z04*Y01
-        SY0 = Z04*X01 - X04*Z01
-        SZ0 = X04*Y01 - Y04*X01
-        S2 = ONE/MAX(EM30,SX0*SX0 + SY0*SY0 + SZ0*SZ0)
-C
-        LB4(I) = -(SX0*SX1 + SY0*SY1 + SZ0*SZ1) * S2
-        LC4(I) =  (SX0*SX4 + SY0*SY4 + SZ0*SZ4) * S2
-C
-        AAA    = ONE/MAX(EM30,X01*X01+Y01*Y01+Z01*Z01)
-        HLC1(I)= LC1(I)*ABS(LC1(I))*AAA
-        HLB4(I)= LB4(I)*ABS(LB4(I))*AAA
-        AL1(I) = -(XI0*X01+YI0*Y01+ZI0*Z01)*AAA
-        AL1(I) = MAX(ZERO,MIN(ONE,AL1(I)))
-        AAA    = ONE/MAX(EM30,X02*X02+Y02*Y02+Z02*Z02)
-        HLC2(I)= LC2(I)*ABS(LC2(I))*AAA
-        HLB1(I)= LB1(I)*ABS(LB1(I))*AAA
-        AL2(I) = -(XI0*X02+YI0*Y02+ZI0*Z02)*AAA
-        AL2(I) = MAX(ZERO,MIN(ONE,AL2(I)))
-        AAA    = ONE/MAX(EM30,X03*X03+Y03*Y03+Z03*Z03)
-        HLC3(I)= LC3(I)*ABS(LC3(I))*AAA
-        HLB2(I)= LB2(I)*ABS(LB2(I))*AAA
-        AL3(I) = -(XI0*X03+YI0*Y03+ZI0*Z03)*AAA
-        AL3(I) = MAX(ZERO,MIN(ONE,AL3(I)))
-        AAA    = ONE/MAX(EM30,X04*X04+Y04*Y04+Z04*Z04)
-        HLC4(I)= LC4(I)*ABS(LC4(I))*AAA
-        HLB3(I)= LB3(I)*ABS(LB3(I))*AAA
-        AL4(I) = -(XI0*X04+YI0*Y04+ZI0*Z04)*AAA
-        AL4(I) = MAX(ZERO,MIN(ONE,AL4(I)))
-C
-       ENDDO
-C
-       DO I=1,JLT
-        LA = ONE - LB1(I) - LC1(I)
-        AAA = ONE / MAX(EM20,X12*X12+Y12*Y12+Z12*Z12)
-        HLA= LA*ABS(LA) * AAA
-        IF(LA<ZERO.AND.
-     +     HLA<=HLB1(I).AND.HLA<=HLC1(I))THEN
-         LB1(I) = (XI2(I)*X12+YI2(I)*Y12+ZI2(I)*Z12) * AAA
-         LB1(I) = MAX(ZERO,MIN(ONE,LB1(I)))
-         LC1(I) = ONE - LB1(I)
-        ELSEIF(LB1(I)<ZERO.AND.
-     +         HLB1(I)<=HLC1(I).AND.HLB1(I)<=HLA)THEN
-         LB1(I) = ZERO
-         LC1(I) = AL2(I)
-        ELSEIF(LC1(I)<ZERO.AND.
-     +         HLC1(I)<=HLA.AND.HLC1(I)<=HLB1(I))THEN
-         LC1(I) = ZERO
-         LB1(I) = AL1(I)
-        ENDIF
-       ENDDO
-C
-       DO I=1,JLT
-        LA = ONE - LB2(I) - LC2(I)
-        AAA = ONE / MAX(EM20,X23*X23+Y23*Y23+Z23*Z23)
-        HLA= LA*ABS(LA) * AAA
-        IF(LA<ZERO.AND.
-     +     HLA<=HLB2(I).AND.HLA<=HLC2(I))THEN
-         LB2(I) = (XI3(I)*X23+YI3(I)*Y23+ZI3(I)*Z23)*AAA
-         LB2(I) = MAX(ZERO,MIN(ONE,LB2(I)))
-         LC2(I) = ONE - LB2(I)
-        ELSEIF(LB2(I)<ZERO.AND.
-     +         HLB2(I)<=HLC2(I).AND.HLB2(I)<=HLA)THEN
-         LB2(I) = ZERO
-         LC2(I) = AL3(I)
-        ELSEIF(LC2(I)<ZERO.AND.
-     +         HLC2(I)<=HLA.AND.HLC2(I)<=HLB2(I))THEN
-         LC2(I) = ZERO
-         LB2(I) = AL2(I)
-        ENDIF
-       ENDDO
-C
-       DO I=1,JLT
-        LA = ONE - LB3(I) - LC3(I)
-        AAA = ONE / MAX(EM20,X34*X34+Y34*Y34+Z34*Z34)
-        HLA= LA*ABS(LA) * AAA
-        IF(LA<ZERO.AND.
-     +     HLA<=HLB3(I).AND.HLA<=HLC3(I))THEN
-         LB3(I) = (XI4(I)*X34+YI4(I)*Y34+ZI4(I)*Z34)*AAA
-         LB3(I) = MAX(ZERO,MIN(ONE,LB3(I)))
-         LC3(I) = ONE - LB3(I)
-        ELSEIF(LB3(I)<ZERO.AND.
-     +         HLB3(I)<=HLC3(I).AND.HLB3(I)<=HLA)THEN
-         LB3(I) = ZERO
-         LC3(I) = AL4(I)
-        ELSEIF(LC3(I)<ZERO.AND.
-     +         HLC3(I)<=HLA.AND.HLC3(I)<=HLB3(I))THEN
-         LC3(I) = ZERO
-         LB3(I) = AL3(I)
-        ENDIF
-       ENDDO
-C
-       DO I=1,JLT
-        LA = ONE - LB4(I) - LC4(I)
-        AAA = ONE / MAX(EM20,X41*X41+Y41*Y41+Z41*Z41)
-        HLA= LA*ABS(LA) * AAA
-        IF(LA<ZERO.AND.
-     +     HLA<=HLB4(I).AND.HLA<=HLC4(I))THEN
-         LB4(I) = (XI1(I)*X41+YI1(I)*Y41+ZI1(I)*Z41)*AAA
-         LB4(I) = MAX(ZERO,MIN(ONE,LB4(I)))
-         LC4(I) = ONE - LB4(I)
-        ELSEIF(LB4(I)<ZERO.AND.
-     +         HLB4(I)<=HLC4(I).AND.HLB4(I)<=HLA)THEN
-         LB4(I) = ZERO
-         LC4(I) = AL1(I)
-        ELSEIF(LC4(I)<ZERO.AND.
-     +         HLC4(I)<=HLA.AND.HLC4(I)<=HLB4(I))THEN
-         LC4(I) = ZERO
-         LB4(I) = AL4(I)
-        ENDIF
-       ENDDO
-
-       DO I=1,JLT
-C
-        NX1 = XI(I)-(X0 + LB1(I)*X01 + LC1(I)*X02)
-        NY1 = YI(I)-(Y0 + LB1(I)*Y01 + LC1(I)*Y02)
-        NZ1 = ZI(I)-(Z0 + LB1(I)*Z01 + LC1(I)*Z02)
-c       write(6,"(A,3Z20)") "XI=",XI(I),YI(I),ZI(I)
-c       write(6,"(A,3Z20)") "X0=",X0,Y0,Z0
-c       write(6,"(A,3Z20)") "X01=",X01,Y01,Z01
-c       write(6,"(A,3Z20)") "X02=",X02,Y02,Z02
+        x41 = x1 - x4
+        y41 = y1 - y4
+        z41 = z1 - z4
 
 
-        P1 = NX1*NX1 + NY1*NY1 +NZ1*NZ1
-        D1 = MAX(ZERO, GAP2(I) - P1)
-c       write(6,"(A,Z20,Z20)") "P1=",P1,GAP2(I)
-c       write(6,"(A,Z20)") "D1=",D1
-c       write(6,"(A,Z20)") "LB1=",LB1(I)
-c       write(6,"(A,Z20)") "LC1=",LC1(I)
-c       write(6,"(A,Z20,A,Z20,A,Z20,A,Z20)") "X0=",X0,"Y0=",Y0,"Z0=",Z0,"XI=",XI(I)
-C
-        NX2 = XI(I)-(X0 + LB2(I)*X02 + LC2(I)*X03)
-        NY2 = YI(I)-(Y0 + LB2(I)*Y02 + LC2(I)*Y03)
-        NZ2 = ZI(I)-(Z0 + LB2(I)*Z02 + LC2(I)*Z03)
-        P2 = NX2*NX2 + NY2*NY2 +NZ2*NZ2
-        D2 = MAX(ZERO, GAP2(I) - P2)
-C
-        NX3 = XI(I)-(X0 + LB3(I)*X03 + LC3(I)*X04)
-        NY3 = YI(I)-(Y0 + LB3(I)*Y03 + LC3(I)*Y04)
-        NZ3 = ZI(I)-(Z0 + LB3(I)*Z03 + LC3(I)*Z04)
-        P3 = NX3*NX3 + NY3*NY3 +NZ3*NZ3
-        D3 = MAX(ZERO, GAP2(I) - P3)
-C
-        NX4 = XI(I)-(X0 + LB4(I)*X04 + LC4(I)*X01)
-        NY4 = YI(I)-(Y0 + LB4(I)*Y04 + LC4(I)*Y01)
-        NZ4 = ZI(I)-(Z0 + LB4(I)*Z04 + LC4(I)*Z01)
-        P4 = NX4*NX4 + NY4*NY4 +NZ4*NZ4
-        D4 = MAX(ZERO, GAP2(I) - P4)
-C !!!!!!!!!!!!!!!!!!!!!!!
-C  PENE = GAP^2 - DIST^2 UTILISE POUR TESTER SI NON NUL
-C!!!!!!!!!!!!!!!!!!!!!!!!
-        PENE(I) = MAX(D1,D2,D3,D4)
-c       write(6,*) "PENE=",PENE(I)
-c       write(6,"(A,Z20,A,Z20,A,Z20,A,Z20)") "D1=",D1,"D2=",D2,"D3=",D3,"D4=",D4
-C
-       ENDDO
-      ENDIF
-C
-      RETURN
-      END
+
+       do i=1,jlt
+c
+        xi0 = x0 - xi(i)
+        yi0 = y0 - yi(i)
+        zi0 = z0 - zi(i)
+c
+        xi1(i) = x1 - xi(i)
+        yi1(i) = y1 - yi(i)
+        zi1(i) = z1 - zi(i)
+c
+        xi2(i) = x2 - xi(i)
+        yi2(i) = y2 - yi(i)
+        zi2(i) = z2 - zi(i)
+c
+        xi3(i) = x3 - xi(i)
+        yi3(i) = y3 - yi(i)
+        zi3(i) = z3 - zi(i)
+c
+        xi4(i) = x4 - xi(i)
+        yi4(i) = y4 - yi(i)
+        zi4(i) = z4 - zi(i)
+c
+        sx1 = yi0*zi1(i) - zi0*yi1(i)
+        sy1 = zi0*xi1(i) - xi0*zi1(i)
+        sz1 = xi0*yi1(i) - yi0*xi1(i)
+c
+        sx2 = yi0*zi2(i) - zi0*yi2(i)
+        sy2 = zi0*xi2(i) - xi0*zi2(i)
+        sz2 = xi0*yi2(i) - yi0*xi2(i)
+c
+        sx0 = y01*z02 - z01*y02
+        sy0 = z01*x02 - x01*z02
+        sz0 = x01*y02 - y01*x02
+        s2 = one/max(em30,sx0*sx0 + sy0*sy0 + sz0*sz0)
+c
+        lb1(i) = -(sx0*sx2 + sy0*sy2 + sz0*sz2) * s2
+        lc1(i) =  (sx0*sx1 + sy0*sy1 + sz0*sz1) * s2
+c
+        sx3 = yi0*zi3(i) - zi0*yi3(i)
+        sy3 = zi0*xi3(i) - xi0*zi3(i)
+        sz3 = xi0*yi3(i) - yi0*xi3(i)
+c
+        sx0 = y02*z03 - z02*y03
+        sy0 = z02*x03 - x02*z03
+        sz0 = x02*y03 - y02*x03
+        s2 = one/max(em30,sx0*sx0 + sy0*sy0 + sz0*sz0)
+c
+        lb2(i) = -(sx0*sx3 + sy0*sy3 + sz0*sz3) * s2
+        lc2(i) =  (sx0*sx2 + sy0*sy2 + sz0*sz2) * s2
+c
+        sx4 = yi0*zi4(i) - zi0*yi4(i)
+        sy4 = zi0*xi4(i) - xi0*zi4(i)
+        sz4 = xi0*yi4(i) - yi0*xi4(i)
+c
+        sx0 = y03*z04 - z03*y04
+        sy0 = z03*x04 - x03*z04
+        sz0 = x03*y04 - y03*x04
+        s2 = one/max(em30,sx0*sx0 + sy0*sy0 + sz0*sz0)
+c
+        lb3(i) = -(sx0*sx4 + sy0*sy4 + sz0*sz4) * s2
+        lc3(i) =  (sx0*sx3 + sy0*sy3 + sz0*sz3) * s2
+c
+        sx0 = y04*z01 - z04*y01
+        sy0 = z04*x01 - x04*z01
+        sz0 = x04*y01 - y04*x01
+        s2 = one/max(em30,sx0*sx0 + sy0*sy0 + sz0*sz0)
+c
+        lb4(i) = -(sx0*sx1 + sy0*sy1 + sz0*sz1) * s2
+        lc4(i) =  (sx0*sx4 + sy0*sy4 + sz0*sz4) * s2
+c
+        aaa    = one/max(em30,x01*x01+y01*y01+z01*z01)
+        hlc1(i)= lc1(i)*abs(lc1(i))*aaa
+        hlb4(i)= lb4(i)*abs(lb4(i))*aaa
+        al1(i) = -(xi0*x01+yi0*y01+zi0*z01)*aaa
+        al1(i) = max(zero,min(one,al1(i)))
+        aaa    = one/max(em30,x02*x02+y02*y02+z02*z02)
+        hlc2(i)= lc2(i)*abs(lc2(i))*aaa
+        hlb1(i)= lb1(i)*abs(lb1(i))*aaa
+        al2(i) = -(xi0*x02+yi0*y02+zi0*z02)*aaa
+        al2(i) = max(zero,min(one,al2(i)))
+        aaa    = one/max(em30,x03*x03+y03*y03+z03*z03)
+        hlc3(i)= lc3(i)*abs(lc3(i))*aaa
+        hlb2(i)= lb2(i)*abs(lb2(i))*aaa
+        al3(i) = -(xi0*x03+yi0*y03+zi0*z03)*aaa
+        al3(i) = max(zero,min(one,al3(i)))
+        aaa    = one/max(em30,x04*x04+y04*y04+z04*z04)
+        hlc4(i)= lc4(i)*abs(lc4(i))*aaa
+        hlb3(i)= lb3(i)*abs(lb3(i))*aaa
+        al4(i) = -(xi0*x04+yi0*y04+zi0*z04)*aaa
+        al4(i) = max(zero,min(one,al4(i)))
+c
+       enddo
+c
+       do i=1,jlt
+        la = one - lb1(i) - lc1(i)
+        aaa = one / max(em20,x12*x12+y12*y12+z12*z12)
+        hla= la*abs(la) * aaa
+        if(la<zero.and.
+     +     hla<=hlb1(i).and.hla<=hlc1(i))then
+         lb1(i) = (xi2(i)*x12+yi2(i)*y12+zi2(i)*z12) * aaa
+         lb1(i) = max(zero,min(one,lb1(i)))
+         lc1(i) = one - lb1(i)
+        elseif(lb1(i)<zero.and.
+     +         hlb1(i)<=hlc1(i).and.hlb1(i)<=hla)then
+         lb1(i) = zero
+         lc1(i) = al2(i)
+        elseif(lc1(i)<zero.and.
+     +         hlc1(i)<=hla.and.hlc1(i)<=hlb1(i))then
+         lc1(i) = zero
+         lb1(i) = al1(i)
+        endif
+       enddo
+c
+       do i=1,jlt
+        la = one - lb2(i) - lc2(i)
+        aaa = one / max(em20,x23*x23+y23*y23+z23*z23)
+        hla= la*abs(la) * aaa
+        if(la<zero.and.
+     +     hla<=hlb2(i).and.hla<=hlc2(i))then
+         lb2(i) = (xi3(i)*x23+yi3(i)*y23+zi3(i)*z23)*aaa
+         lb2(i) = max(zero,min(one,lb2(i)))
+         lc2(i) = one - lb2(i)
+        elseif(lb2(i)<zero.and.
+     +         hlb2(i)<=hlc2(i).and.hlb2(i)<=hla)then
+         lb2(i) = zero
+         lc2(i) = al3(i)
+        elseif(lc2(i)<zero.and.
+     +         hlc2(i)<=hla.and.hlc2(i)<=hlb2(i))then
+         lc2(i) = zero
+         lb2(i) = al2(i)
+        endif
+       enddo
+c
+       do i=1,jlt
+        la = one - lb3(i) - lc3(i)
+        aaa = one / max(em20,x34*x34+y34*y34+z34*z34)
+        hla= la*abs(la) * aaa
+        if(la<zero.and.
+     +     hla<=hlb3(i).and.hla<=hlc3(i))then
+         lb3(i) = (xi4(i)*x34+yi4(i)*y34+zi4(i)*z34)*aaa
+         lb3(i) = max(zero,min(one,lb3(i)))
+         lc3(i) = one - lb3(i)
+        elseif(lb3(i)<zero.and.
+     +         hlb3(i)<=hlc3(i).and.hlb3(i)<=hla)then
+         lb3(i) = zero
+         lc3(i) = al4(i)
+        elseif(lc3(i)<zero.and.
+     +         hlc3(i)<=hla.and.hlc3(i)<=hlb3(i))then
+         lc3(i) = zero
+         lb3(i) = al3(i)
+        endif
+       enddo
+c
+       do i=1,jlt
+        la = one - lb4(i) - lc4(i)
+        aaa = one / max(em20,x41*x41+y41*y41+z41*z41)
+        hla= la*abs(la) * aaa
+        if(la<zero.and.
+     +     hla<=hlb4(i).and.hla<=hlc4(i))then
+         lb4(i) = (xi1(i)*x41+yi1(i)*y41+zi1(i)*z41)*aaa
+         lb4(i) = max(zero,min(one,lb4(i)))
+         lc4(i) = one - lb4(i)
+        elseif(lb4(i)<zero.and.
+     +         hlb4(i)<=hlc4(i).and.hlb4(i)<=hla)then
+         lb4(i) = zero
+         lc4(i) = al1(i)
+        elseif(lc4(i)<zero.and.
+     +         hlc4(i)<=hla.and.hlc4(i)<=hlb4(i))then
+         lc4(i) = zero
+         lb4(i) = al4(i)
+        endif
+       enddo
+
+       do i=1,jlt
+c
+        nx1 = xi(i)-(x0 + lb1(i)*x01 + lc1(i)*x02)
+        ny1 = yi(i)-(y0 + lb1(i)*y01 + lc1(i)*y02)
+        nz1 = zi(i)-(z0 + lb1(i)*z01 + lc1(i)*z02)
+c       write(6,"(a,3z20)") "xi=",xi(i),yi(i),zi(i)
+c       write(6,"(a,3z20)") "x0=",x0,y0,z0
+c       write(6,"(a,3z20)") "x01=",x01,y01,z01
+c       write(6,"(a,3z20)") "x02=",x02,y02,z02
+
+
+        p1 = nx1*nx1 + ny1*ny1 +nz1*nz1
+        d1 = max(zero, gap2(i) - p1)
+c       write(6,"(a,z20,z20)") "p1=",p1,gap2(i)
+c       write(6,"(a,z20)") "d1=",d1
+c       write(6,"(a,z20)") "lb1=",lb1(i)
+c       write(6,"(a,z20)") "lc1=",lc1(i)
+c       write(6,"(a,z20,a,z20,a,z20,a,z20)") "x0=",x0,"y0=",y0,"z0=",z0,"xi=",xi(i)
+c
+        nx2 = xi(i)-(x0 + lb2(i)*x02 + lc2(i)*x03)
+        ny2 = yi(i)-(y0 + lb2(i)*y02 + lc2(i)*y03)
+        nz2 = zi(i)-(z0 + lb2(i)*z02 + lc2(i)*z03)
+        p2 = nx2*nx2 + ny2*ny2 +nz2*nz2
+        d2 = max(zero, gap2(i) - p2)
+c
+        nx3 = xi(i)-(x0 + lb3(i)*x03 + lc3(i)*x04)
+        ny3 = yi(i)-(y0 + lb3(i)*y03 + lc3(i)*y04)
+        nz3 = zi(i)-(z0 + lb3(i)*z03 + lc3(i)*z04)
+        p3 = nx3*nx3 + ny3*ny3 +nz3*nz3
+        d3 = max(zero, gap2(i) - p3)
+c
+        nx4 = xi(i)-(x0 + lb4(i)*x04 + lc4(i)*x01)
+        ny4 = yi(i)-(y0 + lb4(i)*y04 + lc4(i)*y01)
+        nz4 = zi(i)-(z0 + lb4(i)*z04 + lc4(i)*z01)
+        p4 = nx4*nx4 + ny4*ny4 +nz4*nz4
+        d4 = max(zero, gap2(i) - p4)
+c  pene = gap^2 - dist^2 utilise pour tester si non nul
+        pene(i) = max(d1,d2,d3,d4)
+c       write(6,*) "pene=",pene(i)
+c       write(6,"(a,z20,a,z20,a,z20,a,z20)") "d1=",d1,"d2=",d2,"d3=",d3,"d4=",d4
+c
+       enddo
+      endif
+c
+      return
+      end
       end module

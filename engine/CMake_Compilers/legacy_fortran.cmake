@@ -22,7 +22,6 @@ set_source_files_properties( ${source_directory}/source/airbag/fvrezone.F PROPER
 set_source_files_properties( ${source_directory}/source/airbag/mhvis3.F PROPERTIES COMPILE_FLAGS "${legacy_flags}" )
 set_source_files_properties( ${source_directory}/source/airbag/volum0.F PROPERTIES COMPILE_FLAGS "${legacy_flags}" )
 set_source_files_properties( ${source_directory}/source/input/freform.F PROPERTIES COMPILE_FLAGS "${legacy_flags}" )
-
 set_source_files_properties( ${source_directory}/source/input/leceig.F PROPERTIES COMPILE_FLAGS "${legacy_flags}" )
 set_source_files_properties( ${source_directory}/source/boundary_conditions/ebcs/ebcs6.F PROPERTIES COMPILE_FLAGS "${legacy_flags}" )
 set_source_files_properties( ${source_directory}/source/boundary_conditions/ebcs/ebcs10.F PROPERTIES COMPILE_FLAGS "${legacy_flags}" )
@@ -1205,8 +1204,6 @@ set_source_files_properties( ${source_directory}/source/interfaces/intsort/i21bu
 set_source_files_properties( ${source_directory}/source/interfaces/intsort/i11sto.F PROPERTIES COMPILE_FLAGS "${legacy_flags}" )
 set_source_files_properties( ${source_directory}/source/interfaces/intsort/i25buce_crit.F PROPERTIES COMPILE_FLAGS "${legacy_flags}" )
 set_source_files_properties( ${source_directory}/source/interfaces/intsort/i20main_tri.F PROPERTIES COMPILE_FLAGS "${legacy_flags}" )
-set_source_files_properties( ${source_directory}/source/interfaces/intsort/i7sto.F PROPERTIES COMPILE_FLAGS "${legacy_flags}" )
-set_source_files_properties( ${source_directory}/source/interfaces/intsort/i7trivox.F PROPERTIES COMPILE_FLAGS "${legacy_flags}" )
 set_source_files_properties( ${source_directory}/source/interfaces/intsort/i25optcd_edg.F PROPERTIES COMPILE_FLAGS "${legacy_flags}" )
 set_source_files_properties( ${source_directory}/source/interfaces/intsort/i11tri.F PROPERTIES COMPILE_FLAGS "${legacy_flags}" )
 set_source_files_properties( ${source_directory}/source/interfaces/intsort/i20sto.F PROPERTIES COMPILE_FLAGS "${legacy_flags}" )

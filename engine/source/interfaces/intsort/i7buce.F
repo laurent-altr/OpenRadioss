@@ -150,12 +150,12 @@ C
      1      ADD   ,NSN    ,RENUM  ,NSNR     ,ISZNSNR  ,
      2      IRECT ,X      ,STF    ,STFN     ,XYZM     ,
      3      I_ADD ,NSV    ,MAXSIZ ,II_STOK  ,CAND_N   ,
-     4      CAND_E,NCONTACT,NOINT  ,TZINF    ,MAXBOX   ,
+     4      CAND_E,NCONTACT,TZINF    ,MAXBOX   ,
      5      MINBOX,I_MEM  ,NB_N_B ,I_ADD_MAX,ESHIFT   ,
      6      INACTI,IFQ    ,MWAG(IP0), CAND_P   ,IFPEN    ,
      7      NRTM  ,NSNROLD,IGAP   ,GAP      ,GAP_S    ,
      8      GAP_M ,GAPMIN ,GAPMAX ,MARGE    ,CURV_MAX ,
-     9      NIN    ,GAP_S_L,GAP_M_L,INTTH, DRAD  ,ITIED    ,
+     9      GAP_S_L,GAP_M_L,INTTH, DRAD  ,ITIED    ,
      A      CAND_F ,KREMNOD  ,REMNOD  ,FLAGREMNODE,DGAPLOAD)
 
  234  CONTINUE
@@ -374,13 +374,13 @@ C (en // SMP il y a possibilite de redondance de traitement mais no pb)
      1   NSN     ,RENUM    ,NSNR     ,ISZNSNR  ,I_MEM   ,
      2   IRECT   ,X        ,STF      ,STFN     ,XYZM    ,
      3   NSV     ,II_STOK  ,CAND_N   ,ESHIFT   ,CAND_E  ,
-     4   NCONTACT,NOINT    ,TZINF    ,GAP_S_L  ,GAP_M_L ,
+     4   NCONTACT,TZINF    ,GAP_S_L  ,GAP_M_L ,
      5   VOXEL1  ,NBX      ,NBY      ,NBZ      ,
      6   INACTI  ,IFQ      ,MWAG(IP0),CAND_P   ,IFPEN   ,
      7   NRTM    ,NSNROLD  ,IGAP     ,GAP      ,GAP_S   ,
      8   GAP_M   ,GAPMIN   ,GAPMAX   ,MARGE    ,CURV_MAX,
-     9   NIN     ,ITASK    ,BGAPSMX  ,KREMNOD  ,REMNOD  ,
-     A   ITAB    ,FLAGREMNODE,DRAD   ,ITIED    ,CAND_F  ,
+     9   ITASK    ,BGAPSMX  ,KREMNOD  ,REMNOD  ,
+     A   FLAGREMNODE,DRAD   ,ITIED    ,CAND_F  ,
      B   DGAPLOAD,
      C   TOTAL_NB_NRTM, NSPMD, NUMNOD, XREM, SIZE(XREM,1), 
      D   IREM, size(irem,1), NEXT_NOD)
