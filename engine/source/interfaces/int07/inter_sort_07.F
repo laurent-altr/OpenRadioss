@@ -26,7 +26,7 @@ Chd|-- called by -----------
 Chd|        INTER_SORT                    source/interfaces/generic/inter_sort.F
 Chd|-- calls ---------------
 Chd|        I7BUCE                        source/interfaces/intsort/i7buce.F
-Chd|        I7BUCE_VOX                    source/interfaces/intsort/i7buce.F
+Chd|        INTER7_COLLISION_DETECTION                    source/interfaces/intsort/i7buce.F
 Chd|        MY_BARRIER                    source/system/machine.F       
 Chd|        SPMD_CELL_EXCHANGE            source/mpi/generic/spmd_cell_exchange.F
 Chd|        SPMD_RNUMCD                   source/mpi/interfaces/spmd_i7tool.F
@@ -63,6 +63,7 @@ C-----------------------------------------------
         USE INTER_STRUCT_MOD
         USE INTER_SORTING_MOD
         USE INTBUFDEF_MOD 
+        USE INTER7_COLLISION_DETECTION_MOD
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -234,19 +235,34 @@ C
         IF (IMONM > 0 .AND. ITASK == 0) CALL STARTIME(30,1)
 C
         IF(.TRUE.) THEN
-            CALL I7BUCE_VOX(
-     1      X      ,INTBUF_TAB%IRECTM(1+4*ESHIFT),INTBUF_TAB%NSV  ,INACTI    ,INTBUF_TAB%CAND_P,
-     2      NMN_G  ,NRTM_T                       ,NSN     ,INTBUF_TAB%CAND_E,INTBUF_TAB%CAND_N,
-     3      GAP    ,NOINT       ,INTBUF_TAB%I_STOK(1) ,NCONTACT ,INTER_STRUCT(NIN)%BOX_LIMIT_MAIN ,
-     4      TZINF  ,MAXBOX      ,MINBOX         ,INTER_STRUCT(NIN)%CAND_A  ,INTER_STRUCT(NIN)%CURV_MAX,
+            CALL INTER7_COLLISION_DETECTION(
+     1      X      ,INTBUF_TAB%IRECTM,INTBUF_TAB%NSV       ,INACTI    ,INTBUF_TAB%CAND_P,
+     2      NMN_G  ,NRTM_T           ,NSN                  ,INTBUF_TAB%CAND_E,INTBUF_TAB%CAND_N,
+     3      GAP    ,NOINT            ,INTBUF_TAB%I_STOK(1) ,NCONTACT ,INTER_STRUCT(NIN)%BOX_LIMIT_MAIN,
+     4      TZINF  ,INTER_STRUCT(NIN)%CAND_A  ,INTER_STRUCT(NIN)%CURV_MAX,
      6      NB_N_B ,ESHIFT      ,ILD            ,IFQ    ,INTBUF_TAB%IFPEN,
-     8      INTBUF_TAB%STFNS,NIN ,INTBUF_TAB%STFM(1+ESHIFT),IPARI(21,NIN),INTBUF_TAB%GAP_S,
-     A      NSNR   ,NCONT  ,RENUM  ,NSNROLD  ,INTBUF_TAB%GAP_M(1+ESHIFT),
-     B      GAPMIN ,GAPMAX      ,CURV_MAX_MAX   ,NUM_IMP   ,INTBUF_TAB%GAP_SL,
-     C      INTBUF_TAB%GAP_ML(1+ESHIFT),INTTH ,ITASK  , INTBUF_TAB%VARIABLES(7),I_MEM     ,  
-     D      INTBUF_TAB%KREMNODE(1+2*ESHIFT),INTBUF_TAB%REMNODE,ITAB , IPARI(63,NIN),DRAD         ,
-     E      ITIED ,INTBUF_TAB%CAND_F,DGAPLOADP,REMOTE_S_NODE,LIST_REMOTE_S_NODE,
-     F      NRTM)
+     8      INTBUF_TAB%STFNS,INTBUF_TAB%STFM,IPARI(21,NIN),INTBUF_TAB%GAP_S,
+     A      NSNR   ,NCONT  ,RENUM  ,NSNROLD  ,INTBUF_TAB%GAP_M,
+     B      GAPMIN ,GAPMAX  ,NUM_IMP   ,INTBUF_TAB%GAP_SL,
+     C      INTBUF_TAB%GAP_ML,ITASK  , INTBUF_TAB%VARIABLES(7),I_MEM     ,  
+     D      INTBUF_TAB%KREMNODE,INTBUF_TAB%REMNODE,  IPARI(63,NIN),DRAD         ,
+     E      ITIED ,INTBUF_TAB%CAND_F,DGAPLOADP,
+     F      NRTM, INTER_STRUCT(NIN)%SIZE_CAND_A)
+
+c    1   X        ,IRECT   ,NSV     ,INACTI   ,CAND_P  ,
+c    2   NMN      ,NRTM    ,NSN     ,CAND_E   ,CAND_N  ,
+c    3   GAP      ,NOINT   ,II_STOK ,NCONTACT ,BMINMA  ,
+c    4   TZINF    ,CAND_A,  CURV_MAX,
+c    5   NB_N_B   ,ESHIFT  ,ILD     ,IFQ      ,IFPEN   ,
+c    8   STFN     ,STF     ,IGAP     ,GAP_S   ,
+c    A   NSNR     ,NCONT   ,RENUM   ,NSNROLD  ,GAP_M   ,
+c    B   GAPMIN   ,GAPMAX  ,NUM_IMP,GAP_S_L ,
+c    C   GAP_M_L  ,ITASK   ,BGAPSMX  ,I_MEM   ,  
+c    D   KREMNOD  ,REMNOD  ,FLAGREMNODE, DRAD ,
+c    E   ITIED    ,CAND_F  ,DGAPLOAD,
+c    F   TOTAL_NB_NRTM, s_cand_a)
+
+
 
         ELSE
             CALL I7BUCE(

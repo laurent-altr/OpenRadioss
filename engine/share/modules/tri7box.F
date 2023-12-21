@@ -279,7 +279,7 @@ Chd|        SPMD_I7XVCOM2                 source/mpi/interfaces/spmd_i7xvcom2.F
 Chd|        SPMD_IFRONT                   source/mpi/interfaces/spmd_ifront.F
 Chd|        SPMD_INITFI                   source/mpi/interfaces/spmd_i7tool.F
 Chd|        SPMD_INT18_LAW151_PON         source/mpi/forces/spmd_int18_law151_pon.F
-Chd|        SPMD_OLDNUMCD                 source/mpi/interfaces/spmd_i7tool.F
+Chd|        SPMD_PREV_REMOTE_NUMBERCD                 source/mpi/interfaces/spmd_i7tool.F
 Chd|        SPMD_RNUM25                   source/mpi/interfaces/spmd_i7tool.F
 Chd|        SPMD_RNUM25_EDGE              source/mpi/interfaces/spmd_rnum25_edge.F
 Chd|        SPMD_RNUMCD                   source/mpi/interfaces/spmd_i7tool.F
@@ -511,6 +511,7 @@ C Temporary array for VOXEL SORTING
       INTEGER , DIMENSION(:), ALLOCATABLE :: NEXT_NOD
       INTEGER , DIMENSION(:), ALLOCATABLE :: CHAIN_ELEM,CHAIN_NEXT
       INTEGER , DIMENSION(:), ALLOCATABLE :: CHAIN_LAST 
+      INTEGER , DIMENSION(:), ALLOCATABLE :: PREV_REMOTE_NUMBER 
       INTEGER LVOXEL
       PARAMETER(LVOXEL = 8000000)
       INTEGER INIVOXEL, VOXEL1(LVOXEL)
