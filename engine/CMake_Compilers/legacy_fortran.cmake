@@ -1248,6 +1248,7 @@ set_source_files_properties( ${source_directory}/source/interfaces/intsort/i21tr
 set_source_files_properties( ${source_directory}/source/interfaces/intsort/i20buce_crit.F PROPERTIES COMPILE_FLAGS "${legacy_flags}" )
 set_source_files_properties( ${source_directory}/source/interfaces/intsort/i25pen3.F PROPERTIES COMPILE_FLAGS "${legacy_flags}" )
 set_source_files_properties( ${source_directory}/source/interfaces/intsort/i7tri.F PROPERTIES COMPILE_FLAGS "${legacy_flags}" )
+set_source_files_properties( ${source_directory}/source/interfaces/intsort/i7trivox.F PROPERTIES COMPILE_FLAGS "${legacy_flags}" )
 set_source_files_properties( ${source_directory}/source/interfaces/intsort/i25sto_edg.F PROPERTIES COMPILE_FLAGS "${legacy_flags}" )
 set_source_files_properties( ${source_directory}/source/interfaces/intsort/i24buce_crit.F PROPERTIES COMPILE_FLAGS "${legacy_flags}" )
 set_source_files_properties( ${source_directory}/source/interfaces/intsort/i22main_tri.F PROPERTIES COMPILE_FLAGS "${legacy_flags}" )

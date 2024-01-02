@@ -150,12 +150,12 @@ C
      1      ADD   ,NSN    ,RENUM  ,NSNR     ,ISZNSNR  ,
      2      IRECT ,X      ,STF    ,STFN     ,XYZM     ,
      3      I_ADD ,NSV    ,MAXSIZ ,II_STOK  ,CAND_N   ,
-     4      CAND_E,NCONTACT,TZINF    ,MAXBOX   ,
+     4      CAND_E,NCONTACT,NOINT  ,TZINF    ,MAXBOX   ,
      5      MINBOX,I_MEM  ,NB_N_B ,I_ADD_MAX,ESHIFT   ,
      6      INACTI,IFQ    ,MWAG(IP0), CAND_P   ,IFPEN    ,
      7      NRTM  ,NSNROLD,IGAP   ,GAP      ,GAP_S    ,
      8      GAP_M ,GAPMIN ,GAPMAX ,MARGE    ,CURV_MAX ,
-     9      GAP_S_L,GAP_M_L,INTTH, DRAD  ,ITIED    ,
+     9      NIN    ,GAP_S_L,GAP_M_L,INTTH, DRAD  ,ITIED    ,
      A      CAND_F ,KREMNOD  ,REMNOD  ,FLAGREMNODE,DGAPLOAD)
 
  234  CONTINUE
@@ -199,7 +199,6 @@ C============================================================================
 C   M o d u l e s
 C-----------------------------------------------
       USE TRI7BOX
-      USE I7TRIVOX_MOD , ONLY : I7TRIVOX
       USE MESSAGE_MOD
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
@@ -212,7 +211,6 @@ C-----------------------------------------------
 #include      "units_c.inc"
 #include      "warn_c.inc"
 #include      "com01_c.inc"
-#include      "com04_c.inc"
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
@@ -367,27 +365,20 @@ C (en // SMP il y a possibilite de redondance de traitement mais no pb)
       DO I=INIVOXEL,(NBX+2)*(NBY+2)*(NBZ+2)
         VOXEL1(I)=0
       ENDDO
-      IF(ITASK == 0) ALLOCATE(NEXT_NOD(NSN+NSNR))
-      call MY_BARRIER
       INIVOXEL = MAX(INIVOXEL,(NBX+2)*(NBY+2)*(NBZ+2)+1)
        CALL I7TRIVOX(
      1   NSN     ,RENUM    ,NSNR     ,ISZNSNR  ,I_MEM   ,
      2   IRECT   ,X        ,STF      ,STFN     ,XYZM    ,
      3   NSV     ,II_STOK  ,CAND_N   ,ESHIFT   ,CAND_E  ,
-     4   NCONTACT,TZINF    ,GAP_S_L  ,GAP_M_L ,
-     5   VOXEL1  ,NBX      ,NBY      ,NBZ      ,
+     4   NCONTACT,NOINT    ,TZINF    ,GAP_S_L  ,GAP_M_L ,
+     5   VOXEL1  ,NBX      ,NBY      ,NBZ      ,INTTH   ,
      6   INACTI  ,IFQ      ,MWAG(IP0),CAND_P   ,IFPEN   ,
      7   NRTM    ,NSNROLD  ,IGAP     ,GAP      ,GAP_S   ,
      8   GAP_M   ,GAPMIN   ,GAPMAX   ,MARGE    ,CURV_MAX,
-     9   ITASK    ,BGAPSMX  ,KREMNOD  ,REMNOD  ,
-     A   FLAGREMNODE,DRAD   ,ITIED    ,CAND_F  ,
-     B   DGAPLOAD,
-     C   TOTAL_NB_NRTM, NSPMD, NUMNOD, XREM, SIZE(XREM,1), 
-     D   IREM, size(irem,1), NEXT_NOD)
-
-        IF(ITASK==0)  THEN
-            IF(ALLOCATED(NEXT_NOD)) DEALLOCATE(NEXT_NOD)
-        ENDIF
+     9   NIN     ,ITASK    ,BGAPSMX  ,KREMNOD  ,REMNOD  ,
+     A   ITAB    ,FLAGREMNODE,DRAD   ,ITIED    ,CAND_F  ,
+     B   DGAPLOAD,REMOTE_S_NODE,LIST_REMOTE_S_NODE,
+     C   TOTAL_NB_NRTM)
  
  234  CONTINUE
 

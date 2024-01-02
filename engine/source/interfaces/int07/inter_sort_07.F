@@ -56,6 +56,7 @@ C============================================================================
 C   M o d u l e s
 C-----------------------------------------------
         USE TRI7BOX
+        USE COMMAND_LINE_ARGS_MOD
         USE MESSAGE_MOD
         USE INTBUFDEF_MOD
         USE H3D_MOD
@@ -122,6 +123,7 @@ C-----------------------------------------------
         my_real :: DGAPLOADP
         REAL T1  !elapsed time in smp
         LOGICAL TYPE18
+        INTEGER :: FIRST, LAST
         INTEGER :: NSN,NMN,NTY,NRTM
 C-----------------------------------------------
         NUM_IMP = 0
@@ -234,7 +236,7 @@ C
 #endif
         IF (IMONM > 0 .AND. ITASK == 0) CALL STARTIME(30,1)
 C
-        IF(.TRUE.) THEN
+        IF(GOT_PREVIEW == 1) THEN
             CALL INTER7_COLLISION_DETECTION(
      1      X      ,INTBUF_TAB%IRECTM,INTBUF_TAB%NSV       ,INACTI    ,INTBUF_TAB%CAND_P,
      2      NMN_G  ,NRTM_T           ,NSN                  ,INTBUF_TAB%CAND_E,INTBUF_TAB%CAND_N,
@@ -249,22 +251,33 @@ C
      E      ITIED ,INTBUF_TAB%CAND_F,DGAPLOADP,
      F      NRTM, INTER_STRUCT(NIN)%SIZE_CAND_A)
 
-c    1   X        ,IRECT   ,NSV     ,INACTI   ,CAND_P  ,
-c    2   NMN      ,NRTM    ,NSN     ,CAND_E   ,CAND_N  ,
-c    3   GAP      ,NOINT   ,II_STOK ,NCONTACT ,BMINMA  ,
-c    4   TZINF    ,CAND_A,  CURV_MAX,
-c    5   NB_N_B   ,ESHIFT  ,ILD     ,IFQ      ,IFPEN   ,
-c    8   STFN     ,STF     ,IGAP     ,GAP_S   ,
-c    A   NSNR     ,NCONT   ,RENUM   ,NSNROLD  ,GAP_M   ,
-c    B   GAPMIN   ,GAPMAX  ,NUM_IMP,GAP_S_L ,
-c    C   GAP_M_L  ,ITASK   ,BGAPSMX  ,I_MEM   ,  
-c    D   KREMNOD  ,REMNOD  ,FLAGREMNODE, DRAD ,
-c    E   ITIED    ,CAND_F  ,DGAPLOAD,
-c    F   TOTAL_NB_NRTM, s_cand_a)
+
+        ELSE IF(INTBUF_TAB%METRIC%ALGO == ALGO_VOXEL .OR.  INTBUF_TAB%METRIC%ALGO == TRY_ALGO_VOXEL) THEN
+            FIRST = 1 + ITASK*(NRTM/NTHREAD)
+            LAST = FIRST + NRTM_T - 1
+            IF(ITASK==NTHREAD-1) LAST=NRTM
+            CURV_MAX(1:NRTM_T) = INTER_STRUCT(NIN)%CURV_MAX(FIRST:LAST)
 
 
+            CALL I7BUCE_VOX(
+     1      X      ,INTBUF_TAB%IRECTM(1+4*ESHIFT),INTBUF_TAB%NSV  ,INACTI    ,INTBUF_TAB%CAND_P,
+     2      NMN_G  ,NRTM_T                       ,NSN     ,INTBUF_TAB%CAND_E,INTBUF_TAB%CAND_N,
+     3      GAP    ,NOINT       ,INTBUF_TAB%I_STOK(1) ,NCONTACT ,INTER_STRUCT(NIN)%BOX_LIMIT_MAIN ,
+     4      TZINF  ,MAXBOX      ,MINBOX         ,INTER_STRUCT(NIN)%CAND_A         ,CURV_MAX  ,
+     6      NB_N_B ,ESHIFT      ,ILD            ,IFQ    ,INTBUF_TAB%IFPEN,
+     8      INTBUF_TAB%STFNS,NIN ,INTBUF_TAB%STFM(1+ESHIFT),IPARI(21,NIN),INTBUF_TAB%GAP_S,
+     A      NSNR   ,NCONT  ,RENUM  ,NSNROLD  ,INTBUF_TAB%GAP_M(1+ESHIFT),
+     B      GAPMIN ,GAPMAX      ,CURV_MAX_MAX   ,NUM_IMP   ,INTBUF_TAB%GAP_SL,
+     C      INTBUF_TAB%GAP_ML(1+ESHIFT),INTTH ,ITASK  , INTBUF_TAB%VARIABLES(7),I_MEM     ,  
+     D      INTBUF_TAB%KREMNODE(1+2*ESHIFT),INTBUF_TAB%REMNODE,ITAB , IPARI(63,NIN),DRAD         ,
+     E      ITIED ,INTBUF_TAB%CAND_F,DGAPLOADP,REMOTE_S_NODE,LIST_REMOTE_S_NODE,
+     F      NRTM)
 
         ELSE
+        FIRST = 1 + ITASK*(NRTM/NTHREAD)
+        LAST = FIRST + NRTM_T - 1
+        IF(ITASK==NTHREAD-1) LAST=NRTM
+        CURV_MAX(1:NRTM_T) = INTER_STRUCT(NIN)%CURV_MAX(FIRST:LAST)
             CALL I7BUCE(
      1 X      ,INTBUF_TAB%IRECTM(1+4*ESHIFT),INTBUF_TAB%NSV  ,INACTI    ,INTBUF_TAB%CAND_P,
      2 NMN_G  ,NRTM_T                       ,NSN     ,INTBUF_TAB%CAND_E,INTBUF_TAB%CAND_N,
