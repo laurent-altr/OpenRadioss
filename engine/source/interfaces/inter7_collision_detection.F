@@ -51,7 +51,7 @@ C============================================================================
 C   M o d u l e s
 C-----------------------------------------------
       USE TRI7BOX
-      USE I7TRIVOX_MOD , ONLY : I7TRIVOX
+      USE INTER7_CANDIDATE_PAIRS_MOD
       USE MESSAGE_MOD
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
@@ -226,7 +226,7 @@ c         ! En SPMD, pour inacti ou IFQ, retrouve ancienne numerotation des cand
 
        call MY_BARRIER
        INIVOXEL = MAX(INIVOXEL,(NBX+2)*(NBY+2)*(NBZ+2)+1)
-       CALL I7TRIVOX(
+       CALL INTER7_CANDIDATE_PAIRS(
      1   NSN     ,PREV_REMOTE_NUMBER ,NSNR     ,S_PREV_REMOTE_NUMBER  ,I_MEM   ,
      2   IRECT   ,X        ,STF      ,STFN     ,XYZM    ,
      3   NSV     ,II_STOK  ,CAND_N   ,ESHIFT   ,CAND_E  ,
