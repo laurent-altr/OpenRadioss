@@ -62,61 +62,60 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
-      integer, intent(inout) :: i_mem
-      integer, intent(in) :: nsn
-      integer, intent(in) :: nsnrold !< number of remote nodes in the previous collision detection
-      integer, intent(in) :: igap
-      integer, intent(in) :: itied
-      integer, intent(in) :: j_stok
-      integer, intent(in) :: mulnsn !< allocated size of cand_n, cand_e, cand_p, cand_f
-      integer, intent(in) :: inacti
-      integer, intent(in) :: ifq 
-      integer, intent(in) :: eshift
-      integer, intent(in) :: irect(4,*)                                         
-      integer, intent(in) :: nsv(*)
-      integer, intent(inout) :: cand_n(*) !< output: node number of the candidate pair
-      integer, intent(inout) :: cand_e(*) !< output: segment number of the candidate pair
-      integer, intent(inout) :: cand_a(*)
-      integer, intent(inout) :: prov_n(j_stok) !< input node number of the candidate pair, before filtering
-      integer, intent(inout) :: prov_e(j_stok) !< input segment number of the candidate pair, before filtering
-      integer, intent(inout) :: ifpen(*) !
-      integer, intent(in) :: oldnum(*)
-      integer, intent(inout) :: ii_stok
-      my_real, intent(in) :: drad
-      my_real, intent(in) :: dgapload
-      my_real, intent(in) :: x(3,*)
-      my_real, intent(inout) :: cand_p(*)
-      my_real, intent(in) :: gap_s(*)
-      my_real, intent(in) :: gap_m(*)
-      my_real, intent(in) :: margin
-      my_real, intent(in) :: gap
-      my_real, intent(in) :: gapmin
-      my_real, intent(in) :: gapmax
-      my_real, intent(in) :: curv_max(*)
-      my_real, intent(in) :: gap_s_l(*)
-      my_real, intent(in) :: gap_m_l(*)
-      my_real, intent(inout) :: cand_f(8,*)
-      my_real, intent(inout) :: x1 !< x coordinate of the first node of the quadrangle or triangle
-      my_real, intent(inout) :: x2
-      my_real, intent(inout) :: x3
-      my_real, intent(inout) :: x4
-      my_real, intent(inout) :: y1
-      my_real, intent(inout) :: y2
-      my_real, intent(inout) :: y3
-      my_real, intent(inout) :: y4
-      my_real, intent(inout) :: z1
-      my_real, intent(inout) :: z2
-      my_real, intent(inout) :: z3
-      my_real, intent(inout) :: z4
-      my_real, intent(inout) :: xi(j_stok) !< x coordinate of the second nodes 
-      my_real, intent(inout) :: yi(j_stok)
-      my_real, intent(inout) :: zi(j_stok)
-      my_real, intent(inout) :: pene(j_stok)
-      my_real, intent(inout) :: gapv(j_stok)
-      integer, intent(in) :: nsnr !< number of remote nodes
-      integer, intent(in) :: s_xrem !< size of xrem
-      my_real, intent(in) :: xrem(s_xrem, nsnr)
-
+          integer, intent(inout) :: i_mem !< memory error flag
+          integer, intent(in) :: nsn  !< number secondary nodes
+          integer, intent(in) :: nsnrold !< number of remote nodes in the previous collision detection
+          integer, intent(in) :: igap !< gap formulation
+          integer, intent(in) :: itied !< tied contact formulation
+          integer, intent(in) :: j_stok !< number of candidate pairs to be filtered
+          integer, intent(in) :: mulnsn !< allocated size of cand_n, cand_e, cand_p, cand_f
+          integer, intent(in) :: inacti !< initial penetration formulation
+          integer, intent(in) :: ifq !< friction formulation ?
+          integer, intent(in) :: eshift !< shift for segment numbering
+          integer, intent(in) :: irect(4,*) !< 4 nodes of the segment
+          integer, intent(in) :: nsv(*) !< secondary node ids
+          integer, intent(inout) :: cand_n(*) !< output: node number of the candidate pair
+          integer, intent(inout) :: cand_e(*) !< output: segment number of the candidate pair
+          integer, intent(inout) :: cand_a(*)
+          integer, intent(inout) :: prov_n(j_stok) !< input node number of the candidate pair, before filtering
+          integer, intent(inout) :: prov_e(j_stok) !< input segment number of the candidate pair, before filtering
+          integer, intent(inout) :: ifpen(*) !
+          integer, intent(in) :: oldnum(*)
+          integer, intent(inout) :: ii_stok !< current total number of candidate pairs
+          my_real, intent(in) :: drad
+          my_real, intent(in) :: dgapload
+          my_real, intent(in) :: x(3,*) !< coordinates of all the nodes
+          my_real, intent(inout) :: cand_p(*)
+          my_real, intent(in) :: gap_s(*)
+          my_real, intent(in) :: gap_m(*)
+          my_real, intent(in) :: margin
+          my_real, intent(in) :: gap
+          my_real, intent(in) :: gapmin
+          my_real, intent(in) :: gapmax
+          my_real, intent(in) :: curv_max(*)
+          my_real, intent(in) :: gap_s_l(*)
+          my_real, intent(in) :: gap_m_l(*)
+          my_real, intent(inout) :: cand_f(8,*)
+          my_real, intent(inout) :: x1 !< x coordinate of the first node of the quadrangle or triangle
+          my_real, intent(inout) :: x2
+          my_real, intent(inout) :: x3
+          my_real, intent(inout) :: x4
+          my_real, intent(inout) :: y1
+          my_real, intent(inout) :: y2
+          my_real, intent(inout) :: y3
+          my_real, intent(inout) :: y4
+          my_real, intent(inout) :: z1
+          my_real, intent(inout) :: z2
+          my_real, intent(inout) :: z3
+          my_real, intent(inout) :: z4
+          my_real, intent(inout) :: xi(j_stok) !< x coordinate of the second nodes
+          my_real, intent(inout) :: yi(j_stok)
+          my_real, intent(inout) :: zi(j_stok)
+          my_real, intent(inout) :: pene(j_stok)
+          my_real, intent(inout) :: gapv(j_stok)
+          integer, intent(in) :: nsnr !< number of remote nodes
+          integer, intent(in) :: s_xrem !< size of xrem
+          my_real, intent(in) :: xrem(s_xrem, nsnr)
 c-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
@@ -144,7 +143,7 @@ C-----------------------------------------------
      .                 z1    ,z2    ,z3    ,z4     ,xi   ,
      .                 yi    ,zi    ,pene  ,gapv, i3n)
 c-----------------------------------------------
-c suppression des anciens candidats deje stockes (pene initiale)
+c removal of old candidates already stored (initial penetration)
 c-----------------------------------------------
           if(inacti==5.or.inacti==6.or.inacti==7.or.ifq>0.or.itied/=0)then
             do i=1,j_stok

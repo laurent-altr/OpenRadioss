@@ -77,14 +77,14 @@ C     REAL
 C-----------------------------------------------
        IBID = 0
        RBID = ZERO
-        CALL I10COR3T(J_STOK  ,X     ,IRECT ,NSV   ,PROV_E  ,
+        CALL I7COR3T(J_STOK  ,X     ,IRECT ,NSV   ,PROV_E  ,
      1               PROV_N  ,IGAP  ,GAP   ,X1    ,X2     ,
      2               X3      ,X4    ,Y1    ,Y2    ,Y3     ,
      3               Y4      ,Z1    ,Z2    ,Z3    ,Z4     ,
      4               XI      ,YI    ,ZI    ,STIF  ,IX1    ,
      5               IX2     ,IX3   ,IX4   ,NSN   ,GAP_S  ,
      6               GAP_M   ,GAPV  ,GAPMAX,GAPMIN,BID    ,
-     7               10      ,NIN   ,RBID  ,RBID  ,
+     7               10      ,NIN   ,RBID  ,RBID  ,IBID   ,
      8               RBID    ,RBID  )
 C-----------------------------------------------
         CALL I7PEN3(J_STOK ,MARGE ,X1    ,X2     ,X3   ,
