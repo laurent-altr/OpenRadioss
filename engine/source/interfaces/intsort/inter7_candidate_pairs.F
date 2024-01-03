@@ -23,33 +23,80 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
       MODULE INTER7_CANDIDATE_PAIRS_MOD
         integer :: max_node_per_cell !< maximum number of nodes in a cell
       CONTAINS
-Chd|====================================================================
-Chd|  I7TRIVOX                      source/interfaces/intsort/i7trivox.F
-Chd|-- called by -----------
-Chd|        I7BUCE_VOX                    source/interfaces/intsort/i7buce.F
-Chd|-- calls ---------------
-Chd|        ANCMSG                        source/output/message/message.F
-Chd|        ARRET                         source/system/arret.F
-Chd|        I7STO                         source/interfaces/intsort/i7sto.F
-Chd|        MY_BARRIER                    source/system/machine.F
-Chd|        SPMD_OLDNUMCD                 source/mpi/interfaces/spmd_i7tool.F
-Chd|        MESSAGE_MOD                   share/message_module/message_mod.F
-Chd|        TRI7BOX                       share/modules/tri7box.F
-Chd|====================================================================
+
+!! \brief get the list of candidates for all segment  
+      
         SUBROUTINE INTER7_CANDIDATE_PAIRS(
-     1        nsn    ,oldnum ,nsnr    ,isznsnr  ,i_mem    ,
-     2        irect  ,x           ,stf     ,stfn     ,xyzm     ,
-     3        nsv    ,ii_stok     ,cand_n  ,eshift   ,cand_e   ,
-     4        mulnsn ,tzinf   ,gap_s_l  ,gap_m_l  ,
-     5        voxel  ,nbx         ,nby     ,nbz      ,
-     6        inacti ,ifq         ,cand_a  ,cand_p   ,ifpen    ,
-     7        nrtm   ,nsnrold     ,igap    ,gap      ,gap_s    ,
-     8        gap_m  ,gapmin      ,gapmax  ,marge    ,curv_max ,
-     9        itask       ,bgapsmx ,kremnod  ,remnod   ,
-     a        flagremnode ,drad    ,itied    ,cand_f   ,
-     b        dgapload, s_cand_a,
-     c        total_nb_nrtm,  numnod, xrem     ,s_xrem,
-     e        irem, s_irem, next_nod)
+     &                                    nsn          ,                     
+     &                                    oldnum       , 
+     &                                    nsnr         , 
+     &                                    isznsnr      , 
+     &                                    i_mem        , 
+     &                                    irect        , 
+     &                                    x            , 
+     &                                    stf          , 
+     &                                    stfn         , 
+     &                                    xyzm         , 
+     &                                    nsv          , 
+     &                                    ii_stok      , 
+     &                                    cand_n       , 
+     &                                    eshift       , 
+     &                                    cand_e       , 
+     &                                    mulnsn       , 
+     &                                    tzinf        , 
+     &                                    gap_s_l      , 
+     &                                    gap_m_l      , 
+     &                                    voxel        , 
+     &                                    nbx          , 
+     &                                    nby          , 
+     &                                    nbz          , 
+     &                                    inacti       , 
+     &                                    ifq          , 
+     &                                    cand_a       , 
+     &                                    cand_p       , 
+     &                                    ifpen        , 
+     &                                    nrtm         , 
+     &                                    nsnrold      , 
+     &                                    igap         , 
+     &                                    gap          , 
+     &                                    gap_s        , 
+     &                                    gap_m        , 
+     &                                    gapmin       , 
+     &                                    gapmax       , 
+     &                                    marge        , 
+     &                                    curv_max     , 
+     &                                    itask        , 
+     &                                    bgapsmx      , 
+     &                                    s_kremnod    , 
+     &                                    kremnod      , 
+     &                                    s_remnod     , 
+     &                                    remnod       , 
+     &                                    flagremnode  , 
+     &                                    drad         , 
+     &                                    itied        , 
+     &                                    cand_f       , 
+     &                                    dgapload     , 
+     &                                    s_cand_a     , 
+     &                                    total_nb_nrtm, 
+     &                                    numnod       , 
+     &                                    xrem         , 
+     &                                    s_xrem       , 
+     &                                    irem         , 
+     &                                    s_irem       , 
+     &                                    next_nod      )
+c    1        nsn    ,oldnum ,nsnr    ,isznsnr  ,i_mem    ,
+c    2        irect  ,x           ,stf     ,stfn     ,xyzm     ,
+c    3        nsv    ,ii_stok     ,cand_n  ,eshift   ,cand_e   ,
+c    4        mulnsn ,tzinf   ,gap_s_l  ,gap_m_l  ,
+c    5        voxel  ,nbx         ,nby     ,nbz      ,
+c    6        inacti ,ifq         ,cand_a  ,cand_p   ,ifpen    ,
+c    7        nrtm   ,nsnrold     ,igap    ,gap      ,gap_s    ,
+c    8        gap_m  ,gapmin      ,gapmax  ,marge    ,curv_max ,
+c    9        itask       ,bgapsmx , s_kremnod, kremnod  , s_remnod, remnod   ,
+c    a        flagremnode ,drad    ,itied    ,cand_f   ,
+c    b        dgapload, s_cand_a,
+c    c        total_nb_nrtm,  numnod, xrem     ,s_xrem,
+c    e        irem, s_irem, next_nod)
 
           USE INTER7_FILTER_CAND_MOD
           USE CONSTANT_MOD
@@ -84,21 +131,23 @@ C-----------------------------------------------
           integer, intent(in), value :: s_cand_a !< size of cand_a
           integer, intent(in) :: nsv(nsn) !< global secondary node numbers
           integer, intent(in) :: oldnum(isznsnr) !< renumbering ?
-          integer, intent(in) :: kremnod(*) !< list of removed nodes
-          integer, intent(in) :: remnod(*) !< list of removed nodes
+          integer, intent(in), value :: s_kremnod ! 2 * nrtm + 1 if option is used
+          integer, intent(in) :: kremnod(s_kremnod) !< list of removed nodes
+          integer, intent(in), value :: s_remnod
+          integer, intent(in) :: remnod(s_remnod) !< list of removed nodes
           integer, intent(in) :: irect(4,nrtm) !< node id (from 1 to NUMNOD) for each segment (1:nrtm)
           integer, intent(inout) :: ii_stok !< number of candidates found
           integer, intent(inout) :: mulnsn !< maximum numbrer of candidates (size of cand_n)
           integer, intent(inout) :: cand_n(mulnsn) !< list of candidates (secodnary)
           integer, intent(inout) :: cand_e(mulnsn) !< list of candidates (main)
-          integer, intent(inout) :: ifpen(mulnsn) !< something related to friction??
-          integer, intent(inout) :: cand_a(s_cand_a) !< ??
+          integer, intent(inout) :: ifpen(mulnsn) !< something related to friction (???)
+          integer, intent(inout) :: cand_a(s_cand_a) !< (???)
           integer, intent(inout) :: irem(s_irem,nsnr) !< remote (spmd) integer data
           integer, intent(inout) :: voxel(nbx+2,nby+2,nbz+2) !< contain the first node of each voxel
           integer, intent(inout) :: next_nod(nsn+nsnr) !< next node in the same voxel
           my_real, intent(in) :: x(3,numnod) !< coordinates of nodes all
-          my_real, intent(inout) :: cand_p(mulnsn) !< penetration ??
-          my_real, intent(in), value :: gap !< gap for
+          my_real, intent(inout) :: cand_p(mulnsn) !< penetration (???) 
+          my_real, intent(in), value :: gap !< gap (???) 
           my_real, intent(in) :: gap_s(nsn) !< gap for secondary nodes
           my_real, intent(in) :: gap_m(nrtm) !< gap for main nodes
           my_real, intent(in) :: gap_s_l(nsn) !< gap for secondary nodes (???)
@@ -112,8 +161,8 @@ C-----------------------------------------------
           my_real, intent(in) :: xyzm(12) !< bounding box
           my_real, intent(in), value :: drad !< radiation distance (thermal analysis)
           my_real, intent(in), value :: dgapload !< gap load (???)
-          my_real, intent(inout) :: cand_f(mulnsn) !< related to tied contact, cand force???
-          my_real, intent(inout) :: stf(nrtm) !< stiffness of segments
+          my_real, intent(inout) :: cand_f(mulnsn) !< related to tied contact, cand force (???)
+          my_real, intent(inout) :: stf(nrtm) !< stiffness of segments (quadrangles or triangles)
           my_real, intent(inout) :: stfn(nsn) !< stiffness secondary nodes
           my_real, intent(inout) :: xrem(s_xrem,nsnr) !< remote (spmd) real data
 C-----------------------------------------------
@@ -515,39 +564,39 @@ C=======================================================================
 C 5   VOXEL CLUSTERING  RESET
 C=======================================================================
 !$OMP BARRIER
-          IF(TOTAL_NB_NRTM>0 .AND. itask == 0) THEN
-            DO JJ = 1, NB_VOXEL_ON
-              J = list_nb_voxel_on(JJ)
-              K = J
-              IIZ =  MOD(K,NBZ+2) + 1
-              ! IZ [1,NBZ+2]
-              K = (K-IIZ+1)/(NBZ+2)
-              IIY =  MOD(K,NBY+2) + 1
-              K = (K-IIY+1)/(NBY+2)
-              IIX = MOD(K,NBX+2) + 1
-              VOXEL(IIX,IIY,IIZ) = 0
-            ENDDO
-          ENDIF
+          if(total_nb_nrtm>0 .and. itask == 0) then
+            do jj = 1, nb_voxel_on
+              j = list_nb_voxel_on(jj)
+              k = j
+              iiz =  mod(k,nbz+2) + 1
+              ! iz [1,nbz+2]
+              k = (k-iiz+1)/(nbz+2)
+              iiy =  mod(k,nby+2) + 1
+              k = (k-iiy+1)/(nby+2)
+              iix = mod(k,nbx+2) + 1
+              voxel(iix,iiy,iiz) = 0
+            enddo
+          endif
 !$OMP BARRIER
 C=======================================================================
 C 7   DEALLOCATE
 C=======================================================================
-          IF(FLAGREMNODE == 2) THEN
-            IF(ALLOCATED(TAGREMNODE)) DEALLOCATE(TAGREMNODE)
-          ENDIF
-          If(itask == 0) DEALLOCATE(LIST_NB_VOXEL_ON)
-          DEALLOCATE(XI)
-          DEALLOCATE(YI)
-          DEALLOCATE(ZI)
-          DEALLOCATE(STIF)
-          DEALLOCATE(PENE)
-          DEALLOCATE(GAPV)
-          DEALLOCATE(PROV_N)
-          DEALLOCATE(PROV_E)
+          if(flagremnode == 2) then
+            if(allocated(tagremnode)) deallocate(tagremnode)
+          endif
+          if(itask == 0) deallocate(list_nb_voxel_on)
+          deallocate(xi)
+          deallocate(yi)
+          deallocate(zi)
+          deallocate(stif)
+          deallocate(pene)
+          deallocate(gapv)
+          deallocate(prov_n)
+          deallocate(prov_e)
 
 
-          RETURN
-        END
+          return
+        end
 
       END MODULE
 

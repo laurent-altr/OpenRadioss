@@ -46,7 +46,9 @@ Chd|====================================================================
      C   GAP_M_L  ,ITASK   ,BGAPSMX  ,I_MEM   ,  
      D   KREMNOD  ,REMNOD  ,FLAGREMNODE, DRAD ,
      E   ITIED    ,CAND_F  ,DGAPLOAD,
-     F   TOTAL_NB_NRTM, s_cand_a)
+     F   TOTAL_NB_NRTM, s_cand_a,
+     F   S_KREMNOD, S_REMNOD)
+
 C============================================================================
 C   M o d u l e s
 C-----------------------------------------------
@@ -76,6 +78,8 @@ C-----------------------------------------------
       INTEGER CAND_E(*),CAND_N(*),IFPEN(*),KREMNOD(*),REMNOD(*)
       INTEGER NCONTACT,ESHIFT,ILD,NB_N_B, IGAP, NCONT,I_MEM,
      *        II_STOK, FLAGREMNODE, ITIED
+      INTEGER, intent(in) :: S_KREMNOD, S_REMNOD
+
 C     REAL
       my_real
      .   GAP,TZINF,
@@ -198,7 +202,7 @@ C
      6   INACTI  ,IFQ      ,CAND_A,CAND_P   ,IFPEN   ,
      7   NRTM    ,NSNROLD  ,IGAP     ,GAP      ,GAP_S   ,
      8   GAP_M   ,GAPMIN   ,GAPMAX   ,MARGE    ,CURV_MAX,
-     9   ITASK    ,BGAPSMX  ,KREMNOD  ,REMNOD  ,
+     9   ITASK    ,BGAPSMX  ,S_KREMNOD, KREMNOD  ,S_REMNOD, REMNOD  ,
      A   FLAGREMNODE,DRAD   ,ITIED    ,CAND_F  ,
      B   DGAPLOAD, s_cand_a, 
      C   TOTAL_NB_NRTM,  NUMNOD, XREM, SIZE(XREM,1), 

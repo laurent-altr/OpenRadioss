@@ -50,27 +50,27 @@ C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
   ! Dummy Arguments
-          integer, intent(in) :: jlt !< number of secondary nodes to be checked
-          integer, intent(in) :: nsn !< number of secondary nodes
-          integer, intent(in) :: ityp !< contact interface type
+          integer, intent(in), value :: jlt !< number of secondary nodes to be checked
+          integer, intent(in), value :: nsn !< number of secondary nodes
+          integer, intent(in), value :: ityp !< contact interface type
 
           integer, intent(in) :: irect(4,*) !< irect(1:4,i) contains the node id of the i-th main segment 
           integer, intent(in) :: nsv(*)     !< nsv(i) contains the id of the i-th secondary node
           integer, intent(inout) :: cand_e(*)  !< cand_e(i) contains the id of the main segment of the i-th pair of collision candidates
           integer, intent(inout) :: cand_n(*)  !< cand_n(i) contains the id of the secondary node of the i-th pair of collision candidates
-          integer, intent(in) :: igap       !< flag for gap formulation
+          integer, intent(in), value :: igap       !< flag for gap formulation
 
           my_real, intent(in) :: x(3,*)     !< x(1:3,i) contains the coordinates of the i-th node
           my_real, intent(inout) :: gapv(*) !< gap per secondary node, may be variable depending on the gap formulation
           my_real, intent(in) :: gap_s(*)
           my_real, intent(in) :: gap_m(*)
           my_real, intent(in) :: curv_max(*)
-          my_real, intent(in) :: gap        
-          my_real, intent(in) :: gapmax
-          my_real, intent(in) :: gapmin
+          my_real, intent(in), value :: gap        
+          my_real, intent(in), value :: gapmax
+          my_real, intent(in), value :: gapmin
 
-          my_real, intent(in) :: dgapload
-          my_real, intent(in) :: drad
+          my_real, intent(in), value :: dgapload
+          my_real, intent(in), value :: drad
 
           my_real, intent(inout) :: x1    !<x coordinate of the first node of the main segment
           my_real, intent(inout) :: x2    !<x coordinate of the second node of the main segment
@@ -89,8 +89,8 @@ C-----------------------------------------------
           my_real, intent(inout) :: zi(jlt) !<z coordinate of the i-th secondary node
           my_real, intent(in) :: gap_s_l(*) 
           my_real, intent(in) :: gap_m_l(*)
-          integer, intent(in) :: s_xrem              !< size of xrem
-          integer, intent(in) :: nsnr                !< number of remote (spmd) secondary nodes 
+          integer, intent(in), value :: s_xrem              !< size of xrem
+          integer, intent(in), value :: nsnr                !< number of remote (spmd) secondary nodes 
           my_real, intent(in) :: xrem(s_xrem, nsnr)  !< Remote (spmd) secondary data (coordinates etc.)
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
