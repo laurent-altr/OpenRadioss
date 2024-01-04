@@ -42,16 +42,13 @@ Chd|====================================================================
      6        gap_m ,gapmin ,gapmax,curv_max,
      7        gap_s_l,gap_m_l,drad,itied    ,
      8        cand_f ,dgapload,
-     .        x1, x2, x3, x4,
-     .        y1, y2, y3, y4,
-     .        z1, z2, z3, z4,
-     .        xi, yi, zi,
-     .        pene, gapv, nsnr,
+     .        nsnr,
      .        xrem ,s_xrem)
 
 
-          USE INTER7_GATHER_CAND_MOD, ONLY: INTER7_GATHER_CAND
-          USE INTER7_PENETRATION_MOD, ONLY: INTER7_PENETRATION
+          USE COLLISION_MOD , ONLY : GROUP_SIZE
+          USE INTER7_GATHER_CAND_MOD , ONLY: INTER7_GATHER_CAND
+          USE INTER7_PENETRATION_MOD , ONLY: INTER7_PENETRATION
           USE CONSTANT_MOD
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
@@ -96,23 +93,6 @@ C-----------------------------------------------
           my_real, intent(in) :: gap_s_l(*)
           my_real, intent(in) :: gap_m_l(*)
           my_real, intent(inout) :: cand_f(8,*)
-          my_real, intent(inout) :: x1 !< x coordinate of the first node of the quadrangle or triangle
-          my_real, intent(inout) :: x2
-          my_real, intent(inout) :: x3
-          my_real, intent(inout) :: x4
-          my_real, intent(inout) :: y1
-          my_real, intent(inout) :: y2
-          my_real, intent(inout) :: y3
-          my_real, intent(inout) :: y4
-          my_real, intent(inout) :: z1
-          my_real, intent(inout) :: z2
-          my_real, intent(inout) :: z3
-          my_real, intent(inout) :: z4
-          my_real, intent(inout) :: xi(j_stok) !< x coordinate of the second nodes
-          my_real, intent(inout) :: yi(j_stok)
-          my_real, intent(inout) :: zi(j_stok)
-          my_real, intent(inout) :: pene(j_stok)
-          my_real, intent(inout) :: gapv(j_stok)
           integer, intent(in) :: nsnr !< number of remote nodes
           integer, intent(in) :: s_xrem !< size of xrem
           my_real, intent(in) :: xrem(s_xrem, nsnr)
@@ -124,24 +104,46 @@ C-----------------------------------------------
           integer :: j_start, j_end
           integer :: i3n !< 0 for quad, 1 for triangle
           integer, parameter :: itype = 7
+          my_real :: x1(GROUP_SIZE) !< x coordinate of the first node of the quadrangle or triangle
+          my_real :: x2(GROUP_SIZE)
+          my_real :: x3(GROUP_SIZE)
+          my_real :: x4(GROUP_SIZE)
+          my_real :: y1(GROUP_SIZE)
+          my_real :: y2(GROUP_SIZE)
+          my_real :: y3(GROUP_SIZE)
+          my_real :: y4(GROUP_SIZE)
+          my_real :: z1(GROUP_SIZE)
+          my_real :: z2(GROUP_SIZE)
+          my_real :: z3(GROUP_SIZE)
+          my_real :: z4(GROUP_SIZE)
+          my_real :: xi(GROUP_SIZE) !< x coordinate of the second nodes
+          my_real :: yi(GROUP_SIZE)
+          my_real :: zi(GROUP_SIZE)
+          my_real :: pene(GROUP_SIZE)
+          my_real :: gapv(GROUP_SIZE)
+          integer :: ix1(GROUP_SIZE)
+          integer :: ix2(GROUP_SIZE)
+          integer :: ix3(GROUP_SIZE)
+          integer :: ix4(GROUP_SIZE)
+
+
 C-----------------------------------------------
-          i3n=0
-          if(irect(3,prov_e(1))==irect(4,prov_e(1))) i3n=1
 
           call inter7_gather_cand(j_stok  ,x    ,irect ,nsv   ,prov_e  ,
-     1                 prov_n  ,igap ,gap   ,x1    ,x2      ,
-     2                 x3      ,x4   ,y1    ,y2    ,y3      ,
-     3                 y4      ,z1   ,z2    ,z3    ,z4      ,
-     4                 xi      ,yi   ,zi    ,
-     5                 nsn     ,gap_s   ,
-     6                 gap_m   ,gapv ,gapmax, gapmin, curv_max,
-     7                 itype   ,gap_s_l,gap_m_l,
-     8                 drad    ,dgapload, nsnr,
-     .                 s_xrem, xrem)
+     1                  prov_n  ,igap ,gap   ,x1    ,x2      ,
+     2                  x3      ,x4   ,y1    ,y2    ,y3      ,
+     3                  y4      ,z1   ,z2    ,z3    ,z4      ,
+     4                  xi      ,yi   ,zi    ,
+     5                  nsn     ,gap_s   , ix1, ix2, ix3, ix4,
+     6                  gap_m   ,gapv ,gapmax, gapmin, curv_max,
+     7                  itype   ,gap_s_l,gap_m_l,
+     8                  drad    ,dgapload, nsnr,
+     .                  s_xrem, xrem)
           call inter7_penetration(j_stok ,margin ,x1    ,x2     ,x3   ,
      .                 x4    ,y1    ,y2    ,y3     ,y4   ,
      .                 z1    ,z2    ,z3    ,z4     ,xi   ,
-     .                 yi    ,zi    ,pene  ,gapv, i3n)
+     .                 ix3,   ix4,
+     .                 yi    ,zi    ,pene  ,gapv )
 c-----------------------------------------------
 c removal of old candidates already stored (initial penetration)
 c-----------------------------------------------

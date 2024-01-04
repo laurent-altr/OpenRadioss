@@ -107,7 +107,7 @@ C-----------------------------------------------
        GOT_INSPIRE_ALM=0
        MDS_PATH_LEN = 0
        MDS_PATHI = 0
-       GOT_PREVIEW= 1
+       GOT_PREVIEW= 0
 
        ! Initialize MDS_PATH Array
        MDS_PATH=''
