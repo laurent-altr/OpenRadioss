@@ -21,7 +21,6 @@ Copyright>        As an alternative to this open-source version, Altair also off
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
       MODULE INTER7_CANDIDATE_PAIRS_MOD
-        integer :: max_node_per_cell !< maximum number of nodes in a cell
       CONTAINS
 
 !! \brief get the list of candidates for all segment
@@ -84,25 +83,9 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
      &                                    irem         ,
      &                                    s_irem       ,
      &                                    next_nod      )
-c    1        nsn    ,oldnum ,nsnr    ,isznsnr  ,i_mem    ,
-c    2        irect  ,x           ,stf     ,stfn     ,xyzm     ,
-c    3        nsv    ,ii_stok     ,cand_n  ,eshift   ,cand_e   ,
-c    4        mulnsn ,tzinf   ,gap_s_l  ,gap_m_l  ,
-c    5        voxel  ,nbx         ,nby     ,nbz      ,
-c    6        inacti ,ifq         ,cand_a  ,cand_p   ,ifpen    ,
-c    7        nrtm   ,nsnrold     ,igap    ,gap      ,gap_s    ,
-c    8        gap_m  ,gapmin      ,gapmax  ,marge    ,curv_max ,
-c    9        itask       ,bgapsmx , s_kremnod, kremnod  , s_remnod, remnod   ,
-c    a        flagremnode ,drad    ,itied    ,cand_f   ,
-c    b        dgapload, s_cand_a,
-c    c        total_nb_nrtm,  numnod, xrem     ,s_xrem,
-c    e        irem, s_irem, next_nod)
-
           USE COLLISION_MOD , ONLY : GROUP_SIZE
           USE INTER7_FILTER_CAND_MOD
           USE CONSTANT_MOD
-C-----------------------------------------------
-C   I m p l i c i t   T y p e s
 C-----------------------------------------------
           implicit none
 #include "my_real.inc"
@@ -110,7 +93,7 @@ C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
           integer, intent(inout) :: i_mem !< error code when not enough memory
-          integer, intent(in) :: eshift !< openmp shift for main segments
+          integer, intent(in), value :: eshift !< openmp shift for main segments
           integer, intent(in), value :: nsn !< number of secondary nodes
           integer, intent(in), value :: nsnr !< current number of remote secondary nodes
           integer, intent(in), value :: nsnrold !< old number of remote secondary nodes
@@ -130,15 +113,17 @@ C-----------------------------------------------
           integer, intent(in), value :: s_xrem !< size of xrem
           integer, intent(in), value :: s_irem !< size of xrem
           integer, intent(in), value :: s_cand_a !< size of cand_a
+          integer, intent(in), value :: s_kremnod ! 2 * nrtm + 1 if option is used
+          integer, intent(in), value :: s_remnod !< size of remnod
+          integer, intent(in), value :: mulnsn !< maximum numbrer of candidates (size of cand_n)
+          integer, intent(inout) :: ii_stok !< number of candidates found
+
           integer, intent(in) :: nsv(nsn) !< global secondary node numbers
           integer, intent(in) :: oldnum(isznsnr) !< renumbering ?
-          integer, intent(in), value :: s_kremnod ! 2 * nrtm + 1 if option is used
           integer, intent(in) :: kremnod(s_kremnod) !< list of removed nodes
-          integer, intent(in), value :: s_remnod
           integer, intent(in) :: remnod(s_remnod) !< list of removed nodes
           integer, intent(in) :: irect(4,nrtm) !< node id (from 1 to NUMNOD) for each segment (1:nrtm)
-          integer, intent(inout) :: ii_stok !< number of candidates found
-          integer, intent(inout) :: mulnsn !< maximum numbrer of candidates (size of cand_n)
+
           integer, intent(inout) :: cand_n(mulnsn) !< list of candidates (secodnary)
           integer, intent(inout) :: cand_e(mulnsn) !< list of candidates (main)
           integer, intent(inout) :: ifpen(mulnsn) !< something related to friction (???)
@@ -146,35 +131,37 @@ C-----------------------------------------------
           integer, intent(inout) :: irem(s_irem,nsnr) !< remote (spmd) integer data
           integer, intent(inout) :: voxel(nbx+2,nby+2,nbz+2) !< contain the first node of each voxel
           integer, intent(inout) :: next_nod(nsn+nsnr) !< next node in the same voxel
-          my_real, intent(in) :: x(3,numnod) !< coordinates of nodes all
-          my_real, intent(inout) :: cand_p(mulnsn) !< penetration (???)
+
           my_real, intent(in), value :: gap !< gap (???)
-          my_real, intent(in) :: gap_s(nsn) !< gap for secondary nodes
-          my_real, intent(in) :: gap_m(nrtm) !< gap for main nodes
-          my_real, intent(in) :: gap_s_l(nsn) !< gap for secondary nodes (???)
-          my_real, intent(in) :: gap_m_l(nrtm) !< gap for main nodes (???)
           my_real, intent(in), value :: gapmin !< minimum gap
           my_real, intent(in), value :: gapmax !< maximum gap
           my_real, intent(in), value :: bgapsmx!< overestimation of gap_s
           my_real, intent(in), value :: marge !< margin
           my_real, intent(in), value :: tzinf !< some kind of length for "zone of influence" ?
-          my_real, intent(in) :: curv_max(nrtm) !< maximum curvature
-          my_real, intent(in) :: xyzm(12) !< bounding box
           my_real, intent(in), value :: drad !< radiation distance (thermal analysis)
           my_real, intent(in), value :: dgapload !< gap load (???)
+          my_real, intent(in) :: x(3,numnod) !< coordinates of nodes all
+          my_real, intent(in) :: gap_s(nsn) !< gap for secondary nodes
+          my_real, intent(in) :: gap_m(nrtm) !< gap for main nodes
+          my_real, intent(in) :: gap_s_l(nsn) !< gap for secondary nodes (???)
+          my_real, intent(in) :: gap_m_l(nrtm) !< gap for main nodes (???)
+          my_real, intent(in) :: curv_max(nrtm) !< maximum curvature
+          my_real, intent(in) :: xyzm(12) !< bounding box
+
+          my_real, intent(inout) :: cand_p(mulnsn) !< penetration (???)
           my_real, intent(inout) :: cand_f(mulnsn) !< related to tied contact, cand force (???)
-          my_real, intent(inout) :: stf(nrtm) !< stiffness of segments (quadrangles or triangles)
+          my_real, intent(in) :: stf(nrtm) !< stiffness of segments (quadrangles or triangles)
           my_real, intent(inout) :: stfn(nsn) !< stiffness secondary nodes
           my_real, intent(inout) :: xrem(s_xrem,nsnr) !< remote (spmd) real data
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
           integer i,j,
-     .            nn,ne,k,l,j_stok,ii,jj,
-     .            nsnf, nsnl,delnod,m
+     .            nn,ne,k,l,j_stok,jj,
+     .            delnod,m
           integer, dimension(:), allocatable :: tagremnode
           my_real
-     .       xs,ys,zs,xx,sx,sy,sz,s2,
+     .       xs,ys,zs,sx,sy,sz,s2,
      .       xmin, xmax,ymin, ymax,zmin, zmax,
      .       xx1,xx2,xx3,xx4,yy1,yy2,yy3,yy4,zz1,zz2,zz3,zz4,
      .       d1x,d1y,d1z,d2x,d2y,d2z,dd1,dd2,d2,a2
@@ -185,18 +172,17 @@ C-----------------------------------------------
           my_real
      .       xminb,yminb,zminb,xmaxb,ymaxb,zmaxb,
      .       xmine,ymine,zmine,xmaxe,ymaxe,zmaxe,aaa
-          integer first,new,last,ierror
+          integer first,last
           integer :: nb_voxel_on !< number of remote nodes in the bounding box
           integer, dimension(:), allocatable :: list_nb_voxel_on
-          integer :: node_per_cell !< number of nodes in a cell
           integer, dimension(GROUP_SIZE) :: prov_n, prov_e !< temporary list of candidates
 
 
 C-----------------------------------------------
-          IF(itask == 0)THEN
+          if(itask == 0)then
             allocate(list_nb_voxel_on((nbx+2)*(nby+2)*(nbz+2)))
             nb_voxel_on = 0
-          END IF
+          end if
 
 !$OMP BARRIER
 
@@ -205,7 +191,7 @@ C-----------------------------------------------
 ! The domain is subdivided in cells (voxel)
 ! All the cells have the sime size, except the first and the last one in each direction
 
-!     bounding box of the model
+! bounding box of the model
           xmin = xyzm(1)
           ymin = xyzm(2)
           zmin = xyzm(3)
@@ -222,11 +208,6 @@ C-----------------------------------------------
           xmaxb = xyzm(10)
           ymaxb = xyzm(11)
           zmaxb = xyzm(12)
-
-c         ! En SPMD, pour inacti ou IFQ, retrouve ancienne numerotation des candidats non locaux
-c         if(nspmd>1.and.(inacti==5.or.inacti==6.or.inacti==7.or.ifq>0.or.itied/=0)) then
-c           CALL SPMD_OLDNUMCD(RENUM,OLDNUM,ISZNSNR,NSNROLD)
-c         end if
 
 C=======================================================================
 C 1   Add local nodes to the cells
@@ -321,7 +302,6 @@ C=======================================================================
             enddo
             deallocate(last_nod)
           end if !itask == 0
-
 !$OMP BARRIER
 
 
@@ -338,11 +318,13 @@ C=======================================================================
           call my_barrier
 !$OMP DO SCHEDULE(DYNAMIC)
           do ne=1,nrtm
-            if(stf(ne) == zero)cycle ! on ne retient pas les facettes detruites
+            if(stf(ne) == zero)cycle ! the segment is deleted/eroded
             if(flagremnode == 2) then
               k = kremnod(2*(ne-1)+1)+1
               l = kremnod(2*(ne-1)+2)
               do i=k,l
+                ! the segment ne cannot be in contact with the node remnod(i)
+                ! typically, remnod(i) contains nodes of neighboring elements
                 tagremnode(remnod(i)) = 1
               enddo
             endif
@@ -425,6 +407,7 @@ C=======================================================================
                   do while(jj /= 0)
 
                     if(jj<=nsn)then
+                      ! local node
                       nn=nsv(jj)
 
                       if(nn == m1)goto 200
@@ -442,10 +425,10 @@ C=======================================================================
                         aaa = marge+curv_max(ne)+max(min(gapmax,max(gapmin,gap_s(jj)+gap_m(ne)))+dgapload,drad)
                       endif
                     else
+                      ! remote (SPMD) node: data are stored in irem/xrem (communicated earlier)
                       j=jj-nsn
                       delnod = 0
                       if(flagremnode == 2) then
-                        nn = irem(1,j)
                         k = kremnod(2*(ne-1)+2) + 1
                         l = kremnod(2*(ne-1)+3)
                         do m=k,l
@@ -493,6 +476,7 @@ C=======================================================================
                     prov_e(j_stok) = ne
 
                     if(j_stok == GROUP_SIZE) then 
+                       ! filter prov_n, prov_e and append to cand_n, cand_e
                        call inter7_filter_cand(
      1                   j_stok,irect  ,x     ,nsv   ,ii_stok,
      2                   cand_n,cand_e ,mulnsn,marge  ,
@@ -563,6 +547,181 @@ C=======================================================================
           return
         end
 
+
+        SUBROUTINE INTER7_SERIALIZE(      filename     , 
+     &                                    nsn          ,
+     &                                    oldnum       ,
+     &                                    nsnr         ,
+     &                                    isznsnr      ,
+     &                                    irect        ,
+     &                                    x            ,
+     &                                    stf          ,
+     &                                    stfn         ,
+     &                                    xyzm         ,
+     &                                    nsv          ,
+     &                                    ii_stok      ,
+     &                                    cand_n       ,
+     &                                    cand_e       ,
+     &                                    mulnsn       ,
+     &                                    tzinf        ,
+     &                                    gap_s_l      ,
+     &                                    gap_m_l      ,
+     &                                    inacti       ,
+     &                                    ifq          ,
+     &                                    cand_a       ,
+     &                                    nrtm         ,
+     &                                    nsnrold      ,
+     &                                    igap         ,
+     &                                    gap          ,
+     &                                    gap_s        ,
+     &                                    gap_m        ,
+     &                                    gapmin       ,
+     &                                    gapmax       ,
+     &                                    marge        ,
+     &                                    curv_max     ,
+     &                                    bgapsmx      ,
+     &                                    s_kremnod    ,
+     &                                    kremnod      ,
+     &                                    s_remnod     ,
+     &                                    remnod       ,
+     &                                    flagremnode  ,
+     &                                    drad         ,
+     &                                    itied        ,
+     &                                    dgapload     ,
+     &                                    s_cand_a     ,
+     &                                    total_nb_nrtm,
+     &                                    numnod       )
+          USE COLLISION_MOD , ONLY : GROUP_SIZE
+          USE INTER7_FILTER_CAND_MOD
+          USE CONSTANT_MOD
+C-----------------------------------------------
+          implicit none
+#include "my_real.inc"
+C-----------------------------------------------
+C   D u m m y   A r g u m e n t s
+C-----------------------------------------------
+          character(len =*), intent(in) :: filename
+
+          integer, intent(in), value :: nsn !< number of secondary nodes
+          integer, intent(in), value :: nsnr !< current number of remote secondary nodes
+          integer, intent(in), value :: nsnrold !< old number of remote secondary nodes
+          integer, intent(in), value :: isznsnr !< size of oldnum
+          integer, intent(in), value :: nrtm !< number of considered segment
+          integer, intent(in), value :: total_nb_nrtm !< total number of segments
+          integer, intent(in), value :: inacti !< inactivation of initial penetrations
+          integer, intent(in), value :: ifq !< friction model ?
+          integer, intent(in), value :: igap !< gap model ?
+          integer, intent(in), value :: flagremnode !< flag for removed nodes?
+          integer, intent(in), value :: itied !< tied contact ?
+          integer, intent(in), value :: numnod !< total number of nodes of the model
+          integer, intent(in), value :: s_cand_a !< size of cand_a
+          integer, intent(in), value :: s_kremnod ! 2 * nrtm + 1 if option is used
+          integer, intent(in), value :: s_remnod !< size of remnod
+          integer, intent(in), value :: mulnsn !< maximum numbrer of candidates (size of cand_n)
+          integer, intent(inout) :: ii_stok !< number of candidates found
+
+          integer, intent(in) :: nsv(nsn) !< global secondary node numbers
+          integer, intent(in) :: oldnum(isznsnr) !< renumbering ?
+          integer, intent(in) :: kremnod(s_kremnod) !< list of removed nodes
+          integer, intent(in) :: remnod(s_remnod) !< list of removed nodes
+          integer, intent(in) :: irect(4,nrtm) !< node id (from 1 to NUMNOD) for each segment (1:nrtm)
+          integer, intent(in) :: cand_a(s_cand_a) !< (???)
+
+
+          integer, intent(inout) :: cand_n(mulnsn) !< list of candidates (secodnary)
+          integer, intent(inout) :: cand_e(mulnsn) !< list of candidates (main)
+
+
+
+          my_real, intent(in), value :: gap !< gap (???)
+          my_real, intent(in), value :: gapmin !< minimum gap
+          my_real, intent(in), value :: gapmax !< maximum gap
+          my_real, intent(in), value :: bgapsmx!< overestimation of gap_s
+          my_real, intent(in), value :: marge !< margin
+          my_real, intent(in), value :: tzinf !< some kind of length for "zone of influence" ?
+          my_real, intent(in), value :: drad !< radiation distance (thermal analysis)
+          my_real, intent(in), value :: dgapload !< gap load (???)
+          my_real, intent(in) :: x(3,numnod) !< coordinates of nodes all
+          my_real, intent(in) :: gap_s(nsn) !< gap for secondary nodes
+          my_real, intent(in) :: gap_m(nrtm) !< gap for main nodes
+          my_real, intent(in) :: gap_s_l(nsn) !< gap for secondary nodes (???)
+          my_real, intent(in) :: gap_m_l(nrtm) !< gap for main nodes (???)
+          my_real, intent(in) :: curv_max(nrtm) !< maximum curvature
+          my_real, intent(in) :: xyzm(12) !< bounding box
+          my_real, intent(in) :: stf(nrtm) !< stiffness of segments (quadrangles or triangles)
+          my_real, intent(in) :: stfn(nsn) !< stiffness secondary nodes
+C-----------------------------------------------
+
+C-----------------------------------------------
+C   L o c a l   V a r i a b l e s
+C-----------------------------------------------
+          integer :: i, j, iostat, unitNum
+
+   ! Open file
+          open(NEWUNIT=unitNum, FILE=filename, FORM='UNFORMATTED', STATUS='REPLACE', IOSTAT=iostat)
+          if (iostat /= 0) then
+            write(6,*) "error opening file: ", filename
+            return
+          end if
+
+          ! Relevant input
+          write(unitNum) nsn !< number of secondary nodes
+          write(unitNum) nsnr !< current number of remote secondary nodes
+          write(unitNum) nsnrold !< old number of remote secondary nodes
+          write(unitNum) isznsnr !< size of oldnum
+          write(unitNum) nrtm !< number of considered segment
+          write(unitNum) total_nb_nrtm !< total number of segments
+          write(unitNum) inacti !< inactivation of initial penetrations
+          write(unitNum) ifq !< friction model ?
+          write(unitNum) igap !< gap model ?
+          write(unitNum) flagremnode !< flag for removed nodes?
+          write(unitNum) itied !< tied contact ?
+          write(unitNum) numnod !< total number of nodes of the model
+          write(unitNum) s_cand_a !< size of cand_a
+          write(unitNum) s_kremnod ! 2 * nrtm + 1 if option is used
+          write(unitNum) s_remnod !< size of remnod
+          write(unitNum) mulnsn !< maximum numbrer of candidates (size of cand_n)
+
+          write(unitNum) nsv(1:nsn) !< global secondary node numbers
+          write(unitNum) oldnum(1:isznsnr) !< renumbering ?
+          write(unitNum) kremnod(1:s_kremnod) !< list of removed nodes
+          write(unitNum) remnod(1:s_remnod) !< list of removed nodes
+          do i = 1, nrtm
+            write(unitNum) (irect(j, i), j = 1, 4)
+          enddo
+          write(unitNum) cand_a(1:s_cand_a) !< (???)
+
+          write(unitNum) gap !< gap (???)
+          write(unitNum) gapmin !< minimum gap
+          write(unitNum) gapmax !< maximum gap
+          write(unitNum) bgapsmx!< overestimation of gap_s
+          write(unitNum) marge !< margin
+          write(unitNum) tzinf !< some kind of length for "zone of influence" ?
+          write(unitNum) drad !< radiation distance (thermal analysis)
+          write(unitNum) dgapload !< gap load (???)
+          do i = 1, numnod
+            write(unitnum) (x(j, i), j = 1, 3)
+          end do
+          write(unitNum) gap_s(1:nsn) !< gap for secondary nodes
+          write(unitNum) gap_m(1:nrtm) !< gap for main nodes
+          write(unitNum) gap_s_l(1:nsn) !< gap for secondary nodes (???)
+          write(unitNum) gap_m_l(1:nrtm) !< gap for main nodes (???)
+          write(unitNum) curv_max(1:nrtm) !< maximum curvature
+          write(unitNum) xyzm(1:12) !< bounding box
+          write(unitNum) stf(1:nrtm) !< stiffness of segments (quadrangles or triangles)
+          write(unitNum) stfn(1:nsn) !< stiffness secondary nodes
+
+
+          !relevant output
+          !mumnsn is the maximum number of candidates, ii_stok is the number of candidates found
+          write(unitNum) ii_stok !< number of candidates found
+          write(unitNum) cand_n(1:ii_stok) !< list of candidates (secodnary)
+          write(unitNum) cand_e(1:ii_stok) !< list of candidates (main)
+
+
+
+          close(unitNum)
+        end subroutine
       END MODULE
 
 

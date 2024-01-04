@@ -102,7 +102,6 @@ C-----------------------------------------------
           integer :: i,k_stok,i_stok,n,ne,j
           integer :: inacti_l, itied_l, ifq_l
           integer :: j_start, j_end
-          integer :: i3n !< 0 for quad, 1 for triangle
           integer, parameter :: itype = 7
           my_real :: x1(GROUP_SIZE) !< x coordinate of the first node of the quadrangle or triangle
           my_real :: x2(GROUP_SIZE)

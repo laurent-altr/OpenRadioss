@@ -49,19 +49,19 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
-          integer jlt, igap
-          my_real
-     .            gapv(GROUP_SIZE), margin
-          my_real
+          integer, intent(in) :: jlt
+          my_real, intent(in) :: gapv(GROUP_SIZE), margin
+          my_real, intent(in) ::
      .         x1(GROUP_SIZE), x2(GROUP_SIZE), x3(GROUP_SIZE), x4(GROUP_SIZE), !< x coordinates of the 4 nodes of the surface
      .         y1(GROUP_SIZE), y2(GROUP_SIZE), y3(GROUP_SIZE), y4(GROUP_SIZE), !< y coordinates of the 4 nodes of the surface
      .         z1(GROUP_SIZE), z2(GROUP_SIZE), z3(GROUP_SIZE), z4(GROUP_SIZE), !< z coordinates of the 4 nodes of the surface
-     .         xi(GROUP_SIZE), yi(GROUP_SIZE), zi(GROUP_SIZE), pene(GROUP_SIZE) !< secondary nodes and penetration
-         integer, dimension(GROUP_SIZE) :: ix3, ix4
+     .         xi(GROUP_SIZE), yi(GROUP_SIZE), zi(GROUP_SIZE)
+          my_real, intent(inout) ::  pene(GROUP_SIZE) !< secondary nodes and penetration
+          integer, intent(in) :: ix3(GROUP_SIZE), ix4(GROUP_SIZE) !< index of the 3rd and 4th nodes of the surface
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-          integer i, ig,i3n
+          integer i, i3n
           my_real
      .     X0(GROUP_SIZE), Y0(GROUP_SIZE), Z0(GROUP_SIZE), GAP2(GROUP_SIZE),
      .     NX1(GROUP_SIZE), NX2(GROUP_SIZE), NX3(GROUP_SIZE), NX4(GROUP_SIZE),
@@ -80,11 +80,11 @@ C-----------------------------------------------
      .     HLB1(GROUP_SIZE), HLC1(GROUP_SIZE), HLB2(GROUP_SIZE),HLC2(GROUP_SIZE),
      .     HLB3(GROUP_SIZE), HLC3(GROUP_SIZE), HLB4(GROUP_SIZE),HLC4(GROUP_SIZE)
           my_real
-     .         dti, s2,a1,a2,a3,a4,d1,d2,d3,d4,
+     .         s2,d1,d2,d3,d4,
      .         x12,x23,x34,x41,xi0,sx1,sx2,sx3,sx4,sx0,
      .         y12,y23,y34,y41,yi0,sy1,sy2,sy3,sy4,sy0,
      .         z12,z23,z34,z41,zi0,sz1,sz2,sz3,sz4,sz0,
-     .         la, hla, aaa, zoneinf, zoneinf2
+     .         la, hla, aaa, zoneinf
 c-----------------------------------------------
 ! the aim is to compute the penetration between a chuck of secondary nodes and a main surface
 ! the candidate for penetration are couple of secondary nodes and the main surface
