@@ -113,7 +113,7 @@ C-----------------------------------------------
           integer, intent(in), value :: s_xrem !< size of xrem
           integer, intent(in), value :: s_irem !< size of xrem
           integer, intent(in), value :: s_cand_a !< size of cand_a
-          integer, intent(in), value :: s_kremnod ! 2 * nrtm + 1 if option is used
+          integer, intent(in), value :: s_kremnod !< 2 * nrtm + 1 if option is used
           integer, intent(in), value :: s_remnod !< size of remnod
           integer, intent(in), value :: mulnsn !< maximum numbrer of candidates (size of cand_n)
           integer, intent(inout) :: ii_stok !< number of candidates found
@@ -124,7 +124,7 @@ C-----------------------------------------------
           integer, intent(in) :: remnod(s_remnod) !< list of removed nodes
           integer, intent(in) :: irect(4,nrtm) !< node id (from 1 to NUMNOD) for each segment (1:nrtm)
 
-          integer, intent(inout) :: cand_n(mulnsn) !< list of candidates (secodnary)
+          integer, intent(inout) :: cand_n(mulnsn) !< list of candidates (secondary)
           integer, intent(inout) :: cand_e(mulnsn) !< list of candidates (main)
           integer, intent(inout) :: ifpen(mulnsn) !< something related to friction (???)
           integer, intent(inout) :: cand_a(s_cand_a) !< (???)
@@ -520,7 +520,7 @@ C=======================================================================
      .                   xrem ,s_xrem)
 
 C=======================================================================
-C 5   VOXEL CLUSTERING  RESET
+C 5   VOXEL RESET
 C=======================================================================
 !$OMP BARRIER
           if(total_nb_nrtm>0 .and. itask == 0) then
@@ -547,7 +547,7 @@ C=======================================================================
           return
         end
 
-
+!! \brief write the data to a file
         SUBROUTINE INTER7_SERIALIZE(      filename     , 
      &                                    nsn          ,
      &                                    oldnum       ,
@@ -566,6 +566,9 @@ C=======================================================================
      &                                    tzinf        ,
      &                                    gap_s_l      ,
      &                                    gap_m_l      ,
+     &                                    nbx          ,
+     &                                    nby          ,
+     &                                    nbz          ,
      &                                    inacti       ,
      &                                    ifq          ,
      &                                    cand_a       ,
@@ -591,9 +594,6 @@ C=======================================================================
      &                                    s_cand_a     ,
      &                                    total_nb_nrtm,
      &                                    numnod       )
-          USE COLLISION_MOD , ONLY : GROUP_SIZE
-          USE INTER7_FILTER_CAND_MOD
-          USE CONSTANT_MOD
 C-----------------------------------------------
           implicit none
 #include "my_real.inc"
@@ -618,7 +618,11 @@ C-----------------------------------------------
           integer, intent(in), value :: s_kremnod ! 2 * nrtm + 1 if option is used
           integer, intent(in), value :: s_remnod !< size of remnod
           integer, intent(in), value :: mulnsn !< maximum numbrer of candidates (size of cand_n)
-          integer, intent(inout) :: ii_stok !< number of candidates found
+          integer, intent(in), value :: nbx !< number of voxels in x
+          integer, intent(in), value :: nby !< number of voxels in y
+          integer, intent(in), value :: nbz !< number of voxels in z
+
+          integer, intent(in) :: ii_stok !< number of candidates found
 
           integer, intent(in) :: nsv(nsn) !< global secondary node numbers
           integer, intent(in) :: oldnum(isznsnr) !< renumbering ?
@@ -627,11 +631,8 @@ C-----------------------------------------------
           integer, intent(in) :: irect(4,nrtm) !< node id (from 1 to NUMNOD) for each segment (1:nrtm)
           integer, intent(in) :: cand_a(s_cand_a) !< (???)
 
-
-          integer, intent(inout) :: cand_n(mulnsn) !< list of candidates (secodnary)
-          integer, intent(inout) :: cand_e(mulnsn) !< list of candidates (main)
-
-
+          integer, intent(in) :: cand_n(mulnsn) !< list of candidates (secondary)
+          integer, intent(in) :: cand_e(mulnsn) !< list of candidates (main)
 
           my_real, intent(in), value :: gap !< gap (???)
           my_real, intent(in), value :: gapmin !< minimum gap
@@ -651,12 +652,10 @@ C-----------------------------------------------
           my_real, intent(in) :: stf(nrtm) !< stiffness of segments (quadrangles or triangles)
           my_real, intent(in) :: stfn(nsn) !< stiffness secondary nodes
 C-----------------------------------------------
-
-C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
           integer :: i, j, iostat, unitNum
-
+C-----------------------------------------------
    ! Open file
           open(NEWUNIT=unitNum, FILE=filename, FORM='UNFORMATTED', STATUS='REPLACE', IOSTAT=iostat)
           if (iostat /= 0) then
@@ -678,9 +677,13 @@ C-----------------------------------------------
           write(unitNum) itied !< tied contact ?
           write(unitNum) numnod !< total number of nodes of the model
           write(unitNum) s_cand_a !< size of cand_a
-          write(unitNum) s_kremnod ! 2 * nrtm + 1 if option is used
+          write(unitNum) s_kremnod !< 2 * nrtm + 1 if option is used
           write(unitNum) s_remnod !< size of remnod
           write(unitNum) mulnsn !< maximum numbrer of candidates (size of cand_n)
+          write(unitNum) nbx !< number of voxels in x
+          write(unitNum) nby !< number of voxels in y
+          write(unitNum) nbz !< number of voxels in z
+
 
           write(unitNum) nsv(1:nsn) !< global secondary node numbers
           write(unitNum) oldnum(1:isznsnr) !< renumbering ?
@@ -706,22 +709,431 @@ C-----------------------------------------------
           write(unitNum) gap_m(1:nrtm) !< gap for main nodes
           write(unitNum) gap_s_l(1:nsn) !< gap for secondary nodes (???)
           write(unitNum) gap_m_l(1:nrtm) !< gap for main nodes (???)
+
           write(unitNum) curv_max(1:nrtm) !< maximum curvature
           write(unitNum) xyzm(1:12) !< bounding box
           write(unitNum) stf(1:nrtm) !< stiffness of segments (quadrangles or triangles)
           write(unitNum) stfn(1:nsn) !< stiffness secondary nodes
 
-
           !relevant output
           !mumnsn is the maximum number of candidates, ii_stok is the number of candidates found
           write(unitNum) ii_stok !< number of candidates found
-          write(unitNum) cand_n(1:ii_stok) !< list of candidates (secodnary)
+          write(unitNum) cand_n(1:ii_stok) !< list of candidates (secondary)
           write(unitNum) cand_e(1:ii_stok) !< list of candidates (main)
-
-
 
           close(unitNum)
         end subroutine
+!! \brief write the data to a file
+        SUBROUTINE INTER7_DESERIALIZE(    filename     , 
+     &                                    nsn          ,
+     &                                    oldnum       ,
+     &                                    nsnr         ,
+     &                                    isznsnr      ,
+     &                                    irect        ,
+     &                                    x            ,
+     &                                    stf          ,
+     &                                    stfn         ,
+     &                                    xyzm         ,
+     &                                    nsv          ,
+     &                                    ii_stok      ,
+     &                                    cand_n       ,
+     &                                    cand_e       ,
+     &                                    mulnsn       ,
+     &                                    tzinf        ,
+     &                                    gap_s_l      ,
+     &                                    gap_m_l      ,
+     &                                    nbx          ,
+     &                                    nby          ,
+     &                                    nbz          ,
+     &                                    inacti       ,
+     &                                    ifq          ,
+     &                                    cand_a       ,
+     &                                    nrtm         ,
+     &                                    nsnrold      ,
+     &                                    igap         ,
+     &                                    gap          ,
+     &                                    gap_s        ,
+     &                                    gap_m        ,
+     &                                    gapmin       ,
+     &                                    gapmax       ,
+     &                                    marge        ,
+     &                                    curv_max     ,
+     &                                    bgapsmx      ,
+     &                                    s_kremnod    ,
+     &                                    kremnod      ,
+     &                                    s_remnod     ,
+     &                                    remnod       ,
+     &                                    flagremnode  ,
+     &                                    drad         ,
+     &                                    itied        ,
+     &                                    dgapload     ,
+     &                                    s_cand_a     ,
+     &                                    total_nb_nrtm,
+     &                                    numnod       )
+C-----------------------------------------------
+          implicit none
+#include "my_real.inc"
+C-----------------------------------------------
+C   D u m m y   A r g u m e n t s
+C-----------------------------------------------
+          character(len =*), intent(in) :: filename
+
+          integer, intent(out) :: nsn !< number of secondary nodes
+          integer, intent(out) :: nsnr !< current number of remote secondary nodes
+          integer, intent(out) :: nsnrold !< old number of remote secondary nodes
+          integer, intent(out) :: isznsnr !< size of oldnum
+          integer, intent(out) :: nrtm !< number of considered segment
+          integer, intent(out) :: total_nb_nrtm !< total number of segments
+          integer, intent(out) :: inacti !< inactivation of initial penetrations
+          integer, intent(out) :: ifq !< friction model ?
+          integer, intent(out) :: igap !< gap model ?
+          integer, intent(out) :: flagremnode !< flag for removed nodes?
+          integer, intent(out) :: itied !< tied contact ?
+          integer, intent(out) :: numnod !< total number of nodes of the model
+          integer, intent(out) :: s_cand_a !< size of cand_a
+          integer, intent(out) :: s_kremnod ! 2 * nrtm + 1 if option is used
+          integer, intent(out) :: s_remnod !< size of remnod
+          integer, intent(out) :: mulnsn !< maximum numbrer of candidates (size of cand_n)
+          integer, intent(out) :: nbx !< number of voxels in x
+          integer, intent(out) :: nby !< number of voxels in y
+          integer, intent(out) :: nbz !< number of voxels in z
+
+          integer, intent(out) :: ii_stok !< number of candidates found
+
+          integer, intent(out), dimension(:), allocatable :: nsv !< global secondary node numbers
+          integer, intent(out), dimension(:), allocatable :: oldnum !< renumbering ?
+          integer, intent(out), dimension(:), allocatable :: kremnod !< list of removed nodes
+          integer, intent(out), dimension(:), allocatable :: remnod !< list of removed nodes
+          integer, intent(out), dimension(:,:), allocatable :: irect !< node id (from 1 to NUMNOD) for each segment (1:nrtm)
+          integer, intent(out), dimension(:), allocatable :: cand_a !< (???)
+
+          integer, intent(out), dimension(:), allocatable :: cand_n !< list of candidates (secondary)
+          integer, intent(out), dimension(:), allocatable :: cand_e !< list of candidates (main)
+
+          my_real, intent(out) :: gap !< gap (???)
+          my_real, intent(out) :: gapmin !< minimum gap
+          my_real, intent(out) :: gapmax !< maximum gap
+          my_real, intent(out) :: bgapsmx!< overestimation of gap_s
+          my_real, intent(out) :: marge !< margin
+          my_real, intent(out) :: tzinf !< some kind of length for "zone of influence" ?
+          my_real, intent(out) :: drad !< radiation distance (thermal analysis)
+          my_real, intent(out) :: dgapload !< gap load (???)
+
+          my_real, intent(out), dimension(:,:), allocatable :: x !< coordinates of nodes all
+          my_real, intent(out), dimension(:), allocatable :: gap_s !< gap for secondary nodes
+          my_real, intent(out), dimension(:), allocatable :: gap_m !< gap for main nodes
+          my_real, intent(out), dimension(:), allocatable :: gap_s_l !< gap for secondary nodes (???)
+          my_real, intent(out), dimension(:), allocatable :: gap_m_l !< gap for main nodes (???)
+          my_real, intent(out), dimension(:), allocatable :: curv_max !< maximum curvature
+          my_real, intent(out), dimension(:), allocatable :: stf !< stiffness of segments (quadrangles or triangles)
+          my_real, intent(out), dimension(:), allocatable :: stfn !< stiffness secondary nodes
+          my_real, intent(out) :: xyzm(12) !< bounding box
+
+C-----------------------------------------------
+C   L o c a l   V a r i a b l e s
+C-----------------------------------------------
+          integer :: i, j, iostat, unitNum
+C-----------------------------------------------
+   ! Open file
+          open(NEWUNIT=unitNum, FILE=filename, FORM='UNFORMATTED', STATUS='OLD', IOSTAT=iostat)
+          if (iostat /= 0) then
+            write(6,*) "error opening file: ", filename
+            return
+          end if
+
+          ! Relevant input
+          read(unitNum) nsn !< number of secondary nodes
+          read(unitNum) nsnr !< current number of remote secondary nodes
+          read(unitNum) nsnrold !< old number of remote secondary nodes
+          read(unitNum) isznsnr !< size of oldnum
+          read(unitNum) nrtm !< number of considered segment
+          read(unitNum) total_nb_nrtm !< total number of segments
+          read(unitNum) inacti !< inactivation of initial penetrations
+          read(unitNum) ifq !< friction model ?
+          read(unitNum) igap !< gap model ?
+          read(unitNum) flagremnode !< flag for removed nodes?
+          read(unitNum) itied !< tied contact ?
+          read(unitNum) numnod !< total number of nodes of the model
+          read(unitNum) s_cand_a !< size of cand_a
+          read(unitNum) s_kremnod !< 2 * nrtm + 1 if option is used
+          read(unitNum) s_remnod !< size of remnod
+          read(unitNum) mulnsn !< maximum numbrer of candidates (size of cand_n)
+          read(unitNum) nbx !< number of voxels in x
+          read(unitNum) nby !< number of voxels in y
+          read(unitNum) nbz !< number of voxels in z
+
+          allocate(nsv(nsn))
+          allocate(oldnum(isznsnr))
+          allocate(kremnod(s_kremnod))
+          allocate(remnod(s_remnod))
+          allocate(irect(4, nrtm))
+          allocate(cand_a(s_cand_a))
+          allocate(x(3, numnod))
+          allocate(gap_s(nsn))
+          allocate(gap_m(nrtm))
+          allocate(gap_s_l(nsn))
+          allocate(gap_m_l(nrtm))
+          allocate(curv_max(nrtm))
+          allocate(stf(nrtm))
+          allocate(stfn(nsn))
+
+          read(unitNum) nsv(1:nsn) !< global secondary node numbers
+          read(unitNum) oldnum(1:isznsnr) !< renumbering ?
+          read(unitNum) kremnod(1:s_kremnod) !< list of removed nodes
+          read(unitNum) remnod(1:s_remnod) !< list of removed nodes
+          do i = 1, nrtm
+            read(unitNum) (irect(j, i), j = 1, 4)
+          enddo
+          read(unitNum) cand_a(1:s_cand_a) !< (???)
+
+          read(unitNum) gap !< gap (???)
+          read(unitNum) gapmin !< minimum gap
+          read(unitNum) gapmax !< maximum gap
+          read(unitNum) bgapsmx!< overestimation of gap_s
+          read(unitNum) marge !< margin
+          read(unitNum) tzinf !< some kind of length for "zone of influence" ?
+          read(unitNum) drad !< radiation distance (thermal analysis)
+          read(unitNum) dgapload !< gap load (???)
+          do i = 1, numnod
+            read(unitnum) (x(j, i), j = 1, 3)
+          end do
+          read(unitNum) gap_s(1:nsn) !< gap for secondary nodes
+          read(unitNum) gap_m(1:nrtm) !< gap for main nodes
+          read(unitNum) gap_s_l(1:nsn) !< gap for secondary nodes (???)
+          read(unitNum) gap_m_l(1:nrtm) !< gap for main nodes (???)
+
+          read(unitNum) curv_max(1:nrtm) !< maximum curvature
+          read(unitNum) xyzm(1:12) !< bounding box
+          read(unitNum) stf(1:nrtm) !< stiffness of segments (quadrangles or triangles)
+          read(unitNum) stfn(1:nsn) !< stiffness secondary nodes
+
+          !relevant output
+          !mumnsn is the maximum number of candidates, ii_stok is the number of candidates found
+          read(unitNum) ii_stok !< number of candidates found
+          allocate(cand_n(mulnsn))
+          allocate(cand_e(mulnsn))
+          cand_n = 0
+          cand_e = 0
+          read(unitNum) cand_n(1:ii_stok) !< list of candidates (secondary)
+          read(unitNum) cand_e(1:ii_stok) !< list of candidates (main)
+
+          close(unitNum)
+        end subroutine
+
+
+        !!\brief compare the couple cand_n(i) cand_e(i) with the couple cand_n_ref/cand_e_ref
+        !!\details check if there exist i and j such as cand_n(i)=cand_n_ref(j) and cand_e(i)=cand_e_ref(j)
+        subroutine test_candidates(filename)
+          use iso_c_binding , only : c_int
+          implicit none
+          interface
+          subroutine compare_cand(cand_n, cand_e, ii_stok, cand_n_ref, cand_e_ref, ii_stok_ref) bind(C, name="compare_cand")
+              import :: c_int
+              integer(c_int), intent(in) :: cand_n(*), cand_e(*), ii_stok, cand_n_ref(*), cand_e_ref(*), ii_stok_ref
+          end subroutine compare_cand
+          end interface
+#include "my_real.inc"
+C-----------------------------------------------
+C   D u m m y   A r g u m e n t s
+C-----------------------------------------------
+          character(len =*), intent(in) :: filename
+C-----------------------------------------------
+C   L o c a l   V a r i a b l e s
+C-----------------------------------------------
+          integer :: nsn !< number of secondary nodes
+          integer :: nsnr !< current number of remote secondary nodes
+          integer :: nsnrold !< old number of remote secondary nodes
+          integer :: isznsnr !< size of oldnum
+          integer :: nrtm !< number of considered segment
+          integer :: total_nb_nrtm !< total number of segments
+          integer :: inacti !< inactivation of initial penetrations
+          integer :: ifq !< friction model ?
+          integer :: igap !< gap model ?
+          integer :: flagremnode !< flag for removed nodes?
+          integer :: itied !< tied contact ?
+          integer :: numnod !< total number of nodes of the model
+          integer :: s_cand_a !< size of cand_a
+          integer :: s_kremnod ! 2 * nrtm + 1 if option is used
+          integer :: s_remnod !< size of remnod
+          integer :: mulnsn !< maximum numbrer of candidates (size of cand_n)
+          integer :: nbx !< number of voxels in x
+          integer :: nby !< number of voxels in y
+          integer :: nbz !< number of voxels in z
+          integer :: ii_stok, ii_stok_ref !< number of candidates found
+          integer, dimension(:), allocatable :: nsv !< global secondary node numbers
+          integer, dimension(:), allocatable :: oldnum !< renumbering ?
+          integer, dimension(:), allocatable :: kremnod !< list of removed nodes
+          integer, dimension(:), allocatable :: remnod !< list of removed nodes
+          integer, dimension(:,:), allocatable :: irect !< node id (from 1 to NUMNOD) for each segment (1:nrtm)
+          integer, dimension(:), allocatable :: cand_a !< (???)
+          integer, dimension(:), allocatable :: cand_n, cand_n_ref !< list of candidates (secondary)
+          integer, dimension(:), allocatable :: cand_e, cand_e_ref !< list of candidates (main)
+          my_real :: gap !< gap (???)
+          my_real :: gapmin !< minimum gap
+          my_real :: gapmax !< maximum gap
+          my_real :: bgapsmx!< overestimation of gap_s
+          my_real :: marge !< margin
+          my_real :: tzinf !< some kind of length for "zone of influence" ?
+          my_real :: drad !< radiation distance (thermal analysis)
+          my_real :: dgapload !< gap load (???)
+          my_real, dimension(:,:), allocatable :: x !< coordinates of nodes all
+          my_real, dimension(:), allocatable :: gap_s !< gap for secondary nodes
+          my_real, dimension(:), allocatable :: gap_m !< gap for main nodes
+          my_real, dimension(:), allocatable :: gap_s_l !< gap for secondary nodes (???)
+          my_real, dimension(:), allocatable :: gap_m_l !< gap for main nodes (???)
+          my_real, dimension(:), allocatable :: curv_max !< maximum curvature
+          my_real, dimension(:), allocatable :: stf !< stiffness of segments (quadrangles or triangles)
+          my_real, dimension(:), allocatable :: stfn !< stiffness secondary nodes
+          my_real, dimension(:), allocatable :: cand_f,cand_p
+
+          my_real ::  xyzm(12) !< bounding box
+          integer :: voxel(8000000)
+          integer, dimension(:), allocatable :: next_nod,ifpen
+          integer :: eshift,i_mem,i, itask, s_irem, s_xrem 
+          my_real, dimension(:,:), allocatable :: xrem
+          integer, dimension(:,:), allocatable :: irem
+          
+          eshift = 0
+
+
+          call INTER7_DESERIALIZE(        filename     , 
+     &                                    nsn          ,
+     &                                    oldnum       ,
+     &                                    nsnr         ,
+     &                                    isznsnr      ,
+     &                                    irect        ,
+     &                                    x            ,
+     &                                    stf          ,
+     &                                    stfn         ,
+     &                                    xyzm         ,
+     &                                    nsv          ,
+     &                                    ii_stok_ref  ,
+     &                                    cand_n_ref   ,
+     &                                    cand_e_ref   ,
+     &                                    mulnsn       ,
+     &                                    tzinf        ,
+     &                                    gap_s_l      ,
+     &                                    gap_m_l      ,
+     &                                    nbx          ,
+     &                                    nby          ,
+     &                                    nbz          ,
+     &                                    inacti       ,
+     &                                    ifq          ,
+     &                                    cand_a       ,
+     &                                    nrtm         ,
+     &                                    nsnrold      ,
+     &                                    igap         ,
+     &                                    gap          ,
+     &                                    gap_s        ,
+     &                                    gap_m        ,
+     &                                    gapmin       ,
+     &                                    gapmax       ,
+     &                                    marge        ,
+     &                                    curv_max     ,
+     &                                    bgapsmx      ,
+     &                                    s_kremnod    ,
+     &                                    kremnod      ,
+     &                                    s_remnod     ,
+     &                                    remnod       ,
+     &                                    flagremnode  ,
+     &                                    drad         ,
+     &                                    itied        ,
+     &                                    dgapload     ,
+     &                                    s_cand_a     ,
+     &                                    total_nb_nrtm,
+     &                                    numnod       )
+
+!$OMP MASTER
+        allocate(cand_n(mulnsn))
+        allocate(cand_e(mulnsn))
+        allocate(cand_f(mulnsn))
+        allocate(cand_p(mulnsn))
+        allocate(ifpen(mulnsn))
+        s_xrem = 1 
+        s_irem = 1
+        allocate(xrem(s_xrem, nsnr))
+        allocate(irem(s_irem, nsnr))
+        ifpen = 0
+        cand_n = 0
+        cand_e = 0
+        cand_f = 0
+        cand_p = 0
+        ii_stok = 0
+        allocate(next_nod(nsn+nsnr))
+!$OMP END MASTER
+
+!$OMP SINGLE
+        do i=1,(nbx+2)*(nby+2)*(nbz+2)
+          voxel(i)=0
+        enddo
+!$OMP END SINGLE
+
+
+        call INTER7_CANDIDATE_PAIRS(
+     &                                    nsn          ,
+     &                                    oldnum       ,
+     &                                    nsnr         ,
+     &                                    isznsnr      ,
+     &                                    i_mem        ,
+     &                                    irect        ,
+     &                                    x            ,
+     &                                    stf          ,
+     &                                    stfn         ,
+     &                                    xyzm         ,
+     &                                    nsv          ,
+     &                                    ii_stok      ,
+     &                                    cand_n       ,
+     &                                    eshift       ,
+     &                                    cand_e       ,
+     &                                    mulnsn       ,
+     &                                    tzinf        ,
+     &                                    gap_s_l      ,
+     &                                    gap_m_l      ,
+     &                                    voxel        ,
+     &                                    nbx          ,
+     &                                    nby          ,
+     &                                    nbz          ,
+     &                                    inacti       ,
+     &                                    ifq          ,
+     &                                    cand_a       ,
+     &                                    cand_p       ,
+     &                                    ifpen        ,
+     &                                    nrtm         ,
+     &                                    nsnrold      ,
+     &                                    igap         ,
+     &                                    gap          ,
+     &                                    gap_s        ,
+     &                                    gap_m        ,
+     &                                    gapmin       ,
+     &                                    gapmax       ,
+     &                                    marge        ,
+     &                                    curv_max     ,
+     &                                    itask        ,
+     &                                    bgapsmx      ,
+     &                                    s_kremnod    ,
+     &                                    kremnod      ,
+     &                                    s_remnod     ,
+     &                                    remnod       ,
+     &                                    flagremnode  ,
+     &                                    drad         ,
+     &                                    itied        ,
+     &                                    cand_f       ,
+     &                                    dgapload     ,
+     &                                    s_cand_a     ,
+     &                                    total_nb_nrtm,
+     &                                    numnod       ,
+     &                                    xrem         ,
+     &                                    s_xrem       ,
+     &                                    irem         ,
+     &                                    s_irem       ,
+     &                                    next_nod      )
+
+
+          call compare_cand(cand_n, cand_e, ii_stok, cand_n_ref, cand_e_ref, ii_stok_ref)
+
+        end subroutine
+
+
       END MODULE
 
 

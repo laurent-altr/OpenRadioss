@@ -179,9 +179,11 @@ C
       ENDIF
 
       ! redundancy in smp
-      DO I=INIVOXEL,(NBX+2)*(NBY+2)*(NBZ+2)
+!$OMP SINGLE
+      DO I=1,(NBX+2)*(NBY+2)*(NBZ+2)
         VOXEL1(I)=0
       ENDDO
+!$OMP END SINGLE NOWAIT
       IF(ITASK == 0) THEN 
          ALLOCATE(NEXT_NOD(NSN+NSNR))
          ALLOCATE(PREV_REMOTE_NUMBER(S_PREV_REMOTE_NUMBER))
@@ -191,7 +193,6 @@ C
        end if
       endif
       call MY_BARRIER
-      INIVOXEL = MAX(INIVOXEL,(NBX+2)*(NBY+2)*(NBZ+2)+1)
 
        CALL INTER7_CANDIDATE_PAIRS(
      1   NSN     ,PREV_REMOTE_NUMBER ,NSNR     ,S_PREV_REMOTE_NUMBER  ,I_MEM   ,
