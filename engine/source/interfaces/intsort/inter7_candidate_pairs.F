@@ -179,6 +179,7 @@ C-----------------------------------------------
 
 
 C-----------------------------------------------
+
           if(itask == 0)then
             allocate(list_nb_voxel_on((nbx+2)*(nby+2)*(nbz+2)))
             nb_voxel_on = 0
@@ -315,7 +316,7 @@ C=======================================================================
               tagremnode(i) = 0
             enddo
           endif
-          call my_barrier
+!$OMP BARRIER
 !$OMP DO SCHEDULE(DYNAMIC)
           do ne=1,nrtm
             if(stf(ne) == zero)cycle ! the segment is deleted/eroded
@@ -544,6 +545,59 @@ C=======================================================================
             if(allocated(tagremnode)) deallocate(tagremnode)
           endif
           if(itask == 0) deallocate(list_nb_voxel_on)
+
+C#ifndef NO_SERIALIZE
+C        if(nsn > 13602 .and. nrtm > 1800) then
+C        call INTER7_SERIALIZE(      "t10m.dat", 
+C     &                                    nsn          ,
+C     &                                    oldnum       ,
+C     &                                    nsnr         ,
+C     &                                    isznsnr      ,
+C     &                                    irect        ,
+C     &                                    x            ,
+C     &                                    stf          ,
+C     &                                    stfn         ,
+C     &                                    xyzm         ,
+C     &                                    nsv          ,
+C     &                                    ii_stok      ,
+C     &                                    cand_n       ,
+C     &                                    cand_e       ,
+C     &                                    mulnsn       ,
+C     &                                    tzinf        ,
+C     &                                    gap_s_l      ,
+C     &                                    gap_m_l      ,
+C     &                                    nbx          ,
+C     &                                    nby          ,
+C     &                                    nbz          ,
+C     &                                    inacti       ,
+C     &                                    ifq          ,
+C     &                                    cand_a       ,
+C     &                                    nrtm         ,
+C     &                                    nsnrold      ,
+C     &                                    igap         ,
+C     &                                    gap          ,
+C     &                                    gap_s        ,
+C     &                                    gap_m        ,
+C     &                                    gapmin       ,
+C     &                                    gapmax       ,
+C     &                                    marge        ,
+C     &                                    curv_max     ,
+C     &                                    bgapsmx      ,
+C     &                                    s_kremnod    ,
+C     &                                    kremnod      ,
+C     &                                    s_remnod     ,
+C     &                                    remnod       ,
+C     &                                    flagremnode  ,
+C     &                                    drad         ,
+C     &                                    itied        ,
+C     &                                    dgapload     ,
+C     &                                    s_cand_a     ,
+C     &                                    total_nb_nrtm,
+C     &                                    numnod       )
+C        stop              
+C        endif
+C#endif
+
           return
         end
 
@@ -655,8 +709,9 @@ C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
           integer :: i, j, iostat, unitNum
+          integer :: pos
+
 C-----------------------------------------------
-   ! Open file
           open(NEWUNIT=unitNum, FILE=filename, FORM='UNFORMATTED', STATUS='REPLACE', IOSTAT=iostat)
           if (iostat /= 0) then
             write(6,*) "error opening file: ", filename
@@ -689,11 +744,11 @@ C-----------------------------------------------
           write(unitNum) oldnum(1:isznsnr) !< renumbering ?
           write(unitNum) kremnod(1:s_kremnod) !< list of removed nodes
           write(unitNum) remnod(1:s_remnod) !< list of removed nodes
+
           do i = 1, nrtm
             write(unitNum) (irect(j, i), j = 1, 4)
           enddo
           write(unitNum) cand_a(1:s_cand_a) !< (???)
-
           write(unitNum) gap !< gap (???)
           write(unitNum) gapmin !< minimum gap
           write(unitNum) gapmax !< maximum gap
@@ -720,7 +775,28 @@ C-----------------------------------------------
           write(unitNum) ii_stok !< number of candidates found
           write(unitNum) cand_n(1:ii_stok) !< list of candidates (secondary)
           write(unitNum) cand_e(1:ii_stok) !< list of candidates (main)
+          write(6,*)  "nsn          ",nsn                             
+          write(6,*)  "nsnr         ",nsnr                                            
+          write(6,*)  "nsnrold      ",nsnrold                                        
+          write(6,*)  "isznsnr      ",isznsnr                  
+          write(6,*)  "nrtm         ",nrtm                                
+          write(6,*)  "total_nb_nrtm",total_nb_nrtm                            
+          write(6,*)  "inacti       ",inacti                                        
+          write(6,*)  "ifq          ",ifq                    
+          write(6,*)  "igap         ",igap               
+          write(6,*)  "flagremnode  ",flagremnode                           
+          write(6,*)  "itied        ",itied                  
+          write(6,*)  "numnod       ",numnod                                      
+          write(6,*)  "s_cand_a     ",s_cand_a                  
+          write(6,*)  "s_kremnod    ",s_kremnod                                  
+          write(6,*)  "s_remnod     ",s_remnod                  
+          write(6,*)  "mulnsn       ",mulnsn                                                  
+          write(6,*)  "nbx          ",nbx                         
+          write(6,*)  "nby          ",nby                         
+          write(6,*)  "nbz          ",nbz                         
+          write(6,*)  "ii_stok      ",ii_stok                         
 
+          call flush(unitNum)
           close(unitNum)
         end subroutine
 !! \brief write the data to a file
@@ -833,8 +909,8 @@ C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
           integer :: i, j, iostat, unitNum
+          integer :: pos
 C-----------------------------------------------
-   ! Open file
           open(NEWUNIT=unitNum, FILE=filename, FORM='UNFORMATTED', STATUS='OLD', IOSTAT=iostat)
           if (iostat /= 0) then
             write(6,*) "error opening file: ", filename
@@ -861,6 +937,27 @@ C-----------------------------------------------
           read(unitNum) nbx !< number of voxels in x
           read(unitNum) nby !< number of voxels in y
           read(unitNum) nbz !< number of voxels in z
+
+          write(6,*)  "nsn          ",nsn                             
+          write(6,*)  "nsnr         ",nsnr                                            
+          write(6,*)  "nsnrold      ",nsnrold                                        
+          write(6,*)  "isznsnr      ",isznsnr                  
+          write(6,*)  "nrtm         ",nrtm                                
+          write(6,*)  "total_nb_nrtm",total_nb_nrtm                            
+          write(6,*)  "inacti       ",inacti                                        
+          write(6,*)  "ifq          ",ifq                    
+          write(6,*)  "igap         ",igap               
+          write(6,*)  "flagremnode  ",flagremnode                           
+          write(6,*)  "itied        ",itied                  
+          write(6,*)  "numnod       ",numnod                                      
+          write(6,*)  "s_cand_a     ",s_cand_a                  
+          write(6,*)  "s_kremnod    ",s_kremnod                                  
+          write(6,*)  "s_remnod     ",s_remnod                  
+          write(6,*)  "mulnsn       ",mulnsn                                                  
+          write(6,*)  "nbx          ",nbx                         
+          write(6,*)  "nby          ",nby                         
+          write(6,*)  "nbz          ",nbz                         
+
 
           allocate(nsv(nsn))
           allocate(oldnum(isznsnr))
@@ -894,6 +991,7 @@ C-----------------------------------------------
           read(unitNum) tzinf !< some kind of length for "zone of influence" ?
           read(unitNum) drad !< radiation distance (thermal analysis)
           read(unitNum) dgapload !< gap load (???)
+
           do i = 1, numnod
             read(unitnum) (x(j, i), j = 1, 3)
           end do
@@ -916,8 +1014,8 @@ C-----------------------------------------------
           cand_e = 0
           read(unitNum) cand_n(1:ii_stok) !< list of candidates (secondary)
           read(unitNum) cand_e(1:ii_stok) !< list of candidates (main)
-
           close(unitNum)
+          write(6,*)  "ii_stok_ref   ",ii_stok                         
         end subroutine
 
 
@@ -929,7 +1027,8 @@ C-----------------------------------------------
           interface
           subroutine compare_cand(cand_n, cand_e, ii_stok, cand_n_ref, cand_e_ref, ii_stok_ref) bind(C, name="compare_cand")
               import :: c_int
-              integer(c_int), intent(in) :: cand_n(*), cand_e(*), ii_stok, cand_n_ref(*), cand_e_ref(*), ii_stok_ref
+              integer(c_int), intent(in) :: cand_n(*), cand_e(*), cand_n_ref(*), cand_e_ref(*)
+              integer(c_int), intent(in), value :: ii_stok_ref, ii_stok
           end subroutine compare_cand
           end interface
 #include "my_real.inc"
@@ -986,6 +1085,9 @@ C-----------------------------------------------
           my_real, dimension(:), allocatable :: stfn !< stiffness secondary nodes
           my_real, dimension(:), allocatable :: cand_f,cand_p
 
+          INTEGER OMP_GET_THREAD_NUM, OMP_GET_NUM_THREADS
+          EXTERNAL OMP_GET_THREAD_NUM, OMP_GET_NUM_THREADS
+
           my_real ::  xyzm(12) !< bounding box
           integer :: voxel(8000000)
           integer, dimension(:), allocatable :: next_nod,ifpen
@@ -993,7 +1095,9 @@ C-----------------------------------------------
           my_real, dimension(:,:), allocatable :: xrem
           integer, dimension(:,:), allocatable :: irem
           
+          i_mem = 0
           eshift = 0
+          ii_stok_ref = 0
 
 
           call INTER7_DESERIALIZE(        filename     , 
@@ -1043,7 +1147,6 @@ C-----------------------------------------------
      &                                    total_nb_nrtm,
      &                                    numnod       )
 
-!$OMP MASTER
         allocate(cand_n(mulnsn))
         allocate(cand_e(mulnsn))
         allocate(cand_f(mulnsn))
@@ -1060,13 +1163,14 @@ C-----------------------------------------------
         cand_p = 0
         ii_stok = 0
         allocate(next_nod(nsn+nsnr))
-!$OMP END MASTER
 
+!$OMP PARALLEL PRIVATE(i,itask)
 !$OMP SINGLE
         do i=1,(nbx+2)*(nby+2)*(nbz+2)
           voxel(i)=0
         enddo
 !$OMP END SINGLE
+         ITASK = OMP_GET_THREAD_NUM() 
 
 
         call INTER7_CANDIDATE_PAIRS(
@@ -1128,6 +1232,8 @@ C-----------------------------------------------
      &                                    s_irem       ,
      &                                    next_nod      )
 
+!$OMP END PARALLEL
+          write(6,*) __FILE__,ii_stok,ii_stok_ref
 
           call compare_cand(cand_n, cand_e, ii_stok, cand_n_ref, cand_e_ref, ii_stok_ref)
 

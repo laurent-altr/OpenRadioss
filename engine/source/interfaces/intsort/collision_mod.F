@@ -23,5 +23,5 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 
 ! module with GROUP_SIZE as parameter
       MODULE COLLISION_MOD
-            integer, parameter :: GROUP_SIZE = 128
+        integer, parameter :: GROUP_SIZE = 64
       END MODULE COLLISION_MOD

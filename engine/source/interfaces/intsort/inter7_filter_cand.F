@@ -55,7 +55,6 @@ C   I m p l i c i t   T y p e s
 C-----------------------------------------------
           implicit none
 #include   "my_real.inc"
-#include   "comlock.inc"
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
@@ -124,6 +123,7 @@ C-----------------------------------------------
           integer :: ix2(GROUP_SIZE)
           integer :: ix3(GROUP_SIZE)
           integer :: ix4(GROUP_SIZE)
+          logical :: exit_flag
 
 
 C-----------------------------------------------
@@ -173,16 +173,21 @@ c-----------------------------------------------
             if(pene(i)/=zero) k_stok = k_stok + 1
           enddo
           if(k_stok==0)return
-c increment the number of kept candidates
-#include "lockon.inc"
+          exit_flag = .false.
+!$omp critical
           i_stok = ii_stok
-          if(i_stok+k_stok>mulnsn) then
-            i_mem = 2
-#include "lockoff.inc"
-            return
+          if (i_stok + k_stok > mulnsn) then
+              i_mem = 2
+              exit_flag = .true.
+          else
+              ii_stok = i_stok + k_stok
           endif
-          ii_stok   = i_stok + k_stok
-#include "lockoff.inc"
+!$omp end critical
+          
+          if (exit_flag) then
+              return
+          endif
+
           inacti_l = inacti
           itied_l = itied
           ifq_l = ifq
