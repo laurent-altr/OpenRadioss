@@ -42,7 +42,7 @@ extern "C"
         }
 
         std::cout << "number of candidates: " << ii_stok << "( "<<ii_stok_ref<<")\n";
-        if (j == ii_stok_ref)
+        if (num_matches == ii_stok_ref)
         {
             std::cout << "Success: All candidates_ref are found in candidates.\n";
         }
