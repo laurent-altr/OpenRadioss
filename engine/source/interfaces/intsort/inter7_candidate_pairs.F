@@ -1085,8 +1085,8 @@ C-----------------------------------------------
           my_real, dimension(:), allocatable :: stfn !< stiffness secondary nodes
           my_real, dimension(:), allocatable :: cand_f,cand_p
 
-          INTEGER OMP_GET_THREAD_NUM, OMP_GET_NUM_THREADS
-          EXTERNAL OMP_GET_THREAD_NUM, OMP_GET_NUM_THREADS
+          integer OMP_GET_THREAD_NUM, OMP_GET_NUM_THREADS
+          external OMP_GET_THREAD_NUM, OMP_GET_NUM_THREADS
 
           my_real ::  xyzm(12) !< bounding box
           integer :: voxel(8000000)
@@ -1094,7 +1094,9 @@ C-----------------------------------------------
           integer :: eshift,i_mem,i, itask, s_irem, s_xrem 
           my_real, dimension(:,:), allocatable :: xrem
           integer, dimension(:,:), allocatable :: irem
-          
+          double precision :: start_time, end_time, elapsed_time
+          double precision OMP_GET_WTIME
+          external OMP_GET_WTIME
           i_mem = 0
           eshift = 0
           ii_stok_ref = 0
@@ -1163,7 +1165,7 @@ C-----------------------------------------------
         cand_p = 0
         ii_stok = 0
         allocate(next_nod(nsn+nsnr))
-
+        start_time = OMP_GET_WTIME()
 !$OMP PARALLEL PRIVATE(i,itask)
 !$OMP SINGLE
         do i=1,(nbx+2)*(nby+2)*(nbz+2)
@@ -1233,7 +1235,9 @@ C-----------------------------------------------
      &                                    next_nod      )
 
 !$OMP END PARALLEL
-          write(6,*) __FILE__,ii_stok,ii_stok_ref
+          end_time = OMP_GET_WTIME()
+
+          write(6,*) "Elapsed time =", end_time - start_time 
 
           call compare_cand(cand_n, cand_e, ii_stok, cand_n_ref, cand_e_ref, ii_stok_ref)
 
