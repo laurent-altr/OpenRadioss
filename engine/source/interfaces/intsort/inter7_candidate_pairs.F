@@ -478,7 +478,7 @@ C=======================================================================
 
                     if(j_stok == GROUP_SIZE) then 
                        ! filter prov_n, prov_e and append to cand_n, cand_e
-                       call inter7_filter_cand(
+                       if(i_mem == 0) call inter7_filter_cand(
      1                   j_stok,irect  ,x     ,nsv   ,ii_stok,
      2                   cand_n,cand_e ,mulnsn,marge  ,
      3                   i_mem ,prov_n ,prov_e,eshift,inacti ,
@@ -494,7 +494,7 @@ C=======================================================================
  
   200               continue
                     jj = next_nod(jj)
-                    if(i_mem==2) jj = 0
+c                   if(i_mem==2) jj = 0
                   enddo ! while(jj /= 0)
                 enddo ! x
               enddo  ! y
@@ -508,7 +508,7 @@ C=======================================================================
             endif
           enddo
 !$OMP END DO
-          if(j_stok > 0) call inter7_filter_cand(
+          if(j_stok > 0 .and. i_mem == 0) call inter7_filter_cand(
      1                   j_stok,irect  ,x     ,nsv   ,ii_stok,
      2                   cand_n,cand_e ,mulnsn,marge  ,
      3                   i_mem ,prov_n ,prov_e,eshift,inacti ,
