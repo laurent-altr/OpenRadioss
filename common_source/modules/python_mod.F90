@@ -86,8 +86,8 @@
 
           subroutine python_update_time(time,dt) bind(c, name="cpp_python_update_time")
             use iso_c_binding
-            real(kind = c_double), intent(in) :: time
-            real(kind = c_double), intent(in) :: dt
+            real(kind = c_double), value, intent(in) :: time
+            real(kind = c_double), value, intent(in) :: dt
           end subroutine python_update_time
         end interface
 
@@ -410,8 +410,7 @@
           y = real(argout,kind(1.0))
         end subroutine
 
-!! \brief
-!! \details
+!! \brief update variables known by python functions
         subroutine python_update_globals(tt, dt2)
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                     Module
@@ -424,13 +423,13 @@
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Included files
 ! ----------------------------------------------------------------------------------------------------------------------
-!#include "my_real.inc"
+#include "my_real.inc"
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                     Arguments
 ! ----------------------------------------------------------------------------------------------------------------------
 !         type(python_),                   intent(inout) :: py !< the Fortran structure that holds the python function
-          double precision,                            intent(in) :: tt !< the current time
-          double precision,                            intent(in) :: dt2 !< the time step
+          my_real,                            intent(in) :: tt !< the current time
+          my_real,                            intent(in) :: dt2 !< the time step
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Local variables
 ! ----------------------------------------------------------------------------------------------------------------------

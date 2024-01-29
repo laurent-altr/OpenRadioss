@@ -2947,7 +2947,7 @@ C First: try with reduced bounding box
         CALL ENGINE_USER_INITIALIZE(NSPMD_USER,NTASK_USER,ISPMD_USER)
       ENDIF
       ! ----------------------
-
+      CALL PYTHON_UPDATE_GLOBALS(TT,DT2)
 C=======================================================================
 
 C----------------------------------------
@@ -8401,6 +8401,9 @@ C------------
         ENDIF
        ENDIF
       ENDIF
+C ---------------------------------
+      CALL PYTHON_UPDATE_GLOBALS(TT,DT2)
+C ---------------------------------
 C----------------------------------
 C       IMPLICITE SOLVER
 C----------------------------------
