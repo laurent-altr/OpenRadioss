@@ -39,7 +39,7 @@
 // the maximum length of a line of code of python function
 #define max_line_length 500 
 // the maximum number of lines of python function
-#define max_num_lines  1000
+#define max_num_lines 1000
 #define max_code_length max_line_length*max_num_lines
 
 
@@ -58,6 +58,8 @@ typedef int (*T_PyRun_SimpleString)(const char *);
 typedef int (*T_PyTuple_SetItem)(PyObject *, int, PyObject *);
 typedef void (*T_Py_DecRef)(PyObject *);
 typedef double (*T_PyFloat_AsDouble)(PyObject *);
+typedef int (*T_PyDict_SetItemString)(PyObject *, const char *, PyObject *);
+
 
 // Note on the python library used:
 //
@@ -102,6 +104,7 @@ T_PyRun_SimpleString PyRun_SimpleString;
 T_PyTuple_SetItem PyTuple_SetItem;
 T_Py_DecRef Py_DecRef;
 T_PyFloat_AsDouble PyFloat_AsDouble;
+T_PyDict_SetItemString PyDict_SetItemString;
 
 // global variables
 PyObject *pDict = nullptr;
@@ -126,6 +129,8 @@ void load_functions(T handle, bool& python_initialized) {
     load_function(handle, "PyTuple_SetItem", PyTuple_SetItem, python_initialized);
     load_function(handle, "Py_DecRef", Py_DecRef, python_initialized);
     load_function(handle, "PyFloat_AsDouble", PyFloat_AsDouble, python_initialized);
+    load_function(handle, "PyDict_SetItemString", PyDict_SetItemString, python_initialized);
+
 }
 
 
@@ -507,7 +512,39 @@ extern "C"
         }
         //        std::cout << "Function exists? " << *error << std::endl;
     }
+
+void cpp_python_update_time(double TIME, double DT) {
+    if (!python_initialized) {
+        std::cerr << "ERROR: Python is not initialized." << std::endl;
+        return;
+    }
+
+    if (!pDict) {
+        std::cerr << "ERROR: Python main module dictionary not initialized." << std::endl;
+        return;
+    }
+
+    // Convert C++ doubles to Python objects
+    PyObject *py_TIME = static_cast<PyObject*>(PyFloat_FromDouble(TIME));
+    PyObject *py_DT = static_cast<PyObject*>(PyFloat_FromDouble(DT));
+
+    if (!py_TIME || !py_DT) {
+        std::cerr << "ERROR: Failed to create Python objects from C++ doubles." << std::endl;
+        return;
+    }
+
+    // Set the Python global variables in the main module's dictionary
+    PyDict_SetItemString(pDict, "TIME", py_TIME);
+    PyDict_SetItemString(pDict, "DT", py_DT);
+
+    // Release the Python objects
+    if(py_TIME != nullptr) Py_DecRef(py_TIME);
+    if(py_DT != nullptr) Py_DecRef(py_DT);
 }
+
+
+
+} // extern "C"
 
 #else
 // dummy functions
@@ -538,6 +575,9 @@ extern "C"
     void cpp_python_check_function(char *name, int *error)
     {
         //        std::cout << "ERROR: python not enabled" << std::endl;
+    }
+    void cpp_python_update_time(double TIME, double DT) {
+
     }
 }
 

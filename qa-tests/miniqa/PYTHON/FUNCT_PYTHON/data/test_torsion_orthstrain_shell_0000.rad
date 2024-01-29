@@ -2172,6 +2172,7 @@ New PROP 1
 #---1----|----2----|----3----|----4----|----5----|----6----|----7----|----8----|----9----|---10----|
 /FUNCT_PYTHON/3
 def myfun2(x):
+    print(f"TIME: {TIME:.16f}, DT: {DT:.16f}")
     return x
 
 /FUNCT_PYTHON/1
@@ -2186,6 +2187,7 @@ def myfun(x):
     else:
         d = myfun2(x) # it is possible to call other functions within a function
         return d*d*d*(10-15*d+6*d*d)
+
 
 #---1----|----2----|----3----|----4----|----5----|----6----|----7----|----8----|----9----|---10----|
 /FUNCT/2

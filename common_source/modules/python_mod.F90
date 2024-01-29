@@ -83,6 +83,12 @@
             character(kind=c_char), dimension(*) :: name
             integer(kind=c_int), intent(out) :: error
           end subroutine python_check_function
+
+          subroutine python_update_time(time,dt) bind(c, name="cpp_python_update_time")
+            use iso_c_binding
+            real(kind = c_double), intent(in) :: time
+            real(kind = c_double), intent(in) :: dt
+          end subroutine python_update_time
         end interface
 
 !! \brief the python function structure: it contains the python code in plain text
@@ -403,6 +409,40 @@
           call python_deriv_funct1D_dp(py, funct_id, argin, argout)
           y = real(argout,kind(1.0))
         end subroutine
+
+!! \brief
+!! \details
+        subroutine python_update_globals(tt, dt2)
+! ----------------------------------------------------------------------------------------------------------------------
+!                                                     Module
+! ----------------------------------------------------------------------------------------------------------------------
+          use iso_c_binding, only : c_double
+! ----------------------------------------------------------------------------------------------------------------------
+!                                                   Implicit none
+! ----------------------------------------------------------------------------------------------------------------------
+          implicit none
+! ----------------------------------------------------------------------------------------------------------------------
+!                                                   Included files
+! ----------------------------------------------------------------------------------------------------------------------
+!#include "my_real.inc"
+! ----------------------------------------------------------------------------------------------------------------------
+!                                                     Arguments
+! ----------------------------------------------------------------------------------------------------------------------
+!         type(python_),                   intent(inout) :: py !< the Fortran structure that holds the python function
+          double precision,                            intent(in) :: tt !< the current time
+          double precision,                            intent(in) :: dt2 !< the time step
+! ----------------------------------------------------------------------------------------------------------------------
+!                                                   Local variables
+! ----------------------------------------------------------------------------------------------------------------------
+          real(kind=c_double)                           :: time, dt
+! ----------------------------------------------------------------------------------------------------------------------
+!                                                      Body
+! ----------------------------------------------------------------------------------------------------------------------
+          time = tt ! cast to double precision
+          dt = dt2  ! cast to double precision
+          call python_update_time(time, dt)
+        end subroutine
+
 
 
         ! unit test
