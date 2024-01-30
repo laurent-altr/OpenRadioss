@@ -26,8 +26,10 @@
 #include <sstream>
 #include <cstring>
 #include <vector>
+#include <set>
+#include <regex>
 #ifndef PYTHON_DISABLED
-//#include <Python.h>
+// #include <Python.h>
 #ifdef _WIN32
 /* Windows includes */
 #include <windows.h>
@@ -37,37 +39,27 @@
 #endif
 
 // the maximum length of a line of code of python function
-#define max_line_length 500 
+#define max_line_length 500
 // the maximum number of lines of python function
 #define max_num_lines 1000
-#define max_code_length max_line_length*max_num_lines
+#define max_code_length max_line_length *max_num_lines
 
-//    Coordinates     CX_n,  CY_n,  CZ_n
-//    Displacement    DX_n,  DY_n,  DZ_n
-//    DisplacementR  DRX_n, DRY_n, DRZ_n
-//    Velocity        VX_n,  VY_n , VZ_n
-//    VelocityR      VRX_n, VRY_n, VRZ_n
-//    Acceleration    AX_n,  AY_n,  AZ_n
-//    AccelerationR  ARX_n, ARY_n, ARZ_n
+typedef void *PyObject;
 
-
-typedef void* PyObject;
-
-typedef PyObject (*T_PyDict_GetItemString)(PyObject *, const char*);
+typedef PyObject (*T_PyDict_GetItemString)(PyObject *, const char *);
 typedef int (*T_PyCallable_Check)(PyObject *);
 typedef PyObject (*T_PyTuple_New)(int);
 typedef PyObject (*T_PyFloat_FromDouble)(double);
-typedef PyObject (*T_PyObject_CallObject)(PyObject *, PyObject*);
+typedef PyObject (*T_PyObject_CallObject)(PyObject *, PyObject *);
 typedef void (*T_Py_Initialize)();
 typedef void (*T_Py_Finalize)();
-typedef PyObject* (*T_PyImport_AddModule)(const char *);
-typedef PyObject* (*T_PyModule_GetDict)(PyObject *);
+typedef PyObject *(*T_PyImport_AddModule)(const char *);
+typedef PyObject *(*T_PyModule_GetDict)(PyObject *);
 typedef int (*T_PyRun_SimpleString)(const char *);
 typedef int (*T_PyTuple_SetItem)(PyObject *, int, PyObject *);
 typedef void (*T_Py_DecRef)(PyObject *);
 typedef double (*T_PyFloat_AsDouble)(PyObject *);
 typedef int (*T_PyDict_SetItemString)(PyObject *, const char *, PyObject *);
-
 
 // Note on the python library used:
 //
@@ -77,29 +69,32 @@ typedef int (*T_PyDict_SetItemString)(PyObject *, const char *, PyObject *);
 
 // load a function from a dynamic library
 #ifdef _WIN32
-template<typename T>
-void load_function(HMODULE handle, const std::string& func_name, T& func_ptr, bool& python_initialized) {
+template <typename T>
+void load_function(HMODULE handle, const std::string &func_name, T &func_ptr, bool &python_initialized)
+{
     func_ptr = reinterpret_cast<T>(GetProcAddress(handle, func_name.c_str()));
-    if (func_ptr == nullptr) {
-        //std::cout << "Could not load " << func_name << ": " << GetLastError() << std::endl;
+    if (func_ptr == nullptr)
+    {
+        // std::cout << "Could not load " << func_name << ": " << GetLastError() << std::endl;
         python_initialized = false;
     }
 }
 
 #else
-template<typename T>
-void load_function(void* handle, const std::string& func_name, T& func_ptr, bool& python_initialized) {
+template <typename T>
+void load_function(void *handle, const std::string &func_name, T &func_ptr, bool &python_initialized)
+{
     func_ptr = reinterpret_cast<T>(dlsym(handle, func_name.c_str()));
-    if (func_ptr == nullptr) {
-        const char* dlsym_error = dlerror();
+    if (func_ptr == nullptr)
+    {
+        const char *dlsym_error = dlerror();
         std::cout << "Could not load " << func_name << ": " << dlsym_error << std::endl;
         python_initialized = false;
     }
 }
 #endif
 
-
-T_Py_Initialize  Py_Initialize;
+T_Py_Initialize Py_Initialize;
 T_Py_Finalize Py_Finalize;
 T_PyDict_GetItemString PyDict_GetItemString;
 T_PyCallable_Check PyCallable_Check;
@@ -118,11 +113,43 @@ T_PyDict_SetItemString PyDict_SetItemString;
 PyObject *pDict = nullptr;
 bool python_initialized = false;
 
+std::set<size_t> nodes_uid;
+
+// Function to extract numbers based on the pattern and fill the global set
+void extract_uid(const std::string &input)
+{
+    //    Coordinates     CX_n,  CY_n,  CZ_n
+    //    Displacement    DX_n,  DY_n,  DZ_n
+    //    DisplacementR  DRX_n, DRY_n, DRZ_n
+    //    Velocity        VX_n,  VY_n , VZ_n
+    //    VelocityR      VRX_n, VRY_n, VRZ_n
+    //    Acceleration    AX_n,  AY_n,  AZ_n
+    //    AccelerationR  ARX_n, ARY_n, ARZ_n
+    // Regex pattern: non-alphanumeric or start of line, followed by A[XYZ] and underscore and numbers
+
+    std::regex pattern(R"((?:[^a-zA-Z0-9]|^)[ACDV][R]*[XYZ]_[0-9]+)");
+
+    auto begin = std::sregex_iterator(input.begin(), input.end(), pattern);
+    auto end = std::sregex_iterator();
+
+    for (auto i = begin; i != end; ++i)
+    {
+        auto match = *i;
+        std::string match_str = match.str();
+        size_t underscore_pos = match_str.find('_');
+        if (underscore_pos != std::string::npos)
+        {
+            size_t number = std::stoi(match_str.substr(underscore_pos + 1));
+            nodes_uid.insert(number);
+        }
+    }
+}
 
 // Here is the list of the function that are loaded from the Python library
 // The template is there only to have one version of the code for both Windows and Linux
-template<typename T>
-void load_functions(T handle, bool& python_initialized) {
+template <typename T>
+void load_functions(T handle, bool &python_initialized)
+{
     python_initialized = true;
     load_function(handle, "Py_Initialize", Py_Initialize, python_initialized);
     load_function(handle, "Py_Finalize", Py_Finalize, python_initialized);
@@ -138,46 +165,52 @@ void load_functions(T handle, bool& python_initialized) {
     load_function(handle, "Py_DecRef", Py_DecRef, python_initialized);
     load_function(handle, "PyFloat_AsDouble", PyFloat_AsDouble, python_initialized);
     load_function(handle, "PyDict_SetItemString", PyDict_SetItemString, python_initialized);
-
 }
 
-
 // call a python function with a list of arguments
-PyObject* call_python_function(const char* func_name, double * args, int num_args) {
+PyObject *call_python_function(const char *func_name, double *args, int num_args)
+{
     PyObject *pFunc, *pArgs, *pValue;
-    pFunc = static_cast<PyObject*>(PyDict_GetItemString(pDict, func_name));
-    if (PyCallable_Check(pFunc)) {
-        pArgs = static_cast<PyObject*>(PyTuple_New(num_args));
-        for( size_t i = 0; i < num_args; i++ ) {
-            PyTuple_SetItem(pArgs, i, static_cast<PyObject*>(PyFloat_FromDouble(args[i])));
+    pFunc = static_cast<PyObject *>(PyDict_GetItemString(pDict, func_name));
+    if (PyCallable_Check(pFunc))
+    {
+        pArgs = static_cast<PyObject *>(PyTuple_New(num_args));
+        for (size_t i = 0; i < num_args; i++)
+        {
+            PyTuple_SetItem(pArgs, i, static_cast<PyObject *>(PyFloat_FromDouble(args[i])));
         }
-        pValue = static_cast<PyObject*>(PyObject_CallObject(pFunc, pArgs));
+        pValue = static_cast<PyObject *>(PyObject_CallObject(pFunc, pArgs));
         Py_DecRef(pArgs);
         return pValue;
     }
-    std::cout << "ERROR in Python function: cannot call function:"<<func_name << std::endl;
+    std::cout << "ERROR in Python function: cannot call function:" << func_name << std::endl;
     return nullptr;
 }
 
-void python_execute_code(const std::string& code) {
+void python_execute_code(const std::string &code)
+{
     PyRun_SimpleString(code.c_str());
 }
 
 // returns the function name from the function signature, or an empty string if the function name is not found
-std::string extract_function_name(const std::string& signature) {
-    if (signature.substr(0, 3) != "def") {
-        std::cout<<"ERROR in Python function: signature does not start with 'def'"<<std::endl;
-        return "";  
+std::string extract_function_name(const std::string &signature)
+{
+    if (signature.substr(0, 3) != "def")
+    {
+        std::cout << "ERROR in Python function: signature does not start with 'def'" << std::endl;
+        return "";
     }
     std::size_t startPos = signature.find_first_not_of(" ", 3);
-    if(startPos == std::string::npos) {
-        std::cout<<"ERROR in Python function: function name not found"<<std::endl;
-        return ""; 
+    if (startPos == std::string::npos)
+    {
+        std::cout << "ERROR in Python function: function name not found" << std::endl;
+        return "";
     }
     // Find the index of the opening parenthesis
     std::size_t endPos = signature.find("(", startPos);
-    if(endPos == std::string::npos) {
-        std::cout<<"ERROR in Python function: opening parenthesis not found"<<std::endl;
+    if (endPos == std::string::npos)
+    {
+        std::cout << "ERROR in Python function: opening parenthesis not found" << std::endl;
         return "";
     }
     // Extract the function name
@@ -187,7 +220,7 @@ std::string extract_function_name(const std::string& signature) {
 // Search for the Python library in the directory specified by the environment variable RAD_PYTHON_PATH
 // If not found, look for PYTHONHOME and search for the library in PYTHONHOME/lib
 #ifdef _WIN32
-//Wndows version
+// Wndows version
 void python_load_library()
 {
     python_initialized = true;
@@ -222,20 +255,20 @@ void python_load_library()
 
         if (python_exec == NULL)
         {
-            std::cout << "ERROR: No python installation found." << std::endl ;
+            std::cout << "ERROR: No python installation found." << std::endl;
             std::cout << "       Set PATH to Python Installation or set RAD_PYTHON_PATH to the Python library" << std::endl;
             python_initialized = false;
             return;
         }
 
         char python_filename[2048];
-        DWORD filelen =  GetModuleFileName(python_exec,python_filename,2048);
-        int i=filelen;
-        while (i>0 && python_filename[i-1]!='\\')
-           --i;
-        python_filename[i]='\0';
-        
-        strcpy_s(python_path,20000,python_filename);     
+        DWORD filelen = GetModuleFileName(python_exec, python_filename, 2048);
+        int i = filelen;
+        while (i > 0 && python_filename[i - 1] != '\\')
+            --i;
+        python_filename[i] = '\0';
+
+        strcpy_s(python_path, 20000, python_filename);
         FreeLibrary(python_exec);
 
         std::string dir_path = std::string(python_path);
@@ -250,18 +283,19 @@ void python_load_library()
             return;
         }
 
-        do {
+        do
+        {
             std::string full_dll_path = dir_path + find_file_data.cFileName;
             handle = LoadLibrary(full_dll_path.c_str());
 
             if (handle)
             {
                 python_initialized = true;
-                //std::cout << "Trying python library: " << full_dll_path << std::endl;
+                // std::cout << "Trying python library: " << full_dll_path << std::endl;
                 load_functions(handle, python_initialized);
                 if (python_initialized)
                 {
-                    //std::cout << "Python library found at " << full_dll_path << std::endl;
+                    // std::cout << "Python library found at " << full_dll_path << std::endl;
                     FindClose(hFind);
                     Py_Initialize();
                     return;
@@ -297,7 +331,6 @@ void python_load_library()
         {
             python_initialized = false;
             std::cout << "WARNING: Could not find any python library in RAD_PYTHON_PATH= " << python_path << std::endl;
-
         }
         else
         {
@@ -352,7 +385,7 @@ void python_load_library()
         }
         // if we reach this point, we did not find any python library
         // we look into some default locations
-        std::cout<<" INFO: searching for python library in default locations LD_LIBRARY_PATH"<<std::endl;
+        std::cout << " INFO: searching for python library in default locations LD_LIBRARY_PATH" << std::endl;
         std::vector<std::string> possible_names = {
             "libpython3.12.so",
             "libpython3.11.so",
@@ -397,7 +430,8 @@ extern "C"
     void cpp_python_initialize(int *ierror)
     {
         // if ierror = 1 on entry, then "-python" is missing from the starter command line, and we will not execute any python code
-        if(*ierror == 1) return;
+        if (*ierror == 1)
+            return;
         *ierror = 1;
         // Load Python dynamic library
         python_load_library();
@@ -429,7 +463,8 @@ extern "C"
         int current_line = 0;
         std::stringstream function_code;
 
-        if(!python_initialized){
+        if (!python_initialized)
+        {
             std::cout << "ERROR: Python not initialized" << std::endl;
             std::cout << "Make sure that the following python code is safe" << std::endl;
         }
@@ -451,24 +486,26 @@ extern "C"
                     std::cout << "ERROR: function name not found in function signature" << std::endl;
                     return;
                 }
-                // copy function_name into argument name
-                #ifdef _WIN64
-                   strcpy_s(name,max_line_length, function_name.c_str());
-                #else
-                   strcpy(name, function_name.c_str());
-                #endif
+// copy function_name into argument name
+#ifdef _WIN64
+                strcpy_s(name, max_line_length, function_name.c_str());
+#else
+                strcpy(name, function_name.c_str());
+#endif
                 // add the null char at the end of the string
                 name[function_name.size()] = '\0';
             }
+            extract_uid(tmp_string);
             //            std::cout << tmp_string << std::endl;  // Print the line (optional)
             function_code << tmp_string << std::endl; // Add the line to the function code
             i++;                                      // Move past the null character
             current_line++;
         }
-        if(python_initialized)
+        if (python_initialized)
         {
             python_execute_code(function_code.str());
-        }else
+        }
+        else
         {
             // print the python function to stdout and stderr
             std::cout << function_code.str() << std::endl;
@@ -478,7 +515,8 @@ extern "C"
     // works for functions with 2 arguments and 1 return value
     void cpp_python_call_function(char *name, int num_args, double *args, int num_return, double *return_values)
     {
-        if( !python_initialized ) {
+        if (!python_initialized)
+        {
             return;
         }
         PyObject *result = call_python_function(name, args, num_args);
@@ -504,44 +542,64 @@ extern "C"
             {
                 *error = 1;
             }
-        } else
+        }
+        else
         {
             *error = 1;
         }
         //        std::cout << "Function exists? " << *error << std::endl;
     }
 
+    void cpp_python_update_time(double TIME, double DT)
+    {
+        if (!python_initialized)
+        {
+            // std::cerr << "ERROR: Python is not initialized." << std::endl;
+            return;
+        }
 
+        if (!pDict)
+        {
+            std::cerr << "ERROR: Python main module dictionary not initialized." << std::endl;
+            return;
+        }
 
-void cpp_python_update_time(double TIME, double DT) {
-    if (!python_initialized) {
-        //std::cerr << "ERROR: Python is not initialized." << std::endl;
-        return;
+        // Convert C++ doubles to Python objects
+        PyObject *py_TIME = static_cast<PyObject *>(PyFloat_FromDouble(TIME));
+        PyObject *py_DT = static_cast<PyObject *>(PyFloat_FromDouble(DT));
+
+        if (!py_TIME || !py_DT)
+        {
+            std::cerr << "ERROR: Failed to create Python objects from C++ doubles." << std::endl;
+            return;
+        }
+
+        // Set the Python global variables in the main module's dictionary
+        PyDict_SetItemString(pDict, "TIME", py_TIME);
+        PyDict_SetItemString(pDict, "DT", py_DT);
+
+        // Release the Python objects
+        if (py_TIME != nullptr)
+            Py_DecRef(py_TIME);
+        if (py_DT != nullptr)
+            Py_DecRef(py_DT);
+    }
+    // return the number of nodes that are used in the python functions
+    void cpp_python_get_number_of_nodes(int *num_nodes)
+    {
+        *num_nodes = nodes_uid.size();
     }
 
-    if (!pDict) {
-        std::cerr << "ERROR: Python main module dictionary not initialized." << std::endl;
-        return;
+    // return the list of nodes (user ids) that are used in the python functions
+    void cpp_python_get_nodes(int *nodes_uid_array)
+    {
+        int i = 0;
+        for (auto node_uid : nodes_uid)
+        {
+            nodes_uid_array[i] = node_uid;
+            i++;
+        }
     }
-
-    // Convert C++ doubles to Python objects
-    PyObject *py_TIME = static_cast<PyObject*>(PyFloat_FromDouble(TIME));
-    PyObject *py_DT = static_cast<PyObject*>(PyFloat_FromDouble(DT));
-
-    if (!py_TIME || !py_DT) {
-        std::cerr << "ERROR: Failed to create Python objects from C++ doubles." << std::endl;
-        return;
-    }
-
-    // Set the Python global variables in the main module's dictionary
-    PyDict_SetItemString(pDict, "TIME", py_TIME);
-    PyDict_SetItemString(pDict, "DT", py_DT);
-
-    // Release the Python objects
-    if(py_TIME != nullptr) Py_DecRef(py_TIME);
-    if(py_DT != nullptr) Py_DecRef(py_DT);
-}
-
 
 
 } // extern "C"
@@ -550,7 +608,7 @@ void cpp_python_update_time(double TIME, double DT) {
 // dummy functions
 extern "C"
 {
-    void cpp_python_initialize(int * ok)
+    void cpp_python_initialize(int *ok)
     {
         // ok = 0; if not ok
         *ok = 0;
@@ -576,8 +634,8 @@ extern "C"
     {
         //        std::cout << "ERROR: python not enabled" << std::endl;
     }
-    void cpp_python_update_time(double TIME, double DT) {
-
+    void cpp_python_update_time(double TIME, double DT)
+    {
     }
 }
 
