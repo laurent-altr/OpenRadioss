@@ -42,6 +42,14 @@
 #define max_num_lines 1000
 #define max_code_length max_line_length*max_num_lines
 
+//    Coordinates     CX_n,  CY_n,  CZ_n
+//    Displacement    DX_n,  DY_n,  DZ_n
+//    DisplacementR  DRX_n, DRY_n, DRZ_n
+//    Velocity        VX_n,  VY_n , VZ_n
+//    VelocityR      VRX_n, VRY_n, VRZ_n
+//    Acceleration    AX_n,  AY_n,  AZ_n
+//    AccelerationR  ARX_n, ARY_n, ARZ_n
+
 
 typedef void* PyObject;
 
@@ -186,9 +194,6 @@ void python_load_library()
     HMODULE handle = NULL;
     HMODULE python_exec = NULL;
 
-
-
-
     // Get the string from the environment variable RAD_PYTHON_PATH
     char python_path[20000];
     int path_size = GetEnvironmentVariable("RAD_PYTHON_PATH", python_path, 20000);
@@ -209,9 +214,6 @@ void python_load_library()
             load_functions(handle, python_initialized);
         }
     }
-
-
-
 
     if (!python_initialized)
     {
@@ -449,7 +451,6 @@ extern "C"
                     std::cout << "ERROR: function name not found in function signature" << std::endl;
                     return;
                 }
-                //                std::cout << "Registering function: " << function_name << std::endl;
                 // copy function_name into argument name
                 #ifdef _WIN64
                    strcpy_s(name,max_line_length, function_name.c_str());
@@ -471,15 +472,12 @@ extern "C"
         {
             // print the python function to stdout and stderr
             std::cout << function_code.str() << std::endl;
-//            std::cout << function_code.str() << std::endl;
         }
-        //        std::cout<<" function registered"<<std::endl;
     }
 
     // works for functions with 2 arguments and 1 return value
     void cpp_python_call_function(char *name, int num_args, double *args, int num_return, double *return_values)
     {
-        //        std::cout<<"Calling function: "<<name<<std::endl;
         if( !python_initialized ) {
             return;
         }
@@ -513,9 +511,11 @@ extern "C"
         //        std::cout << "Function exists? " << *error << std::endl;
     }
 
+
+
 void cpp_python_update_time(double TIME, double DT) {
     if (!python_initialized) {
-        std::cerr << "ERROR: Python is not initialized." << std::endl;
+        //std::cerr << "ERROR: Python is not initialized." << std::endl;
         return;
     }
 

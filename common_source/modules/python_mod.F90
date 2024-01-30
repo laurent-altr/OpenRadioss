@@ -101,6 +101,9 @@
           integer :: num_args !< the number of arguments of the function (1 for 1D function)
           integer :: num_return !< the number of return values of the function (1 for 1D function)
           integer :: user_id !< the user id of the function
+          integer :: number_of_nodes !< the nodes that are used by the function
+          integer, dimension(:) :: nodes_global_ids !< the global ids of the nodes that are used by the function
+          integer, dimension(:) :: nodes_local_ids!< the global ids of the nodes that are used by the function
         end type python_function
 
 !! \brief the python structure: it contains the python functions
@@ -146,8 +149,9 @@
           buffer_size = 3 ! funct_offset, nb_functs
 ! compute the size of the buffer
           do i = 1, python%nb_functs
-            buffer_size = buffer_size + 6! 5 integers: len_name, len_code, num_lines, num_args, num_return
+            buffer_size = buffer_size + 7! 5 integers: len_name, len_code, num_lines, num_args, num_return
             buffer_size = buffer_size + python%functs(i)%len_name + python%functs(i)%len_code
+            buffer_size = buffer_size + 2 *python%functs(i)%number_of_nodes
           enddo
 ! allocate the buffer
           if(allocated(buffer)) deallocate(buffer)
@@ -166,7 +170,8 @@
               buffer(pos+3) = python%functs(i)%num_args
               buffer(pos+4) = python%functs(i)%num_return
               buffer(pos+5) = python%functs(i)%user_id
-              pos = pos + 6
+              buffer(pos+6) = python%functs(i)%number_of_nodes
+              pos = pos + 7
 ! transfer the name to the buffer, using the transfer function
               len_name=python%functs(i)%len_name
               len_code = python%functs(i)%len_code
@@ -174,6 +179,12 @@
               pos = pos + python%functs(i)%len_name
               buffer(pos:pos+len_code-1) = transfer(python%functs(i)%code, buffer(pos:pos+len_code-1))
               pos = pos + python%functs(i)%len_code
+              if(python%functs(i)%number_of_nodes > 0) then
+                buffer(pos:pos+python%functs(i)%number_of_nodes-1) = python%functs(i)%nodes_global_ids
+                pos = pos + python%functs(i)%number_of_nodes
+                buffer(pos:pos+python%functs(i)%number_of_nodes-1) = python%functs(i)%nodes_local_ids
+                pos = pos + python%functs(i)%number_of_nodes
+              endif
             enddo
           endif
         end subroutine python_serialize
@@ -206,7 +217,8 @@
               python%functs(i)%num_args = buffer(pos+3)
               python%functs(i)%num_return = buffer(pos+4)
               python%functs(i)%user_id = buffer(pos+5)
-              pos = pos + 6
+              python%functs(i)%number_of_nodes = buffer(pos+6)
+              pos = pos + 7
               allocate(python%functs(i)%name(python%functs(i)%len_name),stat = ierr)
               if(ierr == 0) then
                 python%functs(i)%name=transfer(buffer(pos:pos+python%functs(i)%len_name-1), python%functs(i)%name)
@@ -216,6 +228,16 @@
               if(ierr == 0) then
                 python%functs(i)%code = transfer(buffer(pos:pos+python%functs(i)%len_code-1), python%functs(i)%code)
                 pos = pos + python%functs(i)%len_code
+              endif
+              allocate(python%functs(i)%nodes_global_ids(python%functs(i)%number_of_nodes),stat = ierr)
+              if(ierr == 0) then
+                python%functs(i)%nodes_global_ids = buffer(pos:pos+python%functs(i)%number_of_nodes-1)
+                pos = pos + python%functs(i)%number_of_nodes
+              endif
+              allocate(python%functs(i)%nodes_local_ids(python%functs(i)%number_of_nodes),stat = ierr)
+              if(ierr == 0) then
+                python%functs(i)%nodes_local_ids = buffer(pos:pos+python%functs(i)%number_of_nodes-1)
+                pos = pos + python%functs(i)%number_of_nodes
               endif
             enddo
           endif
@@ -243,6 +265,8 @@
 !                                                      Body
 ! ----------------------------------------------------------------------------------------------------------------------
           name=" "
+          funct%number_of_nodes = 0
+
           call python_register_function(name, code, num_lines)
           allocate(funct%name(len_trim(name)),stat = ierr)
           if(ierr == 0) then
