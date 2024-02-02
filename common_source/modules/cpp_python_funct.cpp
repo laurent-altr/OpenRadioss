@@ -27,6 +27,7 @@
 #include <cstring>
 #include <vector>
 #include <set>
+#include <map>
 #include <regex>
 #ifndef PYTHON_DISABLED
 // #include <Python.h>
@@ -113,36 +114,41 @@ T_PyDict_SetItemString PyDict_SetItemString;
 PyObject *pDict = nullptr;
 bool python_initialized = false;
 
-std::set<size_t> nodes_uid;
+// user ids of the nodes that are used in the python functions
+std::set<int> nodes_uid;
+
+// mapping between user ids and local ids
+std::map<int, int> nodes_uid_to_local_id;
 
 // Function to extract numbers based on the pattern and fill the global set
 void extract_uid(const std::string &input)
 {
-    //    Coordinates     CX_n,  CY_n,  CZ_n
-    //    Displacement    DX_n,  DY_n,  DZ_n
-    //    DisplacementR  DRX_n, DRY_n, DRZ_n
-    //    Velocity        VX_n,  VY_n , VZ_n
-    //    VelocityR      VRX_n, VRY_n, VRZ_n
-    //    Acceleration    AX_n,  AY_n,  AZ_n
-    //    AccelerationR  ARX_n, ARY_n, ARZ_n
-    // Regex pattern: non-alphanumeric or start of line, followed by A[XYZ] and underscore and numbers
-
-    std::regex pattern(R"((?:[^a-zA-Z0-9]|^)[ACDV][R]*[XYZ]_[0-9]+)");
-
-    auto begin = std::sregex_iterator(input.begin(), input.end(), pattern);
-    auto end = std::sregex_iterator();
-
-    for (auto i = begin; i != end; ++i)
-    {
-        auto match = *i;
-        std::string match_str = match.str();
-        size_t underscore_pos = match_str.find('_');
-        if (underscore_pos != std::string::npos)
-        {
-            size_t number = std::stoi(match_str.substr(underscore_pos + 1));
-            nodes_uid.insert(number);
-        }
-    }
+      //    Coordinates     CX_n,  CY_n,  CZ_n
+      //    Displacement    DX_n,  DY_n,  DZ_n
+      //    DisplacementR  DRX_n, DRY_n, DRZ_n
+      //    Velocity        VX_n,  VY_n , VZ_n
+      //    VelocityR      VRX_n, VRY_n, VRZ_n
+      //    Acceleration    AX_n,  AY_n,  AZ_n
+      //    AccelerationR  ARX_n, ARY_n, ARZ_n
+      // Regex pattern: non-alphanumeric or start of line, followed by A[XYZ] and underscore and numbers
+         std::cout<<"input: "<<input<<std::endl; 
+         std::regex pattern(R"((?:[^a-zA-Z0-9]|^)[ACDV][R]*[XYZ]_[0-9]+)");
+     
+//         auto begin = std::sregex_iterator(input.begin(), input.end(), pattern);
+//         auto end = std::sregex_iterator();
+//   
+//         for (auto i = begin; i != end; ++i)
+//         {
+//             auto match = *i;
+//             std::string match_str = match.str();
+//             size_t underscore_pos = match_str.find('_');
+//             if (underscore_pos != std::string::npos)
+//             {
+//                 int number = std::stoi(match_str.substr(underscore_pos + 1));
+//                 nodes_uid.insert(number);
+//                 std::cout<<"number: "<<number<<std::endl;
+//             }
+//         }
 }
 
 // Here is the list of the function that are loaded from the Python library
@@ -587,20 +593,57 @@ extern "C"
     // return the number of nodes that are used in the python functions
     void cpp_python_get_number_of_nodes(int *num_nodes)
     {
-        *num_nodes = nodes_uid.size();
+        if( !python_initialized )
+        {
+            *num_nodes = 0;
+        } else
+        {
+            *num_nodes = nodes_uid.size();
+        }
+
     }
 
     // return the list of nodes (user ids) that are used in the python functions
     void cpp_python_get_nodes(int *nodes_uid_array)
     {
-        int i = 0;
-        for (auto node_uid : nodes_uid)
+        if (python_initialized)
         {
-            nodes_uid_array[i] = node_uid;
-            i++;
+            int i = 0;
+            for (auto node_uid : nodes_uid)
+            {
+                // std::cout << "Node uid: " << node_uid << std::endl;
+                nodes_uid_array[i] = node_uid;
+                i++;
+            }
         }
     }
-
+    // itab(i) = uid of node local node i
+    void cpp_python_create_node_mapping(int *itab, int *num_nodes)
+    {
+        if (python_initialized)
+        {
+            // loop over the set
+            for (auto node_uid : nodes_uid)
+            {
+                // find i such that itab[i] = node_uid
+                bool found = false;
+                for (int i = 0; i < *num_nodes; i++)
+                {
+                    if (itab[i] == node_uid)
+                    {
+                        nodes_uid_to_local_id[node_uid] = i;
+                        std::cout << "Node uid: " << node_uid << " local id: " << i << std::endl;
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found)
+                {
+                    std::cout << "Node uid: " << node_uid << " not found in itab" << std::endl;
+                }
+            }
+        }
+    }
 
 } // extern "C"
 
@@ -634,9 +677,14 @@ extern "C"
     {
         //        std::cout << "ERROR: python not enabled" << std::endl;
     }
-    void cpp_python_update_time(double TIME, double DT)
-    {
-    }
+    void cpp_python_update_time(double TIME, double DT){}
+    void cpp_python_get_number_of_nodes(int *num_nodes){}
+    // return the list of nodes (user ids) that are used in the python functions
+    void cpp_python_get_nodes(int *nodes_uid_array){}
+    void cpp_python_create_node_mapping(int *itab, int *num_nodes){}
+
+
+
 }
 
 #endif

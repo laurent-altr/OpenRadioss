@@ -99,8 +99,16 @@
           subroutine python_get_nodes(nodes_global_ids) &
             bind(c, name="cpp_python_get_nodes")
             use iso_c_binding
-            integer(kind=c_int), dimension(:), intent(inout) :: nodes_global_ids
+            integer(kind=c_int), intent(inout) :: nodes_global_ids(*)
           end subroutine python_get_nodes
+
+          !interface for    void cpp_create_node_mapping(int * itab, int *num_nodes)
+          subroutine python_create_node_mapping(itab, num_nodes) &
+            bind(c, name="cpp_python_create_node_mapping")
+            use iso_c_binding
+            integer(kind=c_int), intent(in) :: num_nodes
+            integer(kind=c_int), intent(in) :: itab(*)
+          end subroutine python_create_node_mapping
         end interface
 
 !! \brief the python function structure: it contains the python code in plain text
@@ -234,6 +242,8 @@
 
         end subroutine python_deserialize
 
+
+
 !! \brief Initialize the python function
 !! \details allocate funct%name and funct%code, and copy the name and code from the input file
         subroutine python_funct_init(funct, code, len_code, num_lines)
@@ -274,22 +284,22 @@
           funct%num_lines = num_lines
         end subroutine
 
+
 !! \brief Register the python functions saved in the python structure into the python interpreter dictionary
-        subroutine python_register(py)
+        subroutine python_register(py, itab, numnod)
           implicit none
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                     Arguments
 ! ----------------------------------------------------------------------------------------------------------------------
           type(python_),                     intent(in) :: py !< the Fortran structure that holds the python function
+          integer,                           intent(in) :: numnod !< the global number of nodes
+          integer,                           intent(in) :: itab(numnod) !< the global node ids
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Local variables
 ! ----------------------------------------------------------------------------------------------------------------------
-          character(len=max_line_length) :: name
+          character(len=max_line_length)             :: name
           character(kind=c_char,len=max_code_length) :: code
-          integer                        :: i,n,ierror
-          integer, dimension(:), allocatable :: nodes_global_ids
-          integer :: number_of_nodes
-!         double precision, dimension(1) :: argin, argout
+          integer                                    :: i,n,ierror
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                      Body
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -309,13 +319,9 @@
             code(py%functs(n)%len_code+1:py%functs(n)%len_code+1) = c_null_char
             call python_register_function(name, code, py%functs(n)%num_lines)
           end do
+          ! creates a mapping between the global node ids and the local node ids
+          call python_create_node_mapping(itab, numnod)
 
-          call python_get_number_of_nodes(number_of_nodes)
-          allocate(nodes_global_ids(number_of_nodes))
-          call python_get_nodes(nodes_global_ids)
-          do i = 1, number_of_nodes
-            write(6,*) "node ", i, " global id = ", nodes_global_ids(i)
-          end do
         end subroutine
 
 !! \brief Evaluate the python function
@@ -433,12 +439,12 @@
         end subroutine
 
 !! \brief update variables known by python functions
-        subroutine python_update_globals(tt, dt2)
+        subroutine python_update_globals(tt, dt2, X, A, D, DR, V, VR, AR)
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                     Module
 ! ----------------------------------------------------------------------------------------------------------------------
           use iso_c_binding, only : c_double
-! ----------------------------------------------------------------------------------------------------------------------
+! --------------------------------------------------------------------------------------------------------------------------
 !                                                   Implicit none
 ! ----------------------------------------------------------------------------------------------------------------------
           implicit none
@@ -449,9 +455,15 @@
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                     Arguments
 ! ----------------------------------------------------------------------------------------------------------------------
-!         type(python_),                   intent(inout) :: py !< the Fortran structure that holds the python function
-          my_real,                            intent(in) :: tt !< the current time
-          my_real,                            intent(in) :: dt2 !< the time step
+          my_real, optional,                  intent(in) :: tt !< the current time
+          my_real, optional,                  intent(in) :: dt2 !< the time step
+          my_real, optional,  dimension(3,*), intent(in) :: X !< the coordinates
+          my_real, optional,  dimension(3,*), intent(in) :: A !< the acceleration
+          my_real, optional,  dimension(3,*), intent(in) :: D !< the displacement
+          my_real, optional,  dimension(3,*), intent(in) :: DR !< the rotational? relative? displacement
+          my_real, optional,  dimension(3,*), intent(in) :: V !< the velocity
+          my_real, optional,  dimension(3,*), intent(in) :: VR !< the rotational? relative? velocity
+          my_real, optional,  dimension(3,*), intent(in) :: AR !< the acceleration
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Local variables
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -459,9 +471,56 @@
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                      Body
 ! ----------------------------------------------------------------------------------------------------------------------
-          time = tt ! cast to double precision
-          dt = dt2  ! cast to double precision
-          call python_update_time(time, dt)
+          if(present(tt)) then
+            time = tt
+          else
+            time = 0.0
+          endif
+          if(present(dt2)) then
+            dt = dt2
+          else
+            dt = 0.0
+          endif
+          if(present(tt) .and. present(dt2)) call python_update_time(time, dt)
+
+          if(present(X)) call python_update_variables("X",1, X)
+          if(present(A)) call python_update_variables("A",1, A)
+          if(present(D)) call python_update_variables("D",1, D)
+          if(present(DR)) call python_update_variables("DR",2, DR)
+          if(present(V)) call python_update_variables("V",1, V)
+          if(present(VR)) call python_update_variables("VR",2, VR)
+          if(present(AR)) call python_update_variables("AR",2, AR)
+
+        end subroutine
+
+!! \brief update variables known by python functions
+        subroutine python_update_variables(name, name_len, variable)
+! ----------------------------------------------------------------------------------------------------------------------
+!                                                     Module
+! ----------------------------------------------------------------------------------------------------------------------
+          use iso_c_binding
+! --------------------------------------------------------------------------------------------------------------------------
+!                                                   Implicit none
+! ----------------------------------------------------------------------------------------------------------------------
+          implicit none
+! ----------------------------------------------------------------------------------------------------------------------
+!                                                   Included files
+! ----------------------------------------------------------------------------------------------------------------------
+#include "my_real.inc"
+! ----------------------------------------------------------------------------------------------------------------------
+!                                                     Arguments
+! ----------------------------------------------------------------------------------------------------------------------
+          integer,                              intent(in) :: name_len !< the length of the name
+          character(kind=c_char), dimension(*), intent(in) :: name      !< the name of the variable
+          my_real, dimension(3,*)             , intent(in) :: variable  !< the variable
+! ----------------------------------------------------------------------------------------------------------------------
+!                                                   Local variables
+! ----------------------------------------------------------------------------------------------------------------------
+          real(kind=c_double)                           :: value
+! ----------------------------------------------------------------------------------------------------------------------
+!                                                      Body
+! ----------------------------------------------------------------------------------------------------------------------
+          write(6,*) "python_update_variables: name = ", name(:name_len) , " variable = ", variable(1,1)
         end subroutine
 
 

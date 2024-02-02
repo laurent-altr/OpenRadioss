@@ -1986,7 +1986,7 @@ C Reinitialise sensor variables defined in /SENS/RESET
 C========================================================================================
 
 C save the Python functions into the Python interpreter dictionarry
-       CALL PYTHON_REGISTER(PYTHON)
+       CALL PYTHON_REGISTER(PYTHON,ITAB,NUMNOD)
 
 C========================================================================================
 C                                     PARALLEL SECTION (SMP)
@@ -2947,7 +2947,7 @@ C First: try with reduced bounding box
         CALL ENGINE_USER_INITIALIZE(NSPMD_USER,NTASK_USER,ISPMD_USER)
       ENDIF
       ! ----------------------
-      CALL PYTHON_UPDATE_GLOBALS(TT,DT2)
+      CALL PYTHON_UPDATE_GLOBALS(TT,DT2,X=X,A=A,V=V)
 C=======================================================================
 
 C----------------------------------------
@@ -5403,7 +5403,7 @@ C   MADYMO_DEL is globalized with SPMD_ALLGLOB_ISUM9
 C   if Positive, all domains send the info during Time Step exchange
 C   
 C   --------------------------------------------------------
-C   Don't communicate IDEL7NOK if already done. (IDEL7NG >0)
+C   Don not communicate IDEL7NOK if already done. (IDEL7NG >0)
 C  ---------------------------------------------------------
 
         MADYMO_DEL_GLOBAL=0
@@ -6800,6 +6800,7 @@ C-----------------------------------------------
      .    CALL TEMPUR(TEMP ,MCP,FTHE,NODFTSK,NODLTSK,WEIGHT,MCP_OFF)
 !$OMP END PARALLEL
 
+
 C------------------------------------------
 C       DT_DC for thick-shell 
 C-----------------------------------------------
@@ -6937,6 +6938,8 @@ C-----------------------------------------------
       END IF
 
       IF (IMON>0) CALL STOPTIME(7,1)
+      CALL PYTHON_UPDATE_GLOBALS(A=A,V=V,AR=AR,VR=VR)
+
 C------------------------------
 C         GRAVITE / ACCEL. BASE
 C------------------------------
@@ -8403,6 +8406,7 @@ C------------
       ENDIF
 C ---------------------------------
       CALL PYTHON_UPDATE_GLOBALS(TT,DT2)
+
 C ---------------------------------
 C----------------------------------
 C       IMPLICITE SOLVER
@@ -8605,6 +8609,8 @@ C----------------------------------------------------------------
             ENDIF
           ENDIF
         ENDIF
+c     CALL PYTHON_UPDATE_GLOBALS(TT,DT2V)
+
 C------------------------------------------
 C         SYNCHRONISATION SUR V TT ET NCYCLE (implicite)
 C----------------------------
@@ -8780,7 +8786,7 @@ C===============================================================================
         ENDIF
       ENDIF
 
-
+      CALL PYTHON_UPDATE_GLOBALS(X= X, D=D, DR=DR)
 C========================================================================================
 C                                   NON PARALLEL SECTION (SMP)
 C========================================================================================
@@ -8798,9 +8804,6 @@ c
 C
           IF (NSPMD > 1)       ! exchange ENRTAG
      .      CALL SPMD_CRK_ADV(IAD_ELEM ,FR_ELEM ,INOD_CRK ,ENRTAG)
-c         /---------------/
-          CALL MY_BARRIER
-c         /---------------/
 
 C========================================================================================
 C                                   PARALLEL SECTION (SMP)
@@ -8815,9 +8818,6 @@ c         USE ENRTAG => set positive enrichments
      .                   NODENR   ,ENRTAG   ,NODLEVXF   ,PROCNE_CRK    )
 !$OMP END PARALLEL
 
-c         /---------------/
-          CALL MY_BARRIER
-c         /---------------/
 c         set TAGXP after updating enrichments
           CALL UPXFEM_TAGXP(XFEM_TAB,
      .         IPARG        ,IXC        ,NGROUC      ,IGROUC  ,IXTG    ,
@@ -8835,9 +8835,7 @@ c         update velocities of phantom elements
      .                     X        ,V        ,VR       ,A        ,AR       ,
      .                     ITAB     )
 !$OMP END PARALLEL
-c         /---------------/
-          CALL MY_BARRIER
-c         /---------------/
+
 
 C========================================================================================
 C                                   NON PARALLEL SECTION (SMP)
@@ -8853,10 +8851,6 @@ c----------------------------------------------------------------------
            CALL SPMD_EXCH_CRKVEL(IAD_ELEM ,FR_ELEM ,INOD_CRK ,ITAB   ,
      .                           X        ,V       ,VR       )
          ENDIF
-C         /---------------/
-          CALL MY_BARRIER
-C         /---------------/
-
 C========================================================================================
 C                                   PARALLEL SECTION (SMP)
 C========================================================================================
