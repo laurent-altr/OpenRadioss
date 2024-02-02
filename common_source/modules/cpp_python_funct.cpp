@@ -39,6 +39,12 @@
 #include <dirent.h>
 #endif
 
+#ifdef MYREAL8 
+//double precision define my_real as double
+typedef double my_real;
+#else
+typedef float my_real;
+#endif
 // the maximum length of a line of code of python function
 #define max_line_length 500
 // the maximum number of lines of python function
@@ -61,6 +67,12 @@ typedef int (*T_PyTuple_SetItem)(PyObject *, int, PyObject *);
 typedef void (*T_Py_DecRef)(PyObject *);
 typedef double (*T_PyFloat_AsDouble)(PyObject *);
 typedef int (*T_PyDict_SetItemString)(PyObject *, const char *, PyObject *);
+//    load_function(handle, "PyErr_Fetch", PyErr_Fetch, python_initialized);
+typedef void (*T_PyErr_Fetch)(PyObject **, PyObject **, PyObject **);
+//    load_function(handle, "PyErr_Display", PyErr_Display, python_initialized);
+typedef void (*T_PyErr_Display)(PyObject *, PyObject *, PyObject *);
+//    load_function(handle, "PyErr_Occurred", PyErr_Occurred, python_initialized);
+typedef PyObject *(*T_PyErr_Occurred)();
 
 // Note on the python library used:
 //
@@ -109,7 +121,9 @@ T_PyTuple_SetItem PyTuple_SetItem;
 T_Py_DecRef Py_DecRef;
 T_PyFloat_AsDouble PyFloat_AsDouble;
 T_PyDict_SetItemString PyDict_SetItemString;
-
+T_PyErr_Fetch PyErr_Fetch;
+T_PyErr_Display PyErr_Display;
+T_PyErr_Occurred PyErr_Occurred;
 // global variables
 PyObject *pDict = nullptr;
 bool python_initialized = false;
@@ -131,24 +145,24 @@ void extract_uid(const std::string &input)
       //    Acceleration    AX_n,  AY_n,  AZ_n
       //    AccelerationR  ARX_n, ARY_n, ARZ_n
       // Regex pattern: non-alphanumeric or start of line, followed by A[XYZ] and underscore and numbers
-         std::cout<<"input: "<<input<<std::endl; 
+         //std::cout<<"input: "<<input<<std::endl; 
          std::regex pattern(R"((?:[^a-zA-Z0-9]|^)[ACDV][R]*[XYZ]_[0-9]+)");
      
-//         auto begin = std::sregex_iterator(input.begin(), input.end(), pattern);
-//         auto end = std::sregex_iterator();
-//   
-//         for (auto i = begin; i != end; ++i)
-//         {
-//             auto match = *i;
-//             std::string match_str = match.str();
-//             size_t underscore_pos = match_str.find('_');
-//             if (underscore_pos != std::string::npos)
-//             {
-//                 int number = std::stoi(match_str.substr(underscore_pos + 1));
-//                 nodes_uid.insert(number);
-//                 std::cout<<"number: "<<number<<std::endl;
-//             }
-//         }
+           auto begin = std::sregex_iterator(input.begin(), input.end(), pattern);
+           auto end = std::sregex_iterator();
+     
+           for (auto i = begin; i != end; ++i)
+           {
+               auto match = *i;
+               std::string match_str = match.str();
+               size_t underscore_pos = match_str.find('_');
+               if (underscore_pos != std::string::npos)
+               {
+                   int number = std::stoi(match_str.substr(underscore_pos + 1));
+                   nodes_uid.insert(number);
+                   std::cout<<"[PYTHON] uid found: "<<number<<std::endl;
+               }
+           }
 }
 
 // Here is the list of the function that are loaded from the Python library
@@ -171,6 +185,9 @@ void load_functions(T handle, bool &python_initialized)
     load_function(handle, "Py_DecRef", Py_DecRef, python_initialized);
     load_function(handle, "PyFloat_AsDouble", PyFloat_AsDouble, python_initialized);
     load_function(handle, "PyDict_SetItemString", PyDict_SetItemString, python_initialized);
+    load_function(handle, "PyErr_Fetch", PyErr_Fetch, python_initialized);
+    load_function(handle, "PyErr_Display", PyErr_Display, python_initialized);
+    load_function(handle, "PyErr_Occurred", PyErr_Occurred, python_initialized);
 }
 
 // call a python function with a list of arguments
@@ -187,9 +204,36 @@ PyObject *call_python_function(const char *func_name, double *args, int num_args
         }
         pValue = static_cast<PyObject *>(PyObject_CallObject(pFunc, pArgs));
         Py_DecRef(pArgs);
+
+        if (pValue != nullptr)
+        {
+            // Function executed successfully
+            // Add your code here to handle the result
+        }
+        else
+        {
+            //  convet func_name to a string    
+            std::string func_name_str(func_name);
+            std::cout << "ERROR in Python function "<<func_name_str<<": function execution failed" << std::endl;
+            if (PyErr_Occurred()) 
+            {
+                // Fetch the error
+                PyObject *pType, *pValue, *pTraceback;
+                PyErr_Fetch(&pType, &pValue, &pTraceback);
+          
+                // Print the error
+                PyErr_Display(pType, pValue, pTraceback);
+          
+                // Decrement reference counts for the error objects
+                Py_DecRef(pType);
+                Py_DecRef(pValue);
+                Py_DecRef(pTraceback);
+            }
+        }
+
         return pValue;
     }
-    std::cout << "ERROR in Python function: cannot call function:" << func_name << std::endl;
+    std::cout << "ERROR in Python function: cannot call function: " << func_name << std::endl;
     return nullptr;
 }
 
@@ -462,6 +506,54 @@ extern "C"
         PyRun_SimpleString(code);
     }
 
+    void cpp_python_initiazlize_global_variables()
+    {
+        if (!python_initialized)
+        {
+            return;
+        }
+        // initialize TIME and DT to 0
+
+        PyObject *py_TIME = static_cast<PyObject *>(PyFloat_FromDouble(0.0));
+        PyObject *py_DT = static_cast<PyObject *>(PyFloat_FromDouble(0.0));
+        PyDict_SetItemString(pDict, "TIME", py_TIME);
+        PyDict_SetItemString(pDict, "DT", py_DT);
+
+        // loop over the set of nodes
+        for (auto node_uid : nodes_uid)
+        {
+            std::string entity_names[] = {"C", "D", "V", "A", "VR", "AR", "DR"};
+            for (auto name : entity_names)
+            {
+                const double x_values = static_cast<double>(1);
+                const double y_values = static_cast<double>(1);
+                const double z_values = static_cast<double>(1);
+                PyObject *py_x_values = static_cast<PyObject *>(PyFloat_FromDouble(x_values));
+                PyObject *py_y_values = static_cast<PyObject *>(PyFloat_FromDouble(y_values));
+                PyObject *py_z_values = static_cast<PyObject *>(PyFloat_FromDouble(z_values));
+                if (!py_x_values || !py_y_values || !py_z_values)
+                {
+                    std::cout << "ERROR: Failed to create Python objects from C++ doubles." << std::endl;
+                    return;
+                }
+                std::string x_name = name + "X_" + std::to_string(node_uid);
+                std::string y_name = name + "Y_" + std::to_string(node_uid);
+                std::string z_name = name + "Z_" + std::to_string(node_uid);
+                // std::cout<<" write to python: "<<x_name<<" "<<y_name<<" "<<z_name<<std::endl;
+                PyDict_SetItemString(pDict, x_name.c_str(), py_x_values);
+                PyDict_SetItemString(pDict, y_name.c_str(), py_y_values);
+                PyDict_SetItemString(pDict, z_name.c_str(), py_z_values);
+                // Release the Python objects
+                if (py_x_values != nullptr)
+                    Py_DecRef(py_x_values);
+                if (py_y_values != nullptr)
+                    Py_DecRef(py_y_values);
+                if (py_z_values != nullptr)
+                    Py_DecRef(py_z_values);
+            }
+        }
+    }
+
     // register a function in the python dictionary
     void cpp_python_register_function(char *name, char code[], int num_lines)
     {
@@ -509,6 +601,8 @@ extern "C"
         }
         if (python_initialized)
         {
+            // initialize the global variables found in the python function
+            cpp_python_initiazlize_global_variables();
             python_execute_code(function_code.str());
         }
         else
@@ -556,7 +650,7 @@ extern "C"
         //        std::cout << "Function exists? " << *error << std::endl;
     }
 
-    void cpp_python_update_time(double TIME, double DT)
+    void cpp_python_update_time(my_real TIME, my_real DT)
     {
         if (!python_initialized)
         {
@@ -569,10 +663,12 @@ extern "C"
             std::cerr << "ERROR: Python main module dictionary not initialized." << std::endl;
             return;
         }
-
+        // donvert TIME and DT to double precision in TIME2 and DT2
+        double TIME2 = static_cast<double>(TIME);
+        double DT2 = static_cast<double>(DT);
         // Convert C++ doubles to Python objects
-        PyObject *py_TIME = static_cast<PyObject *>(PyFloat_FromDouble(TIME));
-        PyObject *py_DT = static_cast<PyObject *>(PyFloat_FromDouble(DT));
+        PyObject *py_TIME = static_cast<PyObject *>(PyFloat_FromDouble(TIME2));
+        PyObject *py_DT = static_cast<PyObject *>(PyFloat_FromDouble(DT2));
 
         if (!py_TIME || !py_DT)
         {
@@ -620,6 +716,8 @@ extern "C"
     // itab(i) = uid of node local node i
     void cpp_python_create_node_mapping(int *itab, int *num_nodes)
     {
+        // print number of nodes and python_initialized
+        std::cout << "Number of nodes: " << *num_nodes << " python_initialized" << python_initialized << std::endl;
         if (python_initialized)
         {
             // loop over the set
@@ -645,7 +743,51 @@ extern "C"
         }
     }
 
-} // extern "C"
+    // values is an array of size (3*numnod) containing the values of the nodal entities
+    void cpp_python_update_nodal_entity(int numnod, int name_len, char *name, my_real *values)
+    {
+        if(!python_initialized)
+        {
+            return;
+        }
+        double x_values, y_values, z_values;
+        // loop over the map nodes_uid_to_local_id
+        for(auto it = nodes_uid_to_local_id.begin(); it != nodes_uid_to_local_id.end(); ++it)
+        {
+            int node_uid = it->first;
+            int local_id = it->second;
+            x_values = static_cast<double>(values[3 * local_id]);
+            y_values = static_cast<double>(values[3 * local_id + 1]);
+            z_values = static_cast<double>(values[3 * local_id + 2]);
+            PyObject *py_x_values = static_cast<PyObject *>(PyFloat_FromDouble(x_values));
+            PyObject *py_y_values = static_cast<PyObject *>(PyFloat_FromDouble(y_values));
+            PyObject *py_z_values = static_cast<PyObject *>(PyFloat_FromDouble(z_values));
+            if (!py_x_values || !py_y_values || !py_z_values)
+            {
+                std::cout<< "ERROR: Failed to create Python objects from C++ doubles." << std::endl;
+                return;
+            }
+            // Set the Python global variables in the main module's dictionary
+            std::string x_name = std::string(name) + "X_" + std::to_string(node_uid);
+            std::string y_name = std::string(name) + "Y_" + std::to_string(node_uid);
+            std::string z_name = std::string(name) + "Z_" + std::to_string(node_uid);
+            //std::cout<<" write to python: "<<x_name<<" "<<y_name<<" "<<z_name<<std::endl;
+            PyDict_SetItemString(pDict, x_name.c_str(), py_x_values);
+            PyDict_SetItemString(pDict, y_name.c_str(), py_y_values);
+            PyDict_SetItemString(pDict, z_name.c_str(), py_z_values);
+            // Release the Python objects
+            if (py_x_values != nullptr)
+                Py_DecRef(py_x_values);
+            if (py_y_values != nullptr)
+                Py_DecRef(py_y_values);
+            if (py_z_values != nullptr)
+                Py_DecRef(py_z_values);
+        }
+    }
+
+    // initialize the global variables found in the python function
+
+    } // extern "C"
 
 #else
 // dummy functions
@@ -682,8 +824,6 @@ extern "C"
     // return the list of nodes (user ids) that are used in the python functions
     void cpp_python_get_nodes(int *nodes_uid_array){}
     void cpp_python_create_node_mapping(int *itab, int *num_nodes){}
-
-
 
 }
 

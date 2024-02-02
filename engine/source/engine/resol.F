@@ -2947,7 +2947,8 @@ C First: try with reduced bounding box
         CALL ENGINE_USER_INITIALIZE(NSPMD_USER,NTASK_USER,ISPMD_USER)
       ENDIF
       ! ----------------------
-      CALL PYTHON_UPDATE_GLOBALS(TT,DT2,X=X,A=A,V=V)
+      CALL PYTHON_UPDATE_TIME(TT,DT2)
+      CALL PYTHON_UPDATE_NODAL_ENTITIES(NUMNOD, X=X,A=A,V=V,D=D,DR=DR,VR=VR)
 C=======================================================================
 
 C----------------------------------------
@@ -6938,7 +6939,7 @@ C-----------------------------------------------
       END IF
 
       IF (IMON>0) CALL STOPTIME(7,1)
-      CALL PYTHON_UPDATE_GLOBALS(A=A,V=V,AR=AR,VR=VR)
+      CALL PYTHON_UPDATE_NODAL_ENTITIES(NUMNOD,A=A,V=V,AR=AR,VR=VR)
 
 C------------------------------
 C         GRAVITE / ACCEL. BASE
@@ -8405,7 +8406,7 @@ C------------
        ENDIF
       ENDIF
 C ---------------------------------
-      CALL PYTHON_UPDATE_GLOBALS(TT,DT2)
+      CALL PYTHON_UPDATE_TIME(TT,DT2)
 
 C ---------------------------------
 C----------------------------------
@@ -8786,7 +8787,7 @@ C===============================================================================
         ENDIF
       ENDIF
 
-      CALL PYTHON_UPDATE_GLOBALS(X= X, D=D, DR=DR)
+      CALL PYTHON_UPDATE_NODAL_ENTITIES(NUMNOD,X= X, D=D, DR=DR)
 C========================================================================================
 C                                   NON PARALLEL SECTION (SMP)
 C========================================================================================

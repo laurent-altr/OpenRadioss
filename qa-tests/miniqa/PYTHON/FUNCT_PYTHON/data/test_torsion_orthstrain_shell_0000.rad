@@ -2172,7 +2172,8 @@ New PROP 1
 #---1----|----2----|----3----|----4----|----5----|----6----|----7----|----8----|----9----|---10----|
 /FUNCT_PYTHON/3
 def myfun2(x):
-    print(f"TIME: {TIME:.16f}, DT: {DT:.16f}")
+    #print(f"TIME: {TIME:.16f}, DT: {DT:.16f}")
+    #print(f"CX_100: {CX_100:16f}")
     return x
 
 /FUNCT_PYTHON/1

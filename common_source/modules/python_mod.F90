@@ -86,10 +86,27 @@
 
           subroutine python_update_time(time,dt) bind(c, name="cpp_python_update_time")
             use iso_c_binding
+#ifdef MYREAL8
             real(kind = c_double), value, intent(in) :: time
             real(kind = c_double), value, intent(in) :: dt
+#else
+            real(kind = c_float), value, intent(in) :: time
+            real(kind = c_float), value, intent(in) :: dt
+#endif
           end subroutine python_update_time
 
+          !interface for    void cpp_python_update_nodal_entities(char *name, int len_name, my_real *values)
+          subroutine python_set_node_values(numnod, name_len, name, val) bind(c, name="cpp_python_update_nodal_entity")
+            use iso_c_binding
+            integer(kind=c_int), value, intent(in) :: numnod
+            integer(kind=c_int), value, intent(in) :: name_len
+            character(kind=c_char), dimension(name_len), intent(in) :: name
+#ifdef MYREAL8
+            real(kind=c_double), dimension(3,numnod), intent(in) :: val
+#else
+            real(kind=c_float), dimension(3,numnod), intent(in) :: val
+#endif
+          end subroutine python_set_node_values
 
           subroutine python_get_number_of_nodes(number_of_nodes) bind(c, name="cpp_python_get_number_of_nodes")
             use iso_c_binding
@@ -320,6 +337,7 @@
             call python_register_function(name, code, py%functs(n)%num_lines)
           end do
           ! creates a mapping between the global node ids and the local node ids
+          write(6,*) "python create node mapping"
           call python_create_node_mapping(itab, numnod)
 
         end subroutine
@@ -439,7 +457,7 @@
         end subroutine
 
 !! \brief update variables known by python functions
-        subroutine python_update_globals(tt, dt2, X, A, D, DR, V, VR, AR)
+        subroutine python_update_nodal_entities(numnod,X, A, D, DR, V, VR, AR)
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                     Module
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -455,46 +473,33 @@
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                     Arguments
 ! ----------------------------------------------------------------------------------------------------------------------
-          my_real, optional,                  intent(in) :: tt !< the current time
-          my_real, optional,                  intent(in) :: dt2 !< the time step
-          my_real, optional,  dimension(3,*), intent(in) :: X !< the coordinates
-          my_real, optional,  dimension(3,*), intent(in) :: A !< the acceleration
-          my_real, optional,  dimension(3,*), intent(in) :: D !< the displacement
-          my_real, optional,  dimension(3,*), intent(in) :: DR !< the rotational? relative? displacement
-          my_real, optional,  dimension(3,*), intent(in) :: V !< the velocity
-          my_real, optional,  dimension(3,*), intent(in) :: VR !< the rotational? relative? velocity
-          my_real, optional,  dimension(3,*), intent(in) :: AR !< the acceleration
+          integer,                                 intent(in) :: numnod !< the number of nodes
+          my_real, optional,  dimension(3,numnod), intent(in) :: X !< the coordinates
+          my_real, optional,  dimension(3,numnod), intent(in) :: A !< the acceleration
+          my_real, optional,  dimension(3,numnod), intent(in) :: D !< the displacement
+          my_real, optional,  dimension(3,numnod), intent(in) :: DR !< the rotational? relative? displacement
+          my_real, optional,  dimension(3,numnod), intent(in) :: V !< the velocity
+          my_real, optional,  dimension(3,numnod), intent(in) :: VR !< the rotational? relative? velocity
+          my_real, optional,  dimension(3,numnod), intent(in) :: AR !< the acceleration
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Local variables
 ! ----------------------------------------------------------------------------------------------------------------------
-          real(kind=c_double)                           :: time, dt
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                      Body
 ! ----------------------------------------------------------------------------------------------------------------------
-          if(present(tt)) then
-            time = tt
-          else
-            time = 0.0
-          endif
-          if(present(dt2)) then
-            dt = dt2
-          else
-            dt = 0.0
-          endif
-          if(present(tt) .and. present(dt2)) call python_update_time(time, dt)
 
-          if(present(X)) call python_update_variables("X",1, X)
-          if(present(A)) call python_update_variables("A",1, A)
-          if(present(D)) call python_update_variables("D",1, D)
-          if(present(DR)) call python_update_variables("DR",2, DR)
-          if(present(V)) call python_update_variables("V",1, V)
-          if(present(VR)) call python_update_variables("VR",2, VR)
-          if(present(AR)) call python_update_variables("AR",2, AR)
+          if(present(X))  call python_update_nodal_entity(numnod,"C",1, X)
+          if(present(A))  call python_update_nodal_entity(numnod,"A",1, A)
+          if(present(D))  call python_update_nodal_entity(numnod,"D",1, D)
+          if(present(DR)) call python_update_nodal_entity(numnod,"DR",2, DR)
+          if(present(V))  call python_update_nodal_entity(numnod,"V",1, V)
+          if(present(VR)) call python_update_nodal_entity(numnod,"VR",2, VR)
+          if(present(AR)) call python_update_nodal_entity(numnod,"AR",2, AR)
 
         end subroutine
 
 !! \brief update variables known by python functions
-        subroutine python_update_variables(name, name_len, variable)
+        subroutine python_update_nodal_entity(numnod, name, name_len, val)
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                     Module
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -510,17 +515,20 @@
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                     Arguments
 ! ----------------------------------------------------------------------------------------------------------------------
-          integer,                              intent(in) :: name_len !< the length of the name
-          character(kind=c_char), dimension(*), intent(in) :: name      !< the name of the variable
-          my_real, dimension(3,*)             , intent(in) :: variable  !< the variable
+          integer,                                     intent(in) :: numnod !< the number of nodes
+          integer,                                     intent(in) :: name_len !< the length of the name
+          character(kind=c_char), dimension(name_len), intent(in) :: name      !< the name of the variable
+          my_real, dimension(3,numnod),                intent(in) :: val !< the values
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Local variables
 ! ----------------------------------------------------------------------------------------------------------------------
-          real(kind=c_double)                           :: value
+          character(kind=c_char), dimension(name_len+1)        :: temp_name
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                      Body
 ! ----------------------------------------------------------------------------------------------------------------------
-          write(6,*) "python_update_variables: name = ", name(:name_len) , " variable = ", variable(1,1)
+          temp_name(1:name_len) = name
+          temp_name(name_len+1:name_len+1) = c_null_char
+          call python_set_node_values(numnod, name_len, temp_name, val)
         end subroutine
 
 
