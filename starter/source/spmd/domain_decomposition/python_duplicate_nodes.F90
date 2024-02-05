@@ -46,7 +46,7 @@
 ! ----------------------------------------------------------------------------------------------------------------------
 
         call python_get_number_of_nodes(number_of_nodes_in_python)
-        write(6,*) "number of nodes = ", number_of_nodes_in_python, " numnod = ", numnod
+        !write(6,*) "number of nodes = ", number_of_nodes_in_python, " numnod = ", numnod
         allocate(nodes_global_ids(number_of_nodes_in_python))
         call python_get_nodes(nodes_global_ids)
 

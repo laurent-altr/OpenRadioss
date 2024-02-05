@@ -160,7 +160,7 @@ void extract_uid(const std::string &input)
                {
                    int number = std::stoi(match_str.substr(underscore_pos + 1));
                    nodes_uid.insert(number);
-                   std::cout<<"[PYTHON] uid found: "<<number<<std::endl;
+                   //std::cout<<"[PYTHON] uid found: "<<number<<std::endl;
                }
            }
 }
