@@ -62,7 +62,6 @@ C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
 #include      "implicit_f.inc"
-#include      "comlock.inc"
 C-----------------------------------------------
 C   G l o b a l   P a r a m e t e r s
 C-----------------------------------------------
@@ -228,29 +227,42 @@ c     7               RIGE  ,FCONT,H3D_DATA,KNOTLOCPC,KNOTLOCEL)
 C
       IF(ANIM_V(4)+OUTP_V(4)+H3D_DATA%N_VECT_CONT >0)THEN
         IF (INCONV==1) THEN
-#include "lockon.inc"
           DO I=1,JLT
+!$omp atomic
             FCONT(1,IX1(I)) =FCONT(1,IX1(I)) + FX1(I)
+!$omp atomic
             FCONT(2,IX1(I)) =FCONT(2,IX1(I)) + FY1(I)
+!$omp atomic
             FCONT(3,IX1(I)) =FCONT(3,IX1(I)) + FZ1(I)
+!$omp atomic
             FCONT(1,IX2(I)) =FCONT(1,IX2(I)) + FX2(I)
+!$omp atomic
             FCONT(2,IX2(I)) =FCONT(2,IX2(I)) + FY2(I)
+!$omp atomic
             FCONT(3,IX2(I)) =FCONT(3,IX2(I)) + FZ2(I)
+!$omp atomic
             FCONT(1,IX3(I)) =FCONT(1,IX3(I)) + FX3(I)
+!$omp atomic
             FCONT(2,IX3(I)) =FCONT(2,IX3(I)) + FY3(I)
+!$omp atomic
             FCONT(3,IX3(I)) =FCONT(3,IX3(I)) + FZ3(I)
+!$omp atomic
             FCONT(1,IX4(I)) =FCONT(1,IX4(I)) + FX4(I)
+!$omp atomic
             FCONT(2,IX4(I)) =FCONT(2,IX4(I)) + FY4(I)
+!$omp atomic
             FCONT(3,IX4(I)) =FCONT(3,IX4(I)) + FZ4(I)
             JG = NSVG(I)
             IF(JG>0) THEN
 C en SPMD : traitement a refaire apres reception noeud remote si JG < 0
+!$omp atomic
               FCONT(1,JG)=FCONT(1,JG)- FXI(I)
+!$omp atomic
               FCONT(2,JG)=FCONT(2,JG)- FYI(I)
+!$omp atomic
               FCONT(3,JG)=FCONT(3,JG)- FZI(I)
             ENDIF
           ENDDO
-#include "lockoff.inc"
         END IF !(INCONV==1) THEN
       ENDIF
 C-----------------------------------------------------
@@ -263,41 +275,54 @@ C-----------------------------------------------------
             DO J=1,NBINTER
               IF(NSTRF(K1S)==NOINT)THEN
                 IF(ISECUT/=0)THEN
-#include "lockon.inc"
                   DO K=1,JLT
 C attention aux signes pour le cumul des efforts
 C a rendre conforme avec CFORC3
                     IF(SECFCUM(4,IX1(K),I)==1.)THEN
+!$omp atomic
                       SECFCUM(1,IX1(K),I)=SECFCUM(1,IX1(K),I)-FX1(K)
+!$omp atomic
                       SECFCUM(2,IX1(K),I)=SECFCUM(2,IX1(K),I)-FY1(K)
+!$omp atomic
                       SECFCUM(3,IX1(K),I)=SECFCUM(3,IX1(K),I)-FZ1(K)
                     ENDIF
                     IF(SECFCUM(4,IX2(K),I)==1.)THEN
+!$omp atomic
                       SECFCUM(1,IX2(K),I)=SECFCUM(1,IX2(K),I)-FX2(K)
+!$omp atomic
                       SECFCUM(2,IX2(K),I)=SECFCUM(2,IX2(K),I)-FY2(K)
+!$omp atomic
                       SECFCUM(3,IX2(K),I)=SECFCUM(3,IX2(K),I)-FZ2(K)
                     ENDIF
                     IF(SECFCUM(4,IX3(K),I)==1.)THEN
+!$omp atomic
                       SECFCUM(1,IX3(K),I)=SECFCUM(1,IX3(K),I)-FX3(K)
+!$omp atomic
                       SECFCUM(2,IX3(K),I)=SECFCUM(2,IX3(K),I)-FY3(K)
+!$omp atomic
                       SECFCUM(3,IX3(K),I)=SECFCUM(3,IX3(K),I)-FZ3(K)
                     ENDIF
                     IF(SECFCUM(4,IX4(K),I)==1.)THEN
+!$omp atomic
                       SECFCUM(1,IX4(K),I)=SECFCUM(1,IX4(K),I)-FX4(K)
+!$omp atomic
                       SECFCUM(2,IX4(K),I)=SECFCUM(2,IX4(K),I)-FY4(K)
+!$omp atomic
                       SECFCUM(3,IX4(K),I)=SECFCUM(3,IX4(K),I)-FZ4(K)
                     ENDIF
                     JG = NSVG(K)
                     IF(JG>0) THEN
 C en SPMD : traitement a refaire apres reception noeud remote si JG < 0
                       IF(SECFCUM(4,JG,I)==1.)THEN
+!$omp atomic
                         SECFCUM(1,JG,I)=SECFCUM(1,JG,I)+FXI(K)
+!$omp atomic
                         SECFCUM(2,JG,I)=SECFCUM(2,JG,I)+FYI(K)
+!$omp atomic
                         SECFCUM(3,JG,I)=SECFCUM(3,JG,I)+FZI(K)
                       ENDIF
                     ENDIF
                   ENDDO
-#include "lockoff.inc"
                 ENDIF
 C +fsav(section)
               ENDIF
@@ -1150,7 +1175,6 @@ C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
 #include      "implicit_f.inc"
-#include      "comlock.inc"
 C-----------------------------------------------
 C   G l o b a l   P a r a m e t e r s
 C-----------------------------------------------
@@ -1207,15 +1231,12 @@ C
         ENDIF
       ENDDO
 C
-#include "lockon.inc"
+!$omp critical
       NISKYL = NISKY
       NISKY = NISKY + NISKYL1 + IGP
       NISKYFIL = NISKYFI
       NISKYFI = NISKYFI + IGM
-      !!debug
-      !I0 = NISKYL+1
-#include "lockoff.inc"
-C
+!$omp end critical
       IF (NISKYL+NISKYL1+IGP > LSKYI) THEN
         CALL ANCMSG(MSGID=26,ANMODE=ANINFO)
         CALL ARRET(2)
@@ -1432,7 +1453,6 @@ C
         ENDIF
       ENDIF
 C
-!#include "lockon.inc"
 !      DO i = 1,jlt
 !        WRITE(914,'(1X,I5,I5,3(1X,Z20))')I,NSVG(I),FXI(I),FYI(I),FZI(I)
 !        WRITE(914,'(1X,I5,I5,3(1X,Z20))')I,IX1(I),FX1(I),FY1(I),FZ1(I)
@@ -1440,7 +1460,6 @@ C
 !        WRITE(914,'(1X,I5,I5,3(1X,Z20))')I,IX3(I),FX3(I),FY3(I),FZ3(I)
 !        WRITE(914,'(1X,I5,I5,3(1X,Z20))')I,IX4(I),FX4(I),FY4(I),FZ4(I)
 !      enddo
-!#include "lockoff.inc"
 C
       RETURN
       END
@@ -1476,7 +1495,6 @@ C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
 #include      "implicit_f.inc"
-#include      "comlock.inc"
 C-----------------------------------------------
 C   G l o b a l   P a r a m e t e r s
 C-----------------------------------------------
@@ -1535,13 +1553,12 @@ C
           IGM = IGM+1
         ENDIF
       ENDDO
-C
-#include "lockon.inc"
+!$omp critical
       NISKYL = NISKY
       NISKY = NISKY + NISKYL1 + IGP
       NISKYFIL = NISKYFI
       NISKYFI = NISKYFI + IGM
-#include "lockoff.inc"
+!$omp end critical	
 C
       IF (NISKYL+NISKYL1+IGP > LSKYI) THEN
         CALL ANCMSG(MSGID=26,ANMODE=ANINFO)

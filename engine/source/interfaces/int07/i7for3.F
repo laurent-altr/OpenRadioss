@@ -1479,16 +1479,21 @@ C      if type7 sym of type19 opposite sign for normal force -> forc_sign = -1
         FSAV10=FSAV10+ABS(IMPZ)
         FSAV11=FSAV11+ABS(FNI(I))*DT12
       ENDDO
-#include "lockon.inc"
+!$omp atomic
       FSAV(1)=FSAV(1)+FSAV1
+!$omp atomic
       FSAV(2)=FSAV(2)+FSAV2
+!$omp atomic
       FSAV(3)=FSAV(3)+FSAV3
+!$omp atomic
       FSAV(8)=FSAV(8)+FSAV8
+!$omp atomic
       FSAV(9)=FSAV(9)+FSAV9
+!$omp atomic
       FSAV(10)=FSAV(10)+FSAV10
+!$omp atomic
       FSAV(11)=FSAV(11)+FSAV11
 C
-#include "lockoff.inc"
 C
       IF(ISENSINT(1)/=0) THEN
         DO I=1,JLT
@@ -1503,25 +1508,39 @@ C---------------------------------
      .              (MANIM>=4.AND.MANIM<=15).OR.H3D_DATA%MH3D/=0))
      .   .OR.H3D_DATA%N_VECT_PCONT_MAX>0)THEN
         IF (INCONV==1) THEN
-#include "lockon.inc"
           DO I=1,JLT
+  !$OMP ATOMIC
             FNCONT(1,IX1(I)) =FNCONT(1,IX1(I)) + FXI(I)*H1(I)
+  !$OMP ATOMIC
             FNCONT(2,IX1(I)) =FNCONT(2,IX1(I)) + FYI(I)*H1(I)
+  !$OMP ATOMIC
             FNCONT(3,IX1(I)) =FNCONT(3,IX1(I)) + FZI(I)*H1(I)
+  !$OMP ATOMIC
             FNCONT(1,IX2(I)) =FNCONT(1,IX2(I)) + FXI(I)*H2(I)
+  !$OMP ATOMIC
             FNCONT(2,IX2(I)) =FNCONT(2,IX2(I)) + FYI(I)*H2(I)
+  !$OMP ATOMIC
             FNCONT(3,IX2(I)) =FNCONT(3,IX2(I)) + FZI(I)*H2(I)
+  !$OMP ATOMIC
             FNCONT(1,IX3(I)) =FNCONT(1,IX3(I)) + FXI(I)*H3(I)
+  !$OMP ATOMIC
             FNCONT(2,IX3(I)) =FNCONT(2,IX3(I)) + FYI(I)*H3(I)
+  !$OMP ATOMIC
             FNCONT(3,IX3(I)) =FNCONT(3,IX3(I)) + FZI(I)*H3(I)
+  !$OMP ATOMIC
             FNCONT(1,IX4(I)) =FNCONT(1,IX4(I)) + FXI(I)*H4(I)
+  !$OMP ATOMIC
             FNCONT(2,IX4(I)) =FNCONT(2,IX4(I)) + FYI(I)*H4(I)
+  !$OMP ATOMIC
             FNCONT(3,IX4(I)) =FNCONT(3,IX4(I)) + FZI(I)*H4(I)
             JG = NSVG(I)
             IF(JG>0) THEN
 C en SPMD : traitement a refaire apres reception noeud remote si JG < 0
+  !$OMP ATOMIC
               FNCONT(1,JG)=FNCONT(1,JG)- FXI(I)
+  !$OMP ATOMIC
               FNCONT(2,JG)=FNCONT(2,JG)- FYI(I)
+  !$OMP ATOMIC
               FNCONT(3,JG)=FNCONT(3,JG)- FZI(I)
             ELSE ! cas noeud remote en SPMD
               JG = -JG
@@ -1530,7 +1549,6 @@ C en SPMD : traitement a refaire apres reception noeud remote si JG < 0
               FNCONTI(NIN)%P(3,JG)=FNCONTI(NIN)%P(3,JG)-FZI(I)
             ENDIF
           ENDDO
-#include "lockoff.inc"
         END IF !(INCONV==1) THEN
       ENDIF
 C
@@ -3026,34 +3044,50 @@ C---------------------------------
      .              (MANIM>=4.AND.MANIM<=15).OR.H3D_DATA%MH3D/=0))
      .   .OR.H3D_DATA%N_VECT_PCONT_MAX>0)THEN
         IF (INCONV==1) THEN
-#include "lockon.inc"
           DO I=1,JLT
+!$omp atomic
             FTCONT(1,IX1(I)) =FTCONT(1,IX1(I)) + FXT(I)*H1(I)
+!$omp atomic
             FTCONT(2,IX1(I)) =FTCONT(2,IX1(I)) + FYT(I)*H1(I)
+!$omp atomic
             FTCONT(3,IX1(I)) =FTCONT(3,IX1(I)) + FZT(I)*H1(I)
+!$omp atomic
             FTCONT(1,IX2(I)) =FTCONT(1,IX2(I)) + FXT(I)*H2(I)
+!$omp atomic
             FTCONT(2,IX2(I)) =FTCONT(2,IX2(I)) + FYT(I)*H2(I)
+!$omp atomic
             FTCONT(3,IX2(I)) =FTCONT(3,IX2(I)) + FZT(I)*H2(I)
+!$omp atomic
             FTCONT(1,IX3(I)) =FTCONT(1,IX3(I)) + FXT(I)*H3(I)
+!$omp atomic
             FTCONT(2,IX3(I)) =FTCONT(2,IX3(I)) + FYT(I)*H3(I)
+!$omp atomic
             FTCONT(3,IX3(I)) =FTCONT(3,IX3(I)) + FZT(I)*H3(I)
+!$omp atomic
             FTCONT(1,IX4(I)) =FTCONT(1,IX4(I)) + FXT(I)*H4(I)
+!$omp atomic
             FTCONT(2,IX4(I)) =FTCONT(2,IX4(I)) + FYT(I)*H4(I)
+!$omp atomic
             FTCONT(3,IX4(I)) =FTCONT(3,IX4(I)) + FZT(I)*H4(I)
             JG = NSVG(I)
             IF(JG>0) THEN
 C en SPMD : traitement a refaire apres reception noeud remote si JG < 0
+!$omp atomic
               FTCONT(1,JG)=FTCONT(1,JG)- FXT(I)
+!$omp atomic
               FTCONT(2,JG)=FTCONT(2,JG)- FYT(I)
+!$omp atomic
               FTCONT(3,JG)=FTCONT(3,JG)- FZT(I)
             ELSE ! cas noeud remote en SPMD
               JG = -JG
+!$omp atomic
               FTCONTI(NIN)%P(1,JG)=FTCONTI(NIN)%P(1,JG)-FXT(I)
+!$omp atomic
               FTCONTI(NIN)%P(2,JG)=FTCONTI(NIN)%P(2,JG)-FYT(I)
+!$omp atomic
               FTCONTI(NIN)%P(3,JG)=FTCONTI(NIN)%P(3,JG)-FZT(I)
             ENDIF
           ENDDO
-#include "lockoff.inc"
         END IF !(INCONV==1) THEN
       ENDIF
 C
@@ -3084,22 +3118,34 @@ C      if type7 sym of type19 opposite sign for tangential force -> forc_sign = 
         FSAV23=FSAV23+ZP(I)*IMPX-XP(I)*IMPZ
         FSAV24=FSAV24+XP(I)*IMPY-YP(I)*IMPX
       ENDDO
-#include "lockon.inc"
+!$omp atomic 
       FSAV(4) = FSAV(4) + FSAV4
+!$omp atomic
       FSAV(5) = FSAV(5) + FSAV5
+!$omp atomic
       FSAV(6) = FSAV(6) + FSAV6
+!$omp atomic
       FSAV(12) = FSAV(12) + FSAV12
+!$omp atomic
       FSAV(13) = FSAV(13) + FSAV13
+!$omp atomic
       FSAV(14) = FSAV(14) + FSAV14
+!$omp atomic
       FSAV(15) = FSAV(15) + FSAV15
+!$omp atomic
       FSAV(22) = FSAV(22) + FSAV22
+!$omp atomic
       FSAV(23) = FSAV(23) + FSAV23
+!$omp atomic
       FSAV(24) = FSAV(24) + FSAV24
+!$omp atomic update
       FSAV(25) = FSAV(25) + (FHEATS+FHEATM)*QFRICT
+!$omp atomic 
       FSAV(26) = FSAV(26) + ECONTT  ! ECONTTIED part is not added in CE_ELAST for the moment
+!$omp atomic update
       FSAV(27) = FSAV(27) + ECONVT- (FHEATS+FHEATM)*QFRICT
+!$omp atomic
       FSAV(28) = FSAV(28) + ECONTDT
-#include "lockoff.inc"
 C
       IF(ISENSINT(1)/=0) THEN
         DO I=1,JLT
@@ -3476,73 +3522,87 @@ C
             END IF
           END DO
         END IF
-#include "lockon.inc"
         DO JSUB=1,NISUB
           NSUB=LISUB(JSUB)
           DO J=1,15
+!$omp atomic
             FSAVSUB(J,NSUB)=FSAVSUB(J,NSUB)+FSAVSUB1(J,JSUB)
           END DO
+!$omp atomic	
           FSAVSUB(22,NSUB)=FSAVSUB(22,NSUB)+FSAVSUB1(22,JSUB)
+!$omp atomic
           FSAVSUB(23,NSUB)=FSAVSUB(23,NSUB)+FSAVSUB1(23,JSUB)
+!$omp atomic
           FSAVSUB(24,NSUB)=FSAVSUB(24,NSUB)+FSAVSUB1(24,JSUB)
         END DO
-#include "lockoff.inc"
       END IF
 C---------------------------------
-#include "lockon.inc"
       IF (INCONV==1) THEN
+!$omp atomic update
         ECONTV = ECONTV + ECONVT ! Frictional Energy
+!$omp atomic update
         ECONT  = ECONT + ECONTT  ! Elatic Energy
+!$omp atomic update
         ECONTD = ECONTD + ECONTDT ! Damping Energy
+!$omp atomic update
         ECONT_CUMU = ECONT_CUMU + ECONTTIED ! Elastic energy for tied contact : it is cumulated energy
       END IF !(INCONV==1) THEN
       IF (INTTH/=0) THEN
+!$omp atomic update
         QFRIC = QFRIC + (FHEATS+FHEATM)*QFRICT    ! FRICTIONAL HEAT ADDED TO INTERNAL ENERGY
+!$omp atomic update
         ECONTV = ECONTV - (FHEATS+FHEATM)*QFRICT  ! FRICTIONAL HEAT REMOVED FROM CONTACT ENERGY
       ENDIF
-#include "lockoff.inc"
 C---------------------------------
       IF(INTEREFRIC >0)THEN
         IF (INCONV==1) THEN
-#include "lockon.inc"
           DO I=1,JLT
             EFRIC_LM = HALF*EFRIC_L(I)
+!$omp atomic
             EFRIC(INTEREFRIC,IX1(I)) = EFRIC(INTEREFRIC,IX1(I)) + H1(I)*(EFRIC_LM-FHEATM*EFRICT(I))
+!$omp atomic
             EFRIC(INTEREFRIC,IX2(I)) = EFRIC(INTEREFRIC,IX2(I)) + H2(I)*(EFRIC_LM-FHEATM*EFRICT(I))
+!$omp atomic
             EFRIC(INTEREFRIC,IX3(I)) = EFRIC(INTEREFRIC,IX3(I)) + H3(I)*(EFRIC_LM-FHEATM*EFRICT(I))
+!$omp atomic
             EFRIC(INTEREFRIC,IX4(I)) = EFRIC(INTEREFRIC,IX4(I)) + H4(I)*(EFRIC_LM-FHEATM*EFRICT(I))
             JG = NSVG(I)
             EFRIC_LS = HALF*EFRIC_L(I)
             IF(JG>0) THEN
+!$omp atomic
               EFRIC(INTEREFRIC,JG) = EFRIC(INTEREFRIC,JG) + (EFRIC_LS-FHEATS*EFRICT(I))
             ELSE ! node remote
               JG = -JG
+!$omp atomic
               EFRICFI(NIN)%P(JG)=EFRICFI(NIN)%P(JG)+ (EFRIC_LS-FHEATS*EFRICT(I))
             ENDIF
           ENDDO
-#include "lockoff.inc"
         END IF !(INCONV==1) THEN
       ENDIF
 C---------------------------------
       IF(H3D_DATA%N_SCAL_CSE_FRIC >0)THEN
         IF (INCONV==1) THEN
-#include "lockon.inc"
           DO I=1,JLT
             EFRIC_LM = HALF*EFRIC_L(I)
+!$omp atomic
             EFRICG(IX1(I)) = EFRICG(IX1(I)) + H1(I)*(EFRIC_LM-FHEATM*EFRICT(I))
+!$omp atomic
             EFRICG(IX2(I)) = EFRICG(IX2(I)) + H2(I)*(EFRIC_LM-FHEATM*EFRICT(I))
+!$omp atomic
             EFRICG(IX3(I)) = EFRICG(IX3(I)) + H3(I)*(EFRIC_LM-FHEATM*EFRICT(I))
+!$omp atomic
             EFRICG(IX4(I)) = EFRICG(IX4(I)) + H4(I)*(EFRIC_LM-FHEATM*EFRICT(I))
             JG = NSVG(I)
             EFRIC_LS = HALF*EFRIC_L(I)
             IF(JG>0) THEN
+!$omp atomic
               EFRICG(JG) = EFRICG(JG) + (EFRIC_LS-FHEATS*EFRICT(I))
             ELSE ! node remote
               JG = -JG
+!$omp atomic
               EFRICGFI(NIN)%P(JG)=EFRICGFI(NIN)%P(JG)+ (EFRIC_LS-FHEATS*EFRICT(I))
             ENDIF
           ENDDO
-#include "lockoff.inc"
         END IF !(INCONV==1) THEN
       ENDIF
 C---------------------------------
@@ -4164,28 +4224,30 @@ C
       IF(IADM/=0)THEN
         DO I=1,JLT
           JG = NSVG(I)
-#include "lockon.inc"
           IF(JG>0) THEN
-C en SPMD : traitement a refaire apres reception noeud remote si JG < 0
+!$omp atomic
             RCONTACT(JG)=MIN(RCONTACT(JG),RCURVI(I))
           END IF
+!$omp atomic
           RCONTACT(IX1(I))=MIN(RCONTACT(IX1(I)),RCURVI(I))
+!$omp atomic
           RCONTACT(IX2(I))=MIN(RCONTACT(IX2(I)),RCURVI(I))
+!$omp atomic
           RCONTACT(IX3(I))=MIN(RCONTACT(IX3(I)),RCURVI(I))
+!$omp atomic
           RCONTACT(IX4(I))=MIN(RCONTACT(IX4(I)),RCURVI(I))
-#include "lockoff.inc"
         END DO
       END IF
       IF(IADM>=2)THEN
         DO I=1,JLT
           JG = NSVG(I)
-#include "lockon.inc"
           IF(JG>0) THEN
-C en SPMD : traitement a refaire apres reception noeud remote si JG < 0
+#include "lockon.inc"
             PCONTACT(JG)=MAX(PCONTACT(JG),PENE(I)/(PADM*GAPV(I)))
             ACONTACT(JG)=MIN(ACONTACT(JG),ANGLMI(I))
-          END IF
 #include "lockoff.inc"
+
+          END IF
         END DO
       END IF
 C

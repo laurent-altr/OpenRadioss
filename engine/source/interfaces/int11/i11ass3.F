@@ -56,7 +56,6 @@ C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
 #include      "implicit_f.inc"
-#include      "comlock.inc"
 C-----------------------------------------------
 C   G l o b a l   P a r a m e t e r s
 C-----------------------------------------------
@@ -167,24 +166,34 @@ C
 C
       IF(ANIM_V(4)+OUTP_V(4)+H3D_DATA%N_VECT_CONT >0)THEN
          IF (INCONV==1) THEN
-#include "lockon.inc"
            DO I=1,JLT
             IF(CS_LOC(I)<=NRTS) THEN
+!$omp atomic
               FCONT(1,N1(I)) =FCONT(1,N1(I)) + FX1(I)
+!$omp atomic
               FCONT(2,N1(I)) =FCONT(2,N1(I)) + FY1(I)
+!$omp atomic
               FCONT(3,N1(I)) =FCONT(3,N1(I)) + FZ1(I)
+!$omp atomic
               FCONT(1,N2(I)) =FCONT(1,N2(I)) + FX2(I)
+!$omp atomic
               FCONT(2,N2(I)) =FCONT(2,N2(I)) + FY2(I)
+!$omp atomic
               FCONT(3,N2(I)) =FCONT(3,N2(I)) + FZ2(I)
             END IF
+!$omp atomic
             FCONT(1,M1(I)) =FCONT(1,M1(I)) + FX3(I)
+!$omp atomic
             FCONT(2,M1(I)) =FCONT(2,M1(I)) + FY3(I)
+!$omp atomic
             FCONT(3,M1(I)) =FCONT(3,M1(I)) + FZ3(I)
+!$omp atomic
             FCONT(1,M2(I)) =FCONT(1,M2(I)) + FX4(I)
+!$omp atomic
             FCONT(2,M2(I)) =FCONT(2,M2(I)) + FY4(I)
+!$omp atomic
             FCONT(3,M2(I)) =FCONT(3,M2(I)) + FZ4(I)
            ENDDO
-#include "lockoff.inc"
          END IF !(INCONV==1) THEN
       ENDIF
 C
@@ -197,32 +206,42 @@ C
         DO J=1,NBINTER
          IF(NSTRF(K1S)==NOINT)THEN
            IF(ISECUT/=0)THEN
-#include "lockon.inc"
              DO K=1,JLT
               IF(CS_LOC(K)<=NRTS) THEN
                IF(SECFCUM(4,N1(K),I)==1.)THEN
+!$omp atomic
                 SECFCUM(1,N1(K),I)=SECFCUM(1,N1(K),I)-FX1(K)
+!$omp atomic
                 SECFCUM(2,N1(K),I)=SECFCUM(2,N1(K),I)-FY1(K)
+!$omp atomic
                 SECFCUM(3,N1(K),I)=SECFCUM(3,N1(K),I)-FZ1(K)
                ENDIF
                IF(SECFCUM(4,N2(K),I)==1.)THEN
+!$omp atomic
                 SECFCUM(1,N2(K),I)=SECFCUM(1,N2(K),I)-FX2(K)
+!$omp atomic
                 SECFCUM(2,N2(K),I)=SECFCUM(2,N2(K),I)-FY2(K)
+!$omp atomic
                 SECFCUM(3,N2(K),I)=SECFCUM(3,N2(K),I)-FZ2(K)
                ENDIF
               END IF
               IF(SECFCUM(4,M1(K),I)==1.)THEN
+!$omp atomic
                 SECFCUM(1,M1(K),I)=SECFCUM(1,M1(K),I)-FX3(K)
+!$omp atomic
                 SECFCUM(2,M1(K),I)=SECFCUM(2,M1(K),I)-FY3(K)
+!$omp atomic
                 SECFCUM(3,M1(K),I)=SECFCUM(3,M1(K),I)-FZ3(K)
               ENDIF
               IF(SECFCUM(4,M2(K),I)==1.)THEN
+!$omp atomic
                 SECFCUM(1,M2(K),I)=SECFCUM(1,M2(K),I)-FX4(K)
+!$omp atomic
                 SECFCUM(2,M2(K),I)=SECFCUM(2,M2(K),I)-FY4(K)
+!$omp atomic
                 SECFCUM(3,M2(K),I)=SECFCUM(3,M2(K),I)-FZ4(K)
               ENDIF
              ENDDO
-#include "lockoff.inc"
            ENDIF
 C +fsav(section)
          ENDIF
@@ -735,7 +754,6 @@ C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
 #include      "implicit_f.inc"
-#include      "comlock.inc"
 C-----------------------------------------------
 C   G l o b a l   P a r a m e t e r s
 C-----------------------------------------------
@@ -784,12 +802,12 @@ C
         ENDIF
       ENDDO   
      
-#include "lockon.inc"
+!$OMP CRITICAL
       NISKYL = NISKY
       NISKY = NISKY + NISKYL1 + IGP
       NISKYFIL = NISKYFI
       NISKYFI = NISKYFI + IGM
-#include "lockoff.inc"
+!$OMP END CRITICAL
 
       IF (NISKYL+NISKYL1+IGP > LSKYI) THEN
          CALL ANCMSG(MSGID=26,ANMODE=ANINFO_BLIND)   
@@ -1009,7 +1027,6 @@ C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
 #include      "implicit_f.inc"
-#include      "comlock.inc"
 C-----------------------------------------------
 C   G l o b a l   P a r a m e t e r s
 C-----------------------------------------------
@@ -1060,12 +1077,12 @@ C
         ENDIF
       ENDDO        
 
-#include "lockon.inc"
+!$OMP CRITICAL
       NISKYL = NISKY
       NISKY = NISKY + NISKYL1 + IGP
       NISKYFIL = NISKYFI
       NISKYFI = NISKYFI + IGM
-#include "lockoff.inc"
+!$OMP END CRITICAL
 C
       IF (NISKYL+NISKYL1+IGP > LSKYI) THEN
          CALL ANCMSG(MSGID=26,ANMODE=ANINFO_BLIND)

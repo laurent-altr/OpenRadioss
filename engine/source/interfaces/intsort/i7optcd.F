@@ -415,10 +415,10 @@ C
       ENDIF
 C
       IF(COUNT_CAND > 0 .OR. CT > 0) THEN
-#include "lockon.inc"
+!$omp atomic
         LSKYI_COUNT=LSKYI_COUNT+COUNT_CAND*5
+!$omp atomic
         COUNT_REMSLV(NIN)=COUNT_REMSLV(NIN)+CT 
-#include "lockoff.inc"
       ENDIF
 
       RETURN

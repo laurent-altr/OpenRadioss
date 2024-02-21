@@ -149,7 +149,8 @@ c provisoire
       LOGICAL DBG_type18_fvm
       SAVE IIX,IIY,IIZ
 C-----------------------------------------------
-      IF(ITASK == 0)THEN
+C     IF(ITASK == 0)THEN
+!$OMP SINGLE
         REMOTE_S_NODE = 0
         CPT_VOX0 = 0
         ALLOCATE(NEXT_NOD(NSN+NSNR),STAT=IERROR)
@@ -164,9 +165,9 @@ C-----------------------------------------------
      .        C1='(/INTER/TYPE7)')
           CALL ARRET(2)
         ENDIF
-      END IF
+!$OMP END SINGLE NOWAIT
+C     END IF
 
-      CALL MY_BARRIER !Barrier to wait init voxel and allocation NEX_NOD
 
 ! Phase initiale de construction de BPE et BPN deplacee de I7BUCE => I7TRI
 
@@ -203,6 +204,8 @@ C-----------------------------------------------
       IF(NSPMD>1.AND.(INACTI==5.OR.INACTI==6.OR.INACTI==7.OR.IFQ>0.OR.ITIED/=0)) THEN
         CALL SPMD_OLDNUMCD(RENUM,OLDNUM,ISZNSNR,NSNROLD)
       END IF
+
+      CALL MY_BARRIER !Barrier to wait init voxel and allocation NEXT_NOD
 
 C=======================================================================
 C 1   NODE CLUSTERING
@@ -308,22 +311,6 @@ C=======================================================================
           ENDIF
         ENDDO
       END IF !ITASK == 0
-
-      CALL MY_BARRIER ! Barrier to wait task0 treatment
-
-      IF(FIRST_TEST(NIN)) THEN
-!During the first sorting, we use the reduced box
-!If too many (>5 %) nodes are outside the reduced box
-!then the box is not reduced anymore
-        CALL MY_BARRIER
-        IF(ITASK == 0) THEN
-          IF(CPT_VOX0 > 5*(REMOTE_S_NODE + NSN)/100) TO_TRIM(NIN) = .FALSE.
-          FIRST_TEST(NIN) = .FALSE.
-        ENDIF
-        CALL MY_BARRIER
-      ENDIF
-
-
 C=======================================================================
 C 3   FACE RECOVERY AND ENUMERATION OF CANDIDATE COUPLES
 C=======================================================================
@@ -334,6 +321,9 @@ C=======================================================================
           TAGREMNODE(I) = 0
         ENDDO
       ENDIF
+
+      CALL MY_BARRIER ! Barrier to wait task0 treatment
+
       DO NE=1,NRTM
         IF(STF(NE) == ZERO)CYCLE ! on ne retient pas les facettes detruites
         IF(FLAGREMNODE == 2) THEN
@@ -600,6 +590,18 @@ C=======================================================================
       ENDIF
       IF(FLAGREMNODE == 2) THEN
         IF(ALLOCATED(TAGREMNODE)) DEALLOCATE(TAGREMNODE)
+      ENDIF
+
+      IF(FIRST_TEST(NIN)) THEN
+!During the first sorting, we use the reduced box
+!If too many (>5 %) nodes are outside the reduced box
+!then the box is not reduced anymore
+        CALL MY_BARRIER
+        IF(ITASK == 0) THEN
+          IF(CPT_VOX0 > 5*(REMOTE_S_NODE + NSN)/100) TO_TRIM(NIN) = .FALSE.
+          FIRST_TEST(NIN) = .FALSE.
+        ENDIF
+        CALL MY_BARRIER
       ENDIF
 
 
