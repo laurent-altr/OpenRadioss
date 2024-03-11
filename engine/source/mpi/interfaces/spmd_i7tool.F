@@ -5095,22 +5095,22 @@ C rajout partie edge
           IF (ITYP==24)THEN
               CALL READ_DB(TIME_SFI(I)%P(1),LENR)
           ELSEIF(ITYP==25)THEN
-              CALL READ_DB(TIME_SFI(I)%P(1),2*LENR)
+              IF(LENR > 0) CALL READ_DB(TIME_SFI(I)%P(1),2*LENR)
           END IF
           IF (ITYP==24.OR.ITYP==25)THEN
-              CALL READ_DB(SECND_FRFI(I)%P(1,1),6*LENR)
+              IF(LENR > 0) CALL READ_DB(SECND_FRFI(I)%P(1,1),6*LENR)
               IF(ITYP==24) THEN
                  CALL READ_DB(PENE_OLDFI(I)%P(1,1),5*LENR)
               ENDIF
               IF(ITYP==25) THEN
-                 CALL READ_DB(PENE_OLDFI(I)%P(1,1),8*LENR)
+                 IF(LENR > 0) CALL READ_DB(PENE_OLDFI(I)%P(1,1),8*LENR)
               ENDIF
-              CALL READ_DB(STIF_OLDFI(I)%P(1,1),2*LENR)
+              IF(LENR > 0) CALL READ_DB(STIF_OLDFI(I)%P(1,1),2*LENR)
               IF(IPARI(97,I) > 0) THEN
-                 CALL READ_DB(STIF_MSDT_FI(I)%P(1),LENR) ! stif based on mass and dt
+                 IF(LENR > 0) CALL READ_DB(STIF_MSDT_FI(I)%P(1),LENR) ! stif based on mass and dt
               ENDIF
               IF(PARAMETERS%INTCAREA > 0.AND.IPARI(36,I)>0) THEN
-                 CALL READ_DB(INTAREANFI(I)%P(1),LENR) ! Area of seconday node
+                 IF(LENR > 0) CALL READ_DB(INTAREANFI(I)%P(1),LENR) ! Area of seconday node
               ENDIF
           ENDIF  ! fin partie type 24 & 25
 C

@@ -818,10 +818,12 @@ c     .         lb(i,it1),lc(i,it1),lb(i,it1)+lc(i,it1)
               PENE_OLD(8,N) = ZN(I,SUBTRIA_N(I)) 
 c          write(*,*) 'XN YN ZN',  SUBTRIA_N(I),XN(I,IT),YN(I,IT),ZN(I,IT)
           ENDIF
+c         if(ITAB(nsvg(i)) == 2420439) then 
+c          write(6,'(A,2I10,3Z20)') "peneold31",SUBTRIA_N(i),IT,PENE_OLD(6:8,N) 
+c         endif
+
         ELSE
-          IRTLM_FI(NIN)%P(2,N-NSN) = IT+5*SUBTRIA(I)
-C         IRTLM_FI(NIN)%P(3,N-NSN) = CAND_E(I)
-C         IRTLM_FI(NIN)%P(4,N-NSN) = ISPMD+1
+          IRTLM_FI(NIN)%P(2,N-NSN) = IT+5*SUBTRIA(I) !help
           TIME_SFI(NIN)%P(2*(N-NSN-1)+1)   = DIST(I)
 C
 C         Condition for sliding :
@@ -844,10 +846,13 @@ c     .           itafi(nin)%p(n-nsn),itab(ix1(i)),itab(ix2(i)),itab(ix3(i)),ita
 c     .           itold,pent(i,itold),far(i,itold),
 c     .           it,pent(i,it1),far(i,it1)
           IF(IRTLM_FI(NIN)%P(2,N-NSN)  <= 0) THEN
-              PENE_OLDFI(NIN)%P(6,N-NSN) = XN(I,IT)
-              PENE_OLDFI(NIN)%P(7,N-NSN) = YN(I,IT)
-              PENE_OLDFI(NIN)%P(8,N-NSN) = ZN(I,IT)               
+              PENE_OLDFI(NIN)%P(6,N-NSN) = XN(I,SUBTRIA_N(I)) 
+              PENE_OLDFI(NIN)%P(7,N-NSN) = YN(I,SUBTRIA_N(I))
+              PENE_OLDFI(NIN)%P(8,N-NSN) = ZN(I,SUBTRIA_N(I)) 
           ENDIF
+c         if(itafi(nin)%p(n-nsn) == 2420439) then 
+c          write(6,'(A,2I10,3Z20)') "peneold31",SUBTRIA_N(i),IT,PENE_OLDFI(NIN)%P(6:8,N-NSN) 
+c         endif
         END IF
       END DO
 C-----

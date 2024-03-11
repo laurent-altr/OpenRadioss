@@ -394,9 +394,9 @@ C---------------------------------
       DO I=1,JLT
         IF(PENE(I) == ZERO)CYCLE
         ECONTT = ECONTT+HALF*STIF(I)*PENE(I)**2
-       if(itab(nsvg(i))==2420443.or.itab(ix1(i))==2420443.or.itab(ix2(i))==2420443.or.itab(ix3(i))==2420443.or.itab(ix4(i))==2420443) then
-       write(*,*) 'forc mx', NCYCLE,itab(nsvg(i)),itab(ix1(i)),itab(ix2(i)),itab(ix3(i)),itab(ix4(i)),STIF(I),PENE(I),HALF*STIF(I)*PENE(I)**2
-       endif
+C       if(itab(nsvg(i))==2420443.or.itab(ix1(i))==2420443.or.itab(ix2(i))==2420443.or.itab(ix3(i))==2420443.or.itab(ix4(i))==2420443) then
+C       write(*,*) 'forc mx', NCYCLE,itab(nsvg(i)),itab(ix1(i)),itab(ix2(i)),itab(ix3(i)),itab(ix4(i)),STIF(I),PENE(I),HALF*STIF(I)*PENE(I)**2
+C       endif
       END DO
 C---------------------------------
 C     DAMPING + FRIC
