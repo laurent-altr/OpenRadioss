@@ -207,9 +207,9 @@ C-----------------------------------------------
 C=======================================================================
 C 1   NODE CLUSTERING
 C=======================================================================
-      IF(ITASK==0.AND.TOTAL_NB_NRTM>0)THEN
+      IF(TOTAL_NB_NRTM>0)THEN
         !==========LAGRANGIAN and STAGGERED ALE==========!
-        TEST_V0 = FIRST_TEST(NIN)
+!$OMP DO SCHEDULE(GUIDED)
         DO I=1,NSN
           IIX(I)=0
           IIY(I)=0
@@ -230,14 +230,33 @@ C=======================================================================
           IIX(I)=MAX(1,2+MIN(NBX,IIX(I)))
           IIY(I)=MAX(1,2+MIN(NBY,IIY(I)))
           IIZ(I)=MAX(1,2+MIN(NBZ,IIZ(I)))
+        ENDDO
+!$OMP END DO NOWAIT
+!$OMP DO SCHEDULE(GUIDED)
+        DO J = 1, NSNR
+          IIX(NSN+J) = 0
+          IIY(NSN+J) = 0
+          IIZ(NSN+J) = 0
+          IF(XREM(1,J) < XMIN)  CYCLE
+          IF(XREM(1,J) > XMAX)  CYCLE
+          IF(XREM(2,J) < YMIN)  CYCLE
+          IF(XREM(2,J) > YMAX)  CYCLE
+          IF(XREM(3,J) < ZMIN)  CYCLE
+          IF(XREM(3,J) > ZMAX)  CYCLE
+          IIX(NSN+J)=INT(NBX*(XREM(1,J)-XMINB)/(XMAXB-XMINB))
+          IIY(NSN+J)=INT(NBY*(XREM(2,J)-YMINB)/(YMAXB-YMINB))
+          IIZ(NSN+J)=INT(NBZ*(XREM(3,J)-ZMINB)/(ZMAXB-ZMINB))
+          IIX(NSN+J)=MAX(1,2+MIN(NBX,IIX(NSN+J)))
+          IIY(NSN+J)=MAX(1,2+MIN(NBY,IIY(NSN+J)))
+          IIZ(NSN+J)=MAX(1,2+MIN(NBZ,IIZ(NSN+J)))
+        ENDDO 
+!$OMP END DO
+
+
+!$OMP SINGLE
+        DO I = 1, NSN
+          IF(IIX(I) == 0) CYCLE
           FIRST = VOXEL(IIX(I),IIY(I),IIZ(I))
-          IF(TEST_V0) THEN
-! count the number of SECONDARY nodes outiside the reduced box
-            IF(IIX(I) ==  1    .OR.  IIY(I) ==  1    .OR. IIZ(I) == 1 .AND.
-     .         IIX(I) ==  NBX+2 .OR. IIY(I) == NBY+2 .OR. IIZ(I) == NBZ+2) THEN
-              CPT_VOX0 = CPT_VOX0 +1
-            ENDIF
-          ENDIF
           IF(FIRST == 0)THEN
             !empty cell
             VOXEL(IIX(I),IIY(I),IIZ(I)) = I ! first
@@ -258,37 +277,11 @@ C=======================================================================
             NEXT_NOD(I)     = 0 ! last one
           ENDIF
         ENDDO
-
-C=======================================================================
-C 2   REMOTE NODE CLUSTERING
-C=======================================================================
-        DO J = 1, NSNR
-
-          IF(XREM(1,J) < XMIN)  CYCLE
-          IF(XREM(1,J) > XMAX)  CYCLE
-          IF(XREM(2,J) < YMIN)  CYCLE
-          IF(XREM(2,J) > YMAX)  CYCLE
-          IF(XREM(3,J) < ZMIN)  CYCLE
-          IF(XREM(3,J) > ZMAX)  CYCLE
-
+        DO J = 1,NSNR
+          IF(IIX(NSN+J) == 0 ) CYCLE
+          FIRST = VOXEL(IIX(NSN+J),IIY(NSN+J),IIZ(NSN+J))
           REMOTE_S_NODE = REMOTE_S_NODE + 1
           LIST_REMOTE_S_NODE( REMOTE_S_NODE ) = J
-          IIX(NSN+J)=INT(NBX*(XREM(1,J)-XMINB)/(XMAXB-XMINB))
-          IIY(NSN+J)=INT(NBY*(XREM(2,J)-YMINB)/(YMAXB-YMINB))
-          IIZ(NSN+J)=INT(NBZ*(XREM(3,J)-ZMINB)/(ZMAXB-ZMINB))
-          IIX(NSN+J)=MAX(1,2+MIN(NBX,IIX(NSN+J)))
-          IIY(NSN+J)=MAX(1,2+MIN(NBY,IIY(NSN+J)))
-          IIZ(NSN+J)=MAX(1,2+MIN(NBZ,IIZ(NSN+J)))
-
-          FIRST = VOXEL(IIX(NSN+J),IIY(NSN+J),IIZ(NSN+J))
-          IF(TEST_V0) THEN
-! count the number of SECONDARY nodes outiside the reduced box
-            IF(IIX(J+NSN) ==  1     .OR. IIY(J+NSN) ==  1     .OR. IIZ(J+NSN) == 1 .AND.
-     .         IIX(J+NSN) ==  NBX+2 .OR. IIY(J+NSN) ==  NBY+2 .OR. IIZ(J+NSN) == NBZ+2) THEN
-              CPT_VOX0 = CPT_VOX0 +1
-            ENDIF
-          ENDIF
-
           IF(FIRST == 0)THEN
             ! empty cell
             VOXEL(IIX(NSN+J),IIY(NSN+J),IIZ(NSN+J)) = NSN+J ! first
@@ -307,21 +300,24 @@ C=======================================================================
             NEXT_NOD(NSN+J)     = 0 ! last one
           ENDIF
         ENDDO
+!$omp end single
+
+
       END IF !ITASK == 0
 
-      CALL MY_BARRIER ! Barrier to wait task0 treatment
+!     CALL MY_BARRIER ! Barrier to wait task0 treatment
 
-      IF(FIRST_TEST(NIN)) THEN
-!During the first sorting, we use the reduced box
-!If too many (>5 %) nodes are outside the reduced box
-!then the box is not reduced anymore
-        CALL MY_BARRIER
-        IF(ITASK == 0) THEN
-          IF(CPT_VOX0 > 5*(REMOTE_S_NODE + NSN)/100) TO_TRIM(NIN) = .FALSE.
-          FIRST_TEST(NIN) = .FALSE.
-        ENDIF
-        CALL MY_BARRIER
-      ENDIF
+c     IF(FIRST_TEST(NIN)) THEN
+cDuring the first sorting, we use the reduced box
+cIf too many (>5 %) nodes are outside the reduced box
+cthen the box is not reduced anymore
+c       CALL MY_BARRIER
+c       IF(ITASK == 0) THEN
+c         IF(CPT_VOX0 > 5*(REMOTE_S_NODE + NSN)/100) TO_TRIM(NIN) = .FALSE.
+c         FIRST_TEST(NIN) = .FALSE.
+c       ENDIF
+c       CALL MY_BARRIER
+c     ENDIF
 
 
 C=======================================================================
