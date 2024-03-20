@@ -1,12 +1,21 @@
 <details>
-  <summary>Level 1</summary>
+  <summary>A</summary>
+  <ul>
+    <li>
+      <details>
+        <summary>A1</summary>
+        <ul>
+          <li>A1.1</li>
+          <li>A1.2</li>
+        </ul>
+      </details>
+    </li>
+    <li>A2</li>
+  </ul>
+</details>
 
-  <details>
-    <summary>Level 2</summary>
-
-    Content for Level 2.
-
-  </details>
-
+<details>
+  <summary>C</summary>
+  <!-- Content for C -->
 </details>
 
