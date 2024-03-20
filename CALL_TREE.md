@@ -104,10 +104,6 @@
       - i25trivox_edg
         - i25sto_edg
           - i25pen3_edg
-        - i25sto_edg
-          - i25pen3_edg
-        - i25sto_e2s
-          - i25pen3_e2s
         - i25sto_e2s
           - i25pen3_e2s
     - upgrade_lcand_edg
@@ -142,8 +138,6 @@
       - i25dst3_1
       - i25glob_1
       - i25prep_slid_1
-    - allocate_comm_struct
-    - allocate_comm_struct
     - allocate_comm_struct
     - spmd_i25_slide_exch
     - i25prep_add
