@@ -1,21 +1,197 @@
-<details>
-  <summary>A</summary>
-  <ul>
-    <li>
-      <details>
-        <summary>A1</summary>
-        <ul>
-          <li>A1.1</li>
-          <li>A1.2</li>
-        </ul>
-      </details>
-    </li>
-    <li>A2</li>
-  </ul>
-</details>
-
-<details>
-  <summary>C</summary>
-  <!-- Content for C -->
-</details>
-
+- inttri
+  - int18_law151_nsv_shift
+  - intmass_update
+  - i7main_crit_tri
+    - i7buce_crit
+  - i24main_crit_tri
+  - i25main_crit_tri
+    - i25buce_crit
+  - i25main_gap
+    - i25gap3
+  - i11main_crit_tri
+  - i17main_crit_tri
+  - i20main_crit_tri
+  - i7main_crit_tri
+    - i7buce_crit
+  - i21main_gap
+  - i21reset
+  - i21main_crit_tri
+  - intcrit
+    - spmd_sync_mmxg2
+    - spmd_get_stif
+      - spmd_sd_stfn
+    - spmd_get_stif11
+      - spmd_sd_stfn11
+    - spmd_get_stif20
+      - spmd_sd_stfa20
+    - spmd_get_stif20e
+      - spmd_sd_stfn20e
+    - spmd_get_stif25
+      - spmd_sd_stfn25
+  - i21_icrit
+  - spmd_i7itied_cand
+  - spmd_i7itied_cand
+  - spmd_exch_sorting_efric
+  - inter_check_sort
+  - spmd_allglob_isum9
+  - inter_trc_7
+    - i7trc
+  - spmd_get_inacti_global
+    - spmd_iallreduce_int_comm
+  - inter_prepare_sort
+    - inter_count_node_curv
+      - inter_curv_computation
+    - inter_minmax_node
+    - spmd_box_limit_reduction
+      - spmd_allreduce_db
+    - inter_box_creation
+    - inter_color_coarse_voxel
+    - spmd_coarse_cell_exchange
+    - inter_color_voxel
+      - inter_cell_color
+    - spmd_coarse_cell_exchange
+    - spmd_cell_list_exchange
+    - inter_voxel_creation
+    - spmd_cell_list_exchange
+    - spmd_cell_list_exchange
+    - spmd_cell_list_exchange
+    - spmd_wait_nb
+  - inter_sort
+    - inter_sort_07
+      - spmd_cell_exchange
+      - spmd_rnumcd
+      - inter7_collision_detection
+        - spmd_oldnumcd
+        - inter7_candidate_pairs
+          - inter7_filter_cand
+            - inter7_gather_cand
+            - inter7_penetration
+      - i7buce_vox
+        - i7trivox
+          - spmd_oldnumcd
+          - i7sto
+            - i7cor3t
+            - i7pen3
+            - i7pen3
+      - upgrade_multimp
+      - spmd_tri7gat
+  - i7main_tri !type 18
+  - i10main_tri
+  - i11main_tri
+  - i17main_tri
+  - i20main_tri
+  - i22main_tri
+  - i24main_tri
+  - i24main_tri
+  - i25main_tri
+    - i25trc_edg
+    - i25trc_e2s
+    - i7xsave
+    - i25gapmsave
+    - spmd_tri25vox0
+    - spmd_tri25vox0_edge
+    - spmd_tri25vox
+    - spmd_rnum25
+    - spmd_rnum25_edge
+    - i25buce
+      - i25trivox
+        - i25sto
+          - i25cor3t
+          - i25pen3
+          - i25s1s2
+        - i25sto
+          - i25cor3t
+          - i25pen3
+          - i25s1s2
+        - i25sto
+          - i25cor3t
+          - i25pen3
+          - i25s1s2
+    - upgrade_multimp
+    - i25buce_edg
+      - i25trivox_edg
+        - i25sto_edg
+          - i25pen3_edg
+        - i25sto_edg
+          - i25pen3_edg
+        - i25sto_e2s
+          - i25pen3_e2s
+        - i25sto_e2s
+          - i25pen3_e2s
+    - upgrade_lcand_edg
+    - upgrade_lcand_e2s
+    - spmd_tri25gat
+    - spmd_tri25egat
+  - i21main_tri
+  - i25main_free
+    - i25edge_switch
+    - i25free_bound
+    - spmd_get_stif25_edg
+  - i25main_opt_tri
+    - i25irtlm
+    - i25optcd
+    - upgrade_cand_opt
+    - i25optcd
+    - i25optcd_edg
+    - i25optcd_e2s
+  - i25main_norm
+    - i25tagn
+    - i25normp
+      - spmd_exch_nor
+      - spmd_exch_nor
+    - i25normp
+      - spmd_exch_nor
+      - spmd_exch_nor
+    - i25assnp
+  - spmd_get_stif25_edg
+  - i25main_slid
+    - i25comp_1
+      - i25cor3_1
+      - i25dst3_1
+      - i25glob_1
+      - i25prep_slid_1
+    - allocate_comm_struct
+    - allocate_comm_struct
+    - allocate_comm_struct
+    - spmd_i25_slide_exch
+    - i25prep_add
+    - i25prep_nindex
+    - i25prep_sizbufs
+    - spmd_i25_slide_exch
+    - i25prep_send
+    - spmd_i25_slide_exch
+    - spmd_i25_slide_exch
+    - spmd_i25_slide_gat
+      - reallocate_fi1
+      - my_orders
+      - reallocate_fi2
+      - deallocate_fi1_tmp
+    - i25prep_slid_2
+    - upgrade_cand_opt
+    - spmd_i26_slide_exch
+    - spmd_i25_slide_exch
+    - deallocate_comm_struct
+  - inter_deallocate_wait
+  - spmd_ifront
+  - spmd_ifront_stamp
+  - i7main_opt_tri
+    - i7optcd
+  - i10main_opt_tri
+  - i11main_opt_tri
+  - i20main_opt_tri
+  - i23main_opt_tri
+  - i24main_opt_tri
+  - i21main_opt_tri
+  - int18_law151_nsv_shift
+  - i25maind_2
+    - i25comp_2
+      - i25cdcor3
+      - i25cor3_21
+      - i25dst3_21
+      - i25glob
+      - i25cdcor3
+      - i25cor3_22
+      - i25dst3_22
+      - i25glob_22
+  - spmd_ifront
+  - spmd_i25front_nor
