@@ -1,9 +1,12 @@
 <details>
-  <summary>Function Name (click to expand)</summary>
+  <summary>Level 1</summary>
 
-  - Callee Function 1
-  - Callee Function 2
-  - Callee Function 3
+  <details>
+    <summary>Level 2</summary>
+
+    Content for Level 2.
+
+  </details>
 
 </details>
 
