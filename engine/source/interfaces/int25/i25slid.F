@@ -1018,8 +1018,11 @@ C             Pointeurs sur la zone vs cette interface et ce processeur
             LR = 0
             LI = 0
 C
+!$OMP TASKLOOP PRIVATE(I,LR,LI,NOD,II)
             DO J=1,NSEND
               I = INDEX(IDEB+J)
+              LR = (J-1)*RSIZ
+              LI = (J-1)*ISIZ
               IF(I <= NSN)THEN
                 NOD = INTBUF_TAB%NSV(I)
                 RBUF(P,NI25)%p(LR+1) = X(1,NOD)
@@ -1031,14 +1034,7 @@ C
                 RBUF(P,NI25)%p(LR+7) = MS(NOD)
                 RBUF(P,NI25)%p(LR+8) = INTBUF_TAB%STFNS(I)
                 IBUF(P,NI25)%p(LI+1) = INTBUF_TAB%NSV_ON_PMAIN(I)
-c                 IF(MAIN_PROC(NOD) == LOC_PROC) THEN
-c                   IBUF(P,NI25)%p(LI+1) = -ITAB(NOD)
-c                   ! on peut metre ici directement le numero local
-c                 ELSE
-c                   IBUF(P,NI25)%p(LI+1) = -ITAB(NOD)
-c                 ENDIF
                 IBUF(P,NI25)%p(LI+2) = ITAB(NOD)
-c                  if(itab(nod)==6992)print *,'prep_send nat',ispmd+1,p,li,main_proc(nod)
                 IBUF(P,NI25)%p(LI+3) = MAIN_PROC(NOD)
                 IBUF(P,NI25)%p(LI+4) = KINET(NOD)
               ELSE
@@ -1058,9 +1054,8 @@ c                  if(ITAFI(NIN)%P(II) ==6992)print *,'prep_send rem',ispmd+1,p,
                 IBUF(P,NI25)%p(LI+3) = PMAINFI(NIN)%P(II)
                 IBUF(P,NI25)%p(LI+4) = KINFI(NIN)%P(II)
               END IF
-              LR = LR + RSIZ
-              LI = LI + ISIZ
             END DO
+!$OMP END TASKLOOP
 C
 C shift for real variables (prepare for next setting)
             RSHIFT = 9
@@ -1073,9 +1068,11 @@ C specific cases ../..
 
             IF(.TRUE.) THEN
               LI = 0
-#include      "vectorize.inc"
+!#include      "vectorize.inc"
+!$OMP TASKLOOP PRIVATE(J,I,II,NOD,LI)
               DO J = 1, NSEND
                 I = INDEX(IDEB+J)
+                LI = (j-1) * ISIZ
                 IF(I <= NSN) THEN
                   NOD = INTBUF_TAB%NSV(I)
                   IBUF(P,NI25)%p(LI+ISHIFT)  = ICODT(NOD)
@@ -1085,8 +1082,8 @@ C specific cases ../..
                   IBUF(P,NI25)%p(LI+ISHIFT)  = ICODT_FI(NIN)%P(II)
                   IBUF(P,NI25)%p(LI+ISHIFT+1)= ISKEW_FI(NIN)%P(II)
                 END IF
-                LI = LI + ISIZ
               END DO
+!$OMP END TASKLOOP
               ISHIFT = ISHIFT + 2
             ENDIF
 
@@ -1267,9 +1264,10 @@ C -- IDTMINS_INT /= 0
 C
             IF(ITYP==25)THEN
               LR = 0
-#include      "vectorize.inc"
+!$OMP TASKLOOP PRIVATE(J,I,II,NOD,LR)
               DO J = 1, NSEND
                 I = INDEX(IDEB+J)
+                LR = (J-1) * RSIZ
                 IF(I <= NSN)THEN
                   RBUF(P,NI25)%p(LR+RSHIFT)    =INTBUF_TAB%TIME_S(2*(I-1)+1)
                   RBUF(P,NI25)%p(LR+RSHIFT+1)  =INTBUF_TAB%TIME_S(2*(I-1)+2)
@@ -1294,14 +1292,15 @@ C
                   RBUF(P,NI25)%p(LR+RSHIFT+8)  =PENE_OLDFI(NIN)%P(4,II)
                   RBUF(P,NI25)%p(LR+RSHIFT+9)  =PENE_OLDFI(NIN)%P(5,II)
                 END IF
-                LR = LR + RSIZ
               END DO
+!$OMP END TASKLOOP
               RSHIFT = RSHIFT + 10
 
               LI = 0
-#include      "vectorize.inc"
+!$OMP TASKLOOP PRIVATE(J,I,II,NOD,LI)
               DO J = 1, NSEND
                 I = INDEX(IDEB+J)
+                LI = (J-1) * ISIZ
                 IF(I <= NSN)THEN
                   NOD = INTBUF_TAB%NSV(I)
                   IBUF(P,NI25)%p(LI+ISHIFT)  =INTBUF_TAB%IRTLM(4*(I-1)+1)
@@ -1317,8 +1316,8 @@ C
                   IBUF(P,NI25)%p(LI+ISHIFT+3)=IRTLM_FI(NIN)%P(4,II)
                   IBUF(P,NI25)%p(LI+ISHIFT+4)=ICONT_I_FI(NIN)%P(II)
                 END IF
-                LI = LI + ISIZ
               END DO
+!$OMP END TASKLOOP
               ISHIFT = ISHIFT + 5
 
               IF (ILEV==2) THEN

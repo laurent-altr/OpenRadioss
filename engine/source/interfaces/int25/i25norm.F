@@ -953,44 +953,24 @@ C
 
       NRTMFT= 1+(JTASK-1)*NRTM/ NTHREAD
       NRTMLT= JTASK*NRTM/NTHREAD
-      DO N=NRTMFT,NRTMLT,MVSIZ
-C
-        LLT=MIN(NRTMLT-N+1,MVSIZ)
-C
-#include  "vectorize.inc"
-        DO I=1,LLT
-C
-          IRM=I+N-1
-C
-
+!$OMP DO SCHEDULE(GUIDED)
+      DO IRM= 1 ,NRTM
           IF(ACTNOR(IRM)==3) THEN
              WNOD_NORMAL(1:3,1:4,IRM) = RZERO
-C            CYCLE
           ENDIF
-
-           IF(ACTNOR(IRM)==0) THEN
-CC pas besoin de calculer les bis. sur ce irm
-C             WNOD_NORMAL(1:3,1:4,IRM) = RZERO
-              CYCLE
-           ENDIF
-
-C
-          IF(STIFM(IRM) == 0) THEN
+          IF(ACTNOR(IRM)==0) THEN
+             CYCLE
+          ENDIF
+          IF(STIFM(IRM)==0) THEN
             WNOD_NORMAL(1:3,1:4,IRM) = RZERO
           ELSE
             DO J=1,4
               JRM =MVOISIN(J,IRM)
               JEDG=EVOISIN(J,IRM)
               IF(JRM > 0 )THEN
-C               IF(ACTNOR(JRM) > 0) THEN
-                  WNOD_NORMAL(1,J,IRM) = NOD_NORMAL(1,JEDG,JRM)
-                  WNOD_NORMAL(2,J,IRM) = NOD_NORMAL(2,JEDG,JRM)
-                  WNOD_NORMAL(3,J,IRM) = NOD_NORMAL(3,JEDG,JRM)
-C               ELSE
-C                 WNOD_NORMAL(1,J,IRM) = RZERO
-C                 WNOD_NORMAL(2,J,IRM) = RZERO
-C                 WNOD_NORMAL(3,J,IRM) = RZERO
-C               ENDIF
+                WNOD_NORMAL(1,J,IRM) = NOD_NORMAL(1,JEDG,JRM)
+                WNOD_NORMAL(2,J,IRM) = NOD_NORMAL(2,JEDG,JRM)
+                WNOD_NORMAL(3,J,IRM) = NOD_NORMAL(3,JEDG,JRM)
               ELSEIF(JRM<=0)THEN
                 WNOD_NORMAL(1,J,IRM) = RZERO
                 WNOD_NORMAL(2,J,IRM) = RZERO
@@ -998,10 +978,10 @@ C               ENDIF
               END IF
             END DO !J
           ENDIF ! STIFM = 0
-        END DO !I
-      END DO ! N
+        END DO !IRM
+!$OMP END DO
 C
-      CALL MY_BARRIER
+!     CALL MY_BARRIER
       IF(NSPMD > 1)THEN
         IF(JTASK==1)THEN
           SIZE = 3

@@ -156,8 +156,6 @@ C
         END DO
       END IF
 C
-      CALL MY_BARRIER
-C
 C-----------------------------------------------------------------------
 C       Secnd node leaving its previous impacted segment ...
 C-----------------------------------------------------------------------  
@@ -183,7 +181,6 @@ C-----------------------------------------------------------------------
         CALL ALLOCATE_COMM_STRUCT(COMM_INT,NSPMD,NINTER25) 
         CALL ALLOCATE_COMM_STRUCT(COMM_REAL,NSPMD,NINTER25) 
         CALL ALLOCATE_COMM_STRUCT(COMM_SIZ,NSPMD,NINTER25) 
-
 C
         NSLIDMX=0
         NADMAX =0
