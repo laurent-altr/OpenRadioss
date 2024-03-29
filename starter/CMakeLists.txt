@@ -28,6 +28,7 @@ endif()
 
 set (source_directory ${CMAKE_CURRENT_SOURCE_DIR})
 set (include_directory "${CMAKE_CURRENT_SOURCE_DIR}/share" )
+message(STATUS "current source directory : ${CMAKE_CURRENT_SOURCE_DIR}")
 
 # Source file settings
 # --------------------
@@ -79,7 +80,6 @@ endforeach()
 
 list(REMOVE_DUPLICATES include_dir_list)
 
-# compatibility with previous Makefile system / remove old _inc_xxxx directory
 file(GLOB_RECURSE delete_old_inc ${source_directory}/share/_inc_*/*.inc)
 foreach (incfile ${delete_old_inc})
     get_filename_component(dir ${incfile} PATH)
@@ -224,7 +224,7 @@ if (NOT CMAKE_BUILD_TYPE)
 endif (NOT CMAKE_BUILD_TYPE)
 
 
-
+message(STATUS "ADD EXECUTABLE")
 
 add_executable (${EXEC_NAME} ${source_files} ${c_source_files} ${cpp_source_files} ${Build_includes_directory}/starter_message_description.inc ${Build_includes_directory}/__foo.inc)
 
@@ -247,3 +247,4 @@ install (TARGETS ${EXECUTABLES}
 install (PROGRAMS ${SCRIPTS}
          DESTINATION "bin")
 
+message(STATUS "END OF STARTER")

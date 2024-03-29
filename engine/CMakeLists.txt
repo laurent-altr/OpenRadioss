@@ -270,3 +270,4 @@ install (TARGETS ${EXECUTABLES}
 install (PROGRAMS ${SCRIPTS}
          DESTINATION "bin")
 
+message(STATUS "END OF ENGINE")
