@@ -1351,7 +1351,8 @@ C----------------------------------------------
 C
       NEDGES_OLD = NEDGES
 
-      IF(EDGE_FILTERING == 1 .AND. (NUMELS > NELEM / 3 .OR. ICFSI > 0 )) THEN 
+C     IF(EDGE_FILTERING == 1 .AND. (NUMELS > NELEM / 3 .OR. ICFSI > 0 )) THEN 
+      IF(.TRUE.) THEN
         WRITE(IOUT,'(A)') "** INFO: SIMPLIFIED DOMAIN DECOMPOSITION" 
 C+------------------------------------------------------------+
 C| Domain decomposition for models with solids                |
