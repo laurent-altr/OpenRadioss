@@ -190,14 +190,24 @@ C-----------------------------------------------
           integer :: nb_voxel_on !< number of remote nodes in the bounding box
           integer, dimension(:), allocatable :: list_nb_voxel_on
           integer, dimension(GROUP_SIZE) :: prov_n, prov_e !< temporary list of candidates
-
+          integer :: voxel_id 
+#if defined(_OPENMP)
+          integer  omp_get_num_threads
+          external omp_get_num_threads
+#endif
+           integer :: nthreads
 
 C-----------------------------------------------
+#ifdef _OPENMP
+          nthreads = OMP_GET_NUM_THREADS()
+#else
+          nthreads = 1
+#endif
 
-          if(itask == 0)then
+c         if(itask == 0)then
             allocate(list_nb_voxel_on((nbx+2)*(nby+2)*(nbz+2)))
             nb_voxel_on = 0
-          end if
+c         end if
 
 !$OMP BARRIER
 
@@ -227,15 +237,15 @@ C-----------------------------------------------
 C=======================================================================
 C 1   Add local nodes to the cells
 C=======================================================================
-          if(itask==0.and.total_nb_nrtm>0)then
+          if(total_nb_nrtm>0)then
             allocate(last_nod(nsn+nsnr))
-            do i=1,nsn
+            do i=1,nsn ! number of nodes
               iix=0
               iiy=0
               iiz=0
-              if(stfn(i) == zero)cycle
+              if(stfn(i) == zero)cycle !do not consider deleted nodes
               j=nsv(i)
-              if(x(1,j) < xmin)  cycle
+              if(x(1,j) < xmin)  cycle !do not consider nodes outside the bounding box
               if(x(1,j) > xmax)  cycle
               if(x(2,j) < ymin)  cycle
               if(x(2,j) > ymax)  cycle
@@ -247,28 +257,34 @@ C=======================================================================
               iix=max(1,2+min(nbx,iix))
               iiy=max(1,2+min(nby,iiy))
               iiz=max(1,2+min(nbz,iiz))
-              first = voxel(iix,iiy,iiz)
-              if(first == 0)then
-                !empty cell
-                nb_voxel_on = nb_voxel_on + 1
-                ! 1d version of 3d potition, indexes starts at 1
-                list_nb_voxel_on(nb_voxel_on) = (iix-1)*(nby+2)*(nbz+2)+(iiy-1)*(nbz+2)+(iiz-1)
-                voxel(iix,iiy,iiz) = i ! first
-                next_nod(i)                 = 0 ! last one
-                last_nod(i)                 = 0 ! no last
-              elseif(last_nod(first) == 0)then
-                !cell containing one node
-                !add as next node
-                next_nod(first) = i ! next
-                last_nod(first) = i ! last
-                next_nod(i)     = 0 ! last one
-              else
-                !
-                !jump to the last node of the cell
-                last = last_nod(first) ! last node in this voxel
-                next_nod(last)  = i ! next
-                last_nod(first) = i ! last
-                next_nod(i)     = 0 ! last one
+              voxel_id = (iix-1)*(nby+2)*(nbz+2)+(iiy-1)*(nbz+2)+(iiz-1)
+              ! thread id : itask from 0 to nthreads-1
+              !  for each voxel_id, give one thread id using modulo
+              if(itask == mod(voxel_id,nthreads))then
+                !itask owns this cell
+                first = voxel(iix,iiy,iiz)
+                if(first == 0)then
+                  !empty cell
+                  nb_voxel_on = nb_voxel_on + 1
+                  ! 1d version of 3d potition, indexes starts at 1
+                  list_nb_voxel_on(nb_voxel_on) =voxel_id ! (iix-1)*(nby+2)*(nbz+2)+(iiy-1)*(nbz+2)+(iiz-1)
+                  voxel(iix,iiy,iiz) = i ! first
+                  next_nod(i)                 = 0 ! last one
+                  last_nod(i)                 = 0 ! no last
+                elseif(last_nod(first) == 0)then
+                  !cell containing one node
+                  !add as next node
+                  next_nod(first) = i ! next
+                  last_nod(first) = i ! last
+                  next_nod(i)     = 0 ! last one
+                else
+                  !
+                  !jump to the last node of the cell
+                  last = last_nod(first) ! last node in this voxel
+                  next_nod(last)  = i ! next
+                  last_nod(first) = i ! last
+                  next_nod(i)     = 0 ! last one
+                endif
               endif
             enddo
 
@@ -290,35 +306,34 @@ C=======================================================================
               iix=max(1,2+min(nbx,iix))
               iiy=max(1,2+min(nby,iiy))
               iiz=max(1,2+min(nbz,iiz))
-
-              first = voxel(iix,iiy,iiz)
-
-              if(first == 0)then
-                ! empty cell
-                nb_voxel_on = nb_voxel_on + 1
-                ! 1d version of 3d potition
-                list_nb_voxel_on( nb_voxel_on ) = (iix-1) * (nby+2) * (nbz+2) + (iiy-1) * (nbz+2) + (iiz-1)
-
-                voxel(iix,iiy,iiz) = nsn+j ! first
-                next_nod(nsn+j)     = 0 ! last one
-                last_nod(nsn+j)     = 0 ! no last
-              elseif(last_nod(first) == 0)then
-                ! cell containing one node, add it as next node
-                next_nod(first) = nsn+j  ! next
-                last_nod(first) = nsn+j  ! last
-                next_nod(nsn+j)  = 0     ! last one
-              else
-                ! , jump to the last node of the cell
-                last = last_nod(first)  ! last node in this voxel
-                next_nod(last)  = nsn+j ! next
-                last_nod(first) = nsn+j ! last
-                next_nod(nsn+j)     = 0 ! last one
+              voxel_id = (iix-1)*(nby+2)*(nbz+2)+(iiy-1)*(nbz+2)+(iiz-1)
+              if(itask == mod(voxel_id,nthreads))then
+                first = voxel(iix,iiy,iiz)
+                if(first == 0)then
+                  ! empty cell
+                  nb_voxel_on = nb_voxel_on + 1
+                  ! 1d version of 3d potition
+                  list_nb_voxel_on( nb_voxel_on ) = voxel_id                                                         
+               
+                  voxel(iix,iiy,iiz) = nsn+j ! first
+                  next_nod(nsn+j)     = 0 ! last one
+                  last_nod(nsn+j)     = 0 ! no last
+                elseif(last_nod(first) == 0)then
+                  ! cell containing one node, add it as next node
+                  next_nod(first) = nsn+j  ! next
+                  last_nod(first) = nsn+j  ! last
+                  next_nod(nsn+j)  = 0     ! last one
+                else
+                  ! , jump to the last node of the cell
+                  last = last_nod(first)  ! last node in this voxel
+                  next_nod(last)  = nsn+j ! next
+                  last_nod(first) = nsn+j ! last
+                  next_nod(nsn+j)     = 0 ! last one
+                endif
               endif
             enddo
             deallocate(last_nod)
           end if !itask == 0
-!$OMP BARRIER
-
 
 C=======================================================================
 C 3   FACE RECOVERY AND ENUMERATION OF CANDIDATE COUPLES
@@ -538,7 +553,7 @@ C=======================================================================
 C 5   VOXEL RESET
 C=======================================================================
 !$OMP BARRIER
-          if(total_nb_nrtm>0 .and. itask == 0) then
+          if(total_nb_nrtm>0) then
             do jj = 1, nb_voxel_on
               j = list_nb_voxel_on(jj)
               k = j
