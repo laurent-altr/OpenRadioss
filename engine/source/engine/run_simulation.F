@@ -1329,10 +1329,6 @@ C----
      .               , DIMENSION(:), ALLOCATABLE :: WRFLOW
               SAVE LWIFLOW, LWRFLOW, WIFLOW, WRFLOW
               INTEGER SIZ, R2R_ON
-#if defined(MUMPS5)
-              INTEGER, DIMENSION(:), ALLOCATABLE :: CDDLP
-              TYPE(DMUMPS_STRUC) MUMPS_PAR
-#endif
               INTEGER IFVMESH
 C
               my_real ,DIMENSION(:,:), ALLOCATABLE :: MADCLFRECV,PARTSAV2
@@ -3069,94 +3065,6 @@ C       IMPLICIT SIZES [MONO THREAD]
 C       Double precision only
 C----------------------------------
               IF (IMPL_S==1.OR.NEIG>0) THEN
-#if defined(MYREAL8) && !defined(WITHOUT_LINALG)
-                ALLOCATE (ELBUF_IMP(NGROUP))
-                CALL ALLOC_ELBUF_IMP(ELBUF_TAB,ELBUF_IMP,NGROUP, IPARG)
-                IF (IMON>0) CALL STARTIME(34,1)
-                IF (IMON>0) CALL STARTIME(31,1)
-                L1 = 1+NIXS*NUMELS + NSVOIS*NIXS
-                L2 = L1+6*NUMELS10
-                L3 = L2+12*NUMELS20
-                CALL IMP_SOL_INIT(
-     1          GEO       ,NPBY      ,LPBY      ,ITAB      ,
-     2          IPARI     ,IXS       ,IXQ       ,IXC       ,IXT       ,
-     4          IXP       ,IXR       ,IXTG      ,IXTG1     ,IXS(L1)   ,
-     5          IXS(L2)   ,IXS(L3)   ,IPARG     ,
-     6          ELBUF     ,NINT7     ,NBINTC    ,X         ,DMCP      ,
-     7          FR_ELEM   ,IAD_ELEM  ,FR_I2M    ,IAD_I2M   ,
-     8          NPRW      ,NUM_IMP1  ,NUM_IMPL  ,MONVOL    ,IGRSURF   ,
-     9          FR_MV     ,IPM       ,IGEO      ,IAD_RBY   ,
-     A          FR_RBY    ,SH4TREE   ,SH3TREE   ,IRBE3     ,LRBE3     ,
-     B          FR_RBE3M  ,IAD_RBE3M ,IRBE2     ,LRBE2     ,IBFV      ,
-     C          VEL       ,ELBUF_TAB ,IFRAME    ,INTBUF_TAB,
-     D          NDDL0     ,NNZK0     ,IMPBUF_TAB)
-                IF (IMON>0) CALL STOPTIME(31,1)
-                IF (IMON>0) CALL STOPTIME(34,1)
-C
-                NS_IMP=>IMPBUF_TAB%CAND_N
-                NE_IMP=>IMPBUF_TAB%CAND_E
-                IND_IMP=>IMPBUF_TAB%INDSUBT
-                X_A=>X
-                X_C=>X
-                FEXT_IMP=>IMPBUF_TAB%AC
-                R_IMP=>IMPBUF_TAB%R_IMP
-                ALLOCATE(FAC_K(0), IPIV_K(0))
-                IF (IMUMPSV >0.OR.(ISOLV==7.AND.NSPMD>1)) THEN
-#if defined(MUMPS5)
-                  CALL SPMD_MUMPS_INI(MUMPS_PAR, 1)
-#else
-                  WRITE(6,*) __LINE__,"Fatal error: MUMPS required"
-                  CALL FLUSH(6)
-                  CALL ARRET(5)
-#endif
-                  ALLOCATE(CDDLP(NDDL0))
-                ENDIF
-                IBUCK= IBUCKL
-!--- deactivate contact w/ offset
-                SH_OFFSET_TAB%NSH_OSET = 0
-C----------------------------------
-C       EIGENSOLVER  [MONO THREAD]
-C----------------------------------
-C------ one routine for EIG
-                IF (NEIG>0) THEN
-                  CALL TRACE_IN(3,NCYCLE,ZERO)
-#ifdef DNC
-                  CALL IMP_EIGSOL(
-     1                            EIGIPM      , EIGRPM      , MS        ,IN         , EIGIBUF   ,
-     2                            X           ,IXTG1        ,TF         , NPC       , FR_WAVE   ,
-     3                            W16         , WA        ,
-     4                            ICODT       , ICODR       , ISKEW     ,IBFV       , VEL       ,
-     4                            V           , A           , ELBUF    , IXS       , IXQ     ,
-     5                            IXC         , IXT         , IXP      , IXR       , IXTG    ,
-     6                            PM          , GEO         , FANI     , ICUT      , SKEW    ,
-     7                            XCUT        ,FANI(1,1+NFIA), ITAB    ,FANI(1,1+NFEA),FANI(1,1+NFOA),
-     8                            ANIN        , LPBY        , NPBY     , NSTRF     , RWBUF   ,
-     9                            NPRW        , TANI        , ELBUF_TAB ,MAT_ELEM%MAT_PARAM, DD_IAD  ,
-     A                            IAD_ELEM    , FR_ELEM     , WEIGHT   , EANI      , IPART   ,
-     B                            RBY         , NOM_OPT     , IGRSURF  ,
-     C                            BUFSF       , IDATA       , RDATA    , BUFMAT    , BUFGEO  ,
-     D                            KXX         , IXX         , KXSP     , IXSP      , NOD2SP  ,
-     E                            SPBUF       , IXS(L1)     , IXS(L2)  , IXS(L3)   , VR      ,
-     F                            MONVOL      , VOLMON      , IPM      , IGEO      , IPARG   ,
-     G                            NODGLOB     , IAD_ELEM    , FR_ELEM  , FR_SEC    , FR_RBY2 ,
-     H                            IAD_RBY2    , FR_WALL     ,  IPARI   ,
-     I                            INTBUF_TAB  , D           ,PARTSAV   ,
-     J                            FSAV(1,NFNCA+1),FSAV(1,NFTCA+1), TEMP      , THKE    ,
-     K                            ERR_THK_SH4 , ERR_THK_SH3 , IRBE2    , IRBE3     ,LRBE2    ,
-     L                            LRBE3       , FRBE3    ,FR_RBE2  , FR_RBE3M  , IAD_RBE2,
-     M                            WEIGHT_MD   , CLUSTER     , FCLUSTER , MCLUSTER  , XFEM_TAB,
-     O                            W           , NV46     , NERCVOIS  , NESDVOIS,
-     P                            LERCVOIS    , LESDVOIS    ,CRKEDGE   , INDX_CRK  , XEDGE4N ,
-     Q                            XEDGE3N     ,STACK        ,SPH2SOL   ,STIFN      ,STIFR    ,
-     R                            DRAPE_SH4N    , DRAPE_SH3N    ,H3D_DATA  ,SUBSETS    ,IGRNOD   ,
-     S                            FCONT_MAX   ,FANI(1,NFNCA2+1),FANI(1,NFTCA2+1), ALE_CONNECTIVITY ,
-     T                            ITASK       ,NDDL0        ,NNZK0     ,IMPBUF_TAB , DRAPEG)
-#endif
-                  DT2 = MAX(EM20,TSTOP-TT)
-                  MSTOP=2
-                  GOTO 300
-                END IF !IF (NEIG>0) THEN
-#endif
               ELSE
                 IMPL_S0 = 0
                 X_A=>X
@@ -3211,57 +3119,10 @@ C     to be sorted > active
                 KSP2SORT=KSPH23
               END IF
 
-C-------------------------------
-C       POINTERS FOR USER ROUTINES
-C-------------------------------
-              CALL SAV_BUF_POINT(PM,1)
-              CALL SAV_BUF_POINT(BUFMAT,2)
-              CALL SAV_BUF_POINT(GEO,3)
-              CALL SAV_BUF_POINT(BUFGEO,4)
-              CALL SAV_BUF_POINT(NPC,5)
-              CALL SAV_BUF_POINT(TF,6)
-              CALL SAV_BUF_POINT(ISKWN,9)
-              CALL SAV_BUF_POINT(SKEW,10)
-              CALL SAV_BUF_POINT(LACCELM,11)
-              CALL SAV_BUF_POINT(ACCELM,12)
-              CALL SAV_BUF_POINT(ITABM1,13)
-              CALL SAV_BUF_POINT(X,14)
-              CALL SAV_BUF_POINT(D,15)
-              CALL SAV_BUF_POINT(V,16)
-              CALL SAV_BUF_POINT(A,17)
-              CALL SAV_BUF_POINT(V,16)
-              CALL SAV_BUF_POINT(A,17)
-              CALL SAV_BUF_POINT(WEIGHT,18)
-              CALL SAV_BUF_POINT(IPM,19)
-              CALL SAV_BUF_POINT(IGEO,20)
-
 C ----------------------------------------------
 C Specific Initializations
 C ----------------------------------------------
 
-#ifdef DNC
-              MADYMO_DEL_GLOBAL=0
-              MADYMO_DEL=0
-              IF(IMADCPL==1)THEN
-
-                ALLOCATE(MAD_TAG_SOL(NUMELS))
-                ALLOCATE(MAD_TAG_SH (NUMELC))
-                ALLOCATE(MAD_TAG_TG (NUMELTG))
-                ALLOCATE(MAD_FAIL_ELEMENTS (NMADSOL+NMADSH4+NMADSH3))
-                MAD_TAG_SOL(1:NUMELS)=0
-                MAD_TAG_SH(1:NUMELC)=0
-                MAD_TAG_TG(1:NUMELTG)=0
-                MAD_FAIL_ELEMENTS(1:NMADSOL+NMADSH4+NMADSH3) = 0
-
-                ALLOCATE(MADCLFRECV(3,MADCLNODS))
-
-                CALL INITIAL_DATA_EXCH_MADCPL(X,A,V,MS,MADCLNOD)
-
-C Implementing a dummy Madymo cycle
-                CALL DUMMY_CYCLE_MADCPL(X,MADCLNOD)
-
-              ENDIF
-#endif
 
               IF(NINTER25 /= 0) THEN
                 CALL SPMD_I25FRONT_INIT(ITAB,MAIN_PROC,INTBUF_TAB,IPARI)
@@ -3317,14 +3178,6 @@ C Reallocate RENUM array
                 RNUM_SIZ=RNS
                 ALLOCATE(RENUM(RNUM_SIZ))
               ENDIF
-
-#ifdef DNC
-              IF (IMADCPL>0)THEN
-
-                CALL DATA_SEND_MADCPL(X,MADCLNOD,
-     *                                MADYMO_DEL_GLOBAL,MAD_FAIL_ELEMENTS)
-              ENDIF
-#endif
 
 C-----------------------------------------------
 C     TRACE BACK
@@ -5486,13 +5339,6 @@ C
                 CALL SPMD_EXCH_ICONT(IFOAM,IAD_ELEM ,FR_ELEM,SIZE,LENR)
               ENDIF
 C
-#ifdef DNC
-              IF (IMADCPL>0)THEN
-C   at every cycle except cycle 0, send the Nodes coordinates
-                CALL DATA_RECV_MADCPL(X,A,V,MS,FANI,MADCLNOD,MADCLFRECV,H3D_DATA)
-              ENDIF
-#endif
-
               IF(ALE%SUB%IALESUB==2 .AND. ALE%SUB%IFSUB==2) THEN
 CFP SKIP KINEMATIC FORCES
 
@@ -5740,40 +5586,6 @@ C Get IDEL7NOK global
                     ISMSNOK=1
                   END IF
                 END IF
-
-#ifdef DNC
-                IF(IMADCPL /=0)THEN
-C  ---------------------------------------------------------
-C   Radioss Madymo Coupling
-C  ---------------------------------------------------------
-C   IF IDEL7NOK is > Deleted elements were found
-C   MAD_FAIL_ELEMENTS is upgraded
-C
-C   If one domain has new deleted elements, MADYMO_DEL is set to 1
-C   MADYMO_DEL is globalized with SPMD_ALLGLOB_ISUM9
-C   if Positive, all domains send the info during Time Step exchange
-C
-C   --------------------------------------------------------
-C   Do not communicate IDEL7NOK if already done. (IDEL7NG >0)
-C  ---------------------------------------------------------
-
-                  MADYMO_DEL_GLOBAL=0
-                  MADYMO_DEL=0
-
-                  IF (IDEL7NOK > 0 ) THEN
-                    CALL MAD_ELFAIL( ELBUF_TAB,IPARG,
-     *                               MADSOL,MADSH3,MADSH4,
-     *                               MAD_TAG_SOL, MAD_TAG_SH,MAD_TAG_TG,
-     *                               MADYMO_DEL,
-     *                               MAD_FAIL_ELEMENTS)
-
-                  ENDIF
-
-                  MADYMO_DEL_GLOBAL = MADYMO_DEL
-
-                  CALL SPMD_ALLGLOB_ISUM9(MADYMO_DEL_GLOBAL,1)
-                ENDIF
-#endif
 C  ---------------------------------------------------------
                 IDEL7NOK=0
                 IF (IMON>0) CALL STOPTIME(8,1)
@@ -6546,21 +6358,6 @@ C-----------------------------
                 ENDIF
               ENDIF
               ! ----------------------
-#ifdef DNC
-              IF(MDS_AVAIL==1) THEN
-                TSTOP_USER = TSTOP
-                TT_USER = TT
-                MSTOP_USER = 0
-                NCYCLE_USER = NCYCLE
-                CALL MDS_ENGINE_USER_CHECK(ISPMD_USER,TSTOP_USER,NCYCLE_USER,TT_USER,MSTOP_USER)
-                IF(MSTOP_USER > 0) THEN
-                  MSTOP=1
-                  MREST=1
-                ENDIF
-              ENDIF
-#endif
-
-              ! ----------------------
 
               IF(NSPMD>1)THEN
                 CALL SPMD_GLOB_MIN5(DT2  ,ITYPTS,NELTS ,ICODT ,IMSCH,
@@ -6674,24 +6471,6 @@ C--------------------------------------------------------------C
 
               ENDIF
 
-#ifdef DNC
-C----------------------------------------------
-C Radioss Madymo coupling - Exchange Timesteps
-C----------------------------------------------
-              IF(IMADCPL==1)THEN
-                MADENDREQUEST = 0
-                IF (IMONM > 0) CALL STARTIME(55,1)
-C Exchange Time Step
-                CALL TSTP_EXCH_MADCPL(MADENDREQUEST,MADCLNOD,MADCLFRECV,
-     *                                V,A,MS ,MADYMO_DEL_GLOBAL )
-                IF (MADENDREQUEST == -1)THEN
-                  MSTOP = 2
-                  CALL TRACE_OUT(3)
-                  RETURN
-                ENDIF
-                IF (IMONM > 0) CALL STOPTIME(55,1)
-              ENDIF
-#endif
 C-----------------------------
               IF (IMONM > 0) CALL STARTIME(53,1)
               DT2OLD=DT2
@@ -8752,118 +8531,13 @@ C                                     PARALLEL SECTION (SMP)
 C========================================================================================
 
                 IF (IMP_CHK > 0) THEN
-#if defined(MUMPS5)
-                  CALL IMP_CHKM(
-     1            ICODE  ,ISKEW  ,ISKWN  ,IPART  ,IXTG   ,IXS    ,IXQ    ,
-     2            IXC    ,IXT    ,IXP    ,IXR    ,IXTG1          ,ITAB   ,ITABM1 ,
-     3            NPC    ,IBCL   ,IBFV   ,SENSORS%SENSOR_TAB,NNLINK ,LNLINK ,IPARG  ,IGRV   ,
-     4            IPARI  ,INTBUF_TAB,NPRW   ,ICONX  ,NPBY,LPBY   ,LRIVET ,
-     5            NSTRF  ,LJOINT ,ICODT  ,ICODR  ,ISKY  ,ADSKY,IADS(I87J),
-     6            ILINK  ,LLINK  ,WEIGHT         ,ITASK ,IBVEL  ,LBVEL  ,FBVEL  ,
-     7            X      ,D      ,V      ,VR     ,DR     ,THKE   ,DAMP   ,MS     ,
-     8            IN     ,PM     ,SKEW   ,GEO    ,EANI   ,BUFMAT ,BUFGEO ,BUFSF  ,
-     9            TF     ,FORC   ,VEL    ,FSAV   ,AGRV   ,FR_WAVE,PARTS0 ,
-     A            ELBUF  ,RBY   ,RIVET,FR_ELEM,IAD_ELEM,NSENSOR,
-     B            WA     ,     A      ,AR     ,STIFN  ,STIFR  ,PARTSAV,FSKY   ,
-     C            FSKYI  ,IFRAME ,XFRAME ,W16    ,IACTIV ,FSKYM  ,IGEO   ,IPM    ,
-     D            TFEXT  ,NODFT  ,NODLT  ,NT_IMP ,NUM_IMP,NS_IMP ,NE_IMP ,IND_IMP,
-     L            IT     ,RWBUF  ,LPRW    ,FR_WALL,NBINTC ,INTLIST,
-     M            FANI(1,1+NFOA+2*(NSECT+NRBODY)),RWSAV  ,FSAVD ,
-     N            DIRUL  ,LGRAV  ,IRBE3  ,LRBE3  ,FRBE3  ,
-     O            FRWL6  ,IRBE2  ,LRBE2 ,ICFIELD,LCFIELD,CFIELD,ELBUF_TAB,
-     P            WEIGHT_MD, STACK,SENSORS%SFSAV,SENSORS%FSAV,SENSORS%STABSEN,SENSORS%TABSENSOR,DRAPE_SH4N  ,
-     Q            DRAPE_SH3N,H3D_DATA ,NDDL0,NNZK0,IMPBUF_TAB,CPTREAC,FTHREAC,NODREAC,
-     R            DRAPEG ,OUTPUT%TH%TH_SURF,FSAVSURF,NSEG_LOADP,DPL0CLD,VEL0CLD)
-                  MSTOP=2
-#else
-                  WRITE(6,*) __LINE__,"Fatal error: MUMPS required"
-                  CALL FLUSH(6)
-                  CALL ARRET(5)
-#endif
                 ELSEIF ((TT<=TSTOP.OR.(TT-TSTOP)<EM10).AND.IBUCK==0) THEN
 C-----integer : 1:IKC,2:IKUD,3:W_DDL,4:IADM,5:JDIM,6:NDOFI,7:IDDLI
 C-----reel : 1,2,3,4:DIAG_K,LT_K,DIAG_M,LT_M,5,6:LB,DB,7:BKUD,8,9:D_IMP,DR_IMP
 C----       10,11,12:ELBUF_C,BUFMAT_C,X_C,13,14:DD,DDR,15,16:X_ac,V_zero,23,24:AC,ACR
-#if defined(MUMPS5)
-                  CALL IMP_SOLV(
-     1            ICODE  ,ISKEW  ,ISKWN  ,IPART  ,IXTG   ,IXS    ,IXQ    ,
-     2            IXC    ,IXT    ,IXP    ,IXR    ,IXTG1          ,ITAB   ,ITABM1 ,
-     3            NPC    ,IBCL   ,IBFV   ,SENSORS%SENSOR_TAB,NNLINK ,LNLINK ,IPARG  ,IGRV   ,
-     4            IPARI  ,INTBUF_TAB,NPRW   ,ICONX  ,NPBY,LPBY   ,LRIVET ,
-     5            NSTRF  ,LJOINT ,ICODT  ,ICODR  ,ISKY  ,ADSKY,IADS(I87J),
-     6            ILINK  ,LLINK  ,WEIGHT         ,ITASK ,IBVEL  ,LBVEL  ,FBVEL  ,
-     7            X      ,D      ,V      ,VR     ,DR     ,THKE   ,DAMP   ,MS     ,
-     8            IN     ,PM     ,SKEW   ,GEO    ,EANI   ,BUFMAT ,BUFGEO ,BUFSF  ,
-     9            TF     ,FORC   ,VEL    ,FSAV   ,AGRV   ,FR_WAVE,PARTS0 ,
-     A            ELBUF  ,RBY   ,RIVET,FR_ELEM,IAD_ELEM,
-     B            WA     ,A      ,AR     ,STIFN  ,STIFR  ,PARTSAV,FSKY   ,
-     C            FSKYI  ,IFRAME ,XFRAME ,W16    ,IACTIV ,FSKYM  ,IGEO   ,IPM    ,
-     D            TFEXT  ,NODFT  ,NODLT  ,NT_IMP ,NUM_IMP,NS_IMP ,NE_IMP ,IND_IMP,
-     L            IT     ,RWBUF  ,LPRW   ,FR_WALL,NBINTC ,INTLIST,
-     M            FANI(1,1+NFOA+2*(NSECT+NRBODY)),RWSAV  ,FSAVD ,
-     N            GRAPHE , FAC_K  ,IPIV_K ,NKCOND,NSENSOR,
-     O            MONVOL ,IGRSURF,FR_MV  ,VOLMON ,DIRUL,
-     P            NODGLOB,MUMPS_PAR,CDDLP ,ISENDTO,IRCVFROM,NEWFRONT,IMSCH  ,
-     Q            I2MSCH ,ISIZXV,ILENXV ,ISLEN7  ,IRLEN7 ,ISLEN11,IRLEN11,ISLEN17,
-     R            IRLEN17,IRLEN7T,ISLEN7T,KINET  ,NUM_IMP1,TEMP  ,DT2PREV,WA     ,
-     S            LGRAV  ,SH4TREE,SH3TREE,IRLEN20,ISLEN20,IRLEN20T,ISLEN20T,
-     T            IRLEN20E,ISLEN20E,IRBE3,LRBE3  ,FRBE3  ,FR_I2M,IAD_I2M,FR_RBE3M,
-     U            IAD_RBE3M,FRWL6,IRBE2  ,LRBE2,INTBUF_TAB_CP,
-     W            IKINE  ,DIAG_SMS,ICFIELD,LCFIELD,CFIELD,COUNT_REMSLV,
-     X            COUNT_REMSLVE,ELBUF_TAB,ELBUF_IMP,XDP,WEIGHT_MD , STACK  ,
-     Y            SENSORS%SFSAV,SENSORS%FSAV,SENSORS%STABSEN,SENSORS%TABSENSOR,DRAPE_SH4N  , DRAPE_SH3N,
-     Z            H3D_DATA,MULTI_FVM,IGRBRIC,IGRSH4N,IGRSH3N,IGRBEAM,FORNEQS,MAXDGAP,
-     A            NDDL0   ,NNZK0 ,IT_T   ,IMPBUF_TAB,CPTREAC,FTHREAC,NODREAC, DRAPEG,
-     B            INTERFACES,OUTPUT%TH%TH_SURF,FSAVSURF,NSEG_LOADP,DPL0CLD,VEL0CLD)
-#else
-                  WRITE(6,*) __LINE__,"Fatal error: MUMPS required"
-                  CALL FLUSH(6)
-                  CALL ARRET(5)
-#endif
 C Modes buckling
                   IF (NBUCK>0) IBUCK=1
                 ELSEIF (IBUCK>0) THEN
-C
-#if defined(MUMPS5) && defined(DNC)
-                  CALL IMP_BUCK(
-     2            PM,             GEO,             IPM,       IGEO,           ELBUF,
-     3            IXS,            IXQ,             IXC,       IXT,            IXP,
-     4            IXR,            IXTG,            IXTG1,     IPARG,
-     5            TF,             NPC,             FR_WAVE,   W16,            BUFMAT,
-     6            THKE,           BUFGEO,          NSENSOR,   SENSORS%SENSOR_TAB,RBY,
-     7            SKEW,           WA,                ICODT,   ICODR,         ISKEW,
-     9            IBFV,           VEL,             LPBY,      NPBY,           ITAB,
-     A            WEIGHT,         MS,              IN,        IPARI,     INTBUF_TAB,
-     B            X_A ,           ITSK ,
-     E            FANI,           ICUT,            XCUT,      FANI(1,1+NFIA), FANI(1,1+NFEA),
-     F            FANI(1,1+NFOA), ANIN,            NSTRF,     RWBUF,          NPRW,
-     G            TANI,           DD_IAD,          EANI,      IPART,
-     H            NOM_OPT,        IGRSURF,         BUFSF,     IDATA,
-     I            RDATA,          KXX,             IXX,       KXSP,           IXSP,
-     J            NOD2SP,         SPBUF,           IXS(L1),   IXS(L2),        IXS(L3),
-     K            VR,             MONVOL,          VOLMON,    NODGLOB,        IAD_ELEM,
-     L            FR_ELEM,        FR_SEC,          FR_RBY2,   IAD_RBY2,       FR_WALL,
-     M            V,              A,               GRAPHE,    PARTSAV ,       XFRAME  ,
-     N            DIRUL,
-     O            FSAV(1,NFNCA+1), FSAV(1,NFTCA+1),TEMP      ,SH4TREE,        SH3TREE,
-     P            ERR_THK_SH4,    ERR_THK_SH3    , IFRAME    ,LPRW      ,     ELBUF_TAB,
-     Q            FSAV           ,FSAVD          , RWSAV     ,AR        ,     IRBE3   ,
-     R            LRBE3          ,FRBE3          , FR_I2M    ,IAD_I2M   ,     FR_RBE3M,
-     S            IAD_RBE3M      ,FRWL6          , IBCL      ,FORC      ,     IRBE2   ,
-     T            LRBE2          ,IAD_RBE2       , FR_RBE2   ,WEIGHT_MD,
-     U            CLUSTER        ,FCLUSTER       , MCLUSTER  ,XFEM_TAB  ,
-     V            ALE_CONNECTIVITY    ,W              , NV46      ,NERCVOIS  ,     NESDVOIS ,
-     W            LERCVOIS       ,LESDVOIS       ,CRKEDGE    ,STACK     ,SENSORS%SFSAV   ,
-     X            SENSORS%FSAV   ,SENSORS%STABSEN,SENSORS%TABSENSOR,INDX_CRK  ,XEDGE4N       ,
-     Y            XEDGE3N        ,SPH2SOL        ,STIFN_TMP  ,STIFR_TMP ,     DRAPE_SH4N ,
-     Z            DRAPE_SH3N     ,H3D_DATA       ,SUBSETS    ,IGRNOD    ,     FCONT_MAX,
-     A            FANI(1,NFNCA2+1),FANI(1,NFTCA2+1),NDDL0    ,NNZK0     ,IMPBUF_TAB ,
-     B            DRAPEG         ,MAT_ELEM%MAT_PARAM   )
-#else
-                  WRITE(6,*) __LINE__,"Fatal error: MUMPS required"
-                  CALL FLUSH(6)
-                  CALL ARRET(5)
-#endif
 
                   IF (IDYNA==0.AND.ITSK==0) CALL CP_DM(NUMGEO,GEO,IGEO,DMCP,2)
                   MSTOP=2
@@ -9357,10 +9031,6 @@ C--- //0 ----------------
               IF(IDT_THERM == 1.AND.(TSTOP-TT)<=EM20)THEN
                 MSTOP_DT_THERM = 1
               ENDIF
-
-#if defined(MYREAL8) && !defined(WITHOUT_LINALG)
- 300          CONTINUE
-#endif
 
 C---------------
 C     END OF RUN
@@ -10105,9 +9775,6 @@ C
                 END IF
                 IF(IMPL_S>0.OR.NEIG>0)THEN
                   CALL DEALLOC_IMPBUF(IMPBUF_TAB)
-#if defined(MUMPS5)
-                  CALL DEALLOCM_IMP(MUMPS_PAR)
-#endif
                 END IF
                 IF(IPARIT==0.AND.IRESP==1) THEN
                   DEALLOCATE( ACC_DP )
