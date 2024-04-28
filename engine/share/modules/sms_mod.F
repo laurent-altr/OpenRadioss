@@ -102,6 +102,11 @@ C-----------------------------------------------
                ALLOCATE(JADI_SMS(0))
                ALLOCATE(JDII_SMS(0))
                ALLOCATE(LTI_SMS(0))
+
+               ALLOCATE(KDI_SMS(0),JDI_SMS(0),PK_SMS(0),LT_SMS(0),LTK_SMS(0),
+     .                 JSM_SMS(0),
+     .                 TAG_LNK_SMS(0),NRWL_SMS(0))
+
         RETURN
       END SUBROUTINE
         SUBROUTINE SMS_DEALLOCATE()
