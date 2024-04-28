@@ -57,7 +57,31 @@ C-----------------------------------------------
       my_real,
      .        DIMENSION(:,:), ALLOCATABLE :: DIAG_SMS3, PREC_SMS3
       INTEGER, DIMENSION(:,:),ALLOCATABLE :: ISKYI_SMS
+      INTEGER, ALLOCATABLE, DIMENSION(:,:) :: T2MAIN_SMS2
+      my_real, DIMENSION(:),ALLOCATABLE :: T2FAC_SMS2
+
 C-----------------------------------------------
+        CONTAINS
+        SUBROUTINE SMS_ALLOCATE()
+          IMPLICIT NONE
+              ALLOCATE(TAGNOD_SMS(0),NATIV_SMS(0),
+     .                 TAGPRT_SMS(0),TAGREL_SMS(0),
+     .                 INDX1_SMS(0),INDX2_SMS(0),
+     .                 TAGSLV_RBY_SMS(0),TAGMSR_RBY_SMS(0),
+     .                 KAD_SMS(0), JAD_SMS(0), LAD_SMS(0),
+     .                 JADC_SMS(0),
+     .                 JADS_SMS(0), JADS10_SMS(0),
+     .                 JADT_SMS(0),
+     .                 JADP_SMS(0),
+     .                 JADR_SMS(0),
+     .                 JADTG_SMS(0),
+     .                 X_SMS(0,0), P_SMS(0,0),
+     .                 Y_SMS(0,0), Z_SMS(0,0), PREC_SMS(0),
+     .                 XMOM_SMS(0,0), PREC_SMS3(0,0),DIAG_SMS3(0,0),
+     .                 T2MAIN_SMS2(0,0),
+     .                 T2FAC_SMS2(0))
+        END SUBROUTINE
+
       END MODULE SMS_MOD
 Chd|====================================================================
 Chd|  SMS_PCG_PROJ                  share/modules/sms_mod.F       

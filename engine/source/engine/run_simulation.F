@@ -1423,8 +1423,6 @@ C-------------------------------------------------------------------------------
      .         ,  DIMENSION(:),ALLOCATABLE :: WASPSYM
 C AMS
               INTEGER LSKYI_SMS_NEW
-              INTEGER, ALLOCATABLE, DIMENSION(:,:) :: T2MAIN_SMS
-              my_real, DIMENSION(:),ALLOCATABLE :: T2FAC_SMS
 C-----------------------------------------------------------------------------------
 C     FVMBAG: switch to UP
               INTEGER :: NFVBAG0
@@ -1974,22 +1972,7 @@ C    SELECTIVE MASS SCALING
 C----------------------------------------------------------
 C for chkpt :: ISMSCH=1
               ISMSCH  =1
-              ALLOCATE(TAGNOD_SMS(0),NATIV_SMS(0),
-     .                 TAGPRT_SMS(0),TAGREL_SMS(0),
-     .                 INDX1_SMS(0),INDX2_SMS(0),
-     .                 TAGSLV_RBY_SMS(0),TAGMSR_RBY_SMS(0),
-     .                 KAD_SMS(0), JAD_SMS(0), LAD_SMS(0),
-     .                 JADC_SMS(0),
-     .                 JADS_SMS(0), JADS10_SMS(0),
-     .                 JADT_SMS(0),
-     .                 JADP_SMS(0),
-     .                 JADR_SMS(0),
-     .                 JADTG_SMS(0),
-     .                 X_SMS(0,0), P_SMS(0,0),
-     .                 Y_SMS(0,0), Z_SMS(0,0), PREC_SMS(0),
-     .                 XMOM_SMS(0,0), PREC_SMS3(0,0),DIAG_SMS3(0,0),
-     .                 T2MAIN_SMS(0,0),
-     .                 T2FAC_SMS(0))
+              CALL SMS_ALLOCATE()
 C init pointer
               PTR_SMS => NATIV_SMS
               ALLOCATE(JADI21_SMS(0),
@@ -3105,9 +3088,9 @@ C===============================================================================
      I          DELTA_PMAX_GAP_NODE,IAD_FRNOR,FR_NOR,
      J          NB25_CANDT,NB25_IMPCT,NB25_DST1,NB25_DST2,INTLIST25,
      K          IAD_FREDG,FR_EDG,MAIN_PROC,NATIV_SMS,I_OPT_STOK ,
-     L          MULTI_FVM,IPARG  ,ELBUF_TAB, H3D_DATA, T2MAIN_SMS,
+     L          MULTI_FVM,IPARG  ,ELBUF_TAB, H3D_DATA, T2MAIN_SMS2,
      M          LSKYI_SMS_NEW    ,FORNEQS  ,INT7ITIED,IDEL7NOK_SAV,MAXDGAP,
-     N          T2FAC_SMS,ICODT,ISKEW ,FSKYN25  ,ADDCSRECT,PROCNOR,
+     N          T2FAC_SMS2,ICODT,ISKEW ,FSKYN25  ,ADDCSRECT,PROCNOR,
      O          INTER_STRUCT,SORT_COMM,RNUM_SIZ,NATIV_SMS_SIZ,TEMP_SIZ,
      P          INTERFACES)
 C
@@ -3536,8 +3519,8 @@ C Init var parallel SMP
      L          ISENSINT          ,NISUBMAX       ,NB25_CANDT      ,NB25_IMPCT      ,
      M          NB25_DST1         ,NB25_DST2      ,IXIG3D         ,KXIG3D          ,WIGE            ,
      N          KNOT              ,IGEO           ,MULTI_FVM      ,H3D_DATA        ,INTBUF_FRIC_TAB ,
-     P          PSKIDS            ,T2MAIN_SMS   ,FORNEQS        ,KNOTLOCPC       ,KNOTLOCEL      ,
-     Q          PINCH_DATA%APINCH(1,IDX_PINCH),PINCH_DATA%STIFPINCH(IDX_PINCH),T2FAC_SMS,TAGNCONT   ,
+     P          PSKIDS            ,T2MAIN_SMS2   ,FORNEQS        ,KNOTLOCPC       ,KNOTLOCEL      ,
+     Q          PINCH_DATA%APINCH(1,IDX_PINCH),PINCH_DATA%STIFPINCH(IDX_PINCH),T2FAC_SMS2,TAGNCONT   ,
      R          KLOADPINTER       ,LOADPINTER     ,LOADP_HYD_INTER ,DGAPLOADINT    ,S_LOADPINTER    ,
      S          INTERFACES        ,XCELL_REMOTE)
 
@@ -4631,7 +4614,7 @@ C===============================================================================
      7                 NATIV_SMS,DMINT2,ANIN(NDAMA2+1),NB_FRI2M ,FR_LOCI2M,
      8                 DT2T  ,NELTST ,ITYPTST   ,INTBUF_TAB     ,TEMP     ,MCP   ,
      9                 FTHE  ,CONDN  ,
-     A                 H3D_DATA,T2FAC_SMS,FANI(1,NFNCA2+1),FANI(1,NFTCA2+1))
+     A                 H3D_DATA,T2FAC_SMS2,FANI(1,NFNCA2+1),FANI(1,NFTCA2+1))
                   ENDDO
                   IF (IMONM > 0) CALL STOPTIME(28,1)
                   IF (IMON>0) THEN
@@ -7573,7 +7556,7 @@ C
      .                     DIAG_SMS3, LT_SMS,
      .                     KAD_SMS, KDI_SMS , PK_SMS, LTK_SMS,
      .                     JADI_SMS, JDII_SMS, LTI_SMS, MSKYI_SMS, ISKYI_SMS,
-     .                     XMOM_SMS, TAGMSR_RBY_SMS, T2MAIN_SMS)
+     .                     XMOM_SMS, TAGMSR_RBY_SMS, T2MAIN_SMS2)
 C
                 IF(ALLOCATED(FTHREAC))DEALLOCATE(FTHREAC)
                 IF(ALLOCATED(FTHDTM))DEALLOCATE(FTHDTM)
