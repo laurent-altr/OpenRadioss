@@ -572,7 +572,7 @@ Chd|====================================================================
      8        NODGLOBXFE,SPH2SOL ,SOL2SPH ,IRST ,FSKYD  ,
      9        DMSPH     ,WAGAP   ,XFEM_TAB,ELCUTC  ,NODENR  ,
      A        KXFENOD2ELC,ENRTAG,INTBUF_TAB,
-     B        RTHBU    F,KXIG3D ,IXIG3D ,KNOT, WIGE,
+     B        RTHBUF,KXIG3D ,IXIG3D ,KNOT, WIGE,
      C        WSMCOMP,STACK,
      D        CPUTIME_MP_GLOB, CPUTIME_MP ,TAB_UMP,POIN_UMP ,SOL2SPH_TYP,
      E        IRUNN_BIS,ADDCSRECT, IAD_FRNOR,FR_NOR  ,PROCNOR,
@@ -1951,36 +1951,6 @@ C ----------------------------------------------
      .                        IFOAM_CONT(0) )
               ENDIF
 C
-              IF(NADMESH/=0)THEN
-                ALLOCATE(LSH4ACT(NUMELC),LSH4KIN(NUMELC),
-     .                   PSH4ACT(0:LEVELMAX+1),PSH4KIN(0:LEVELMAX+1),
-     .                   LSH3ACT(NUMELTG),LSH3KIN(NUMELTG),
-     .                   PSH3ACT(0:LEVELMAX+1),PSH3KIN(0:LEVELMAX+1),
-     .                   STAT=IERROR)
-C
-                IF(IERROR/=0) THEN
-                  CALL ANCMSG(MSGID=153,ANMODE=ANINFO,
-     .                I1=IERROR)
-                  CALL ARRET(2)
-                END IF
-
-                IF (IPARIT/=0) THEN
-                  ALLOCATE(MSH4SKY(NUMELC),MSH3SKY(NUMELTG),
-     .                   STAT=IERROR)
-                  IF(IERROR/=0) THEN
-                    CALL ANCMSG(MSGID=153,ANMODE=ANINFO,
-     .                I1=IERROR)
-                    CALL ARRET(2)
-                  END IF
-                ELSE
-                  ALLOCATE(MSH4SKY(0),MSH3SKY(0))
-                END IF
-                ALLOCATE(ILEVNOD(0:NUMNOD),STAT=IERR)
-                IF(IERR/=0) THEN
-                  CALL ANCMSG(MSGID=20,ANMODE=ANINFO)
-                  CALL ARRET(2)
-                END IF
-              END IF
 C
               IF(ISTATCND /= 0)THEN
                 ALLOCATE(LSH4UPL(NUMELC),LSH3UPL(NUMELTG),
@@ -2247,14 +2217,8 @@ C-----------------------------------------------
               LL1 = 1+8*NUMELS
               LL2 = LL1+6*NUMELS10
               LL3 = LL2+12*NUMELS20
-              IF(NADMESH/=0.AND.IDEL7NG>=1)THEN
-                ALLOCATE(TAGTRIMC(NUMELC))
-                ALLOCATE(TAGTRIMTG(NUMELTG))
-              ELSE
-                ALLOCATE(TAGTRIMC(0))
-                ALLOCATE(TAGTRIMTG(0))
-              ENDIF
-
+              ALLOCATE(TAGTRIMC(0))
+              ALLOCATE(TAGTRIMTG(0))
 C NITSCHE METHOD
               NFACNIT =0
               IF (NITSCHE > 0 ) THEN
@@ -2420,7 +2384,6 @@ C===============================================================================
               GLOBAL_ACTIVE_ALE_ELEMENT = .FALSE.
               CALL CHECK_ALE_COMM(IPARG,ELBUF_TAB,GLOBAL_ACTIVE_ALE_ELEMENT)
 C     End Initialisations //
-              IF(NADMESH/=0.AND.IDEL7NG>=1) IDEL7NOK = 0
 C     THERMAL TIME STEP : we don t check incompatible kinematic conditions anymore
 c      we constraint all DDLs
               IF(IDT_THERM == 1) THEN
@@ -2591,107 +2554,6 @@ C                                     PARALLEL SECTION (SMP)
 C========================================================================================
 
 C------------IF adaptive Mesh : check if there are elements eroded after trimming to remove nodes from interface------
-              IF(NADMESH/=0.AND.IDEL7NG>=1)THEN
-
-                L1 = 1+NIXS*NUMELS + NSVOIS*NIXS
-                L2 = L1+6*NUMELS10
-                L3 = L2+12*NUMELS20
-                IF((INT24USE==1.OR.NINTER25/=0).AND.IDEL7NOK==1)THEN
-                  INDSEGLO(2:NINTER+1)=0
-                  INDSEGLO(1)=1
-                ENDIF
-
-!$OMP PARALLEL
-!$OMP+ PRIVATE(ITSK,NODFTSK,NODLTSK,NUMNTSK,NDTSK,IPMTSK,IGMTSK)
-!$OMP+ PRIVATE(PARTFTSK,PARTLTSK,NWAFTSK,N1,GREFTSK,GRELTSK)
-C Init var parallel SMP
-                CALL SMP_INIT(
-     1           ITSK  ,NODFTSK ,NODLTSK ,NUMNTSK,NDTSK,
-     2           IPMTSK,PARTFTSK,PARTLTSK,NWAFTSK,IGMTSK  ,
-     3              GREFTSK,GRELTSK)
-
-                CALL TAGOFF3N(
-     1             GEO        ,IXS       ,IXS(L1)   ,IXS(L1)   ,IXS(L3)  ,IXQ    ,
-     2             IXC         ,IXT      ,IXP       ,IXR       ,IXTG     ,
-     3             WA(NUMNOD+1),NODFTSK  ,NODLTSK   ,IPARG     ,ELBUF    ,ITSK   ,
-     4             WA(NWAFTSK) ,IXTG1    ,IAD_ELEM  ,FR_ELEM   ,ITAB     ,ITABM1 ,
-     5             ADDCNEL     ,CNEL     ,KXSP      ,ELBUF_TAB ,TAGEL    ,IEXLNK ,
-     6             IGRNOD      ,DD_R2R   ,DD_R2R_ELEM,SDD_R2R_ELEM,IDEL7NOK_SAV ,
-     7             IDEL7NOK_R2R,TAGTRIMC,TAGTRIMTG,S_ELEM_STATE,ELEM_STATE,
-     8             SHOOT_STRUCT,SHOOT_STRUCT%GLOBAL_NB_ELEM_OFF)
-                ! ---------------------
-                ! check if a node is deactivated and deactivate all the corresponding secondary nodes
-                CALL CHECK_NODAL_STATE( ITSK,WA(NUMNOD+1),NEWFRONT,INTBUF_TAB,SHOOT_STRUCT%SIZE_SEC_NODE,
-     .                 SHOOT_STRUCT%SHIFT_S_NODE,SHOOT_STRUCT%INTER_SEC_NODE,SHOOT_STRUCT%SEC_NODE_ID)
-                ! ---------------------
-
-                ! ---------------------
-                ! check if a surface/edge must be deactivated and save the surface/edge id
-                IF(ITSK==0) THEN
-                  CALL FIND_SURFACE_INTER( ITAB  ,SHOOT_STRUCT  ,IXS  ,IXS(L1)  ,IXC  ,
-     .                                     IXTG  ,
-     .                                     NGROUP,NPARG,IGROUPS,IPARG )
-
-                  CALL FIND_EDGE_INTER( ITAB,SHOOT_STRUCT,IXS,IXS(L1),
-     1                                  IXC,IXTG,IXQ,IXT,IXP,
-     2                                  IXR,GEO,NGROUP,IGROUPS,IPARG )
-                ENDIF
-                CALL MY_BARRIER( )
-                ! ---------------------
-
-                ! ---------------------
-                ! exchange of surfaces (ie. 4 nodes) to deactivate and deactivation
-                ! ONLY FOR LOCAL SURFACE / REMOTE ELEMENT
-                IF(NSPMD>1) THEN
-                  IF(ITSK==0) CALL SPMD_EXCH_DELETED_SURF_EDGE( IAD_ELEM,ITABM1,SHOOT_STRUCT,INTBUF_TAB,NEWFRONT,
-     .                                 IPARI,GEO,
-     .                                 IXS,IXC,IXT,IXP,IXR,IXTG,
-     .                                 ADDCNEL,CNEL,WA(NWAFTSK),TAGEL )
-                  CALL MY_BARRIER()
-                ENDIF
-                ! ---------------------
-
-                ! ---------------------
-                ! loop over the surface id and deactivate the surface
-                ! ONLY FOR LOCAL SURFACE / LOCAL ELEMENT
-                CALL CHECK_SURFACE_STATE( ITSK,SHOOT_STRUCT%SAVE_SURFACE_NB,SHOOT_STRUCT%SAVE_SURFACE,
-     .                                    SHOOT_STRUCT%SHIFT_INTERFACE,INTBUF_TAB,
-     .                                    IPARI,GEO,
-     .                                    IXS,IXC,IXT,IXP,IXR,IXTG,
-     .                                    ADDCNEL,CNEL,WA(NWAFTSK),TAGEL,SHOOT_STRUCT )
-
-                ! loop over the edge id and deactivate the edge
-                ! ONLY FOR LOCAL EDGE / LOCAL ELEMENT
-                CALL CHECK_EDGE_STATE( ITSK,SHOOT_STRUCT%SAVE_M_EDGE_NB,SHOOT_STRUCT%SAVE_S_EDGE_NB,
-     .                                 SHOOT_STRUCT%SAVE_M_EDGE,SHOOT_STRUCT%SAVE_S_EDGE,
-     .                                 SHOOT_STRUCT%SHIFT_INTERFACE,INTBUF_TAB,NEWFRONT,IPARI,GEO,
-     .                                 IXS,IXC,IXT,IXP,IXR,IXTG,
-     .                                 ADDCNEL,CNEL,WA(NWAFTSK),TAGEL,SHOOT_STRUCT )
-                ! ---------------------
-
-                ! ---------------------
-                ! exchange of deactivated surfaces (ie. 4 nodes) to deactivate to deactivate the neighbourhood
-                ! ONLY FOR REMOTE SURFACE + interface type 24 or 25
-                IF(INT24USE>0.OR.NINTER25/=0) THEN
-                  IF(ITSK==0) CALL CHECK_REMOTE_SURFACE_STATE( SHOOT_STRUCT%NUMBER_REMOTE_SURF,SHOOT_STRUCT%REMOTE_SURF,
-     .                                                         SHOOT_STRUCT%SHIFT_INTERFACE,INTBUF_TAB,
-     .                                                         IPARI,IAD_ELEM,SHOOT_STRUCT )
-                  CALL MY_BARRIER()
-                ENDIF
-                ! ---------------------
-
-                CALL CHKSTFN3N(
-     1             IPARI   ,GEO         ,IXS      ,IXQ         ,IXC     ,IXT       ,
-     2             IXP     ,IXR         ,IXTG     ,WA(NUMNOD+1),IPARG   ,ITSK      ,
-     3             NEWFRONT,WA(NWAFTSK) ,MS       ,IN          ,ANIN(NDMA+1),ITAB  ,
-     4             ITABM1  ,ADDCNEL     , CNEL    ,INDIDEL     ,NINDEX1 ,NINDEX2   ,
-     5             NINDEX3 ,NINDEX4     ,TAGEL    ,INT24USE    ,IBUFSEGLO ,INDSEGLO,
-     6             IBUFIDEL ,INTBUF_TAB,IAD_ELEM)
-
-
-!$OMP END PARALLEL
-                CALL DEALLOC_SHOOT_INTER( SHOOT_STRUCT )
-              ENDIF
               IF(ISFEM >= 1) THEN
                 SVARNOD = 2*NUMNOD
               ELSE
@@ -3802,86 +3664,6 @@ C--------------------------------------------------------
 
               END IF
 
-C-------------------------------------------------------
-C     ADAPTIVE MESHING
-C   Get ICONTACT After sort, After Contact forces if SPMD
-C                              Before Contact forces if SMP
-C-------------------------------------------------------
-              IF(NADMESH > 0.AND.IMPL_S==0)THEN
-                IF (IMON>0) CALL STARTIME(36,1)
-C
-                NSH4OLD=NSH4ACT
-                NSH3OLD=NSH3ACT
-                IADMESH=0
-                ICHKADM=0
-                IF(TT >= TADMESH+DTADMESH)THEN
-                  TADMESH=TADMESH+DTADMESH
-                  ICHKADM=1
-                END IF
-C
-                IF(ICHKADM/=0 .AND. IADMERRT/=0)THEN
-C
-                  CALL ADMERR(
-     .            IXC     ,IXTG     ,X        ,IPARG       ,ELBUF_TAB   ,
-     .             IPART   ,IPART(K3),IPART(K8),ERR_THK_SH4 ,ERR_THK_SH3 ,
-     .             IAD_ELEM ,FR_ELEM ,WEIGHT   ,SH4TREE     ,SH3TREE     )
-                END IF
-
-C========================================================================================
-C                                     PARALLEL SECTION (SMP)
-C========================================================================================
-
-!$OMP PARALLEL PRIVATE(ITSK,NODFTSK,NODLTSK)
-                ITSK = OMP_GET_THREAD_NUM()
-                NODFTSK   = 1+ITSK*NUMNOD/ NTHREAD
-                NODLTSK   = (ITSK+1)*NUMNOD/NTHREAD
-
-                CALL ADMDIV(IXC  ,IPART(K3),IXTG ,IPART(K8),IPART,
-     .                      ITSK ,ICONTACT ,IPARG,X        ,MS     ,
-     .                      IN   ,RCONTACT ,ELBUF_TAB,NODFTSK  ,NODLTSK,
-     .                       IGEO ,IPM      ,SH4TREE,PADMESH,MSC  ,
-     .                       INC  ,SH3TREE  ,MSTG   ,INTG   ,PTG  ,
-     .                    ACONTACT,PCONTACT,ERR_THK_SH4,ERR_THK_SH3,MSCND,
-     .                       INCND,PM      ,MCP     ,MCPC   ,MCPTG)
-                NGDONE = 1
-C       /---------------/
-                CALL MY_BARRIER
-C       /---------------/
-                IF(IADMRULE /= 0)THEN
-                  IF(IADMESH > 0)THEN
-                    CALL ADMREGUL(IXC  ,IPART(K3),IXTG ,IPART(K8),IPART,
-     .                            ITSK   ,IPARG    ,X      ,MS       ,IN   ,
-     .                            ELBUF_TAB,NODFTSK  ,NODLTSK,IGEO     ,IPM  ,
-     .                            SH4TREE,MSC  ,INC   ,SH3TREE,MSTG    ,
-     .                            INTG   ,PTG  ,MSCND ,INCND  ,PM      ,
-     .                            MCP    ,MCPC ,MCPTG )
-C           /---------------/
-                    CALL MY_BARRIER
-C           /---------------/
-                  END IF
-                END IF
-
-                IF(IADMESH > 0)THEN
-                  IF(ITSK==0) THEN
-                    CALL ADMORDR(SH4TREE,SH3TREE,IXC,IXTG)
-                    IF(ISTATCND /= 0) CALL CNDORDR(IPART,IPART(K3),IPART(K8),
-     .                                             SH4TREE,SH3TREE)
-                  END IF
-                  IFLGADM=1
-                  CALL ADMGVID(
-     1              IPARG     ,ELBUF_TAB ,FSKY   ,FSKY  ,FTHESKY,
-     2              IADS(I87C),IADS(I87G),IFLGADM,IGROUC,NGROUC ,
-     3              CONDNSKY  )
-                  CALL MY_BARRIER
-                  NGDONE = 1
-                END IF
-                RCONTACT(NODFTSK:NODLTSK)=EP30
-                ACONTACT(NODFTSK:NODLTSK)=EP30
-                PCONTACT(NODFTSK:NODLTSK)=ZERO
-!$OMP END PARALLEL
-
-                IF (IMON>0) CALL STOPTIME(36,1)
-              END IF
 C--- // N/3 --------------------------------------------------------
 C       EXTERNAL AND INTERNAL FORCES (ANIM)
 C--------------------------------
@@ -5820,16 +5602,6 @@ C-----------------------------------------------------
                 END IF
 
 C----------------------------------------------------------
-C         ADAPTIVE MESHING : FORCES AND STIFNESS FROM SECND TO MAIN
-C-----------------------------------------------------
-                IF(NADMESH/=0)THEN
-                  IF (IMON>0) CALL STARTIME(37,1)
-                  CALL ADMFOR0(IXC, IPART(K3), IXTG, IPART(K8), IPART,
-     1                         A  , STIFN    ,    AR, STIFR   ,X    ,
-     2                         SH4TREE,SH3TREE,STCND,     FTHE,CONDN)
-                  IF (IMON>0) CALL STOPTIME(37,1)
-                END IF
-C----------------------------------------------------------
 C         RIGID MATERIAL
 C----------------------------------------------------------
                 IF (IRIGID_MAT > 0) THEN
@@ -7559,29 +7331,6 @@ C===============================================================================
                 END IF
 
 
-C-----------------------------------------------------
-C     adaptive meshing : velocities on secnd nodes
-C-----------------------------------------------------
-
-                IF(NADMESH/=0)THEN
-                  IF (IMON>0) CALL STARTIME(38,1)
-
-C========================================================================================
-C                                          PARALLEL SECTION (SMP)
-C========================================================================================
-
-!$OMP PARALLEL PRIVATE(ITSK)
-                  ITSK = OMP_GET_THREAD_NUM()
-
-                  CALL ADMVIT(IXC, IPART(K3), IXTG, IPART(K8), IPART,
-     1                        ITSK   ,A        , V   , AR       , VR   ,
-     2                      SH4TREE,SH3TREE ,TEMP )
-
-!$OMP END PARALLEL
-
-                  IF (IMON>0) CALL STOPTIME(38,1)
-                END IF
-
 C--------------------------------------------------
 c     rigid bodies velocities on secondary nodes
 C--------------------------------------------------
@@ -9151,12 +8900,6 @@ C mass & velocity
                 IF(ALLOCATED(INDIDEL))DEALLOCATE(INDIDEL)
                 IF(ALLOCATED(IPARTL))DEALLOCATE(IPARTL)
                 IF(ALLOCATED(EMINX))DEALLOCATE(EMINX)
-                IF(NADMESH/=0)THEN
-                  DEALLOCATE(LSH4ACT,LSH4KIN,PSH4ACT,PSH4KIN,
-     .                       LSH3ACT,LSH3KIN,PSH3ACT,PSH3KIN,
-     .                       MSH4SKY,MSH3SKY)
-                  IF(IDEL7NG>=1) DEALLOCATE(TAGTRIMC,TAGTRIMTG)
-                END IF
                 IF(ALLOCATED(STIFN_TMP))DEALLOCATE(STIFN_TMP)
                 IF(ALLOCATED(STIFR_TMP))DEALLOCATE(STIFR_TMP)
                 IF(ALLOCATED(ACND))DEALLOCATE(ACND)
@@ -9537,12 +9280,6 @@ C Multidomain -> close sockets
                 !ENDIF
                 IF(ALLOCATED(IPARTL))DEALLOCATE(IPARTL)
                 IF(ALLOCATED(EMINX))DEALLOCATE(EMINX)
-                IF(NADMESH/=0)THEN
-                  DEALLOCATE(LSH4ACT,LSH4KIN,PSH4ACT,PSH4KIN,
-     .                       LSH3ACT,LSH3KIN,PSH3ACT,PSH3KIN,
-     .                       MSH4SKY,MSH3SKY)
-                  IF(IDEL7NG>=1) DEALLOCATE(TAGTRIMC,TAGTRIMTG)
-                END IF
 C
                 !interface22
                 IF(ALLOCATED(BRICK_LIST))       DEALLOCATE (BRICK_LIST)
