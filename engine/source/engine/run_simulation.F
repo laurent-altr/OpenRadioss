@@ -1223,8 +1223,7 @@ C-----------------------------------------------
      .                I87L,I87M,I87N,IMSCH,IAD1B,IAD1,IAD2,I2MSCH, ISMSCH, ONOFP
               INTEGER CPLXIT,  ADRNOD, ONOF, ONFELT, ICH,IFLGADM, MADENDREQUEST
               INTEGER IDUM1, DIM6, DIM_EXCH
-              INTEGER LLT1,IWIOUT
-              INTEGER KSPH1,KSPH21,KSPH22,KSPH23,
+              INTEGER LLT1,IWIOUT,
      .                KSPACTIV,KSP2SORT,NELTSA,ITYPTSA,IDTNOD
               INTEGER NEGMAS
               INTEGER NBINTC, SIZE, LENR, LENS, LENI, SIZI, ISIZXV ,ILENXV,
@@ -2017,64 +2016,6 @@ C    SELECTIVE MASS SCALING
 C----------------------------------------------------------
 C for chkpt :: ISMSCH=1
               ISMSCH  =1
-              IF(IDTMINS /= 0)THEN
-                ALLOCATE(TAGNOD_SMS(NUMNOD),NATIV_SMS(NUMNOD),
-     .                   TAGPRT_SMS(NPART),TAGREL_SMS(NGROUP),
-     .                   INDX1_SMS(NUMNOD),INDX2_SMS(NUMNOD),
-     .                   TAGSLV_RBY_SMS(NUMNOD),TAGMSR_RBY_SMS(NUMNOD),
-     .                   KAD_SMS(NUMNOD+1), JAD_SMS(NUMNOD+1), IAD_SMS(NUMNOD+1), LAD_SMS(NUMNOD+1),
-     .                      JADC_SMS(4*NUMELC),
-     .                      JADS_SMS(8*NUMELS), JADS10_SMS(6*NUMELS10),
-     .                      JADT_SMS(2*NUMELT),
-     .                      JADP_SMS(2*NUMELP),
-     .                      JADR_SMS(3*NUMELR),
-     .                      JADTG_SMS(3*NUMELTG),
-     .                   X_SMS(3,NUMNOD), P_SMS(3,NUMNOD),
-     .                   Y_SMS(3,NUMNOD), Z_SMS(3,NUMNOD),
-     .                   PREC_SMS(NUMNOD), XMOM_SMS(3,NUMNOD),
-     .                   PREC_SMS3(3,NUMNOD),DIAG_SMS3(3,NUMNOD),
-     .                   T2MAIN_SMS(6,NUMNOD),
-     .                   T2FAC_SMS(NUMNOD),
-     .                   STAT=IERROR)
-                IF(IERROR/=0) THEN
-                  CALL ANCMSG(MSGID=19,ANMODE=ANINFO,
-     .                C1='(/DT/.../AMS)')
-                  CALL ARRET(2)
-                ENDIF
-                FR_RMS(1:NSPMD+1)=0
-                FR_SMS(1:NSPMD+1)=0
-                T2MAIN_SMS = 0
-                T2FAC_SMS = ONE
-              ELSEIF(IDTMINS_INT/=0)THEN
-                ALLOCATE(TAGNOD_SMS(NUMNOD),NATIV_SMS(0),
-     .                   TAGPRT_SMS(0),TAGREL_SMS(0),
-     .                   INDX1_SMS(NUMNOD),INDX2_SMS(NUMNOD),
-     .                   TAGSLV_RBY_SMS(NUMNOD),TAGMSR_RBY_SMS(NUMNOD),
-     .                   KAD_SMS(0), JAD_SMS(0), LAD_SMS(0),
-     .                      JADC_SMS(0),
-     .                      JADS_SMS(0), JADS10_SMS(0),
-     .                      JADT_SMS(0),
-     .                      JADP_SMS(0),
-     .                      JADR_SMS(0),
-     .                      JADTG_SMS(0),
-     .                   X_SMS(3,NUMNOD), P_SMS(3,NUMNOD),
-     .                   Y_SMS(3,NUMNOD), Z_SMS(3,NUMNOD),
-     .                   PREC_SMS(NUMNOD), XMOM_SMS(3,NUMNOD),
-     .                   PREC_SMS3(3,NUMNOD),DIAG_SMS3(3,NUMNOD),
-     .                   T2MAIN_SMS(6,NUMNOD),
-     .                   T2FAC_SMS(NUMNOD),
-     .                   STAT=IERROR)
-                IF(IERROR/=0) THEN
-                  CALL ANCMSG(MSGID=19,ANMODE=ANINFO,
-     .                C1='(/DT/.../AMS)')
-                  CALL ARRET(2)
-                ENDIF
-                TAGNOD_SMS(1:NUMNOD)=0
-                FR_RMS(1:NSPMD+1)=0
-                FR_SMS(1:NSPMD+1)=0
-                T2MAIN_SMS = 0
-                T2FAC_SMS = ONE
-              ELSE
                 ALLOCATE(TAGNOD_SMS(0),NATIV_SMS(0),
      .                   TAGPRT_SMS(0),TAGREL_SMS(0),
      .                   INDX1_SMS(0),INDX2_SMS(0),
@@ -2093,47 +2034,11 @@ C for chkpt :: ISMSCH=1
      .                   T2FAC_SMS(0))
 C init pointer
                 PTR_SMS => NATIV_SMS
-              END IF
-              IF(IDTMINS == 2 .AND. NINTSTAMP /=0)THEN
-                ALLOCATE(JADI21_SMS(NINTSTAMP),
-     .                   TAGSLV_I21_SMS(NUMNOD),TAGMSR_I21_SMS(NUMNOD),
-     .                   STAT=IERROR)
-                IF(IERROR/=0) THEN
-                  CALL ANCMSG(MSGID=19,ANMODE=ANINFO,
-     .                C1='(/DT/.../AMS)')
-                  CALL ARRET(2)
-                ENDIF
-              ELSE
                 ALLOCATE(JADI21_SMS(0),
      .                   TAGSLV_I21_SMS(0),TAGMSR_I21_SMS(0))
-              END IF
-C --
-              IF(IDTMINS /= 0 .OR. IDTMINS_INT /= 0)THEN
-                ALLOCATE(NODXI_SMS(NUMNOD),NODII_SMS(NUMNOD),
-     .                   STAT=IERROR)
-                IF(IERROR/=0) THEN
-                  CALL ANCMSG(MSGID=19,ANMODE=ANINFO,
-     .                  C1='(/DT/.../AMS)')
-                  CALL ARRET(2)
-                ENDIF
-              ELSE
                 ALLOCATE(NODXI_SMS(0),NODII_SMS(0))
-              END IF
-C --
-              IF(IDTMINS == 2 .OR. IDTMINS_INT /= 0)THEN
-                ALLOCATE(MSKYI_SMS(LSKYI_SMS),ISKYI_SMS(LSKYI_SMS,3),
-     .               JADI_SMS(NUMNOD+1),JDII_SMS(2*LSKYI_SMS),
-     .               LTI_SMS(2*LSKYI_SMS),
-     .               STAT=IERROR)
-                IF(IERROR/=0) THEN
-                  CALL ANCMSG(MSGID=19,ANMODE=ANINFO,
-     .                  C1='(/DT/.../AMS)')
-                  CALL ARRET(2)
-                ENDIF
-              ELSE
                 ALLOCATE(MSKYI_SMS(0),ISKYI_SMS(0,0),
      .                   JADI_SMS(0),JDII_SMS(0),LTI_SMS(0))
-              END IF
 
               IF (IREAC == 1 ) THEN
                 ALLOCATE(NODREAC(NUMNOD))
@@ -2465,7 +2370,7 @@ C ---------------------
                 MCLUSTER(1:3)=0
               ENDIF
 !
-              IF (SH_OFFSET_TAB%NSH_OSET > 0 .AND. IMPL_S==0) THEN
+              IF (SH_OFFSET_TAB%NSH_OSET > 0 ) THEN
                 ALLOCATE(XYZ(3,NUMNOD))
               ELSE
                 ALLOCATE(XYZ(0,0))
@@ -2499,11 +2404,7 @@ C-----------------------------------------------
 C       Allocations Phase 2
 C-----------------------------------------------
               ALLOCATE(FTHREAC(6*CPTREAC))
-              IF (IMPL_S==1) THEN
-                ALLOCATE(FTHDTM(6*CPTREAC))
-              ELSE
-                ALLOCATE(FTHDTM(0))
-              ENDIF
+              ALLOCATE(FTHDTM(0))
 C
               ! OUTPUT (ANIM,OUTP,H3D,TH) set COMPTREAC TO 1 IF REQUESTED
               COMPTREAC = 0
@@ -2575,12 +2476,9 @@ C           /DT/INTER/AMS
 C
               END IF
 C----------------------------------------------------------
-              IF(IDTMINS /= 0)THEN
-              ELSE
                 ALLOCATE(KDI_SMS(0),JDI_SMS(0),PK_SMS(0),LT_SMS(0),LTK_SMS(0),
      .                   JSM_SMS(0),
      .                   TAG_LNK_SMS(0),NRWL_SMS(0))
-              END IF
 C
               IF (M_VS_SMS>0) THEN
                 LNZM=M_VS_SMS+3
@@ -2603,11 +2501,8 @@ C
 C---------------------------------------------------------------------
 C AMS + POFF
 C---------------------------------------------------------------------
-              IF(IDTMINS/=0.AND.IPARIT==0)THEN
-              ELSE
                 ALLOCATE(FR_LOC(1))
                 ALLOCATE(FR_LOCI2M(1))
-              ENDIF
 
 C========================================================================================
 C                                     NON PARALLEL SECTION (SMP)
@@ -2705,8 +2600,6 @@ C----------------------------------
 C       IMPLICIT SIZES [MONO THREAD]
 C       Double precision only
 C----------------------------------
-              IF (IMPL_S==1.OR.NEIG>0) THEN
-              ELSE
                 IMPL_S0 = 0
                 X_A=>X
                 IMP_DUM(1)=0
@@ -2719,7 +2612,6 @@ C----------------------------------
                 ELSE
                   X_C =>X
                 ENDIF
-              END IF !IF (IMPL_S==1.OR.NEIG>0) THEN
 C------------------------------------------------------
 C  Fin Implicit [MONO THREAD]
 C------------------------------------------------------
@@ -2740,26 +2632,6 @@ C------------------------------------------------------
                   IAD2 = IAD1B+NUMNOD+1
                 ENDIF
               ENDIF
-              IF(NUMSPH/=0)THEN
-                IF(SCODVER>=44.AND.SMINVER<3)
-     .           CALL SPHRES44B(KXSP ,IXSP ,NOD2SP ,IPARG ,SPBUF )
-              ENDIF
-C------------------------------------------------------
-C SPH pointers
-C------------------------------------------------------
-              KSPH1 =1+3*NUMSPH
-              KSPH21 =NUMSPH+1
-              KSPH22 =KSPH21+16*NUMSPH
-              KSPH23 =KSPH22+MIN(1,NSPHIO)*3*NUMSPH
-              KSPACTIV=1
-              IF(NSPHSOL==0)THEN
-C     pointer to list of paticles to be sorted (to be sorted == active)
-                KSP2SORT=1
-              ELSE
-C     to be sorted > active
-                KSP2SORT=KSPH23
-              END IF
-
 C ----------------------------------------------
 C Specific Initializations
 C ----------------------------------------------
@@ -2849,18 +2721,6 @@ C
               DT2=EP06
               NT_IMP=0
               DT_THERM=EP06
-              IF(IMPL_S>0) THEN
-                IF(NCYCLE>0) THEN
-                  IF (ISMDISP==1) THEN
-                    X_A=>IMPBUF_TAB%X_A
-                    X_C=>IMPBUF_TAB%X_A
-                  END IF
-                  IF (IMON>0) CALL STARTIME(5,1)
-                  CALL IMP_FANIE(FANI  ,FEXT_IMP,NFIA  ,NFEA  ,NODFT ,NODLT,
-     .                           H3D_DATA  )
-                  IF (IMON>0) CALL STOPTIME(5,1)
-                ENDIF
-              END IF
 
 
               IF(NCYCLE==1.AND.INTERFACES%PARAMETERS%ISTIF_DT>0)
@@ -3059,7 +2919,7 @@ C-------------------------------------------------------------------
 C-------------------------------------------------------------------
 C       EXTERNAL FORCES
 C-------------------------------------------------------------------
-              IF (NCONLD/=0 .AND. IMPL_S/=1) THEN
+              IF (NCONLD/=0) THEN
                 CALL TRACE_IN(10,0,ZERO)
                 IF (IMON>0) CALL STARTIME(4,1)
                 IF (IMONM > 0) CALL STARTIME(41,1)
@@ -3084,7 +2944,7 @@ C
                 CALL TRACE_OUT(10)
               ENDIF
 C
-              IF(NFXVEL/=0.AND.IMPL_S/=1) THEN
+              IF(NFXVEL/=0) THEN
                 IF(IMON>0) THEN
                   CALL STARTIME(6,1)
                   CALL STARTIME(4,1)
@@ -3102,7 +2962,7 @@ C
 C-------------------------------------------------------------------
 C       LOAD PFLUID
 C-------------------------------------------------------------------
-              IF(NLOADP_F/=0.AND.IMPL_S/=1) THEN
+              IF(NLOADP_F/=0) THEN
                 CALL TRACE_IN(10,0,ZERO)
                 IF (IMON>0) CALL STARTIME(4,1)
                 IF (IMONM > 0) CALL STARTIME(41,1)
@@ -3121,7 +2981,7 @@ C-------------------------------------------------------------------
 C-------------------------------------------------------------------
 C       LOAD PBLAST
 C----------------------------------
-              IF(NLOADP_B/=0.AND.IMPL_S/=1) THEN
+              IF(NLOADP_B/=0) THEN
                 CALL TRACE_IN(10,0,ZERO)
                 IF (IMON>0) CALL STARTIME(4,1)
                 IF (IMONM > 0) CALL STARTIME(41,1)
@@ -3288,12 +3148,6 @@ C
      2                             FR_SEC,IAD_SEC,LSEND1,LRECV1,LSEND2,
      3                             LRECV2,WEIGHT_MD)
               END IF
-C----------------------------------------------------------
-C       INTER/TYPE21 ROTATION
-C----------------------------------------------------------
-              IF(NINTSTAMP/=0)THEN
-                CALL INTSTAMP_INIT(INTSTAMP,ICODR)
-              END IF
 C---------------------------------------------
 C TETRA4 : SMOOTH FINITE ELEMENT FORMULATIONS
 C---------------------------------------------
@@ -3419,7 +3273,7 @@ C--------------------------------
 
               IF(ANIM_V(5)+OUTP_V(5)+H3D_DATA%N_VECT_FINT+
      .         ANIM_V(6)+OUTP_V(6)+H3D_DATA%N_VECT_FEXT>0
-     .          .AND.IMPL_S==0)THEN
+     .          )THEN
 
 C========================================================================================
 C                                     PARALLEL SECTION (SMP)
@@ -3536,8 +3390,6 @@ C===============================================================================
 C                                     NON PARALLEL SECTION (SMP)
 C========================================================================================
 
-              IF(ALE%SUB%IALESUB ==2 .AND. ALE%SUB%IFSUB==2)GOTO 22
- 21           CONTINUE
 C
               IF (IMON>0) CALL STARTIME(6,1)
               IF (IMONM > 0) CALL STARTIME(51,1)
@@ -3681,11 +3533,7 @@ C Init var parallel SMP
                   END DO
                 END IF
 
-                IF (IMPL_S>0) THEN
-                  IADISK   = 1+ITSK*NINT7
-                ELSE
-                  IADISK   = 1
-                ENDIF
+                IADISK   = 1
 
                 CALL INTFOP1(
      1              IPARI  ,X       ,A(1,NDTSK) ,
@@ -3707,10 +3555,6 @@ C Init var parallel SMP
 
 !$OMP END PARALLEL
 
-                IF(IMPL_S>0) THEN
-                  CALL RE2INT5(NT_IMP,NUM_IMP,NS_IMP,NE_IMP,NUM_IMPL,IPARI,NINT7)
-                  NT_IMP5=NT_IMP
-                END IF
 C
                 IF (IMON>0) CALL STOPTIME(2,1)
                 CALL TRACE_OUT(4)
@@ -3745,9 +3589,6 @@ C                                     PARALLEL SECTION (SMP)
 C========================================================================================
 
                 NCONT = 0 ! Initialisation number of nodes tagged for FCONT storage
-                IF (IMPL_S>0) THEN
-                  NTMP = NT_IMP5 + NT_IMP1
-                ENDIF
 
 !$OMP PARALLEL
 !$OMP+ PRIVATE(ITSK,NODFTSK,NODLTSK,NUMNTSK,NDTSK,IPMTSK,IADISK,IGMTSK)
@@ -3762,12 +3603,7 @@ C Init var parallel SMP
                 DT2TT = DT2T
                 NELTSTT = NELTST
                 ITYPTSTT= ITYPTST
-
-                IF (IMPL_S>0) THEN
-                  IADISK   = 1+NTMP+ITSK*(NINT7-NTMP)
-                ELSE
-                  IADISK   = 1
-                ENDIF
+                IADISK   = 1
                 IDX_FTHE = NDTSK
                 IF(NDTSK>IFTHE) IDX_FTHE  = 1
                 IDX_CONDN = NDTSK
@@ -3836,9 +3672,6 @@ C===============================================================================
 C                                     NON PARALLEL SECTION (SMP)
 C========================================================================================
 
-                IF(IMPL_S>0) CALL RE2INT7(NT_IMP,NUM_IMP,NS_IMP,NE_IMP,
-     1                                      IND_IMP,NUM_IMPL,IPARI,NINT7 )
-C
                 IF (IMON>0) THEN
                   CALL STOPTIME(8,1)
                   CALL STARTIME(10,1)
@@ -3918,15 +3751,6 @@ C--------------------------------------------------------
      *                             INT24E2EUSE )
 
                 IF (IMON>0) CALL STOPTIME(8,1)
-              ENDIF
-C--------------------------------------------------------
-C INTERFACE 21 - Communication of heat flux
-C--------------------------------------------------------
-              IF(NSPMD>1)THEN
-                IF(NINTSTAMP /= 0.AND.FTEMPVAR21==1) THEN
-                  CALL SPMD_I21FTHECOM(IPARI  ,FTHE  ,INTBUF_TAB  ,SENSORS%SENSOR_TAB,NISKYFI ,
-     .                                 FTHESKYI,ISKY ,FSKYI       ,CONDNSKYI,NSENSOR)
-                ENDIF
               ENDIF
 C--------------------------------------------------------
 C Itet=2 STIFND <- STIFN part of interface only
@@ -4175,108 +3999,6 @@ C
               CALL TRACE_OUT(14)
 
               IF (IMON>0) CALL STOPTIME(3,1)
-C-----
-              IF(NUMSPHG/=0)THEN
-                IF (IMONM > 0) CALL STARTIME(48,1)
-                IF (IMONM > 0) CALL STARTIME(87,1)
-                CALL TRACE_IN(13,0,ZERO)
-C-----------------------------------------------
-C     SPH SORT, SYMMETRIZATION AND CSPH PREPARATION & SPH INLETS/OUTLETS (After forint)
-C-----------------------------------------------
-C========================================================================================
-C                                     PARALLEL SECTION (SMP)
-C========================================================================================
-!$OMP PARALLEL
-!$OMP+ PRIVATE(ITSK,NODFTSK,NODLTSK,NUMNTSK,NDTSK,IPMTSK,IGMTSK)
-!$OMP+ PRIVATE(PARTFTSK,PARTLTSK,NWAFTSK,GREFTSK,GRELTSK)
-C Init var parallel SMP
-                CALL SMP_INIT(
-     1           ITSK  ,NODFTSK ,NODLTSK ,NUMNTSK,NDTSK,
-     2           IPMTSK,PARTFTSK,PARTLTSK,NWAFTSK,IGMTSK  ,
-     3              GREFTSK,GRELTSK)
-
-                CALL SPHPREP(
-     1            PM      ,GEO     ,X       ,V       ,MS      ,
-     2            ELBUF_TAB,WA      ,TF      ,BUFMAT  ,PARTSAV ,
-     3            IPARG   ,NPC     ,IPART   ,ITAB    ,BUFGEO  ,
-     4            XFRAME  ,KXSP    ,IXSP    ,NOD2SP  ,IPART(K10),
-     5            SPBUF   ,ISPCOND ,ISPSYM  ,XSPSYM  ,VSPSYM    ,
-     6            WASPH(KSPH21) ,LPRTSPH ,LONFSPH ,WASPH(KSP2SORT) ,
-     7            ISPHIO  ,VSPHIO  ,IGRSURF ,D        ,
-     8            SPHVELN ,ITSK    ,XDP     ,IBUFSSG_IO,LGAUGE  ,
-     9            GAUGE   ,NGROUNC ,IGROUNC ,SOL2SPH ,SPH2SOL   ,
-     A            IXS     ,IADS    ,ADSKY   ,FSKYD   ,DMSPH(NDTSK),
-     B            WASPH(KSPACTIV),ICONTACT_OLD,OFF_SPH_R2R,WSMCOMP,IRUNN_BIS,
-     C            SPH_IORD1)
-!$OMP END PARALLEL
-
-                IF (IMONM > 0) CALL STOPTIME(87,1)
-C========================================================================================
-C                                     PARALLEL SECTION (SMP)
-C========================================================================================
-                IF (IMONM > 0) CALL STARTIME(88,1)
-
-!$OMP PARALLEL
-!$OMP+ PRIVATE(ITSK,NODFTSK,NODLTSK,NUMNTSK,NDTSK,IPMTSK)
-!$OMP+ PRIVATE(PARTFTSK,PARTLTSK,NWAFTSK)
-!$OMP+ PRIVATE(DT2TT,NELTSTT,ITYPTSTT,IGMTSK,GREFTSK,GRELTSK)
-
-C Init var parallel SMP
-                CALL SMP_INIT(
-     1            ITSK  ,NODFTSK  ,NODLTSK  ,NUMNTSK,NDTSK   ,
-     2            IPMTSK,PARTFTSK,PARTLTSK,NWAFTSK,IGMTSK  ,
-     3              GREFTSK,GRELTSK)
-
-                DT2TT = DT2T
-                NELTSTT = NELTST
-                ITYPTSTT= ITYPTST
-
-                IAD_GREL = 1
-                IF(IGRELEM == 1)IAD_GREL = K10-K1+1
-
-C----------------------------------
-C       SPH: Internal forces
-C----------------------------------
-                CALL FORINTP(
-     1            PM            ,GEO            ,X          ,A(1,NDTSK)      ,V             ,
-     2            MS            ,W              ,ELBUF_TAB  ,WA              ,FV            ,
-     3            STIFN(NDTSK)  ,TF             ,BUFMAT     ,PARTSAV(IPMTSK) ,NLOC_DMG      ,
-     4            FSAV          ,DT2TT          ,IADS       ,IPARG           ,NPC           ,
-     5            NELTSTT       ,ITYPTSTT       ,IPART      ,ITAB            ,ISKY          ,
-     6            BUFGEO        ,FSKYI          ,XFRAME     ,KXSP            ,IXSP          ,
-     7            NOD2SP        ,IPART(K10)     ,SPBUF      ,ISPCOND         ,ISPSYM        ,
-     8            XSPSYM%BUF    ,VSPSYM%BUF     ,
-     9            WASPH(KSPH21) ,LPRTSPH        ,LONFSPH    ,WASPH(KSPACTIV) ,ISPHIO        ,
-     A            VSPHIO        ,SPHVELN        ,ITSK       ,IPM             ,GRESAV(IGMTSK),
-     B            GRTH          ,IGRTH(IAD_GREL),TABLE      ,LGAUGE          ,GAUGE         ,
-     C            NGROUNC       ,IGROUNC        ,IXS        ,IRST            ,SOL2SPH       ,
-     D            SPH2SOL       ,FSKY           ,FSKY       ,IGEO            ,TEMP          ,
-     E            FTHE          ,FTHESKYI       ,SPHG_F6    ,WSMCOMP%BUF     ,SOL2SPH_TYP   ,
-     F            MAt_ELEM      ,OUTPUT         ,SPH_IORD1)
-#include "lockon.inc"
-                IF(DT2TT<DT2T)THEN
-                  DT2T = DT2TT
-                  NELTST = NELTSTT
-                  ITYPTST= ITYPTSTT
-                END IF
-#include "lockoff.inc"
-
-!$OMP END PARALLEL
-C -------------------------------------------------------------------
-C   User Libraries get the possibility to use GET_U_NOD_X & GET_U_NOD_V in user elements properties (Solids & Springs)
-                GETUNOD_NOCOM=0
-C -------------------------------------------------------------------
-
-C=======================================================================================
-C                                     NON PARALLEL SECTION (SMP)
-C========================================================================================
-
-                CALL TRACE_OUT(13)
-                IF (IMONM > 0) CALL STOPTIME(88,1)
-                IF (IMONM > 0) CALL STOPTIME(48,1)
-              ENDIF
-
-
               IF(NVOLU/=0)THEN
                 IF (IMONM > 0) CALL STARTIME(50,1)
                 CALL TRACE_IN(11,0,ZERO)
@@ -4381,8 +4103,6 @@ C
                 ENDIF
               ENDIF
 
- 22           CONTINUE
-
 !   Mpi communication for Nlocal option : parith/off
               IF(IPARIT /= 0.AND.NSPMD > 1.AND. NLOC_DMG%IMOD > 0)THEN
                 CALL SPMD_EXCH_SUB_PON(NLOC_DMG)
@@ -4393,7 +4113,7 @@ C
               ENDIF
 !   ----------------------------------
 
-              IF(NLOADP_HYD/=0.AND.IMPL_S/=1) THEN
+              IF(NLOADP_HYD/=0) THEN
                 FEXT = ZERO
                 CALL TRACE_IN(10,0,ZERO)
                 IF (IMON>0) CALL STARTIME(4,1)
@@ -4463,28 +4183,6 @@ C Transfer of contact force from sleeping particles to solid nodes
 C========================================================================================
 C                                     PARALLEL SECTION (SMP)
 C========================================================================================
-              IF(NUMSPH /= 0 .AND. NSPHSOL /= 0 )THEN
-                IF (IMONM > 0) CALL STARTIME(48,1)
-                IF (IMONM > 0) CALL STARTIME(89,1)
-
-!$OMP PARALLEL
-!$OMP+PRIVATE(ITSK,NODFTSK,NODLTSK)
-                ITSK = OMP_GET_THREAD_NUM()
-                NODFTSK   = 1+ITSK*NUMNOD/ NTHREAD
-                NODLTSK   = (ITSK+1)*NUMNOD/NTHREAD
-
-                CALL SOLTOSPHF(
-     1           A      ,SPBUF   ,IXS     ,KXSP    ,IPART(K10),
-     2           NOD2SP ,IRST   ,NGROUNC  ,IGROUNC ,IPARG    ,
-     3           STIFN  ,SOL2SPH,SPH2SOL  ,ELBUF_TAB,ITSK    ,
-     4           NODFTSK,NODLTSK,ISKY     ,FSKYI    ,IGEO    ,
-     5           SOL2SPH_TYP)
-
-!$OMP END PARALLEL
-
-                IF (IMONM > 0) CALL STOPTIME(89,1)
-                IF (IMONM > 0) CALL STOPTIME(48,1)
-              ENDIF
 
 C===== Nitsche Method Reinit FORNEQS every cycle
 
@@ -4548,7 +4246,6 @@ C
                     SIZE = SIZE + 4
                   ENDIF
 C
-                  IF(SOL2SPH_FLAG/=0) SIZE = SIZE + 1
 C
                   IF(NITSCHE > 0 )THEN
                     NFACNIT = 3
@@ -4559,8 +4256,6 @@ C
                   IF(H3D_DATA%N_VECT_PCONT_MAX /=0.AND.NINTSTAMP==0) LENC = LENC+6
 C
                   LENR = IAD_ELEM(1,NSPMD+1)-IAD_ELEM(1,1)
-                  IF(IDTMINS /= 0)THEN
-                  ELSE
                     CALL SPMD_EXCH_A(
      1               A       ,AR     ,STIFN,STIFR ,MS   ,
      2               IAD_ELEM,FR_ELEM,MSNF ,ALE%SUB%IFSUBM,SIZE ,
@@ -4568,9 +4263,6 @@ C
      4               MS_2D,MCP_OFF,
      5               FORNEQS ,NFACNIT,LENC ,FANI ,H3D_DATA,
      6               FANI(1,NFNCA+1) ,FANI(1,NFTCA+1) )
-
-                  ENDIF
-C
                 ELSE
                   SIZE =  4 + IRODDL*4
                   IF(ALE%SUB%IFSUBM==1)THEN
@@ -4610,9 +4302,6 @@ C
                     LENR1 = FR_NBCC1(2,NSPMD+1)
                   ENDIF
 C
-                  IF(SOL2SPH_FLAG/=0)THEN
-                    SIZE = SIZE + 1
-                  ENDIF
 C
                   LENC = 0
                   IF(ANIM_V(26)+H3D_DATA%N_VECT_CONT_MAX /=0.AND.NINTSTAMP==0) LENC = 3*LENI
@@ -4786,27 +4475,6 @@ C===============================================================================
 !$OMP END PARALLEL
               END IF
 c--------------------------------------
-              IF(SOL2SPH_FLAG/=0)THEN
-C========================================================================================
-C                                     PARALLEL SECTION (SMP)
-C========================================================================================
-
-!$OMP PARALLEL PRIVATE(ITSK,NODFTSK,NODLTSK)
-                ITSK = OMP_GET_THREAD_NUM()
-                NODFTSK   = 1+ITSK*NUMNOD/ NTHREAD
-                NODLTSK   = (ITSK+1)*NUMNOD/NTHREAD
-                DO I=NODFTSK,NODLTSK
-                  IF(MS(I)/=ZERO)THEN
-                    IF(MS(I)-DMSPH(I) < EM03*MS(I))THEN
-                      MS(I)=ZERO
-                    ELSE
-                      MS(I)=MAX(ZERO,MS(I)-DMSPH(I))
-                    END IF
-                  END IF
-                  DMSPH(I)=ZERO
-                ENDDO
-!$OMP END PARALLEL
-              ENDIF
 
 C========================================================================================
 C                                     NON PARALLEL SECTION (SMP)
@@ -4850,7 +4518,6 @@ C
               ENDIF
 C
               IF(ALE%SUB%IALESUB==2 .AND. ALE%SUB%IFSUB==2) THEN
-CFP SKIP KINEMATIC FORCES
 
               ELSE
 
@@ -5252,13 +4919,6 @@ C Implicit barrier on NEGMAS
 C========================================================================================
 C                                     NON PARALLEL SECTION (SMP)
 C========================================================================================
-C
-C Assemblage TYPE21
-C
-                IF(NINTSTAMP/=0)THEN
-                  CALL INTSTAMP_ASS(INTSTAMP,MS ,IN ,A ,AR ,
-     .                              STIFN   ,STIFR  ,WEIGHT)
-                END IF
 C-----------------------------------------------------
 C         RIGID BODY: SUM forces, stiff.
 C-----------------------------------------------------
@@ -5349,15 +5009,6 @@ C     Rigid wall - Force node (moving RWALL)
 C----------------------------------------------------------
                 IF(NRWALL>0)CALL RGWALF(A ,RWBUF ,NPRW ,MS )
 
-C-----------------------------------------------
-C     SELECTIVE MASS SCALING
-C-----------------------------------------------
-                IF( IDTMINS == 1 .AND.
-     .             (ISMSCH/=0.OR.NCYCLE==0.OR.ISMSNOK/=0.OR.IADMESH/=0))THEN
-C
-C       Obsolete
-                ELSEIF(IDTMINS == 2.OR.IDTMINS_INT/=0)THEN
-                ENDIF
 C----------------------------------------------------------
 C     SCALE TIME STEP
 
@@ -5366,15 +5017,6 @@ C                                     NON PARALLEL SECTION (SMP)
 C========================================================================================
               ENDIF ! ALE%SUB
 C----------------------------
-
-C----------------------------------------------------------
-C       INTER/TYPE21 TIME STEP
-C----------------------------------------------------------
-              IF(NINTSTAMP/=0)THEN
-                CALL INTSTAMP_DT(INTSTAMP,IPARI,NELTST,ITYPTST,DT2T,
-     .                           PTR_SMS ,DIAG_SMS,MS ,V      ,STIFN,
-     .                           STIFR   )
-              END IF
 
               IMSCH=0
 
@@ -5454,8 +5096,6 @@ C--------------------------------------------------
 
               ENDIF
 
-C
-
 C------------------------------------
 C  THERMAL TIME STEP COMPUTATION
 C-----------------------------
@@ -5496,8 +5136,6 @@ C       additional storage due to reset of stifn stifr
                 STRCND(NODFTSK:NODLTSK)=STIFR(NODFTSK:NODLTSK)
               ENDIF
 
-              IF(IDTMINS==0)THEN
-C     IF(IDTMINS==0.AND.IDTMINS_INT==0)THEN
                 CALL DTNODA(
      1                      NODFTSK,NODLTSK ,NELTSTT,ITYPTSTT   ,ITAB   ,
      2                      MS   ,IN    ,STIFN ,STIFR     ,DT2TT   ,
@@ -5505,16 +5143,6 @@ C     IF(IDTMINS==0.AND.IDTMINS_INT==0)THEN
      4                      WEIGHT,A    ,AR    ,IGRNOD    ,
      5                      ANIN(NDIN+1),RBYM  ,ARBYM ,ARRBYM,WEIGHT_MD,
      6                      MCP         ,MCP_OFF,CONDN ,ALE_CONNECTIVITY%NALE  ,H3D_DATA  )
-              ELSEIF(IDTMINS/=0)THEN
-                CALL DTNODAMS(
-     1                      NODFTSK,NODLTSK ,NELTSTT,ITYPTSTT   ,ITAB   ,
-     2                      MS   ,IN    ,STIFN ,STIFR     ,DT2TT   ,
-     3                      DMAST,DINERT,ANIN,ANIN(NDMA+1),IMSCH  ,
-     4                      WEIGHT,A    ,AR    ,IGRNOD    ,
-     5                      ANIN(NDIN+1),RBYM  ,ARBYM ,ARRBYM ,ISMSCH ,
-     6                      NATIV_SMS   ,DIAG_SMS ,NPBY,TAGMSR_RBY_SMS,
-     7                      H3D_DATA    )
-              END IF
 
 #include "lockon.inc"
               DMAS  = DMAS  + DMAST
@@ -5567,80 +5195,6 @@ C
                   ITYPTS = ITYPTST
                   DT2    = DT2T
                 ENDIF
-              ENDIF
-
-C----------------------------
-C    IMPLICIT SYNCHRONISATION On DT2 FBIG
-C----------------------------
-C-----------------------------
-              IF(ALE%SUB%IALESUB==2 .AND.ALE%SUB%IFSUB==2)THEN
-                IF(NSPMD>1) THEN
-                  IWIOUT = 0
-                  IF (ISPMD/=0) CALL SPMD_CHKW(IWIOUT,IOUT)
-                  CALL SPMD_GLOB_MIN5(DT2  ,ITYPTS,NELTS ,ICODT ,IMSCH,
-     .                                TSTOP,IWIOUT,MSTOP, ISMSCH,
-     .                                INT24USE,NBINTC,INTLIST,IPARI,INTBUF_TAB)
-                  IF(IEXICODT>0) THEN
-                    SIZE = 1
-                    LENR = IAD_ELEM(1,NSPMD+1)-IAD_ELEM(1,1)
-                    CALL SPMD_EXCH_ICODT(ICODT,IAD_ELEM,FR_ELEM,SIZE,LENR)
-                    IEXICODT = 0
-                  ENDIF
-                ENDIF
-
-
-C========================================================================================
-C                                     PARALLEL SECTION (SMP)
-C========================================================================================
-
-!$OMP PARALLEL
-!$OMP+ PRIVATE(ITSK,NODFTSK,NODLTSK,NUMNTSK,NDTSK,IPMTSK,IGMTSK)
-!$OMP+ PRIVATE(PARTFTSK,PARTLTSK,NWAFTSK,DT2TT,NELTSTT,ITYPTSTT)
-!$OMP+ PRIVATE(GREFTSK,GRELTSK)
-
-C Init var parallel SMP
-                CALL SMP_INIT(
-     1            ITSK  ,NODFTSK  ,NODLTSK  ,NUMNTSK,NDTSK   ,
-     2            IPMTSK,PARTFTSK,PARTLTSK,NWAFTSK,IGMTSK  ,
-     3                GREFTSK,GRELTSK)
-
-
-                DT2TT = DT2T
-                NELTSTT = NELTST
-                ITYPTSTT= ITYPTST
-
-                CALL ALESUB2(
-     1             ALE_CONNECTIVITY%NALE   ,V      ,DSAVE  ,ICODT  ,ISKEW,
-     2             SKEW    ,ASAVE ,A      ,D      ,NELTSTT,
-     3             ITYPTSTT,ITSK  ,NODFTSK,NODLTSK,DT2SAVE,
-     4             STIFN   ,DT2TT ,NELTSA ,ITYPTSA,NELTS  ,
-     5             WEIGHT ,FSKY   ,FSKY   )
-
-#include "lockon.inc"
-                IF(DT2TT<DT2T)THEN
-                  DT2T = DT2TT
-                  NELTST = NELTSTT
-                  ITYPTST= ITYPTSTT
-                END IF
-#include "lockoff.inc"
-
-!$OMP END PARALLEL
-
-C========================================================================================
-C                                     NON PARALLEL SECTION (SMP)
-C========================================================================================
-                ALE%SUB%IFSUB=0
-                ALE%SUB%IFSUBM=0
-
-C-----------------------------
-C       MAJ SPMD ecriture L01
-C-----------------------------
-                IF(NSPMD>1.AND.IWIOUT>0) THEN
-                  CALL SPMD_WIOUT(IOUT,IWIOUT)
-                  IWIOUT = 0
-                ENDIF
-                GOTO 21
-
               ENDIF
 
               IF (IMON>0) CALL STARTIME(6,1)
@@ -5776,7 +5330,6 @@ C processes in charge of the FVMBAGS know NPOLH)
               ENDIF
 
               IF(IDT_THERM == 0) DT2= MIN(DT2,1.1*DT2OLD,DTMX)
-              IF (IMPL_S==1)  CALL IMP_DT2(DT2)
 
               IF (IMONM > 0) CALL STOPTIME(53,1)
 
@@ -5805,7 +5358,7 @@ C-----------------------------
                 IWIOUT = 0
               ENDIF
 C       EXTERNAL WORK OF CONCENTRATED LOADS
-              IF (NCONLD/=0.AND.IMPL_S/=1) THEN
+              IF (NCONLD/=0) THEN
                 TFEXT = TFEXT + TFEXC*DT2
               ENDIF
 
@@ -5827,7 +5380,7 @@ C--- // ---------------------------------------
 C     OUTPUT (ANIM,OUTP,H3D,TH) STEP 1 ON 3 TO GET FREAC/MREAC
 C      adding FEXT+FINT
 C-----------------------------------------------
-              IF(COMPTREAC/=0.AND.(IMPL_S==0 .OR. INCONV==1)) THEN
+              IF(COMPTREAC/=0.AND.(INCONV==1)) THEN
                 CALL REACTION_FORCES_1(NODFTSK,NODLTSK,A,AR,FREAC)
               END IF
 
@@ -5839,57 +5392,6 @@ C-----------------------------------------------
 !$OMP END PARALLEL
 
               IF (IMON>0) CALL STOPTIME(7,1)
-C-----------------------------------------------
-C     SELECTIVE MASS SCALING
-C-----------------------------------------------
-              IF(IDTMINS == 1)THEN
-C
-C       Obsolete
-              ELSEIF(IDTMINS == 2.OR.IDTMINS_INT /= 0)THEN
-
-                IF (IMON>0) CALL STARTIME(39,1)
-
-C========================================================================================
-C                                     PARALLEL SECTION (SMP)
-C========================================================================================
-
-!$OMP PARALLEL PRIVATE(ITSK,NODFTSK,NODLTSK)
-                ITSK = OMP_GET_THREAD_NUM()
-                NODFTSK   = 1+ITSK*NUMNOD/ NTHREAD
-                NODLTSK   = (ITSK+1)*NUMNOD/NTHREAD
-                CALL SMS_MASS_SCALE_2(
-     1                ITSK     ,NODFTSK   ,NODLTSK  ,NODII_SMS ,INDX2_SMS ,
-     2                NODXI_SMS,MS        ,MS0      ,A         ,ICODT     ,
-     3                ICODR    ,ISKEW     ,SKEW     ,JAD_SMS   ,JDI_SMS   ,
-     4                LT_SMS   ,X_SMS     ,P_SMS    ,Z_SMS     ,Y_SMS     ,
-     5                PREC_SMS ,INDX1_SMS ,DIAG_SMS ,IAD_ELEM  ,FR_ELEM   ,
-     6                WEIGHT   ,NPBY      ,LPBY      ,
-     7                TAGSLV_RBY_SMS,LAD_SMS ,KAD_SMS ,JSM_SMS ,IBFV      ,
-     8                VEL      ,NPC      ,TF       ,V         ,X          ,
-     9                D        ,SENSORS%SENSOR_TAB,NSENSOR,IFRAME,XFRAME,
-     A                JADI_SMS ,JDII_SMS ,LTI_SMS  ,FR_SMS    ,FR_RMS     ,
-     B                ISKYI_SMS,MSKYI_SMS,RES_SMS  ,IGRV      ,AGRV       ,
-     C                LGRAV    ,ILINK    ,LLINK    ,FR_RL     ,FRL6       ,
-     D                NNLINK   ,LNLINK   ,FR_LL    ,FNL6      ,TAG_LNK_SMS,
-     E                ITAB     ,FSAV     ,LJOINT   ,IADCJ     ,FR_CJ      ,
-     F                AR       ,VR       ,IN       ,FRL       ,FNL        ,
-     G                NPRW     ,LPRW     ,RWBUF    ,RWSAV     ,
-     H                FANI(1,1+NFOA+2*(NSECT+NRBODY)),FR_WALL ,NRWL_SMS   ,
-     I                INTSTAMP ,KINET    ,IXC      ,IXTG      ,SH4TREE    ,
-     J                SH3TREE  ,CPTREAC  ,NODREAC  ,FTHREAC   ,
-     K                FRWL6    ,3+IRODDL*3,TAGSLV_RBY,DAMPR   , DAMP      ,
-     L                IGRNOD   ,DR       ,RBY      ,TAGMSR_RBY_SMS,
-     M                JSM_SMS  ,IRBE2     ,LRBE2   ,IAD_RBE2  ,FR_RBE2M   ,
-     N                NMRBE2   ,R2SIZE    ,IRBE3    ,LRBE3      ,FRBE3    ,
-     O                IAD_RBE3M ,FR_RBE3M,FR_RBE3MP ,RRBE3      ,RRBE3_PON,
-     P                PREC_SMS3 ,DIAG_SMS3,IAD_RBY  ,FR_RBY6    ,RBY6     ,
-     Q                R3SIZE    ,BETATE   ,IBCSCYC    ,LBCSCYC)
-
-!$OMP END PARALLEL
-
-                IF (IMON>0) CALL STOPTIME(39,1)
-
-              ENDIF
 
               IDUM1=0
               RDUM1=ZERO
@@ -5911,135 +5413,6 @@ C     IMPLICIT  SYNCHRONISATION (FORCES), FV(FUNC) ET SKEW(MOVING)
 C-----------------------------------------------------------------
 
               IF (IMPL_S == 1) THEN
-                ENCIN = ZERO
-                ENROT = ZERO
-                ENCIN2 = ZERO
-                ENROT2 = ZERO
-                IF (IMON>0) CALL STARTIME(5,1)
-C-----------------------
-                IF (INCONV==1) THEN
-                  CALL THBCS_IMP(NODFT,NODLT ,A,AR,
-     &                           FTHREAC,NODREAC,CPTREAC,FTHDTM,DT3)
-                ENDIF
-C========================================================================================
-C                                     PARALLEL SECTION (SMP)
-C========================================================================================
-
-!$OMP   PARALLEL PRIVATE(ITSK,NODFTSK,NODLTSK)
-                ITSK = OMP_GET_THREAD_NUM()
-                NODFTSK   = 1+ITSK*NUMNOD/ NTHREAD
-                NODLTSK   = (ITSK+1)*NUMNOD/NTHREAD
-
-                IF (ILAG+IALE+IEULER/=0) THEN
-C-----------------------
-C         MULTIMATERIAL
-C-----------------------
-                  IF (NMULT>0) THEN
-                    CALL BMULTN(FILL,DFILL,IMS,IFILL,NODFTSK,NODLTSK)
-                  ENDIF
-                  CALL IMP_FANII(FANI ,A     ,NFIA      ,NODFT    ,NODLT    ,
-     .                         H3D_DATA )
-                  IF (IMPDEB==1.AND.IMCONV==0) THEN
-                    IF (NCYCLE>=NDEB0.AND.NCYCLE<=NDEB1) THEN
-                      CALL IMP_FOUT(
-     1                FANI     ,A        ,AR       ,NFIA      ,NFEA       ,
-     2                NODFTSK  ,NODLTSK  ,H3D_DATA ,IMPBUF_TAB)
-                    ENDIF
-                  ENDIF
-C---      // N/3 ---------------------------------------
-C         INTERNAL FORCES (ANIM)
-C-----------------------------------------------
-                  IF (ISECUT/=0) THEN
-                    IF (IMON>0) CALL STARTIME(7,1)
-                    CALL SECTION_IO (
-     1              NSTRF,D,DR,V,VR,FSAV(1,1+NINTER+NRWALL+NRBODY),
-     2              SECFCUM,A             ,AR    ,SECBUF,MS      ,IN     ,
-     3              X      ,FANI(1,NFOA+1),WEIGHT,XSEC  ,IAD_ELEM,FR_ELEM,
-     4              RG_CUT ,IAD_CUT       ,FR_CUT,WEIGHT_MD,IOLDSECT,
-     5              SENSORS%STABSEN,SENSORS%SFSAV,SENSORS%TABSENSOR,SENSORS%FSAV)
-                    IF(IMON>0) CALL STOPTIME(7,1)
-                  ENDIF
-                ENDIF ! ILAG+IALE+IEULER/=0
-
-!$OMP   END PARALLEL
-
-                IF (IMON>0) CALL STOPTIME(5,1)
-C-----------------------------------------------
-                IF (ILAG+IALE+IEULER/=0)THEN
-                  IF(IMON>0) CALL STARTIME(4,1)
-                  IF(IMONM > 0) CALL STARTIME(40,1)
-
-C========================================================================================
-C                                     PARALLEL SECTION (SMP)
-C========================================================================================
-
-!$OMP PARALLEL
-
-                  CALL RBYCOR(
-     1                 RBY ,X   ,V    ,VR     ,SKEW    ,FSAV     ,
-     2                 LPBY,NPBY,ISKEW,ITAB   ,WEIGHT  ,A        ,
-     3                 AR  ,MS  ,IN   ,KINDRBY,IRBKIN_L,NRBYKIN_L ,
-     4                 WEIGHT_MD,MS_2D)
-!$OMP     END PARALLEL
-
-                  IF(IMON>0) CALL STOPTIME(4,1)
-                  IF(IMONM > 0) CALL STOPTIME(40,1)
-                ENDIF  ! ILAG+IALE+IEULER/=0
-C========================================================================================
-C-----  RBE2 Bilan crrection
-C========================================================================================
-                IF (NRBE2>0)THEN
-                  IF(IMON>0) CALL STARTIME(4,1)
-                  IF(IMONM > 0) CALL STARTIME(40,1)
-!$OMP PARALLEL
-                  CALL RBE2COR(IRBE2 ,LRBE2 ,X    ,V     ,VR    ,
-     2                         SKEW  ,ISKEW ,ITAB ,WEIGHT,A     ,
-     3                         AR    ,MS0   ,IN   ,WEIGHT_MD)
-!$OMP     END PARALLEL
-
-                  IF(IMON>0) CALL STOPTIME(4,1)
-                  IF(IMONM > 0) CALL STOPTIME(40,1)
-                ENDIF
-C--------------------
-C       SENSOR //  IN IMPLICIT
-C-----------------------------------------------
-C       Exchange SENSORS%FSAV for sensors 6-13
-C-----------------------------------------------
-                IF (NSENSOR > 0) THEN
-                  IF (NSPMD > 1 .AND. SENSORS%STABSEN > 0) THEN
-                    DIM6=12
-                    DIM_EXCH = SENSORS%SFSAV
-                    CALL SPMD_EXSUM_FB6(DIM6,DIM_EXCH,SENSORS%FSAV)
-                  ENDIF
-                ENDIF
-c
-                IF (NSENSOR > 0 .AND. INCONV == 1) THEN
-                  CALL SENSOR_ENER_SAV(NSENSOR,SENSORS%SENSOR_TAB ,PARTSAV ,PARTSAV2)
-                  ! -------------------------------
-                  ! pre-computation and mpi communication for type 16 sensor
-                  IF (COMM_SENS16%BOOL) THEN
-                    CALL SENSOR_DIST_SURF0(NSENSOR,SENSORS%SENSOR_TAB,X,IGRSURF)
-                  ENDIF
-                  ! -------------------------------
-                  ! pre-computation and mpi communication for type 17 sensor
-                  IF(COMM_SENS17%BOOL) THEN
-                    CALL SENSOR_TEMP0(NSENSOR,SENSORS%SENSOR_TAB,IGRNOD,TEMP,WEIGHT)
-                  ENDIF
-                  ! -------------------------------
-                  IF (NSPMD > 1) THEN
-                    CALL SENSOR_SPMD(SENSORS%SENSOR_TAB,IPARI   ,NPRW     ,ISENSP  ,NSENSP  ,
-     .                           XSENS     ,X       ,ACCELM   ,IACCP   ,NACCP   ,
-     .                           GAUGE     ,IGAUP   ,NGAUP    ,PARTSAV2,NSENSOR )
-                  ENDIF
-                  ! check activation condition of base sensors
-                  CALL SENSOR_BASE(SENSORS  ,NSENSOR   ,TT        ,DT2       ,
-     .                 XSENS     ,IPARI     ,PARTSAV2  ,GAUGE     ,FSAV      ,
-     .                 X         ,V         ,A         ,ACCELM    ,NPRW      ,
-     .                 SUBSETS   ,IGRSURF   ,IGRNOD    )
-c
-                  ! check activation condition of logical sensors hierarchy
-                  CALL SENSOR_LOGICAL(NSENSOR,SENSORS%SENSOR_TAB)
-                ENDIF
               ELSE ! IMPL_S
 C-----------------------------
 C       Non pure thermal case
@@ -6065,80 +5438,6 @@ C-------  ----------------
 
 !$OMP     END PARALLEL
 
-C-----------------------------------------------
-C         SPH SMOOTHING OF VELOCITIES
-C-----------------------------------------------
-                  IF ((NUMSPH/=0).OR.(SOL2SPH_FLAG==1)) THEN
-C------------------------
-C           Conservative smoothing of velocities
-C------------------------
-                    IF (IMONM > 0) CALL STARTIME(48,1)
-                    IF (IMONM > 0) CALL STARTIME(89,1)
-
-                    ALLOCATE(WASPSYM(3*NSPHSYM+1),STAT=IERROR)
-                    IF(IERROR/=0)THEN
-                      CALL ANCMSG(MSGID=19,ANMODE=ANINFO,C1="WASPSYM")
-                      CALL ARRET(2)
-                    ENDIF
-C========================================================================================
-C                                     PARALLEL SECTION (SMP)
-C========================================================================================
-
-!$OMP      PARALLEL PRIVATE(ITSK,IPMTSK)
-                    ITSK = OMP_GET_THREAD_NUM()
-                    IPMTSK = 1 + ITSK*NPSAV*NPART
-
-                    CALL SPLISSV(
-     1              X         ,V        ,MS       ,A         ,SPBUF     ,
-     2              WA        ,ITAB     ,KXSP     ,IXSP      ,NOD2SP    ,
-     3              D         ,ISPSYM   ,XSPSYM%BUF   ,VSPSYM%BUF    ,BUFMAT    ,
-     4              BUFGEO    ,NPC      ,TF       ,PM        ,GEO       ,
-     5              ISPCOND   ,XFRAME   ,WASPSYM,IPART(K10),PARTSAV(IPMTSK),
-     6              WASPH(KSPH21) ,WSMCOMP%BUF ,WASPH(KSPACTIV) ,IPART,ITSK,
-     7              SPH2SOL   ,SOL2SPH  ,IRST    ,IXS        ,IPARG     ,
-     8              NGROUNC   ,IGROUNC  ,ELBUF_TAB,IAD_ELEM  ,FR_ELEM   ,
-     9              IGEO      ,SOL2SPH_TYP)
-
-!$OMP       END PARALLEL
-                    DEALLOCATE(WASPSYM)
-
-C========================================================================================
-C                                   NON PARALLEL SECTION (SMP)
-C========================================================================================
-
-                    IF (IMONM > 0) CALL STOPTIME(48,1)
-                    IF (IMONM > 0) CALL STOPTIME(89,1)
-C
-C------------------------
-C           Second Part of artificial forces work.
-C--- //0 ----------------
-                    IF (IMON>0) CALL STARTIME(6,1)
-                    IF (IMONM > 0) CALL STARTIME(48,1)
-                    CALL SPWFVIS(SPBUF,IPART(K10),PARTSAV,IPARG,ELBUF_TAB,
-     .                           KXSP ,WASPH(KSPACTIV))
-                    IF (IMONM > 0) CALL STOPTIME(48,1)
-                    IF (IMON>0) CALL STOPTIME(6,1)
-
-C========================================================================================
-C                                     PARALLEL SECTION (SMP)
-C========================================================================================
-
-!$OMP PARALLEL
-!$OMP+ PRIVATE(ITSK,NODFTSK,NODLTSK,NUMNTSK,NDTSK,IPMTSK,IGMTSK)
-!$OMP+ PRIVATE(PARTFTSK,PARTLTSK,NWAFTSK,GREFTSK,GRELTSK)
-
-C Init var parallel SMP
-                    CALL SMP_INIT(
-     1                ITSK  ,NODFTSK ,NODLTSK ,NUMNTSK,NDTSK   ,
-     2                IPMTSK,PARTFTSK,PARTLTSK,NWAFTSK,IGMTSK  ,
-     3                GREFTSK,GRELTSK)
-
-                    CALL ASSPART(
-     2                 PARTFTSK,PARTLTSK,PARTSAV,GREFTSK,GRELTSK,GRESAV)
-
-!$OMP     END PARALLEL
-
-                  ENDIF  ! (NUMSPH/=0).OR.(SOL2SPH_FLAG==1)
 C========================================================================================
 C                                     NON PARALLEL SECTION (SMP)
 C========================================================================================
@@ -6280,58 +5579,6 @@ C                                     NON PARALLEL SECTION (SMP)
 C========================================================================================
 
                   IF (IMON>0) CALL STOPTIME(5,1)
-C-----------------------------------------------
-C  INLETS,OUTLETS.
-C-----------------------------------------------
-                  IF(NSPHIO/=0)THEN
-
-C globalize NSPHACT in NSPHACTG
-                    NSPHACTG = NSPHACT
-
-                    IF(NSPMD>1)THEN
-                      CALL SPMD_GLOB_ISUM9(NSPHACTG,1)
-                      CALL SPMD_IBCAST(NSPHACTG,NSPHACTG,1,1,0,2)
-                    END IF
-
-                    IF(NSPHACTG/=0)THEN
-C--- //0 ----------------
-                      IF (IMON>0) CALL STARTIME(6,1)
-                      IF (IMONM > 0) CALL STARTIME(48,1)
-                      IF (IMONM > 0) CALL STARTIME(89,1)
-
-                      CALL SPONFV (X   ,V     ,A       ,D       ,MS      ,
-     2                       SPBUF   ,ITAB    ,KXSP    ,IXSP    ,NOD2SP  ,
-     3                       NPC     ,TF      ,ISPHIO  ,VSPHIO  ,IPART   ,
-     4                      IPART(K10),WASPH(KSPACTIV) ,WA,WASPH(KSPH22) )
-
-                      IF (IMONM > 0) CALL STOPTIME(89,1)
-                      IF (IMONM > 0) CALL STOPTIME(48,1)
-                      IF (IMON>0) CALL STOPTIME(6,1)
-                    ENDIF
-                  END IF
-
-C========================================================================================
-C                                     NON PARALLEL SECTION (SMP)
-C========================================================================================
-
-C-----------------------------------------------
-C INLETS,OUTLETS.
-C-----------------------------------------------
-                  IF(NSPHIO/=0.AND.NSPHACTG/=0)THEN
-C--- //0 ----------------
-                    IF (IMON>0) CALL STARTIME(6,1)
-                    IF (IMONM > 0) CALL STARTIME(48,1)
-                    IF (IMONM > 0) CALL STARTIME(89,1)
-
-                    CALL SPONFV (X   ,V     ,A       ,D       ,MS      ,
-     2                     SPBUF   ,ITAB    ,KXSP    ,IXSP    ,NOD2SP  ,
-     3                     NPC     ,TF      ,ISPHIO  ,VSPHIO  ,IPART   ,
-     4                     IPART(K10),WASPH(KSPACTIV),WA,WASPH(KSPH22) )
-
-                    IF (IMONM > 0) CALL STOPTIME(89,1)
-                    IF (IMONM > 0) CALL STOPTIME(48,1)
-                    IF (IMON>0) CALL STOPTIME(6,1)
-                  ENDIF
 
 C-----------------------------------------------
 C Multidomains : resynchro des accelerations en SPH
@@ -6348,7 +5595,7 @@ C                                     PARALLEL SECTION (SMP)
 C========================================================================================
                   IF (IMON>0) CALL STARTIME(7,1)
 
-                  IF(COMPTREAC/=0.AND.(IMPL_S==0 .OR. INCONV==1)) THEN
+                  IF(COMPTREAC/=0.AND.(INCONV==1)) THEN
 
 !$OMP PARALLEL PRIVATE(ITSK,NODFTSK,NODLTSK)
 
@@ -6442,7 +5689,7 @@ C===============================================================================
 
                   IF (IMON>0) CALL STARTIME(7,1)
 
-                  IF(COMPTREAC/=0.AND.(IMPL_S==0 .OR. INCONV==1)) THEN
+                  IF(COMPTREAC/=0.AND.(INCONV==1)) THEN
 
 !$OMP PARALLEL PRIVATE(ITSK,NODFTSK,NODLTSK)
 
@@ -6674,7 +5921,7 @@ C===============================================================================
 
                 IF (IMON>0) CALL STARTIME(7,1)
 
-                IF(COMPTREAC/=0.AND.(IMPL_S==0 .OR. INCONV==1)) THEN
+                IF(COMPTREAC/=0.AND.(INCONV==1)) THEN
 
 !$OMP PARALLEL PRIVATE(ITSK,NODFTSK,NODLTSK)
 
@@ -6751,7 +5998,7 @@ C-----------------------------------------------
 C-----------------------------------------------
                 IF (IMON>0) CALL STARTIME(7,1)
 
-                IF(COMPTREAC/=0.AND.(IMPL_S==0 .OR. INCONV==1)) THEN
+                IF(COMPTREAC/=0.AND.(INCONV==1)) THEN
 
 !$OMP PARALLEL PRIVATE(ITSK,NODFTSK,NODLTSK)
 
@@ -6779,7 +6026,7 @@ C===============================================================================
 
                 IF (IMON>0) CALL STARTIME(7,1)
 
-                IF(CPTREAC/=0.AND.(IMPL_S==0 .OR. INCONV==1)) THEN
+                IF(CPTREAC/=0.AND.(INCONV==1)) THEN
 
 !$OMP PARALLEL PRIVATE(ITSK,NODFTSK,NODLTSK)
 
@@ -6859,7 +6106,7 @@ C===============================================================================
 
                 IF (IMON>0) CALL STARTIME(7,1)
 
-                IF(CPTREAC/=0.AND.(IMPL_S==0 .OR. INCONV==1)) THEN
+                IF(CPTREAC/=0.AND.(INCONV==1)) THEN
 
 !$OMP PARALLEL PRIVATE(ITSK,NODFTSK,NODLTSK)
 
@@ -6879,42 +6126,6 @@ C----------------------------------------------
                 END IF
 
                 IF (IMON>0) CALL STOPTIME(7,1)
-
-C========================================================================================
-C                                     PARALLEL SECTION (SMP)
-C========================================================================================
-
-                IF (IMON>0) CALL STARTIME(4,1)
-                IF (IMONM > 0) CALL STARTIME(43,1)
-
-!$OMP PARALLEL
-
-C-------------------
-C         RIGID WALL
-C---- // -----------
-                IF(NRWALL>0.AND.IDTMINS==1)THEN
-C
-C         Obsolete
-                ELSEIF(NRWALL>0.AND.(IDTMINS==2.OR.IDTMINS_INT/=0))THEN
-                  CALL RGWAL0(
-     1            X           ,A        ,V      ,RWBUF   ,LPRW,
-     2            NPRW        ,MS       ,FSAV(1,NINTER+1),FR_WALL ,
-     3            FANI(1,1+NFOA+2*(NSECT+NRBODY)),
-     4            RWSAV       ,WEIGHT   ,FRWL6   ,NODXI_SMS, WEIGHT_MD,
-     5            SENSORS%SFSAV,SENSORS%FSAV,SENSORS%STABSEN,SENSORS%TABSENSOR)
-                ELSE
-                  CALL RGWAL0(
-     1            X           ,A        ,V      ,RWBUF   ,LPRW,
-     2            NPRW        ,MS       ,FSAV(1,NINTER+1),FR_WALL ,
-     3            FANI(1,1+NFOA+2*(NSECT+NRBODY)),
-     4            RWSAV       ,WEIGHT   ,FRWL6   ,NATIV_SMS, WEIGHT_MD,
-     5            SENSORS%SFSAV,SENSORS%FSAV,SENSORS%STABSEN,SENSORS%TABSENSOR)
-                ENDIF
-
-!$OMP END PARALLEL
-
-                IF (IMON>0) CALL STOPTIME(4,1)
-                IF (IMONM > 0) CALL STOPTIME(43,1)
 
 C========================================================================================
 C                                    NON PARALLEL SECTION (SMP)
@@ -7153,32 +6364,6 @@ C--- //0 ----------------
                 IF (IMON>0) CALL STARTIME(4,1)
                 IF (IMONM > 0) CALL STARTIME(40,1)
 
-                IF(NUMSPH/=0.AND.NSPHSOL/=0)THEN
-C------------------------
-C         Solids impose velocity to SPH
-C--- // ----------------
-                  IF (IMONM > 0) CALL STARTIME(48,1)
-                  IF (IMONM > 0) CALL STARTIME(89,1)
-
-C========================================================================================
-C                                     PARALLEL SECTION (SMP)
-C========================================================================================
-
-!$OMP PARALLEL PRIVATE(ITSK)
-                  ITSK = OMP_GET_THREAD_NUM()
-
-                  CALL SOLTOSPHA(
-     1            ITSK    ,V       ,A         ,MS             ,PM         ,
-     2            IPART   ,IXS     ,IPART(K1) ,KXSP           ,IPART(K10) ,
-     3            IRST    ,SPBUF   ,PARTSAV   ,SOL2SPH ,IPARG       ,
-     4            NGROUNC ,IGROUNC ,ELBUF_TAB ,IGEO)
-
-!$OMP END PARALLEL
-
-                  IF (IMONM > 0) CALL STOPTIME(89,1)
-                  IF (IMONM > 0) CALL STOPTIME(48,1)
-                ENDIF
-
 C========================================================================================
 C                                     PARALLEL SECTION (SMP)
 C========================================================================================
@@ -7227,22 +6412,6 @@ C implicit barrier on end do
 
                 END IF ! Fin NBGAUGE > 0
 
-C--------------------
-C       SPH Flow
-C-- // --------------
-                IF (NSPHIO > 0) THEN
-!$OMP PARALLEL DO SCHEDULE(DYNAMIC,1) PRIVATE(IVAD)
-                  DO K=1,NSPHIO
-                    IF (ISPHIO(1,K)>1) THEN
-                      IVAD = ISPHIO(4,K)
-                      CALL SPGAUGE_F(
-     .                  VSPHIO(IVAD+13),VSPHIO(IVAD+15),VSPHIO(IVAD+18),VSPHIO(IVAD+20),
-     .                  VSPHIO(IVAD+16),1)
-                    END IF
-                  ENDDO
-C implicit barrier on end do
-!$OMP END PARALLEL DO
-                END IF
 
 !$OMP PARALLEL
                 IF(NRBYKIN>0)THEN
@@ -7399,15 +6568,11 @@ c--------------
                   ELSE
                     ! double precision accumlation and then cast in simple precision
                     TT_DOUBLE = TT_DOUBLE + TTMP
-                    IF (IMPL_S==1.OR.NEIG>0) THEN
-                      TT = TT + TTMP
-                    ELSE
                       IF(IRESP == 1)THEN
                         TT = SNGL(TT_DOUBLE)
                       ELSE
                         TT = TT_DOUBLE
                       ENDIF
-                    ENDIF
                     !TT=TT+TTMP
                   ENDIF
                   NTMP = 1
@@ -7437,49 +6602,6 @@ C===============================================================================
 
               END IF
 
-C
-C========================================================================================
-C                                     PARALLEL SECTION (SMP)
-C========================================================================================
-              IF(NTMP==1)THEN
-                IF(IDTMINS==1)THEN
-C
-C        Obsolete
-                ELSEIF(IDTMINS==2.OR.IDTMINS_INT/=0)THEN
-C--------------------------------------------------
-                  IF (IMON>0) CALL STARTIME(39,1)
-
-!$OMP PARALLEL PRIVATE(ITSK,NODFTSK,NODLTSK)
-
-                  ITSK = OMP_GET_THREAD_NUM()
-                  NODFTSK   = 1+ITSK*NUMNOD/ NTHREAD
-                  NODLTSK   = (ITSK+1)*NUMNOD/NTHREAD
-
-                  CALL SMS_ENCIN_2(
-     1                  ITSK     ,NODFTSK  ,NODLTSK  ,NODXI_SMS ,
-     2                  MS       ,JAD_SMS  ,JDI_SMS  ,LT_SMS    ,INDX1_SMS,
-     3                  DIAG_SMS ,IAD_ELEM ,FR_ELEM  ,WEIGHT    ,V        ,
-     4                  A        ,X_SMS    ,Y_SMS    ,Z_SMS     ,XMOM_SMS ,
-     5                  ICODT    ,ICODR    ,ISKEW    ,SKEW      ,IBFV      ,
-     6                  VEL      ,NPC      ,TF       ,X         ,D         ,
-     7                  SENSORS  ,IFRAME   ,XFRAME    ,JADI_SMS ,
-     8                  JDII_SMS ,LTI_SMS  ,ISKYI_SMS ,MSKYI_SMS ,FR_SMS   ,
-     9                  FR_RMS   ,NPBY     ,TAGSLV_RBY_SMS,INTSTAMP,CPTREAC,
-     A                  NODREAC  ,FTHREAC  ,AR        ,VR        ,
-     B                  DR       ,IN       ,RBY      ,IRBE2     ,LRBE2     ,
-     C                  IAD_RBE2 ,FR_RBE2M ,NMRBE2   ,R2SIZE    ,IRBE3     ,
-     D                  LRBE3    ,FRBE3    ,IAD_RBE3M,FR_RBE3M  ,FR_RBE3MP ,
-     E                  RRBE3    ,RRBE3_PON,IAD_RBY  ,FR_RBY6   ,RBY6      ,
-     F                  LPBY     ,TAGMSR_RBY_SMS,R3SIZE,NODII_SMS,INDX2_SMS,
-     G                  IBCSCYC  ,LBCSCYC ,OUTPUT)
-
-!$OMP END PARALLEL
-
-                  IF (IMON>0) CALL STOPTIME(39,1)
-
-                END IF
-              END IF
-C---
               NISKY_SMS=0
 
 C========================================================================================
@@ -7542,7 +6664,7 @@ C===============================================================================
 
               IF (IMON>0) CALL STARTIME(7,1)
 
-              IF(COMPTREAC/=0.AND.(IMPL_S==0 .OR. INCONV==1)) THEN
+              IF(COMPTREAC/=0.AND.(INCONV==1)) THEN
 
 !$OMP PARALLEL PRIVATE(ITSK,NODFTSK,NODLTSK)
 
@@ -7716,15 +6838,11 @@ C-------> Multidomain single precision:  double precision time scale----
                 ELSE
                   ! double precision accumlation and then cast in simple precision
                   TT_DOUBLE = TT_DOUBLE + DT2
-                  IF (IMPL_S==1.OR.NEIG>0) THEN
-                    TT = TT + DT2
-                  ELSE
                     IF(IRESP == 1)THEN
                       TT = SNGL(TT_DOUBLE)
                     ELSE
                       TT = TT_DOUBLE
                     ENDIF
-                  ENDIF
                 ENDIF
 C May do 1 more cycle to write animation if TT = TTANIM - 10%
                 IF (IMADCPL /= 1) THEN
@@ -7793,65 +6911,17 @@ C------------
                   ELSE
                     ! double precision accumlation and then cast in simple precision
                     TT_DOUBLE = TT_DOUBLE - TTMP - DT2
-                    IF (IMPL_S==1.OR.NEIG>0) THEN
-                      TT = TT - TTMP - DT2
-                    ELSE
                       IF(IRESP == 1)THEN
                         TT = SNGL(TT_DOUBLE)
                       ELSE
                         TT = TT_DOUBLE
                       ENDIF
-                    ENDIF
                     !TT=TT-TTMP-DT2
                   ENDIF
                 ENDIF
               ENDIF
-C----------------------------------
-C       IMPLICITE SOLVER
-C----------------------------------
-              IF (IMPL_S==1) THEN
-                CALL TRACE_IN(3,NCYCLE,ZERO)
-                IF (IMON>0) CALL STARTIME(34,1)
 
-C========================================================================================
-C                                     PARALLEL SECTION (SMP)
-C========================================================================================
-
-                IF (IMP_CHK > 0) THEN
-                ELSEIF ((TT<=TSTOP.OR.(TT-TSTOP)<EM10).AND.IBUCK==0) THEN
-C-----integer : 1:IKC,2:IKUD,3:W_DDL,4:IADM,5:JDIM,6:NDOFI,7:IDDLI
-C-----reel : 1,2,3,4:DIAG_K,LT_K,DIAG_M,LT_M,5,6:LB,DB,7:BKUD,8,9:D_IMP,DR_IMP
-C----       10,11,12:ELBUF_C,BUFMAT_C,X_C,13,14:DD,DDR,15,16:X_ac,V_zero,23,24:AC,ACR
-C Modes buckling
-                  IF (NBUCK>0) IBUCK=1
-                ELSEIF (IBUCK>0) THEN
-
-                  IF (IDYNA==0.AND.ITSK==0) CALL CP_DM(NUMGEO,GEO,IGEO,DMCP,2)
-                  MSTOP=2
-                ELSE
-                  IF (ILASTANIM/=1) THEN
-                    IF (ILINE/=1.AND.ISPMD==0) THEN
-                      WRITE(IOUT,*)
-                      WRITE(ISTDO,*)
-                      WRITE(IOUT,1002)IT_T
-                      WRITE(ISTDO,1002)IT_T
-                      WRITE(IOUT,1003)IT_BCS,IT_PCG
-                      WRITE(ISTDO,1003)IT_BCS,IT_PCG
-                    ENDIF
-                  END IF !(ILASTANIM==2) THEN
-                  TT = MIN(TT,TSTOP+EM10)
-                  DT2 = DT2T
-                ENDIF !IF (IMP_CHK>0)
-                IF (TT>TSTOP.AND.INCONV==1) THEN
-                  CALL IMP_RESTARCP(X,V,VR,GEO,IGEO,DMCP,IMPBUF_TAB)
-                ENDIF !IF (TT>TSTOP.AND.INCONV==1)
-
-                CALL TRACE_OUT(3)
-                IF (IMON>0) CALL STOPTIME(34,1)
-C---------------------------
-C     Not pure thermal case
-C---------------------------
-              ELSEIF(ILAG+IALE+IEULER/=0)THEN
+              IF(ILAG+IALE+IEULER/=0)THEN
 
 C========================================================================================
 C                                     PARALLEL SECTION (SMP)
@@ -8182,11 +7252,6 @@ C===============================================================================
 C                                     NON PARALLEL SECTION (SMP)
 C========================================================================================
 
-              IF(NINTSTAMP/=0)THEN
-                CALL INTSTAMP_MOVE(INTSTAMP ,NPC   ,TF   ,SKEW ,PTR_SMS,
-     .                                V     ,VR    ,MS   ,X    ,D      ,
-     .                             NPBY     ,RBY   )
-              END IF
               ! --------------------------------
               ! velocity update for /INT18 + LAW151
               IF( MULTI_FVM%IS_INT18_LAW151 ) THEN
@@ -8294,9 +7359,6 @@ C mass & velocity
                 IF (IMON>0) CALL STOPTIME(8,1)
               ENDIF
 
-              IF(NINTSTAMP /= 0.AND.FTEMPVAR21==1.AND.NSPMD>1) THEN
-                CALL SPMD_I21TEMPCOM(IPARI,TEMP,INTBUF_TAB,NSENSOR,SENSORS%SENSOR_TAB)
-              ENDIF
 
               IF(NUMFRAM/=0.AND.N2D==0)THEN
 C----------------------------
@@ -8304,13 +7366,8 @@ C      MOVING FRAME: RETRIEVE POSITION & VELOCITY.
 C--- //0 ----------------
                 IF (IMON>0)CALL STARTIME(6,1)
                 IF (IMONM > 0) CALL STARTIME(49,1)
-                IF (IMPL_S >0) THEN
-                  CALL MOVFRA_IMP(XFRAME ,IFRAME ,X      ,V      ,A      ,
-     .                            VR     ,AR     ,D      )
-                ELSE
                   CALL MOVFRA2(XFRAME ,IFRAME ,X      ,V      ,VR     ,
      .                         D      )
-                END IF !(IMPL_S >0)
                 IF (IMONM > 0) CALL STOPTIME(49,1)
                 IF (IMON>0) CALL STOPTIME(6,1)
               ENDIF
@@ -8371,13 +7428,6 @@ C mass & velocity
                     IF (IMON>0) CALL STOPTIME(8,1)
                   ENDIF
 
-C--------------------------------------------------------
-C INTERFACE 21 - Communication of nodal temperature
-C--------------------------------------------------------
-
-                  IF(NINTSTAMP /= 0.AND.FTEMPVAR21==1.AND.NSPMD>1) THEN
-                    CALL SPMD_I21TEMPCOM(IPARI,TEMP,INTBUF_TAB,NSENSOR,SENSORS%SENSOR_TAB)
-                  ENDIF
 
                   ICH = 0
                   IF (RESTART_FILE==1) THEN
@@ -8391,11 +7441,6 @@ C--------------------------------------------------------
 
                     IF (NFLOW>0) CALL NFWREST(IFLOW, RFLOW)
                     CALL FVWREST()
-                    IF (IMPL_S>0) THEN
-                      CALL IMP_TRANS(R_IMP)
-                      CALL IMPWREST(IRFORM,IMPL_S0)
-                    ENDIF
-C
                     IF(ITHERM_FE > 0 )CALL THCWREST(MCP, TEMP)
 C
                     IF(NITSCHE > 0 )CALL NITSCHEWREST(FORNEQS)
@@ -8490,15 +7535,12 @@ C
                     GOTO 100
                   ELSEIF( STATE_ANIM == 2 .OR. STATE_H3D == 2 ) THEN
                     MSTOP=2
-                    GOTO 500
                   ENDIF
-
                 ELSE
                   MSTOP=2
-                  GOTO 500
                 END IF
               END IF
-C-----------------------
+              IF(MSTOP .NE. 2 ) THEN
               IF(DT2<=ZERO) THEN
                 WRITE(IOUT,*)' **ERROR : TIME STEP LESS OR EQUAL ZERO'
                 WRITE(ISTDO,*)' **ERROR : TIME STEP LESS OR EQUAL ZERO'
@@ -8651,12 +7693,6 @@ C mass & velocity
 
 C
                     ICH = 0
-C--------------------------------------------------------
-C INTERFACE 21 - Communication of nodal temperature
-C--------------------------------------------------------
-                    IF(NINTSTAMP /= 0.AND.FTEMPVAR21==1.AND.NSPMD>1) THEN
-                      CALL SPMD_I21TEMPCOM(IPARI,TEMP,INTBUF_TAB,NSENSOR,SENSORS%SENSOR_TAB)
-                    ENDIF
 
                     CALL WRRESTP(AF         ,IAF             ,XDP        ,ICH             ,ADSKY          ,
      .                           ELBUF_TAB  ,XFEM_TAB        ,INTBUF_TAB ,MULTI_FVM       ,MAT_ELEM       ,
@@ -8668,10 +7704,6 @@ C--------------------------------------------------------
 
                     IF (NFLOW>0) CALL NFWREST(IFLOW, RFLOW)
                     CALL FVWREST()
-                    IF (IMPL_S>0) THEN
-                      CALL IMP_TRANS(R_IMP)
-                      CALL IMPWREST(IRFORM,IMPL_S0)
-                    ENDIF
 C
                     IF(ITHERM_FE > 0  ) CALL THCWREST(MCP, TEMP)
 C
@@ -8789,13 +7821,6 @@ C
      *                           INT24E2EUSE)
                         IF (IMON>0) CALL STOPTIME(8,1)
                       ENDIF
-C--------------------------------------------------------
-C INTERFACE 21 - Communication of nodal temperature
-C--------------------------------------------------------
-                      IF(NINTSTAMP /= 0.AND.FTEMPVAR21==1.AND.NSPMD>1) THEN
-                        CALL SPMD_I21TEMPCOM(IPARI,TEMP,INTBUF_TAB,NSENSOR,SENSORS%SENSOR_TAB)
-                      ENDIF
-
                       ICH = 1
                       CALL WRRESTP(AF        ,IAF             ,XDP         ,ICH              ,ADSKY          ,
      .                            ELBUF_TAB  ,XFEM_TAB        ,INTBUF_TAB  ,MULTI_FVM        ,MAT_ELEM       ,
@@ -8807,10 +7832,6 @@ C--------------------------------------------------------
 
                       IF (NFLOW>0) CALL NFWREST(IFLOW, RFLOW)
                       CALL FVWREST()
-                      IF (IMPL_S>0) THEN
-                        CALL IMP_TRANS(R_IMP)
-                        CALL IMPWREST(IRFORM,IMPL_S0)
-                      ENDIF
 C
                       IF(ITHERM_FE > 0  )CALL THCWREST(MCP, TEMP)
 C
@@ -8898,10 +7919,8 @@ C
 C-------------------------------
                 IF(IMON>0) CALL STOPTIME(7,1)
               ENDIF
-C-------------------------------
- 500          CONTINUE
-C-------------------------------
 
+              ENDIF ! MSTOP 
               IF(MSTOP/=0) THEN
                 PARALLEL_SECTION = 0
 C Multidomain -> close sockets
@@ -9042,9 +8061,6 @@ C
                   DEALLOCATE(RRBE3)
                   IF (IPARIT>0) DEALLOCATE(RRBE3_PON)
                 END IF
-                IF(IMPL_S>0.OR.NEIG>0)THEN
-                  CALL DEALLOC_IMPBUF(IMPBUF_TAB)
-                END IF
                 IF(IPARIT==0.AND.IRESP==1) THEN
                   DEALLOCATE( ACC_DP )
                 ENDIF
@@ -9100,7 +8116,7 @@ C=============================
 C END OF EXPLICIT ITERATIVE LOOP
 C=============================
 
-              GO TO 100
+              GOTO 100
 C
  1002         FORMAT(3X,'* IMPLICIT COMPUTATION TERMINATED WITH ',3X,
      .                  'TOTAL NONLINEAR ITERATIONS:',I8)
