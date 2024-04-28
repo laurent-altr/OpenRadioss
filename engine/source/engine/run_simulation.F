@@ -170,24 +170,7 @@ Chd|        GET_IBUF_C                    source/coupling/rad2rad/rad2rad_c.c
 Chd|        GET_SHMBUF_C                  source/coupling/rad2rad/rad2rad_c.c
 Chd|        GRAVIT                        source/loads/general/grav/gravit.F
 Chd|        GRAVIT_FVM_FEM                source/loads/general/grav/gravit_fvm_fem.F
-Chd|        I14IST                        source/interfaces/int14/i14ist.F
-Chd|        I14WFS                        source/interfaces/int14/i14wfs.F
-Chd|        I18MAIN_KINE_1                source/interfaces/int18/i18main_kine.F
-Chd|        I18MAIN_KINE_2                source/interfaces/int18/i18main_kine.F
-Chd|        I24E2E_FICTIVE_NODES_UPDATE   source/interfaces/int24/i24for3e.F
-Chd|        I24NITSCHFOR3                 source/interfaces/int24/i24nitschfor3.F
-Chd|        I24PXFEM                      source/interfaces/int24/i24pxfem.F
 Chd|        IMPWREST                      source/output/restart/wrrest.F
-Chd|        IMP_BUCK                      source/implicit/imp_buck.F
-Chd|        IMP_CHKM                      source/implicit/imp_solv.F
-Chd|        IMP_DT2                       source/implicit/imp_dt.F
-Chd|        IMP_FANIE                     source/implicit/imp_solv.F
-Chd|        IMP_FANII                     source/implicit/imp_solv.F
-Chd|        IMP_FOUT                      source/implicit/imp_solv.F
-Chd|        IMP_RESTARCP                  source/implicit/imp_sol_init.F
-Chd|        IMP_SOLV                      source/implicit/imp_solv.F
-Chd|        IMP_SOL_INIT                  source/implicit/imp_sol_init.F
-Chd|        IMP_TRANS                     source/output/restart/wrrest.F
 Chd|        INIT_I25_EDGE                 source/interfaces/int25/init_i25_edge.F
 Chd|        INIT_INTERF_SORTING_STRATEGY  source/interfaces/init_interf_sorting_strategy.F
 Chd|        INIT_NODAL_STATE              source/interfaces/interf/init_nodal_state.F
@@ -1975,12 +1958,6 @@ C for chkpt :: ISMSCH=1
               CALL SMS_ALLOCATE()
 C init pointer
               PTR_SMS => NATIV_SMS
-              ALLOCATE(JADI21_SMS(0),
-     .                 TAGSLV_I21_SMS(0),TAGMSR_I21_SMS(0))
-              ALLOCATE(NODXI_SMS(0),NODII_SMS(0))
-              ALLOCATE(MSKYI_SMS(0),ISKYI_SMS(0,0),
-     .                 JADI_SMS(0),JDII_SMS(0),LTI_SMS(0))
-
               IF (IREAC == 1 ) THEN
                 ALLOCATE(NODREAC(NUMNOD))
               ELSE
@@ -2701,17 +2678,6 @@ C===============================================================================
               ENDIF
               NGDONE = 1
               NSGDONE = 1
-C------------------------
-C       INTERFACES 14 & 15 :
-C         Initialisation buffers: forces, moments, stifness of surfaces.
-C--- //0 ----------------
-              IF (ISPMD==0) THEN
-                IF (NINTER/=0) THEN
-                  IF (IMON>0) CALL STARTIME(2,1)
-                  CALL I14IST(IPARI,INTBUF_TAB,IGRSURF,BUFSF)
-                  IF (IMON>0) CALL STOPTIME(2,1)
-                ENDIF
-              ENDIF
 
 C========================================================================================
 C                                     NON PARALLEL SECTION (SMP)
@@ -4655,11 +4621,6 @@ C===============================================================================
      1               CALL CND_DMASI2(ICNDS10,NKEND,IMAP2ND,MASI2ND0,MS  ,WEIGHT)
                 END IF
 C
-                IF(INTPLYXFEM > 0) THEN
-                  CALL I24PXFEM(
-     1               IPARI  ,INTBUF_TAB ,WAGAP,IAD_ELEM,FR_ELEM)
-                ENDIF
-C
 C----------------------------------------------------------
 C         RBE2 - FORCES and MOMENTS (Torque)
 C----------------------------------------------------------
@@ -6033,21 +5994,6 @@ C===============================================================================
 C                                   DOMAIN 0
 C========================================================================================
 
-                IF (ISPMD==0) THEN
-C------------------------
-C       INTERFACES 14 & 15
-C--- //0 ----------------
-                  IF(NINTER/=0)THEN
-                    IF (IMON>0) THEN
-                      CALL STARTIME(2,1)
-                    ENDIF
-                    CALL I14WFS(IPARI,INTBUF_TAB,IGRSURF,FSAV)
-                    IF (IMON>0) THEN
-                      CALL STOPTIME(2,1)
-                    ENDIF
-                  ENDIF
-                ENDIF
-C----
                 IF (NS10E>0) CALL S10CNDI2A(ICNDS10 ,ITAGND ,A      )
 C------------------------
 C         INTERFACES TIED
@@ -7547,17 +7493,7 @@ C
                 IF(ALLOCATED(PSH3UPL))DEALLOCATE(PSH3UPL)
                 IF(ALLOCATED(ERR_THK_SH3))DEALLOCATE(ERR_THK_SH3)
                 IF(ALLOCATED(ERR_THK_SH4))DEALLOCATE(ERR_THK_SH4)
-                DEALLOCATE(TAGNOD_SMS,NATIV_SMS,NODXI_SMS,TAGPRT_SMS,TAGREL_SMS,
-     .                     INDX1_SMS, TAGSLV_RBY_SMS, TAG_LNK_SMS, NRWL_SMS,
-     .                     JAD_SMS, JDI_SMS, JSM_SMS,
-     .                     JADC_SMS,JADS_SMS,JADS10_SMS,JADT_SMS,
-     .                     JADP_SMS,JADR_SMS,JADTG_SMS,
-     .                     X_SMS, P_SMS,Y_SMS, Z_SMS, PREC_SMS, PREC_SMS3,
-     .                     DIAG_SMS3, LT_SMS,
-     .                     KAD_SMS, KDI_SMS , PK_SMS, LTK_SMS,
-     .                     JADI_SMS, JDII_SMS, LTI_SMS, MSKYI_SMS, ISKYI_SMS,
-     .                     XMOM_SMS, TAGMSR_RBY_SMS, T2MAIN_SMS2)
-C
+                CALL SMS_DEALLOCATE()
                 IF(ALLOCATED(FTHREAC))DEALLOCATE(FTHREAC)
                 IF(ALLOCATED(FTHDTM))DEALLOCATE(FTHDTM)
                 IF(ALLOCATED(FREAC))DEALLOCATE(FREAC)
