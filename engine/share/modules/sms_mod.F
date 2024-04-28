@@ -61,8 +61,33 @@ C-----------------------------------------------
       my_real, DIMENSION(:),ALLOCATABLE :: T2FAC_SMS2
 
 C-----------------------------------------------
-        CONTAINS
+      END MODULE SMS_MOD
+Chd|====================================================================
+Chd|  SMS_PCG_PROJ                  share/modules/sms_mod.F       
+Chd|-- called by -----------
+Chd|        RESOL                         source/engine/resol.F         
+Chd|        SMS_INISI                     source/ams/sms_proj.F         
+Chd|        SMS_INIST                     source/ams/sms_proj.F         
+Chd|        SMS_INIX                      source/ams/sms_proj.F         
+Chd|        SMS_PCG                       source/ams/sms_pcg.F          
+Chd|        SMS_PRO_P                     source/ams/sms_proj.F         
+Chd|        SMS_UPDST                     source/ams/sms_proj.F         
+Chd|-- calls ---------------
+Chd|====================================================================
+      MODULE SMS_PCG_PROJ
+#include      "my_real.inc"
+      my_real,
+     .         DIMENSION(:,:),ALLOCATABLE :: PROJ_S,PROJ_T
+      my_real,
+     .         DIMENSION(:,:),ALLOCATABLE :: PROJ_K
+      my_real,
+     .         DIMENSION(:),ALLOCATABLE :: PROJ_LA_1,PROJ_W
+ 
+      END MODULE SMS_PCG_PROJ
+
         SUBROUTINE SMS_ALLOCATE()
+            USE SMS_MOD
+            USE SMS_PCG_PROJ
             IMPLICIT NONE
                ALLOCATE(TAGNOD_SMS(0))
                ALLOCATE(NATIV_SMS(0))
@@ -107,9 +132,16 @@ C-----------------------------------------------
      .                 JSM_SMS(0),
      .                 TAG_LNK_SMS(0),NRWL_SMS(0))
 
+                ALLOCATE(PROJ_S(0,0),PROJ_T(0,0),
+     .                   PROJ_LA_1(0),
+     .                          PROJ_W(0),PROJ_K(0,0))
+
         RETURN
       END SUBROUTINE
         SUBROUTINE SMS_DEALLOCATE()
+            USE SMS_MOD
+            USE SMS_PCG_PROJ
+
             IMPLICIT NONE
               DEALLOCATE(TAGNOD_SMS)
               DEALLOCATE(NATIV_SMS)
@@ -152,26 +184,3 @@ C-----------------------------------------------
             RETURN
       END SUBROUTINE
 
-      END MODULE SMS_MOD
-Chd|====================================================================
-Chd|  SMS_PCG_PROJ                  share/modules/sms_mod.F       
-Chd|-- called by -----------
-Chd|        RESOL                         source/engine/resol.F         
-Chd|        SMS_INISI                     source/ams/sms_proj.F         
-Chd|        SMS_INIST                     source/ams/sms_proj.F         
-Chd|        SMS_INIX                      source/ams/sms_proj.F         
-Chd|        SMS_PCG                       source/ams/sms_pcg.F          
-Chd|        SMS_PRO_P                     source/ams/sms_proj.F         
-Chd|        SMS_UPDST                     source/ams/sms_proj.F         
-Chd|-- calls ---------------
-Chd|====================================================================
-      MODULE SMS_PCG_PROJ
-#include      "my_real.inc"
-      my_real,
-     .         DIMENSION(:,:),ALLOCATABLE :: PROJ_S,PROJ_T
-      my_real,
-     .         DIMENSION(:,:),ALLOCATABLE :: PROJ_K
-      my_real,
-     .         DIMENSION(:),ALLOCATABLE :: PROJ_LA_1,PROJ_W
- 
-      END MODULE SMS_PCG_PROJ
