@@ -736,107 +736,403 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
-      INTEGER ITASK
-      INTEGER  ICODE(*), ISKEW(*), ISKWN(LISKN,*), NETH(*),
-     .   IPART(*),NOM_OPT(LNOPT1,*),IXS(*),
-     .   IXQ(NIXQ,*),IXC(NIXC,*), IXT(NIXT,*), IXP(NIXP,*),
-     .   IXR(NIXR,*),IXTG(NIXTG,*), IXTG1(4,*),
-     .   ITAB(*), 
-     .   KINET(*),
-     .   IFILL(NUMNOD,*), IMS(*), NPC(*), IBCL(*), IBFV(*),
-     .   IDUM(*), LAS(*),IPARG(NPARG,*),IPARI(NPARI,*),
-     .   NPRW(*), LPRW(*), ICONX(*), NPBY(NNPBY,*),
-     .   LPBY(*),
-     .   LRIVET(*), NSTRF(*), LJOINT(*), ICODT(*), ICODR(*), ILINK(*),
-     .   LLINK(*), LINALE(*), NEFLSW(*), NNFLSW(*),
-     .   NODPOR(*),ICUT(*) , INOISE(*),MONVOL(*),
-     .   ADSKY(*),IADS(*),LACCELM(3,*),DD_IAD(NSPMD+1,*),FR_ELEM(*),
-     .   IAD_ELEM(2,*),IAD_RBY(*),FR_RBY(*),NNLINK(10,*),LNLINK(*),
-     .   IAF(*),IGRV(*),WEIGHT(*),MAIN_PROC(*),WEIGHT_MD(*),
-     .   KXX(NIXX,*),IXX(*),IEXLNK(NR2R,*),ITABM1(*),
-     .   IFRAME(LISKN,*),KXSP(NISP,*),IXSP(*),NOD2SP(*),
-     .   ISPCOND(NISPCOND,*),ISPSYM(NSPCOND,*),IBVEL(NBVELP,*),LBVEL(*),
-     .   ISPHIO(NISPHIO,*),LPRTSPH(*),LONFSPH(*),LAGBUF(*),IBCSLAG(*),
-     .   IACTIV(*),GJBUFI(LKJNI,*) ,IBMPC(*),NPBYL(NNPBY,*), LPBYL(*),
-     .   NBRCVOIS(*),NBSDVOIS(*),LNRCVOIS(*),LNSDVOIS(*),
-     .   NERCVOIS(*),NESDVOIS(*),LERCVOIS(*),LESDVOIS(*), NPORGEO(*),
-     .   NPSEGCOM(*), LSEGCOM(*), IGEO(NPROPGI,*),
-     .   IPM(NPROPMI,*),MADPRT(*), MADSH4(*), MADSH3(*), MADSOL(*),
-     .   MADNOD(*),MADFAIL(*), IADSDP(*), IADRCP(*),
-     .   PROCNE(*), FR_WALL(*),IAD_RBY2(*),
-     .   FR_RBY2(*),IAD_I2M(*),FR_I2M(*),ADDCNI2(*),PROCNI2(*),IADI2(*),
-     .   FR_MV(*), IADMV2(*),  FR_LL(*),  FR_RL(*),
-     .   IADCJ(*), FR_CJ(*),  
-     .   FR_SEC(*), IAD_SEC(4,*),
-     .   IAD_CUT(NSPMD+2,*), FR_CUT(*), RG_CUT(*), NEWFRONT(*),
-     .   FR_MAD(5,*), NODGLOB(*), LNODPOR(*), FR_I18(*), 
-     .   FXBIPM(NBIPM,*),FXBNOD(*),FXBELM(*), FXBGRVI(*),
-     .   EIGIPM(NEIPM,*), EIGIBUF(*), IFLOW(*), FASOLFR(*),
-     .   DD_R2R(NSPMD+1,*), LGRAV(*), FR_LAGF(3,*), LLAGF(*),
-     .   ICONTACT(*), SH4TREE(*), SH3TREE(*), IPADMESH(*),
-     .   ISKWP(*), NSKWP(*), ISENSP(2,*), NSENSP(*), IACCP(*), NACCP(*),
-     .   IPART_STATE(*),SH4TRIM(*), SH3TRIM(*),IRBYM(*) ,LNRBYM(*),
-     .   ICODRBYM(*),IRBE3(NRBE3L,*),LRBE3(*),IAD_RBE3M(*),FR_RBE3M(*),
-     .   FRBE3(*), FR_RBE3MP(*),IAD_RBYM(*),
-     .   FR_RBYM(*),NOM_SECT(*), IBCR(*),IRBE2(*),LRBE2(*),
-     .   IAD_RBE2(*),FR_RBE2(*),IADSDP_PXFEM(*),
-     .   IADRCP_PXFEM(*),ICFIELD(*),LCFIELD(*),ILOADP(*),LLOADP(*),
-     .   IADSDP_CRK(*),IADRCP_CRK(*),INOD_CRK(*),IEL_CRK(*),IADC_CRK(*),
-     .   ADSKY_CRK(*),PROCNE_CRK(*),CNE_CRK(*),IBORDNODE(*),
-     .   NODEDGE(*),IAD_EDGE(*),FR_EDGE(*),FR_NBEDGE(*),
-     .   CRKNODIAD(*), LGAUGE(3,*), IGAUP(*), NGAUP(*),NODLEVXF(*),
-     .   NODGLOBXFE(*),ELCUTC(2,*),NODENR(*),KXFENOD2ELC(*),
-     .   ENRTAG(NUMNOD,*),KXIG3D(*),IXIG3D(*),
-     .   NATIV0_SMS(*), SEGQUADFR(*), TAGSLV_RBY(*),
-     .   KLOADPINTER(NINTER+1)  ,LOADPINTER(NINTER*NLOADP_HYD) 
-      INTEGER IDATA(*), IBFTEMP(*), IBCV(*), IBFFLUX(*), WEIGHT_RM(*),
-     .        ICODT_PLY(*), ISKEW_PLY(*),INOD_PXFEM(*),IEL_PXFEM(*),
-     .        IADC_PXFEM(*),ADSKY_PXFEM(*),ICODE_PLY(*),MADCLNOD(*),
-     .        PROCNE_PXFEM(*),
-     .        IBUFSSG_IO(*),IBC_PLY(*),DD_R2R_ELEM(*),
-     .        SPH2SOL(*), SOL2SPH(2,*), IRST(3,*), SOL2SPH_TYP(*),IRUNN_BIS,
-     .        ADDCSRECT(*), IAD_FRNOR(*), FR_NOR(*), PROCNOR(*), 
-     .        IAD_FREDG(*), FR_EDG(*),TAG_SKINS6(*),IBCSCYC(*),LBCSCYC(*)
+      INTEGER, INTENT(INOUT) :: ITASK !< OpenMP task number
+      INTEGER, INTENT(INOUT) :: ICODE(*)
+      INTEGER, INTENT(INOUT) :: ISKEW(*)
+      INTEGER, INTENT(INOUT) :: ISKWN(LISKN,*)
+      INTEGER, INTENT(INOUT) :: NETH(*)
+      INTEGER, INTENT(INOUT) :: IPART(*)
+      INTEGER, INTENT(INOUT) :: NOM_OPT(LNOPT1,*)
+      INTEGER, INTENT(INOUT) :: IXS(*)
+      INTEGER, INTENT(INOUT) :: IXQ(NIXQ,*)
+      INTEGER, INTENT(INOUT) :: IXC(NIXC,*)
+      INTEGER, INTENT(INOUT) :: IXT(NIXT,*)
+      INTEGER, INTENT(INOUT) :: IXP(NIXP,*)
+      INTEGER, INTENT(INOUT) :: IXR(NIXR,*)
+      INTEGER, INTENT(INOUT) :: IXTG(NIXTG,*)
+      INTEGER, INTENT(INOUT) :: IXTG1(4,*)
+      INTEGER, INTENT(INOUT) :: ITAB(*)
+      INTEGER, INTENT(INOUT) :: KINET(*)
+      INTEGER, INTENT(INOUT) :: IFILL(NUMNOD,*)
+      INTEGER, INTENT(INOUT) :: IMS(*)
+      INTEGER, INTENT(INOUT) :: NPC(*)
+      INTEGER, INTENT(INOUT) :: IBCL(*)
+      INTEGER, INTENT(INOUT) :: IBFV(*)
+      INTEGER, INTENT(INOUT) :: IDUM(*)
+      INTEGER, INTENT(INOUT) :: LAS(*)
+      INTEGER, INTENT(INOUT) :: IPARG(NPARG,*)
+      INTEGER, INTENT(INOUT) :: IPARI(NPARI,*)
+      INTEGER, INTENT(INOUT) :: NPRW(*)
+      INTEGER, INTENT(INOUT) :: LPRW(*)
+      INTEGER, INTENT(INOUT) :: ICONX(*)
+      INTEGER, INTENT(INOUT) :: NPBY(NNPBY,*)
+      INTEGER, INTENT(INOUT) :: LPBY(*)
+      INTEGER, INTENT(INOUT) :: LRIVET(*)
+      INTEGER, INTENT(INOUT) :: NSTRF(*)
+      INTEGER, INTENT(INOUT) :: LJOINT(*)
+      INTEGER, INTENT(INOUT) :: ICODT(*)
+      INTEGER, INTENT(INOUT) :: ICODR(*)
+      INTEGER, INTENT(INOUT) :: ILINK(*)
+      INTEGER, INTENT(INOUT) :: LLINK(*)
+      INTEGER, INTENT(INOUT) :: LINALE(*)
+      INTEGER, INTENT(INOUT) :: NEFLSW(*)
+      INTEGER, INTENT(INOUT) :: NNFLSW(*)
+      INTEGER, INTENT(INOUT) :: NODPOR(*)
+      INTEGER, INTENT(INOUT) :: ICUT(*)
+      INTEGER, INTENT(INOUT) :: INOISE(*)
+      INTEGER, INTENT(INOUT) :: MONVOL(*)
+      INTEGER, INTENT(INOUT) :: ADSKY(*)
+      INTEGER, INTENT(INOUT) :: IADS(*)
+      INTEGER, INTENT(INOUT) :: LACCELM(3,*)
+      INTEGER, INTENT(INOUT) :: DD_IAD(NSPMD+1,*)
+      INTEGER, INTENT(INOUT) :: FR_ELEM(*)
+      INTEGER, INTENT(INOUT) :: IAD_ELEM(2,*)
+      INTEGER, INTENT(INOUT) :: IAD_RBY(*)
+      INTEGER, INTENT(INOUT) :: FR_RBY(*)
+      INTEGER, INTENT(INOUT) :: NNLINK(10,*)
+      INTEGER, INTENT(INOUT) :: LNLINK(*)
+      INTEGER, INTENT(INOUT) :: IAF(*)
+      INTEGER, INTENT(INOUT) :: IGRV(*)
+      INTEGER, INTENT(INOUT) :: WEIGHT(*)
+      INTEGER, INTENT(INOUT) :: MAIN_PROC(*)
+      INTEGER, INTENT(INOUT) :: WEIGHT_MD(*)
+      INTEGER, INTENT(INOUT) :: KXX(NIXX,*)
+      INTEGER, INTENT(INOUT) :: IXX(*)
+      INTEGER, INTENT(INOUT) :: IEXLNK(NR2R,*)
+      INTEGER, INTENT(INOUT) :: ITABM1(*)
+      INTEGER, INTENT(INOUT) :: IFRAME(LISKN,*)
+      INTEGER, INTENT(INOUT) :: KXSP(NISP,*)
+      INTEGER, INTENT(INOUT) :: IXSP(*)
+      INTEGER, INTENT(INOUT) :: NOD2SP(*)
+      INTEGER, INTENT(INOUT) :: ISPCOND(NISPCOND,*)
+      INTEGER, INTENT(INOUT) :: ISPSYM(NSPCOND,*)
+      INTEGER, INTENT(INOUT) :: IBVEL(NBVELP,*)
+      INTEGER, INTENT(INOUT) :: LBVEL(*)
+      INTEGER, INTENT(INOUT) :: ISPHIO(NISPHIO,*)
+      INTEGER, INTENT(INOUT) :: LPRTSPH(*)
+      INTEGER, INTENT(INOUT) :: LONFSPH(*)
+      INTEGER, INTENT(INOUT) :: LAGBUF(*)
+      INTEGER, INTENT(INOUT) :: IBCSLAG(*)
+      INTEGER, INTENT(INOUT) :: IACTIV(*)
+      INTEGER, INTENT(INOUT) :: GJBUFI(LKJNI,*)
+      INTEGER, INTENT(INOUT) :: IBMPC(*)
+      INTEGER, INTENT(INOUT) :: NPBYL(NNPBY,*)
+      INTEGER, INTENT(INOUT) :: LPBYL(*)
+      INTEGER, INTENT(INOUT) :: NBRCVOIS(*)
+      INTEGER, INTENT(INOUT) :: NBSDVOIS(*)
+      INTEGER, INTENT(INOUT) :: LNRCVOIS(*)
+      INTEGER, INTENT(INOUT) :: LNSDVOIS(*)
+      INTEGER, INTENT(INOUT) :: NERCVOIS(*)
+      INTEGER, INTENT(INOUT) :: NESDVOIS(*)
+      INTEGER, INTENT(INOUT) :: LERCVOIS(*)
+      INTEGER, INTENT(INOUT) :: LESDVOIS(*)
+      INTEGER, INTENT(INOUT) :: NPORGEO(*)
+      INTEGER, INTENT(INOUT) :: NPSEGCOM(*)
+      INTEGER, INTENT(INOUT) :: LSEGCOM(*)
+      INTEGER, INTENT(INOUT) :: IGEO(NPROPGI,*)
+      INTEGER, INTENT(INOUT) :: IPM(NPROPMI,*)
+      INTEGER, INTENT(INOUT) :: MADPRT(*)
+      INTEGER, INTENT(INOUT) :: MADSH4(*)
+      INTEGER, INTENT(INOUT) :: MADSH3(*)
+      INTEGER, INTENT(INOUT) :: MADSOL(*)
+      INTEGER, INTENT(INOUT) :: MADNOD(*)
+      INTEGER, INTENT(INOUT) :: MADFAIL(*)
+      INTEGER, INTENT(INOUT) :: IADSDP(*)
+      INTEGER, INTENT(INOUT) :: IADRCP(*)
+      INTEGER, INTENT(INOUT) :: PROCNE(*)
+      INTEGER, INTENT(INOUT) :: FR_WALL(*)
+      INTEGER, INTENT(INOUT) :: IAD_RBY2(*)
+      INTEGER, INTENT(INOUT) :: FR_RBY2(*)
+      INTEGER, INTENT(INOUT) :: IAD_I2M(*)
+      INTEGER, INTENT(INOUT) :: FR_I2M(*)
+      INTEGER, INTENT(INOUT) :: ADDCNI2(*)
+      INTEGER, INTENT(INOUT) :: PROCNI2(*)
+      INTEGER, INTENT(INOUT) :: IADI2(*)
+      INTEGER, INTENT(INOUT) :: FR_MV(*)
+      INTEGER, INTENT(INOUT) :: IADMV2(*)
+      INTEGER, INTENT(INOUT) :: FR_LL(*)
+      INTEGER, INTENT(INOUT) :: FR_RL(*)
+      INTEGER, INTENT(INOUT) :: IADCJ(*)
+      INTEGER, INTENT(INOUT) :: FR_CJ(*)
+      INTEGER, INTENT(INOUT) :: FR_SEC(*)
+      INTEGER, INTENT(INOUT) :: IAD_SEC(4,*)
+      INTEGER, INTENT(INOUT) :: IAD_CUT(NSPMD+2,*)
+      INTEGER, INTENT(INOUT) :: FR_CUT(*)
+      INTEGER, INTENT(INOUT) :: RG_CUT(*)
+      INTEGER, INTENT(INOUT) :: NEWFRONT(*)
+      INTEGER, INTENT(INOUT) :: FR_MAD(5,*)
+      INTEGER, INTENT(INOUT) :: NODGLOB(*)
+      INTEGER, INTENT(INOUT) :: LNODPOR(*)
+      INTEGER, INTENT(INOUT) :: FR_I18(*)
+      INTEGER, INTENT(INOUT) :: FXBIPM(NBIPM,*)
+      INTEGER, INTENT(INOUT) :: FXBNOD(*)
+      INTEGER, INTENT(INOUT) :: FXBELM(*)
+      INTEGER, INTENT(INOUT) :: FXBGRVI(*)
+      INTEGER, INTENT(INOUT) :: EIGIPM(NEIPM,*)
+      INTEGER, INTENT(INOUT) :: EIGIBUF(*)
+      INTEGER, INTENT(INOUT) :: IFLOW(*)
+      INTEGER, INTENT(INOUT) :: FASOLFR(*)
+      INTEGER, INTENT(INOUT) :: DD_R2R(NSPMD+1,*)
+      INTEGER, INTENT(INOUT) :: LGRAV(*)
+      INTEGER, INTENT(INOUT) :: FR_LAGF(3,*)
+      INTEGER, INTENT(INOUT) :: LLAGF(*)
+      INTEGER, INTENT(INOUT) :: ICONTACT(*)
+      INTEGER, INTENT(INOUT) :: SH4TREE(*)
+      INTEGER, INTENT(INOUT) :: SH3TREE(*)
+      INTEGER, INTENT(INOUT) :: IPADMESH(*)
+      INTEGER, INTENT(INOUT) :: ISKWP(*)
+      INTEGER, INTENT(INOUT) :: NSKWP(*)
+      INTEGER, INTENT(INOUT) :: ISENSP(2,*)
+      INTEGER, INTENT(INOUT) :: NSENSP(*)
+      INTEGER, INTENT(INOUT) :: IACCP(*)
+      INTEGER, INTENT(INOUT) :: NACCP(*)
+      INTEGER, INTENT(INOUT) :: IPART_STATE(*)
+      INTEGER, INTENT(INOUT) :: SH4TRIM(*)
+      INTEGER, INTENT(INOUT) :: SH3TRIM(*)
+      INTEGER, INTENT(INOUT) :: IRBYM(*)
+      INTEGER, INTENT(INOUT) :: LNRBYM(*)
+      INTEGER, INTENT(INOUT) :: ICODRBYM(*)
+      INTEGER, INTENT(INOUT) :: IRBE3(NRBE3L,*)
+      INTEGER, INTENT(INOUT) :: LRBE3(*)
+      INTEGER, INTENT(INOUT) :: IAD_RBE3M(*)
+      INTEGER, INTENT(INOUT) :: FR_RBE3M(*)
+      INTEGER, INTENT(INOUT) :: FRBE3(*)
+      INTEGER, INTENT(INOUT) :: FR_RBE3MP(*)
+      INTEGER, INTENT(INOUT) :: IAD_RBYM(*)
+      INTEGER, INTENT(INOUT) :: FR_RBYM(*)
+      INTEGER, INTENT(INOUT) :: NOM_SECT(*)
+      INTEGER, INTENT(INOUT) :: IBCR(*)
+      INTEGER, INTENT(INOUT) :: IRBE2(*)
+      INTEGER, INTENT(INOUT) :: LRBE2(*)
+      INTEGER, INTENT(INOUT) :: IAD_RBE2(*)
+      INTEGER, INTENT(INOUT) :: FR_RBE2(*)
+      INTEGER, INTENT(INOUT) :: IADSDP_PXFEM(*)
+      INTEGER, INTENT(INOUT) :: IADRCP_PXFEM(*)
+      INTEGER, INTENT(INOUT) :: ICFIELD(*)
+      INTEGER, INTENT(INOUT) :: LCFIELD(*)
+      INTEGER, INTENT(INOUT) :: ILOADP(*)
+      INTEGER, INTENT(INOUT) :: LLOADP(*)
+      INTEGER, INTENT(INOUT) :: IADSDP_CRK(*)
+      INTEGER, INTENT(INOUT) :: IADRCP_CRK(*)
+      INTEGER, INTENT(INOUT) :: INOD_CRK(*)
+      INTEGER, INTENT(INOUT) :: IEL_CRK(*)
+      INTEGER, INTENT(INOUT) :: IADC_CRK(*)
+      INTEGER, INTENT(INOUT) :: ADSKY_CRK(*)
+      INTEGER, INTENT(INOUT) :: PROCNE_CRK(*)
+      INTEGER, INTENT(INOUT) :: CNE_CRK(*)
+      INTEGER, INTENT(INOUT) :: IBORDNODE(*)
+      INTEGER, INTENT(INOUT) :: NODEDGE(*)
+      INTEGER, INTENT(INOUT) :: IAD_EDGE(*)
+      INTEGER, INTENT(INOUT) :: FR_EDGE(*)
+      INTEGER, INTENT(INOUT) :: FR_NBEDGE(*)
+      INTEGER, INTENT(INOUT) :: CRKNODIAD(*)
+      INTEGER, INTENT(INOUT) :: LGAUGE(3,*)
+      INTEGER, INTENT(INOUT) :: IGAUP(*)
+      INTEGER, INTENT(INOUT) :: NGAUP(*)
+      INTEGER, INTENT(INOUT) :: NODLEVXF(*)
+      INTEGER, INTENT(INOUT) :: NODGLOBXFE(*)
+      INTEGER, INTENT(INOUT) :: ELCUTC(2,*)
+      INTEGER, INTENT(INOUT) :: NODENR(*)
+      INTEGER, INTENT(INOUT) :: KXFENOD2ELC(*)
+      INTEGER, INTENT(INOUT) :: ENRTAG(NUMNOD,*)
+      INTEGER, INTENT(INOUT) :: KXIG3D(*)
+      INTEGER, INTENT(INOUT) :: IXIG3D(*)
+      INTEGER, INTENT(INOUT) :: NATIV0_SMS(*)
+      INTEGER, INTENT(INOUT) :: SEGQUADFR(*)
+      INTEGER, INTENT(INOUT) :: TAGSLV_RBY(*)
+      INTEGER, INTENT(INOUT) :: KLOADPINTER(NINTER+1)
+      INTEGER, INTENT(INOUT) :: LOADPINTER(NINTER*NLOADP_HYD) 
+      INTEGER, INTENT(INOUT) :: IDATA(*)
+      INTEGER, INTENT(INOUT) :: IBFTEMP(*)
+      INTEGER, INTENT(INOUT) :: IBCV(*)
+      INTEGER, INTENT(INOUT) :: IBFFLUX(*)
+      INTEGER, INTENT(INOUT) :: WEIGHT_RM(*)
+      INTEGER, INTENT(INOUT) :: ICODT_PLY(*)
+      INTEGER, INTENT(INOUT) :: ISKEW_PLY(*)
+      INTEGER, INTENT(INOUT) :: INOD_PXFEM(*)
+      INTEGER, INTENT(INOUT) :: IEL_PXFEM(*)
+      INTEGER, INTENT(INOUT) :: IADC_PXFEM(*)
+      INTEGER, INTENT(INOUT) :: ADSKY_PXFEM(*)
+      INTEGER, INTENT(INOUT) :: ICODE_PLY(*)
+      INTEGER, INTENT(INOUT) :: MADCLNOD(*)
+      INTEGER, INTENT(INOUT) :: PROCNE_PXFEM(*)
+      INTEGER, INTENT(INOUT) :: IBUFSSG_IO(*)
+      INTEGER, INTENT(INOUT) :: IBC_PLY(*)
+      INTEGER, INTENT(INOUT) :: DD_R2R_ELEM(*)
+      INTEGER, INTENT(INOUT) :: SPH2SOL(*)
+      INTEGER, INTENT(INOUT) :: SOL2SPH(2,*)
+      INTEGER, INTENT(INOUT) :: IRST(3,*)
+      INTEGER, INTENT(INOUT) :: SOL2SPH_TYP(*)
+      INTEGER, INTENT(INOUT) :: IRUNN_BIS
+      INTEGER, INTENT(INOUT) :: ADDCSRECT(*)
+      INTEGER, INTENT(INOUT) :: IAD_FRNOR(*)
+      INTEGER, INTENT(INOUT) :: FR_NOR(*)
+      INTEGER, INTENT(INOUT) :: PROCNOR(*)
+      INTEGER, INTENT(INOUT) :: IAD_FREDG(*)
+      INTEGER, INTENT(INOUT) :: FR_EDG(*)
+      INTEGER, INTENT(INOUT) :: TAG_SKINS6(*)
+      INTEGER, INTENT(INOUT) :: IBCSCYC(*)
+      INTEGER, INTENT(INOUT) :: LBCSCYC(*)
       INTEGER, DIMENSION(NUMSKW), INTENT(IN) :: ISKWP_L
-      INTEGER, DIMENSION(*), INTENT(in) :: ID_GLOBAL_VOIS,FACE_VOIS
-      my_real, DIMENSION(3*NUMNOD), TARGET :: X
-      my_real
-     .   D(3,*)      ,V(3,*)   ,VR(3,*),DAMP(*),
-     .   MS(*)   ,IN(*)   ,PM(NPROPM,*),SKEW(LSKEW,*),GEO(NPROPG,*),
-     .   BUFMAT(*) ,W(3,*)    ,VEUL(*),FILL(NUMNOD,*),DFILL(NUMNOD,*),
-     .   ALPH(*)   ,WB(3,*)   ,TF(*)       ,FORC(*)  ,VEL(*),
-     .   FSAV(NTHVKI,*) ,FZERO(3,*),XLAS(*)     ,ELBUF(*) ,
-     .   RWBUF(NRWLP,*),RWSAV(*),RBY(NRBY,*),RIVET(*),WA(*),
-     .   FV(*)     ,A(3,*)    ,AR(3,*)     ,VAL2(*)  ,PHI(*),
-     .   R(3,*)    ,CRFLSW(*),FLSW(*),
-     .   FANI(3,*) ,UWA(*)    ,PARTSAV(*)    ,STIFN(*) ,STIFR(*),
-     .   DSAVE(3,*),ASAVE(3,*),XCUT(*)   ,ANIN(*)    ,BUFNOIS(*),
-     .   FSKY(8,*),DR(3,*),ACCELM(LLACCELM,*),
-     .   TANI(*),VOLMON(*),EANI(*),AGRV(*), THKE(*), BUFSF(*),AF(*),
-     .   SECBUF(*),SECFCUM(7,NUMNOD,NSECT),LAMBDA(*), 
-     .   FR_WAVE(*),PARTS0(*),BUFGEO(*),
-     .   SPBUF(NSPBUF,*),XFRAME(NXFRAME,*),
-     .   WASPH(*),W16(*),VSPHIO(*),FBVEL(*),DAMPR(NRDAMP,*),
-     .   RDATA(*),PV(*),FSAVD(NTHVKI,*),GJBUFR(LKJNR,*),RBMPC(*),
-     .   SPHVELN(*),RBYL(NRBY,*),FSKYM(*), MSNF(*),VISCN(*),
-     .   FXBRPM(*), FXBMOD(*), FXBGLM(*), FXBCPM(*), FXBCPS(*),
-     .   FXBLM(*),  FXBFLS(*), FXBDLS(*), FXBDEP(*), FXBVIT(*),
-     .   FXBACC(*), FXBSIG(*), FXBGRVR(*), EIGRPM(NERPM,*),  
-     .   FSKYD(*), DMSPH(*),KNOT(*),WIGE(*),MS_2D(*),
-     .   KNOTLOCPC(*),KNOTLOCEL(*),XCELL(*),XFACE(*),FCONT_MAX(3,*)
-      my_real
-     .   RFLOW(*), RCONTACT(*),
-     .   PADMESH(*), MSC(*), MSTG(*), INC(*) , INTG(*), PTG(3,*),
-     .   ACONTACT(*), PCONTACT(*), FACTIV(*), TEMP(*), MCP(*),
-     .   MSCND(*), INCND(*), RBYM(*), FBFFLUX(*),
-     .   FCONV(*), FBFTEMP(*), MS_PLY(*), ZI_PLY(*), MS0(*), ADMSMS(*),
-     .   MCPC(*), MCPTG(*), DMELC(*), DMELTG(*), MSSA(*), DMELS(*),
-     .   MSTR(*), DMELTR(*), MSP(*), DMELP(*), MSRT(*), DMELRT(*),
-     .   FRADIA(*), RES_SMS(*), PHIE(*),MSF(*),
-     .   CFIELD(*),MSZ2(*), DIAG_SMS(*),LOADP(*), DMINT2(*),POR(*),
-     .   GAUGE(LLGAUGE,*),WAGAP(2,*),RTHBUF(*),FORNEQS(3,*),IN0(*),
-     .   DPL0CLD(*),VEL0CLD(*)
-      my_real , INTENT(IN) :: DGAPLOADINT(NINTER*NLOADP_HYD)
+      INTEGER, DIMENSION(*), INTENT(IN) :: ID_GLOBAL_VOIS
+      INTEGER, DIMENSION(*), INTENT(IN) :: FACE_VOIS
+      my_real, DIMENSION(3,NUMNOD), TARGET :: X !< TARGET keyword illegal here
+      my_real, INTENT(INOUT) :: D(3,*)
+      my_real, INTENT(INOUT) :: V(3,*)
+      my_real, INTENT(INOUT) :: VR(3,*)
+      my_real, INTENT(INOUT) :: DAMP(*)
+      my_real, INTENT(INOUT) :: MS(*)
+      my_real, INTENT(INOUT) :: IN(*)
+      my_real, INTENT(INOUT) :: PM(NPROPM,*)
+      my_real, INTENT(INOUT) :: SKEW(LSKEW,*)
+      my_real, INTENT(INOUT) :: GEO(NPROPG,*)
+      my_real, INTENT(INOUT) :: BUFMAT(*)
+      my_real, INTENT(INOUT) :: W(3,*)
+      my_real, INTENT(INOUT) :: VEUL(*)
+      my_real, INTENT(INOUT) :: FILL(NUMNOD,*)
+      my_real, INTENT(INOUT) :: DFILL(NUMNOD,*)
+      my_real, INTENT(INOUT) :: ALPH(*)
+      my_real, INTENT(INOUT) :: WB(3,*)
+      my_real, INTENT(INOUT) :: TF(*)
+      my_real, INTENT(INOUT) :: FORC(*)
+      my_real, INTENT(INOUT) :: VEL(*)
+      my_real, INTENT(INOUT) :: FSAV(NTHVKI,*)
+      my_real, INTENT(INOUT) :: FZERO(3,*)
+      my_real, INTENT(INOUT) :: XLAS(*)
+      my_real, INTENT(INOUT) :: ELBUF(*)
+      my_real, INTENT(INOUT) :: RWBUF(NRWLP,*)
+      my_real, INTENT(INOUT) :: RWSAV(*)
+      my_real, INTENT(INOUT) :: RBY(NRBY,*)
+      my_real, INTENT(INOUT) :: RIVET(*)
+      my_real, INTENT(INOUT) :: WA(*)
+      my_real, INTENT(INOUT) :: FV(*)
+      my_real, INTENT(INOUT) :: A(3,*)
+      my_real, INTENT(INOUT) :: AR(3,*)
+      my_real, INTENT(INOUT) :: VAL2(*)
+      my_real, INTENT(INOUT) :: PHI(*)
+      my_real, INTENT(INOUT) :: R(3,*)
+      my_real, INTENT(INOUT) :: CRFLSW(*)
+      my_real, INTENT(INOUT) :: FLSW(*)
+      my_real, INTENT(INOUT) :: FANI(3,*)
+      my_real, INTENT(INOUT) :: UWA(*)
+      my_real, INTENT(INOUT) :: PARTSAV(*)
+      my_real, INTENT(INOUT) :: STIFN(*)
+      my_real, INTENT(INOUT) :: STIFR(*)
+      my_real, INTENT(INOUT) :: DSAVE(3,*)
+      my_real, INTENT(INOUT) :: ASAVE(3,*)
+      my_real, INTENT(INOUT) :: XCUT(*)
+      my_real, INTENT(INOUT) :: ANIN(*)
+      my_real, INTENT(INOUT) :: BUFNOIS(*)
+      my_real, INTENT(INOUT) :: FSKY(8,*)
+      my_real, INTENT(INOUT) :: DR(3,*)
+      my_real, INTENT(INOUT) :: ACCELM(LLACCELM,*)
+      my_real, INTENT(INOUT) :: TANI(*)
+      my_real, INTENT(INOUT) :: VOLMON(*)
+      my_real, INTENT(INOUT) :: EANI(*)
+      my_real, INTENT(INOUT) :: AGRV(*)
+      my_real, INTENT(INOUT) :: THKE(*)
+      my_real, INTENT(INOUT) :: BUFSF(*)
+      my_real, INTENT(INOUT) :: AF(*)
+      my_real, INTENT(INOUT) :: SECBUF(*)
+      my_real, INTENT(INOUT) :: SECFCUM(7,NUMNOD,NSECT)
+      my_real, INTENT(INOUT) :: LAMBDA(*)
+      my_real, INTENT(INOUT) :: FR_WAVE(*)
+      my_real, INTENT(INOUT) :: PARTS0(*)
+      my_real, INTENT(INOUT) :: BUFGEO(*)
+      my_real, INTENT(INOUT) :: SPBUF(NSPBUF,*)
+      my_real, INTENT(INOUT) :: XFRAME(NXFRAME,*)
+      my_real, INTENT(INOUT) :: WASPH(*)
+      my_real, INTENT(INOUT) :: W16(*)
+      my_real, INTENT(INOUT) :: VSPHIO(*)
+      my_real, INTENT(INOUT) :: FBVEL(*)
+      my_real, INTENT(INOUT) :: DAMPR(NRDAMP,*)
+      my_real, INTENT(INOUT) :: RDATA(*)
+      my_real, INTENT(INOUT) :: PV(*)
+      my_real, INTENT(INOUT) :: FSAVD(NTHVKI,*)
+      my_real, INTENT(INOUT) :: GJBUFR(LKJNR,*)
+      my_real, INTENT(INOUT) :: RBMPC(*)
+      my_real, INTENT(INOUT) :: SPHVELN(*)
+      my_real, INTENT(INOUT) :: RBYL(NRBY,*)
+      my_real, INTENT(INOUT) :: FSKYM(*)
+      my_real, INTENT(INOUT) :: MSNF(*)
+      my_real, INTENT(INOUT) :: VISCN(*)
+      my_real, INTENT(INOUT) :: FXBRPM(*)
+      my_real, INTENT(INOUT) :: FXBMOD(*)
+      my_real, INTENT(INOUT) :: FXBGLM(*)
+      my_real, INTENT(INOUT) :: FXBCPM(*)
+      my_real, INTENT(INOUT) :: FXBCPS(*)
+      my_real, INTENT(INOUT) :: FXBLM(*)
+      my_real, INTENT(INOUT) :: FXBFLS(*)
+      my_real, INTENT(INOUT) :: FXBDLS(*)
+      my_real, INTENT(INOUT) :: FXBDEP(*)
+      my_real, INTENT(INOUT) :: FXBVIT(*)
+      my_real, INTENT(INOUT) :: FXBACC(*)
+      my_real, INTENT(INOUT) :: FXBSIG(*)
+      my_real, INTENT(INOUT) :: FXBGRVR(*)
+      my_real, INTENT(INOUT) :: EIGRPM(NERPM,*)
+      my_real, INTENT(INOUT) :: FSKYD(*)
+      my_real, INTENT(INOUT) :: DMSPH(*)
+      my_real, INTENT(INOUT) :: KNOT(*)
+      my_real, INTENT(INOUT) :: WIGE(*)
+      my_real, INTENT(INOUT) :: MS_2D(*)
+      my_real, INTENT(INOUT) :: KNOTLOCPC(*)
+      my_real, INTENT(INOUT) :: KNOTLOCEL(*)
+      my_real, INTENT(INOUT) :: XCELL(*)
+      my_real, INTENT(INOUT) :: XFACE(*)
+      my_real, INTENT(INOUT) :: FCONT_MAX(3,*)
+      my_real, INTENT(INOUT) :: RFLOW(*)
+      my_real, INTENT(INOUT) :: RCONTACT(*)
+      my_real, INTENT(INOUT) :: PADMESH(*)
+      my_real, INTENT(INOUT) :: MSC(*)
+      my_real, INTENT(INOUT) :: MSTG(*)
+      my_real, INTENT(INOUT) :: INC(*)
+      my_real, INTENT(INOUT) :: INTG(*)
+      my_real, INTENT(INOUT) :: PTG(3,*)
+      my_real, INTENT(INOUT) :: ACONTACT(*)
+      my_real, INTENT(INOUT) :: PCONTACT(*)
+      my_real, INTENT(INOUT) :: FACTIV(*)
+      my_real, INTENT(INOUT) :: TEMP(*)
+      my_real, INTENT(INOUT) :: MCP(*)
+      my_real, INTENT(INOUT) :: MSCND(*)
+      my_real, INTENT(INOUT) :: INCND(*)
+      my_real, INTENT(INOUT) :: RBYM(*)
+      my_real, INTENT(INOUT) :: FBFFLUX(*)
+      my_real, INTENT(INOUT) :: FCONV(*)
+      my_real, INTENT(INOUT) :: FBFTEMP(*)
+      my_real, INTENT(INOUT) :: MS_PLY(*)
+      my_real, INTENT(INOUT) :: ZI_PLY(*)
+      my_real, INTENT(INOUT) :: MS0(*)
+      my_real, INTENT(INOUT) :: ADMSMS(*)
+      my_real, INTENT(INOUT) :: MCPC(*)
+      my_real, INTENT(INOUT) :: MCPTG(*)
+      my_real, INTENT(INOUT) :: DMELC(*)
+      my_real, INTENT(INOUT) :: DMELTG(*)
+      my_real, INTENT(INOUT) :: MSSA(*)
+      my_real, INTENT(INOUT) :: DMELS(*)
+      my_real, INTENT(INOUT) :: MSTR(*)
+      my_real, INTENT(INOUT) :: DMELTR(*)
+      my_real, INTENT(INOUT) :: MSP(*)
+      my_real, INTENT(INOUT) :: DMELP(*)
+      my_real, INTENT(INOUT) :: MSRT(*)
+      my_real, INTENT(INOUT) :: DMELRT(*)
+      my_real, INTENT(INOUT) :: FRADIA(*)
+      my_real, INTENT(INOUT) :: RES_SMS(*)
+      my_real, INTENT(INOUT) :: PHIE(*)
+      my_real, INTENT(INOUT) :: MSF(*)
+      my_real, INTENT(INOUT) :: CFIELD(*)
+      my_real, INTENT(INOUT) :: MSZ2(*)
+      my_real, INTENT(INOUT) :: DIAG_SMS(*)
+      my_real, INTENT(INOUT) :: LOADP(*)
+      my_real, INTENT(INOUT) :: DMINT2(*)
+      my_real, INTENT(INOUT) :: POR(*)
+      my_real, INTENT(INOUT) :: GAUGE(LLGAUGE,*)
+      my_real, INTENT(INOUT) :: WAGAP(2,*)
+      my_real, INTENT(INOUT) :: RTHBUF(*)
+      my_real, INTENT(INOUT) :: FORNEQS(3,*)
+      my_real, INTENT(INOUT) :: IN0(*)
+      my_real, INTENT(INOUT) :: DPL0CLD(*)
+      my_real, INTENT(INOUT) :: VEL0CLD(*)
+      my_real, INTENT(IN) :: DGAPLOADINT(NINTER*NLOADP_HYD)
       TYPE (CLUSTER_) ,DIMENSION(*) :: CLUSTER
       TYPE(PRGRAPH) :: GRAPHE(*)
       TYPE(TTABLE) :: TABLE(*)
@@ -864,7 +1160,7 @@ C     Mat + Prop timers
       TYPE(MULTI_FVM_STRUCT) :: MULTI_FVM
       TYPE(H3D_DATABASE) :: H3D_DATA
       TYPE(INTBUF_FRIC_STRUCT_), DIMENSION(NINTERFRIC) :: INTBUF_FRIC_TAB
-      TYPE (FAILWAVE_STR_) :: FAILWAVE 
+      TYPE(FAILWAVE_STR_) :: FAILWAVE 
 !
       TYPE(SUBSET_) ,DIMENSION(NSUBS)   :: SUBSETS
       TYPE(GROUP_)  ,DIMENSION(NGRNOD)  :: IGRNOD
@@ -926,13 +1222,9 @@ C-----------------------------------------------
       INTEGER :: I87A,I87B,I87C,I87D,I87E,I87F,I87G,I87H,I87I,I87J,I87K,
      .        I87L,I87M,I87N,IMSCH,IAD1B,IAD1,IAD2,I2MSCH, ISMSCH, ONOFP
       INTEGER CPLXIT,  ADRNOD, ONOF, ONFELT, ICH,IFLGADM, MADENDREQUEST
-      CHARACTER*13 CDUM
       INTEGER IDUM1, DIM6, DIM_EXCH
-      
-      my_real
-     .        RDUM1,MADUF,RBUF(10)
       INTEGER LLT1,IWIOUT
-      INTEGER KSPH1,KSPH21,KSPH22,KSPH23,IUN,
+      INTEGER KSPH1,KSPH21,KSPH22,KSPH23,
      .        KSPACTIV,KSP2SORT,NELTSA,ITYPTSA,IDTNOD
       INTEGER NEGMAS
       INTEGER NBINTC, SIZE, LENR, LENS, LENI, SIZI, ISIZXV ,ILENXV,
@@ -969,6 +1261,8 @@ C----
      .     CNEL, ADDCNEL, ADDTMPL, IPARTL, NPARTL, LINDIDEL, LBUFIDEL,
      .     LBUFSEGLO
       my_real
+     .        RDUM1,MADUF,RBUF(10)
+      my_real
      .   DT2T,
      .   DT2SAVE,  MAS, BB, TFEXC,TREST,DTREST,
      .   DMAST, DINERT, FACTB,DAMPT,
@@ -987,25 +1281,46 @@ C----
      .     I15A,I15B,I15C,I15D,I15E,I15F,I15G,I15H,I15I,I15J,I15K,
      .     I87A,I87B,I87C,I87D,I87E,I87F,I87G,I87H,I87I,I87J,I87K,I87L,
      .     I87M,I87N,I15ATH,I35ATH,LAG_SEC,NFT2,NDAMA2
-      INTEGER NDDL0,NNZK0,LENQMV,NV46,NUM_IMP(NINTER),NINT7,NT_IMP,
-     .        LI1,LI2,LI3,LI4,LI5,LI6,
-     .        LIF,NNDL,IT,NMC2,LI13,DIRUL(NFXVEL),NUM_IMP1(NINTER),
-     .        FR_RBE2M(SFR_RBE2),R2SIZE,
-     .        NUM_IMPL(NINTER,NTHREAD), I_OPT_STOK(NINTER),IT_T,NTMP
-      INTEGER
-     .        IER1,NDS,IBUCK,NMRBE2,NTHOLD
-      SAVE
-     .        NMRBE2,R2SIZE,NINT7
+      INTEGER :: NDDL0
+      INTEGER :: NNZK0
+      INTEGER :: LENQMV
+      INTEGER :: NV46
+      INTEGER :: NUM_IMP(NINTER)
+      INTEGER :: NT_IMP
+      INTEGER :: LI1
+      INTEGER :: LI2
+      INTEGER :: LI3
+      INTEGER :: LI4
+      INTEGER :: LI5
+      INTEGER :: LI6
+      INTEGER :: LIF
+      INTEGER :: NNDL
+      INTEGER :: IT
+      INTEGER :: NMC2
+      INTEGER :: LI13
+      INTEGER :: DIRUL(NFXVEL)
+      INTEGER :: NUM_IMP1(NINTER)
+      INTEGER :: FR_RBE2M(SFR_RBE2)
+      INTEGER :: NUM_IMPL(NINTER,NTHREAD)
+      INTEGER :: I_OPT_STOK(NINTER)
+      INTEGER :: IT_T
+      INTEGER :: NTMP
+      INTEGER :: IER1
+      INTEGER :: NDS
+      INTEGER :: IBUCK
+      INTEGER :: NTHOLD
+      INTEGER, SAVE :: NMRBE2
+      INTEGER, SAVE :: R2SIZE
+      INTEGER, SAVE :: NINT7
       INTEGER, DIMENSION(:),POINTER :: NS_IMP,NE_IMP,IND_IMP
       TYPE (IMPBUF_STRUCT_), TARGET :: IMPBUF_TAB
-      my_real, DIMENSION(:)  , POINTER :: X_A,FEXT_IMP,R_IMP 
-      my_real
-     .   TTMP,DMCP(NUMGEO)
+      my_real, DIMENSION(:,:), POINTER :: X_A
+      my_real, DIMENSION(:), POINTER :: FEXT_IMP,R_IMP 
+      my_real :: TTMP,DMCP(NUMGEO)
       data TTMP /0.0/
       INTEGER LWIBEM, LWRBEM, IERROR, IERROR2, INTER_ERRORS
       INTEGER, DIMENSION(:), ALLOCATABLE :: WIBEM
-      my_real
-     .       , DIMENSION(:), ALLOCATABLE :: WRBEM
+      my_real , DIMENSION(:), ALLOCATABLE :: WRBEM
       SAVE LWIBEM, LWRBEM, WIBEM, WRBEM
       INTEGER NKCOND, NDDLG, NRP, NCP, NKCOND_INI, NT_IMP_OLD
       INTEGER LWIFLOW, LWRFLOW
@@ -1014,8 +1329,8 @@ C----
      .       , DIMENSION(:), ALLOCATABLE :: WRFLOW
       SAVE LWIFLOW, LWRFLOW, WIFLOW, WRFLOW
       INTEGER SIZ, R2R_ON
-      INTEGER, DIMENSION(:), ALLOCATABLE :: CDDLP
 #if defined(MUMPS5)
+      INTEGER, DIMENSION(:), ALLOCATABLE :: CDDLP
       TYPE(DMUMPS_STRUC) MUMPS_PAR
 #endif
       INTEGER IFVMESH
@@ -1121,7 +1436,6 @@ C-------------------------------------------------------------------------------
 C Sensors inter
       INTEGER, ALLOCATABLE, DIMENSION(:,:) :: ISENSINT
       INTEGER NISUBMAX
-
       INTEGER, ALLOCATABLE, DIMENSION(:) :: ICONTACT_OLD
 C-----------------------------------------------------------------------------------
       my_real
@@ -1153,9 +1467,7 @@ C---Nitsche Method----
       REAL(kind=8) :: TT_DOUBLE
       my_real
      .         DTNOD_NLOCAL
-      INTEGER, DIMENSION(:),ALLOCATABLE ::IBUFPDEL, NINDEXPDEL
-      
-      DOUBLE PRECISION :: argin,argout
+      INTEGER, DIMENSION(:), ALLOCATABLE :: IBUFPDEL, NINDEXPDEL
       DOUBLE PRECISION, DIMENSION(:,:,:),ALLOCATABLE :: RBY6_C
 C----------------------------------------------------------------------------------
 C IMPVEL/FGEO
@@ -1164,8 +1476,8 @@ C-------------------------------------------------------------------------------
 C /DAMP/VREL
       INTEGER SIZE_RBY6_C     
 !  contact w/ offset  
-      my_real, DIMENSION(:),ALLOCATABLE, TARGET :: XYZ    
-      my_real, DIMENSION(:)  , POINTER :: X_C 
+      my_real, DIMENSION(:,:),ALLOCATABLE, TARGET :: XYZ    
+      my_real, DIMENSION(:,:),POINTER :: X_C 
       TYPE(sh_offset_)                   :: SH_OFFSET_TAB   
 C-----------------------------------------------------------------------------------
       INTEGER IFLAG, COMPTREAC ! Flag for computing reaction forces
@@ -1227,12 +1539,10 @@ C-------------------------------------------------------------------------------
         ! ----------
 
         my_real, DIMENSION(:), ALLOCATABLE :: FSKY_L
-      DATA IUN/1/
 C-----------------------------------------------------------------------------------       
 C Uncomment for Debug - ITAB is copied in Debug Module.
 C-----------------------------------------------------------------------------------
        CALL PREPARE_DEBUG()
-
 C-----------------------------------------------------------------------------------
       BOOL_RESTART = .TRUE.
       STATE_H3D = 0 
@@ -2197,9 +2507,9 @@ C ---------------------
       ENDIF
 !
        IF (SH_OFFSET_TAB%NSH_OSET > 0 .AND. IMPL_S==0) THEN
-           ALLOCATE(XYZ(3*NUMNOD)) 
+           ALLOCATE(XYZ(3,NUMNOD)) 
        ELSE
-           ALLOCATE(XYZ(0))  
+           ALLOCATE(XYZ(0,0))  
        ENDIF
 
       ! -------------------------
@@ -2891,7 +3201,7 @@ C------------------------------------------------------
       KSPH1 =1+3*NUMSPH
       KSPH21 =NUMSPH+1
       KSPH22 =KSPH21+16*NUMSPH
-      KSPH23 =KSPH22+MIN(IUN,NSPHIO)*3*NUMSPH
+      KSPH23 =KSPH22+MIN(1,NSPHIO)*3*NUMSPH
       KSPACTIV=1
       IF(NSPHSOL==0)THEN
 C     pointer to list of paticles to be sorted (to be sorted == active)
@@ -3198,12 +3508,12 @@ C------------------------
           CALL TRACE_IN(9,2,ZERO)
 
           CALL USER_WINDOWS_ROUTINE( ISPMD        ,NSPMD         ,USERL_AVAIL   ,
-     1                               USER_WINDOWS ,RAD_INPUTNAME ,LEN_RAD_INPUTNAME,
-     2                               NUMNOD       ,NCYCLE        ,ITAB             ,
-     3                               TT           ,DT1           ,TFEXT            ,
-     4                               D            ,X            ,V                ,
-     5                               VR           ,MS           ,IN               ,
-     6                               STIFN        ,STIFR        ,A                ,
+     1                            USER_WINDOWS ,RAD_INPUTNAME ,LEN_RAD_INPUTNAME,
+     2                               NUMNOD       ,NCYCLE        ,ITAB          ,
+     3                               TT           ,DT1           ,TFEXT         ,
+     4                               D            ,X            ,V              ,
+     5                               VR           ,MS           ,IN             ,
+     6                               STIFN        ,STIFR        ,A              ,
      7                               AR           ,DT2)
 
           CALL TRACE_OUT(9)
@@ -3348,7 +3658,7 @@ C----------------------------------
 !       offset projection for contact ! add smp // after
 !----------------------------------
         IF (SH_OFFSET_TAB%NSH_OSET > 0) THEN
-           XYZ(1:3*NUMNOD) = X(1:3*NUMNOD)
+           XYZ(1:3,1:NUMNOD) = X(1:3,1:NUMNOD)
            CALL offset_nPROJ(NSPMD,NUMNOD,XYZ,SH_OFFSET_TAB)
         ENDIF  
 !
@@ -3459,8 +3769,6 @@ C----------------------------------------
       END IF
       IF (IMONM > 0) CALL STOPTIME(24,1)
       IF (IMON>0) CALL STOPTIME(13,1)
-
-
 C--------------------------------------------------------
 C INTERFACE 24 - Communication part 4 / 4
 C--------------------------------------------------------
@@ -3475,7 +3783,7 @@ C--------------------------------------------------------
           ENDIF
       
 C
-C Traitement des Section en SPMD comm avant FORINT
+C Processing of Sections in SPMD communication before FORINT
 C
       IF(NSECT>0.AND.NSPMD>1) THEN
         LSEND1 = IAD_SEC(1,NSPMD+1)
@@ -3944,11 +4252,7 @@ C----------------------------------------
         DT2TT = DT2T
         NELTSTT = NELTST
         ITYPTSTT= ITYPTST
-        IF (IMPL_S>0) THEN
-         IADISK   = 1
-        ELSE
-         IADISK   = 1
-        ENDIF
+        IADISK   = 1
         CALL INTFOP8(
      1      IPARI  ,X_C     ,A(1,1) ,
      2      ICODT  ,FSAV    ,WA(1),V         ,MS             ,
@@ -4058,7 +4362,7 @@ C===============================================================================
 
         NCONT = 0 ! Initialisation number of nodes tagged for FCONT storage
         IF (IMPL_S>0) THEN
-         NTMP = NT_IMP5 + NT_IMP1
+          NTMP = NT_IMP5 + NT_IMP1
         ENDIF
 
 !$OMP PARALLEL
@@ -5189,8 +5493,10 @@ C   at every cycle except cycle 0, send the Nodes coordinates
       ENDIF
 #endif
 
+      IF(ALE%SUB%IALESUB==2 .AND. ALE%SUB%IFSUB==2) THEN 
 CFP SKIP KINEMATIC FORCES
-      IF(ALE%SUB%IALESUB==2 .AND. ALE%SUB%IFSUB==2) GOTO 23
+
+      ELSE
       
 C
 C POROUS MEDIA (not parallel) 
@@ -5848,9 +6154,8 @@ C
 C========================================================================================
 C                                     NON PARALLEL SECTION (SMP)
 C========================================================================================
-
+      ENDIF ! ALE%SUB
 C----------------------------
-  23  CONTINUE
 
 C----------------------------------------------------------
 C       INTER/TYPE21 TIME STEP
@@ -6057,8 +6362,6 @@ C
 C----------------------------
 C    IMPLICIT SYNCHRONISATION On DT2 FBIG
 C----------------------------
-
-
 C-----------------------------
       IF(ALE%SUB%IALESUB==2 .AND.ALE%SUB%IFSUB==2)THEN
         IF(NSPMD>1) THEN
@@ -6193,7 +6496,7 @@ C--           IF no node/elemt on proc - dt2=10E6 -> dt2 can be equal to zero
             ENDDO
           ELSE
             BB = ZERO
-            IF (FLG_DTNODAMP==1) GOTO 600
+            IF (FLG_DTNODAMP .NE. 1) THEN
             DO I=1,NDAMP
               DAMPA = MAX(DAMPR(3,I),DAMPR(5,I),DAMPR(7,I))
               DAMPA = MAX(DAMPA,DAMPR(9,I),DAMPR(11,I),DAMPR(13,I))
@@ -6208,7 +6511,7 @@ C--           IF no node/elemt on proc - dt2=10E6 -> dt2 can be equal to zero
                 BB=MAX(BB,(MIN(DAMPB,DAMPT)+HALF*(DAMPA+DAMPA3)*DT2*DT2))
               ENDIF
             ENDDO
-600         CONTINUE
+            ENDIF
            END IF
            DT2 = SQRT(BB*BB + DT2*DT2) - BB
         ELSEIF(ISTAT==3) THEN
@@ -6525,7 +6828,7 @@ C-----------------------------------------------------------------
         ENROT2 = ZERO       
         IF (IMON>0) CALL STARTIME(5,1)
 C-----------------------
-        IF (IMPL_S==1 .AND. INCONV==1) THEN
+        IF (INCONV==1) THEN
           CALL THBCS_IMP(NODFT,NODLT ,A,AR,
      &                   FTHREAC,NODREAC,CPTREAC,FTHDTM,DT3)
         ENDIF
@@ -6599,8 +6902,6 @@ C===============================================================================
         IF (NRBE2>0)THEN
           IF(IMON>0) CALL STARTIME(4,1)
           IF(IMONM > 0) CALL STARTIME(40,1)
-C                                     
-
 !$OMP PARALLEL
             CALL RBE2COR(IRBE2 ,LRBE2 ,X    ,V     ,VR    ,
      2                   SKEW  ,ISKEW ,ITAB ,WEIGHT,A     ,
@@ -6641,7 +6942,6 @@ c
      .                   XSENS     ,X       ,ACCELM   ,IACCP   ,NACCP   ,
      .                   GAUGE     ,IGAUP   ,NGAUP    ,PARTSAV2,NSENSOR )
           ENDIF      
-c
           ! check activation condition of base sensors
           CALL SENSOR_BASE(SENSORS  ,NSENSOR   ,TT        ,DT2       ,
      .         XSENS     ,IPARI     ,PARTSAV2  ,GAUGE     ,FSAV      ,
@@ -6650,19 +6950,14 @@ c
 c
           ! check activation condition of logical sensors hierarchy
           CALL SENSOR_LOGICAL(NSENSOR,SENSORS%SENSOR_TAB)
-
         ENDIF
-
-        GOTO 111
-
-      ENDIF
+      ELSE ! IMPL_S 
 C-----------------------------
 C       Non pure thermal case 
 C-----------------------------
         IF (ILAG + IALE + IEULER /= 0) THEN
 
           IF (IMON>0) CALL STARTIME(5,1)
-        
 C========================================================================================
 C                                     PARALLEL SECTION (SMP)
 C========================================================================================
@@ -8025,7 +8320,7 @@ C===============================================================================
         END IF
       ENDIF
 c--------------
- 111  CONTINUE
+      ENDIF ! implicit 
 c--------------
 
       NTMP = IMCONV
@@ -9878,6 +10173,5 @@ C
 
       DEALLOCATE(IKINE)
 c-----------
-
       RETURN
       END

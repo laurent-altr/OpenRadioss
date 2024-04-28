@@ -1372,6 +1372,7 @@ set_source_files_properties( ${source_directory}/source/engine/radioss_title.F P
 set_source_files_properties( ${source_directory}/source/engine/radioss2.F PROPERTIES COMPILE_FLAGS "${legacy_flags}" )
 set_source_files_properties( ${source_directory}/source/engine/resol_head.F PROPERTIES COMPILE_FLAGS "${legacy_flags}" )
 set_source_files_properties( ${source_directory}/source/engine/resol.F PROPERTIES COMPILE_FLAGS "${legacy_flags}" )
+set_source_files_properties( ${source_directory}/source/engine/run_simulation.F PROPERTIES COMPILE_FLAGS "${legacy_flags}" )
 set_source_files_properties( ${source_directory}/source/engine/radioss0.F PROPERTIES COMPILE_FLAGS "${legacy_flags}" )
 set_source_files_properties( ${source_directory}/source/engine/execargcheck.F PROPERTIES COMPILE_FLAGS "${legacy_flags}" )
 set_source_files_properties( ${source_directory}/source/assembly/asspar5.F PROPERTIES COMPILE_FLAGS "${legacy_flags}" )
