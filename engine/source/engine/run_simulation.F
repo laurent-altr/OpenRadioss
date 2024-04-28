@@ -4745,19 +4745,6 @@ C===============================================================================
                 IF (IMONM > 0) CALL STOPTIME(48,1)
               ENDIF
 
-C-----------------------------------------------
-C Multidomains : synchro proc of flag_activation
-C----------------------------------------------
-              IF (NSPMD>1) THEN
-                IF ((SDD_R2R_ELEM>0).AND.(FLG_SPHINOUT_R2R>0)) THEN
-                  LENR = IAD_ELEM(1,NSPMD+1)-IAD_ELEM(1,1)
-                  CALL SPMD_EXCH_R2R_SPHOFF(OFF_SPH_R2R,IAD_ELEM,FR_ELEM,DD_R2R,DD_R2R_ELEM,LENR)
-                  CALL SPMD_EXCH_R2R_SPH(X,IAD_ELEM,FR_ELEM,DD_R2R,DD_R2R_ELEM,LENR)
-                  CALL SPMD_EXCH_R2R_SPH(D,IAD_ELEM,FR_ELEM,DD_R2R,DD_R2R_ELEM,LENR)
-                  CALL SPMD_EXCH_R2R_SPH(V,IAD_ELEM,FR_ELEM,DD_R2R,DD_R2R_ELEM,LENR)
-                ENDIF
-              ENDIF
-
 
               IF(NVOLU/=0)THEN
                 IF (IMONM > 0) CALL STARTIME(50,1)
@@ -5433,9 +5420,6 @@ C recuperation IDEL7NOK global
                   ENDIF
                   IDEL7NOK_SAV = IDEL7NOK
                   IF (R2R_SIU==1.AND.IDEL7NG>=1) THEN
-                    CALL GET_SHMBUF_C(IDEL7NOK_R2R,2)
-                    IDEL7NOK = IDEL7NOK+IDEL7NOK_R2R
-                    IDEL7NOK = MIN(1,IDEL7NOK)
                   ENDIF
 C Attention WA utilise sur 2*NUMNOD (NUMNOD + NUMNOD SPECIFIQUE SPMD)
                   IF ((IDEL7NG>=1.AND.IDEL7NOK==1).OR.(PDEL>0.AND.IDEL7NOK==1)) THEN
@@ -5938,30 +5922,6 @@ c
                 ENDIF
 C----------------------------------------------------------
 C     SCALE TIME STEP
-C========================================================================================
-C                                     PARALLEL SECTION (SMP)
-C========================================================================================
-C--- COUPLAGE RADIOSS 2 RADIOSS
-                IF (IRAD2R /= 0) THEN
-                  IF (NSPMD>1) CALL SPMD_BARRIER()
-                  CALL R2R_EXCHANGE(
-     1              IEXLNK   ,IGRNOD  ,D       ,V       ,VR     ,
-     2              A        ,AR      ,MS      ,IN     ,STIFN   ,STIFR  ,
-     3              R2R_ON   ,DD_R2R  ,WEIGHT ,IAD_ELEM,FR_ELEM ,RBY    ,
-     4              XDP      ,X       ,DD_R2R_ELEM, SDD_R2R_ELEM,OFF_SPH_R2R,
-     5              NUMSPH_GLO_R2R,NLOC_DMG)
-C
-                  IF (FLG_SPHINOUT_R2R/=0) THEN
-                    DO I=1,NUMNOD
-                      IF (OFF_SPH_R2R(I)==2) THEN
-                        OFF_SPH_R2R(I) = 1
-                      ELSE
-                        OFF_SPH_R2R(I) = 0
-                      ENDIF
-                    END DO
-                  ENDIF
-C
-                ENDIF
 
 C========================================================================================
 C                                     NON PARALLEL SECTION (SMP)
@@ -6391,86 +6351,6 @@ C --------------------------
                 DEALLOCATE(STK_SN,STK_SR)
               ENDIF
 
-C--------------------------------------------------------------C
-C      RADIOSS 2 RADIOSS COUPLING
-C--------------------------------------------------------------C
-              IF (IRAD2R /= 0 .AND. R2R_ACTIV == 1) THEN
-                CALL R2R_SENDKINE(IEXLNK,IGRNOD,MS,IN)
-                IF (NSPMD>1) CALL SPMD_BARRIER()
-C--------------------------------------------------------------C
-!$OMP PARALLEL PRIVATE(ITSK)
-!$OMP MASTER
-C--------------------------------------------------------------C
-C--------------------------------------------------------------C
-                IF (IMONM > 0) CALL STARTIME(54,1)
-                IF (NCYCLE == ZERO) TT_DP = TT
-C--------------------------------------------------------------C
-                IF(ISPMD==0)THEN
-                  CALL R2R_SEM_C()
-                  IF (IRESP==1) CALL SEND_FBUFDP_C(TT_DP,1)
-                  IF (IRESP/=1) CALL SEND_FBUFDP_C(TT,1)
-                  IF ((R2R_SIU==1).AND.(IDDOM/=0)) THEN
-                    CALL GET_IBUF_C(R2R_TH_MAIN,10)
-                  ENDIF
-                  CALL SEND_FBUF_C(DT2,1)
-                  CALL SEND_IBUF_C(R2R_MFILR,1)
-                  CALL SEND_IBUF_C(R2R_MSTOP,1)
-                  IF (R2R_MFILR==1) THEN
-                    CALL SEND_FBUF_C(TMAN_R2R,1)
-                    CALL SEND_IBUF_C(R2R_CTR,3)
-                  ENDIF
-                  IF (IRESP==1) CALL GET_FBUFDP_C(TT_DP,1)
-                  IF (IRESP/=1) CALL GET_FBUFDP_C(TT,1)
-                  CALL GET_IBUF_C(MREST,1)
-                  CALL GET_IBUF_C(R2R_MFILR,1)
-                  CALL GET_IBUF_C(R2R_MSTOP,1)
-                  IF (R2R_MFILR==2) THEN
-                    CALL GET_FBUF_C(TMAN_R2R,1)
-                    CALL GET_IBUF_C(R2R_CTR,3)
-                  ENDIF
-                  CALL GET_FBUF_C(DT2,1)
-                END IF
-C--------------------------------------------------------------C
-                IF(NSPMD>1)THEN
-                  IF(ISPMD==0) THEN
-                    RBUF(1) = TT
-                    RBUF(2) = DT2
-                  END IF
-                  CALL SPMD_RBCAST(RBUF,RBUF,2,1,0,2)
-                  CALL SPMD_IBCAST(MREST,MREST,1,1,0,2)
-                  CALL SPMD_IBCAST(R2R_TH_MAIN,R2R_TH_MAIN,10,1,0,2)
-                  IF(ISPMD/=0) THEN
-                    TT = RBUF(1)
-                    DT2 = RBUF(2)
-                  END IF
-                END IF
-C--------------------------------------------------------------C
-                IF ((R2R_SIU==1).OR.(NSPMD==1)) THEN
-                  CALL R2R_SEM_C()
-                  CALL GET_IBUF_C(BID,1)
-                  CALL R2R_UNLOCK_THREADS_C(NTHREAD)
-                ELSEIF (ISPMD==0) THEN
-                  CALL R2R_SEM_C()
-                  CALL GET_IBUF_C(BID,1)
-                  CALL R2R_UNLOCK_THREADS_C(NTHREAD*NSPMD)
-                ENDIF
-!$OMP END MASTER
-                CALL R2R_BLOCK_C()
-C--------------------------------------------------------------C
-!$OMP END PARALLEL
-C--------------------------------------------------------------C
-C--------------------------------------------------------------C
-
-                CALL R2R_GETDATA(IEXLNK  ,IGRNOD  ,X       ,V       ,
-     .                           VR      ,A       ,AR      ,MS      ,IN      ,
-     .                           XDP     ,D       ,R2R_ON  ,DD_R2R  ,WEIGHT  ,
-     .                           IAD_ELEM,FR_ELEM ,STIFN   ,STIFR   ,DD_R2R_ELEM  ,
-     .                           SDD_R2R_ELEM,NLOC_DMG)
-
-                IF (IMONM > 0) CALL STOPTIME(54,1)
-
-              ENDIF
-
 C-----------------------------
               IF (IMONM > 0) CALL STARTIME(53,1)
               DT2OLD=DT2
@@ -6485,14 +6365,6 @@ C-----------------------------
               IF(NSPMD>1.AND.IWIOUT>0) THEN
                 CALL SPMD_WIOUT(IOUT,IWIOUT)
                 IWIOUT = 0
-              ENDIF
-C-----------------------------------------------------
-C         RAD2RAD : EXTERNAL WORK OF COUPLED PROCESSES
-C-----------------------------------------------------
-              IF (IRAD2R /= 0) THEN
-                IF(ISPMD==0)THEN
-                  R2RFX1 = R2RFX1*DT2 + R2RFX2*DT12*DT2
-                ENDIF
               ENDIF
 C       EXTERNAL WORK OF CONCENTRATED LOADS
               IF (NCONLD/=0.AND.IMPL_S/=1) THEN
@@ -9624,12 +9496,6 @@ C-------------------------------
               IF(MSTOP/=0) THEN
                 PARALLEL_SECTION = 0
 C Multidomain -> close sockets
-                IF (IRAD2R==1) THEN
-                  DO ITSK=1,NTHREAD
-                    CALL CLOSE_SOCK_C(SOCKET(ITSK))
-                  END DO
-                ENDIF
-C /KILL
                 IF((NCYCLE/NCRST)*NCRST/=NCYCLE.AND.
      2             MREST/=1.AND.WMCHECK/=1.AND.NSPMD>1)THEN
                   L1 = 1+NIXS*NUMELS + NSVOIS*NIXS
