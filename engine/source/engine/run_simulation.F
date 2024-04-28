@@ -2576,200 +2576,11 @@ C
               END IF
 C----------------------------------------------------------
               IF(IDTMINS /= 0)THEN
-                L1 = 1+NIXS*NUMELS + NSVOIS*NIXS
-                L2 = L1+6*NUMELS10
-                L3 = L2+12*NUMELS20
-
-C NATIV_SMS read from starter state
-                NATIV_SMS(1:NUMNOD) = NATIV0_SMS(1:NUMNOD)
-C
-                CALL SMS_INI_PART(IGRPART ,TAGPRT_SMS)
-
-                IF(IDTMINS_INT==0)
-     .          CALL SMS_INI_RBY(
-     1          KINET   ,NPRW     ,LPRW    ,NPBY    , LPBY     ,
-     2          TAGMSR_RBY_SMS,TAGSLV_RBY_SMS)
-
-                CALL SMS_INI_KAD(
-     1          IXS     ,IXQ      ,IXC     ,IXT     ,IXP       ,
-     2          IXR     ,IXTG     ,IXTG1   ,IXS(L1) ,IXS(L3)   ,
-     3          IXS(L2) ,IPARG    ,MS      ,MS0     ,TAGNOD_SMS,
-     4          ICODT    ,ICODR   ,KINET   ,INDX1_SMS,
-     5          KAD_SMS ,IPART(I15A),IPART(I15B),
-     6          IPART(I15C),IPART(I15D),IPART(I15E),IPART(I15F),IPART(I15G),
-     7          IPART(I15H),IPART(I15I),TAGPRT_SMS ,TAGREL_SMS ,ITAB       ,
-     8          WEIGHT     ,IRBE2      ,IRBE3      ,LRBE2      ,LRBE3      ,
-     9          IAD_ELEM   ,FR_ELEM    ,NPRW       ,LPRW       ,IPART      ,
-     A          IGEO       ,NATIV_SMS  )
-
-                ALLOCATE(KDI_SMS(KNZ_SMS),PK_SMS(KNZ_SMS),STAT=IERROR)
-                IF(IERROR/=0) THEN
-                  CALL ANCMSG(MSGID=19,ANMODE=ANINFO,
-     .                C1='(/DT/.../AMS)')
-                  CALL ARRET(2)
-                ENDIF
-
-                NSGDONE=1
-                CALL SMS_INI_KDI(
-     2                 IXC      ,IPARG   ,IXS      ,IXT      ,IXP     ,
-     3                 IXR      ,IXTG    ,IXS(L1)  ,TAGNOD_SMS,KAD_SMS ,
-     4                 KDI_SMS  ,JADC_SMS,JADS_SMS ,JADS10_SMS ,
-     5                 JADT_SMS ,JADP_SMS,
-     6                 JADR_SMS,JADTG_SMS,INDX1_SMS,TAGPRT_SMS,IAD_SMS ,
-     7           TAGREL_SMS,IPART(I15A),IPART(I15B),IPART(I15C),IPART(I15D),
-     8          IPART(I15E),IPART(I15F),IPART(I15G),IPART(I15H),IPART(I15I),
-     9                 IAD_ELEM  ,FR_ELEM,NPBY     ,LPBY     ,KINET    ,
-     A                 TAGSLV_RBY_SMS,IPARI  ,INTBUF_TAB,IADI2,
-     B                 LAD_SMS   ,IPART,IGEO     ,WEIGHT    ,
-     C                 NATIV_SMS)
-
-                ALLOCATE(IDI_SMS(NNZ_SMS),JDI_SMS(NNZ_SMS),STAT=IERROR)
-                IF(IERROR/=0) THEN
-                  CALL ANCMSG(MSGID=19,ANMODE=ANINFO,
-     .                C1='(/DT/.../AMS)')
-                  CALL ARRET(2)
-                ENDIF
-
-                NSGDONE=1
-                CALL SMS_INI_JAD_1(
-     2                 IXC      ,IPARG   ,IXS      ,IXT       ,IXP      ,
-     3                 IXR      ,IXTG    ,IXS(L1)  ,TAGNOD_SMS,JADC_SMS ,
-     4                 JADS_SMS ,JADS10_SMS,JADT_SMS,JADP_SMS ,JADR_SMS ,
-     5                 JADTG_SMS,INDX1_SMS,TAGPRT_SMS,
-     6                 KAD_SMS,KDI_SMS    ,PK_SMS     ,
-     7           TAGREL_SMS,IPART(I15A),IPART(I15B),IPART(I15C),IPART(I15D),
-     8          IPART(I15E),IPART(I15F),IPART(I15G),IPART(I15H),IPART(I15I),
-     9                 IAD_ELEM  ,FR_ELEM,NPBY     ,LPBY     ,KINET    ,
-     A                 TAGSLV_RBY_SMS,IPARI  ,INTBUF_TAB,IADI2,
-     B                 LAD_SMS   ,IPART      ,IGEO      ,WEIGHT  ,NATIV_SMS,
-     C                 IAD_SMS   ,IDI_SMS,JAD_SMS  ,JDI_SMS   ,T2MAIN_SMS)
-                DEALLOCATE(JDI_SMS)
-
-                ALLOCATE(JDI_SMS(NNZ_SMS),STAT=IERROR)
-                IF(IERROR/=0) THEN
-                  CALL ANCMSG(MSGID=19,ANMODE=ANINFO,
-     .                C1='(/DT/.../AMS)')
-                  CALL ARRET(2)
-                ENDIF
-
-                NSGDONE=1
-                CALL SMS_INI_JAD_2(
-     2                 IXC      ,IPARG   ,IXS      ,IXT      ,IXP     ,
-     3                 IXR      ,IXTG    ,IXS(L1)  ,TAGNOD_SMS,JADC_SMS ,
-     4                 JADS_SMS ,JADS10_SMS,JADT_SMS ,JADP_SMS,JADR_SMS ,
-     5                 JADTG_SMS,INDX1_SMS,TAGPRT_SMS,KAD_SMS ,KDI_SMS  ,
-     6           TAGREL_SMS,IPART(I15A),IPART(I15B),IPART(I15C),IPART(I15D),
-     7          IPART(I15E),IPART(I15F),IPART(I15G),IPART(I15H),IPART(I15I),
-     8                 IAD_ELEM  ,FR_ELEM,NPBY     ,LPBY     ,KINET    ,
-     9                 TAGSLV_RBY_SMS,IPARI  ,INTBUF_TAB,IADI2    ,
-     A                 LAD_SMS   ,NPRW ,LPRW,TAGMSR_RBY_SMS,
-     B             TAGSLV_I21_SMS ,TAGMSR_I21_SMS, JADI21_SMS,INTSTAMP  ,
-     .                                                        IPART     ,
-     C             IGEO    ,WEIGHT  ,NATIV_SMS,IRBE2      ,LRBE2     ,
-     D             IAD_SMS ,IDI_SMS ,JAD_SMS  ,JDI_SMS    ,T2MAIN_SMS)
-                DEALLOCATE(JDI_SMS)
-                ALLOCATE(JDI_SMS(NNZ_SMS),STAT=IERROR)
-                IF(IERROR/=0) THEN
-                  CALL ANCMSG(MSGID=19,ANMODE=ANINFO,
-     .                C1='(/DT/.../AMS)')
-                  CALL ARRET(2)
-                ENDIF
-                ALLOCATE(JSM_SMS(NNZ_SMS),STAT=IERROR)
-                IF(IERROR/=0) THEN
-                  CALL ANCMSG(MSGID=19,ANMODE=ANINFO,
-     .                C1='(/DT/.../AMS)')
-                  CALL ARRET(2)
-                ENDIF
-
-                NSGDONE=1
-                CALL SMS_INI_JAD_3(
-     2                 IXC      ,IPARG   ,IXS      ,IXT      ,IXP      ,
-     3                 IXR      ,IXTG    ,IXS(L1)  ,TAGNOD_SMS,JADC_SMS,
-     4                 JADS_SMS ,JADS10_SMS,JADT_SMS,JADP_SMS,JADR_SMS ,
-     5                 JADTG_SMS,INDX1_SMS,TAGPRT_SMS,KAD_SMS,KDI_SMS  ,
-     6           TAGREL_SMS,IPART(I15A),IPART(I15B),IPART(I15C),IPART(I15D),
-     7          IPART(I15E),IPART(I15F),IPART(I15G),IPART(I15H),IPART(I15I),
-     8                 IAD_ELEM  ,FR_ELEM,NPBY     ,LPBY     ,KINET    ,
-     9                 TAGSLV_RBY_SMS,IPARI  ,INTBUF_TAB,IADI2    ,
-     A                 LAD_SMS ,JSM_SMS ,TAGSLV_I21_SMS,INTSTAMP  ,IPART    ,
-     B                 IGEO    ,TAGMSR_RBY_SMS,WEIGHT,NATIV_SMS,
-     C                 IAD_SMS ,IDI_SMS ,JAD_SMS ,JDI_SMS    ,T2MAIN_SMS)
-
-                DEALLOCATE(IAD_SMS,IDI_SMS)
-
-                ALLOCATE(LTK_SMS(KNZ_SMS),LT_SMS(NNZ_SMS),STAT=IERROR)
-                IF(IERROR/=0) THEN
-                  CALL ANCMSG(MSGID=19,ANMODE=ANINFO,
-     .                C1='(/DT/.../AMS)')
-                  CALL ARRET(2)
-                ENDIF
-
-                ALLOCATE(TAG_LNK_SMS(NRLINK+NLINK+NJOINT),
-     .                   NRWL_SMS(SLPRW),
-     .                   STAT=IERROR)
-                IF(IERROR/=0) THEN
-                  CALL ANCMSG(MSGID=19,ANMODE=ANINFO,
-     .                C1='(/DT/.../AMS)')
-                  CALL ARRET(2)
-                ENDIF
-
-                IF(IDTMINS==1)THEN
-C             Obsolete
-                ELSE
-                  CALL SMS_INI_KIN_2(
-     1            ILINK     ,LLINK    ,NNLINK    ,LNLINK    ,TAG_LNK_SMS,
-     2            FR_LL     ,FR_RL    ,WEIGHT    ,ITAB      ,LJOINT     ,
-     3            IADCJ     ,FR_CJ    ,NPRW      ,LPRW      ,FR_WALL    ,
-     4            NRWL_SMS  ,IAD_ELEM ,FR_ELEM   )
-                END IF
-
-                IF(IDTMINS_INT/=0)THEN
-C re-tag rigid bodies (all nodes)
-                  CALL SMS_INI_RBY(
-     1            KINET   ,NPRW     ,LPRW    ,NPBY    , LPBY     ,
-     2            TAGMSR_RBY_SMS,TAGSLV_RBY_SMS)
-                END IF
-
-                CALL SMS_INI_INT(
-     1          IPARI    ,INTBUF_TAB     ,IAD_ELEM   ,FR_ELEM  ,INTLIST,
-     2          NBINTC)
-
-              ELSEIF(IDTMINS_INT/=0)THEN
-C
-C           /DT/INTER/AMS
-                ALLOCATE(KDI_SMS(0),JDI_SMS(0),PK_SMS(0),LT_SMS(0),LTK_SMS(0),
-     .                   JSM_SMS(0),
-     .                   TAG_LNK_SMS(NRLINK+NLINK+NJOINT),NRWL_SMS(SLPRW),
-     .                   STAT=IERROR)
-                IF(IERROR/=0) THEN
-                  CALL ANCMSG(MSGID=19,ANMODE=ANINFO,
-     .                C1='(/DT/.../AMS)')
-                  CALL ARRET(2)
-                ENDIF
-
-                NINDX1_SMS=0
-                NSMSPCG=MIN(NSMSPCG,NUMNODG)
-
-                CALL SMS_INI_KIN_2(
-     1          ILINK     ,LLINK    ,NNLINK    ,LNLINK    ,TAG_LNK_SMS,
-     2          FR_LL     ,FR_RL    ,WEIGHT    ,ITAB      ,LJOINT     ,
-     3          IADCJ     ,FR_CJ    ,NPRW      ,LPRW      ,FR_WALL    ,
-     4          NRWL_SMS  ,IAD_ELEM ,FR_ELEM   )
-
-                CALL SMS_INI_RBY(
-     1          KINET   ,NPRW     ,LPRW    ,NPBY    , LPBY     ,
-     2          TAGMSR_RBY_SMS,TAGSLV_RBY_SMS)
-
-                CALL SMS_INI_INT(
-     1          IPARI    ,INTBUF_TAB     ,IAD_ELEM   ,FR_ELEM  ,INTLIST,
-     2          NBINTC)
-
               ELSE
                 ALLOCATE(KDI_SMS(0),JDI_SMS(0),PK_SMS(0),LT_SMS(0),LTK_SMS(0),
      .                   JSM_SMS(0),
      .                   TAG_LNK_SMS(0),NRWL_SMS(0))
               END IF
-
 C
               IF (M_VS_SMS>0) THEN
                 LNZM=M_VS_SMS+3
@@ -2790,41 +2601,9 @@ C
      .                          PROJ_W(0),PROJ_K(0,0))
               END IF
 C---------------------------------------------------------------------
-C DEBUG MATRIX AMS
-C---------------------------------------------------------------------
-              IF (IDTMINS/=0.AND.DEBUG(MACRO_DEBUG_AMS)==1) THEN
-                IF(NSPMD > 1) THEN
-                  IF (ISPMD==0) THEN
-                    SIZ = NUMNODG
-                  ELSE
-                    SIZ = 0
-                  END IF
-                  CALL SPMD_COLLECTM(TAGNOD_SMS,ITAB,WEIGHT,NODGLOB,SIZ)
-                ELSE
-                  CALL COLLECTM(TAGNOD_SMS,ITAB,WEIGHT,NODGLOB)
-                END IF
-              END IF
-C---------------------------------------------------------------------
 C AMS + POFF
 C---------------------------------------------------------------------
               IF(IDTMINS/=0.AND.IPARIT==0)THEN
-                ALLOCATE(UNCOMP_FR(NUMNOD))
-                ALLOCATE(UNCOMP_FRI2M(NUMNOD))
-
-                CALL AMS_PREPARE_POFF_ASSEMBLY(
-     *                     IAD_ELEM,FR_ELEM,NB_FR,UNCOMP_FR,
-     *                      IAD_I2M,FR_I2M,NB_FRI2M,UNCOMP_FRI2M)
-
-                ALLOCATE(FR_LOC(NB_FR))
-                FR_LOC(1:NB_FR) = UNCOMP_FR(1:NB_FR)
-
-                ALLOCATE(FR_LOCI2M(NB_FRI2M))
-                FR_LOCI2M(1:NB_FRI2M) = UNCOMP_FRI2M(1:NB_FRI2M)
-
-
-                DEALLOCATE(UNCOMP_FR)
-                DEALLOCATE(UNCOMP_FRI2M)
-
               ELSE
                 ALLOCATE(FR_LOC(1))
                 ALLOCATE(FR_LOCI2M(1))
@@ -3537,12 +3316,7 @@ C----------------------------------------
                 L3 = L2+12*NUMELS20
                 LSKYI_COUNT = 0
                 LSKYI_SMS_NEW = 0
-
-                IF(IDTMINS/=0) THEN
-                  NATIV_SMS_SIZ = NUMNOD
-                ELSE
-                  NATIV_SMS_SIZ = 0
-                ENDIF
+                NATIV_SMS_SIZ = 0
 
 C========================================================================================
 C                                     PARALLEL SECTION (SMP)
@@ -3619,31 +3393,6 @@ C Remote Secnd Nodes
 
                 IF (IMON > 0) CALL STOPTIME(2,1)
                 CALL TRACE_OUT(8)
-              ENDIF
-
-C ----------------------------------------------------
-C SMS - Check if ISKYI_SMS & MSKYI_SMS are sufficiently allocate
-C If not reallocate them
-C ----------------------------------------------------
-
-              IF ((IDTMINS == 2.OR.IDTMINS_INT/=0).AND.(NINTER > 0)) THEN
-C
-                IF (LSKYI_SMS_NEW > LSKYI_SMS) THEN
-C
-                  DEALLOCATE(ISKYI_SMS,MSKYI_SMS,JDII_SMS,LTI_SMS)
-C
-                  LSKYI_SMS = NINT(LSKYI_SMS_NEW*1.2)
-                  ALLOCATE(MSKYI_SMS(LSKYI_SMS),ISKYI_SMS(LSKYI_SMS,3),
-     .                     JDII_SMS(2*LSKYI_SMS),LTI_SMS(2*LSKYI_SMS),
-     .                     STAT=IERROR)
-C
-                  IF(IERROR/=0) THEN
-                    CALL ANCMSG(MSGID=19,ANMODE=ANINFO,
-     .                    C1='LSKYI_SMS RESIZE')
-                    CALL ARRET(2)
-                  ENDIF
-C
-                ENDIF
               ENDIF
 
 C--------------------------------------------------------
@@ -4811,14 +4560,6 @@ C
 C
                   LENR = IAD_ELEM(1,NSPMD+1)-IAD_ELEM(1,1)
                   IF(IDTMINS /= 0)THEN
-
-                    CALL SPMD_EXCH_A_AMS_POFF(
-     1               A       ,AR     ,STIFN,STIFR ,MS   ,
-     2               IAD_ELEM,FR_ELEM,MSNF ,ALE%SUB%IFSUBM,SIZE ,
-     3               LENR    ,FTHE , MCP,FR_LOC,NB_FR   ,
-     4               MS_2D ,MCP_OFF,FORNEQS ,NFACNIT    ,
-     5               LENC ,FANI ,H3D_DATA,FANI(1,NFNCA+1),
-     6               FANI(1,NFTCA+1))
                   ELSE
                     CALL SPMD_EXCH_A(
      1               A       ,AR     ,STIFN,STIFR ,MS   ,
@@ -5334,24 +5075,6 @@ C===============================================================================
 C                                     NON PARALLEL SECTION (SMP)
 C========================================================================================
 
-C elt deletion => need to rebuild ams mass matrix ...
-                IF(IDTMINS>=1.OR.IDTMINS_INT/=0)THEN
-                  IF(MCHECK==0)THEN
-                    ISMSNOK=0
-                    IF(IDEL7NG==0)THEN
-                      IF (NSPMD>1) THEN
-C Get IDEL7NOK global
-                        IF (IMONM > 0 ) CALL STARTIME(76,1)
-                        CALL SPMD_ALLGLOB_ISUM9(IDEL7NOK,1)
-                        IF (IMONM > 0 ) CALL STOPTIME(76,1)
-                        IDEL7NOK = MIN(1,IDEL7NOK)
-                      ENDIF
-                    ENDIF
-                    ISMSNOK=IDEL7NOK
-                  ELSE
-                    ISMSNOK=1
-                  END IF
-                END IF
 C  ---------------------------------------------------------
                 IDEL7NOK=0
                 IF (IMON>0) CALL STOPTIME(8,1)
@@ -5439,7 +5162,6 @@ C===============================================================================
                     CALL STOPTIME(6,1)
                   ENDIF
 C
-                  IF((IDTMINS/=0.OR.IDTMINS_INT/=0).AND.NCYCLE==0)ISMSCH=1
 
                 ENDIF
 C
@@ -5635,62 +5357,6 @@ C-----------------------------------------------
 C
 C       Obsolete
                 ELSEIF(IDTMINS == 2.OR.IDTMINS_INT/=0)THEN
-C
-                  NSGDONE=1
-                  NRBDONE=1
-
-                  IF (IMON>0) CALL STARTIME(39,1)
-                  IF (IMON>0) CALL STARTIME(75,1)
-
-C========================================================================================
-C                                     PARALLEL SECTION (SMP)
-C========================================================================================
-                  L1 = 1+NIXS*NUMELS + NSVOIS*NIXS
-
-C       Sorting of ISKYI_SMS and additional connections for TYPE2 + contact
-                  CALL SPMD_SORT_SMS(ISKYI_SMS,MSKYI_SMS,FR_SMS)
-C
-                  IF(NSPMD > 1)THEN
-                    CALL SPMD_NLIST_SMS(FR_SMS,FR_RMS)
-                  END IF
-
-!$OMP PARALLEL PRIVATE(ITSK,NODFTSK,NODLTSK)
-                  ITSK = OMP_GET_THREAD_NUM()
-                  NODFTSK   = 1+ITSK*NUMNOD/ NTHREAD
-                  NODLTSK   = (ITSK+1)*NUMNOD/NTHREAD
-C
-                  CALL SMS_BUILD_MAT_2(
-     1                       ITSK     ,NODFTSK ,NODLTSK   ,
-     2                       IXC      ,IPARG   ,IXS       ,IXT       ,IXP       ,
-     3                       IXR      ,IXTG    ,TAGNOD_SMS,MS        ,MS0       ,
-     4                       INDX1_SMS,INDX2_SMS,JAD_SMS  ,JDI_SMS   ,LT_SMS    ,
-     .                       KAD_SMS ,KDI_SMS  ,LTK_SMS   ,PK_SMS    ,NODII_SMS ,
-     5                       JADC_SMS ,JADS_SMS ,JADT_SMS ,JADP_SMS ,JADR_SMS  ,
-     6                       JADTG_SMS,DIAG_SMS ,TAGPRT_SMS,TAGREL_SMS,
-     7               IPART(I15A),IPART(I15B),IPART(I15C),IPART(I15D),IPART(I15E),
-     8               IPART(I15F),IPART(I15G),IPART(I15H),IPART(I15I),IAD_ELEM   ,
-     9                       FR_ELEM  ,NPBY    ,LPBY  ,TAGSLV_RBY_SMS ,LAD_SMS  ,
-     A                       JSM_SMS ,DMELTG    ,DMELC      ,MSKYI_SMS,
-     B                       ISKYI_SMS,JADI_SMS,JDII_SMS  ,LTI_SMS    ,NODXI_SMS,
-     C                       DMELS    ,DMELTR  ,DMELP     ,DMELRT     ,IGEO     ,
-     D                       FR_SMS   ,FR_RMS  ,ELBUF     ,IPARI      ,INTBUF_TAB,
-     E                       KINET    ,TAGSLV_I21_SMS,JADI21_SMS,INTSTAMP,
-     F                       IXS(L1),JADS10_SMS,ILINK     ,LLINK      ,NNLINK   ,
-     G                       LNLINK   ,TAG_LNK_SMS,LJOINT ,IADCJ      ,FR_CJ    ,
-     H                       ITAB  ,WEIGHT  ,DMINT2    ,ELBUF_TAB,TAGMSR_RBY_SMS,
-     I                       NPRW  ,LPRW    ,FR_WALL   ,NRWL_SMS      ,RBY      ,
-     J                       X     ,A       ,AR        ,IN            ,V        ,
-     K                       VR    ,IRBE2   ,LRBE2     ,IRBE3         ,LRBE3    ,
-     L                       IAD_RBE3M ,FR_RBE3M ,NATIV_SMS,T2MAIN_SMS,T2FAC_SMS)
-c
-!$OMP END PARALLEL
-
-                  PTR_SMS => NODXI_SMS
-
-                  ISMSCH=0
-                  IF (IMON>0) CALL STOPTIME(39,1)
-                  IF (IMON>0) CALL STOPTIME(75,1)
-
                 ENDIF
 C----------------------------------------------------------
 C     SCALE TIME STEP
