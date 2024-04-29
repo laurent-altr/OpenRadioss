@@ -60,19 +60,22 @@ C     REAL
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER M3, M2, M1, I, N, N3, N2, N1, J, K, JJ,NINDEX,
-     .        INDEX(NSN)
+      INTEGER M3, M2, M1, I, N, N3, N2, N1, J, K, JJ,NINDEX
+      INTEGER, DIMENSION(:), ALLOCATABLE :: INDEX !(NSN)
 C     REAL
       my_real
      .   RA2, XWL, YWL, ZWL, VXW, VYW, VZW, TFXTN, FACT,
      .   TFXT, VX, VY, VZ, UX, UY, UZ, XC, YC, ZC, DP, XX, XN,
      .   YN, ZN, DV, DA, DVT, FNXN, FNYN, FNZN, FNXT, FNYT, FNZT, FNDFN,
      .   FTDFT, FRIC, FRIC2, FCOE, XWLO, YWLO, ZWLO,
-     .   F1(NSN), F2(NSN), F3(NSN), F4(NSN), F5(NSN), F6(NSN), F7(NSN),
      .   TFXT2, TFXTN2, WEWE2
+      my_real, DIMENSION(:), ALLOCATABLE :: F1, F2, F3, F4, F5, F6, F7
       DOUBLE PRECISION 
      .   FRWL6_L(7,6)
 C-----------------------------------------------
+      ALLOCATE(INDEX(NSN))
+      ALLOCATE(F1(NSN), F2(NSN), F3(NSN), F4(NSN), F5(NSN), F6(NSN), F7(NSN))
+
       ICONT=0
       CALL MY_BARRIER
 !       We need an OMP barrier here because each thread initializes 
@@ -320,6 +323,8 @@ C to be uncommented the day it is parallel in implicit
            END IF
          ENDDO
       ENDIF
+      DEALLOCATE(F1, F2, F3, F4, F5, F6, F7)
+
 C  
       RETURN
       END

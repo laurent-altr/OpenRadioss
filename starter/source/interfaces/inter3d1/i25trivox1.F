@@ -112,9 +112,9 @@ C     REAL
       my_real
      .   LEDGMAX, MARGE, BGAPSMX
       my_real , INTENT(IN) :: DRAD, DGAPLOAD
-      INTEGER :: LARGE_NODE(NSN) ! list of nodes that have large research distance wrt solids
-      INTEGER :: IS_LARGE_NODE(NSN) ! tag nodes that have large research distance wrt solids
-      INTEGER :: NB_LARGE_NODES
+      INTEGER, INTENT(INOUT) :: LARGE_NODE(NSN) ! list of nodes that have large research distance wrt solids
+      INTEGER, INTENT(INOUT) :: IS_LARGE_NODE(NSN) ! tag nodes that have large research distance wrt solids
+      INTEGER, INTENT(INOUT) :: NB_LARGE_NODES
       INTEGER , INTENT(IN) :: NRTMT
 
 C-----------------------------------------------

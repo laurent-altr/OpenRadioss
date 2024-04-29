@@ -62,8 +62,8 @@ C     REAL
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER M3, M2, M1, I, N, N3, N2, N1, K, J,JJ,NINDEX,
-     .        INDEX(NSN)
+      INTEGER M3, M2, M1, I, N, N3, N2, N1, K, J,JJ,NINDEX
+      INTEGER, DIMENSION(:), ALLOCATABLE ::  INDEX !(NSN)
 C     REAL
       my_real
      .   XWL, YWL, ZWL, VXW, VYW, VZW, TFXTN, FACT,
@@ -74,11 +74,15 @@ C     REAL
      .   FCOE,AX,
      .   XWL0, YWL0, ZWL0, DP0, XC0, YC0, ZC0, TOL, VN, VNOLD, 
      .   DP0DT, DVX, DVY, DVZ, PREC, XPREC,
-     .   F1(NSN), F2(NSN), F3(NSN), F4(NSN), F5(NSN), F6(NSN), F7(NSN),
      .   TFXT2, TFXTN2, WEWE2
+!     .   F1(NSN), F2(NSN), F3(NSN), F4(NSN), F5(NSN), F6(NSN), F7(NSN),
+       my_real, dimension(:), allocatable :: F1, F2, F3, F4, F5, F6, F7
+
       DOUBLE PRECISION 
      .   FRWL6_L(7,6)
 C-----------------------------------------------
+      ALLOCATE(INDEX(NSN))
+      ALLOCATE(F1(NSN), F2(NSN), F3(NSN), F4(NSN), F5(NSN), F6(NSN), F7(NSN))
       IF(IRESP==1)THEN
         PREC=EM07
       END IF
@@ -476,6 +480,9 @@ C to be uncommented the day it is parallel in implicit
           END IF
         ENDDO
       ENDIF
+
+      DEALLOCATE(F1, F2, F3, F4, F5, F6, F7)
+
 C
       RETURN
       END
