@@ -20,18 +20,18 @@ Copyright>
 Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
-Chd|====================================================================
-Chd|  HM_READ_TRIA                  source/elements/reader/hm_read_tria.F
-Chd|-- called by -----------
-Chd|        LECTUR                        source/starter/lectur.F       
-Chd|-- calls ---------------
-Chd|        ANCMSG                        source/output/message/message.F
-Chd|        ANODSET                       source/output/analyse/analyse_node.c
-Chd|        VDOUBLE                       source/system/sysfus.F        
-Chd|        USR2SYS                       source/system/sysfus.F        
-Chd|        MESSAGE_MOD                   share/message_module/message_mod.F
-Chd|        SUBMODEL_MOD                  share/modules1/submodel_mod.F 
-Chd|====================================================================
+      !||====================================================================
+      !||    hm_read_tria    ../starter/source/elements/reader/hm_read_tria.F
+      !||--- called by ------------------------------------------------------
+      !||    lectur          ../starter/source/starter/lectur.F
+      !||--- calls      -----------------------------------------------------
+      !||    ancmsg          ../starter/share/message_module/inter_ancmsg_mod.F
+      !||    anodset         ../starter/source/output/analyse/analyse_node.c
+      !||    vdouble         ../starter/source/system/sysfus.F
+      !||--- uses       -----------------------------------------------------
+      !||    message_mod     ../starter/share/message_module/message_mod.F
+      !||    submodel_mod    ../starter/share/modules1/submodel_mod.F
+      !||====================================================================
       SUBROUTINE HM_READ_TRIA(IXTG  ,ITAB   ,ITABM1 ,IPART  ,IPARTTG ,
      .                  PM    ,GEO    ,ICNOD  ,IGEO   ,IPM     ,
      .                  UNITAB ,LSUBMODEL)

@@ -20,16 +20,15 @@ Copyright>
 Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
-Chd|====================================================================
-Chd|  W_BUFBRIC_22                  source/interfaces/int22/w_bufbric_22.F
-Chd|-- called by -----------
-Chd|        WRRESTP                       source/output/restart/wrrestp.F
-Chd|-- calls ---------------
-Chd|        WRITE_DB                      source/output/tools/write_db.F
-Chd|        WRITE_I_C                     ../common_source/tools/input_output/write_routtines.c
-Chd|        I22BUFBRIC_MOD                ../common_source/modules/interfaces/cut-cell-search_mod.F
-Chd|        I22TRI_MOD                    ../common_source/modules/interfaces/cut-cell-search_mod.F
-Chd|====================================================================
+      !||====================================================================
+      !||    w_bufbric_22     ../starter/source/interfaces/inter3d1/w_bufbric_22.F
+      !||--- called by ------------------------------------------------------
+      !||    ddsplit          ../starter/source/restart/ddsplit/ddsplit.F
+      !||--- calls      -----------------------------------------------------
+      !||    arret            ../starter/source/system/arret.F
+      !||    write_db         ../starter/source/restart/ddsplit/wrrest.F
+      !||--- uses       -----------------------------------------------------
+      !||====================================================================
       SUBROUTINE W_BUFBRIC_22()
 C-----------------------------------------------
 C   D e s c r i p t i o n

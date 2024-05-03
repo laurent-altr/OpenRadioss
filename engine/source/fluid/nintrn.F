@@ -20,12 +20,13 @@ Copyright>
 Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
-Chd|====================================================================
-Chd|  NINTRN                        source/fluid/nintrn.F         
-Chd|-- called by -----------
-Chd|        LECFLSW                       source/fluid/lecflsw.F        
-Chd|-- calls ---------------
-Chd|====================================================================
+      !||====================================================================
+      !||    nintrn        ../starter/source/system/nintrn.F
+      !||--- calls      -----------------------------------------------------
+      !||    ancmsg        ../starter/share/message_module/inter_ancmsg_mod.F
+      !||--- uses       -----------------------------------------------------
+      !||    message_mod   ../starter/share/message_module/message_mod.F
+      !||====================================================================
       INTEGER FUNCTION NINTRN (IEXT,NTN,M,N)
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s

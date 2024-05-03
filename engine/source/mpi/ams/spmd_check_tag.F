@@ -20,18 +20,19 @@ Copyright>
 Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
-Chd|====================================================================
-Chd|  SPMD_CHECK_TAG                source/mpi/ams/spmd_check_tag.F
-Chd|-- called by -----------
-Chd|        SPMD_EXCH_SMST2               source/mpi/ams/spmd_exch_smst2.F
-Chd|-- calls ---------------
-Chd|        ANCMSG                        source/output/message/message.F
-Chd|        ARRET                         source/system/arret.F         
-Chd|        INTBUFDEF_MOD                 ../common_source/modules/intbufdef_mod.F
-Chd|        MESSAGE_MOD                   share/message_module/message_mod.F
-Chd|        RESTMOD                       share/modules/restart_mod.F   
-Chd|        TRI7BOX                       share/modules/tri7box.F       
-Chd|====================================================================
+      !||====================================================================
+      !||    spmd_check_tag    ../engine/source/mpi/ams/spmd_check_tag.F
+      !||--- called by ------------------------------------------------------
+      !||    spmd_exch_smst2   ../engine/source/mpi/ams/spmd_exch_smst2.F
+      !||--- calls      -----------------------------------------------------
+      !||    ancmsg            ../engine/share/message_module/inter_ancmsg_mod.F
+      !||    arret             ../engine/source/system/arret.F
+      !||--- uses       -----------------------------------------------------
+      !||    intbufdef_mod     ../common_source/modules/intbufdef_mod.F
+      !||    message_mod       ../engine/share/message_module/message_mod.F
+      !||    restmod           ../engine/share/modules/restart_mod.F
+      !||    tri7box           ../engine/share/modules/tri7box.F
+      !||====================================================================
       SUBROUTINE SPMD_CHECK_TAG(NIN,I_STOK,INTBUF_TAB,TAG,NSNR,
      .                          NSN,NTY,INACTI,IFQ,ITIED,NRTS)
 C-----------------------------------------------

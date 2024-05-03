@@ -20,15 +20,13 @@ Copyright>
 Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
-Chd|====================================================================
-Chd|  FIXFINGEO                     source/constraints/general/impvel/fixfingeo.F
-Chd|-- called by -----------
-Chd|        RESOL                         source/engine/resol.F         
-Chd|-- calls ---------------
-Chd|        FINTER2                       source/tools/curve/vinter.F   
-Chd|        FINTER2_SMOOTH                source/tools/curve/finter_smooth.F
-Chd|        SENSOR_MOD                    share/modules/sensor_mod.F    
-Chd|====================================================================
+      !||====================================================================
+      !||    fixfingeo    ../engine/source/constraints/general/impvel/fixfingeo.F
+      !||--- called by ------------------------------------------------------
+      !||    resol        ../engine/source/engine/resol.F
+      !||--- uses       -----------------------------------------------------
+      !||    sensor_mod   ../engine/share/modules/sensor_mod.F
+      !||====================================================================
       SUBROUTINE FIXFINGEO(IBFV   ,A     ,V      ,NPC    ,TF       ,
      2                     VEL    ,MS    ,X      ,D      ,SENSOR_TAB,
      3                     WEIGHT ,CPTREAC,NODREAC,NODNX_SMS,NSENSOR,

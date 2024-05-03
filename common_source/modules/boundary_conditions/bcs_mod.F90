@@ -23,6 +23,26 @@
 ! ======================================================================================================================
 !                                                   PROCEDURES
 ! ======================================================================================================================
+      !||====================================================================
+      !||    bcs_mod                  ../common_source/modules/boundary_conditions/bcs_mod.F90
+      !||--- called by ------------------------------------------------------
+      !||    alemain                  ../engine/source/ale/alemain.F
+      !||    bcs_wall_trigger         ../engine/source/boundary_conditions/bcs_wall_trigger.F90
+      !||    contrl                   ../starter/source/starter/contrl.F
+      !||    ddsplit                  ../starter/source/restart/ddsplit/ddsplit.F
+      !||    hm_read_bcs_wall         ../starter/source/boundary_conditions/hm_read_bcs_wall.F90
+      !||    init_bcs_wall            ../starter/source/boundary_conditions/init_bcs_wall.F90
+      !||    initia                   ../starter/source/elements/initia/initia.F
+      !||    lectur                   ../engine/source/input/lectur.F
+      !||    rdresb                   ../engine/source/output/restart/rdresb.F
+      !||    read_bcs_wall            ../engine/source/output/restart/read_bcs_wall.F90
+      !||    resol                    ../engine/source/engine/resol.F
+      !||    split_bcs_wall           ../starter/source/restart/ddsplit/split_bcs_wall.F90
+      !||    st_qaprint_constraints   ../starter/source/output/qaprint/st_qaprint_constraints.F
+      !||    w_bcs_proc               ../starter/source/restart/ddsplit/w_bcs_proc.F90
+      !||    write_bcs_wall           ../common_source/output/restart/write_bcs_wall.F90
+      !||    wrrestp                  ../engine/source/output/restart/wrrestp.F
+      !||====================================================================
       module bcs_mod
         !use constant_mod , only : zero, ep20
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -32,7 +52,7 @@
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Included files
 ! ----------------------------------------------------------------------------------------------------------------------
-      implicit none
+        implicit none
 #include "my_real.inc"
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Body
@@ -62,8 +82,8 @@
         type bcs_struct_
           integer :: num_wall
           type(bcs_wall_struct_),dimension(:),allocatable :: wall
-          contains
-            procedure :: deallocate
+        contains
+          procedure :: deallocate
         end type bcs_struct_
 
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -71,13 +91,16 @@
         type(bcs_struct_) :: bcs
 
 ! ----------------------------------------------------------------------------------------------------------------------
-        contains
-        
- ! ======================================================================================================================
+      contains
+
+        ! ======================================================================================================================
 !                                                   PROCEDURES
 ! ======================================================================================================================
 !! \brief Deallocate related data structure if allocated
-      subroutine deallocate(this)
+        !||====================================================================
+        !||    deallocate   ../common_source/modules/boundary_conditions/bcs_mod.F90
+        !||====================================================================
+        subroutine deallocate(this)
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Modules
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -85,33 +108,33 @@
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Included files
 ! ----------------------------------------------------------------------------------------------------------------------
-      implicit none
+          implicit none
 #include "my_real.inc"
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Arguments
 ! ----------------------------------------------------------------------------------------------------------------------
-      class(bcs_struct_),intent(inout) :: this
+          class(bcs_struct_),intent(inout) :: this
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Local variables
 ! ----------------------------------------------------------------------------------------------------------------------
-      integer :: ii
+          integer :: ii
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Body
 ! ----------------------------------------------------------------------------------------------------------------------
-      if(this%num_wall > 0)then
-        do ii=1,this%num_wall
-          if(this%wall(ii)%list%size > 0)then
-            if(allocated(this%wall(ii)%list%elem)) deallocate(this%wall(ii)%list%elem)
-            if(allocated(this%wall(ii)%list%face)) deallocate(this%wall(ii)%list%face)
-            if(allocated(this%wall(ii)%list%adjacent_elem)) deallocate(this%wall(ii)%list%adjacent_elem)
+          if(this%num_wall > 0)then
+            do ii=1,this%num_wall
+              if(this%wall(ii)%list%size > 0)then
+                if(allocated(this%wall(ii)%list%elem)) deallocate(this%wall(ii)%list%elem)
+                if(allocated(this%wall(ii)%list%face)) deallocate(this%wall(ii)%list%face)
+                if(allocated(this%wall(ii)%list%adjacent_elem)) deallocate(this%wall(ii)%list%adjacent_elem)
+              endif
+            enddo
+            if(allocated(this%wall))deallocate(this%wall)
           endif
-        enddo
-        if(allocated(this%wall))deallocate(this%wall)
-      endif
 ! ----------------------------------------------------------------------------------------------------------------------
-      return
-      end subroutine deallocate
-       
-        
-        
+          return
+        end subroutine deallocate
+
+
+
       end module bcs_mod

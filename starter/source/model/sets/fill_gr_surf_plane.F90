@@ -20,6 +20,11 @@
 !Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 !Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 !Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
+      !||====================================================================
+      !||    fill_surf_plane_mod   ../starter/source/model/sets/fill_gr_surf_plane.F90
+      !||--- called by ------------------------------------------------------
+      !||    fill_igr              ../starter/source/model/sets/fill_igr.F
+      !||====================================================================
       module fill_surf_plane_mod
       contains
 ! ======================================================================================================================
@@ -29,6 +34,12 @@
 !=======================================================================================================================
 !\brief This subroutine creates a new igrsurf from a /SET of plane surface
 !=======================================================================================================================
+        !||====================================================================
+        !||    fill_surf_plane   ../starter/source/model/sets/fill_gr_surf_plane.F90
+        !||--- called by ------------------------------------------------------
+        !||    fill_igr          ../starter/source/model/sets/fill_igr.F
+        !||--- uses       -----------------------------------------------------
+        !||====================================================================
         subroutine fill_surf_plane(set,igrsurf,igrs,bufsf,lisurf1,nsurf)
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Modules
@@ -59,7 +70,7 @@
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Body
 ! ----------------------------------------------------------------------------------------------------------------------
-!         
+!
           nseg = set%nb_plane
 !
           igrs = igrs + 1
@@ -82,14 +93,14 @@
 !         not printout empty group
           igrsurf(igrs)%set_group = 1
 !
-          igrsurf(igrs)%type = 200 
+          igrsurf(igrs)%type = 200
           iad=set%plane_iad_bufr
           igrsurf(igrs)%iad_bufr = iad
 !
           bufsf(iad+1)=set%plane_xm
           bufsf(iad+2)=set%plane_ym
           bufsf(iad+3)=set%plane_zm
-          bufsf(iad+4)=set%plane_xm1                                                
+          bufsf(iad+4)=set%plane_xm1
           bufsf(iad+5)=set%plane_ym1
           bufsf(iad+6)=set%plane_zm1
 !

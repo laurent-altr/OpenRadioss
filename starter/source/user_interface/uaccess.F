@@ -22,43 +22,24 @@ Copyright>        software under a commercial license.  Contact Altair to discus
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
 
 
-Chd|====================================================================
-Chd|  ST_UACCESS_DUM                source/user_interface/uaccess.F
-Chd|-- called by -----------
-Chd|        STARTER0                      source/starter/starter0.F     
-Chd|-- calls ---------------
-Chd|====================================================================
+      !||====================================================================
+      !||    st_uaccess_dum   ../starter/source/user_interface/uaccess.F
+      !||--- called by ------------------------------------------------------
+      !||    starter0         ../starter/source/starter/starter0.F
+      !||====================================================================
       SUBROUTINE ST_UACCESS_DUM(IERR)
 #include      "implicit_f.inc"
       INTEGER IERR
       IERR=0
       END      
 C
-Chd|====================================================================
-Chd|  SET_U_GEO                     source/user_interface/uaccess.F
-Chd|-- called by -----------
-Chd|        HM_READ_PROP28                source/properties/xelem/hm_read_prop28.F
-Chd|        HM_READ_PROP32                source/properties/spring/hm_read_prop32.F
-Chd|        HM_READ_PROP33_CYL_JNT        source/properties/spring/hm_read_prop33_cyl_jnt.F
-Chd|        HM_READ_PROP33_FIX_JNT        source/properties/spring/hm_read_prop33_fix_jnt.F
-Chd|        HM_READ_PROP33_FREE_JNT       source/properties/spring/hm_read_prop33_free_jnt.F
-Chd|        HM_READ_PROP33_OLD_JNT        source/properties/spring/hm_read_prop33_old_jnt.F
-Chd|        HM_READ_PROP33_PLAN_JNT       source/properties/spring/hm_read_prop33_plan_jnt.F
-Chd|        HM_READ_PROP33_REV_JNT        source/properties/spring/hm_read_prop33_rev_jnt.F
-Chd|        HM_READ_PROP33_SPH_JNT        source/properties/spring/hm_read_prop33_sph_jnt.F
-Chd|        HM_READ_PROP33_TRANS_JNT      source/properties/spring/hm_read_prop33_trans_jnt.F
-Chd|        HM_READ_PROP33_UNIV_JNT       source/properties/spring/hm_read_prop33_univ_jnt.F
-Chd|        HM_READ_PROP34                source/properties/sph/hm_read_prop34.F
-Chd|        HM_READ_PROP35                source/properties/spring/hm_read_prop35.F
-Chd|        HM_READ_PROP36                source/properties/spring/hm_read_prop36.F
-Chd|        HM_READ_PROP44                source/properties/spring/hm_read_prop44.F
-Chd|        HM_READ_PROP45                source/properties/spring/hm_read_prop45.F
-Chd|        HM_READ_PROP46                source/properties/spring/hm_read_prop46.F
-Chd|        HM_READ_PROP_USER4            source/properties/user_spring_solid/hm_read_prop_user4.F
-Chd|-- calls ---------------
-Chd|        ANCMSG                        source/output/message/message.F
-Chd|        MESSAGE_MOD                   share/message_module/message_mod.F
-Chd|====================================================================
+      !||====================================================================
+      !||    set_u_geo     ../starter/source/user_interface/uaccess.F
+      !||--- calls      -----------------------------------------------------
+      !||    ancmsg        ../starter/share/message_module/inter_ancmsg_mod.F
+      !||--- uses       -----------------------------------------------------
+      !||    message_mod   ../starter/share/message_module/message_mod.F
+      !||====================================================================
       INTEGER FUNCTION SET_U_GEO(IVAR,A)
 C-----------------------------------------------
 C   M o d u l e s
@@ -95,30 +76,13 @@ C
       RETURN
       END
 C
-Chd|====================================================================
-Chd|  SET_U_PNU                     source/user_interface/uaccess.F
-Chd|-- called by -----------
-Chd|        HM_READ_PROP28                source/properties/xelem/hm_read_prop28.F
-Chd|        HM_READ_PROP32                source/properties/spring/hm_read_prop32.F
-Chd|        HM_READ_PROP33_CYL_JNT        source/properties/spring/hm_read_prop33_cyl_jnt.F
-Chd|        HM_READ_PROP33_FIX_JNT        source/properties/spring/hm_read_prop33_fix_jnt.F
-Chd|        HM_READ_PROP33_FREE_JNT       source/properties/spring/hm_read_prop33_free_jnt.F
-Chd|        HM_READ_PROP33_OLD_JNT        source/properties/spring/hm_read_prop33_old_jnt.F
-Chd|        HM_READ_PROP33_PLAN_JNT       source/properties/spring/hm_read_prop33_plan_jnt.F
-Chd|        HM_READ_PROP33_REV_JNT        source/properties/spring/hm_read_prop33_rev_jnt.F
-Chd|        HM_READ_PROP33_SPH_JNT        source/properties/spring/hm_read_prop33_sph_jnt.F
-Chd|        HM_READ_PROP33_TRANS_JNT      source/properties/spring/hm_read_prop33_trans_jnt.F
-Chd|        HM_READ_PROP33_UNIV_JNT       source/properties/spring/hm_read_prop33_univ_jnt.F
-Chd|        HM_READ_PROP35                source/properties/spring/hm_read_prop35.F
-Chd|        HM_READ_PROP36                source/properties/spring/hm_read_prop36.F
-Chd|        HM_READ_PROP44                source/properties/spring/hm_read_prop44.F
-Chd|        HM_READ_PROP45                source/properties/spring/hm_read_prop45.F
-Chd|        HM_READ_PROP46                source/properties/spring/hm_read_prop46.F
-Chd|        HM_READ_PROP_USER4            source/properties/user_spring_solid/hm_read_prop_user4.F
-Chd|-- calls ---------------
-Chd|        ANCMSG                        source/output/message/message.F
-Chd|        MESSAGE_MOD                   share/message_module/message_mod.F
-Chd|====================================================================
+      !||====================================================================
+      !||    set_u_pnu     ../starter/source/user_interface/uaccess.F
+      !||--- calls      -----------------------------------------------------
+      !||    ancmsg        ../starter/share/message_module/inter_ancmsg_mod.F
+      !||--- uses       -----------------------------------------------------
+      !||    message_mod   ../starter/share/message_module/message_mod.F
+      !||====================================================================
       INTEGER FUNCTION SET_U_PNU(IVAR,IP,K)
 C-----------------------------------------------
 C   M o d u l e s
@@ -208,14 +172,13 @@ C
       RETURN
       END
 C
-Chd|====================================================================
-Chd|  GET_U_MAT                     source/user_interface/uaccess.F
-Chd|-- called by -----------
-Chd|        RINI36                        source/properties/spring/hm_read_prop36.F
-Chd|-- calls ---------------
-Chd|        ANCMSG                        source/output/message/message.F
-Chd|        MESSAGE_MOD                   share/message_module/message_mod.F
-Chd|====================================================================
+      !||====================================================================
+      !||    get_u_mat           ../starter/source/user_interface/uaccess.F
+      !||--- calls      -----------------------------------------------------
+      !||    ancmsg              ../starter/share/message_module/inter_ancmsg_mod.F
+      !||--- uses       -----------------------------------------------------
+      !||    message_mod         ../starter/share/message_module/message_mod.F
+      !||====================================================================
       my_real FUNCTION GET_U_MAT(IVAR,IM)
 C-----------------------------------------------
 C   M o d u l e s
@@ -274,32 +237,13 @@ C
       RETURN
       END
 C
-Chd|====================================================================
-Chd|  GET_U_GEO                     source/user_interface/uaccess.F
-Chd|-- called by -----------
-Chd|        HM_READ_PART                  source/model/assembling/hm_read_part.F
-Chd|        I11STI3                       source/interfaces/inter3d1/i11sti3.F
-Chd|        I20STI3E                      source/interfaces/inter3d1/i20sti3.F
-Chd|        INIT_SKEW45                   source/elements/joint/rjoint/rini45.F
-Chd|        INSPCND                       source/elements/sph/inspcnd.F 
-Chd|        RINI32                        source/properties/spring/hm_read_prop32.F
-Chd|        RINI33                        source/elements/joint/rjoint/rini33.F
-Chd|        RINI33_RB                     source/elements/joint/rjoint/rini33_rb.F
-Chd|        RINI35                        source/elements/spring/rini35.F
-Chd|        RINI36                        source/properties/spring/hm_read_prop36.F
-Chd|        RINI44                        source/elements/spring/rini44.F
-Chd|        RINI45                        source/elements/joint/rjoint/rini45.F
-Chd|        RINI45_RB                     source/elements/joint/rjoint/rini45_rb.F
-Chd|        RINI46                        source/elements/spring/rini46.F
-Chd|        SPGRHEAD                      source/elements/sph/spgrhead.F
-Chd|        SPGRTAILS                     source/elements/sph/spgrtails.F
-Chd|        SPINIH                        source/elements/sph/spinih.F  
-Chd|        SPINIT3                       source/elements/sph/spinit3.F 
-Chd|        XINI28                        source/elements/xelem/xini28.F
-Chd|-- calls ---------------
-Chd|        ANCMSG                        source/output/message/message.F
-Chd|        MESSAGE_MOD                   share/message_module/message_mod.F
-Chd|====================================================================
+      !||====================================================================
+      !||    get_u_geo           ../starter/source/user_interface/uaccess.F
+      !||--- calls      -----------------------------------------------------
+      !||    ancmsg              ../starter/share/message_module/inter_ancmsg_mod.F
+      !||--- uses       -----------------------------------------------------
+      !||    message_mod         ../starter/share/message_module/message_mod.F
+      !||====================================================================
       my_real FUNCTION GET_U_GEO(IVAR,IP)
 C-----------------------------------------------
 C   M o d u l e s
@@ -362,14 +306,13 @@ C
       RETURN
       END
 C
-Chd|====================================================================
-Chd|  RESET_U_GEO                   source/user_interface/uaccess.F
-Chd|-- called by -----------
-Chd|        RINI33_RB                     source/elements/joint/rjoint/rini33_rb.F
-Chd|-- calls ---------------
-Chd|        ANCMSG                        source/output/message/message.F
-Chd|        MESSAGE_MOD                   share/message_module/message_mod.F
-Chd|====================================================================
+      !||====================================================================
+      !||    reset_u_geo         ../starter/source/user_interface/uaccess.F
+      !||--- calls      -----------------------------------------------------
+      !||    ancmsg              ../starter/share/message_module/inter_ancmsg_mod.F
+      !||--- uses       -----------------------------------------------------
+      !||    message_mod         ../starter/share/message_module/message_mod.F
+      !||====================================================================
       INTEGER FUNCTION RESET_U_GEO(IVAR,IP,A)
 C-----------------------------------------------
 C   M o d u l e s
@@ -436,18 +379,13 @@ C
       RETURN
       END
 C
-Chd|====================================================================
-Chd|  GET_U_PNU                     source/user_interface/uaccess.F
-Chd|-- called by -----------
-Chd|        RINI32                        source/properties/spring/hm_read_prop32.F
-Chd|        RINI33                        source/elements/joint/rjoint/rini33.F
-Chd|        RINI36                        source/properties/spring/hm_read_prop36.F
-Chd|        RINI45                        source/elements/joint/rjoint/rini45.F
-Chd|        XINI28                        source/elements/xelem/xini28.F
-Chd|-- calls ---------------
-Chd|        ANCMSG                        source/output/message/message.F
-Chd|        MESSAGE_MOD                   share/message_module/message_mod.F
-Chd|====================================================================
+      !||====================================================================
+      !||    get_u_pnu           ../starter/source/user_interface/uaccess.F
+      !||--- calls      -----------------------------------------------------
+      !||    ancmsg              ../starter/share/message_module/inter_ancmsg_mod.F
+      !||--- uses       -----------------------------------------------------
+      !||    message_mod         ../starter/share/message_module/message_mod.F
+      !||====================================================================
       INTEGER FUNCTION GET_U_PNU(IVAR,IP,K)
 C-----------------------------------------------
 C   M o d u l e s
@@ -513,13 +451,13 @@ C
 C
       RETURN
       END
-Chd|====================================================================
-Chd|  GET_U_MNU                     source/user_interface/uaccess.F
-Chd|-- called by -----------
-Chd|-- calls ---------------
-Chd|        ANCMSG                        source/output/message/message.F
-Chd|        MESSAGE_MOD                   share/message_module/message_mod.F
-Chd|====================================================================
+      !||====================================================================
+      !||    get_u_mnu        ../starter/source/user_interface/uaccess.F
+      !||--- calls      -----------------------------------------------------
+      !||    ancmsg           ../starter/share/message_module/inter_ancmsg_mod.F
+      !||--- uses       -----------------------------------------------------
+      !||    message_mod      ../starter/share/message_module/message_mod.F
+      !||====================================================================
       INTEGER FUNCTION GET_U_MNU(IVAR,IM,K)
 C-----------------------------------------------
 C   M o d u l e s
@@ -565,13 +503,10 @@ C
       RETURN
       END
 C
-Chd|====================================================================
-Chd|  GET_U_PID                     source/user_interface/uaccess.F
-Chd|-- called by -----------
-Chd|        RINI36                        source/properties/spring/hm_read_prop36.F
-Chd|        GET_U_P                       source/user_interface/uaccess.F
-Chd|-- calls ---------------
-Chd|====================================================================
+      !||====================================================================
+      !||    get_u_pid        ../starter/source/user_interface/uaccess.F
+      !||--- calls      -----------------------------------------------------
+      !||====================================================================
       INTEGER FUNCTION GET_U_PID(IP)
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
@@ -598,12 +533,10 @@ C
       RETURN
       END
 C
-Chd|====================================================================
-Chd|  GET_U_MID                     source/user_interface/uaccess.F
-Chd|-- called by -----------
-Chd|        GET_U_M                       source/user_interface/uaccess.F
-Chd|-- calls ---------------
-Chd|====================================================================
+      !||====================================================================
+      !||    get_u_mid        ../starter/source/user_interface/uaccess.F
+      !||--- calls      -----------------------------------------------------
+      !||====================================================================
       INTEGER FUNCTION GET_U_MID(IM)
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
@@ -628,11 +561,10 @@ C-------------------------------------------------
 C
       RETURN
       END
-Chd|====================================================================
-Chd|  GET_U_FUNC_N                  source/user_interface/uaccess.F
-Chd|-- called by -----------
-Chd|-- calls ---------------
-Chd|====================================================================
+      !||====================================================================
+      !||    get_u_func_n     ../starter/source/user_interface/uaccess.F
+      !||--- calls      -----------------------------------------------------
+      !||====================================================================
       INTEGER FUNCTION GET_U_FUNC_N(IFUNC)
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
@@ -652,13 +584,13 @@ C-----------------------------------------------
       GET_U_FUNC_N=(NPFIP-NPFI)/2
       RETURN
       END
-Chd|====================================================================
-Chd|  GET_U_FUNC_Y                  source/user_interface/uaccess.F
-Chd|-- called by -----------
-Chd|-- calls ---------------
-Chd|        ANCMSG                        source/output/message/message.F
-Chd|        MESSAGE_MOD                   share/message_module/message_mod.F
-Chd|====================================================================
+      !||====================================================================
+      !||    get_u_func_y        ../starter/source/user_interface/uaccess.F
+      !||--- calls      -----------------------------------------------------
+      !||    ancmsg              ../starter/share/message_module/inter_ancmsg_mod.F
+      !||--- uses       -----------------------------------------------------
+      !||    message_mod         ../starter/share/message_module/message_mod.F
+      !||====================================================================
       my_real FUNCTION GET_U_FUNC_Y(IFUNC,N)
 C-----------------------------------------------
 C   M o d u l e s
@@ -705,15 +637,10 @@ C-----------------------------------------------
       GET_U_FUNC_Y=YY
       RETURN
       END
-Chd|====================================================================
-Chd|  GET_U_FUNC                    source/user_interface/uaccess.F
-Chd|-- called by -----------
-Chd|        HM_READ_RETRACTOR             source/tools/seatbelts/hm_read_retractor.F
-Chd|        RINI33                        source/elements/joint/rjoint/rini33.F
-Chd|        RINI45                        source/elements/joint/rjoint/rini45.F
-Chd|        XINI28                        source/elements/xelem/xini28.F
-Chd|-- calls ---------------
-Chd|====================================================================
+      !||====================================================================
+      !||    get_u_func          ../starter/source/user_interface/uaccess.F
+      !||--- calls      -----------------------------------------------------
+      !||====================================================================
       my_real FUNCTION GET_U_FUNC(IFUNC,XX,DERI)
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
@@ -771,12 +698,10 @@ C-----------------------------------------------
  100  CONTINUE
       RETURN
       END
-Chd|====================================================================
-Chd|  GET_U_FUNC_DERI               source/user_interface/uaccess.F
-Chd|-- called by -----------
-Chd|        RINI45                        source/elements/joint/rjoint/rini45.F
-Chd|-- calls ---------------
-Chd|====================================================================
+      !||====================================================================
+      !||    get_u_func_deri     ../starter/source/user_interface/uaccess.F
+      !||--- calls      -----------------------------------------------------
+      !||====================================================================
       my_real FUNCTION GET_U_FUNC_DERI(IFUNC)
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
@@ -820,12 +745,9 @@ C-----------------------------------------------
  
       RETURN
       END       
-Chd|====================================================================
-Chd|  GET_U_M                       source/user_interface/uaccess.F
-Chd|-- called by -----------
-Chd|-- calls ---------------
-Chd|        GET_U_MID                     source/user_interface/uaccess.F
-Chd|====================================================================
+      !||====================================================================
+      !||    get_u_m   ../starter/source/user_interface/uaccess.F
+      !||====================================================================
       INTEGER FUNCTION GET_U_M(MID)
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
@@ -854,12 +776,9 @@ C-----------------------------------------------
       ENDDO
       RETURN
       END
-Chd|====================================================================
-Chd|  GET_U_P                       source/user_interface/uaccess.F
-Chd|-- called by -----------
-Chd|-- calls ---------------
-Chd|        GET_U_PID                     source/user_interface/uaccess.F
-Chd|====================================================================
+      !||====================================================================
+      !||    get_u_p   ../starter/source/user_interface/uaccess.F
+      !||====================================================================
       INTEGER FUNCTION GET_U_P(PID)
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
@@ -888,16 +807,16 @@ C-----------------------------------------------
       ENDDO
       RETURN
       END
-Chd|====================================================================
-Chd|  SET_U_SENS_IPAR               source/user_interface/uaccess.F
-Chd|-- called by -----------
-Chd|-- calls ---------------
-Chd|        ANCMSG                        source/output/message/message.F
-Chd|        MESSAGE_MOD                   share/message_module/message_mod.F
-Chd|        SENSOR_MOD                    share/modules1/sensor_mod.F   
-Chd|        USER_INTERFACE_MOD            share/modules1/user_interface_mod.F
-Chd|        USER_SENSOR_MOD               share/modules1/user_interface_mod.F
-Chd|====================================================================
+      !||====================================================================
+      !||    set_u_sens_ipar      ../starter/source/user_interface/uaccess.F
+      !||--- calls      -----------------------------------------------------
+      !||    ancmsg               ../starter/share/message_module/inter_ancmsg_mod.F
+      !||--- uses       -----------------------------------------------------
+      !||    message_mod          ../starter/share/message_module/message_mod.F
+      !||    sensor_mod           ../starter/share/modules1/sensor_mod.F
+      !||    user_interface_mod   ../starter/share/modules1/user_interface_mod.F
+      !||    user_sensor_mod      ../starter/share/modules1/user_interface_mod.F
+      !||====================================================================
       INTEGER FUNCTION SET_U_SENS_IPAR(IVAR,VAR)
 C-----------------------------------------------
 C   M o d u l e s
@@ -945,16 +864,16 @@ C
       RETURN
       END
 C
-Chd|====================================================================
-Chd|  SET_U_SENS_FPAR               source/user_interface/uaccess.F
-Chd|-- called by -----------
-Chd|-- calls ---------------
-Chd|        ANCMSG                        source/output/message/message.F
-Chd|        MESSAGE_MOD                   share/message_module/message_mod.F
-Chd|        SENSOR_MOD                    share/modules1/sensor_mod.F   
-Chd|        USER_INTERFACE_MOD            share/modules1/user_interface_mod.F
-Chd|        USER_SENSOR_MOD               share/modules1/user_interface_mod.F
-Chd|====================================================================
+      !||====================================================================
+      !||    set_u_sens_fpar      ../starter/source/user_interface/uaccess.F
+      !||--- calls      -----------------------------------------------------
+      !||    ancmsg               ../starter/share/message_module/inter_ancmsg_mod.F
+      !||--- uses       -----------------------------------------------------
+      !||    message_mod          ../starter/share/message_module/message_mod.F
+      !||    sensor_mod           ../starter/share/modules1/sensor_mod.F
+      !||    user_interface_mod   ../starter/share/modules1/user_interface_mod.F
+      !||    user_sensor_mod      ../starter/share/modules1/user_interface_mod.F
+      !||====================================================================
       INTEGER FUNCTION SET_U_SENS_FPAR(IVAR,VAR)
 C-----------------------------------------------
 C   M o d u l e s
@@ -1004,13 +923,13 @@ C
       RETURN
       END
 C
-Chd|====================================================================
-Chd|  GET_U_NUMFUN                  source/user_interface/uaccess.F
-Chd|-- called by -----------
-Chd|-- calls ---------------
-Chd|        ANCMSG                        source/output/message/message.F
-Chd|        MESSAGE_MOD                   share/message_module/message_mod.F
-Chd|====================================================================
+      !||====================================================================
+      !||    get_u_numfun     ../starter/source/user_interface/uaccess.F
+      !||--- calls      -----------------------------------------------------
+      !||    ancmsg           ../starter/share/message_module/inter_ancmsg_mod.F
+      !||--- uses       -----------------------------------------------------
+      !||    message_mod      ../starter/share/message_module/message_mod.F
+      !||====================================================================
       INTEGER FUNCTION GET_U_NUMFUN(IDFUN)
 C-----------------------------------------------
 C   M o d u l e s
@@ -1063,14 +982,10 @@ C
       END
 
 C
-Chd|====================================================================
-Chd|  GET_U_SKEW                    source/user_interface/uaccess.F
-Chd|-- called by -----------
-Chd|        INIT_SKEW45                   source/elements/joint/rjoint/rini45.F
-Chd|        RINI33_RB                     source/elements/joint/rjoint/rini33_rb.F
-Chd|        GET_SKEW                      source/elements/joint/rjoint/rini33.F
-Chd|-- calls ---------------
-Chd|====================================================================
+      !||====================================================================
+      !||    get_u_skew            ../starter/source/user_interface/uaccess.F
+      !||--- calls      -----------------------------------------------------
+      !||====================================================================
       INTEGER FUNCTION GET_U_SKEW(IDSKW,N1,N2,N3,V)
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
@@ -1120,14 +1035,13 @@ C
       RETURN
       END
       
-Chd|====================================================================
-Chd|  UELT_SPMD_ADDITIONAL_NODE     source/user_interface/uaccess.F
-Chd|-- called by -----------
-Chd|-- calls ---------------
-Chd|        IFRONTPLUS                    source/spmd/node/frontplus.F  
-Chd|        USR2SYS                       source/system/sysfus.F        
-Chd|        RESTMOD                       share/modules1/restart_mod.F  
-Chd|====================================================================
+      !||====================================================================
+      !||    uelt_spmd_additional_node   ../starter/source/user_interface/uaccess.F
+      !||--- calls      -----------------------------------------------------
+      !||    ifrontplus                  ../starter/source/spmd/node/frontplus.F
+      !||--- uses       -----------------------------------------------------
+      !||    restmod                     ../starter/share/modules1/restart_mod.F
+      !||====================================================================
       SUBROUTINE UELT_SPMD_ADDITIONAL_NODE(NODID)
 C-----------------------------------------------
 C   M o d u l e s
@@ -1171,11 +1085,9 @@ C-----------------------------------------------
       RETURN
       END
 
-Chd|====================================================================
-Chd|  WRITE_IOUT                    source/user_interface/uaccess.F
-Chd|-- called by -----------
-Chd|-- calls ---------------
-Chd|====================================================================
+      !||====================================================================
+      !||    write_iout   ../starter/source/user_interface/uaccess.F
+      !||====================================================================
       SUBROUTINE WRITE_IOUT(LINE,LEN1)
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s

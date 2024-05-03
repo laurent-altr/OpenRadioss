@@ -28,36 +28,47 @@
 !! gathering SUM(mi.xi,i) : DOMAIN_DATA%COG_L(1:3)
 !! gathering SUM(mi)      : DOMAIN_DATA%SUM_M
 !
+      !||====================================================================
+      !||    spmd_exch_massflow_data2   ../engine/source/ale/grid/spmd_exch_massflow_data2.F90
+      !||--- called by ------------------------------------------------------
+      !||    alew7                      ../engine/source/ale/grid/alew7.F
+      !||--- calls      -----------------------------------------------------
+      !||    spmd_wait                  ../engine/source/mpi/spmd_mod.F90
+      !||--- uses       -----------------------------------------------------
+      !||    ale_mod                    ../common_source/modules/ale/ale_mod.F
+      !||    constant_mod               ../common_source/modules/constant_mod.F
+      !||    spmd_mod                   ../engine/source/mpi/spmd_mod.F90
+      !||====================================================================
       subroutine spmd_exch_massflow_data2( domain_data, nspmd )
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Modules
 ! ----------------------------------------------------------------------------------------------------------------------
-      use spmd_mod
-      use ale_mod , only : massflow_data_
-      use constant_mod , only: zero
+        use spmd_mod
+        use ale_mod , only : massflow_data_
+        use constant_mod , only: zero
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Included file
 ! ----------------------------------------------------------------------------------------------------------------------
-      implicit none
+        implicit none
 #include "my_real.inc"
 #include "task_c.inc"
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Arguments
 ! ----------------------------------------------------------------------------------------------------------------------
-      type(massflow_data_),intent(inout)::domain_data !< intent(in) ale massflow buffer for given domain
-      integer,intent(in)::nspmd                       !< number of spmd domains
+        type(massflow_data_),intent(inout)::domain_data !< intent(in) ale massflow buffer for given domain
+        integer,intent(in)::nspmd                       !< number of spmd domains
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Local variables
 ! ----------------------------------------------------------------------------------------------------------------------
-      integer :: msgtyp, msgoff, p, nbirecv
-      integer :: req_sb(nspmd),irindexi(nspmd)
-      integer :: loc_proc, isize
-      my_real :: rbuf(7,nspmd)
-      data msgoff/2205/
+        integer :: msgtyp, msgoff, p, nbirecv
+        integer :: req_sb(nspmd),irindexi(nspmd)
+        integer :: loc_proc, isize
+        my_real :: rbuf(7,nspmd)
+        data msgoff/2205/
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Preconditions
 ! ----------------------------------------------------------------------------------------------------------------------
-      if(nspmd == 1)return
+        if(nspmd == 1)return
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Body
 ! ----------------------------------------------------------------------------------------------------------------------

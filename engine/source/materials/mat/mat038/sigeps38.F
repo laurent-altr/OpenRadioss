@@ -20,19 +20,17 @@ Copyright>
 Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
-Chd|====================================================================
-Chd|  SIGEPS38                      source/materials/mat/mat038/sigeps38.F
-Chd|-- called by -----------
-Chd|        MULAW                         source/materials/mat_share/mulaw.F
-Chd|        MULAW8                        source/materials/mat_share/mulaw8.F
-Chd|-- calls ---------------
-Chd|        CHECKAXES                     source/materials/mat/mat038/sigeps38.F
-Chd|        DREH                          source/materials/mat/mat033/sigeps33.F
-Chd|        JACOBIEW                      source/materials/mat/mat033/sigeps33.F
-Chd|        VALPVECDP_V                   source/materials/mat/mat033/sigeps33.F
-Chd|        VALPVEC_V                     source/materials/mat/mat033/sigeps33.F
-Chd|        FINTER                        source/tools/curve/finter.F   
-Chd|====================================================================
+      !||====================================================================
+      !||    sigeps38    ../starter/source/materials/mat/mat038/sigeps38.F
+      !||--- called by ------------------------------------------------------
+      !||    mulaw       ../starter/source/materials/mat_share/mulaw.F
+      !||--- calls      -----------------------------------------------------
+      !||    checkaxes   ../starter/source/materials/mat/mat038/sigeps38.F
+      !||    dreh        ../starter/source/materials/tools/matrix.F
+      !||    jacobiew    ../starter/source/materials/tools/matrix.F
+      !||    valpvec     ../starter/source/materials/tools/matrix.F
+      !||    valpvecdp   ../starter/source/materials/tools/matrix.F
+      !||====================================================================
       SUBROUTINE SIGEPS38(
      1      NEL    , NUPARAM, NUVAR   , NFUNC , IFUNC , NPF   ,
      2      TF     , TIME   , TIMESTEP, UPARAM, RHO0  , RHO   ,
@@ -1175,12 +1173,11 @@ C
 
       END
 
-Chd|====================================================================
-Chd|  CHECKAXES                     source/materials/mat/mat038/sigeps38.F
-Chd|-- called by -----------
-Chd|        SIGEPS38                      source/materials/mat/mat038/sigeps38.F
-Chd|-- calls ---------------
-Chd|====================================================================
+      !||====================================================================
+      !||    checkaxes   ../starter/source/materials/mat/mat038/sigeps38.F
+      !||--- called by ------------------------------------------------------
+      !||    sigeps38    ../starter/source/materials/mat/mat038/sigeps38.F
+      !||====================================================================
       SUBROUTINE CHECKAXES(TRAN1,TRAN2,AMIN,AMAX,UNCHANGED,TOL)
 C----------------------------------------------------------------
       IMPLICIT NONE

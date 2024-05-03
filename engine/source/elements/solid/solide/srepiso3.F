@@ -20,14 +20,12 @@ Copyright>
 Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
-Chd|====================================================================
-Chd|  SREPISO3                      source/elements/solid/solide/srepiso3.F
-Chd|-- called by -----------
-Chd|        SCOOR3                        source/elements/solid/solide/scoor3.F
-Chd|        SCOOR3_FVM                    source/ale/alefvm/scoor3_fvm.F
-Chd|        SRCOOR3                       source/elements/solid/solide/srcoor3.F
-Chd|-- calls ---------------
-Chd|====================================================================
+      !||====================================================================
+      !||    srepiso3   ../starter/source/elements/solid/solide/srepiso3.F
+      !||--- called by ------------------------------------------------------
+      !||    srcoor3    ../starter/source/elements/solid/solide/srcoor3.F
+      !||    srefsta3   ../starter/source/elements/solid/solide/srefsta3.F
+      !||====================================================================
       SUBROUTINE SREPISO3(
      1   X1,      X2,      X3,      X4,
      2   X5,      X6,      X7,      X8,

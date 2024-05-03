@@ -20,16 +20,17 @@ Copyright>
 Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
-Chd|====================================================================
-Chd|  MULTI_INLET_EBCS              source/multifluid/multi_inlet_ebcs.F
-Chd|-- called by -----------
-Chd|        MULTI_EBCS                    source/multifluid/multi_ebcs.F
-Chd|-- calls ---------------
-Chd|        ARRET                         source/system/arret.F         
-Chd|        MULTI_SUBMATLAW               source/multifluid/multi_submatlaw.F
-Chd|        SOLVE_EINT                    source/multifluid/multi_inlet_ebcs.F
-Chd|        MULTI_FVM_MOD                 ../common_source/modules/ale/multi_fvm_mod.F
-Chd|====================================================================
+      !||====================================================================
+      !||    multi_inlet_ebcs   ../engine/source/multifluid/multi_inlet_ebcs.F
+      !||--- called by ------------------------------------------------------
+      !||    multi_ebcs         ../engine/source/multifluid/multi_ebcs.F
+      !||--- calls      -----------------------------------------------------
+      !||    arret              ../engine/source/system/arret.F
+      !||    multi_submatlaw    ../engine/source/multifluid/multi_submatlaw.F
+      !||    solve_eint         ../engine/source/multifluid/multi_inlet_ebcs.F
+      !||--- uses       -----------------------------------------------------
+      !||    multi_fvm_mod      ../common_source/modules/ale/multi_fvm_mod.F
+      !||====================================================================
       SUBROUTINE MULTI_INLET_EBCS(ITASK, EBCS_ID, MULTI_FVM, NELEM, ELEM_LIST, FACE_LIST, 
      .     FVM_INLET_DATA, IXS, IXQ, IXTG, XGRID, WGRID, IPM, PM, FUNC_VALUE, NPF,TF)
 C-----------------------------------------------
@@ -473,13 +474,13 @@ C     E n d   o f   s u b r o u t i n e
 C-----------------------------------------------
       END SUBROUTINE MULTI_INLET_EBCS
 
-Chd|====================================================================
-Chd|  SOLVE_EINT                    source/multifluid/multi_inlet_ebcs.F
-Chd|-- called by -----------
-Chd|        MULTI_INLET_EBCS              source/multifluid/multi_inlet_ebcs.F
-Chd|-- calls ---------------
-Chd|        MULTI_SUBMATLAW               source/multifluid/multi_submatlaw.F
-Chd|====================================================================
+      !||====================================================================
+      !||    solve_eint         ../starter/source/initial_conditions/inimap/ini_inimap1d.F
+      !||--- called by ------------------------------------------------------
+      !||    ini_inimap1d       ../starter/source/initial_conditions/inimap/ini_inimap1d.F
+      !||--- calls      -----------------------------------------------------
+      !||--- uses       -----------------------------------------------------
+      !||====================================================================
       SUBROUTINE SOLVE_EINT(MATLAW  , LOCAL_MATID, PM    , IPM         ,NPROPM, NPROPMI, 
      .                      EINT    , RHO        , PRES  , SSP         , 
      .                      BURNFRAC, BURNTIME   , DELTAX, CURRENT_TIME,

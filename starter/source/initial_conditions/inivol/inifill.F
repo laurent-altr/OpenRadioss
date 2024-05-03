@@ -20,15 +20,14 @@ Copyright>
 Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
-Chd|====================================================================
-Chd|  INIFILL                       source/initial_conditions/inivol/inifill.F
-Chd|-- called by -----------
-Chd|        INITIA                        source/elements/initia/initia.F
-Chd|-- calls ---------------
-Chd|        INIPHASE                      source/initial_conditions/inivol/iniphase.F
-Chd|        ELBUFDEF_MOD                  ../common_source/modules/mat_elem/elbufdef_mod.F
-Chd|        MULTI_FVM_MOD                 ../common_source/modules/ale/multi_fvm_mod.F
-Chd|====================================================================
+      !||====================================================================
+      !||    inifill         ../starter/source/initial_conditions/inivol/inifill.F
+      !||--- called by ------------------------------------------------------
+      !||    initia          ../starter/source/elements/initia/initia.F
+      !||--- calls      -----------------------------------------------------
+      !||    iniphase        ../starter/source/initial_conditions/inivol/iniphase.F
+      !||--- uses       -----------------------------------------------------
+      !||====================================================================
       SUBROUTINE INIFILL(IXS       ,IPM    ,NEL       ,IPART_   ,IPHASE  ,
      .                   IDP       ,KVOL   ,BUFMAT    ,ITAGNSOL ,ISOLNOD ,
      .                   NBIP      ,NTRACE ,PART_FILL ,NBSUBMAT ,MLW     ,

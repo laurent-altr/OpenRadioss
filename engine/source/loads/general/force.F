@@ -20,27 +20,27 @@ Copyright>
 Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
-Chd|====================================================================
-Chd|  FORCE_MOD                     source/loads/general/force.F  
-Chd|-- called by -----------
-Chd|        FORCE_IMP                     source/loads/general/force_imp.F
-Chd|        RESOL                         source/engine/resol.F         
-Chd|-- calls ---------------
-Chd|====================================================================
+      !||====================================================================
+      !||    force_mod   ../engine/source/loads/general/force.F
+      !||--- called by ------------------------------------------------------
+      !||    force_imp   ../engine/source/loads/general/force_imp.F
+      !||    resol       ../engine/source/engine/resol.F
+      !||====================================================================
       MODULE FORCE_MOD
       CONTAINS
-Chd|====================================================================
-Chd|  FORCE                         source/loads/general/force.F  
-Chd|-- called by -----------
-Chd|        RESOL                         source/engine/resol.F         
-Chd|-- calls ---------------
-Chd|        FINTER                        source/tools/curve/finter.F   
-Chd|        FINTER_SMOOTH                 source/tools/curve/finter_smooth.F
-Chd|        H3D_MOD                       share/modules/h3d_mod.F       
-Chd|        PINCHTYPE_MOD                 ../common_source/modules/pinchtype_mod.F
-Chd|        SENSOR_MOD                    share/modules/sensor_mod.F    
-Chd|        TH_SURF_MOD                   ../common_source/modules/interfaces/th_surf_mod.F
-Chd|====================================================================
+      !||====================================================================
+      !||    force                 ../engine/source/loads/general/force.F
+      !||--- called by ------------------------------------------------------
+      !||    force_imp             ../engine/source/loads/general/force_imp.F
+      !||    resol                 ../engine/source/engine/resol.F
+      !||--- calls      -----------------------------------------------------
+      !||--- uses       -----------------------------------------------------
+      !||    h3d_mod               ../engine/share/modules/h3d_mod.F
+      !||    pinchtype_mod         ../common_source/modules/pinchtype_mod.F
+      !||    python_funct_mod      ../common_source/modules/python_mod.F90
+      !||    sensor_mod            ../engine/share/modules/sensor_mod.F
+      !||    th_surf_mod           ../common_source/modules/interfaces/th_surf_mod.F
+      !||====================================================================
       SUBROUTINE FORCE (IB      ,FAC       ,NPC     ,TF      ,A      ,
      2                  V       ,X         ,SKEW    ,AR      ,VR     ,
      3                  NSENSOR ,SENSOR_TAB,TFEXC   ,IADC   ,

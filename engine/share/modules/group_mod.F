@@ -20,19 +20,13 @@ Copyright>
 Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
-Chd|====================================================================
-Chd|  GROUP_MOD                     share/modules/group_mod.F     
-Chd|-- called by -----------
-Chd|        GROUP_INI                     source/groups/group_ini.F     
-Chd|        LINE_INI                      source/groups/line_ini.F      
-Chd|        RADIOSS2                      source/engine/radioss2.F      
-Chd|        SUBSET_INI                    source/groups/subset_ini.F    
-Chd|        SURF_INI                      source/groups/surf_ini.F      
-Chd|        WRRESTP                       source/output/restart/wrrestp.F
-Chd|        W_GROUP_STR                   source/output/restart/w_group_str.F
-Chd|-- calls ---------------
-Chd|        GROUPDEF_MOD                  ../common_source/modules/groupdef_mod.F
-Chd|====================================================================
+      !||====================================================================
+      !||    group_mod      ../starter/share/modules1/group_mod.F
+      !||--- called by ------------------------------------------------------
+      !||    lectur         ../starter/source/starter/lectur.F
+      !||    r2r_group      ../starter/source/coupling/rad2rad/r2r_group.F
+      !||--- uses       -----------------------------------------------------
+      !||====================================================================
       MODULE GROUP_MOD
 !
         USE GROUPDEF_MOD      

@@ -20,16 +20,15 @@ Copyright>
 Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
-Chd|====================================================================
-Chd|  INIVOL_SET                    source/initial_conditions/inivol/inivol_set.F
-Chd|-- called by -----------
-Chd|        INITIA                        source/elements/initia/initia.F
-Chd|-- calls ---------------
-Chd|        ANCMSG                        source/output/message/message.F
-Chd|        ELBUFDEF_MOD                  ../common_source/modules/mat_elem/elbufdef_mod.F
-Chd|        MESSAGE_MOD                   share/message_module/message_mod.F
-Chd|        MULTI_FVM_MOD                 ../common_source/modules/ale/multi_fvm_mod.F
-Chd|====================================================================
+      !||====================================================================
+      !||    inivol_set      ../starter/source/initial_conditions/inivol/inivol_set.F
+      !||--- called by ------------------------------------------------------
+      !||    initia          ../starter/source/elements/initia/initia.F
+      !||--- calls      -----------------------------------------------------
+      !||    ancmsg          ../starter/share/message_module/inter_ancmsg_mod.F
+      !||--- uses       -----------------------------------------------------
+      !||    message_mod     ../starter/share/message_module/message_mod.F
+      !||====================================================================
       SUBROUTINE INIVOL_SET(UVAR,NUVAR,NEL,KVOL, MLW, ELBUF_TAB, NG,NBSUBMAT,MULTI_FVM,IXS,IXQ,IXTG,IDP,IPART)
 C-----------------------------------------------
 C   M o d u l e s

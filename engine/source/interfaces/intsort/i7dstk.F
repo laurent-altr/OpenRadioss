@@ -20,17 +20,17 @@ Copyright>
 Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
-Chd|====================================================================
-Chd|  I7DSTK                        source/interfaces/intsort/i7dstk.F
-Chd|-- called by -----------
-Chd|        I10TRI                        source/interfaces/intsort/i10tri.F
-Chd|        I11TRI                        source/interfaces/intsort/i11tri.F
-Chd|        I20TRI                        source/interfaces/intsort/i20tri.F
-Chd|        I20TRI_EDGE                   source/interfaces/intsort/i20tri.F
-Chd|        I21TRI                        source/interfaces/intsort/i21tri.F
-Chd|        I7TRI                         source/interfaces/intsort/i7tri.F
-Chd|-- calls ---------------
-Chd|====================================================================
+      !||====================================================================
+      !||    i7dstk   ../starter/source/interfaces/inter3d1/i7dstk.F
+      !||--- called by ------------------------------------------------------
+      !||    i11tri   ../starter/source/interfaces/inter3d1/i11tri.F
+      !||    i21tri   ../starter/source/interfaces/inter3d1/i21tri.F
+      !||    i23tri   ../starter/source/interfaces/inter3d1/i23tri.F
+      !||    i24tri   ../starter/source/interfaces/inter3d1/i24tri.F
+      !||    i25tri   ../starter/source/interfaces/inter3d1/i25tri.F
+      !||    i2tri    ../starter/source/interfaces/inter3d1/i2tri.F
+      !||    i7tri    ../starter/source/interfaces/inter3d1/i7tri.F
+      !||====================================================================
         SUBROUTINE I7DSTK(NB_NC,NB_EC,ADD,BPN,PN,BPE,PE)
 C============================================================================
 C  cette routine est appelee par : I7TRI(/int7/i7tri.F)

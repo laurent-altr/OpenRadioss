@@ -20,39 +20,14 @@ Copyright>
 Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
-Chd|====================================================================
-Chd|  DSGRAPH_MOD                   share/modules/dsgraph_mod.F   
-Chd|-- called by -----------
-Chd|        DSRREST                       source/output/restart/rdresb.F
-Chd|        DSWREST                       source/output/restart/wrrest.F
-Chd|        EIGCOND                       stub/eigcond.F                
-Chd|        IMP_BUCK                      source/implicit/imp_buck.F    
-Chd|        IMP_CHKM                      source/implicit/imp_solv.F    
-Chd|        IMP_DSFEXT                    source/implicit/imp_dsfext.F  
-Chd|        IMP_DSOLV                     source/implicit/imp_dsolv.F   
-Chd|        IMP_DSOLV_ITER                source/implicit/imp_dsolv.F   
-Chd|        IMP_LANZP                     source/implicit/imp_lanz.F    
-Chd|        IMP_PCGH                      source/implicit/imp_pcg.F     
-Chd|        IMP_PPCGH                     source/implicit/imp_pcg.F     
-Chd|        IMP_SOLV                      source/implicit/imp_solv.F    
-Chd|        LIN_SOLV                      source/implicit/lin_solv.F    
-Chd|        LIN_SOLV2                     source/implicit/lin_solv.F    
-Chd|        LIN_SOLVH0                    source/implicit/lin_solv.F    
-Chd|        LIN_SOLVH1                    source/implicit/lin_solv.F    
-Chd|        LIN_SOLVHM                    source/implicit/lin_solv.F    
-Chd|        LIN_SOLVIH2                   source/implicit/lin_solv.F    
-Chd|        LIN_SOLVP2                    source/implicit/lin_solv.F    
-Chd|        MUMPSLB                       source/implicit/lin_solv.F    
-Chd|        MUMPSLB_HP                    source/implicit/lin_solv.F    
-Chd|        NL_SOLV                       source/implicit/nl_solv.F     
-Chd|        PREC_SOLV                     source/implicit/prec_solv.F   
-Chd|        PREC_SOLVH                    source/implicit/prec_solv.F   
-Chd|        PREC_SOLVP                    source/implicit/prec_solv.F   
-Chd|        RADIOSS2                      source/engine/radioss2.F      
-Chd|        RESOL                         source/engine/resol.F         
-Chd|        RESOL_HEAD                    source/engine/resol_head.F    
-Chd|-- calls ---------------
-Chd|====================================================================
+      !||====================================================================
+      !||    dsgraph_mod   ../starter/share/modules1/dsgraph_mod.F
+      !||--- called by ------------------------------------------------------
+      !||    ddsplit       ../starter/source/restart/ddsplit/ddsplit.F
+      !||    dswrest       ../starter/source/restart/ddsplit/wrrest.F
+      !||    dswrestp      ../starter/source/restart/ddsplit/wrrest.F
+      !||    lectur        ../starter/source/starter/lectur.F
+      !||====================================================================
       MODULE DSGRAPH_MOD
 C-----------------------------------------------
 C   m y _ r e a l

@@ -20,25 +20,11 @@ Copyright>
 Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
-Chd|====================================================================
-Chd|  NVAR                          source/input/nvar.F           
-Chd|-- called by -----------
-Chd|        CREATE_H3D_INPUT              source/output/h3d/h3d_build_fortran/create_h3d_input.F
-Chd|        FRALNK                        source/input/fralnk.F         
-Chd|        FRALNK2                       source/input/fralnk.F         
-Chd|        FREANIM                       source/output/anim/reader/freanim.F
-Chd|        FREDYNAIN                     source/input/fredynain.F      
-Chd|        FREFORM                       source/input/freform.F        
-Chd|        FREIMPL                       source/input/freimpl.F        
-Chd|        FREINIV                       source/input/freiniv.F        
-Chd|        FRELNK                        source/input/frelnk.F         
-Chd|        FRENOIS                       source/input/frenois.F        
-Chd|        FREOUTP                       source/input/freoutp.F        
-Chd|        FRESTAT                       source/input/frestat.F        
-Chd|        H3D_READ                      source/output/h3d/h3d_build_fortran/h3d_read.F
-Chd|        WCIUSC2                       source/input/wciusc2.F        
-Chd|-- calls ---------------
-Chd|====================================================================
+      !||====================================================================
+      !||    nvar                   ../engine/source/input/nvar.F
+      !||--- uses       -----------------------------------------------------
+      !||    names_and_titles_mod   ../common_source/modules/names_and_titles_mod.F
+      !||====================================================================
       INTEGER FUNCTION NVAR(TEXT)
 C-----------------------------------------------
 C   M o d u l e s

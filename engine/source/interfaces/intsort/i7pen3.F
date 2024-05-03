@@ -20,16 +20,23 @@ Copyright>
 Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
-Chd|====================================================================
-Chd|  I7PEN3                        source/interfaces/intsort/i7pen3.F
-Chd|-- called by -----------
-Chd|        I10STO                        source/interfaces/intsort/i10sto.F
-Chd|        I20STO                        source/interfaces/intsort/i20sto.F
-Chd|        I21STO                        source/interfaces/int21/i21sto.F
-Chd|        I23STO                        source/interfaces/int23/i23sto.F
-Chd|        I7STO                         source/interfaces/intsort/i7sto.F
-Chd|-- calls ---------------
-Chd|====================================================================
+      !||====================================================================
+      !||    i7pen3       ../starter/source/interfaces/inter3d1/i7pen3.F
+      !||--- called by ------------------------------------------------------
+      !||    i20ini3      ../starter/source/interfaces/inter3d1/i20ini3.F
+      !||    i21buc1      ../starter/source/interfaces/inter3d1/i21buc3.F
+      !||    i21tri       ../starter/source/interfaces/inter3d1/i21tri.F
+      !||    i23buc1      ../starter/source/interfaces/inter3d1/i23buc3.F
+      !||    i23tri       ../starter/source/interfaces/inter3d1/i23tri.F
+      !||    i24buc1      ../starter/source/interfaces/inter3d1/i24buc1.F
+      !||    i24tri       ../starter/source/interfaces/inter3d1/i24tri.F
+      !||    i25tri       ../starter/source/interfaces/inter3d1/i25tri.F
+      !||    i7buc1       ../starter/source/interfaces/inter3d1/i7buc1.F
+      !||    i7buc_vox1   ../starter/source/interfaces/inter3d1/i7buc_vox1.F
+      !||    i7tri        ../starter/source/interfaces/inter3d1/i7tri.F
+      !||    i7trivox1    ../starter/source/interfaces/inter3d1/i7trivox1.F
+      !||    inint3       ../starter/source/interfaces/inter3d1/inint3.F
+      !||====================================================================
       SUBROUTINE I7PEN3(JLT   ,MARGE ,X1    ,X2     ,X3   ,
      .                  X4    ,Y1    ,Y2    ,Y3     ,Y4   ,
      .                  Z1    ,Z2    ,Z3    ,Z4     ,XI   ,

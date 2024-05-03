@@ -20,14 +20,15 @@ Copyright>
 Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
-Chd|====================================================================
-Chd|  CHKSTIFN                      source/interfaces/inter2d/chkstifn.F
-Chd|-- called by -----------
-Chd|        RESOL                         source/engine/resol.F         
-Chd|-- calls ---------------
-Chd|        CHKSLV                        source/interfaces/inter2d/chkstifn.F
-Chd|        INTBUFDEF_MOD                 ../common_source/modules/intbufdef_mod.F
-Chd|====================================================================
+      !||====================================================================
+      !||    chkstifn        ../engine/source/interfaces/inter2d/chkstifn.F
+      !||--- called by ------------------------------------------------------
+      !||    resol           ../engine/source/engine/resol.F
+      !||--- calls      -----------------------------------------------------
+      !||    chkslv          ../engine/source/interfaces/inter2d/chkstifn.F
+      !||--- uses       -----------------------------------------------------
+      !||    intbufdef_mod   ../common_source/modules/intbufdef_mod.F
+      !||====================================================================
       SUBROUTINE CHKSTIFN(IPARI,MS,INTBUF_TAB)
 C-----------------------------------------------
 C   M o d u l e s
@@ -80,12 +81,11 @@ C
       END
 
 
-Chd|====================================================================
-Chd|  CHKSLV                        source/interfaces/inter2d/chkstifn.F
-Chd|-- called by -----------
-Chd|        CHKSTIFN                      source/interfaces/inter2d/chkstifn.F
-Chd|-- calls ---------------
-Chd|====================================================================
+      !||====================================================================
+      !||    chkslv     ../engine/source/interfaces/inter2d/chkstifn.F
+      !||--- called by ------------------------------------------------------
+      !||    chkstifn   ../engine/source/interfaces/inter2d/chkstifn.F
+      !||====================================================================
       SUBROUTINE CHKSLV(NSN,NSV,STIFN,MS)
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s

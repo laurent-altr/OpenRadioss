@@ -20,14 +20,9 @@ Copyright>
 Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
-Chd|====================================================================
-Chd|  IFACE                         source/ale/ale3d/iface.F      
-Chd|-- called by -----------
-Chd|        BOXASSEM4                     source/model/box/bigbox.F     
-Chd|        FINDELE                       source/boundary_conditions/ebcs/findele.F
-Chd|        I12SOL3                       source/interfaces/inter3d1/insol3.F
-Chd|-- calls ---------------
-Chd|====================================================================
+      !||====================================================================
+      !||    iface   ../starter/source/ale/ale3d/iface.F
+      !||====================================================================
       INTEGER FUNCTION IFACE(IP,N)
 C-----------------------------------------------
 C   D e s c r i p t i o n
@@ -69,12 +64,9 @@ C-----------------------------------------------
       RETURN
       END
 
-Chd|====================================================================
-Chd|  IFACE2                        source/ale/ale3d/iface.F      
-Chd|-- called by -----------
-Chd|        FINDELE                       source/boundary_conditions/ebcs/findele.F
-Chd|-- calls ---------------
-Chd|====================================================================
+      !||====================================================================
+      !||    iface2   ../starter/source/ale/ale3d/iface.F
+      !||====================================================================
       INTEGER FUNCTION IFACE2(IP, N) 
 C-----------------------------------------------
 C   D e s c r i p t i o n
@@ -105,12 +97,9 @@ C-----------------------------------------------
       ENDIF
       END 
 
-Chd|====================================================================
-Chd|  IFACE2T                       source/ale/ale3d/iface.F      
-Chd|-- called by -----------
-Chd|        FINDELE                       source/boundary_conditions/ebcs/findele.F
-Chd|-- calls ---------------
-Chd|====================================================================
+      !||====================================================================
+      !||    iface2t   ../starter/source/ale/ale3d/iface.F
+      !||====================================================================
       INTEGER FUNCTION IFACE2T(IP, N) 
 C-----------------------------------------------
 C   D e s c r i p t i o n

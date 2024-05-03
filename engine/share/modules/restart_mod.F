@@ -20,34 +20,37 @@ Copyright>
 Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
-Chd|====================================================================
-Chd|  RESTMOD                       share/modules/restart_mod.F   
-Chd|-- called by -----------
-Chd|        UPGRADE_CAND_OPT              ../common_source/interf/upgrade_multimp.F
-Chd|        UPGRADE_LCAND_E2S             ../common_source/interf/upgrade_multimp.F
-Chd|        UPGRADE_LCAND_EDG             ../common_source/interf/upgrade_multimp.F
-Chd|        UPGRADE_MULTIMP               ../common_source/interf/upgrade_multimp.F
-Chd|        CRKXFEM_RRESTANIM             source/output/restart/rdresb.F
-Chd|        CRKXFEM_WRESTANIM             source/output/restart/wrrest.F
-Chd|        GET_USER_WINDOW_NODES         source/user_interface/userwindow_interface_routines.F
-Chd|        MAT_SOLID_GET_NOD_V           source/user_interface/uaccess.F
-Chd|        MAT_SOLID_GET_NOD_X           source/user_interface/uaccess.F
-Chd|        PREPARE_DEBUG                 share/modules/debug_mod.F     
-Chd|        RADIOSS2                      source/engine/radioss2.F      
-Chd|        RDRESB                        source/output/restart/rdresb.F
-Chd|        READ_JOINT                    source/output/restart/read_joint.F
-Chd|        RESOL_HEAD                    source/engine/resol_head.F    
-Chd|        RESTALLOC                     source/output/restart/arralloc.F
-Chd|        RTHBUFWREST                   source/output/restart/wrrest.F
-Chd|        SPMD_CHECK_TAG                source/mpi/ams/spmd_check_tag.F
-Chd|        WRITE_JOINT                   source/output/restart/write_joint.F
-Chd|        WRRESTP                       source/output/restart/wrrestp.F
-Chd|-- calls ---------------
-Chd|        CLUSTER_MOD                   share/modules/cluster_mod.F   
-Chd|        FAILWAVE_MOD                  ../common_source/modules/failwave_mod.F
-Chd|        NLOCAL_REG_MOD                ../common_source/modules/nlocal_reg_mod.F
-Chd|        SPHBOX                        share/modules/sphbox.F        
-Chd|====================================================================
+      !||====================================================================
+      !||    restmod                     ../starter/share/modules1/restart_mod.F
+      !||--- called by ------------------------------------------------------
+      !||    contrl                      ../starter/source/starter/contrl.F
+      !||    leclas                      ../starter/source/loads/laser/leclas.F
+      !||    lectur                      ../starter/source/starter/lectur.F
+      !||    new_link                    ../starter/source/coupling/rad2rad/new_link.F
+      !||    r2r_check                   ../starter/source/coupling/rad2rad/r2r_check.F
+      !||    r2r_check_seg               ../starter/source/coupling/rad2rad/routines_r2r.F
+      !||    r2r_clean_inter             ../starter/source/coupling/rad2rad/r2r_clean_inter.F
+      !||    r2r_count                   ../starter/source/coupling/rad2rad/r2r_count.F
+      !||    r2r_domdec                  ../starter/source/coupling/rad2rad/r2r_domdec.F
+      !||    r2r_group                   ../starter/source/coupling/rad2rad/r2r_group.F
+      !||    r2r_input                   ../starter/source/coupling/rad2rad/r2r_input.F
+      !||    r2r_monvol                  ../starter/source/coupling/rad2rad/r2r_prelec.F
+      !||    r2r_prelec                  ../starter/source/coupling/rad2rad/r2r_prelec.F
+      !||    r2r_prelec_name             ../starter/source/coupling/rad2rad/r2r_prelec_name.F
+      !||    r2r_split                   ../starter/source/coupling/rad2rad/r2r_split.F
+      !||    r2r_void                    ../starter/source/coupling/rad2rad/r2r_void.F
+      !||    r2r_void_1d                 ../starter/source/coupling/rad2rad/r2r_void.F
+      !||    read_ebcs                   ../starter/source/boundary_conditions/ebcs/read_ebcs.F
+      !||    set_user_window_nodes       ../starter/source/user_interface/user_windows_tools.F
+      !||    split_ebcs                  ../starter/source/boundary_conditions/ebcs/split_ebcs.F
+      !||    st_qaprint_ebcs             ../starter/source/output/qaprint/st_qaprint_ebcs.F
+      !||    tag_elem_void_r2r           ../starter/source/coupling/rad2rad/tagelem_r2r.F
+      !||    tag_elem_void_r2r_lin       ../starter/source/coupling/rad2rad/tagelem_r2r.F
+      !||    tagnod_r2r_s                ../starter/source/coupling/rad2rad/tagnod_r2r.F
+      !||    uelt_spmd_additional_node   ../starter/source/user_interface/uaccess.F
+      !||    upgrade_remnode2            ../starter/source/interfaces/interf1/upgrade_remnode.F
+      !||--- uses       -----------------------------------------------------
+      !||====================================================================
       MODULE RESTMOD
       USE CLUSTER_MOD
       USE SPHBOX
@@ -207,27 +210,17 @@ C=======================================================================
 
       END MODULE RESTMOD
 
-Chd|====================================================================
-Chd|  INTBUFMOD                     share/modules/restart_mod.F   
-Chd|-- called by -----------
-Chd|        I10MAIN_TRI                   source/interfaces/intsort/i10main_tri.F
-Chd|        I20MAIN_TRI                   source/interfaces/intsort/i20main_tri.F
-Chd|        I21MAIN_TRI                   source/interfaces/intsort/i21main_tri.F
-Chd|        I22MAIN_TRI                   source/interfaces/intsort/i22main_tri.F
-Chd|        I23MAIN_TRI                   source/interfaces/intsort/i23main_tri.F
-Chd|        I24MAIN_TRI                   source/interfaces/intsort/i24main_tri.F
-Chd|        I25MAIND_2                    source/interfaces/int25/i25maind_2.F
-Chd|        I25MAIN_SLID                  source/interfaces/int25/i25main_slid.F
-Chd|        I25MAIN_TRI                   source/interfaces/intsort/i25main_tri.F
-Chd|        INTTRI                        source/interfaces/intsort/inttri.F
-Chd|        RADIOSS2                      source/engine/radioss2.F      
-Chd|        RDRESB                        source/output/restart/rdresb.F
-Chd|        RESOL                         source/engine/resol.F         
-Chd|        RESOL_HEAD                    source/engine/resol_head.F    
-Chd|        RESTALLOC                     source/output/restart/arralloc.F
-Chd|        WRRESTP                       source/output/restart/wrrestp.F
-Chd|-- calls ---------------
-Chd|====================================================================
+      !||====================================================================
+      !||    intbufmod              ../starter/share/modules1/restart_mod.F
+      !||--- called by ------------------------------------------------------
+      !||    inintr                 ../starter/source/interfaces/interf1/inintr.F
+      !||    lectur                 ../starter/source/starter/lectur.F
+      !||    upgrade_remnode        ../starter/source/interfaces/interf1/upgrade_remnode.F
+      !||    upgrade_remnode2       ../starter/source/interfaces/interf1/upgrade_remnode.F
+      !||    upgrade_remnode_e2s    ../starter/source/interfaces/interf1/upgrade_remnode.F
+      !||    upgrade_remnode_edg    ../starter/source/interfaces/interf1/upgrade_remnode.F
+      !||    upgrade_remnode_edg2   ../starter/source/interfaces/interf1/upgrade_remnode.F
+      !||====================================================================
       MODULE INTBUFMOD
 #include "my_real.inc"
         INTEGER , DIMENSION(:), ALLOCATABLE :: INBUF
@@ -237,16 +230,16 @@ Chd|====================================================================
         TARGET :: BUFIN
       END MODULE INTBUFMOD
 C=======================================================================
-Chd|====================================================================
-Chd|  INTBUF_MOD                    share/modules/restart_mod.F   
-Chd|-- called by -----------
-Chd|        RADIOSS2                      source/engine/radioss2.F      
-Chd|        RDRESB                        source/output/restart/rdresb.F
-Chd|        RESTALLOC                     source/output/restart/arralloc.F
-Chd|-- calls ---------------
-Chd|        INT8_MOD                      ../common_source/modules/interfaces/int8_mod.F
-Chd|        INTBUFDEF_MOD                 ../common_source/modules/intbufdef_mod.F
-Chd|====================================================================
+      !||====================================================================
+      !||    intbuf_mod      ../engine/share/modules/restart_mod.F
+      !||--- called by ------------------------------------------------------
+      !||    radioss2        ../engine/source/engine/radioss2.F
+      !||    rdresb          ../engine/source/output/restart/rdresb.F
+      !||    restalloc       ../engine/source/output/restart/arralloc.F
+      !||--- uses       -----------------------------------------------------
+      !||    int8_mod        ../common_source/modules/interfaces/int8_mod.F
+      !||    intbufdef_mod   ../common_source/modules/intbufdef_mod.F
+      !||====================================================================
       MODULE INTBUF_MOD
 
         USE INTBUFDEF_MOD      
@@ -256,30 +249,29 @@ Chd|====================================================================
 
       END MODULE INTBUF_MOD
 C=======================================================================
-Chd|====================================================================
-Chd|  FSKYI_MOD                     share/modules/restart_mod.F   
-Chd|-- called by -----------
-Chd|        REALLOCATE_I_SKYLINE          source/system/reallocate_skyline.F
-Chd|        RESOL                         source/engine/resol.F         
-Chd|        RESTALLOC                     source/output/restart/arralloc.F
-Chd|        SPMD_EXCH2_A_PON              source/mpi/forces/spmd_exch2_a_pon.F
-Chd|        SPMD_I7FCOM_PON               source/mpi/forces/spmd_i7fcom_pon.F
-Chd|-- calls ---------------
-Chd|====================================================================
+      !||====================================================================
+      !||    fskyi_mod              ../engine/share/modules/restart_mod.F
+      !||--- called by ------------------------------------------------------
+      !||    reallocate_i_skyline   ../engine/source/system/reallocate_skyline.F
+      !||    resol                  ../engine/source/engine/resol.F
+      !||    restalloc              ../engine/source/output/restart/arralloc.F
+      !||    spmd_exch2_a_pon       ../engine/source/mpi/forces/spmd_exch2_a_pon.F
+      !||    spmd_i7fcom_pon        ../engine/source/mpi/forces/spmd_i7fcom_pon.F
+      !||====================================================================
       MODULE FSKYI_MOD
         my_real,
      .  DIMENSION(:,:),ALLOCATABLE :: FSKYI,TEMP_FSKYI
         INTEGER,DIMENSION(:),ALLOCATABLE :: ISKY,TEMP_ISKY
       END MODULE FSKYI_MOD
-Chd|====================================================================
-Chd|  INTBUFFRIC_MOD                share/modules/restart_mod.F   
-Chd|-- called by -----------
-Chd|        RADIOSS2                      source/engine/radioss2.F      
-Chd|        RDRESB                        source/output/restart/rdresb.F
-Chd|        RESTALLOC                     source/output/restart/arralloc.F
-Chd|-- calls ---------------
-Chd|        INTBUF_FRIC_MOD               share/modules/intbuf_fric_mod.F
-Chd|====================================================================
+      !||====================================================================
+      !||    intbuffric_mod    ../engine/share/modules/restart_mod.F
+      !||--- called by ------------------------------------------------------
+      !||    radioss2          ../engine/source/engine/radioss2.F
+      !||    rdresb            ../engine/source/output/restart/rdresb.F
+      !||    restalloc         ../engine/source/output/restart/arralloc.F
+      !||--- uses       -----------------------------------------------------
+      !||    intbuf_fric_mod   ../engine/share/modules/intbuf_fric_mod.F
+      !||====================================================================
       MODULE INTBUFFRIC_MOD
 
         USE INTBUF_FRIC_MOD                     

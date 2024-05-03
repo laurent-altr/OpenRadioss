@@ -20,14 +20,20 @@ Copyright>
 Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
-Chd|====================================================================
-Chd|  I21TRI                        source/interfaces/intsort/i21tri.F
-Chd|-- called by -----------
-Chd|        I21BUCE                       source/interfaces/intsort/i21buce.F
-Chd|-- calls ---------------
-Chd|        I21STO                        source/interfaces/int21/i21sto.F
-Chd|        I7DSTK                        source/interfaces/intsort/i7dstk.F
-Chd|====================================================================
+      !||====================================================================
+      !||    i21tri        ../starter/source/interfaces/inter3d1/i21tri.F
+      !||--- called by ------------------------------------------------------
+      !||    i21buc1       ../starter/source/interfaces/inter3d1/i21buc3.F
+      !||--- calls      -----------------------------------------------------
+      !||    ancmsg        ../starter/share/message_module/inter_ancmsg_mod.F
+      !||    i21cor3t      ../starter/source/interfaces/inter3d1/i21cor3t.F
+      !||    i7cmp3        ../starter/source/interfaces/inter3d1/i7cmp3.F
+      !||    i7dst3        ../starter/source/interfaces/inter3d1/i7dst3.F
+      !||    i7dstk        ../starter/source/interfaces/inter3d1/i7dstk.F
+      !||    i7pen3        ../starter/source/interfaces/inter3d1/i7pen3.F
+      !||--- uses       -----------------------------------------------------
+      !||    message_mod   ../starter/share/message_module/message_mod.F
+      !||====================================================================
       SUBROUTINE I21TRI(
      1      ADD      ,NSN     ,IRECT  ,XLOC     ,STF     ,
      2      STFN     ,XYZM    ,I_ADD  ,MAXSIZ  ,II_STOK  ,

@@ -20,14 +20,12 @@ Copyright>
 Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
-Chd|====================================================================
-Chd|  DELNUMB0                      source/output/anim/generate/delnumb0.F
-Chd|-- called by -----------
-Chd|        GENANI                        source/output/anim/generate/genani.F
-Chd|-- calls ---------------
-Chd|        SPMD_IGET_PARTN               source/mpi/anim/spmd_iget_partn.F
-Chd|        WRITE_I_C                     ../common_source/tools/input_output/write_routtines.c
-Chd|====================================================================
+      !||====================================================================
+      !||    delnumb0    ../starter/source/output/anim/delnumb0.F
+      !||--- called by ------------------------------------------------------
+      !||    genani1     ../starter/source/output/anim/genani1.F
+      !||--- calls      -----------------------------------------------------
+      !||====================================================================
       SUBROUTINE DELNUMB0(IPARG   ,EL2FA   ,NBF     ,INUM  ,DD_IAD,
      .                    IADD    ,NBPART  ,IADG    ,KXSP  )
 C=======================================================================

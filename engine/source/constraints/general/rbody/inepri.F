@@ -21,14 +21,15 @@ Copyright>        As an alternative to this open-source version, Altair also off
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
 C
-Chd|====================================================================
-Chd|  INEPRI                        source/constraints/general/rbody/inepri.F
-Chd|-- called by -----------
-Chd|        R2R_RBY                       source/coupling/rad2rad/r2r_init.F
-Chd|        RBYACT                        source/constraints/general/rbody/rbyact.F
-Chd|-- calls ---------------
-Chd|        VALPR                         source/constraints/general/rbody/valpr.F
-Chd|====================================================================
+      !||====================================================================
+      !||    inepri      ../starter/source/materials/mat/mat019/inepri.F
+      !||--- called by ------------------------------------------------------
+      !||    inirby      ../starter/source/constraints/general/rbody/inirby.F
+      !||    inirbys     ../starter/source/constraints/general/rbody/inirby.F
+      !||    rigid_mat   ../starter/source/materials/mat/mat019/rigid_mat.F
+      !||--- calls      -----------------------------------------------------
+      !||    valpr       ../starter/source/materials/mat/mat019/valpr.F
+      !||====================================================================
       SUBROUTINE INEPRI(XI,BM)
 C------------------------------------
 C     CALCUL INERTIES ET REPERE PRINCIPAL

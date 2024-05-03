@@ -1,5 +1,5 @@
 Copyright>        OpenRadioss
-Copyright>        Copyright (C) 1986-2023 Altair Engineering Inc.
+Copyright>        Copyright (C) 1986-2024 Altair Engineering Inc.
 Copyright>
 Copyright>        This program is free software: you can redistribute it and/or modify
 Copyright>        it under the terms of the GNU Affero General Public License as published by
@@ -20,21 +20,28 @@ Copyright>
 Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
-Chd|====================================================================
-Chd|  UPDFAIL                       source/materials/updfail.F    
-Chd|-- called by -----------
-Chd|        LECTUR                        source/starter/lectur.F       
-Chd|-- calls ---------------
-Chd|        ANCMSG                        source/output/message/message.F
-Chd|        FAIL_FUN2SYS                  source/materials/tools/fail_fun2sys.F
-Chd|        MATTAB_USR2SYS                source/materials/tools/mattab_usr2sys.F
-Chd|        MATPARAM_DEF_MOD              ../common_source/modules/mat_elem/matparam_def_mod.F
-Chd|        MESSAGE_MOD                   share/message_module/message_mod.F
-Chd|        TABLE_MOD                     share/modules1/table_mod.F    
-Chd|====================================================================
+      !||====================================================================
+      !||    updfail_mod   ../starter/source/materials/updfail.F
+      !||--- called by ------------------------------------------------------
+      !||    lectur        ../starter/source/starter/lectur.F
+      !||====================================================================
       module updfail_mod
       contains
 !
+      !||====================================================================
+      !||    updfail               ../starter/source/materials/updfail.F
+      !||--- called by ------------------------------------------------------
+      !||    lectur                ../starter/source/starter/lectur.F
+      !||--- calls      -----------------------------------------------------
+      !||    ancmsg                ../starter/share/message_module/inter_ancmsg_mod.F
+      !||    fail_fun2sys          ../starter/source/materials/tools/fail_fun2sys.F
+      !||    mattab_usr2sys        ../starter/source/materials/tools/mattab_usr2sys.F
+      !||    random_walk_dmg       ../starter/source/materials/fail/fractal/random_walk_dmg.F90
+      !||--- uses       -----------------------------------------------------
+      !||    message_mod           ../starter/share/message_module/message_mod.F
+      !||    random_walk_dmg_mod   ../starter/source/materials/fail/fractal/random_walk_dmg.F90
+      !||    table_mod             ../starter/share/modules1/table_mod.F
+      !||====================================================================
       SUBROUTINE UPDFAIL(MAT_PARAM ,NUMMAT ,NFUNCT ,NTABLE ,FUNC_ID ,TABLE ,
      .                   FAIL_FRACTAL,NGRSHEL   ,NGRSH3N,IGRSH4N,IGRSH3N,
      .                   IXC    ,IXTG      ,NUMELC ,NUMELTG )

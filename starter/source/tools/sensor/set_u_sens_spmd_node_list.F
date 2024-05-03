@@ -20,12 +20,9 @@ Copyright>
 Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
-Chd|====================================================================
-Chd|  SET_U_SENS_SPMD_NODE_LIST     source/tools/sensor/set_u_sens_spmd_node_list.F
-Chd|-- called by -----------
-Chd|-- calls ---------------
-Chd|        SENSOR_MOD                    share/modules1/sensor_mod.F   
-Chd|====================================================================
+      !||====================================================================
+      !||    set_u_sens_spmd_node_list   ../starter/source/tools/sensor/set_u_sens_spmd_node_list.F
+      !||====================================================================
         INTEGER FUNCTION SET_U_SENS_SPMD_NODE_LIST(ARRAY,SIZE_ARRAY)
 !$COMMENT
 !       SET_U_SENS_SPMD_NODE_LIST description
@@ -84,4 +81,7 @@ C-----------------------------------------------
 
         SET_U_SENS_SPMD_NODE_LIST = 0
         RETURN
+      !||====================================================================
+      !||    set_u_sens_spmd_node_list   ../starter/source/tools/sensor/set_u_sens_spmd_node_list.F
+      !||====================================================================
         END FUNCTION SET_U_SENS_SPMD_NODE_LIST

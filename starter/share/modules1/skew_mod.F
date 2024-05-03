@@ -20,17 +20,16 @@ Copyright>
 Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
-Chd|====================================================================
-Chd|  SKEW_MOD                      share/modules1/skew_mod.F     
-Chd|-- called by -----------
-Chd|        CHECK_SKEW                    source/spmd/domain_decomposition/check_skew.F
-Chd|        DDSPLIT                       source/restart/ddsplit/ddsplit.F
-Chd|        DOMDEC2                       source/spmd/domdec2.F         
-Chd|        LECTUR                        source/starter/lectur.F       
-Chd|        SPLIT_SKEW                    source/restart/ddsplit/split_skew.F
-Chd|        SPLIT_SKEW_save               source/restart/ddsplit/split_skew.F
-Chd|-- calls ---------------
-Chd|====================================================================
+      !||====================================================================
+      !||    skew_mod          ../starter/share/modules1/skew_mod.F
+      !||--- called by ------------------------------------------------------
+      !||    check_skew        ../starter/source/spmd/domain_decomposition/check_skew.F
+      !||    ddsplit           ../starter/source/restart/ddsplit/ddsplit.F
+      !||    domdec2           ../starter/source/spmd/domdec2.F
+      !||    lectur            ../starter/source/starter/lectur.F
+      !||    split_skew        ../starter/source/restart/ddsplit/split_skew.F
+      !||    split_skew_save   ../starter/source/restart/ddsplit/split_skew.F
+      !||====================================================================
         MODULE SKEW_MOD
 C-----------------------------------------------
 C   m y _ r e a l

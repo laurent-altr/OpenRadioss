@@ -20,13 +20,12 @@ Copyright>
 Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
-Chd|====================================================================
-Chd|  THERM3C                       source/elements/sh3n/coque3n/therm3c.F
-Chd|-- called by -----------
-Chd|        C3FORC3                       source/elements/sh3n/coque3n/c3forc3.F
-Chd|        C3FORC3_CRK                   source/elements/xfem/c3forc3_crk.F
-Chd|-- calls ---------------
-Chd|====================================================================
+      !||====================================================================
+      !||    therm3c       ../engine/source/elements/sh3n/coque3n/therm3c.F
+      !||--- called by ------------------------------------------------------
+      !||    c3forc3       ../engine/source/elements/sh3n/coque3n/c3forc3.F
+      !||    c3forc3_crk   ../engine/source/elements/xfem/c3forc3_crk.F
+      !||====================================================================
       SUBROUTINE THERM3C(JFT  ,JLT   ,PM   ,MAT   ,THK   ,IXTG , 
 c     2                   X  ,AREA   ,DT1C ,      
      2                  PX1  ,PY1  ,PY2   ,AREA   ,DT1C ,
@@ -69,6 +68,9 @@ C --- calcul de la tempurature au CG
 C 
 C - flux
 C      
+      !||====================================================================
+      !||    de   ../engine/source/elements/sh3n/coque3n/therm3c.F
+      !||====================================================================
 ccc function de forme
 cc          PX1(I) = HALF*(X(2,IXTG(3,I)) - X(2,IXTG(4,I)))/AREA(I)
 cc          PX2(I) = HALF*(X(2,IXTG(4,I)) - X(2,IXTG(2,I)))/AREA(I)

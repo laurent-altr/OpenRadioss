@@ -20,24 +20,23 @@ Copyright>
 Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
-Chd|====================================================================
-Chd|  VISC_PARAM_MOD                modules/mat_elem/visc_param_mod.F
-Chd|-- called by -----------
-Chd|        MATPARAM_DEF_MOD              common_source/modules/mat_elem/matparam_def_mod.F
-Chd|        HM_READ_VISC_LPRONY           starter/source/materials/visc/hm_read_visc_lprony.F
-Chd|        HM_READ_VISC_PRONY            starter/source/materials/visc/hm_read_visc_prony.F
-Chd|        UPDMAT                        starter/source/materials/updmat.F
-Chd|        WRITE_VISCPARAM               starter/source/materials/mat/write_viscparam.F
-Chd|        READ_VISCPARAM                engine/source/output/restart/read_viscparam.F
-Chd|        VISCMAIN                      engine/source/materials/visc/viscmain.F
-Chd|        VISC_ET                       engine/source/elements/solid/solidez/visc_et.F
-Chd|        VISC_PRONY                    engine/source/materials/visc/visc_prony.F
-Chd|        VISC_PRONY_LSTRAIN            engine/source/materials/visc/visc_prony_lstrain.F
-Chd|        WRITE_VISCPARAM               engine/source/output/restart/write_viscparam.F
-Chd|-- calls ---------------
-Chd|        NAMES_AND_TITLES_MOD          modules/names_and_titles_mod.F
-Chd|        TABLE4D_MOD                   modules/table4d_mod.F         
-Chd|====================================================================
+      !||====================================================================
+      !||    visc_param_mod         ../common_source/modules/mat_elem/visc_param_mod.F
+      !||--- called by ------------------------------------------------------
+      !||    hm_read_visc_lprony    ../starter/source/materials/visc/hm_read_visc_lprony.F
+      !||    hm_read_visc_prony     ../starter/source/materials/visc/hm_read_visc_prony.F
+      !||    matparam_def_mod       ../common_source/modules/mat_elem/matparam_def_mod.F
+      !||    read_viscparam         ../engine/source/output/restart/read_viscparam.F
+      !||    updmat                 ../starter/source/materials/updmat.F
+      !||    visc_et                ../engine/source/elements/solid/solidez/visc_et.F
+      !||    visc_prony             ../engine/source/materials/visc/visc_prony.F
+      !||    visc_prony_lstrain     ../engine/source/materials/visc/visc_prony_lstrain.F
+      !||    viscmain               ../engine/source/materials/visc/viscmain.F
+      !||    write_viscparam        ../engine/source/output/restart/write_viscparam.F
+      !||--- uses       -----------------------------------------------------
+      !||    names_and_titles_mod   ../common_source/modules/names_and_titles_mod.F
+      !||    table4d_mod            ../common_source/modules/table4d_mod.F
+      !||====================================================================
       MODULE VISC_PARAM_MOD
       USE TABLE4D_MOD
       USE NAMES_AND_TITLES_MOD

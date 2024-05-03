@@ -20,16 +20,12 @@ Copyright>
 Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
-Chd|====================================================================
-Chd|  PARSORF                       source/output/anim/generate/parsorf.F
-Chd|-- called by -----------
-Chd|        GENANI                        source/output/anim/generate/genani.F
-Chd|-- calls ---------------
-Chd|        SPMD_IGET_PARTN               source/mpi/anim/spmd_iget_partn.F
-Chd|        SPMD_IGLOB_PARTN              source/mpi/anim/spmd_iglob_partn.F
-Chd|        WRITE_I_C                     ../common_source/tools/input_output/write_routtines.c
-Chd|        ELBUFDEF_MOD                  ../common_source/modules/mat_elem/elbufdef_mod.F
-Chd|====================================================================
+      !||====================================================================
+      !||    parsorf     ../starter/source/output/anim/parsorf.F
+      !||--- called by ------------------------------------------------------
+      !||    genani1     ../starter/source/output/anim/genani1.F
+      !||--- calls      -----------------------------------------------------
+      !||====================================================================
       SUBROUTINE PARSORF(ELBUF_TAB,
      .                   X      ,D     ,IADD   ,CDG   ,IPARG    ,
      .                   IXT    ,IXP   ,IXR    ,MATER ,EL2FA    ,

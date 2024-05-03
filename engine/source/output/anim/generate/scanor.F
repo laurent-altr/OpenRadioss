@@ -20,14 +20,11 @@ Copyright>
 Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
-Chd|====================================================================
-Chd|  SCANOR                        source/output/anim/generate/scanor.F
-Chd|-- called by -----------
-Chd|        GENANI                        source/output/anim/generate/genani.F
-Chd|        GENH3D                        source/output/h3d/h3d_results/genh3d.F
-Chd|-- calls ---------------
-Chd|        SPMD_MIN_MAX                  source/mpi/anim/spmd_min_max.F
-Chd|====================================================================
+      !||====================================================================
+      !||    scanor   ../starter/source/output/anim/scanor.F
+      !||--- called by ------------------------------------------------------
+      !||    dd_ani   ../starter/source/output/anim/dd_ani.F
+      !||====================================================================
       SUBROUTINE SCANOR(X,D,CDG,XMIN,YMIN,ZMIN,XMAX,YMAX,ZMAX,SCALE,
      .                  WEIGHT)
 C-----------------------------------------------

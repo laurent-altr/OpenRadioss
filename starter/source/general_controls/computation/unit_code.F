@@ -20,14 +20,6 @@ Copyright>
 Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
-Chd|====================================================================
-Chd|  UNIT_CODE                     source/general_controls/computation/unit_code.F
-Chd|-- called by -----------
-Chd|        HM_READ_UNIT                  source/general_controls/computation/hm_read_unit.F
-Chd|-- calls ---------------
-Chd|        ANCMSG                        source/output/message/message.F
-Chd|        MESSAGE_MOD                   share/message_module/message_mod.F
-Chd|====================================================================
       SUBROUTINE UNIT_CODE(LENGTH,FIELD,KEY,FAC,IERR1,ID)
       USE MESSAGE_MOD
 C-----------------------------------------------

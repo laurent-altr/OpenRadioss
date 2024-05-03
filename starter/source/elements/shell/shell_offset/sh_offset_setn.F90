@@ -20,64 +20,75 @@
 !Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 !Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 !Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
+      !||====================================================================
+      !||    sh_offset_setn_mod   ../starter/source/elements/shell/shell_offset/sh_offset_setn.F90
+      !||--- called by ------------------------------------------------------
+      !||    shell_offsetp        ../starter/source/elements/shell/shell_offset/shell_offsetp.F90
+      !||====================================================================
       module sh_offset_setn_mod
 
-        contains
+      contains
 ! ======================================================================================================================
 !                                                   PROCEDURES
 ! ======================================================================================================================
 !
 !=======================================================================================================================
-!!\brief This subroutine compute nodal shell offset 
+!!\brief This subroutine compute nodal shell offset
 !=======================================================================================================================
-      subroutine sh_offset_setn(nshell,numnod,ix_offset,sh_oset,oset_n,itagn)
+        !||====================================================================
+        !||    sh_offset_setn   ../starter/source/elements/shell/shell_offset/sh_offset_setn.F90
+        !||--- called by ------------------------------------------------------
+        !||    shell_offsetp    ../starter/source/elements/shell/shell_offset/shell_offsetp.F90
+        !||--- uses       -----------------------------------------------------
+        !||====================================================================
+        subroutine sh_offset_setn(nshell,numnod,ix_offset,sh_oset,oset_n,itagn)
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Modules
 ! ----------------------------------------------------------------------------------------------------------------------
           use constant_mod, only : zero
 !
-      implicit none
+          implicit none
 !
-#include "my_real.inc"       
+#include "my_real.inc"
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Arguments
 ! ----------------------------------------------------------------------------------------------------------------------
 !
-      integer, intent(in   )                      :: nshell        !< number of shell
-      integer, intent(in   )                      :: numnod         !< number of node
-      integer, intent(in   ),dimension(4,nshell)  :: ix_offset        !< shell connectivity
-      integer, intent(inout),dimension(numnod)     :: itagn         !< itag work array
-      my_real, intent(in   ),dimension(nshell)    :: sh_oset       !< elementary offset
-      my_real, intent(inout),dimension(numnod)     :: oset_n        !< nodal offset
+          integer, intent(in   )                      :: nshell        !< number of shell
+          integer, intent(in   )                      :: numnod         !< number of node
+          integer, intent(in   ),dimension(4,nshell)  :: ix_offset        !< shell connectivity
+          integer, intent(inout),dimension(numnod)     :: itagn         !< itag work array
+          my_real, intent(in   ),dimension(nshell)    :: sh_oset       !< elementary offset
+          my_real, intent(inout),dimension(numnod)     :: oset_n        !< nodal offset
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Local variables
 ! ----------------------------------------------------------------------------------------------------------------------
-      integer i,j,k,n,nnod
+          integer i,j,k,n,nnod
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Body
-! ----------------------------------------------------------------------------------------------------------------------  
-!   
-      itagn(1:numnod) = 0
-      do i = 1, nshell
-!------each node            
-          if (ix_offset(4,i)/=ix_offset(3,i)) then
-            nnod = 4
-          else 
-            nnod = 3
-          end if
-! 
-          do k = 1,nnod
-            n = ix_offset(k,i) 
-            itagn(n) = itagn(n) + 1
-            oset_n(n) = oset_n(n) + sh_oset(i)
+! ----------------------------------------------------------------------------------------------------------------------
+!
+          itagn(1:numnod) = 0
+          do i = 1, nshell
+!------each node
+            if (ix_offset(4,i)/=ix_offset(3,i)) then
+              nnod = 4
+            else
+              nnod = 3
+            end if
+!
+            do k = 1,nnod
+              n = ix_offset(k,i)
+              itagn(n) = itagn(n) + 1
+              oset_n(n) = oset_n(n) + sh_oset(i)
+            end do
           end do
-      end do
 !
-      do n = 1, numnod
-        if (itagn(n)==0) cycle
-        oset_n(n) = oset_n(n)/itagn(n)
-        if (oset_n(n)==zero) itagn(n)=0
-      end do
+          do n = 1, numnod
+            if (itagn(n)==0) cycle
+            oset_n(n) = oset_n(n)/itagn(n)
+            if (oset_n(n)==zero) itagn(n)=0
+          end do
 !
-      end subroutine sh_offset_setn
-    end module sh_offset_setn_mod
+        end subroutine sh_offset_setn
+      end module sh_offset_setn_mod

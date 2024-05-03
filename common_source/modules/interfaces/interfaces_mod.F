@@ -20,34 +20,34 @@ Copyright>
 Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
-Chd|====================================================================
-Chd|  INTERFACES_MOD                modules/interfaces/interfaces_mod.F
-Chd|-- called by -----------
-Chd|        DDSPLIT                       starter/source/restart/ddsplit/ddsplit.F
-Chd|        HM_READ_INTERFACES            starter/source/interfaces/reader/hm_read_interfaces.F
-Chd|        HM_READ_INTER_STRUCT          starter/source/interfaces/reader/hm_read_inter_struct.F
-Chd|        HM_READ_THGROU                starter/source/output/th/hm_read_thgrou.F
-Chd|        INITIA                        starter/source/elements/initia/initia.F
-Chd|        LECTUR                        starter/source/starter/lectur.F
-Chd|        I24MAINF                      engine/source/interfaces/int24/i24main.F
-Chd|        I25MAINF                      engine/source/interfaces/int25/i25mainf.F
-Chd|        IMP_INTTD0                    engine/source/implicit/imp_int_k.F
-Chd|        IMP_SOLV                      engine/source/implicit/imp_solv.F
-Chd|        IMP_TRIPI                     engine/source/implicit/imp_int_k.F
-Chd|        INTFOP2                       engine/source/interfaces/interf/intfop2.F
-Chd|        INTTRI                        engine/source/interfaces/intsort/inttri.F
-Chd|        RADIOSS2                      engine/source/engine/radioss2.F
-Chd|        RDRESA                        engine/source/output/restart/rdresa.F
-Chd|        RDRESB                        engine/source/output/restart/rdresb.F
-Chd|        RESOL                         engine/source/engine/resol.F  
-Chd|        RESOL_HEAD                    engine/source/engine/resol_head.F
-Chd|        SPMD_I7FCOM_POFF              engine/source/mpi/forces/spmd_i7fcom_poff.F
-Chd|        SPMD_I7FCOM_PON               engine/source/mpi/forces/spmd_i7fcom_pon.F
-Chd|        SPMD_I7XVCOM2                 engine/source/mpi/interfaces/spmd_i7xvcom2.F
-Chd|        WRRESTP                       engine/source/output/restart/wrrestp.F
-Chd|-- calls ---------------
-Chd|        PARAMETERS_MOD                modules/interfaces/parameters_mod.F
-Chd|====================================================================
+      !||====================================================================
+      !||    interfaces_mod         ../common_source/modules/interfaces/interfaces_mod.F
+      !||--- called by ------------------------------------------------------
+      !||    ddsplit                ../starter/source/restart/ddsplit/ddsplit.F
+      !||    hm_read_inter_struct   ../starter/source/interfaces/reader/hm_read_inter_struct.F
+      !||    hm_read_interfaces     ../starter/source/interfaces/reader/hm_read_interfaces.F
+      !||    hm_read_thgrou         ../starter/source/output/th/hm_read_thgrou.F
+      !||    i24mainf               ../engine/source/interfaces/int24/i24main.F
+      !||    i25mainf               ../engine/source/interfaces/int25/i25mainf.F
+      !||    imp_inttd0             ../engine/source/implicit/imp_int_k.F
+      !||    imp_solv               ../engine/source/implicit/imp_solv.F
+      !||    imp_tripi              ../engine/source/implicit/imp_int_k.F
+      !||    initia                 ../starter/source/elements/initia/initia.F
+      !||    intfop2                ../engine/source/interfaces/interf/intfop2.F
+      !||    inttri                 ../engine/source/interfaces/intsort/inttri.F
+      !||    lectur                 ../engine/source/input/lectur.F
+      !||    radioss2               ../engine/source/engine/radioss2.F
+      !||    rdresa                 ../engine/source/output/restart/rdresa.F
+      !||    rdresb                 ../engine/source/output/restart/rdresb.F
+      !||    resol                  ../engine/source/engine/resol.F
+      !||    resol_head             ../engine/source/engine/resol_head.F
+      !||    spmd_i7fcom_poff       ../engine/source/mpi/forces/spmd_i7fcom_poff.F
+      !||    spmd_i7fcom_pon        ../engine/source/mpi/forces/spmd_i7fcom_pon.F
+      !||    spmd_i7xvcom2          ../engine/source/mpi/interfaces/spmd_i7xvcom2.F
+      !||    wrrestp                ../engine/source/output/restart/wrrestp.F
+      !||--- uses       -----------------------------------------------------
+      !||    parameters_mod         ../common_source/modules/interfaces/parameters_mod.F
+      !||====================================================================
         MODULE INTERFACES_MOD
 C-----------------------------------------------
 C   M o d u l e s

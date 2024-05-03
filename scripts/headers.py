@@ -153,6 +153,8 @@ class CodeAnalyzer:
 
                         except UnicodeDecodeError:
                             print(f'Error reading file {file_path} due to encoding issues. Skipping...')
+                    else:
+                        print(f'Skipping file {file_path} due to encoding issues.')
 
     def fill_callers(self):
         #starter subroutines can be called by starter and common source subroutines

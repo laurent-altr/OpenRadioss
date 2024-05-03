@@ -20,16 +20,15 @@ Copyright>
 Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
-Chd|====================================================================
-Chd|  TIME_MOD                      share/modules/time_mod.F      
-Chd|-- called by -----------
-Chd|        ADD_ELAPSED_TIME_MON_OFF      source/system/timer.F         
-Chd|        PRINTIME                      source/system/timer.F         
-Chd|        PRINT_RUNTIME                 source/system/timer.F         
-Chd|        RADIOSS2                      source/engine/radioss2.F      
-Chd|        RESOL                         source/engine/resol.F         
-Chd|-- calls ---------------
-Chd|====================================================================
+      !||====================================================================
+      !||    time_mod                   ../engine/share/modules/time_mod.F
+      !||--- called by ------------------------------------------------------
+      !||    add_elapsed_time_mon_off   ../engine/source/system/timer.F
+      !||    print_runtime              ../engine/source/system/timer.F
+      !||    printime                   ../engine/source/system/timer.F
+      !||    radioss2                   ../engine/source/engine/radioss2.F
+      !||    resol                      ../engine/source/engine/resol.F
+      !||====================================================================
       MODULE TIME_MOD
 C-----------------------------------------------
 C   m y _ r e a l

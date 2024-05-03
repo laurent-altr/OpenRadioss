@@ -20,18 +20,13 @@ Copyright>
 Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
-Chd|====================================================================
-Chd|  HM_ADMLCNT                    source/groups/hm_admlistcnt.F 
-Chd|-- called by -----------
-Chd|        HM_LECGRE                     source/groups/hm_lecgre.F     
-Chd|-- calls ---------------
-Chd|        ANCMSG                        source/output/message/message.F
-Chd|        GROUPS_GET_ELEM_LIST          source/groups/groups_get_elem_list.F
-Chd|        MY_ORDERS                     ../common_source/tools/sort/my_orders.c
-Chd|        HM_OPTION_READ_MOD            share/modules1/hm_option_read_mod.F
-Chd|        MESSAGE_MOD                   share/message_module/message_mod.F
-Chd|        SUBMODEL_MOD                  share/modules1/submodel_mod.F 
-Chd|====================================================================
+      !||====================================================================
+      !||    hm_admlcnt           ../starter/source/groups/hm_admlistcnt.F
+      !||--- uses       -----------------------------------------------------
+      !||    hm_option_read_mod   ../starter/share/modules1/hm_option_read_mod.F
+      !||    message_mod          ../starter/share/message_module/message_mod.F
+      !||    submodel_mod         ../starter/share/modules1/submodel_mod.F
+      !||====================================================================
       SUBROUTINE HM_ADMLCNT(NIX     ,IX      ,NUMEL   ,IPARTEL ,IPART   ,
      .                   KELTREE ,ELTREE  ,KSONTREE,NSONTREE,KLEVTREE,
      .                   NLIST   ,MESS    ,IX1     ,IX2     ,INDEX   ,
@@ -69,6 +64,16 @@ C-----------------------------------------------
       INTEGER :: NENTITY
 C-----------------------------------------------
       INTERFACE
+      !||====================================================================
+      !||    groups_get_elem_list   ../starter/source/groups/hm_tagpart.F
+      !||--- called by ------------------------------------------------------
+      !||    groups_get_elem_list   ../starter/source/groups/hm_tagpart.F
+      !||--- calls      -----------------------------------------------------
+      !||    ancmsg                 ../starter/share/message_module/inter_ancmsg_mod.F
+      !||    groups_get_elem_list   ../starter/source/groups/hm_tagpart.F
+      !||--- uses       -----------------------------------------------------
+      !||    submodel_mod           ../starter/share/modules1/submodel_mod.F
+      !||====================================================================
        SUBROUTINE GROUPS_GET_ELEM_LIST(arg1,arg2,arg3)
         USE SUBMODEL_MOD
         INTEGER,DIMENSION(:),ALLOCATABLE       :: arg1

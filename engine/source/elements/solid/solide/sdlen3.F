@@ -20,19 +20,18 @@ Copyright>
 Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
-Chd|====================================================================
-Chd|  SDLEN3                        source/elements/solid/solide/sdlen3.F
-Chd|-- called by -----------
-Chd|        S6CFORC3                      source/elements/thickshell/solide6c/s6cforc3.F
-Chd|        SCFORC3                       source/elements/thickshell/solidec/scforc3.F
-Chd|        SFORC3                        source/elements/solid/solide/sforc3.F
-Chd|        SZFORC3                       source/elements/solid/solidez/szforc3.F
-Chd|-- calls ---------------
-Chd|        SLDEGE                        source/elements/solid/solide/sldege.F
-Chd|        SLEN                          source/elements/solid/solide/slen.F
-Chd|        SLENA                         source/elements/solid/solide/slena.F
-Chd|        ALE_MOD                       ../common_source/modules/ale/ale_mod.F
-Chd|====================================================================
+      !||====================================================================
+      !||    sdlen3             ../starter/source/elements/solid/solide/sdlen3.F
+      !||--- called by ------------------------------------------------------
+      !||    inirig_mat         ../starter/source/elements/initia/inirig_mat.F
+      !||    inivoid            ../starter/source/elements/initia/inivoid.F
+      !||    multifluid_init3   ../starter/source/multifluid/multifluid_init3.F
+      !||    scinit3            ../starter/source/elements/thickshell/solidec/scinit3.F
+      !||    sinit3             ../starter/source/elements/solid/solide/sinit3.F
+      !||    suinit3            ../starter/source/elements/elbuf_init/suinit3.F
+      !||--- calls      -----------------------------------------------------
+      !||    slen               ../starter/source/elements/solid/solide/slen.F
+      !||====================================================================
       SUBROUTINE SDLEN3(
      1   VOLN,    DELTAX,  X1,      X2,
      2   X3,      X4,      X5,      X6,

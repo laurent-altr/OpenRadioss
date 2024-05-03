@@ -20,18 +20,19 @@ Copyright>
 Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
-Chd|====================================================================
-Chd|  LAW158_UPD                    source/materials/mat/mat158/law158_upd.F
-Chd|-- called by -----------
-Chd|        UPDMAT                        source/materials/updmat.F     
-Chd|-- calls ---------------
-Chd|        ANCMSG                        source/output/message/message.F
-Chd|        FUNC_SLOPE                    source/tools/curve/func_slope.F
-Chd|        MATFUN_USR2SYS                source/materials/tools/matfun_usr2sys.F
-Chd|        MESSAGE_MOD                   share/message_module/message_mod.F
-Chd|        SENSOR_MOD                    share/modules1/sensor_mod.F   
-Chd|        TABLE_MOD                     share/modules1/table_mod.F    
-Chd|====================================================================
+      !||====================================================================
+      !||    law158_upd       ../starter/source/materials/mat/mat158/law158_upd.F
+      !||--- called by ------------------------------------------------------
+      !||    updmat           ../starter/source/materials/updmat.F
+      !||--- calls      -----------------------------------------------------
+      !||    ancmsg           ../starter/share/message_module/inter_ancmsg_mod.F
+      !||    func_slope       ../starter/source/tools/curve/func_slope.F
+      !||    matfun_usr2sys   ../starter/source/materials/tools/matfun_usr2sys.F
+      !||--- uses       -----------------------------------------------------
+      !||    message_mod      ../starter/share/message_module/message_mod.F
+      !||    sensor_mod       ../starter/share/modules1/sensor_mod.F
+      !||    table_mod        ../starter/share/modules1/table_mod.F
+      !||====================================================================
       SUBROUTINE LAW158_UPD(TITR   ,UPARAM ,NPC    ,PLD    ,  
      .                      NFUNC  ,NFUNL  ,IFUNC  ,MAT_ID ,FUNC_ID,
      .                      PM     ,NUPARAM,SENSORS)

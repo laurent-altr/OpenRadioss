@@ -20,14 +20,14 @@ Copyright>
 Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
-Chd|====================================================================
-Chd|  I25IRTLM                      source/interfaces/int25/i25irtlm.F
-Chd|-- called by -----------
-Chd|        I25MAIN_OPT_TRI               source/interfaces/intsort/i25main_opt_tri.F
-Chd|-- calls ---------------
-Chd|        INTBUFDEF_MOD                 ../common_source/modules/intbufdef_mod.F
-Chd|        TRI7BOX                       share/modules/tri7box.F       
-Chd|====================================================================
+      !||====================================================================
+      !||    i25irtlm          ../engine/source/interfaces/int25/i25irtlm.F
+      !||--- called by ------------------------------------------------------
+      !||    i25main_opt_tri   ../engine/source/interfaces/intsort/i25main_opt_tri.F
+      !||--- uses       -----------------------------------------------------
+      !||    intbufdef_mod     ../common_source/modules/intbufdef_mod.F
+      !||    tri7box           ../engine/share/modules/tri7box.F
+      !||====================================================================
       SUBROUTINE I25IRTLM(
      1                   IPARI   ,INTBUF_TAB ,ITAB   ,NIN      )
 C=======================================================================

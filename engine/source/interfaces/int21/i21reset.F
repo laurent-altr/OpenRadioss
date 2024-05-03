@@ -20,13 +20,11 @@ Copyright>
 Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
-Chd|====================================================================
-Chd|  I21RESET                      source/interfaces/int21/i21reset.F
-Chd|-- called by -----------
-Chd|        INTTRI                        source/interfaces/intsort/inttri.F
-Chd|-- calls ---------------
-Chd|        INTBUFDEF_MOD                 ../common_source/modules/intbufdef_mod.F
-Chd|====================================================================
+      !||====================================================================
+      !||    i21reset        ../starter/source/interfaces/inter3d1/i21reset.F
+      !||--- called by ------------------------------------------------------
+      !||    inint3_thkvar   ../starter/source/interfaces/inter3d1/inint3_thkvar.F
+      !||====================================================================
       SUBROUTINE I21RESET(
      1  IPARI  ,INTBUF_TAB  ,NIN    ,ITASK  )
 C-----------------------------------------------

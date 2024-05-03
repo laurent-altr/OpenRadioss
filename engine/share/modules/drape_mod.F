@@ -20,61 +20,35 @@ Copyright>
 Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
-Chd|====================================================================
-Chd|  DRAPE_MOD                     share/modules/drape_mod.F     
-Chd|-- called by -----------
-Chd|        C3FORC3                       source/elements/sh3n/coque3n/c3forc3.F
-Chd|        C3FORC3_CRK                   source/elements/xfem/c3forc3_crk.F
-Chd|        C3KE3                         source/elements/sh3n/coque3n/c3ke3.F
-Chd|        CBAFORC3                      source/elements/shell/coqueba/cbaforc3.F
-Chd|        CBAKE3                        source/elements/shell/coqueba/cbake3.F
-Chd|        CDK6FORC3                     source/elements/sh3n/coquedk6/cdk6forc3.F
-Chd|        CDKFORC3                      source/elements/sh3n/coquedk/cdkforc3.F
-Chd|        CFORC3                        source/elements/shell/coque/cforc3.F
-Chd|        CFORC3_CRK                    source/elements/xfem/cforc3_crk.F
-Chd|        CMAIN3                        source/materials/mat_share/cmain3.F
-Chd|        CMAIN3PINCH                   source/elements/shell/coqueba/cmain3pinch.F
-Chd|        CMATC3                        source/elements/shell/coqueba/cmatc3.F
-Chd|        CNCOEFORT                     source/elements/sh3n/coquedk/cncoef3.F
-Chd|        CZFORC3                       source/elements/shell/coquez/czforc3.F
-Chd|        CZFORC3_CRK                   source/elements/xfem/czforc3_crk.F
-Chd|        CZKE3                         source/elements/shell/coquez/czke3.F
-Chd|        CZKEL3                        source/elements/shell/coquez/czkel3.F
-Chd|        C_TF_NE                       source/output/sty/c_tf_ne.F   
-Chd|        DRAPE_RREST                   source/output/restart/rdresb.F
-Chd|        DRAPE_WREST                   source/output/restart/wrrest.F
-Chd|        DYNAIN_C_STRAG                source/output/dynain/dynain_c_strag.F
-Chd|        DYNAIN_C_STRSG                source/output/dynain/dynain_c_strsg.F
-Chd|        EIG                           stub/eig.F                    
-Chd|        EIG1                          stub/eig1.F                   
-Chd|        EIGCOND                       stub/eigcond.F                
-Chd|        EIGP                          stub/eigp.F                   
-Chd|        FORINTC                       source/elements/forintc.F     
-Chd|        GENDYNAIN                     source/output/dynain/gendynain.F
-Chd|        GENH3D                        source/output/h3d/h3d_results/genh3d.F
-Chd|        GENOUTP                       source/output/sty/genoutp.F   
-Chd|        GENSTAT                       source/output/sta/genstat.F   
-Chd|        H3D_SHELL_TENSOR              source/output/h3d/h3d_results/h3d_shell_tensor.F
-Chd|        IMP_BUCK                      source/implicit/imp_buck.F    
-Chd|        IMP_CHKM                      source/implicit/imp_solv.F    
-Chd|        IMP_GLOB_K                    source/implicit/imp_glob_k.F  
-Chd|        IMP_GLOB_K0                   source/implicit/imp_glob_k.F  
-Chd|        IMP_GLOB_KHP                  source/implicit/imp_glob_k.F  
-Chd|        IMP_K_EIG                     stub/imp_k_eig.F              
-Chd|        IMP_SOLV                      source/implicit/imp_solv.F    
-Chd|        LAYINI                        source/elements/shell/coque/layini.F
-Chd|        OUTP_C_TF                     source/output/sty/outp_c_t.F  
-Chd|        RADIOSS2                      source/engine/radioss2.F      
-Chd|        RDCOMI                        source/output/restart/rdcomm.F
-Chd|        RESOL                         source/engine/resol.F         
-Chd|        RESOL_HEAD                    source/engine/resol_head.F    
-Chd|        RESTALLOC                     source/output/restart/arralloc.F
-Chd|        SORTIE_MAIN                   source/output/sortie_main.F   
-Chd|        STAT_C_STRAFG                 source/output/sta/stat_c_strafg.F
-Chd|        STAT_C_STRSFG                 source/output/sta/stat_c_strsfg.F
-Chd|        WRCOMI                        source/output/restart/wrcomm.F
-Chd|-- calls ---------------
-Chd|====================================================================
+      !||====================================================================
+      !||    drape_mod                      ../starter/share/modules1/drape_mod.F
+      !||--- called by ------------------------------------------------------
+      !||    c3grhead                       ../starter/source/elements/sh3n/coque3n/c3grhead.F
+      !||    c3grtails                      ../starter/source/elements/sh3n/coque3n/c3grtails.F
+      !||    c3init3                        ../starter/source/elements/sh3n/coque3n/c3init3.F
+      !||    c3inmas                        ../starter/source/elements/sh3n/coque3n/c3inmas.F
+      !||    cbainit3                       ../starter/source/elements/shell/coqueba/cbainit3.F
+      !||    cdkinit3                       ../starter/source/elements/sh3n/coquedk/cdkinit3.F
+      !||    cgrhead                        ../starter/source/elements/shell/coque/cgrhead.F
+      !||    cgrtails                       ../starter/source/elements/shell/coque/cgrtails.F
+      !||    cinit3                         ../starter/source/elements/shell/coque/cinit3.F
+      !||    cinmas                         ../starter/source/elements/shell/coque/cinmas.F
+      !||    cmaini3                        ../starter/source/elements/sh3n/coquedk/cmaini3.F
+      !||    corthini                       ../starter/source/elements/shell/coque/corthini.F
+      !||    ddsplit                        ../starter/source/restart/ddsplit/ddsplit.F
+      !||    hm_read_drape                  ../starter/source/properties/composite_options/drape/hm_read_drape.F
+      !||    initia                         ../starter/source/elements/initia/initia.F
+      !||    layini1                        ../starter/source/elements/shell/coqueba/layini1.F
+      !||    lectur                         ../starter/source/starter/lectur.F
+      !||    pre_stackgroup                 ../starter/source/stack/pres_stackgroup.F
+      !||    shellthk_upd                   ../starter/source/properties/composite_options/drape/shellthk_upd.F
+      !||    st_qaprint_composite_options   ../starter/source/output/qaprint/st_qaprint_composite_options.F
+      !||    st_qaprint_driver              ../starter/source/output/qaprint/st_qaprint_driver.F
+      !||    stackgroup_drape               ../starter/source/stack/stackgroup_drape.F
+      !||    t3grhead                       ../starter/source/elements/solid_2d/tria/t3grhead.F
+      !||    t3grtails                      ../starter/source/elements/solid_2d/tria/t3grtails.F
+      !||    w_drape                        ../starter/source/restart/ddsplit/w_drape.F
+      !||====================================================================
         MODULE DRAPE_MOD
 c=======================================================================      
 C-----------------------------------------------

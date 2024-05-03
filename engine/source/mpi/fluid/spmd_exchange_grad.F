@@ -1,12 +1,34 @@
-Chd|====================================================================
-Chd|  SPMD_EXCHANGE_GRAD            source/mpi/fluid/spmd_exchange_grad.F
-Chd|-- called by -----------
-Chd|        ALE51_GRADIENT_RECONSTRUCTION source/ale/alemuscl/ale51_gradient_reconstruction.F
-Chd|        ALE51_GRADIENT_RECONSTRUCTION2source/ale/alemuscl/ale51_gradient_reconstruction2.F
-Chd|-- calls ---------------
-Chd|        STARTIME                      source/system/timer.F         
-Chd|        STOPTIME                      source/system/timer.F         
-Chd|====================================================================
+Copyright>        OpenRadioss
+Copyright>        Copyright (C) 1986-2024 Altair Engineering Inc.
+Copyright>
+Copyright>        This program is free software: you can redistribute it and/or modify
+Copyright>        it under the terms of the GNU Affero General Public License as published by
+Copyright>        the Free Software Foundation, either version 3 of the License, or
+Copyright>        (at your option) any later version.
+Copyright>
+Copyright>        This program is distributed in the hope that it will be useful,
+Copyright>        but WITHOUT ANY WARRANTY; without even the implied warranty of
+Copyright>        MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+Copyright>        GNU Affero General Public License for more details.
+Copyright>
+Copyright>        You should have received a copy of the GNU Affero General Public License
+Copyright>        along with this program.  If not, see <https://www.gnu.org/licenses/>.
+Copyright>
+Copyright>
+Copyright>        Commercial Alternative: Altair Radioss Software
+Copyright>
+Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
+Copyright>        software under a commercial license.  Contact Altair to discuss further if the
+Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
+      !||====================================================================
+      !||    spmd_exchange_grad               ../engine/source/mpi/fluid/spmd_exchange_grad.F
+      !||--- called by ------------------------------------------------------
+      !||    ale51_gradient_reconstruction    ../engine/source/ale/alemuscl/ale51_gradient_reconstruction.F
+      !||    ale51_gradient_reconstruction2   ../engine/source/ale/alemuscl/ale51_gradient_reconstruction2.F
+      !||--- calls      -----------------------------------------------------
+      !||    startime                         ../engine/source/system/timer.F
+      !||    stoptime                         ../engine/source/system/timer.F
+      !||====================================================================
       SUBROUTINE SPMD_EXCHANGE_GRAD(DIM,DIM1,DIM2,
      1                       PHI     ,NERCVOIS,NESDVOIS,LERCVOIS,
      2                       LESDVOIS,LENCOM  )

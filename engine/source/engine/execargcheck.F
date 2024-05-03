@@ -20,23 +20,24 @@ Copyright>
 Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
-Chd|====================================================================
-Chd|  EXECARGCHECK                  source/engine/execargcheck.F  
-Chd|-- called by -----------
-Chd|        RADIOSS0                      source/engine/radioss0.F      
-Chd|-- calls ---------------
-Chd|        ARRET                         source/system/arret.F         
-Chd|        BUILD_MSG                     source/output/message/build_msg.F
-Chd|        ISANARGUMENT                  source/engine/execargcheck.F  
-Chd|        PEXECINFO                     source/engine/execargcheck.F  
-Chd|        PHELPINFO                     source/engine/execargcheck.F  
-Chd|        READ_MSGFILE                  source/output/message/read_msgfile.F
-Chd|        UPCASE                        source/engine/execargcheck.F  
-Chd|        CHECK_MOD                     ../common_source/modules/check_mod.F
-Chd|        COMMAND_LINE_ARGS_MOD         share/modules/command_line_args.F
-Chd|        INOUTFILE_MOD                 ../common_source/modules/inoutfile_mod.F
-Chd|        MESSAGE_MOD                   share/message_module/message_mod.F
-Chd|====================================================================
+      !||====================================================================
+      !||    execargcheck           ../starter/source/starter/execargcheck.F
+      !||--- called by ------------------------------------------------------
+      !||    starter0               ../starter/source/starter/starter0.F
+      !||--- calls      -----------------------------------------------------
+      !||    build_msg              ../starter/source/output/message/build_msg.F
+      !||    get_ibuiltin_arch      ../starter/source/system/get_ibuiltin_arch.c
+      !||    isanargument           ../starter/source/starter/execargcheck.F
+      !||    my_exit                ../starter/source/output/analyse/analyse.c
+      !||    pexecinfo              ../starter/source/starter/execargcheck.F
+      !||    phelpinfo              ../starter/source/starter/execargcheck.F
+      !||    prhelpinfo             ../starter/source/starter/execargcheck.F
+      !||    read_msgfile           ../starter/source/output/message/read_msgfile.F
+      !||    upcase                 ../starter/source/starter/execargcheck.F
+      !||--- uses       -----------------------------------------------------
+      !||    grp_size_mod           ../starter/share/modules1/grp_size_mod.F
+      !||    random_mod             ../starter/share/modules1/random_mod.F
+      !||====================================================================
       SUBROUTINE EXECARGCHECK(GOT_INPUT,INPUT,LENI, 
      *                        GOT_PATH,  PATH,  LENP)
       USE MESSAGE_MOD
@@ -548,12 +549,11 @@ C------------------------------------------------
 
 
 
-Chd|====================================================================
-Chd|  UPCASE                        source/engine/execargcheck.F  
-Chd|-- called by -----------
-Chd|        EXECARGCHECK                  source/engine/execargcheck.F  
-Chd|-- calls ---------------
-Chd|====================================================================
+      !||====================================================================
+      !||    upcase         ../starter/source/starter/execargcheck.F
+      !||--- called by ------------------------------------------------------
+      !||    execargcheck   ../starter/source/starter/execargcheck.F
+      !||====================================================================
       SUBROUTINE UPCASE (STRING) 
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
@@ -580,12 +580,11 @@ C
        END DO
        RETURN
        END
-Chd|====================================================================
-Chd|  ISANARGUMENT                  source/engine/execargcheck.F  
-Chd|-- called by -----------
-Chd|        EXECARGCHECK                  source/engine/execargcheck.F  
-Chd|-- calls ---------------
-Chd|====================================================================
+      !||====================================================================
+      !||    isanargument   ../starter/source/starter/execargcheck.F
+      !||--- called by ------------------------------------------------------
+      !||    execargcheck   ../starter/source/starter/execargcheck.F
+      !||====================================================================
        SUBROUTINE ISANARGUMENT(ARGLIST,LENLIST,ARG,ISIN)
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
@@ -620,14 +619,14 @@ C-----------------------------------------------
 
 
 
-Chd|====================================================================
-Chd|  PEXECINFO                     source/engine/execargcheck.F  
-Chd|-- called by -----------
-Chd|        EXECARGCHECK                  source/engine/execargcheck.F  
-Chd|-- calls ---------------
-Chd|        MY_EXIT                       source/system/my_exit.c       
-Chd|        PREXECINFO                    source/engine/execargcheck.F  
-Chd|====================================================================
+      !||====================================================================
+      !||    pexecinfo      ../starter/source/starter/execargcheck.F
+      !||--- called by ------------------------------------------------------
+      !||    execargcheck   ../starter/source/starter/execargcheck.F
+      !||--- calls      -----------------------------------------------------
+      !||    my_exit        ../starter/source/output/analyse/analyse.c
+      !||    prexecinfo     ../starter/source/starter/execargcheck.F
+      !||====================================================================
           SUBROUTINE PEXECINFO(IDUM)
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
@@ -668,12 +667,12 @@ C-----------------------------------------------
         CALL MY_EXIT(0)
         END
 
-Chd|====================================================================
-Chd|  PREXECINFO                    source/engine/execargcheck.F  
-Chd|-- called by -----------
-Chd|        PEXECINFO                     source/engine/execargcheck.F  
-Chd|-- calls ---------------
-Chd|====================================================================
+      !||====================================================================
+      !||    prexecinfo    ../starter/source/starter/execargcheck.F
+      !||--- called by ------------------------------------------------------
+      !||    pexecinfo     ../starter/source/starter/execargcheck.F
+      !||--- calls      -----------------------------------------------------
+      !||====================================================================
           SUBROUTINE PREXECINFO(IDUM)
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
@@ -715,15 +714,14 @@ C-----------------------------------------------
 
         END
 
-Chd|====================================================================
-Chd|  PHELPINFO                     source/engine/execargcheck.F  
-Chd|-- called by -----------
-Chd|        EXECARGCHECK                  source/engine/execargcheck.F  
-Chd|        GET_FILE_NAME_INFO            source/system/get_file_name_info.F
-Chd|-- calls ---------------
-Chd|        ARRET                         source/system/arret.F         
-Chd|        PRHELPINFO                    source/engine/execargcheck.F  
-Chd|====================================================================
+      !||====================================================================
+      !||    phelpinfo      ../starter/source/starter/execargcheck.F
+      !||--- called by ------------------------------------------------------
+      !||    execargcheck   ../starter/source/starter/execargcheck.F
+      !||--- calls      -----------------------------------------------------
+      !||    my_exit        ../starter/source/output/analyse/analyse.c
+      !||    prhelpinfo     ../starter/source/starter/execargcheck.F
+      !||====================================================================
           SUBROUTINE PHELPINFO(ERRN,EMSG,SMSG)
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
@@ -768,12 +766,14 @@ C-----------------------------------------------
         CALL ARRET(7)
         END
 
-Chd|====================================================================
-Chd|  PRHELPINFO                    source/engine/execargcheck.F  
-Chd|-- called by -----------
-Chd|        PHELPINFO                     source/engine/execargcheck.F  
-Chd|-- calls ---------------
-Chd|====================================================================
+      !||====================================================================
+      !||    prhelpinfo           ../starter/source/starter/execargcheck.F
+      !||--- called by ------------------------------------------------------
+      !||    execargcheck         ../starter/source/starter/execargcheck.F
+      !||    get_file_name_info   ../starter/source/system/get_file_name_info.F
+      !||    phelpinfo            ../starter/source/starter/execargcheck.F
+      !||    starter0             ../starter/source/starter/starter0.F
+      !||====================================================================
        SUBROUTINE PRHELPINFO(ERRN,EMSG,SMSG)
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s

@@ -20,26 +20,13 @@ Copyright>
 Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
-Chd|====================================================================
-Chd|  INTSTAMP_GLOB_MOD             share/modules/intstamp_glob_mod.F
-Chd|-- called by -----------
-Chd|        I21BUCE                       source/interfaces/intsort/i21buce.F
-Chd|        I21COR3                       source/interfaces/int21/i21cor3.F
-Chd|        LECTUR                        source/input/lectur.F         
-Chd|        RADIOSS2                      source/engine/radioss2.F      
-Chd|        RDRESB                        source/output/restart/rdresb.F
-Chd|        RESOL                         source/engine/resol.F         
-Chd|        RESTALLOC                     source/output/restart/arralloc.F
-Chd|        SPMD_I21FTHECOM               source/mpi/interfaces/send_cand.F
-Chd|        SPMD_I21TEMPCOM               source/mpi/interfaces/send_cand.F
-Chd|        SPMD_IFRONT_STAMP             source/mpi/interfaces/send_cand.F
-Chd|        SPMD_INITFI                   source/mpi/interfaces/spmd_i7tool.F
-Chd|        SPMD_SAVEFI                   source/mpi/interfaces/spmd_i7tool.F
-Chd|        UPDATE_STRUCT_INT21           source/interfaces/int21/update_struct_int21.F
-Chd|        WRRESTP                       source/output/restart/wrrestp.F
-Chd|-- calls ---------------
-Chd|        INTSTAMP_MOD                  share/modules/intstamp_mod.F  
-Chd|====================================================================
+      !||====================================================================
+      !||    intstamp_glob_mod   ../starter/share/modules1/intstamp_glob_mod.F
+      !||--- called by ------------------------------------------------------
+      !||    lectur              ../starter/source/starter/lectur.F
+      !||--- uses       -----------------------------------------------------
+      !||    intstamp_mod        ../starter/share/modules1/intstamp_mod.F
+      !||====================================================================
       MODULE INTSTAMP_GLOB_MOD
 C-----------------------------------------------
 C   M o d u l e s

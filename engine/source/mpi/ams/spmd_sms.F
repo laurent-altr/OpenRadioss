@@ -20,12 +20,11 @@ Copyright>
 Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
-Chd|====================================================================
-Chd|  SPMD_SORT_SMS                 source/mpi/ams/spmd_sms.F     
-Chd|-- called by -----------
-Chd|        RESOL                         source/engine/resol.F         
-Chd|-- calls ---------------
-Chd|====================================================================
+      !||====================================================================
+      !||    spmd_sort_sms   ../engine/source/mpi/ams/spmd_sms.F
+      !||--- called by ------------------------------------------------------
+      !||    resol           ../engine/source/engine/resol.F
+      !||====================================================================
       SUBROUTINE SPMD_SORT_SMS(ISKYI_SMS,MSKYI_SMS,FR_SMS)
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
@@ -92,12 +91,11 @@ C
       RETURN
       END
 C
-Chd|====================================================================
-Chd|  AMS_PREPARE_POFF_ASSEMBLY     source/mpi/ams/spmd_sms.F     
-Chd|-- called by -----------
-Chd|        RESOL                         source/engine/resol.F         
-Chd|-- calls ---------------
-Chd|====================================================================
+      !||====================================================================
+      !||    ams_prepare_poff_assembly   ../engine/source/mpi/ams/spmd_sms.F
+      !||--- called by ------------------------------------------------------
+      !||    resol                       ../engine/source/engine/resol.F
+      !||====================================================================
       SUBROUTINE AMS_PREPARE_POFF_ASSEMBLY(IAD_ELEM,FR_ELEM,NB_FR,    FR_LOC,
      *                                     IAD_I2M, FR_I2M, NB_FRI2M, FR_LOC_I2M)
 C-----------------------------------------------
@@ -159,12 +157,11 @@ C Interface type2
       END
 C
 #if defined(MPI)
-Chd|====================================================================
-Chd|  SPMD_NLIST_SMS                source/mpi/ams/spmd_sms.F     
-Chd|-- called by -----------
-Chd|        RESOL                         source/engine/resol.F         
-Chd|-- calls ---------------
-Chd|====================================================================
+      !||====================================================================
+      !||    spmd_nlist_sms   ../engine/source/mpi/ams/spmd_sms.F
+      !||--- called by ------------------------------------------------------
+      !||    resol            ../engine/source/engine/resol.F
+      !||====================================================================
       SUBROUTINE SPMD_NLIST_SMS(FR_SMS,FR_RMS)
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
@@ -229,14 +226,14 @@ C
       RETURN
       END
 C
-Chd|====================================================================
-Chd|  SPMD_LIST_SMS                 source/mpi/ams/spmd_sms.F     
-Chd|-- called by -----------
-Chd|        SMS_BUILD_MAT_2               source/ams/sms_build_mat_2.F  
-Chd|        SMS_ENCIN_2                   source/ams/sms_encin_2.F      
-Chd|        SMS_MASS_SCALE_2              source/ams/sms_mass_scale_2.F 
-Chd|-- calls ---------------
-Chd|====================================================================
+      !||====================================================================
+      !||    spmd_list_sms      ../engine/source/mpi/ams/spmd_sms.F
+      !||--- called by ------------------------------------------------------
+      !||    sms_build_mat_2    ../engine/source/ams/sms_build_mat_2.F
+      !||    sms_encin_2        ../engine/source/ams/sms_encin_2.F
+      !||    sms_mass_scale_2   ../engine/source/ams/sms_mass_scale_2.F
+      !||--- calls      -----------------------------------------------------
+      !||====================================================================
       SUBROUTINE SPMD_LIST_SMS(
      1           ISKYI_SMS,FR_SMS,FR_RMS,LIST_SMS,LIST_RMS,
      2           NPBY     ,TAGSLV_RBY_SMS)
@@ -413,14 +410,14 @@ C--------------------------------------------------------------------
       RETURN
       END
 C
-Chd|====================================================================
-Chd|  SPMD_MIJ_SMS                  source/mpi/ams/spmd_sms.F     
-Chd|-- called by -----------
-Chd|        SMS_BUILD_DIAG                source/ams/sms_build_diag.F   
-Chd|        SMS_ENCIN_2                   source/ams/sms_encin_2.F      
-Chd|        SMS_MASS_SCALE_2              source/ams/sms_mass_scale_2.F 
-Chd|-- calls ---------------
-Chd|====================================================================
+      !||====================================================================
+      !||    spmd_mij_sms       ../engine/source/mpi/ams/spmd_sms.F
+      !||--- called by ------------------------------------------------------
+      !||    sms_build_diag     ../engine/source/ams/sms_build_diag.F
+      !||    sms_encin_2        ../engine/source/ams/sms_encin_2.F
+      !||    sms_mass_scale_2   ../engine/source/ams/sms_mass_scale_2.F
+      !||--- calls      -----------------------------------------------------
+      !||====================================================================
       SUBROUTINE SPMD_MIJ_SMS(
      1           ISKYI_SMS,FR_SMS,FR_RMS,LIST_RMS,MSKYI_SMS,
      2           MIJ_SMS)
@@ -515,12 +512,12 @@ C--------------------------------------------------------------------
 C
       RETURN
       END
-Chd|====================================================================
-Chd|  SPMD_GLOB_LMIN                source/mpi/ams/spmd_sms.F     
-Chd|-- called by -----------
-Chd|        SMS_CHECK                     source/ams/sms_fsa_inv.F      
-Chd|-- calls ---------------
-Chd|====================================================================
+      !||====================================================================
+      !||    spmd_glob_lmin   ../engine/source/mpi/ams/spmd_sms.F
+      !||--- called by ------------------------------------------------------
+      !||    sms_check        ../engine/source/ams/sms_fsa_inv.F
+      !||--- calls      -----------------------------------------------------
+      !||====================================================================
       SUBROUTINE SPMD_GLOB_LMIN(LMIN,IMIN)
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
@@ -576,11 +573,10 @@ C
       RETURN
       END
 C
-Chd|====================================================================
-Chd|  SPMD_GLOB_LMAX                source/mpi/ams/spmd_sms.F     
-Chd|-- called by -----------
-Chd|-- calls ---------------
-Chd|====================================================================
+      !||====================================================================
+      !||    spmd_glob_lmax   ../engine/source/mpi/ams/spmd_sms.F
+      !||--- calls      -----------------------------------------------------
+      !||====================================================================
       SUBROUTINE SPMD_GLOB_LMAX(LMAX,IMAX)
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
@@ -636,12 +632,11 @@ C
       RETURN
       END
 C
-Chd|====================================================================
-Chd|  SPMD_NNDFT_SMS                source/mpi/ams/spmd_sms.F     
-Chd|-- called by -----------
-Chd|        SMS_CHECK                     source/ams/sms_fsa_inv.F      
-Chd|-- calls ---------------
-Chd|====================================================================
+      !||====================================================================
+      !||    spmd_nndft_sms   ../engine/source/mpi/ams/spmd_sms.F
+      !||--- called by ------------------------------------------------------
+      !||    sms_check        ../engine/source/ams/sms_fsa_inv.F
+      !||====================================================================
       SUBROUTINE SPMD_NNDFT_SMS(
      1           FR_SMS ,FR_RMS,LIST_SMS,LIST_RMS,IAD_ELEM,
      2           FR_ELEM,NNDFT0,NNDFT1,ISORTND)
@@ -729,12 +724,12 @@ C--------------------------------------------------------------------
       RETURN
       END
 C
-Chd|====================================================================
-Chd|  SPMD_NNZ_SMS                  source/mpi/ams/spmd_sms.F     
-Chd|-- called by -----------
-Chd|        SMS_CHECK                     source/ams/sms_fsa_inv.F      
-Chd|-- calls ---------------
-Chd|====================================================================
+      !||====================================================================
+      !||    spmd_nnz_sms   ../engine/source/mpi/ams/spmd_sms.F
+      !||--- called by ------------------------------------------------------
+      !||    sms_check      ../engine/source/ams/sms_fsa_inv.F
+      !||--- calls      -----------------------------------------------------
+      !||====================================================================
       SUBROUTINE SPMD_NNZ_SMS(
      1           FR_SMS ,FR_RMS,LIST_SMS,LIST_RMS,IAD_ELEM,
      2           FR_ELEM,NNZM  ,IADK    ,KADM    )
@@ -860,15 +855,16 @@ C--------------------------------------------------------------------
       END
 C
 C
-Chd|====================================================================
-Chd|  SPMD_EXCHM_SMS                source/mpi/ams/spmd_sms.F     
-Chd|-- called by -----------
-Chd|        SMS_CHECK                     source/ams/sms_fsa_inv.F      
-Chd|-- calls ---------------
-Chd|        ANCMSG                        source/output/message/message.F
-Chd|        ARRET                         source/system/arret.F         
-Chd|        MESSAGE_MOD                   share/message_module/message_mod.F
-Chd|====================================================================
+      !||====================================================================
+      !||    spmd_exchm_sms   ../engine/source/mpi/ams/spmd_sms.F
+      !||--- called by ------------------------------------------------------
+      !||    sms_check        ../engine/source/ams/sms_fsa_inv.F
+      !||--- calls      -----------------------------------------------------
+      !||    ancmsg           ../engine/share/message_module/inter_ancmsg_mod.F
+      !||    arret            ../engine/source/system/arret.F
+      !||--- uses       -----------------------------------------------------
+      !||    message_mod      ../engine/share/message_module/message_mod.F
+      !||====================================================================
       SUBROUTINE SPMD_EXCHM_SMS(
      1           FR_SMS ,FR_RMS,LIST_SMS,LIST_RMS,IAD_ELEM,
      2           FR_ELEM,IADK  ,JDIK    ,LT_K    ,KADM    , 
@@ -1068,11 +1064,10 @@ C--------------------------------------------------------------------
       RETURN
       END
 C
-Chd|====================================================================
-Chd|  SPMD_EXCH_AWORK               source/mpi/ams/spmd_sms.F     
-Chd|-- called by -----------
-Chd|-- calls ---------------
-Chd|====================================================================
+      !||====================================================================
+      !||    spmd_exch_awork   ../engine/source/mpi/ams/spmd_sms.F
+      !||--- calls      -----------------------------------------------------
+      !||====================================================================
       SUBROUTINE SPMD_EXCH_AWORK(
      1   A      ,IAD_ELEM ,FR_ELEM,SIZE,LENR     )
 C-----------------------------------------------
@@ -1188,12 +1183,12 @@ C
       RETURN
       END
 C
-Chd|====================================================================
-Chd|  SPMD_EXCH_RBE3_NODNX          source/mpi/ams/spmd_sms.F     
-Chd|-- called by -----------
-Chd|        SMS_RBE3_NODXI                source/ams/sms_rbe3.F         
-Chd|-- calls ---------------
-Chd|====================================================================
+      !||====================================================================
+      !||    spmd_exch_rbe3_nodnx   ../engine/source/mpi/ams/spmd_sms.F
+      !||--- called by ------------------------------------------------------
+      !||    sms_rbe3_nodxi         ../engine/source/ams/sms_rbe3.F
+      !||--- calls      -----------------------------------------------------
+      !||====================================================================
       SUBROUTINE SPMD_EXCH_RBE3_NODNX(
      1   NODNX_SMS,FR_M   ,IAD_M ,LCOMM  )
 C-----------------------------------------------
@@ -1292,12 +1287,11 @@ C
 C
 #elif 1
 C
-Chd|====================================================================
-Chd|  SPMD_NLIST_SMS                source/mpi/ams/spmd_sms.F     
-Chd|-- called by -----------
-Chd|        RESOL                         source/engine/resol.F         
-Chd|-- calls ---------------
-Chd|====================================================================
+      !||====================================================================
+      !||    spmd_nlist_sms   ../engine/source/mpi/ams/spmd_sms.F
+      !||--- called by ------------------------------------------------------
+      !||    resol            ../engine/source/engine/resol.F
+      !||====================================================================
       SUBROUTINE SPMD_NLIST_SMS(IDUM1,IDUM2)
 C-----------------------------------------------
 #include "implicit_f.inc"

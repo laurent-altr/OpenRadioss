@@ -20,20 +20,27 @@ Copyright>
 Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
-Chd|====================================================================
-Chd|  INTERFACE_UTABLE_MOD          source/user_interface/interface_utable.F
-Chd|-- called by -----------
-Chd|-- calls ---------------
-Chd|====================================================================
+      !||====================================================================
+      !||    interface_utable_mod   ../starter/source/user_interface/interface_utable.F
+      !||====================================================================
       MODULE INTERFACE_UTABLE_MOD
 C-----------------------------------------------
 #include      "my_real.inc"
       INTERFACE
 C
+      !||====================================================================
+      !||    get_u_numtable   ../starter/source/user_interface/interface_utable.F
+      !||====================================================================
         INTEGER FUNCTION GET_U_NUMTABLE(I)
         INTEGER I
+      !||====================================================================
+      !||    get_u_numtable   ../starter/source/user_interface/interface_utable.F
+      !||====================================================================
         END FUNCTION GET_U_NUMTABLE
 C
+      !||====================================================================
+      !||    get_u_table   ../starter/source/user_interface/interface_utable.F
+      !||====================================================================
         SUBROUTINE GET_U_TABLE(I,XX,YY)
         INTEGER I
         my_real, 
@@ -42,6 +49,9 @@ C
      .         YY
         END SUBROUTINE GET_U_TABLE
 C
+      !||====================================================================
+      !||    get_u_vtable   ../starter/source/user_interface/interface_utable.F
+      !||====================================================================
         SUBROUTINE GET_U_VTABLE(I,NEL,IPOS,XX,YY,DYDX)
         INTEGER I,NEL
         INTEGER, DIMENSION(:,:) :: IPOS 

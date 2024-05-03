@@ -20,15 +20,12 @@ Copyright>
 Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
-Chd|====================================================================
-Chd|  THICKVAR                      source/elements/shell/coque/thickvar.F
-Chd|-- called by -----------
-Chd|        RESOL                         source/engine/resol.F         
-Chd|-- calls ---------------
-Chd|        STARTIMEG                     source/system/timer.F         
-Chd|        STOPTIMEG                     source/system/timer.F         
-Chd|        ELBUFDEF_MOD                  ../common_source/modules/mat_elem/elbufdef_mod.F
-Chd|====================================================================
+      !||====================================================================
+      !||    thickvar        ../starter/source/interfaces/interf1/inintr_thkvar.F
+      !||--- called by ------------------------------------------------------
+      !||    inintr_thkvar   ../starter/source/interfaces/interf1/inintr_thkvar.F
+      !||--- uses       -----------------------------------------------------
+      !||====================================================================
       SUBROUTINE THICKVAR(IPARG,ELBUF_TAB,IXC,IXTG,THKSH4_VAR,
      .                    THKSH3_VAR,THKNOD,THKE,SH4TREE,SH3TREE)
 C-----------------------------------------------

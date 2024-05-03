@@ -21,26 +21,16 @@ Copyright>        As an alternative to this open-source version, Altair also off
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
 
-Chd|====================================================================
-Chd|  GROUPS_GET_ELEM_LIST          source/groups/groups_get_elem_list.F
-Chd|-- called by -----------
-Chd|        HM_ADMLCNT                    source/groups/hm_admlistcnt.F 
-Chd|        HM_GROGRO                     source/groups/hm_grogro.F     
-Chd|        HM_GROGRONOD                  source/groups/hm_grogronod.F  
-Chd|        HM_LECGRE                     source/groups/hm_lecgre.F     
-Chd|        HM_SUBMODGRE                  source/groups/hm_submodgr.F   
-Chd|        HM_SUBMODGRN                  source/groups/hm_submodgr.F   
-Chd|        HM_SUBMODPART                 source/groups/hm_submodpart.F 
-Chd|        HM_SURFGR2                    source/groups/hm_surfgr2.F    
-Chd|        HM_TAGPART                    source/groups/hm_tagpart.F    
-Chd|        HM_TAGPART2                   source/groups/hm_tagpart2.F   
-Chd|-- calls ---------------
-Chd|        HM_GET_INTV                   source/devtools/hm_reader/hm_get_intv.F
-Chd|        HM_GET_INT_ARRAY_INDEX        source/devtools/hm_reader/hm_get_int_array_index.F
-Chd|        HM_OPTION_READ_MOD            share/modules1/hm_option_read_mod.F
-Chd|        MESSAGE_MOD                   share/message_module/message_mod.F
-Chd|        SUBMODEL_MOD                  share/modules1/submodel_mod.F 
-Chd|====================================================================
+      !||====================================================================
+      !||    groups_get_elem_list   ../starter/source/groups/hm_tagpart.F
+      !||--- called by ------------------------------------------------------
+      !||    groups_get_elem_list   ../starter/source/groups/hm_tagpart.F
+      !||--- calls      -----------------------------------------------------
+      !||    ancmsg                 ../starter/share/message_module/inter_ancmsg_mod.F
+      !||    groups_get_elem_list   ../starter/source/groups/hm_tagpart.F
+      !||--- uses       -----------------------------------------------------
+      !||    submodel_mod           ../starter/share/modules1/submodel_mod.F
+      !||====================================================================
       SUBROUTINE GROUPS_GET_ELEM_LIST(LIST_ENTITY,NENTITY,LSUBMODEL)
 C-----------------------------------------------
 C   M o d u l e s

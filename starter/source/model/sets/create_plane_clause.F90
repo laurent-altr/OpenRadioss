@@ -20,6 +20,11 @@
 !Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 !Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 !Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
+      !||====================================================================
+      !||    create_plane_clause_mod   ../starter/source/model/sets/create_plane_clause.F90
+      !||--- called by ------------------------------------------------------
+      !||    hm_set                    ../starter/source/model/sets/hm_set.F
+      !||====================================================================
       module create_plane_clause_mod
       contains
 ! ======================================================================================================================
@@ -29,6 +34,19 @@
 !=======================================================================================================================
 !\brief This subroutine creates a clause from a plane surface
 !=======================================================================================================================
+        !||====================================================================
+        !||    create_plane_clause    ../starter/source/model/sets/create_plane_clause.F90
+        !||--- called by ------------------------------------------------------
+        !||    hm_set                 ../starter/source/model/sets/hm_set.F
+        !||--- calls      -----------------------------------------------------
+        !||    ancmsg                 ../starter/share/message_module/inter_ancmsg_mod.F
+        !||    hm_get_floatv          ../starter/source/devtools/hm_reader/hm_get_floatv.F
+        !||    subrotpoint            ../starter/source/model/submodel/subrot.F
+        !||--- uses       -----------------------------------------------------
+        !||    hm_option_read_mod     ../starter/share/modules1/hm_option_read_mod.F
+        !||    message_mod            ../starter/share/message_module/message_mod.F
+        !||    submodel_mod           ../starter/share/modules1/submodel_mod.F
+        !||====================================================================
         subroutine create_plane_clause(id,title,sub_id,clause,lsubmodel,unitab,iad,nrtrans,ntransf,rtrans)
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Modules
@@ -59,7 +77,7 @@
           character(len=nchartitle),                 intent(in) :: title                             !< set title
           my_real,                                   intent(in) :: rtrans(ntransf,nrtrans)           !< transformation storage array
           type(SET_),                                intent(inout) :: clause                         !< clause of set
-          type(UNIT_TYPE_),                          intent(in) :: unitab                            !< unit table 
+          type(UNIT_TYPE_),                          intent(in) :: unitab                            !< unit table
           type(SUBMODEL_DATA),                       intent(in) :: lsubmodel(nsubmod)              !< submodel storage array
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Local variables
@@ -81,14 +99,14 @@
           ym1 = ZERO
           zm1 = ZERO
 !
-          call hm_get_floatv('XM' ,xm,is_available,lsubmodel,unitab)                                                            
-          call hm_get_floatv('YM' ,ym,is_available,lsubmodel,unitab)                                                            
+          call hm_get_floatv('XM' ,xm,is_available,lsubmodel,unitab)
+          call hm_get_floatv('YM' ,ym,is_available,lsubmodel,unitab)
           call hm_get_floatv('ZM' ,zm,is_available,lsubmodel,unitab)
           if (sub_id /= 0) call subrotpoint(xm,ym,zm,rtrans,sub_id,lsubmodel)
 !
-          call hm_get_floatv  ('XM1' ,xm1,is_available,lsubmodel,unitab)                                                            
-          call hm_get_floatv  ('YM1' ,ym1,is_available,lsubmodel,unitab)                                                            
-          call hm_get_floatv  ('ZM1' ,zm1,is_available,lsubmodel,unitab)                                                            
+          call hm_get_floatv  ('XM1' ,xm1,is_available,lsubmodel,unitab)
+          call hm_get_floatv  ('YM1' ,ym1,is_available,lsubmodel,unitab)
+          call hm_get_floatv  ('ZM1' ,zm1,is_available,lsubmodel,unitab)
           if (sub_id /= 0) call subrotpoint(xm1,ym1,zm1,rtrans,sub_id,lsubmodel)
 !
 !         Normal Vector

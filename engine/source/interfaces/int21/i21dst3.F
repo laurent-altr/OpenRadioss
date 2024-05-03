@@ -20,12 +20,11 @@ Copyright>
 Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
-Chd|====================================================================
-Chd|  I21DST3                       source/interfaces/int21/i21dst3.F
-Chd|-- called by -----------
-Chd|        I21OPTCD                      source/interfaces/int21/i21optcd.F
-Chd|-- calls ---------------
-Chd|====================================================================
+      !||====================================================================
+      !||    i21dst3         ../starter/source/interfaces/inter3d1/i21dst3.F
+      !||--- called by ------------------------------------------------------
+      !||    inint3_thkvar   ../starter/source/interfaces/inter3d1/inint3_thkvar.F
+      !||====================================================================
       SUBROUTINE I21DST3(
      1                  JLT    ,LIST   ,CAND_N ,CAND_E ,IX1    ,
      2                  IX2    ,IX3    ,IX4    ,GAPV   ,XI     ,

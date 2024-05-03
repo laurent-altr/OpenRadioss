@@ -22,19 +22,16 @@ Copyright>        software under a commercial license.  Contact Altair to discus
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
 C            SPMD_AGETMSR                    /spe/spmd_anim.F
 C            SSPMD_AGET_SECT                 /spe/spmd_anim.F
-Chd|====================================================================
-Chd|  DXYZSECT                      source/output/anim/generate/dxyzsect.F
-Chd|-- called by -----------
-Chd|        GENANI                        source/output/anim/generate/genani.F
-Chd|-- calls ---------------
-Chd|        DXWALC                        source/output/anim/generate/dxwalc.F
-Chd|        DXWALL                        source/output/anim/generate/dxwall.F
-Chd|        DXWALP                        source/output/anim/generate/dxwalp.F
-Chd|        DXWALS                        source/output/anim/generate/dxwals.F
-Chd|        SPMD_AGETMSR                  source/mpi/anim/spmd_agetmsr.F
-Chd|        SPMD_AGET_SECT                source/mpi/anim/spmd_aget_sect.F
-Chd|        WRITE_R_C                     ../common_source/tools/input_output/write_routtines.c
-Chd|====================================================================
+      !||====================================================================
+      !||    dxyzsect    ../starter/source/output/anim/dxyzsect.F
+      !||--- called by ------------------------------------------------------
+      !||    genani1     ../starter/source/output/anim/genani1.F
+      !||--- calls      -----------------------------------------------------
+      !||    dxwalc      ../starter/source/output/anim/dxwalc.F
+      !||    dxwall      ../starter/source/output/anim/dxwall.F
+      !||    dxwalp      ../starter/source/output/anim/dxwalp.F
+      !||    dxwals      ../starter/source/output/anim/dxwals.F
+      !||====================================================================
       SUBROUTINE DXYZSECT (NSTRF,RWBUF,NPRW  ,X     ,XMIN ,
      2                     YMIN ,ZMIN  ,XMAX ,YMAX  , ZMAX,
      3                      FR_SEC,FR_WALL,WEIGHT,ITAB)

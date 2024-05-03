@@ -20,13 +20,12 @@ Copyright>
 Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
-Chd|====================================================================
-Chd|  SIGEPS48                      source/materials/mat/mat048/sigeps48.F
-Chd|-- called by -----------
-Chd|        MULAW                         source/materials/mat_share/mulaw.F
-Chd|        MULAW8                        source/materials/mat_share/mulaw8.F
-Chd|-- calls ---------------
-Chd|====================================================================
+      !||====================================================================
+      !||    sigeps48   ../engine/source/materials/mat/mat048/sigeps48.F
+      !||--- called by ------------------------------------------------------
+      !||    mulaw      ../engine/source/materials/mat_share/mulaw.F
+      !||    mulaw8     ../engine/source/materials/mat_share/mulaw8.F
+      !||====================================================================
       SUBROUTINE SIGEPS48(
      1     NEL    ,NUPARAM,NUVAR   ,MFUNC   ,KFUNC   ,NPF    ,
      2     TF     ,TIME   ,TIMESTEP,UPARAM  ,RHO0    ,RHO    ,

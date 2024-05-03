@@ -20,100 +20,51 @@ Copyright>
 Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
-Chd|====================================================================
-Chd|  STACK_MOD                     share/modules/stack_mod.F     
-Chd|-- called by -----------
-Chd|        ANIM_BUILD_INDEX_ALL          source/output/anim/reader/anim_build_index_all.F
-Chd|        ANIM_DCOD_KEY_0               source/output/anim/reader/anim_dcod_key_0.F
-Chd|        ANIM_RESET_INDEX_ALL          source/output/anim/reader/anim_reset_index_all.F
-Chd|        ANIOFFC_PLY                   source/output/anim/generate/anioffc_ply.F
-Chd|        C3FORC3                       source/elements/sh3n/coque3n/c3forc3.F
-Chd|        C3FORC3_CRK                   source/elements/xfem/c3forc3_crk.F
-Chd|        C3KE3                         source/elements/sh3n/coque3n/c3ke3.F
-Chd|        CBAFORC3                      source/elements/shell/coqueba/cbaforc3.F
-Chd|        CBAKE3                        source/elements/shell/coqueba/cbake3.F
-Chd|        CDK6FORC3                     source/elements/sh3n/coquedk6/cdk6forc3.F
-Chd|        CDKFORC3                      source/elements/sh3n/coquedk/cdkforc3.F
-Chd|        CFORC3                        source/elements/shell/coque/cforc3.F
-Chd|        CFORC3_CRK                    source/elements/xfem/cforc3_crk.F
-Chd|        CMAIN3                        source/materials/mat_share/cmain3.F
-Chd|        CMAIN3PINCH                   source/elements/shell/coqueba/cmain3pinch.F
-Chd|        CMATC3                        source/elements/shell/coqueba/cmatc3.F
-Chd|        CNCOEFORT                     source/elements/sh3n/coquedk/cncoef3.F
-Chd|        CZFORC3                       source/elements/shell/coquez/czforc3.F
-Chd|        CZFORC3_CRK                   source/elements/xfem/czforc3_crk.F
-Chd|        CZKE3                         source/elements/shell/coquez/czke3.F
-Chd|        C_TF_NE                       source/output/sty/c_tf_ne.F   
-Chd|        DFUNCC                        source/output/anim/generate/dfuncc.F
-Chd|        DFUNCC_PLY                    source/output/anim/generate/dfuncc_ply.F
-Chd|        DMASANIC                      source/output/anim/generate/dmasanic.F
-Chd|        DYNAIN_C_STRAG                source/output/dynain/dynain_c_strag.F
-Chd|        DYNAIN_C_STRSG                source/output/dynain/dynain_c_strsg.F
-Chd|        EIG                           stub/eig.F                    
-Chd|        EIG1                          stub/eig1.F                   
-Chd|        EIGCOND                       stub/eigcond.F                
-Chd|        EIGP                          stub/eigp.F                   
-Chd|        FAIL_SETOFF_C                 source/materials/fail/fail_setoff_c.F
-Chd|        FAIL_SETOFF_NPG_C             source/materials/fail/fail_setoff_npg_c.F
-Chd|        FAIL_SETOFF_WIND_FRWAVE       source/materials/fail/fail_setoff_wind_frwave.F
-Chd|        FORINTC                       source/elements/forintc.F     
-Chd|        FREANIM                       source/output/anim/reader/freanim.F
-Chd|        GENANI                        source/output/anim/generate/genani.F
-Chd|        GENDYNAIN                     source/output/dynain/gendynain.F
-Chd|        GENH3D                        source/output/h3d/h3d_results/genh3d.F
-Chd|        GENOUTP                       source/output/sty/genoutp.F   
-Chd|        GENSTAT                       source/output/sta/genstat.F   
-Chd|        H3D_LIST_QUAD_SCALAR          source/output/h3d/input_list/h3d_list_quad_scalar.F
-Chd|        H3D_LIST_QUAD_TENSOR          source/output/h3d/input_list/h3d_list_quad_tensor.F
-Chd|        H3D_LIST_SHELL_SCALAR         source/output/h3d/input_list/h3d_list_shell_scalar.F
-Chd|        H3D_LIST_SHELL_TENSOR         source/output/h3d/input_list/h3d_list_shell_tensor.F
-Chd|        H3D_QUAD_SCALAR               source/output/h3d/h3d_results/h3d_quad_scalar.F
-Chd|        H3D_QUAD_TENSOR               source/output/h3d/h3d_results/h3d_quad_tensor.F
-Chd|        H3D_QUAD_VECTOR               source/output/h3d/h3d_results/h3d_quad_vector.F
-Chd|        H3D_READ                      source/output/h3d/h3d_build_fortran/h3d_read.F
-Chd|        H3D_SHELL_SCALAR              source/output/h3d/h3d_results/h3d_shell_scalar.F
-Chd|        H3D_SHELL_SCALAR_1            source/output/h3d/h3d_results/h3d_shell_scalar_1.F
-Chd|        H3D_SHELL_TENSOR              source/output/h3d/h3d_results/h3d_shell_tensor.F
-Chd|        H3D_SHELL_VECTOR              source/output/h3d/h3d_results/h3d_shell_vector.F
-Chd|        H3D_SHELL_VECTOR_1            source/output/h3d/h3d_results/h3d_shell_vector_1.F
-Chd|        H3D_SOLID_SCALAR              source/output/h3d/h3d_results/h3d_solid_scalar.F
-Chd|        H3D_SOLID_SCALAR_1            source/output/h3d/h3d_results/h3d_solid_scalar_1.F
-Chd|        H3D_SOLID_TENSOR              source/output/h3d/h3d_results/h3d_solid_tensor.F
-Chd|        H3D_SOLID_TENSOR_1            source/output/h3d/h3d_results/h3d_solid_tensor_1.F
-Chd|        H3D_SOLID_VECTOR              source/output/h3d/h3d_results/h3d_solid_vector.F
-Chd|        H3D_SPH_SCALAR                source/output/h3d/h3d_results/h3d_sph_scalar.F
-Chd|        H3D_SPH_TENSOR                source/output/h3d/h3d_results/h3d_sph_tensor.F
-Chd|        HIST2                         source/output/th/hist2.F      
-Chd|        IMP_BUCK                      source/implicit/imp_buck.F    
-Chd|        IMP_CHKM                      source/implicit/imp_solv.F    
-Chd|        IMP_GLOB_K                    source/implicit/imp_glob_k.F  
-Chd|        IMP_GLOB_K0                   source/implicit/imp_glob_k.F  
-Chd|        IMP_GLOB_KHP                  source/implicit/imp_glob_k.F  
-Chd|        IMP_K_EIG                     stub/imp_k_eig.F              
-Chd|        IMP_SOLV                      source/implicit/imp_solv.F    
-Chd|        INIT_TH                       source/output/th/init_th.F    
-Chd|        INIT_TH0                      source/output/th/init_th0.F   
-Chd|        INI_TMAX                      source/output/ini_outmax.F    
-Chd|        LAYINI                        source/elements/shell/coque/layini.F
-Chd|        LECH3D                        source/output/h3d/h3d_build_fortran/lech3d.F
-Chd|        LECTUR                        source/input/lectur.F         
-Chd|        MULAWC                        source/materials/mat_share/mulawc.F
-Chd|        OUTP_C_TF                     source/output/sty/outp_c_t.F  
-Chd|        RADIOSS2                      source/engine/radioss2.F      
-Chd|        RESOL                         source/engine/resol.F         
-Chd|        RESOL_HEAD                    source/engine/resol_head.F    
-Chd|        RESOL_INIT                    source/engine/resol_init.F    
-Chd|        RESTALLOC                     source/output/restart/arralloc.F
-Chd|        SORTIE_MAIN                   source/output/sortie_main.F   
-Chd|        STAT_C_STRAFG                 source/output/sta/stat_c_strafg.F
-Chd|        STAT_C_STRSFG                 source/output/sta/stat_c_strsfg.F
-Chd|        TENSORC                       source/output/anim/generate/tensorc.F
-Chd|        TENSORC_PLY                   source/output/anim/generate/tensorc_ply.F
-Chd|        THCOQ                         source/output/th/thcoq.F      
-Chd|        UPD_TMAX                      source/output/upd_outmax.F    
-Chd|        USERMAT_SHELL                 source/materials/mat_share/usermat_shell.F
-Chd|-- calls ---------------
-Chd|====================================================================
+      !||====================================================================
+      !||    stack_mod                           ../starter/share/modules1/stack_mod.F
+      !||--- called by ------------------------------------------------------
+      !||    c3grhead                            ../starter/source/elements/sh3n/coque3n/c3grhead.F
+      !||    c3grtails                           ../starter/source/elements/sh3n/coque3n/c3grtails.F
+      !||    c3init3                             ../starter/source/elements/sh3n/coque3n/c3init3.F
+      !||    c3inmas                             ../starter/source/elements/sh3n/coque3n/c3inmas.F
+      !||    cbainit3                            ../starter/source/elements/shell/coqueba/cbainit3.F
+      !||    cbufxfe                             ../starter/source/elements/xfem/cbufxfe.F
+      !||    cdkinit3                            ../starter/source/elements/sh3n/coquedk/cdkinit3.F
+      !||    cgrhead                             ../starter/source/elements/shell/coque/cgrhead.F
+      !||    cgrtails                            ../starter/source/elements/shell/coque/cgrtails.F
+      !||    check_mat_elem_prop_compatibility   ../starter/source/materials/mat/check_mat_elem_prop_compatibility.F
+      !||    check_pthickfail                    ../starter/source/materials/fail/check_pthickfail.F
+      !||    cinit3                              ../starter/source/elements/shell/coque/cinit3.F
+      !||    cinmas                              ../starter/source/elements/shell/coque/cinmas.F
+      !||    cmaini3                             ../starter/source/elements/sh3n/coquedk/cmaini3.F
+      !||    corthdir                            ../starter/source/elements/shell/coque/corthdir.F
+      !||    corthini                            ../starter/source/elements/shell/coque/corthini.F
+      !||    ddsplit                             ../starter/source/restart/ddsplit/ddsplit.F
+      !||    elbuf_ini                           ../starter/source/elements/elbuf_init/elbuf_ini.F
+      !||    hm_read_anim                        ../starter/source/general_controls/engine/hm_read_anim.F
+      !||    hm_read_drape                       ../starter/source/properties/composite_options/drape/hm_read_drape.F
+      !||    hm_read_inistate_d00                ../starter/source/elements/initia/hm_read_inistate_d00.F
+      !||    hm_read_prop17                      ../starter/source/properties/shell/hm_read_prop17.F
+      !||    hm_read_prop51                      ../starter/source/properties/shell/hm_read_prop51.F
+      !||    hm_read_properties                  ../starter/source/properties/hm_read_properties.F
+      !||    hm_read_stack                       ../starter/source/stack/hm_read_stack.F
+      !||    inirig_mat                          ../starter/source/elements/initia/inirig_mat.F
+      !||    initia                              ../starter/source/elements/initia/initia.F
+      !||    inivoid                             ../starter/source/elements/initia/inivoid.F
+      !||    layini1                             ../starter/source/elements/shell/coqueba/layini1.F
+      !||    layini_xfe                          ../starter/source/elements/xfem/cbufxfe.F
+      !||    lec_inistate                        ../starter/source/elements/initia/lec_inistate.F
+      !||    lecstack_ply                        ../starter/source/properties/composite_options/stack/lecstack_ply.F
+      !||    lectur                              ../starter/source/starter/lectur.F
+      !||    pre_stackgroup                      ../starter/source/stack/pres_stackgroup.F
+      !||    shellthk_upd                        ../starter/source/properties/composite_options/drape/shellthk_upd.F
+      !||    spmd_anim_ply_init                  ../starter/source/spmd/spmd_anim_ply_init.F
+      !||    stack_var_mod                       ../starter/share/modules1/stack_var_mod.F
+      !||    stackgroup                          ../starter/source/stack/stackgroup.F
+      !||    stackgroup_drape                    ../starter/source/stack/stackgroup_drape.F
+      !||    t3grhead                            ../starter/source/elements/solid_2d/tria/t3grhead.F
+      !||    t3grtails                           ../starter/source/elements/solid_2d/tria/t3grtails.F
+      !||====================================================================
       MODULE STACK_MOD
 C-----------------------------------------------
 C   m y _ r e a l

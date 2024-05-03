@@ -20,17 +20,22 @@ Copyright>
 Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
-Chd|====================================================================
-Chd|  CHECKSUM_MOD                  source/mpi/output/node_checksum.F
-Chd|-- called by -----------
-Chd|        SPMD_FLUSH_ACCEL              source/mpi/output/spmd_flush_accel.F
-Chd|-- calls ---------------
-Chd|====================================================================
+      !||====================================================================
+      !||    checksum_mod       ../engine/source/mpi/output/node_checksum.F
+      !||--- called by ------------------------------------------------------
+      !||    spmd_flush_accel   ../engine/source/mpi/output/spmd_flush_accel.F
+      !||====================================================================
       MODULE CHECKSUM_MOD
         INTEGER, PARAMETER :: ROOT = 65521
         INTEGER, PARAMETER :: TWO_POWER_16 = 65536
 
         interface
+      !||====================================================================
+      !||    adler32                 ../engine/source/mpi/output/node_checksum.F
+      !||--- called by ------------------------------------------------------
+      !||    double_array_checksum   ../engine/source/mpi/output/node_checksum.F
+      !||--- uses       -----------------------------------------------------
+      !||====================================================================
         subroutine adler32(data, len, checksum) bind(C, name="cpp_adler32")
           use iso_c_binding
           type(c_ptr), value :: data
@@ -40,6 +45,12 @@ Chd|====================================================================
         end interface
       CONTAINS
 !! \brief Returns Adler32 checksum of A(1:SIZ2,1:SIZ1)
+      !||====================================================================
+      !||    double_array_checksum   ../engine/source/mpi/output/node_checksum.F
+      !||--- calls      -----------------------------------------------------
+      !||    adler32                 ../engine/source/mpi/output/node_checksum.F
+      !||--- uses       -----------------------------------------------------
+      !||====================================================================
         FUNCTION  DOUBLE_ARRAY_CHECKSUM(A,SIZ1,SIZ2) RESULT(CHECKSUM)
            USE ISO_C_BINDING
 C-----------------------------------------------

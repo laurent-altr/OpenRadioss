@@ -20,12 +20,15 @@ Copyright>
 Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
-Chd|====================================================================
-Chd|  SCZERO3                       source/elements/thickshell/solidec/sczero3.F
-Chd|-- called by -----------
-Chd|        SCFORC3                       source/elements/thickshell/solidec/scforc3.F
-Chd|-- calls ---------------
-Chd|====================================================================
+      !||====================================================================
+      !||    sczero3     ../starter/source/elements/thickshell/solidec/scinit3.F
+      !||--- called by ------------------------------------------------------
+      !||    ig3dinit3   ../starter/source/elements/ige3d/ig3dinit3.F
+      !||    s6cinit3    ../starter/source/elements/thickshell/solide6c/s6cinit3.F
+      !||    s8cinit3    ../starter/source/elements/thickshell/solide8c/s8cinit3.F
+      !||    s8zinit3    ../starter/source/elements/solid/solide8z/s8zinit3.F
+      !||    scinit3     ../starter/source/elements/thickshell/solidec/scinit3.F
+      !||====================================================================
       SUBROUTINE SCZERO3(
      .   FX1, FY1, FZ1, FX2, FY2, FZ2, FX3, FY3, FZ3, FX4, FY4, FZ4, 
      .   FX5, FY5, FZ5, FX6, FY6, FZ6, FX7, FY7, FZ7, FX8, FY8, FZ8,

@@ -21,13 +21,11 @@ Copyright>        As an alternative to this open-source version, Altair also off
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
 C
-Chd|====================================================================
-Chd|  C_IBVEL                       source/restart/ddsplit/c_ibvel.F
-Chd|-- called by -----------
-Chd|        DDSPLIT                       source/restart/ddsplit/ddsplit.F
-Chd|-- calls ---------------
-Chd|        NLOCAL                        source/spmd/node/ddtools.F    
-Chd|====================================================================
+      !||====================================================================
+      !||    c_ibvel   ../starter/source/restart/ddsplit/c_ibvel.F
+      !||--- called by ------------------------------------------------------
+      !||    ddsplit   ../starter/source/restart/ddsplit/ddsplit.F
+      !||====================================================================
       SUBROUTINE C_IBVEL(IBVEL,LBVEL,LLBVEL_L,NSKYRBM_L,PROC)
 C-----------------------------------------------
 C   M o d u l e s

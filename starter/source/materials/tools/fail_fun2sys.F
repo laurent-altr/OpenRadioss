@@ -1,5 +1,5 @@
 Copyright>        OpenRadioss
-Copyright>        Copyright (C) 1986-2023 Altair Engineering Inc.
+Copyright>        Copyright (C) 1986-2024 Altair Engineering Inc.
 Copyright>
 Copyright>        This program is free software: you can redistribute it and/or modify
 Copyright>        it under the terms of the GNU Affero General Public License as published by
@@ -20,15 +20,15 @@ Copyright>
 Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
-Chd|====================================================================
-Chd|  FAIL_FUN2SYS                  source/materials/tools/fail_fun2sys.F
-Chd|-- called by -----------
-Chd|        UPDFAIL                       source/materials/updfail.F    
-Chd|-- calls ---------------
-Chd|        ANCMSG                        source/output/message/message.F
-Chd|        FAIL_PARAM_MOD                ../common_source/modules/mat_elem/fail_param_mod.F
-Chd|        MESSAGE_MOD                   share/message_module/message_mod.F
-Chd|====================================================================
+      !||====================================================================
+      !||    fail_fun2sys     ../starter/source/materials/tools/fail_fun2sys.F
+      !||--- called by ------------------------------------------------------
+      !||    updfail          ../starter/source/materials/updfail.F
+      !||--- calls      -----------------------------------------------------
+      !||    ancmsg           ../starter/share/message_module/inter_ancmsg_mod.F
+      !||--- uses       -----------------------------------------------------
+      !||    message_mod      ../starter/share/message_module/message_mod.F
+      !||====================================================================
       SUBROUTINE FAIL_FUN2SYS(FAIL ,TITLE  ,MAT_ID ,NFUNCT  ,FUNC_ID  )
 C-----------------------------------------------
 C   M o d u l e s

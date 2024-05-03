@@ -20,12 +20,12 @@ Copyright>
 Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
-Chd|====================================================================
-Chd|  FACNOR                        source/output/anim/generate/facnor.F
-Chd|-- called by -----------
-Chd|        PARSORC                       source/output/anim/generate/parsorc.F
-Chd|-- calls ---------------
-Chd|====================================================================
+      !||====================================================================
+      !||    facnor    ../starter/source/output/anim/facnor.F
+      !||--- called by ------------------------------------------------------
+      !||    parsor    ../starter/source/output/anim/parsor.F
+      !||    parsorc   ../starter/source/output/anim/parsorc.F
+      !||====================================================================
       SUBROUTINE FACNOR(X,D,II,XNORM,CDG,INVERT)
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s

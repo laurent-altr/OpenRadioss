@@ -20,6 +20,11 @@ Copyright>
 Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
+      !||====================================================================
+      !||    i23mainf_mod   ../engine/source/interfaces/int23/i23mainf.F
+      !||--- called by ------------------------------------------------------
+      !||    i23mainf       ../engine/source/interfaces/int23/i23mainf.F
+      !||====================================================================
       module I23MAINF_MOD
       implicit none
 #include      "my_real.inc"
@@ -28,27 +33,27 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
       my_real
      .       , DIMENSION(:), ALLOCATABLE :: CAND_P_SAV
       END MODULE I23MAINF_MOD
-Chd|====================================================================
-Chd|  I23MAINF                      source/interfaces/int23/i23mainf.F
-Chd|-- called by -----------
-Chd|        INTFOP2                       source/interfaces/interf/intfop2.F
-Chd|-- calls ---------------
-Chd|        ANCMSG                        source/output/message/message.F
-Chd|        ARRET                         source/system/arret.F         
-Chd|        I23COR3                       source/interfaces/int23/i23cor3.F
-Chd|        I23DST3                       source/interfaces/int23/i23dst3.F
-Chd|        I23FOR3                       source/interfaces/int23/i23for3.F
-Chd|        I7CDCOR3                      source/interfaces/int07/i7cdcor3.F
-Chd|        MY_BARRIER                    source/system/machine.F       
-Chd|        STARTIME                      source/system/timer.F         
-Chd|        STOPTIME                      source/system/timer.F         
-Chd|        SUM_6_FLOAT_SENS              source/system/parit.F         
-Chd|        FINTER                        source/tools/curve/finter.F   
-Chd|        STRI                          source/tools/univ/stri.F      
-Chd|        H3D_MOD                       share/modules/h3d_mod.F       
-Chd|        INTBUFDEF_MOD                 ../common_source/modules/intbufdef_mod.F
-Chd|        MESSAGE_MOD                   share/message_module/message_mod.F
-Chd|====================================================================
+      !||====================================================================
+      !||    i23mainf           ../engine/source/interfaces/int23/i23mainf.F
+      !||--- called by ------------------------------------------------------
+      !||    intfop2            ../engine/source/interfaces/interf/intfop2.F
+      !||--- calls      -----------------------------------------------------
+      !||    ancmsg             ../engine/share/message_module/inter_ancmsg_mod.F
+      !||    arret              ../engine/source/system/arret.F
+      !||    i23cor3            ../engine/source/interfaces/int23/i23cor3.F
+      !||    i23dst3            ../engine/source/interfaces/int23/i23dst3.F
+      !||    i23for3            ../engine/source/interfaces/int23/i23for3.F
+      !||    i7cdcor3           ../engine/source/interfaces/int07/i7cdcor3.F
+      !||    my_barrier         ../engine/source/system/machine.F
+      !||    startime           ../engine/source/system/timer.F
+      !||    stoptime           ../engine/source/system/timer.F
+      !||    sum_6_float_sens   ../engine/source/system/parit.F
+      !||--- uses       -----------------------------------------------------
+      !||    h3d_mod            ../engine/share/modules/h3d_mod.F
+      !||    i23mainf_mod       ../engine/source/interfaces/int23/i23mainf.F
+      !||    intbufdef_mod      ../common_source/modules/intbufdef_mod.F
+      !||    message_mod        ../engine/share/message_module/message_mod.F
+      !||====================================================================
       SUBROUTINE I23MAINF(
      1                   IPARI  ,INTBUF_TAB         ,X        ,A      ,
      2                   ICODT  ,FSAV    ,V         ,MS       ,ITAB   ,

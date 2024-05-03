@@ -20,20 +20,18 @@ Copyright>
 Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
-Chd|====================================================================
-Chd|  WRTSQI                        source/output/tools/wrtsqi.F  
-Chd|-- called by -----------
-Chd|        CONVWREST                     source/output/restart/wrrest.F
-Chd|        DSWREST                       source/output/restart/wrrest.F
-Chd|        EIGWREST                      source/output/restart/wrrest.F
-Chd|        FXFLUXWREST                   source/constraints/thermic/fxfluxwrest.F
-Chd|        FXTEMPWREST                   source/output/restart/wrrest.F
-Chd|        NFWREST                       source/output/restart/wrrest.F
-Chd|        RADIAWREST                    source/output/restart/wrrest.F
-Chd|        RIGMATWREST                   source/output/restart/wrrest.F
-Chd|-- calls ---------------
-Chd|        STRI                          source/tools/univ/stri.F      
-Chd|====================================================================
+      !||====================================================================
+      !||    wrtsqi          ../starter/source/output/tools/wrtsqi.F
+      !||--- called by ------------------------------------------------------
+      !||    convwrest       ../starter/source/restart/ddsplit/wrrest.F
+      !||    dswrest         ../starter/source/restart/ddsplit/wrrest.F
+      !||    eigwrest        ../starter/source/restart/ddsplit/wrrest.F
+      !||    fxbwrestp       ../starter/source/restart/ddsplit/wrrest.F
+      !||    fxtempwrest     ../starter/source/restart/ddsplit/wrrest.F
+      !||    nfwrest         ../starter/source/restart/ddsplit/wrrest.F
+      !||    plyxfem_wrest   ../starter/source/restart/ddsplit/wrrest.F
+      !||    rigmatwrest     ../starter/source/restart/ddsplit/wrrest.F
+      !||====================================================================
       SUBROUTINE WRTSQI(IA,L,IFORM)
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s

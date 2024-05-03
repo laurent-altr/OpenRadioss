@@ -20,6 +20,9 @@ Copyright>
 Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
+      !||====================================================================
+      !||    unused_mat_detonator   ../starter/source/initial_conditions/detonation/unused_mat_detonator.F
+      !||====================================================================
       FUNCTION UNUSED_MAT_DETONATOR(MDET,NUMMAT,LISTMAT)
 C-----------------------------------------------
 C   D e s c r i p t i o n

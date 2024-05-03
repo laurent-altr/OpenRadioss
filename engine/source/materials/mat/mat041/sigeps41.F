@@ -20,16 +20,18 @@ Copyright>
 Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
-Chd|====================================================================
-Chd|  SIGEPS41                      source/materials/mat/mat041/sigeps41.F
-Chd|-- called by -----------
-Chd|        MULAW                         source/materials/mat_share/mulaw.F
-Chd|        MULAW8                        source/materials/mat_share/mulaw8.F
-Chd|-- calls ---------------
-Chd|        BURN_FRACTION_IREAC1          source/materials/mat/mat041/sigeps41.F
-Chd|        BURN_FRACTION_IREAC2          source/materials/mat/mat041/sigeps41.F
-Chd|        MIXTURE_EQUILIBRIUM           source/materials/mat/mat041/sigeps41.F
-Chd|====================================================================
+      !||====================================================================
+      !||    sigeps41                ../engine/source/materials/mat/mat041/sigeps41.F
+      !||--- called by ------------------------------------------------------
+      !||    mulaw                   ../engine/source/materials/mat_share/mulaw.F
+      !||    mulaw8                  ../engine/source/materials/mat_share/mulaw8.F
+      !||--- calls      -----------------------------------------------------
+      !||    burn_fraction_ireac1    ../engine/source/materials/mat/mat041/sigeps41.F
+      !||    burn_fraction_ireac2    ../engine/source/materials/mat/mat041/sigeps41.F
+      !||    mixture_equilibrium     ../engine/source/materials/mat/mat041/sigeps41.F
+      !||--- uses       -----------------------------------------------------
+      !||    root_finding_algo_mod   ../common_source/modules/root_finding_algo_mod.F90
+      !||====================================================================
       SUBROUTINE SIGEPS41 (
      1     NEL    ,NUPARAM,NUVAR   ,
      2     TIME   ,TIMESTEP,UPARAM  ,RHO0    ,RHO    ,
@@ -344,12 +346,11 @@ C-----------------------------------------------
 C-----------------------------------------------
 
 C-----------------------------------------------
-Chd|====================================================================
-Chd|  BURN_FRACTION_IREAC1          source/materials/mat/mat041/sigeps41.F
-Chd|-- called by -----------
-Chd|        SIGEPS41                      source/materials/mat/mat041/sigeps41.F
-Chd|-- calls ---------------
-Chd|====================================================================
+      !||====================================================================
+      !||    burn_fraction_ireac1   ../engine/source/materials/mat/mat041/sigeps41.F
+      !||--- called by ------------------------------------------------------
+      !||    sigeps41               ../engine/source/materials/mat/mat041/sigeps41.F
+      !||====================================================================
       SUBROUTINE BURN_FRACTION_IREAC1(I_,B_,X_,G1,D_,Y_,cappa,artvisc,dt,pres,etar,fc,cburn,oldfc)
 C-----------------------------------------------
 C   D e s c r i p t i o n
@@ -408,12 +409,11 @@ C-----------------------------------------------
 C-----------------------------------------------
 
 
-Chd|====================================================================
-Chd|  BURN_FRACTION_IREAC2          source/materials/mat/mat041/sigeps41.F
-Chd|-- called by -----------
-Chd|        SIGEPS41                      source/materials/mat/mat041/sigeps41.F
-Chd|-- calls ---------------
-Chd|====================================================================
+      !||====================================================================
+      !||    burn_fraction_ireac2   ../engine/source/materials/mat/mat041/sigeps41.F
+      !||--- called by ------------------------------------------------------
+      !||    sigeps41               ../engine/source/materials/mat/mat041/sigeps41.F
+      !||====================================================================
       SUBROUTINE BURN_FRACTION_IREAC2(I_,B_,X_,G1,D_,Y_,G2,Z_,G_,C_,E_,Figmax,FG1max,FG2min,cappa,chi,ccrit,tol,
      .                 artvisc,dt,pres,etar,fc,cburn,oldfc)
 C-----------------------------------------------
@@ -484,13 +484,15 @@ C-----------------------------------------------
 C-----------------------------------------------
 
 
-Chd|====================================================================
-Chd|  MIXTURE_EQUILIBRIUM           source/materials/mat/mat041/sigeps41.F
-Chd|-- called by -----------
-Chd|        SIGEPS41                      source/materials/mat/mat041/sigeps41.F
-Chd|-- calls ---------------
-Chd|        JWL_EOS_STATE                 source/materials/mat/mat041/sigeps41.F
-Chd|====================================================================
+      !||====================================================================
+      !||    mixture_equilibrium     ../engine/source/materials/mat/mat041/sigeps41.F
+      !||--- called by ------------------------------------------------------
+      !||    sigeps41                ../engine/source/materials/mat/mat041/sigeps41.F
+      !||--- calls      -----------------------------------------------------
+      !||    jwl_eos_state           ../engine/source/materials/mat/mat041/sigeps41.F
+      !||--- uses       -----------------------------------------------------
+      !||    root_finding_algo_mod   ../common_source/modules/root_finding_algo_mod.F90
+      !||====================================================================
       SUBROUTINE MIXTURE_EQUILIBRIUM(
      .               ar   ,br   ,r1r    ,r2r  ,r3r   ,cvr ,etar,
      .               ap   ,bp   ,r1p    ,r2p  ,r3p   ,cvp ,etap,
@@ -648,12 +650,11 @@ C-----------------------------------------------
 C-----------------------------------------------
 
 C-----------------------------------------------
-Chd|====================================================================
-Chd|  JWL_EOS_STATE                 source/materials/mat/mat041/sigeps41.F
-Chd|-- called by -----------
-Chd|        MIXTURE_EQUILIBRIUM           source/materials/mat/mat041/sigeps41.F
-Chd|-- calls ---------------
-Chd|====================================================================
+      !||====================================================================
+      !||    jwl_eos_state         ../engine/source/materials/mat/mat041/sigeps41.F
+      !||--- called by ------------------------------------------------------
+      !||    mixture_equilibrium   ../engine/source/materials/mat/mat041/sigeps41.F
+      !||====================================================================
       SUBROUTINE JWL_EOS_STATE(a,b,r1,r2 ,r3,cv ,eta,tmp,dedv,p,bth,dpdt,en)
 C-----------------------------------------------
 C   D e s c r i p t i o n
@@ -693,6 +694,9 @@ C-----------------------------------------------
       end
 C-----------------------------------------------
 
+      !||====================================================================
+      !||    jwl_eos_delta   ../engine/source/materials/mat/mat041/sigeps41.F
+      !||====================================================================
       function jwl_eos_delta(beta,funct_parameter)     
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
@@ -749,4 +753,7 @@ C-----------------------------------------------
      .           tmp,dedvp,pprod,bthp,dpdtp,enp )
       jwl_eos_delta = preac-pprod
       return
+      !||====================================================================
+      !||    jwl_eos_delta   ../engine/source/materials/mat/mat041/sigeps41.F
+      !||====================================================================
       end function jwl_eos_delta

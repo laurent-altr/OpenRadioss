@@ -21,11 +21,9 @@ Copyright>        As an alternative to this open-source version, Altair also off
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
 C
-Chd|====================================================================
-Chd|  ISTR                          source/tools/univ/istr.F      
-Chd|-- called by -----------
-Chd|-- calls ---------------
-Chd|====================================================================
+      !||====================================================================
+      !||    istr   ../starter/source/tools/univ/istr.F
+      !||====================================================================
       INTEGER FUNCTION ISTR(STR)
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s

@@ -20,12 +20,19 @@ Copyright>
 Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
-Chd|====================================================================
-Chd|  I24PEN3                       source/interfaces/intsort/i24pen3.F
-Chd|-- called by -----------
-Chd|        I24STO                        source/interfaces/intsort/i24sto.F
-Chd|-- calls ---------------
-Chd|====================================================================
+      !||====================================================================
+      !||    i24pen3       ../starter/source/interfaces/inter3d1/i24pen3.F
+      !||--- called by ------------------------------------------------------
+      !||    inint3        ../starter/source/interfaces/inter3d1/inint3.F
+      !||--- calls      -----------------------------------------------------
+      !||    ancmsg        ../starter/share/message_module/inter_ancmsg_mod.F
+      !||    i24fic_getn   ../starter/source/interfaces/inter3d1/i24surfi.F
+      !||    i24penmax     ../starter/source/interfaces/inter3d1/i24pen3.F
+      !||    iconnet       ../starter/source/interfaces/inter3d1/i24pen3.F
+      !||    ini_st3       ../starter/source/interfaces/inter3d1/i24pen3.F
+      !||--- uses       -----------------------------------------------------
+      !||    message_mod   ../starter/share/message_module/message_mod.F
+      !||====================================================================
       SUBROUTINE I24PEN3(JLT   ,MARGE ,X1    ,X2     ,X3   ,
      .                  X4    ,Y1    ,Y2    ,Y3     ,Y4   ,
      .                  Z1    ,Z2    ,Z3    ,Z4     ,XI   ,

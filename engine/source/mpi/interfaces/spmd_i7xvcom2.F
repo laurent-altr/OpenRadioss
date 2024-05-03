@@ -22,26 +22,27 @@ Copyright>        software under a commercial license.  Contact Altair to discus
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
 
 #define TO1D(i,j,k,s1,s2) i+(j-1)*s1+(k-1)*s1*s2
-Chd|====================================================================
-Chd|  SPMD_I7XVCOM2                 source/mpi/interfaces/spmd_i7xvcom2.F
-Chd|-- called by -----------
-Chd|        IMP_TRIPI                     source/implicit/imp_int_k.F   
-Chd|        RESOL                         source/engine/resol.F         
-Chd|-- calls ---------------
-Chd|        ANCMSG                        source/output/message/message.F
-Chd|        ARRET                         source/system/arret.F         
-Chd|        GETDPDAANC                    source/mpi/interfaces/spmd_i7tool.F
-Chd|        PUTDPDAANC                    source/mpi/interfaces/spmd_i7tool.F
-Chd|        PUTDPZERO                     source/mpi/interfaces/spmd_i7tool.F
-Chd|        GROUPDEF_MOD                  ../common_source/modules/groupdef_mod.F
-Chd|        INTBUFDEF_MOD                 ../common_source/modules/intbufdef_mod.F
-Chd|        INTERFACES_MOD                ../common_source/modules/interfaces/interfaces_mod.F
-Chd|        MESSAGE_MOD                   share/message_module/message_mod.F
-Chd|        MULTI_FVM_MOD                 ../common_source/modules/ale/multi_fvm_mod.F
-Chd|        SENSOR_MOD                    share/modules/sensor_mod.F    
-Chd|        TRI25EBOX                     share/modules/tri25ebox.F     
-Chd|        TRI7BOX                       share/modules/tri7box.F       
-Chd|====================================================================
+      !||====================================================================
+      !||    spmd_i7xvcom2    ../engine/source/mpi/interfaces/spmd_i7xvcom2.F
+      !||--- called by ------------------------------------------------------
+      !||    imp_tripi        ../engine/source/implicit/imp_int_k.F
+      !||    resol            ../engine/source/engine/resol.F
+      !||--- calls      -----------------------------------------------------
+      !||    ancmsg           ../engine/share/message_module/inter_ancmsg_mod.F
+      !||    arret            ../engine/source/system/arret.F
+      !||    getdpdaanc       ../engine/source/mpi/interfaces/spmd_i7tool.F
+      !||    putdpdaanc       ../engine/source/mpi/interfaces/spmd_i7tool.F
+      !||    putdpzero        ../engine/source/mpi/interfaces/spmd_i7tool.F
+      !||--- uses       -----------------------------------------------------
+      !||    groupdef_mod     ../common_source/modules/groupdef_mod.F
+      !||    intbufdef_mod    ../common_source/modules/intbufdef_mod.F
+      !||    interfaces_mod   ../common_source/modules/interfaces/interfaces_mod.F
+      !||    message_mod      ../engine/share/message_module/message_mod.F
+      !||    multi_fvm_mod    ../common_source/modules/ale/multi_fvm_mod.F
+      !||    sensor_mod       ../engine/share/modules/sensor_mod.F
+      !||    tri25ebox        ../engine/share/modules/tri25ebox.F
+      !||    tri7box          ../engine/share/modules/tri7box.F
+      !||====================================================================
       SUBROUTINE SPMD_I7XVCOM2(
      1   IPARI   ,X       ,V       ,MS      ,
      2   IMSCH   ,I2MSCH ,DT2PREV ,INTLIST ,NBINTC  ,

@@ -20,16 +20,17 @@ Copyright>
 Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
-Chd|====================================================================
-Chd|  CHECK_EDGE_STATE              source/interfaces/interf/check_edge_state.F
-Chd|-- called by -----------
-Chd|        FIND_EDGE_FROM_REMOTE_PROC    source/interfaces/interf/find_edge_from_remote_proc.F
-Chd|        RESOL                         source/engine/resol.F         
-Chd|-- calls ---------------
-Chd|        CHECK_ACTIVE_ELEM_EDGE        source/interfaces/interf/check_active_elem_edge.F
-Chd|        INTBUFDEF_MOD                 ../common_source/modules/intbufdef_mod.F
-Chd|        SHOOTING_NODE_MOD             share/modules/shooting_node_mod.F
-Chd|====================================================================
+      !||====================================================================
+      !||    check_edge_state             ../engine/source/interfaces/interf/check_edge_state.F
+      !||--- called by ------------------------------------------------------
+      !||    find_edge_from_remote_proc   ../engine/source/interfaces/interf/find_edge_from_remote_proc.F
+      !||    resol                        ../engine/source/engine/resol.F
+      !||--- calls      -----------------------------------------------------
+      !||    check_active_elem_edge       ../engine/source/interfaces/interf/check_active_elem_edge.F
+      !||--- uses       -----------------------------------------------------
+      !||    intbufdef_mod                ../common_source/modules/intbufdef_mod.F
+      !||    shooting_node_mod            ../engine/share/modules/shooting_node_mod.F
+      !||====================================================================
         SUBROUTINE CHECK_EDGE_STATE( ITASK,M_EDGE_NB,S_EDGE_NB,M_EDGE_ID,S_EDGE_ID,
      .                               SHIFT_INTERFACE,INTBUF_TAB,NEWFRONT,IPARI,GEO,
      .                               IXS,IXC,IXT,IXP,IXR,IXTG,

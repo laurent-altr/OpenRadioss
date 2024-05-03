@@ -20,12 +20,12 @@ Copyright>
 Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
-Chd|====================================================================
-Chd|  S10LEN3                       source/elements/solid/solide10/s10len3.F
-Chd|-- called by -----------
-Chd|        S10FORC3                      source/elements/solid/solide10/s10forc3.F
-Chd|-- calls ---------------
-Chd|====================================================================
+      !||====================================================================
+      !||    s10len3      ../starter/source/elements/solid/solide10/s10len3.F
+      !||--- called by ------------------------------------------------------
+      !||    inirig_mat   ../starter/source/elements/initia/inirig_mat.F
+      !||    s10init3     ../starter/source/elements/solid/solide10/s10init3.F
+      !||====================================================================
       SUBROUTINE S10LEN3(
      1   VOL,        NGL,        DELTAX,     DELTAX2,
      2   PX,         PY,         PZ,         VOLG,

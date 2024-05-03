@@ -20,142 +20,146 @@ Copyright>
 Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
-Chd|====================================================================
-Chd|  RADIOSS2                      source/engine/radioss2.F      
-Chd|-- called by -----------
-Chd|        RADIOSS0                      source/engine/radioss0.F      
-Chd|-- calls ---------------
-Chd|        ALELAG_RREST                  source/output/restart/rdresb.F
-Chd|        ANCMSG                        source/output/message/message.F
-Chd|        ARRET                         source/system/arret.F         
-Chd|        BCS0                          source/constraints/general/bcs/bcs0.F
-Chd|        BUILD_MSG                     source/output/message/build_msg.F
-Chd|        CDK6BC3                       source/elements/sh3n/coquedk6/cdk6bc3.F
-Chd|        CFIELDREST                    source/output/restart/rdresb.F
-Chd|        CHECK_MESSAGE_DEFINITION      ../common_source/modules/check_mod.F
-Chd|        CLOSE_C                       ../common_source/tools/input_output/write_routtines.c
-Chd|        CONDRMAT                      source/materials/mat/mat013/condrmat.F
-Chd|        CONVRREST                     source/output/restart/rdresb.F
-Chd|        COQINI                        source/elements/shell/coqini.F
-Chd|        CRKXFEM_RREST                 source/output/restart/rdresb.F
-Chd|        CRKXFEM_RRESTANIM             source/output/restart/rdresb.F
-Chd|        CUR_FIL_C                     ../common_source/tools/input_output/write_routtines.c
-Chd|        DELETE_USER_FILE              source/user_interface/dyn_userlib.c
-Chd|        DRAPE_RREST                   source/output/restart/rdresb.F
-Chd|        DYN_USERLIB_INIT              source/user_interface/dyn_userlib.c
-Chd|        FVDEAL                        source/airbag/fvdeal.F        
-Chd|        FVRREST                       source/output/restart/rdresb.F
-Chd|        FXFLUXRREST                   source/constraints/thermic/fxfluxrrest.F
-Chd|        FXTEMPRREST                   source/output/restart/rdresb.F
-Chd|        GET_FILE_NAME_INFO            source/system/get_file_name_info.F
-Chd|        HIST1                         source/output/th/hist1.F      
-Chd|        HIST13                        source/output/th/hist13.F     
-Chd|        IMPRREST                      source/output/restart/rdresb.F
-Chd|        INICOD                        source/tools/univ/inicod.F    
-Chd|        INICONSTANT                   source/system/iniconstant.F   
-Chd|        INIPAR                        source/mpi/init/inipar.F      
-Chd|        INIRESA                       source/output/restart/rdresa.F
-Chd|        INITIME                       source/system/timer.F         
-Chd|        INIT_DYN_LIB_STRUC            share/modules/dynlib_mod.F    
-Chd|        INIT_TH0                      source/output/th/init_th0.F   
-Chd|        INI_MSG                       source/output/message/ini_msg.F
-Chd|        INTSTAMP_ZERO                 share/modules/intstamp_mod.F  
-Chd|        KNOTLOCELREST                 source/output/restart/rdresb.F
-Chd|        KNOTLOCPCREST                 source/output/restart/rdresb.F
-Chd|        KNOTREST                      source/output/restart/rdresb.F
-Chd|        LECINP                        source/input/lecinp.F         
-Chd|        LECTUR                        source/input/lectur.F         
-Chd|        LF_CONVERT_C_FLAT             source/engine/lf_convert_c.c  
-Chd|        LOADPREST                     source/output/restart/rdresb.F
-Chd|        MY_GETPID                     source/system/pid.c           
-Chd|        NAMES_AND_TITLE_INIT          ../common_source/modules/names_and_titles_mod.F
-Chd|        NFRREST                       source/output/restart/rdresb.F
-Chd|        NITSCHERREST                  source/output/restart/rdresb.F
-Chd|        OPEN_C                        ../common_source/tools/input_output/write_routtines.c
-Chd|        OPEN_F_SCRATCH_FILE           source/system/open_tempfile.F 
-Chd|        PLYXFEM_RAVUPLY               source/output/restart/rdresb.F
-Chd|        PLYXFEM_RREST                 source/output/restart/rdresb.F
-Chd|        PLYXFEM_RRESTANIM             source/output/restart/rdresb.F
-Chd|        PLY_INFO_REST                 source/output/restart/rdresb.F
-Chd|        PRINTCENTER                   source/engine/radioss_title.F 
-Chd|        PRINTCPU                      source/system/timer.F         
-Chd|        R2R_INPUT_INIT                source/coupling/rad2rad/r2r_input_init.F
-Chd|        RADIARREST                    source/output/restart/rdresb.F
-Chd|        RADIOSS_TITLE                 source/engine/radioss_title.F 
-Chd|        RDRESA                        source/output/restart/rdresa.F
-Chd|        RDRESB                        source/output/restart/rdresb.F
-Chd|        READ_C_C                      ../common_source/tools/input_output/write_routtines.c
-Chd|        READ_DB                       source/output/tools/read_db.F 
-Chd|        READ_DPDB                     source/output/tools/read_db.F 
-Chd|        READ_UNITS                    ../common_source/comm/write_units.F
-Chd|        RESOL_HEAD                    source/engine/resol_head.F    
-Chd|        RESTALLOC                     source/output/restart/arralloc.F
-Chd|        RMATRREST                     source/output/restart/rdresb.F
-Chd|        RTHBUFREST                    source/output/restart/rdresb.F
-Chd|        SETIGNORECORE                 source/system/traceback_handler.c
-Chd|        SET_STACK_VALUES              source/system/machine.F       
-Chd|        SPMD_ALLREDUCE_DB             source/mpi/generic/spmd_allreduce_db.F
-Chd|        SPMD_ALLREDUCE_INT            source/mpi/generic/spmd_allreduce_db.F
-Chd|        SPMD_REDUCE_DB                source/mpi/generic/spmd_reduce_db.F
-Chd|        SPMD_RST_CHECK                source/mpi/init/spmd_rst_check.F
-Chd|        STACK_RREST                   source/output/restart/rdresb.F
-Chd|        SWITCH_TO_DTNODA              source/time_step/switch_to_dtnoda.F
-Chd|        TABLE_ZERO                    source/tools/curve/table_tools.F
-Chd|        THCRREST                      source/output/restart/rdresb.F
-Chd|        TH_CLEAN                      ../common_source/modules/output/time_history_mod.F
-Chd|        TRACE_IN                      source/system/trace_back.F    
-Chd|        TRACE_OUT                     source/system/trace_back.F    
-Chd|        UACCESS_DUM                   source/user_interface/uaccess.F
-Chd|        UFUNC_DUM                     source/user_interface/ufunc.F 
-Chd|        UPIDMID_DUM                   source/user_interface/upidmid.F
-Chd|        USENSOR_DUM                   source/user_interface/usensor.F
-Chd|        USER_WINDOWS_CLEAN            ../common_source/modules/user_windows_mod.F
-Chd|        USRPLAS_DUM                   source/user_interface/usrplas.F
-Chd|        UTABLE_DUM                    source/user_interface/utable.F
-Chd|        WIGEREST                      source/output/restart/rdresb.F
-Chd|        WRITE_TPL_FILE                source/implicit/imp_solv.F    
-Chd|        ALEFVM_MOD                    ../common_source/modules/ale/alefvm_mod.F
-Chd|        ALEMUSCL_MOD                  ../common_source/modules/ale/alemuscl_mod.F
-Chd|        ALE_CONNECTIVITY_MOD          ../common_source/modules/ale/ale_connectivity_mod.F
-Chd|        ALE_MOD                       ../common_source/modules/ale/ale_mod.F
-Chd|        CHECK_MOD                     ../common_source/modules/check_mod.F
-Chd|        DIFFUSION_MOD                 share/modules/diffusion_mod.F 
-Chd|        DRAPE_MOD                     share/modules/drape_mod.F     
-Chd|        DSGRAPH_MOD                   share/modules/dsgraph_mod.F   
-Chd|        DT_MOD                        share/modules/dt_mod.F        
-Chd|        DYNLIB_MOD                    share/modules/dynlib_mod.F    
-Chd|        EBCS_MOD                      ../common_source/modules/boundary_conditions/ebcs_mod.F
-Chd|        GROUPDEF_MOD                  ../common_source/modules/groupdef_mod.F
-Chd|        GROUP_MOD                     share/modules/group_mod.F     
-Chd|        H3D_MOD                       share/modules/h3d_mod.F       
-Chd|        INOUTFILE_MOD                 ../common_source/modules/inoutfile_mod.F
-Chd|        INTBUFFRIC_MOD                share/modules/restart_mod.F   
-Chd|        INTBUFMOD                     share/modules/restart_mod.F   
-Chd|        INTBUF_MOD                    share/modules/restart_mod.F   
-Chd|        INTERFACES_MOD                ../common_source/modules/interfaces/interfaces_mod.F
-Chd|        INTSTAMP_GLOB_MOD             share/modules/intstamp_glob_mod.F
-Chd|        LINEAR_SOLVER_MOD             share/modules/linear_solver_mod.F
-Chd|        LOADS_MOD                     ../common_source/modules/loads/loads_mod.F
-Chd|        MAT_ELEM_MOD                  ../common_source/modules/mat_elem/mat_elem_mod.F
-Chd|        MDS_RESTART_MOD               ../common_source/modules/mds_rest.mod.F
-Chd|        MESSAGE_MOD                   share/message_module/message_mod.F
-Chd|        MONVOL_STRUCT_MOD             share/modules/monvol_struct_mod.F
-Chd|        MULTI_FVM_MOD                 ../common_source/modules/ale/multi_fvm_mod.F
-Chd|        OUTPUT_MOD                    ../common_source/modules/output/output_mod.F
-Chd|        PINCHTYPE_MOD                 ../common_source/modules/pinchtype_mod.F
-Chd|        RAD2R_MOD                     share/modules/rad2r.F         
-Chd|        RBODY_MOD                     share/modules/rbody_mod.F     
-Chd|        RESTMOD                       share/modules/restart_mod.F   
-Chd|        SCRATCHFILE_MOD               share/modules/scratchfiles_mod.F
-Chd|        SEGVAR_MOD                    share/modules/segvar_mod.F    
-Chd|        SENSOR_MOD                    share/modules/sensor_mod.F    
-Chd|        SOLTOSPH_MOD                  share/modules/soltosph_mod.F  
-Chd|        STACK_MOD                     share/modules/stack_mod.F     
-Chd|        STATE_MOD                     ../common_source/modules/state_mod.F
-Chd|        TABLE_GLOB_MOD                share/modules/table_glob_mod.F
-Chd|        TIME_MOD                      share/modules/time_mod.F      
-Chd|        USER_INTERFACE_MOD            share/modules/user_interface_mod.F
-Chd|====================================================================
+      !||====================================================================
+      !||    radioss2                     ../engine/source/engine/radioss2.F
+      !||--- called by ------------------------------------------------------
+      !||    radioss0                     ../engine/source/engine/radioss0.F
+      !||--- calls      -----------------------------------------------------
+      !||    alelag_rrest                 ../engine/source/output/restart/rdresb.F
+      !||    ancmsg                       ../engine/share/message_module/inter_ancmsg_mod.F
+      !||    arret                        ../engine/source/system/arret.F
+      !||    bcs0                         ../engine/source/constraints/general/bcs/bcs0.F
+      !||    build_msg                    ../common_source/tools/memory/my_alloc.F
+      !||    cdk6bc3                      ../engine/source/elements/sh3n/coquedk6/cdk6bc3.F
+      !||    cfieldrest                   ../engine/source/output/restart/rdresb.F
+      !||    check_message_definition     ../common_source/modules/check_mod.F
+      !||    close_c                      ../common_source/tools/input_output/write_routtines.c
+      !||    condrmat                     ../engine/source/materials/mat/mat013/condrmat.F
+      !||    convrrest                    ../engine/source/output/restart/rdresb.F
+      !||    coqini                       ../engine/source/elements/shell/coqini.F
+      !||    crkxfem_rrest                ../engine/source/output/restart/rdresb.F
+      !||    crkxfem_rrestanim            ../engine/source/output/restart/rdresb.F
+      !||    cur_fil_c                    ../common_source/tools/input_output/write_routtines.c
+      !||    drape_rrest                  ../engine/source/output/restart/rdresb.F
+      !||    fvdeal                       ../engine/source/airbag/fvdeal.F
+      !||    fvrrest                      ../engine/source/output/restart/rdresb.F
+      !||    fxfluxrrest                  ../engine/source/constraints/thermic/fxfluxrrest.F
+      !||    fxtemprrest                  ../engine/source/output/restart/rdresb.F
+      !||    get_file_name_info           ../engine/source/system/get_file_name_info.F
+      !||    hist1                        ../engine/source/output/th/hist1.F
+      !||    hist13                       ../engine/source/output/th/hist13.F
+      !||    imprrest                     ../engine/source/output/restart/rdresb.F
+      !||    ini_msg                      ../engine/source/output/message/ini_msg.F
+      !||    inicod                       ../engine/source/tools/univ/inicod.F
+      !||    iniconstant                  ../engine/source/system/iniconstant.F
+      !||    inipar                       ../engine/source/mpi/init/inipar.F
+      !||    iniresa                      ../engine/source/output/restart/rdresa.F
+      !||    init_dyn_lib_struc           ../engine/share/modules/dynlib_mod.F
+      !||    init_th0                     ../engine/source/output/th/init_th0.F
+      !||    initime                      ../engine/source/system/timer.F
+      !||    intstamp_zero                ../engine/share/modules/intstamp_mod.F
+      !||    knotlocelrest                ../engine/source/output/restart/rdresb.F
+      !||    knotlocpcrest                ../engine/source/output/restart/rdresb.F
+      !||    knotrest                     ../engine/source/output/restart/rdresb.F
+      !||    lecinp                       ../engine/source/input/lecinp.F
+      !||    lectur                       ../engine/source/input/lectur.F
+      !||    lf_convert_c_flat            ../engine/source/engine/lf_convert_c.c
+      !||    loadprest                    ../engine/source/output/restart/rdresb.F
+      !||    my_getpid                    ../engine/source/system/pid.c
+      !||    names_and_title_init         ../common_source/modules/names_and_titles_mod.F
+      !||    nfrrest                      ../engine/source/output/restart/rdresb.F
+      !||    nitscherrest                 ../engine/source/output/restart/rdresb.F
+      !||    open_c                       ../common_source/tools/input_output/write_routtines.c
+      !||    open_f_scratch_file          ../engine/source/system/open_tempfile.F
+      !||    ply_info_rest                ../engine/source/output/restart/rdresb.F
+      !||    plyxfem_ravuply              ../engine/source/output/restart/rdresb.F
+      !||    plyxfem_rrest                ../engine/source/output/restart/rdresb.F
+      !||    plyxfem_rrestanim            ../engine/source/output/restart/rdresb.F
+      !||    printcenter                  ../engine/source/engine/radioss_title.F
+      !||    printcpu                     ../engine/source/system/timer.F
+      !||    qaopen                       ../common_source/qa/qa_out_mod.F
+      !||    r2r_input_init               ../engine/source/coupling/rad2rad/r2r_input_init.F
+      !||    radiarrest                   ../engine/source/output/restart/rdresb.F
+      !||    radioss_title                ../engine/source/engine/radioss_title.F
+      !||    rdresa                       ../engine/source/output/restart/rdresa.F
+      !||    rdresb                       ../engine/source/output/restart/rdresb.F
+      !||    read_c_c                     ../common_source/tools/input_output/write_routtines.c
+      !||    read_db                      ../engine/source/output/tools/read_db.F
+      !||    read_dpdb                    ../engine/source/output/tools/read_db.F
+      !||    read_units                   ../common_source/comm/write_units.F
+      !||    resol_head                   ../engine/source/engine/resol_head.F
+      !||    restalloc                    ../engine/source/output/restart/arralloc.F
+      !||    rmatrrest                    ../engine/source/output/restart/rdresb.F
+      !||    rthbufrest                   ../engine/source/output/restart/rdresb.F
+      !||    set_stack_values             ../engine/source/system/machine.F
+      !||    setignorecore                ../engine/source/system/traceback_handler.c
+      !||    spmd_allreduce_db            ../engine/source/mpi/generic/spmd_allreduce_db.F
+      !||    spmd_allreduce_int           ../engine/source/mpi/generic/spmd_allreduce_db.F
+      !||    spmd_reduce_db               ../engine/source/mpi/generic/spmd_reduce_db.F
+      !||    spmd_rst_check               ../engine/source/mpi/init/spmd_rst_check.F
+      !||    stack_rrest                  ../engine/source/output/restart/rdresb.F
+      !||    switch_to_dtnoda             ../engine/source/time_step/switch_to_dtnoda.F
+      !||    table_zero                   ../engine/source/tools/curve/table_tools.F
+      !||    th_clean                     ../common_source/modules/output/time_history_mod.F
+      !||    thcrrest                     ../engine/source/output/restart/rdresb.F
+      !||    trace_in                     ../engine/source/system/trace_back.F
+      !||    trace_out                    ../engine/source/system/trace_back.F
+      !||    uaccess_dum                  ../engine/source/user_interface/uaccess.F
+      !||    ufunc_dum                    ../engine/source/user_interface/ufunc.F
+      !||    upidmid_dum                  ../engine/source/user_interface/upidmid.F
+      !||    usensor_dum                  ../engine/source/user_interface/usensor.F
+      !||    user_windows_clean           ../common_source/modules/user_windows_mod.F
+      !||    usrplas_dum                  ../engine/source/user_interface/usrplas.F
+      !||    utable_dum                   ../engine/source/user_interface/utable.F
+      !||    wigerest                     ../engine/source/output/restart/rdresb.F
+      !||    write_tpl_file               ../engine/source/implicit/imp_solv.F
+      !||--- uses       -----------------------------------------------------
+      !||    ale_connectivity_mod         ../common_source/modules/ale/ale_connectivity_mod.F
+      !||    ale_mod                      ../common_source/modules/ale/ale_mod.F
+      !||    alefvm_mod                   ../common_source/modules/ale/alefvm_mod.F
+      !||    alemuscl_mod                 ../common_source/modules/ale/alemuscl_mod.F
+      !||    check_mod                    ../common_source/modules/check_mod.F
+      !||    diffusion_mod                ../engine/share/modules/diffusion_mod.F
+      !||    drape_mod                    ../engine/share/modules/drape_mod.F
+      !||    dsgraph_mod                  ../engine/share/modules/dsgraph_mod.F
+      !||    dt_mod                       ../engine/share/modules/dt_mod.F
+      !||    dynlib_mod                   ../engine/share/modules/dynlib_mod.F
+      !||    ebcs_mod                     ../common_source/modules/boundary_conditions/ebcs_mod.F
+      !||    group_mod                    ../engine/share/modules/group_mod.F
+      !||    groupdef_mod                 ../common_source/modules/groupdef_mod.F
+      !||    h3d_mod                      ../engine/share/modules/h3d_mod.F
+      !||    inoutfile_mod                ../common_source/modules/inoutfile_mod.F
+      !||    intbuf_mod                   ../engine/share/modules/restart_mod.F
+      !||    intbuffric_mod               ../engine/share/modules/restart_mod.F
+      !||    intbufmod                    ../engine/share/modules/restart_mod.F
+      !||    interfaces_mod               ../common_source/modules/interfaces/interfaces_mod.F
+      !||    intstamp_glob_mod            ../engine/share/modules/intstamp_glob_mod.F
+      !||    linear_solver_mod            ../engine/share/modules/linear_solver_mod.F
+      !||    loads_mod                    ../common_source/modules/loads/loads_mod.F
+      !||    mat_elem_mod                 ../common_source/modules/mat_elem/mat_elem_mod.F
+      !||    mds_restart_mod              ../common_source/modules/mds_rest.mod.F
+      !||    message_mod                  ../engine/share/message_module/message_mod.F
+      !||    monvol_struct_mod            ../engine/share/modules/monvol_struct_mod.F
+      !||    multi_fvm_mod                ../common_source/modules/ale/multi_fvm_mod.F
+      !||    names_and_titles_mod         ../common_source/modules/names_and_titles_mod.F
+      !||    output_mod                   ../common_source/modules/output/output_mod.F
+      !||    pinchtype_mod                ../common_source/modules/pinchtype_mod.F
+      !||    python_funct_mod             ../common_source/modules/python_mod.F90
+      !||    qa_out_mod                   ../common_source/qa/qa_out_mod.F
+      !||    rad2r_mod                    ../engine/share/modules/rad2r.F
+      !||    rbody_mod                    ../engine/share/modules/rbody_mod.F
+      !||    restmod                      ../engine/share/modules/restart_mod.F
+      !||    scratchfile_mod              ../engine/share/modules/scratchfiles_mod.F
+      !||    segvar_mod                   ../engine/share/modules/segvar_mod.F
+      !||    sensor_mod                   ../engine/share/modules/sensor_mod.F
+      !||    soltosph_mod                 ../engine/share/modules/soltosph_mod.F
+      !||    stack_mod                    ../engine/share/modules/stack_mod.F
+      !||    state_mod                    ../common_source/modules/state_mod.F
+      !||    table_glob_mod               ../engine/share/modules/table_glob_mod.F
+      !||    time_mod                     ../engine/share/modules/time_mod.F
+      !||    unitab_mod                   ../common_source/modules/unitab_mod.F
+      !||    user_interface_mod           ../engine/share/modules/user_interface_mod.F
+      !||====================================================================
       SUBROUTINE RADIOSS2(IDATA,MIDATA,RDATA,MRDATA) 
 C-----------------------------------------------
 C   M o d u l e s

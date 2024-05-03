@@ -21,13 +21,13 @@ Copyright>        As an alternative to this open-source version, Altair also off
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
 C
-Chd|====================================================================
-Chd|  W_RNLOC                       source/restart/ddsplit/w_rnloc.F
-Chd|-- called by -----------
-Chd|        DDSPLIT                       source/restart/ddsplit/ddsplit.F
-Chd|-- calls ---------------
-Chd|        WRITE_DB                      source/restart/ddsplit/wrrest.F
-Chd|====================================================================
+      !||====================================================================
+      !||    w_rnloc    ../starter/source/restart/ddsplit/w_rnloc.F
+      !||--- called by ------------------------------------------------------
+      !||    ddsplit    ../starter/source/restart/ddsplit/ddsplit.F
+      !||--- calls      -----------------------------------------------------
+      !||    write_db   ../starter/source/restart/ddsplit/wrrest.F
+      !||====================================================================
       SUBROUTINE W_RNLOC(RTAB,NODGLOB,NUMNOD_L,LEN_AM)
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s

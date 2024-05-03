@@ -20,13 +20,14 @@ Copyright>
 Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
-Chd|====================================================================
-Chd|  PROP_PARAM_MOD                modules/mat_elem/prop_param_mod.F
-Chd|-- called by -----------
-Chd|        MAT_ELEM_MOD                  common_source/modules/mat_elem/mat_elem_mod.F
-Chd|-- calls ---------------
-Chd|        PLY_PARAM_MOD                 modules/mat_elem/ply_param_mod.F
-Chd|====================================================================
+      !||====================================================================
+      !||    prop_param_mod         ../common_source/modules/mat_elem/prop_param_mod.F
+      !||--- called by ------------------------------------------------------
+      !||    mat_elem_mod           ../common_source/modules/mat_elem/mat_elem_mod.F
+      !||--- uses       -----------------------------------------------------
+      !||    names_and_titles_mod   ../common_source/modules/names_and_titles_mod.F
+      !||    ply_param_mod          ../common_source/modules/mat_elem/ply_param_mod.F
+      !||====================================================================
       MODULE PROP_PARAM_MOD
         USE PLY_PARAM_MOD
         USE NAMES_AND_TITLES_MOD, ONLY: NCHARTITLE

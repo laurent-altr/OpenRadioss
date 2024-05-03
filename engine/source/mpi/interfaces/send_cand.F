@@ -43,13 +43,15 @@ C 12000 -> 12999 => spmd_lag.F
 C 13000 -> 13999 => spmd_dsreso.F
 
 C
-Chd|====================================================================
-Chd|  SPMD_GET_INACTI7              source/mpi/interfaces/send_cand.F
-Chd|-- called by -----------
-Chd|        I20MAIN_TRI                   source/interfaces/intsort/i20main_tri.F
-Chd|        I7MAIN_TRI                    source/interfaces/intsort/i7main_tri.F
-Chd|-- calls ---------------
-Chd|====================================================================
+      !||====================================================================
+      !||    spmd_get_inacti7   ../engine/source/mpi/interfaces/send_cand.F
+      !||--- called by ------------------------------------------------------
+      !||    i20main_tri        ../engine/source/interfaces/intsort/i20main_tri.F
+      !||    i7main_tri         ../engine/source/interfaces/intsort/i7main_tri.F
+      !||--- calls      -----------------------------------------------------
+      !||--- uses       -----------------------------------------------------
+      !||    spmd_mod           ../engine/source/mpi/spmd_mod.F90
+      !||====================================================================
       SUBROUTINE SPMD_GET_INACTI7(
      .    INACTI,IPARI22,NIN,ISENDTO,IRCVFROM,
      .    INACTII)
@@ -136,15 +138,17 @@ C
 #endif
         RETURN
       END
-Chd|====================================================================
-Chd|  SPMD_GET_STIF                 source/mpi/interfaces/send_cand.F
-Chd|-- called by -----------
-Chd|        IMP_ICOMCRIT                  source/implicit/imp_int_k.F   
-Chd|        INTCRIT                       source/interfaces/intsort/intcrit.F
-Chd|-- calls ---------------
-Chd|        SPMD_SD_STFN                  source/mpi/interfaces/send_cand.F
-Chd|        TRI7BOX                       share/modules/tri7box.F       
-Chd|====================================================================
+      !||====================================================================
+      !||    spmd_get_stif   ../engine/source/mpi/interfaces/send_cand.F
+      !||--- called by ------------------------------------------------------
+      !||    imp_icomcrit    ../engine/source/implicit/imp_int_k.F
+      !||    intcrit         ../engine/source/interfaces/intsort/intcrit.F
+      !||--- calls      -----------------------------------------------------
+      !||    spmd_sd_stfn    ../engine/source/mpi/interfaces/send_cand.F
+      !||--- uses       -----------------------------------------------------
+      !||    spmd_mod        ../engine/source/mpi/spmd_mod.F90
+      !||    tri7box         ../engine/share/modules/tri7box.F
+      !||====================================================================
       SUBROUTINE SPMD_GET_STIF(
      .    NEWFRONT,I_STOK ,CAND_N  ,STFN ,NSN ,
      .    NIN     ,ISENDTO,IRCVFROM,NSV  ,ITAB)
@@ -276,14 +280,16 @@ C
         RETURN
       END
 C
-Chd|====================================================================
-Chd|  SPMD_GET_STIF25               source/mpi/interfaces/send_cand.F
-Chd|-- called by -----------
-Chd|        INTCRIT                       source/interfaces/intsort/intcrit.F
-Chd|-- calls ---------------
-Chd|        SPMD_SD_STFN25                source/mpi/interfaces/send_cand.F
-Chd|        TRI7BOX                       share/modules/tri7box.F       
-Chd|====================================================================
+      !||====================================================================
+      !||    spmd_get_stif25   ../engine/source/mpi/interfaces/send_cand.F
+      !||--- called by ------------------------------------------------------
+      !||    intcrit           ../engine/source/interfaces/intsort/intcrit.F
+      !||--- calls      -----------------------------------------------------
+      !||    spmd_sd_stfn25    ../engine/source/mpi/interfaces/send_cand.F
+      !||--- uses       -----------------------------------------------------
+      !||    spmd_mod          ../engine/source/mpi/spmd_mod.F90
+      !||    tri7box           ../engine/share/modules/tri7box.F
+      !||====================================================================
       SUBROUTINE SPMD_GET_STIF25(
      .    NEWFRONT,STFN ,NSN ,
      .    NIN     ,ISENDTO,IRCVFROM,NSV  ,ITAB)
@@ -400,14 +406,16 @@ C
         RETURN
       END
 C
-Chd|====================================================================
-Chd|  SPMD_GET_STIF20               source/mpi/interfaces/send_cand.F
-Chd|-- called by -----------
-Chd|        INTCRIT                       source/interfaces/intsort/intcrit.F
-Chd|-- calls ---------------
-Chd|        SPMD_SD_STFA20                source/mpi/interfaces/send_cand.F
-Chd|        TRI7BOX                       share/modules/tri7box.F       
-Chd|====================================================================
+      !||====================================================================
+      !||    spmd_get_stif20   ../engine/source/mpi/interfaces/send_cand.F
+      !||--- called by ------------------------------------------------------
+      !||    intcrit           ../engine/source/interfaces/intsort/intcrit.F
+      !||--- calls      -----------------------------------------------------
+      !||    spmd_sd_stfa20    ../engine/source/mpi/interfaces/send_cand.F
+      !||--- uses       -----------------------------------------------------
+      !||    spmd_mod          ../engine/source/mpi/spmd_mod.F90
+      !||    tri7box           ../engine/share/modules/tri7box.F
+      !||====================================================================
       SUBROUTINE SPMD_GET_STIF20(
      1    NEWFRONT,I_STOK ,CAND_N  ,STFA ,NSN ,
      2    NIN     ,ISENDTO,IRCVFROM,NSV  ,ITAB,
@@ -540,15 +548,17 @@ C
         RETURN
       END
 C
-Chd|====================================================================
-Chd|  SPMD_GET_STIF11               source/mpi/interfaces/send_cand.F
-Chd|-- called by -----------
-Chd|        IMP_ICOMCRIT                  source/implicit/imp_int_k.F   
-Chd|        INTCRIT                       source/interfaces/intsort/intcrit.F
-Chd|-- calls ---------------
-Chd|        SPMD_SD_STFN11                source/mpi/interfaces/send_cand.F
-Chd|        TRI7BOX                       share/modules/tri7box.F       
-Chd|====================================================================
+      !||====================================================================
+      !||    spmd_get_stif11   ../engine/source/mpi/interfaces/send_cand.F
+      !||--- called by ------------------------------------------------------
+      !||    imp_icomcrit      ../engine/source/implicit/imp_int_k.F
+      !||    intcrit           ../engine/source/interfaces/intsort/intcrit.F
+      !||--- calls      -----------------------------------------------------
+      !||    spmd_sd_stfn11    ../engine/source/mpi/interfaces/send_cand.F
+      !||--- uses       -----------------------------------------------------
+      !||    spmd_mod          ../engine/source/mpi/spmd_mod.F90
+      !||    tri7box           ../engine/share/modules/tri7box.F
+      !||====================================================================
       SUBROUTINE SPMD_GET_STIF11(
      .    NEWFRONT,I_STOK ,CAND_S  ,STFS  ,NRTS ,
      .    NIN     ,ISENDTO,IRCVFROM,IRECTS,ITAB )
@@ -680,14 +690,16 @@ C
         RETURN
       END
 C
-Chd|====================================================================
-Chd|  SPMD_GET_STIF20E              source/mpi/interfaces/send_cand.F
-Chd|-- called by -----------
-Chd|        INTCRIT                       source/interfaces/intsort/intcrit.F
-Chd|-- calls ---------------
-Chd|        SPMD_SD_STFN20E               source/mpi/interfaces/send_cand.F
-Chd|        TRI7BOX                       share/modules/tri7box.F       
-Chd|====================================================================
+      !||====================================================================
+      !||    spmd_get_stif20e   ../engine/source/mpi/interfaces/send_cand.F
+      !||--- called by ------------------------------------------------------
+      !||    intcrit            ../engine/source/interfaces/intsort/intcrit.F
+      !||--- calls      -----------------------------------------------------
+      !||    spmd_sd_stfn20e    ../engine/source/mpi/interfaces/send_cand.F
+      !||--- uses       -----------------------------------------------------
+      !||    spmd_mod           ../engine/source/mpi/spmd_mod.F90
+      !||    tri7box            ../engine/share/modules/tri7box.F
+      !||====================================================================
       SUBROUTINE SPMD_GET_STIF20E(
      .    NEWFRONT,I_STOK ,CAND_S  ,STFS  ,NLINSA ,
      .    NIN     ,ISENDTO,IRCVFROM,IXLINS,ITAB   ,
@@ -820,13 +832,15 @@ C
         RETURN
       END
 C
-Chd|====================================================================
-Chd|  SPMD_SD_STFN                  source/mpi/interfaces/send_cand.F
-Chd|-- called by -----------
-Chd|        SPMD_GET_STIF                 source/mpi/interfaces/send_cand.F
-Chd|-- calls ---------------
-Chd|        TRI7BOX                       share/modules/tri7box.F       
-Chd|====================================================================
+      !||====================================================================
+      !||    spmd_sd_stfn    ../engine/source/mpi/interfaces/send_cand.F
+      !||--- called by ------------------------------------------------------
+      !||    spmd_get_stif   ../engine/source/mpi/interfaces/send_cand.F
+      !||--- calls      -----------------------------------------------------
+      !||--- uses       -----------------------------------------------------
+      !||    spmd_mod        ../engine/source/mpi/spmd_mod.F90
+      !||    tri7box         ../engine/share/modules/tri7box.F
+      !||====================================================================
       SUBROUTINE  SPMD_SD_STFN(
      1   LOC_PROC,PMAIN ,LENX ,CAND_N,NSV    ,
      2   I_STOK  ,NSN     ,STFN ,IENVOI,ISENDTO,
@@ -962,13 +976,15 @@ C
         RETURN
       END
 C
-Chd|====================================================================
-Chd|  SPMD_SD_STFN25                source/mpi/interfaces/send_cand.F
-Chd|-- called by -----------
-Chd|        SPMD_GET_STIF25               source/mpi/interfaces/send_cand.F
-Chd|-- calls ---------------
-Chd|        TRI7BOX                       share/modules/tri7box.F       
-Chd|====================================================================
+      !||====================================================================
+      !||    spmd_sd_stfn25    ../engine/source/mpi/interfaces/send_cand.F
+      !||--- called by ------------------------------------------------------
+      !||    spmd_get_stif25   ../engine/source/mpi/interfaces/send_cand.F
+      !||--- calls      -----------------------------------------------------
+      !||--- uses       -----------------------------------------------------
+      !||    spmd_mod          ../engine/source/mpi/spmd_mod.F90
+      !||    tri7box           ../engine/share/modules/tri7box.F
+      !||====================================================================
       SUBROUTINE  SPMD_SD_STFN25(
      1   LOC_PROC,PMAIN ,LENX ,NSV    ,
      2   NSN     ,STFN ,IENVOI,ISENDTO,
@@ -1087,13 +1103,15 @@ C
         RETURN
       END
 C
-Chd|====================================================================
-Chd|  SPMD_SD_STFA20                source/mpi/interfaces/send_cand.F
-Chd|-- called by -----------
-Chd|        SPMD_GET_STIF20               source/mpi/interfaces/send_cand.F
-Chd|-- calls ---------------
-Chd|        TRI7BOX                       share/modules/tri7box.F       
-Chd|====================================================================
+      !||====================================================================
+      !||    spmd_sd_stfa20    ../engine/source/mpi/interfaces/send_cand.F
+      !||--- called by ------------------------------------------------------
+      !||    spmd_get_stif20   ../engine/source/mpi/interfaces/send_cand.F
+      !||--- calls      -----------------------------------------------------
+      !||--- uses       -----------------------------------------------------
+      !||    spmd_mod          ../engine/source/mpi/spmd_mod.F90
+      !||    tri7box           ../engine/share/modules/tri7box.F
+      !||====================================================================
       SUBROUTINE  SPMD_SD_STFA20(
      1   LOC_PROC,PMAIN ,LENX ,CAND_N,NSV    ,
      2   I_STOK  ,NSN     ,STFA ,IENVOI,ISENDTO,
@@ -1229,13 +1247,15 @@ C
         RETURN
       END
 C
-Chd|====================================================================
-Chd|  SPMD_SD_STFN11                source/mpi/interfaces/send_cand.F
-Chd|-- called by -----------
-Chd|        SPMD_GET_STIF11               source/mpi/interfaces/send_cand.F
-Chd|-- calls ---------------
-Chd|        TRI7BOX                       share/modules/tri7box.F       
-Chd|====================================================================
+      !||====================================================================
+      !||    spmd_sd_stfn11    ../engine/source/mpi/interfaces/send_cand.F
+      !||--- called by ------------------------------------------------------
+      !||    spmd_get_stif11   ../engine/source/mpi/interfaces/send_cand.F
+      !||--- calls      -----------------------------------------------------
+      !||--- uses       -----------------------------------------------------
+      !||    spmd_mod          ../engine/source/mpi/spmd_mod.F90
+      !||    tri7box           ../engine/share/modules/tri7box.F
+      !||====================================================================
       SUBROUTINE  SPMD_SD_STFN11(
      1   LOC_PROC,PMAIN ,LENX ,CAND_S,IRECTS ,
      2   I_STOK  ,NRTS    ,STFS ,IENVOI,ISENDTO,
@@ -1390,13 +1410,15 @@ C
         RETURN
       END
 C
-Chd|====================================================================
-Chd|  SPMD_SD_STFN20E               source/mpi/interfaces/send_cand.F
-Chd|-- called by -----------
-Chd|        SPMD_GET_STIF20E              source/mpi/interfaces/send_cand.F
-Chd|-- calls ---------------
-Chd|        TRI7BOX                       share/modules/tri7box.F       
-Chd|====================================================================
+      !||====================================================================
+      !||    spmd_sd_stfn20e    ../engine/source/mpi/interfaces/send_cand.F
+      !||--- called by ------------------------------------------------------
+      !||    spmd_get_stif20e   ../engine/source/mpi/interfaces/send_cand.F
+      !||--- calls      -----------------------------------------------------
+      !||--- uses       -----------------------------------------------------
+      !||    spmd_mod           ../engine/source/mpi/spmd_mod.F90
+      !||    tri7box            ../engine/share/modules/tri7box.F
+      !||====================================================================
       SUBROUTINE  SPMD_SD_STFN20E(
      1   LOC_PROC,PMAIN ,LENX ,CAND_S,IXLINS ,
      2   I_STOK  ,NLINSA  ,STFS ,IENVOI,ISENDTO,
@@ -1557,19 +1579,22 @@ C
         RETURN
       END
 
-Chd|====================================================================
-Chd|  SPMD_IFRONT_STAMP             source/mpi/interfaces/send_cand.F
-Chd|-- called by -----------
-Chd|        INTTRI                        source/interfaces/intsort/inttri.F
-Chd|-- calls ---------------
-Chd|        ANCMSG                        source/output/message/message.F
-Chd|        ARRET                         source/system/arret.F         
-Chd|        INTBUFDEF_MOD                 ../common_source/modules/intbufdef_mod.F
-Chd|        INTSTAMP_GLOB_MOD             share/modules/intstamp_glob_mod.F
-Chd|        INTSTAMP_MOD                  share/modules/intstamp_mod.F  
-Chd|        MESSAGE_MOD                   share/message_module/message_mod.F
-Chd|        SENSOR_MOD                    share/modules/sensor_mod.F    
-Chd|====================================================================
+      !||====================================================================
+      !||    spmd_ifront_stamp   ../engine/source/mpi/interfaces/send_cand.F
+      !||--- called by ------------------------------------------------------
+      !||    inttri              ../engine/source/interfaces/intsort/inttri.F
+      !||--- calls      -----------------------------------------------------
+      !||    ancmsg              ../engine/share/message_module/inter_ancmsg_mod.F
+      !||    arret               ../engine/source/system/arret.F
+      !||    spmd_wait           ../engine/source/mpi/spmd_mod.F90
+      !||--- uses       -----------------------------------------------------
+      !||    intbufdef_mod       ../common_source/modules/intbufdef_mod.F
+      !||    intstamp_glob_mod   ../engine/share/modules/intstamp_glob_mod.F
+      !||    intstamp_mod        ../engine/share/modules/intstamp_mod.F
+      !||    message_mod         ../engine/share/message_module/message_mod.F
+      !||    sensor_mod          ../engine/share/modules/sensor_mod.F
+      !||    spmd_mod            ../engine/source/mpi/spmd_mod.F90
+      !||====================================================================
       SUBROUTINE SPMD_IFRONT_STAMP(
      1   IPARI   ,NSENSOR ,INTBUF_TAB, RETRI,TEMP    ,SENSOR_TAB  ,
      2   NBINTC21,INTLIST21)
@@ -1945,19 +1970,22 @@ C
         RETURN
       END
 
-Chd|====================================================================
-Chd|  SPMD_I21TEMPCOM               source/mpi/interfaces/send_cand.F
-Chd|-- called by -----------
-Chd|        RESOL                         source/engine/resol.F         
-Chd|-- calls ---------------
-Chd|        ANCMSG                        source/output/message/message.F
-Chd|        ARRET                         source/system/arret.F         
-Chd|        INTBUFDEF_MOD                 ../common_source/modules/intbufdef_mod.F
-Chd|        INTSTAMP_GLOB_MOD             share/modules/intstamp_glob_mod.F
-Chd|        INTSTAMP_MOD                  share/modules/intstamp_mod.F  
-Chd|        MESSAGE_MOD                   share/message_module/message_mod.F
-Chd|        SENSOR_MOD                    share/modules/sensor_mod.F    
-Chd|====================================================================
+      !||====================================================================
+      !||    spmd_i21tempcom     ../engine/source/mpi/interfaces/send_cand.F
+      !||--- called by ------------------------------------------------------
+      !||    resol               ../engine/source/engine/resol.F
+      !||--- calls      -----------------------------------------------------
+      !||    ancmsg              ../engine/share/message_module/inter_ancmsg_mod.F
+      !||    arret               ../engine/source/system/arret.F
+      !||    spmd_wait           ../engine/source/mpi/spmd_mod.F90
+      !||--- uses       -----------------------------------------------------
+      !||    intbufdef_mod       ../common_source/modules/intbufdef_mod.F
+      !||    intstamp_glob_mod   ../engine/share/modules/intstamp_glob_mod.F
+      !||    intstamp_mod        ../engine/share/modules/intstamp_mod.F
+      !||    message_mod         ../engine/share/message_module/message_mod.F
+      !||    sensor_mod          ../engine/share/modules/sensor_mod.F
+      !||    spmd_mod            ../engine/source/mpi/spmd_mod.F90
+      !||====================================================================
       SUBROUTINE SPMD_I21TEMPCOM(IPARI,TEMP,INTBUF_TAB,NSENSOR,SENSOR_TAB)
 C============================================================================
 C   M o d u l e s
@@ -2138,22 +2166,25 @@ C
         RETURN
       END
 
-Chd|====================================================================
-Chd|  SPMD_I21FTHECOM               source/mpi/interfaces/send_cand.F
-Chd|-- called by -----------
-Chd|        RESOL                         source/engine/resol.F         
-Chd|-- calls ---------------
-Chd|        ANCMSG                        source/output/message/message.F
-Chd|        ARRET                         source/system/arret.F         
-Chd|        INTCONTP                      source/mpi/interfaces/spmd_i7tool.F
-Chd|        SORTINT                       source/mpi/interfaces/spmd_i7tool.F
-Chd|        INTBUFDEF_MOD                 ../common_source/modules/intbufdef_mod.F
-Chd|        INTSTAMP_GLOB_MOD             share/modules/intstamp_glob_mod.F
-Chd|        INTSTAMP_MOD                  share/modules/intstamp_mod.F  
-Chd|        MESSAGE_MOD                   share/message_module/message_mod.F
-Chd|        SENSOR_MOD                    share/modules/sensor_mod.F    
-Chd|        TRI7BOX                       share/modules/tri7box.F       
-Chd|====================================================================
+      !||====================================================================
+      !||    spmd_i21fthecom     ../engine/source/mpi/interfaces/send_cand.F
+      !||--- called by ------------------------------------------------------
+      !||    resol               ../engine/source/engine/resol.F
+      !||--- calls      -----------------------------------------------------
+      !||    ancmsg              ../engine/share/message_module/inter_ancmsg_mod.F
+      !||    arret               ../engine/source/system/arret.F
+      !||    intcontp            ../engine/source/mpi/interfaces/spmd_i7tool.F
+      !||    sortint             ../engine/source/mpi/interfaces/spmd_i7tool.F
+      !||    spmd_wait           ../engine/source/mpi/spmd_mod.F90
+      !||--- uses       -----------------------------------------------------
+      !||    intbufdef_mod       ../common_source/modules/intbufdef_mod.F
+      !||    intstamp_glob_mod   ../engine/share/modules/intstamp_glob_mod.F
+      !||    intstamp_mod        ../engine/share/modules/intstamp_mod.F
+      !||    message_mod         ../engine/share/message_module/message_mod.F
+      !||    sensor_mod          ../engine/share/modules/sensor_mod.F
+      !||    spmd_mod            ../engine/source/mpi/spmd_mod.F90
+      !||    tri7box             ../engine/share/modules/tri7box.F
+      !||====================================================================
       SUBROUTINE SPMD_I21FTHECOM(IPARI    ,FTHE  ,INTBUF_TAB,SENSOR_TAB,NISKYFI ,
      .                           FTHESKYI ,ISKY  ,FSKYI     ,CONDNSKYI ,NSENSOR )
 C============================================================================
@@ -2605,16 +2636,19 @@ C
       END
 
 C
-Chd|====================================================================
-Chd|  SPMD_GET_PENIS                source/mpi/interfaces/send_cand.F
-Chd|-- called by -----------
-Chd|        I11BUCE_CRIT                  source/interfaces/intsort/i11buce_crit.F
-Chd|-- calls ---------------
-Chd|        ANCMSG                        source/output/message/message.F
-Chd|        ARRET                         source/system/arret.F         
-Chd|        MESSAGE_MOD                   share/message_module/message_mod.F
-Chd|        TRI7BOX                       share/modules/tri7box.F       
-Chd|====================================================================
+      !||====================================================================
+      !||    spmd_get_penis   ../engine/source/mpi/interfaces/send_cand.F
+      !||--- called by ------------------------------------------------------
+      !||    i11buce_crit     ../engine/source/interfaces/intsort/i11buce_crit.F
+      !||--- calls      -----------------------------------------------------
+      !||    ancmsg           ../engine/share/message_module/inter_ancmsg_mod.F
+      !||    arret            ../engine/source/system/arret.F
+      !||    spmd_wait        ../engine/source/mpi/spmd_mod.F90
+      !||--- uses       -----------------------------------------------------
+      !||    message_mod      ../engine/share/message_module/message_mod.F
+      !||    spmd_mod         ../engine/source/mpi/spmd_mod.F90
+      !||    tri7box          ../engine/share/modules/tri7box.F
+      !||====================================================================
       SUBROUTINE SPMD_GET_PENIS(PENIS,NIN)
 C-----------------------------------------------
 C   M o d u l e s
@@ -2777,16 +2811,19 @@ C
         RETURN
       END
 C
-Chd|====================================================================
-Chd|  SPMD_GET_PENIS20              source/mpi/interfaces/send_cand.F
-Chd|-- called by -----------
-Chd|        I20BUCE_CRIT                  source/interfaces/intsort/i20buce_crit.F
-Chd|-- calls ---------------
-Chd|        ANCMSG                        source/output/message/message.F
-Chd|        ARRET                         source/system/arret.F         
-Chd|        MESSAGE_MOD                   share/message_module/message_mod.F
-Chd|        TRI7BOX                       share/modules/tri7box.F       
-Chd|====================================================================
+      !||====================================================================
+      !||    spmd_get_penis20   ../engine/source/mpi/interfaces/send_cand.F
+      !||--- called by ------------------------------------------------------
+      !||    i20buce_crit       ../engine/source/interfaces/intsort/i20buce_crit.F
+      !||--- calls      -----------------------------------------------------
+      !||    ancmsg             ../engine/share/message_module/inter_ancmsg_mod.F
+      !||    arret              ../engine/source/system/arret.F
+      !||    spmd_wait          ../engine/source/mpi/spmd_mod.F90
+      !||--- uses       -----------------------------------------------------
+      !||    message_mod        ../engine/share/message_module/message_mod.F
+      !||    spmd_mod           ../engine/source/mpi/spmd_mod.F90
+      !||    tri7box            ../engine/share/modules/tri7box.F
+      !||====================================================================
       SUBROUTINE SPMD_GET_PENIS20(NSV,IXLINS,PENIS,PENISE,PENIA,NIN)
 C-----------------------------------------------
 C   M o d u l e s

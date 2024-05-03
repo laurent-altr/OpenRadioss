@@ -20,12 +20,9 @@ Copyright>
 Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
-Chd|====================================================================
-Chd|  FATHER                        source/model/remesh/build_admesh.F
-Chd|-- called by -----------
-Chd|        ORIGIN                        source/model/remesh/build_admesh.F
-Chd|-- calls ---------------
-Chd|====================================================================
+      !||====================================================================
+      !||    father   ../starter/source/model/remesh/build_admesh.F
+      !||====================================================================
       INTEGER FUNCTION FATHER(NN,IXC,IPARTC,IPART,SONTYPE)
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
@@ -54,14 +51,9 @@ C-----------------------------------------------
       END IF
       RETURN
       END     
-Chd|====================================================================
-Chd|  ORIGIN                        source/model/remesh/build_admesh.F
-Chd|-- called by -----------
-Chd|        I11REMLINE                    source/interfaces/inter3d1/i11remlin.F
-Chd|        I25REMLINE                    source/interfaces/int25/i25remlin.F
-Chd|-- calls ---------------
-Chd|        FATHER                        source/model/remesh/build_admesh.F
-Chd|====================================================================
+      !||====================================================================
+      !||    origin   ../starter/source/model/remesh/build_admesh.F
+      !||====================================================================
       INTEGER FUNCTION ORIGIN(NN,IXC,IPARTC,IPART)
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
@@ -95,6 +87,14 @@ C-----------------------------------------------
       ORIGIN=NN
       RETURN
       END     
+      !||====================================================================
+      !||    identson4      ../starter/source/model/remesh/build_admesh.F
+      !||--- called by ------------------------------------------------------
+      !||    build_admesh   ../starter/source/model/remesh/build_admesh.F
+      !||    identson4      ../starter/source/model/remesh/build_admesh.F
+      !||--- calls      -----------------------------------------------------
+      !||    identson4      ../starter/source/model/remesh/build_admesh.F
+      !||====================================================================
       RECURSIVE SUBROUTINE IDENTSON4(LEVEL,NN,IXC,SH4TREE)
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
@@ -140,6 +140,14 @@ C-----------------------------------------------
       END IF
       RETURN
       END     
+      !||====================================================================
+      !||    identson3      ../starter/source/model/remesh/build_admesh.F
+      !||--- called by ------------------------------------------------------
+      !||    build_admesh   ../starter/source/model/remesh/build_admesh.F
+      !||    identson3      ../starter/source/model/remesh/build_admesh.F
+      !||--- calls      -----------------------------------------------------
+      !||    identson3      ../starter/source/model/remesh/build_admesh.F
+      !||====================================================================
       RECURSIVE SUBROUTINE IDENTSON3(LEVEL,NN,IXTG,SH3TREE)
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
@@ -186,16 +194,18 @@ C-----------------------------------------------
 
       RETURN
       END     
-Chd|====================================================================
-Chd|  BUILD_ADMESH                  source/model/remesh/build_admesh.F
-Chd|-- called by -----------
-Chd|        LECTUR                        source/starter/lectur.F       
-Chd|-- calls ---------------
-Chd|        ANCMSG                        source/output/message/message.F
-Chd|        CONSTIT                       source/elements/nodes/constit.F
-Chd|        FREERR                        source/starter/freform.F      
-Chd|        MESSAGE_MOD                   share/message_module/message_mod.F
-Chd|====================================================================
+      !||====================================================================
+      !||    build_admesh   ../starter/source/model/remesh/build_admesh.F
+      !||--- called by ------------------------------------------------------
+      !||    lectur         ../starter/source/starter/lectur.F
+      !||--- calls      -----------------------------------------------------
+      !||    ancmsg         ../starter/share/message_module/inter_ancmsg_mod.F
+      !||    constit        ../starter/source/elements/nodes/constit.F
+      !||    identson3      ../starter/source/model/remesh/build_admesh.F
+      !||    identson4      ../starter/source/model/remesh/build_admesh.F
+      !||--- uses       -----------------------------------------------------
+      !||    message_mod    ../starter/share/message_module/message_mod.F
+      !||====================================================================
       SUBROUTINE BUILD_ADMESH(
      .                    IPART ,IPARTC,IPARTTG,IXC   ,IXTG  ,
      .                    X     ,ITAB  ,ITABM1 ,SH4TREE,SH3TREE,

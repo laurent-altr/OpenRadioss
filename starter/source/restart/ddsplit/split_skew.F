@@ -20,13 +20,13 @@ Copyright>
 Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
-Chd|====================================================================
-Chd|  SPLIT_SKEW                    source/restart/ddsplit/split_skew.F
-Chd|-- called by -----------
-Chd|        DDSPLIT                       source/restart/ddsplit/ddsplit.F
-Chd|-- calls ---------------
-Chd|        SKEW_MOD                      share/modules1/skew_mod.F     
-Chd|====================================================================
+      !||====================================================================
+      !||    split_skew   ../starter/source/restart/ddsplit/split_skew.F
+      !||--- called by ------------------------------------------------------
+      !||    ddsplit      ../starter/source/restart/ddsplit/ddsplit.F
+      !||--- uses       -----------------------------------------------------
+      !||    skew_mod     ../starter/share/modules1/skew_mod.F
+      !||====================================================================
         SUBROUTINE SPLIT_SKEW(CURR_PROC,ISKWP_L,ISKWP,TAG_SKN,MULTIPLE_SKEW)
 C-----------------------------------------------
 C   M o d u l e s
@@ -119,12 +119,11 @@ C-----------------------------------------------
 
 
 
-Chd|====================================================================
-Chd|  SPLIT_SKEW_save               source/restart/ddsplit/split_skew.F
-Chd|-- called by -----------
-Chd|-- calls ---------------
-Chd|        SKEW_MOD                      share/modules1/skew_mod.F     
-Chd|====================================================================
+      !||====================================================================
+      !||    split_skew_save   ../starter/source/restart/ddsplit/split_skew.F
+      !||--- uses       -----------------------------------------------------
+      !||    skew_mod          ../starter/share/modules1/skew_mod.F
+      !||====================================================================
         SUBROUTINE SPLIT_SKEW_save(CURR_PROC,ISKWP_L,ISKWP,TAG_SKN,MULTIPLE_SKEW,NSKWP)
 C-----------------------------------------------
         USE SKEW_MOD

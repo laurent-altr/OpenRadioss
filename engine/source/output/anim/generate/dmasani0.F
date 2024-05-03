@@ -20,15 +20,12 @@ Copyright>
 Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
-Chd|====================================================================
-Chd|  DMASANI0                      source/output/anim/generate/dmasani0.F
-Chd|-- called by -----------
-Chd|        GENANI                        source/output/anim/generate/genani.F
-Chd|-- calls ---------------
-Chd|        INITBUF                       share/resol/initbuf.F         
-Chd|        ELBUFDEF_MOD                  ../common_source/modules/mat_elem/elbufdef_mod.F
-Chd|        INITBUF_MOD                   share/resol/initbuf.F         
-Chd|====================================================================
+      !||====================================================================
+      !||    dmasani0       ../starter/source/output/anim/dmasani0.F
+      !||--- called by ------------------------------------------------------
+      !||    genani1        ../starter/source/output/anim/genani1.F
+      !||--- uses       -----------------------------------------------------
+      !||====================================================================
       SUBROUTINE DMASANI0(X ,D       ,ELBUF_TAB,GEO     ,IPARG   ,
      2              MAS     ,PM      ,EL2FA    ,IPART   ,IPARTSP )
 C-----------------------------------------------

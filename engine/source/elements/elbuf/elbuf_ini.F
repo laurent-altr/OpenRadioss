@@ -20,14 +20,21 @@ Copyright>
 Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
-Chd|====================================================================
-Chd|  ELBUF_INI                     source/elements/elbuf/elbuf_ini.F
-Chd|-- called by -----------
-Chd|        RDRESB                        source/output/restart/rdresb.F
-Chd|-- calls ---------------
-Chd|        ALLOCBUF_AUTO                 source/elements/elbuf/allocbuf_auto.F
-Chd|        MAT_ELEM_MOD                  ../common_source/modules/mat_elem/mat_elem_mod.F
-Chd|====================================================================
+      !||====================================================================
+      !||    elbuf_ini         ../starter/source/elements/elbuf_init/elbuf_ini.F
+      !||--- called by ------------------------------------------------------
+      !||    lectur            ../starter/source/starter/lectur.F
+      !||--- calls      -----------------------------------------------------
+      !||    allocbuf_auto     ../starter/source/elements/elbuf_init/allocbuf_auto.F
+      !||    ini_outmax_auto   ../starter/source/elements/elbuf_init/ini_outmax_auto.F
+      !||    initvars_auto     ../starter/source/elements/elbuf_init/initvars_auto.F
+      !||    zerovars_auto     ../starter/source/elements/elbuf_init/zerovars_auto.F
+      !||--- uses       -----------------------------------------------------
+      !||    defaults_mod      ../starter/source/modules/defaults_mod.F90
+      !||    elbuftag_mod      ../starter/share/modules1/elbuftag_mod.F
+      !||    message_mod       ../starter/share/message_module/message_mod.F
+      !||    stack_mod         ../starter/share/modules1/stack_mod.F
+      !||====================================================================
       SUBROUTINE ELBUF_INI(MAT_ELEM ,NGROUP ,IPARG)  
 C-----------------------------------------------
 C   M o d u l e s

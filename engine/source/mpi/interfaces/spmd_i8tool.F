@@ -20,13 +20,14 @@ Copyright>
 Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
-Chd|====================================================================
-Chd|  SPMD_I8_ILOC                  source/mpi/interfaces/spmd_i8tool.F
-Chd|-- called by -----------
-Chd|        INTVO8                        source/interfaces/inter3d/intvo8.F
-Chd|-- calls ---------------
-Chd|        INT8_MOD                      ../common_source/modules/interfaces/int8_mod.F
-Chd|====================================================================
+      !||====================================================================
+      !||    spmd_i8_iloc   ../engine/source/mpi/interfaces/spmd_i8tool.F
+      !||--- called by ------------------------------------------------------
+      !||    intvo8         ../engine/source/interfaces/inter3d/intvo8.F
+      !||--- calls      -----------------------------------------------------
+      !||--- uses       -----------------------------------------------------
+      !||    int8_mod       ../common_source/modules/interfaces/int8_mod.F
+      !||====================================================================
       SUBROUTINE SPMD_I8_ILOC(ILOC    ,MSR,ITAB,BUFFER,
      .                        DISTANCE)
 C-----------------------------------------------
@@ -190,13 +191,13 @@ C           DIST1 = DISTANCE(K)
       !CALL STOPTIME(97,1)
 #endif
       END SUBROUTINE
-Chd|====================================================================
-Chd|  SPMD_I8_INDEX                 source/mpi/interfaces/spmd_i8tool.F
-Chd|-- called by -----------
-Chd|        INTVO8                        source/interfaces/inter3d/intvo8.F
-Chd|-- calls ---------------
-Chd|        INT8_MOD                      ../common_source/modules/interfaces/int8_mod.F
-Chd|====================================================================
+      !||====================================================================
+      !||    spmd_i8_index   ../engine/source/mpi/interfaces/spmd_i8tool.F
+      !||--- called by ------------------------------------------------------
+      !||    intvo8          ../engine/source/interfaces/inter3d/intvo8.F
+      !||--- uses       -----------------------------------------------------
+      !||    int8_mod        ../common_source/modules/interfaces/int8_mod.F
+      !||====================================================================
       SUBROUTINE SPMD_I8_INDEX(NMN,FRONTIER,INDEX_IN_COMM,S_COMM)
 C-----------------------------------------------
 C   I n f o r m a t i o n s            
@@ -236,13 +237,14 @@ C-----------------------------------------------
       ENDDO
 
       END SUBROUTINE
-Chd|====================================================================
-Chd|  SPMD_I8_COMMSLV               source/mpi/interfaces/spmd_i8tool.F
-Chd|-- called by -----------
-Chd|        INTVO8                        source/interfaces/inter3d/intvo8.F
-Chd|-- calls ---------------
-Chd|        INT8_MOD                      ../common_source/modules/interfaces/int8_mod.F
-Chd|====================================================================
+      !||====================================================================
+      !||    spmd_i8_commslv   ../engine/source/mpi/interfaces/spmd_i8tool.F
+      !||--- called by ------------------------------------------------------
+      !||    intvo8            ../engine/source/interfaces/inter3d/intvo8.F
+      !||--- calls      -----------------------------------------------------
+      !||--- uses       -----------------------------------------------------
+      !||    int8_mod          ../common_source/modules/interfaces/int8_mod.F
+      !||====================================================================
       SUBROUTINE SPMD_I8_COMMSLV(NBSECNDS,ILOC,NSV,
      .            ITAB,BUFFER,FRONTIER,INDEX_IN_COMM)
 C-----------------------------------------------
@@ -443,13 +445,13 @@ C       WRITE(6,*) __FILE__,__LINE__,ISPMD,I-1
 #endif
       END SUBROUTINE
 
-Chd|====================================================================
-Chd|  SPMD_I8_UPDBUF                source/mpi/interfaces/spmd_i8tool.F
-Chd|-- called by -----------
-Chd|        INTVO8                        source/interfaces/inter3d/intvo8.F
-Chd|-- calls ---------------
-Chd|        INT8_MOD                      ../common_source/modules/interfaces/int8_mod.F
-Chd|====================================================================
+      !||====================================================================
+      !||    spmd_i8_updbuf   ../engine/source/mpi/interfaces/spmd_i8tool.F
+      !||--- called by ------------------------------------------------------
+      !||    intvo8           ../engine/source/interfaces/inter3d/intvo8.F
+      !||--- uses       -----------------------------------------------------
+      !||    int8_mod         ../common_source/modules/interfaces/int8_mod.F
+      !||====================================================================
       SUBROUTINE SPMD_I8_UPDBUF(NBSECNDS,ILOC,NSV,
      .            ITAB,BUFFER,FRONTIER,INDEX_IN_COMM)
 C-----------------------------------------------
@@ -557,13 +559,14 @@ C           BUFFER(I)%BUFI(1:BUFFER(I)%NBSECND_TOT)=0
        END SUBROUTINE
 
 
-Chd|====================================================================
-Chd|  SPMD_I8_IRTL                  source/mpi/interfaces/spmd_i8tool.F
-Chd|-- called by -----------
-Chd|        INTVO8                        source/interfaces/inter3d/intvo8.F
-Chd|-- calls ---------------
-Chd|        INT8_MOD                      ../common_source/modules/interfaces/int8_mod.F
-Chd|====================================================================
+      !||====================================================================
+      !||    spmd_i8_irtl   ../engine/source/mpi/interfaces/spmd_i8tool.F
+      !||--- called by ------------------------------------------------------
+      !||    intvo8         ../engine/source/interfaces/inter3d/intvo8.F
+      !||--- calls      -----------------------------------------------------
+      !||--- uses       -----------------------------------------------------
+      !||    int8_mod       ../common_source/modules/interfaces/int8_mod.F
+      !||====================================================================
       SUBROUTINE SPMD_I8_IRTL(
      .            IRTL,     HAS_MOVED,
      .            TAB_RMAX, TAB_RMAX_UID,
@@ -732,12 +735,12 @@ C
       END SUBROUTINE
 
 
-Chd|====================================================================
-Chd|  SPMD_I8_REDUCE                source/mpi/interfaces/spmd_i8tool.F
-Chd|-- called by -----------
-Chd|        INTFOP8                       source/interfaces/interf/intfop8.F
-Chd|-- calls ---------------
-Chd|====================================================================
+      !||====================================================================
+      !||    spmd_i8_reduce   ../engine/source/mpi/interfaces/spmd_i8tool.F
+      !||--- called by ------------------------------------------------------
+      !||    intfop8          ../engine/source/interfaces/interf/intfop8.F
+      !||--- calls      -----------------------------------------------------
+      !||====================================================================
       SUBROUTINE SPMD_I8_REDUCE(TAB,N,NUM)
 C-----------------------------------------------
 C   I n f o r m a t i o n s            

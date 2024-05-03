@@ -21,14 +21,11 @@ Copyright>        As an alternative to this open-source version, Altair also off
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
 C                                                                     12
-Chd|====================================================================
-Chd|  SROTO3                        source/elements/solid/solidez/sroto3.F
-Chd|-- called by -----------
-Chd|        S8CFORC3                      source/elements/thickshell/solide8c/s8cforc3.F
-Chd|        S8ZFORC3                      source/elements/solid/solide8z/s8zforc3.F
-Chd|        SZFORC3                       source/elements/solid/solidez/szforc3.F
-Chd|-- calls ---------------
-Chd|====================================================================
+      !||====================================================================
+      !||    sroto3     ../starter/source/elements/solid/solidez/szorth3.F
+      !||--- called by ------------------------------------------------------
+      !||    szordef3   ../starter/source/elements/solid/solidez/szorth3.F
+      !||====================================================================
       SUBROUTINE SROTO3(JFT,JLT,SIG,SIGN,
      .                 G1X,G1Y,G1Z,G2X,G2Y,G2Z,G3X,G3Y,G3Z,NEL)
 C-----------------------------------------------

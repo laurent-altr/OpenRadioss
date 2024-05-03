@@ -27,12 +27,11 @@ C  |-- appelee par -----------
 C  |         CBAFORC3                         /coqueba/cbaforc3.F
 C  |-- appelle ---------------
 C  |============================================================
-Chd|====================================================================
-Chd|  CBAPROJ_PLY                   source/properties/composite_options/stack/cbaproj_ply.F
-Chd|-- called by -----------
-Chd|        CBAFORC3                      source/elements/shell/coqueba/cbaforc3.F
-Chd|-- calls ---------------
-Chd|====================================================================
+      !||====================================================================
+      !||    cbaproj_ply   ../engine/source/properties/composite_options/stack/cbaproj_ply.F
+      !||--- called by ------------------------------------------------------
+      !||    cbaforc3      ../engine/source/elements/shell/coqueba/cbaforc3.F
+      !||====================================================================
       SUBROUTINE CBAPROJ_PLY(
      1            JFT    ,JLT  ,NPT  , NPLAT  ,IPLAT, VQN    ,
      2            VQ     ,VF   , VFI , COREL ,DI ,

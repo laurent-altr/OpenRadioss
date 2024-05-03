@@ -20,6 +20,47 @@ Copyright>
 Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
+      !||====================================================================
+      !||    constant_mod               ../common_source/modules/constant_mod.F
+      !||--- called by ------------------------------------------------------
+      !||    anim_nodal_ssp_elems       ../engine/source/output/anim/generate/anim_nodal_ssp_elems.F90
+      !||    bcs_wall_trigger           ../engine/source/boundary_conditions/bcs_wall_trigger.F90
+      !||    chk_shell_offset           ../starter/source/elements/shell/shell_offset/chk_shell_offset.F90
+      !||    create_plane_clause        ../starter/source/model/sets/create_plane_clause.F90
+      !||    damping_vref_rby           ../engine/source/assembly/damping_vref_rby.F90
+      !||    damping_vref_rby_stiff     ../engine/source/assembly/damping_vref_rby_stiff.F90
+      !||    damping_vref_sum6_rby      ../engine/source/assembly/damping_vref_sum6_rby.F90
+      !||    defbeam_sect_new           ../starter/source/properties/beam/defbeam_sect_new.F90
+      !||    dim_shell_offsetp          ../starter/source/elements/shell/shell_offset/dim_shell_offsetp.F90
+      !||    fractal_dmg_init           ../starter/source/materials/fail/fractal/fractal_dmg_init.F90
+      !||    fractal_element_neighbor   ../starter/source/materials/fail/fractal/fractal_element_neighbor.F90
+      !||    get_preload_axial          ../engine/source/elements/spring/preload_axial.F90
+      !||    hm_read_bcs_wall           ../starter/source/boundary_conditions/hm_read_bcs_wall.F90
+      !||    hm_read_fractal_dmg        ../starter/source/materials/fail/fractal/hm_read_fractal_dmg.F90
+      !||    hm_read_preload_axial      ../starter/source/loads/general/preload/hm_read_preload_axial.F90
+      !||    inter7_candidate_pairs     ../engine/source/interfaces/intsort/inter7_candidate_pairs.F
+      !||    inter7_filter_cand         ../engine/source/interfaces/intsort/inter7_filter_cand.F
+      !||    inter7_penetration         ../engine/source/interfaces/intsort/inter7_penetration.F
+      !||    inter_sh_offset_ini        ../engine/source/interfaces/shell_offset/inter_offset_ini.F90
+      !||    mat25_crasurv_c            ../engine/source/materials/mat/mat025/mat25_crasurv_c.F90
+      !||    mat25_crasurv_s            ../engine/source/materials/mat/mat025/mat25_crasurv_s.F90
+      !||    mat25_tsaiwu_c             ../engine/source/materials/mat/mat025/mat25_tsaiwu_c.F90
+      !||    mat25_tsaiwu_s             ../engine/source/materials/mat/mat025/mat25_tsaiwu_s.F90
+      !||    offset_nproj               ../engine/source/interfaces/shell_offset/offset_nproj.F90
+      !||    preload_axial              ../engine/source/elements/spring/preload_axial.F90
+      !||    random_walk_dmg            ../starter/source/materials/fail/fractal/random_walk_dmg.F90
+      !||    read_mat25_crasurv         ../starter/source/materials/mat/mat025/read_mat25_crasurv.F90
+      !||    read_mat25_tsaiwu          ../starter/source/materials/mat/mat025/read_mat25_tsaiwu.F90
+      !||    sh_offset_jonct_chk        ../starter/source/elements/shell/shell_offset/sh_offset_jonkt_chk.F90
+      !||    sh_offset_nproj            ../starter/source/elements/shell/shell_offset/shell_offset_nproj.F90
+      !||    sh_offset_setn             ../starter/source/elements/shell/shell_offset/sh_offset_setn.F90
+      !||    shell_offset_ini           ../starter/source/elements/shell/shell_offset/shell_offset_ini.F90
+      !||    shell_offsetp              ../starter/source/elements/shell/shell_offset/shell_offsetp.F90
+      !||    spmd_exch_massflow_data    ../engine/source/ale/grid/spmd_exch_massflow_data.F90
+      !||    spmd_exch_massflow_data2   ../engine/source/ale/grid/spmd_exch_massflow_data2.F90
+      !||    spmd_exch_massflow_data3   ../engine/source/ale/grid/spmd_exch_massflow_data3.F90
+      !||    spmd_exch_massflow_data4   ../engine/source/ale/grid/spmd_exch_massflow_data4.F90
+      !||====================================================================
       module constant_mod
         implicit none
 #include "my_real.inc"

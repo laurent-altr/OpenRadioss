@@ -20,16 +20,15 @@ Copyright>
 Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
-Chd|====================================================================
-Chd|  ALLOCBUF_AUTO                 source/elements/elbuf/allocbuf_auto.F
-Chd|-- called by -----------
-Chd|        ELBUF_INI                     source/elements/elbuf/elbuf_ini.F
-Chd|-- calls ---------------
-Chd|        READ_DB                       source/output/tools/read_db.F 
-Chd|        READ_DPDB                     source/output/tools/read_db.F 
-Chd|        ELBUFDEF_MOD                  ../common_source/modules/mat_elem/elbufdef_mod.F
-Chd|        H3D_INC_MOD                   share/modules/h3d_inc_mod.F   
-Chd|====================================================================
+      !||====================================================================
+      !||    allocbuf_auto   ../starter/source/elements/elbuf_init/allocbuf_auto.F
+      !||--- called by ------------------------------------------------------
+      !||    elbuf_ini       ../starter/source/elements/elbuf_init/elbuf_ini.F
+      !||--- calls      -----------------------------------------------------
+      !||    ancmsg          ../starter/share/message_module/inter_ancmsg_mod.F
+      !||--- uses       -----------------------------------------------------
+      !||    message_mod     ../starter/share/message_module/message_mod.F
+      !||====================================================================
       SUBROUTINE ALLOCBUF_AUTO(ELBUF_STR,BUFLEN,NPT,ITY,ISNOD,NEWLEN,INLOC,ISOLNOD)
 C-----------------------------------------------
 C   M o d u l e s

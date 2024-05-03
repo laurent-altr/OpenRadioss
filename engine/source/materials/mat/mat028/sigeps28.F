@@ -20,15 +20,15 @@ Copyright>
 Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
-Chd|====================================================================
-Chd|  SIGEPS28                      source/materials/mat/mat028/sigeps28.F
-Chd|-- called by -----------
-Chd|        MULAW                         source/materials/mat_share/mulaw.F
-Chd|        MULAW8                        source/materials/mat_share/mulaw8.F
-Chd|-- calls ---------------
-Chd|        VINTER2                       source/tools/curve/vinter.F   
-Chd|        VINTER2DP                     source/tools/curve/vinter.F   
-Chd|====================================================================
+      !||====================================================================
+      !||    sigeps28    ../engine/source/materials/mat/mat028/sigeps28.F
+      !||--- called by ------------------------------------------------------
+      !||    mulaw       ../engine/source/materials/mat_share/mulaw.F
+      !||    mulaw8      ../engine/source/materials/mat_share/mulaw8.F
+      !||--- calls      -----------------------------------------------------
+      !||    vinter2     ../engine/source/tools/curve/vinter.F
+      !||    vinter2dp   ../engine/source/tools/curve/vinter.F
+      !||====================================================================
       SUBROUTINE SIGEPS28 (
      1     NEL    ,NUPARAM,NUVAR   ,NFUNC   ,IFUNC   ,NPF    ,
      2     TF     ,TIME   ,TIMESTEP,UPARAM  ,RHO0    ,RHO    ,

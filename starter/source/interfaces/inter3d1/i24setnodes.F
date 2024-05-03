@@ -20,19 +20,18 @@ Copyright>
 Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
-Chd|====================================================================
-Chd|  I24SETNODES                   source/interfaces/inter3d1/i24setnodes.F
-Chd|-- called by -----------
-Chd|        LECTUR                        source/starter/lectur.F       
-Chd|-- calls ---------------
-Chd|        ANCMSG                        source/output/message/message.F
-Chd|        IFRONTPLUS                    source/spmd/node/frontplus.F  
-Chd|        INTERSURFL                    source/spmd/node/ddtools.F    
-Chd|        FRONT_MOD                     share/modules1/front_mod.F    
-Chd|        I7I10SPLITMOD                 share/modules1/i710split_mod.F
-Chd|        INTBUFDEF_MOD                 ../common_source/modules/intbufdef_mod.F
-Chd|        MESSAGE_MOD                   share/message_module/message_mod.F
-Chd|====================================================================
+      !||====================================================================
+      !||    i24setnodes     ../starter/source/interfaces/inter3d1/i24setnodes.F
+      !||--- called by ------------------------------------------------------
+      !||    lectur          ../starter/source/starter/lectur.F
+      !||--- calls      -----------------------------------------------------
+      !||    ancmsg          ../starter/share/message_module/inter_ancmsg_mod.F
+      !||    ifrontplus      ../starter/source/spmd/node/frontplus.F
+      !||--- uses       -----------------------------------------------------
+      !||    front_mod       ../starter/share/modules1/front_mod.F
+      !||    i7i10splitmod   ../starter/share/modules1/i710split_mod.F
+      !||    message_mod     ../starter/share/message_module/message_mod.F
+      !||====================================================================
       SUBROUTINE I24SETNODES(IPARI,INTBUF_TAB,INTERCEP,ITAB,I24MAXNSNE)
 C-----------------------------------------------
 C   M o d u l e s
@@ -130,13 +129,11 @@ C
       END
 
 
-Chd|====================================================================
-Chd|  SECND_SURFACE_ON_DOMAIN       source/interfaces/inter3d1/i24setnodes.F
-Chd|-- called by -----------
-Chd|-- calls ---------------
-Chd|        FRONT_MOD                     share/modules1/front_mod.F    
-Chd|        INTBUFDEF_MOD                 ../common_source/modules/intbufdef_mod.F
-Chd|====================================================================
+      !||====================================================================
+      !||    secnd_surface_on_domain   ../starter/source/interfaces/inter3d1/i24setnodes.F
+      !||--- uses       -----------------------------------------------------
+      !||    front_mod                 ../starter/share/modules1/front_mod.F
+      !||====================================================================
       INTEGER FUNCTION SECND_SURFACE_ON_DOMAIN(INTERCEP,SE,PROC)
 C-----------------------------------------------
 C   M o d u l e s

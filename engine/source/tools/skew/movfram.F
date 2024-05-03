@@ -24,13 +24,13 @@ C
 C     This routine is used if (first) STARTER ran was > 4.4b
 C
 C=======================================================================
-Chd|====================================================================
-Chd|  MOVFRA1                       source/tools/skew/movfram.F   
-Chd|-- called by -----------
-Chd|        RESOL                         source/engine/resol.F         
-Chd|-- calls ---------------
-Chd|        SPMD_RBCAST                   source/mpi/generic/spmd_rbcast.F
-Chd|====================================================================
+      !||====================================================================
+      !||    movfra1       ../engine/source/tools/skew/movfram.F
+      !||--- called by ------------------------------------------------------
+      !||    resol         ../engine/source/engine/resol.F
+      !||--- calls      -----------------------------------------------------
+      !||    spmd_rbcast   ../engine/source/mpi/generic/spmd_rbcast.F
+      !||====================================================================
       SUBROUTINE MOVFRA1(XFRAME,IFRAME ,X, V ,A ,VR ,AR)
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
@@ -418,14 +418,14 @@ C
 C     This routine is used if (first) STARTER ran was > 4.4b
 C
 C=======================================================================
-Chd|====================================================================
-Chd|  MOVFRA2                       source/tools/skew/movfram.F   
-Chd|-- called by -----------
-Chd|        RESOL                         source/engine/resol.F         
-Chd|-- calls ---------------
-Chd|        ROTBMR                        source/tools/skew/rotbmr.F    
-Chd|        SPMD_RBCAST                   source/mpi/generic/spmd_rbcast.F
-Chd|====================================================================
+      !||====================================================================
+      !||    movfra2       ../engine/source/tools/skew/movfram.F
+      !||--- called by ------------------------------------------------------
+      !||    resol         ../engine/source/engine/resol.F
+      !||--- calls      -----------------------------------------------------
+      !||    rotbmr        ../engine/source/tools/skew/rotbmr.F
+      !||    spmd_rbcast   ../engine/source/mpi/generic/spmd_rbcast.F
+      !||====================================================================
       SUBROUTINE MOVFRA2(XFRAME ,IFRAME ,X ,V ,VR , D)
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
@@ -789,14 +789,14 @@ C
 C
       RETURN
       END
-Chd|====================================================================
-Chd|  MOVFRA_IMP                    source/tools/skew/movfram.F   
-Chd|-- called by -----------
-Chd|        RESOL                         source/engine/resol.F         
-Chd|-- calls ---------------
-Chd|        ROTBMR                        source/tools/skew/rotbmr.F    
-Chd|        SPMD_RBCAST                   source/mpi/generic/spmd_rbcast.F
-Chd|====================================================================
+      !||====================================================================
+      !||    movfra_imp    ../engine/source/tools/skew/movfram.F
+      !||--- called by ------------------------------------------------------
+      !||    resol         ../engine/source/engine/resol.F
+      !||--- calls      -----------------------------------------------------
+      !||    rotbmr        ../engine/source/tools/skew/rotbmr.F
+      !||    spmd_rbcast   ../engine/source/mpi/generic/spmd_rbcast.F
+      !||====================================================================
       SUBROUTINE MOVFRA_IMP(XFRAME,IFRAME ,X, V ,A ,VR ,AR ,D )
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s

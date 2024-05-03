@@ -22,33 +22,46 @@
 !Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
 !===================================================================================================
 
+      !||====================================================================
+      !||    random_walk_def_mod        ../common_source/modules/random_walk_def_mod.F90
+      !||--- called by ------------------------------------------------------
+      !||    c3init3                    ../starter/source/elements/sh3n/coque3n/c3init3.F
+      !||    cbainit3                   ../starter/source/elements/shell/coqueba/cbainit3.F
+      !||    cinit3                     ../starter/source/elements/shell/coque/cinit3.F
+      !||    fractal_dmg_init           ../starter/source/materials/fail/fractal/fractal_dmg_init.F90
+      !||    fractal_element_neighbor   ../starter/source/materials/fail/fractal/fractal_element_neighbor.F90
+      !||    initia                     ../starter/source/elements/initia/initia.F
+      !||    lectur                     ../engine/source/input/lectur.F
+      !||    random_walk_dmg            ../starter/source/materials/fail/fractal/random_walk_dmg.F90
+      !||    updfail                    ../starter/source/materials/updfail.F
+      !||====================================================================
       module random_walk_def_mod
 
 ! ======================================================================================================================
 !! \brief data structure for random walk algorithm used in fractal damage initialization
-!! \details 
+!! \details
 ! ======================================================================================================================
-      implicit none
+        implicit none
 ! ----------------------------------------------------------------------------------------------------------------------
 #include "my_real.inc"
 ! ----------------------------------------------------------------------------------------------------------------------
 
-      type random_walk_  
-        integer :: id                                   ! element id
-        integer :: nix                                  ! number of edge connexions (3/4)
-        my_real :: damage                               ! damage value 
-        integer, dimension(:), allocatable :: neighbor  ! neighbor element list (nix)
-      end type random_walk_ 
-            
-      type fractal_  
-        integer :: imat
-        integer :: nelem
-        type (random_walk_), dimension(:), allocatable :: random_walk  ! (nelem)
-      end type fractal_ 
-      
-      type fail_fractal_               ! (nfail_fractal)
-        integer :: nfail               ! number of fractal_dmg models (global)
-        type (fractal_) ,dimension(:), allocatable :: fractal   ! (nfail_fractal)     
-      end type fail_fractal_ 
+        type random_walk_
+          integer :: id                                   ! element id
+          integer :: nix                                  ! number of edge connexions (3/4)
+          my_real :: damage                               ! damage value
+          integer, dimension(:), allocatable :: neighbor  ! neighbor element list (nix)
+        end type random_walk_
+
+        type fractal_
+          integer :: imat
+          integer :: nelem
+          type (random_walk_), dimension(:), allocatable :: random_walk  ! (nelem)
+        end type fractal_
+
+        type fail_fractal_               ! (nfail_fractal)
+          integer :: nfail               ! number of fractal_dmg models (global)
+          type (fractal_) ,dimension(:), allocatable :: fractal   ! (nfail_fractal)
+        end type fail_fractal_
 ! ----------------------------------------------------------------------------------------------------------------------
       end module random_walk_def_mod

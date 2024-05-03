@@ -20,47 +20,51 @@ Copyright>
 Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
-Chd|====================================================================
-Chd|  RESOL_HEAD                    source/engine/resol_head.F    
-Chd|-- called by -----------
-Chd|        RADIOSS2                      source/engine/radioss2.F      
-Chd|-- calls ---------------
-Chd|        RESOL                         source/engine/resol.F         
-Chd|        TRACE_IN                      source/system/trace_back.F    
-Chd|        TRACE_OUT                     source/system/trace_back.F    
-Chd|        ALE_CONNECTIVITY_MOD          ../common_source/modules/ale/ale_connectivity_mod.F
-Chd|        CLUSTER_MOD                   share/modules/cluster_mod.F   
-Chd|        DAMP_MOD                      share/modules/damp_mod.F      
-Chd|        DIFFUSION_MOD                 share/modules/diffusion_mod.F 
-Chd|        DRAPE_MOD                     share/modules/drape_mod.F     
-Chd|        DSGRAPH_MOD                   share/modules/dsgraph_mod.F   
-Chd|        DT_MOD                        share/modules/dt_mod.F        
-Chd|        EBCS_MOD                      ../common_source/modules/boundary_conditions/ebcs_mod.F
-Chd|        EIG_MOD                       share/modules/eig_mod.F       
-Chd|        FXB_MOD                       share/modules/fxb_mod.F       
-Chd|        GROUPDEF_MOD                  ../common_source/modules/groupdef_mod.F
-Chd|        H3D_MOD                       share/modules/h3d_mod.F       
-Chd|        INTBUFDEF_MOD                 ../common_source/modules/intbufdef_mod.F
-Chd|        INTBUFMOD                     share/modules/restart_mod.F   
-Chd|        INTBUF_FRIC_MOD               share/modules/intbuf_fric_mod.F
-Chd|        INTERFACES_MOD                ../common_source/modules/interfaces/interfaces_mod.F
-Chd|        LOADS_MOD                     ../common_source/modules/loads/loads_mod.F
-Chd|        MAT_ELEM_MOD                  ../common_source/modules/mat_elem/mat_elem_mod.F
-Chd|        MONVOL_STRUCT_MOD             share/modules/monvol_struct_mod.F
-Chd|        MULTI_FVM_MOD                 ../common_source/modules/ale/multi_fvm_mod.F
-Chd|        OUTPUT_MOD                    ../common_source/modules/output/output_mod.F
-Chd|        PINCHTYPE_MOD                 ../common_source/modules/pinchtype_mod.F
-Chd|        RBODY_MOD                     share/modules/rbody_mod.F     
-Chd|        RESTMOD                       share/modules/restart_mod.F   
-Chd|        SEGVAR_MOD                    share/modules/segvar_mod.F    
-Chd|        SENSOR_MOD                    share/modules/sensor_mod.F    
-Chd|        SOLTOSPH_MOD                  share/modules/soltosph_mod.F  
-Chd|        SPH_MOD                       share/modules/sph_mod.F       
-Chd|        STACK_MOD                     share/modules/stack_mod.F     
-Chd|        STATE_MOD                     ../common_source/modules/state_mod.F
-Chd|        TABLE_GLOB_MOD                share/modules/table_glob_mod.F
-Chd|        USER_WINDOWS_MOD              ../common_source/modules/user_windows_mod.F
-Chd|====================================================================
+      !||====================================================================
+      !||    resol_head             ../engine/source/engine/resol_head.F
+      !||--- called by ------------------------------------------------------
+      !||    radioss2               ../engine/source/engine/radioss2.F
+      !||--- calls      -----------------------------------------------------
+      !||    resol                  ../engine/source/engine/resol.F
+      !||    trace_in               ../engine/source/system/trace_back.F
+      !||    trace_out              ../engine/source/system/trace_back.F
+      !||--- uses       -----------------------------------------------------
+      !||    ale_connectivity_mod   ../common_source/modules/ale/ale_connectivity_mod.F
+      !||    cluster_mod            ../engine/share/modules/cluster_mod.F
+      !||    damp_mod               ../engine/share/modules/damp_mod.F
+      !||    diffusion_mod          ../engine/share/modules/diffusion_mod.F
+      !||    drape_mod              ../engine/share/modules/drape_mod.F
+      !||    dsgraph_mod            ../engine/share/modules/dsgraph_mod.F
+      !||    dt_mod                 ../engine/share/modules/dt_mod.F
+      !||    ebcs_mod               ../common_source/modules/boundary_conditions/ebcs_mod.F
+      !||    eig_mod                ../engine/share/modules/eig_mod.F
+      !||    fxb_mod                ../engine/share/modules/fxb_mod.F
+      !||    groupdef_mod           ../common_source/modules/groupdef_mod.F
+      !||    h3d_mod                ../engine/share/modules/h3d_mod.F
+      !||    intbuf_fric_mod        ../engine/share/modules/intbuf_fric_mod.F
+      !||    intbufdef_mod          ../common_source/modules/intbufdef_mod.F
+      !||    intbufmod              ../engine/share/modules/restart_mod.F
+      !||    interfaces_mod         ../common_source/modules/interfaces/interfaces_mod.F
+      !||    loads_mod              ../common_source/modules/loads/loads_mod.F
+      !||    mat_elem_mod           ../common_source/modules/mat_elem/mat_elem_mod.F
+      !||    monvol_struct_mod      ../engine/share/modules/monvol_struct_mod.F
+      !||    multi_fvm_mod          ../common_source/modules/ale/multi_fvm_mod.F
+      !||    names_and_titles_mod   ../common_source/modules/names_and_titles_mod.F
+      !||    output_mod             ../common_source/modules/output/output_mod.F
+      !||    pinchtype_mod          ../common_source/modules/pinchtype_mod.F
+      !||    python_funct_mod       ../common_source/modules/python_mod.F90
+      !||    rbody_mod              ../engine/share/modules/rbody_mod.F
+      !||    restmod                ../engine/share/modules/restart_mod.F
+      !||    segvar_mod             ../engine/share/modules/segvar_mod.F
+      !||    sensor_mod             ../engine/share/modules/sensor_mod.F
+      !||    soltosph_mod           ../engine/share/modules/soltosph_mod.F
+      !||    sph_mod                ../engine/share/modules/sph_mod.F
+      !||    stack_mod              ../engine/share/modules/stack_mod.F
+      !||    state_mod              ../common_source/modules/state_mod.F
+      !||    table_glob_mod         ../engine/share/modules/table_glob_mod.F
+      !||    unitab_mod             ../common_source/modules/unitab_mod.F
+      !||    user_windows_mod       ../common_source/modules/user_windows_mod.F
+      !||====================================================================
       SUBROUTINE RESOL_HEAD(
      .           ITASK       ,AF          ,IAF            ,IDATA      ,RDATA,XDP       ,
      .           GRAPHE      ,IFLOW       ,RFLOW          ,MCP        ,TEMP            ,

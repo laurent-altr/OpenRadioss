@@ -20,15 +20,11 @@ Copyright>
 Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
-Chd|====================================================================
-Chd|  DRBYCNT                       source/output/anim/generate/drbycnt.F
-Chd|-- called by -----------
-Chd|        GENANI                        source/output/anim/generate/genani.F
-Chd|        GENH3D                        source/output/h3d/h3d_results/genh3d.F
-Chd|-- calls ---------------
-Chd|        SPMD_GLOB_ISUM9               source/mpi/interfaces/spmd_th.F
-Chd|        SPMD_IBCAST                   source/mpi/generic/spmd_ibcast.F
-Chd|====================================================================
+      !||====================================================================
+      !||    drbycnt   ../starter/source/output/anim/drbycnt.F
+      !||--- called by ------------------------------------------------------
+      !||    genani1   ../starter/source/output/anim/genani1.F
+      !||====================================================================
       SUBROUTINE DRBYCNT(NERBY,NPBY,FR_RBY2)
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s

@@ -20,16 +20,17 @@ Copyright>
 Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
-Chd|====================================================================
-Chd|  SMS_INI_PART                  source/ams/sms_init.F         
-Chd|-- called by -----------
-Chd|        RESOL                         source/engine/resol.F         
-Chd|-- calls ---------------
-Chd|        ANCMSG                        source/output/message/message.F
-Chd|        ARRET                         source/system/arret.F         
-Chd|        GROUPDEF_MOD                  ../common_source/modules/groupdef_mod.F
-Chd|        MESSAGE_MOD                   share/message_module/message_mod.F
-Chd|====================================================================
+      !||====================================================================
+      !||    sms_ini_part   ../engine/source/ams/sms_init.F
+      !||--- called by ------------------------------------------------------
+      !||    resol          ../engine/source/engine/resol.F
+      !||--- calls      -----------------------------------------------------
+      !||    ancmsg         ../engine/share/message_module/inter_ancmsg_mod.F
+      !||    arret          ../engine/source/system/arret.F
+      !||--- uses       -----------------------------------------------------
+      !||    groupdef_mod   ../common_source/modules/groupdef_mod.F
+      !||    message_mod    ../engine/share/message_module/message_mod.F
+      !||====================================================================
       SUBROUTINE SMS_INI_PART(IGRPART ,TAGPRT_SMS)
 C-----------------------------------------------
 C   M o d u l e s
@@ -89,13 +90,13 @@ C
 C-----------------------------------------------
       RETURN
       END
-Chd|====================================================================
-Chd|  SMS_INI_RBY                   source/ams/sms_init.F         
-Chd|-- called by -----------
-Chd|        RESOL                         source/engine/resol.F         
-Chd|-- calls ---------------
-Chd|        MESSAGE_MOD                   share/message_module/message_mod.F
-Chd|====================================================================
+      !||====================================================================
+      !||    sms_ini_rby   ../engine/source/ams/sms_init.F
+      !||--- called by ------------------------------------------------------
+      !||    resol         ../engine/source/engine/resol.F
+      !||--- uses       -----------------------------------------------------
+      !||    message_mod   ../engine/share/message_module/message_mod.F
+      !||====================================================================
       SUBROUTINE SMS_INI_RBY(
      1  KINET   ,NPRW      ,LPRW     ,NPBY     , LPBY    ,
      2  TAGMSR_RBY_SMS,TAGSLV_RBY_SMS)
@@ -191,12 +192,11 @@ C
 C-----------------------------------------------
       RETURN
       END
-Chd|====================================================================
-Chd|  SMS_INI_KAD                   source/ams/sms_init.F         
-Chd|-- called by -----------
-Chd|        RESOL                         source/engine/resol.F         
-Chd|-- calls ---------------
-Chd|====================================================================
+      !||====================================================================
+      !||    sms_ini_kad   ../starter/source/ams/sms_init.F
+      !||--- called by ------------------------------------------------------
+      !||    lectur        ../starter/source/starter/lectur.F
+      !||====================================================================
       SUBROUTINE SMS_INI_KAD(
      1  IXS     ,IXQ      ,IXC     ,IXT     ,IXP       ,
      2  IXR     ,IXTG     ,IXTG1   ,IXS10   ,IXS16     ,
@@ -528,11 +528,11 @@ C
 C-----------------------------------------------
       RETURN
       END
-Chd|====================================================================
-Chd|  NODNX_SMS_INI                 source/ams/sms_init.F         
-Chd|-- called by -----------
-Chd|-- calls ---------------
-Chd|====================================================================
+      !||====================================================================
+      !||    nodnx_sms_ini   ../starter/source/ams/sms_init.F
+      !||--- called by ------------------------------------------------------
+      !||    sms_init        ../starter/source/ams/sms_init.F
+      !||====================================================================
       SUBROUTINE NODNX_SMS_INI(
      1 NUMNOD  ,NUMEL ,NIX ,MIX ,LIX ,
      2 IX      ,IPARTX,TAGPRT_SMS,NODNX_SMS)
@@ -573,15 +573,12 @@ C
 
       RETURN
       END
-Chd|====================================================================
-Chd|  SMS_INI_KDI                   source/ams/sms_init.F         
-Chd|-- called by -----------
-Chd|        RESOL                         source/engine/resol.F         
-Chd|-- calls ---------------
-Chd|        STARTIMEG                     source/system/timer.F         
-Chd|        STOPTIMEG                     source/system/timer.F         
-Chd|        INTBUFDEF_MOD                 ../common_source/modules/intbufdef_mod.F
-Chd|====================================================================
+      !||====================================================================
+      !||    sms_ini_kdi     ../starter/source/ams/sms_init.F
+      !||--- called by ------------------------------------------------------
+      !||    lectur          ../starter/source/starter/lectur.F
+      !||--- uses       -----------------------------------------------------
+      !||====================================================================
       SUBROUTINE SMS_INI_KDI(
      2             IXC      ,IPARG   ,IXS      ,IXT      ,IXP     ,
      3             IXR      ,IXTG    ,IXS10    ,NODNX_SMS,KAD_SMS ,
@@ -997,14 +994,13 @@ C
 C
       RETURN
       END
-Chd|====================================================================
-Chd|  SMS_INI_JAD_1                 source/ams/sms_init.F         
-Chd|-- called by -----------
-Chd|        RESOL                         source/engine/resol.F         
-Chd|-- calls ---------------
-Chd|        MY_ORDERS                     ../common_source/tools/sort/my_orders.c
-Chd|        INTBUFDEF_MOD                 ../common_source/modules/intbufdef_mod.F
-Chd|====================================================================
+      !||====================================================================
+      !||    sms_ini_jad_1   ../starter/source/ams/sms_init.F
+      !||--- called by ------------------------------------------------------
+      !||    lectur          ../starter/source/starter/lectur.F
+      !||--- calls      -----------------------------------------------------
+      !||--- uses       -----------------------------------------------------
+      !||====================================================================
       SUBROUTINE SMS_INI_JAD_1(
      2             IXC      ,IPARG   ,IXS      ,IXT      ,IXP     ,
      3             IXR      ,IXTG    ,IXS10    ,NODNX_SMS,JADC_SMS,
@@ -1327,15 +1323,14 @@ C reconstruit JAD_SMS
 C-----------------------------------------------
       RETURN
       END
-Chd|====================================================================
-Chd|  SMS_INI_JAD_2                 source/ams/sms_init.F         
-Chd|-- called by -----------
-Chd|        RESOL                         source/engine/resol.F         
-Chd|-- calls ---------------
-Chd|        INTBUFDEF_MOD                 ../common_source/modules/intbufdef_mod.F
-Chd|        INTSTAMP_MOD                  share/modules/intstamp_mod.F  
-Chd|        MESSAGE_MOD                   share/message_module/message_mod.F
-Chd|====================================================================
+      !||====================================================================
+      !||    sms_ini_jad_2   ../starter/source/ams/sms_init.F
+      !||--- called by ------------------------------------------------------
+      !||    lectur          ../starter/source/starter/lectur.F
+      !||--- uses       -----------------------------------------------------
+      !||    intstamp_mod    ../starter/share/modules1/intstamp_mod.F
+      !||    message_mod     ../starter/share/message_module/message_mod.F
+      !||====================================================================
       SUBROUTINE SMS_INI_JAD_2(
      2             IXC      ,IPARG   ,IXS      ,IXT      ,IXP     ,
      3             IXR      ,IXTG    ,IXS10    ,NODNX_SMS,JADC_SMS,
@@ -1639,19 +1634,17 @@ C reconstruit JAD_SMS
 C-----------------------------------------------
       RETURN
       END
-Chd|====================================================================
-Chd|  SMS_INI_JAD_3                 source/ams/sms_init.F         
-Chd|-- called by -----------
-Chd|        RESOL                         source/engine/resol.F         
-Chd|-- calls ---------------
-Chd|        ANCMSG                        source/output/message/message.F
-Chd|        ARRET                         source/system/arret.F         
-Chd|        SPMD_ALLGLOB_ISUM9            source/mpi/generic/spmd_allglob_isum9.F
-Chd|        SPMD_EXCH_NODNX               source/mpi/ams/spmd_exch_nodnx.F
-Chd|        INTBUFDEF_MOD                 ../common_source/modules/intbufdef_mod.F
-Chd|        INTSTAMP_MOD                  share/modules/intstamp_mod.F  
-Chd|        MESSAGE_MOD                   share/message_module/message_mod.F
-Chd|====================================================================
+      !||====================================================================
+      !||    sms_ini_jad_3   ../starter/source/ams/sms_init.F
+      !||--- called by ------------------------------------------------------
+      !||    lectur          ../starter/source/starter/lectur.F
+      !||--- calls      -----------------------------------------------------
+      !||    ancmsg          ../starter/share/message_module/inter_ancmsg_mod.F
+      !||    arret           ../starter/source/system/arret.F
+      !||--- uses       -----------------------------------------------------
+      !||    intstamp_mod    ../starter/share/modules1/intstamp_mod.F
+      !||    message_mod     ../starter/share/message_module/message_mod.F
+      !||====================================================================
       SUBROUTINE SMS_INI_JAD_3(
      2             IXC      ,IPARG   ,IXS      ,IXT      ,IXP     ,
      3             IXR      ,IXTG    ,IXS10    ,NODNX_SMS,JADC_SMS,
@@ -2093,17 +2086,17 @@ C
 C-----------------------------------------------
       RETURN
       END
-Chd|====================================================================
-Chd|  SMS_INI_KIN_1                 source/ams/sms_init.F         
-Chd|-- called by -----------
-Chd|-- calls ---------------
-Chd|        SPMD_ALLGLOB_ISUM9            source/mpi/generic/spmd_allglob_isum9.F
-Chd|        SPMD_FRWALL_NN                source/mpi/kinematic_conditions/spmd_frwall_nn.F
-Chd|        SPMD_GLOB_IMAX9               source/mpi/generic/spmd_glob_imax9.F
-Chd|        SPMD_IBCAST                   source/mpi/generic/spmd_ibcast.F
-Chd|        SPMD_SD_CJ_2                  source/mpi/kinematic_conditions/spmd_sd_cj_2.F
-Chd|        INTBUFDEF_MOD                 ../common_source/modules/intbufdef_mod.F
-Chd|====================================================================
+      !||====================================================================
+      !||    sms_ini_kin_1        ../engine/source/ams/sms_init.F
+      !||--- calls      -----------------------------------------------------
+      !||    spmd_allglob_isum9   ../engine/source/mpi/generic/spmd_allglob_isum9.F
+      !||    spmd_frwall_nn       ../engine/source/mpi/kinematic_conditions/spmd_frwall_nn.F
+      !||    spmd_glob_imax9      ../engine/source/mpi/generic/spmd_glob_imax9.F
+      !||    spmd_ibcast          ../engine/source/mpi/generic/spmd_ibcast.F
+      !||    spmd_sd_cj_2         ../engine/source/mpi/kinematic_conditions/spmd_sd_cj_2.F
+      !||--- uses       -----------------------------------------------------
+      !||    intbufdef_mod        ../common_source/modules/intbufdef_mod.F
+      !||====================================================================
       SUBROUTINE SMS_INI_KIN_1(
      1  NODNX_SMS ,INDX1_SMS ,ILINK     ,RLINK    ,NNLINK    ,
      2  LNLINK    ,TAG_LNK_SMS,FR_LL    ,FR_RL    ,WEIGHT    ,
@@ -2374,14 +2367,14 @@ C for sms_fixvel, etc
 C-----------------------------------------------
       RETURN
       END
-Chd|====================================================================
-Chd|  SMS_INI_KIN_2                 source/ams/sms_init.F         
-Chd|-- called by -----------
-Chd|        RESOL                         source/engine/resol.F         
-Chd|-- calls ---------------
-Chd|        SPMD_GLOB_IMAX9               source/mpi/generic/spmd_glob_imax9.F
-Chd|        SPMD_IBCAST                   source/mpi/generic/spmd_ibcast.F
-Chd|====================================================================
+      !||====================================================================
+      !||    sms_ini_kin_2     ../engine/source/ams/sms_init.F
+      !||--- called by ------------------------------------------------------
+      !||    resol             ../engine/source/engine/resol.F
+      !||--- calls      -----------------------------------------------------
+      !||    spmd_glob_imax9   ../engine/source/mpi/generic/spmd_glob_imax9.F
+      !||    spmd_ibcast       ../engine/source/mpi/generic/spmd_ibcast.F
+      !||====================================================================
       SUBROUTINE SMS_INI_KIN_2(
      1  ILINK     ,RLINK    ,NNLINK    ,LNLINK    ,TAG_LNK_SMS,
      2  FR_LL    ,FR_RL     ,WEIGHT    ,ITAB      ,LJOINT     ,
@@ -2472,15 +2465,16 @@ C-----------------------------------------------
 C-----------------------------------------------
       RETURN
       END
-Chd|====================================================================
-Chd|  SMS_INI_INT                   source/ams/sms_init.F         
-Chd|-- called by -----------
-Chd|        RESOL                         source/engine/resol.F         
-Chd|-- calls ---------------
-Chd|        SPMD_EXCH_ICONT               source/mpi/nodes/spmd_exch_icont.F
-Chd|        SPMD_EXCH_SMST2               source/mpi/ams/spmd_exch_smst2.F
-Chd|        INTBUFDEF_MOD                 ../common_source/modules/intbufdef_mod.F
-Chd|====================================================================
+      !||====================================================================
+      !||    sms_ini_int       ../engine/source/ams/sms_init.F
+      !||--- called by ------------------------------------------------------
+      !||    resol             ../engine/source/engine/resol.F
+      !||--- calls      -----------------------------------------------------
+      !||    spmd_exch_icont   ../engine/source/mpi/nodes/spmd_exch_icont.F
+      !||    spmd_exch_smst2   ../engine/source/mpi/ams/spmd_exch_smst2.F
+      !||--- uses       -----------------------------------------------------
+      !||    intbufdef_mod     ../common_source/modules/intbufdef_mod.F
+      !||====================================================================
       SUBROUTINE SMS_INI_INT(
      1  IPARI    ,INTBUF_TAB     ,IAD_ELEM   ,FR_ELEM  ,INTLIST,
      2  NBINTC)
@@ -2630,16 +2624,17 @@ C
 C-----------------------------------------------
       RETURN
       END
-Chd|====================================================================
-Chd|  SMS_INI_ERR                   source/ams/sms_init.F         
-Chd|-- called by -----------
-Chd|        RESOL                         source/engine/resol.F         
-Chd|-- calls ---------------
-Chd|        ANCMSG                        source/output/message/message.F
-Chd|        ARRET                         source/system/arret.F         
-Chd|        SPMD_ALLGLOB_ISUM9            source/mpi/generic/spmd_allglob_isum9.F
-Chd|        MESSAGE_MOD                   share/message_module/message_mod.F
-Chd|====================================================================
+      !||====================================================================
+      !||    sms_ini_err          ../engine/source/ams/sms_init.F
+      !||--- called by ------------------------------------------------------
+      !||    resol                ../engine/source/engine/resol.F
+      !||--- calls      -----------------------------------------------------
+      !||    ancmsg               ../engine/share/message_module/inter_ancmsg_mod.F
+      !||    arret                ../engine/source/system/arret.F
+      !||    spmd_allglob_isum9   ../engine/source/mpi/generic/spmd_allglob_isum9.F
+      !||--- uses       -----------------------------------------------------
+      !||    message_mod          ../engine/share/message_module/message_mod.F
+      !||====================================================================
       SUBROUTINE SMS_INI_ERR(NPRW    ,LPRW    ,KINET   )
 C-----------------------------------------------
 C   M o d u l e s

@@ -27,12 +27,11 @@ C|-- appelee par -----------
 C|      EOSMAIN                               /eos/eosmain.F
 C|-- appelle ---------------
 C|============================================================
-Chd|====================================================================
-Chd|  EOSLINEAR                     eos/eoslinear.F               
-Chd|-- called by -----------
-Chd|        EOSMAIN                       common_source/eos/eosmain.F   
-Chd|-- calls ---------------
-Chd|====================================================================
+      !||====================================================================
+      !||    eoslinear   ../common_source/eos/eoslinear.F
+      !||--- called by ------------------------------------------------------
+      !||    eosmain     ../common_source/eos/eosmain.F
+      !||====================================================================
       SUBROUTINE EOSLINEAR(IFLAG,NEL, PM   ,OFF  ,EINT ,MU   ,MU2  , 
      2                     DVOL ,DF   ,VNEW ,MAT  ,PNEW ,DPDM ,
      3                     DPDE ,THETA,ECOLD)

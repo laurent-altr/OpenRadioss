@@ -20,18 +20,16 @@ Copyright>
 Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
-Chd|====================================================================
-Chd|  I25NEIGH                      source/interfaces/inter3d1/i25neigh.F
-Chd|-- called by -----------
-Chd|        ININT3                        source/interfaces/inter3d1/inint3.F
-Chd|-- calls ---------------
-Chd|        I25NEIGH_MSG_ERR              source/interfaces/inter3d1/i25neigh.F
-Chd|        I25NEIGH_SEG_EN               source/interfaces/inter3d1/i25neigh.F
-Chd|        MY_ORDERS                     ../common_source/tools/sort/my_orders.c
-Chd|        BITGET                        source/interfaces/inter3d1/bitget.F
-Chd|        BITSET                        source/interfaces/inter3d1/bitget.F
-Chd|        MESSAGE_MOD                   share/message_module/message_mod.F
-Chd|====================================================================
+      !||====================================================================
+      !||    i25neigh           ../starter/source/interfaces/inter3d1/i25neigh.F
+      !||--- called by ------------------------------------------------------
+      !||    inint3             ../starter/source/interfaces/inter3d1/inint3.F
+      !||--- calls      -----------------------------------------------------
+      !||    i25neigh_msg_err   ../starter/source/interfaces/inter3d1/i25neigh.F
+      !||    i25neigh_seg_en    ../starter/source/interfaces/inter3d1/i25neigh.F
+      !||--- uses       -----------------------------------------------------
+      !||    message_mod        ../starter/share/message_module/message_mod.F
+      !||====================================================================
       SUBROUTINE I25NEIGH(NRTM ,NSN   ,NSV     ,IRECT  ,IRTLM,
      2                         MVOISIN,EVOISIN ,MSEGLO ,MSEGTYP,ITAB   ,
      3                         X      ,ID      ,TITR   ,IGEO   ,NADMSR ,
@@ -963,12 +961,11 @@ C-------------------------------------
 C-------------------------------------
       RETURN
       END
-Chd|====================================================================
-Chd|  I25INI_GAP_N                  source/interfaces/inter3d1/i25neigh.F
-Chd|-- called by -----------
-Chd|        ININT3                        source/interfaces/inter3d1/inint3.F
-Chd|-- calls ---------------
-Chd|====================================================================
+      !||====================================================================
+      !||    i25ini_gap_n   ../starter/source/interfaces/inter3d1/i25neigh.F
+      !||--- called by ------------------------------------------------------
+      !||    inint3         ../starter/source/interfaces/inter3d1/inint3.F
+      !||====================================================================
       SUBROUTINE I25INI_GAP_N(
      1 NRTM  ,IRECT ,IXS   ,GEO   ,IXC   ,IXTG  ,
      2 IXT   ,IXP   ,IPART  ,IPARTC   ,IPARTTG  ,
@@ -1106,15 +1103,15 @@ C
 C        
       RETURN
       END
-Chd|====================================================================
-Chd|  I25NEIGH_SEG_EN               source/interfaces/inter3d1/i25neigh.F
-Chd|-- called by -----------
-Chd|        I25NEIGH                      source/interfaces/inter3d1/i25neigh.F
-Chd|-- calls ---------------
-Chd|        I25NEIGH_REMOVEALLBUT1        source/interfaces/inter3d1/i25neigh.F
-Chd|        I25NEIGH_SEG_E                source/interfaces/inter3d1/i25neigh.F
-Chd|        I25NEIGH_SEG_OPP              source/interfaces/inter3d1/i25neigh.F
-Chd|====================================================================
+      !||====================================================================
+      !||    i25neigh_seg_en          ../starter/source/interfaces/inter3d1/i25neigh.F
+      !||--- called by ------------------------------------------------------
+      !||    i25neigh                 ../starter/source/interfaces/inter3d1/i25neigh.F
+      !||--- calls      -----------------------------------------------------
+      !||    i25neigh_removeallbut1   ../starter/source/interfaces/inter3d1/i25neigh.F
+      !||    i25neigh_seg_e           ../starter/source/interfaces/inter3d1/i25neigh.F
+      !||    i25neigh_seg_opp         ../starter/source/interfaces/inter3d1/i25neigh.F
+      !||====================================================================
       SUBROUTINE I25NEIGH_SEG_EN(N1,IED1,N2   ,IED2 ,MVOISIN,
      .                           NE ,ICE,ISELF,I1,I2  ,IRECT,
      .                           X   ,IE ,NRTM,MSEGTYP,IRR  )
@@ -1209,15 +1206,13 @@ C
 C----6---------------------------------------------------------------7---------8
       RETURN
       END
-Chd|====================================================================
-Chd|  I25NEIGH_SEG_E                source/interfaces/inter3d1/i25neigh.F
-Chd|-- called by -----------
-Chd|        I25NEIGH_SEG_EN               source/interfaces/inter3d1/i25neigh.F
-Chd|-- calls ---------------
-Chd|        ADD_ID                        source/interfaces/inter3d1/i24tools.F
-Chd|        INTAB                         source/interfaces/inter3d1/i24tools.F
-Chd|        SAME_SEG                      source/interfaces/inter3d1/i24tools.F
-Chd|====================================================================
+      !||====================================================================
+      !||    i25neigh_seg_e    ../starter/source/interfaces/inter3d1/i25neigh.F
+      !||--- called by ------------------------------------------------------
+      !||    i25neigh_seg_en   ../starter/source/interfaces/inter3d1/i25neigh.F
+      !||--- calls      -----------------------------------------------------
+      !||    add_id            ../starter/source/interfaces/inter3d1/i24tools.F
+      !||====================================================================
       SUBROUTINE I25NEIGH_SEG_E(N1,IED1,N2,IED2,N,IC,ISELF,
      .                      I1,I2,IRECT,NRTM,MSEGTYP,MVOISIN)
 C----6---------------------------------------------------------------7---------8
@@ -1306,14 +1301,14 @@ C----add 0 for IC if find nothing -> consisting w/ ICN------------------------
 C----6---------------------------------------------------------------7---------8
       RETURN
       END
-Chd|====================================================================
-Chd|  I25NEIGH_REMOVEALLBUT1        source/interfaces/inter3d1/i25neigh.F
-Chd|-- called by -----------
-Chd|        I25NEIGH_SEG_EN               source/interfaces/inter3d1/i25neigh.F
-Chd|-- calls ---------------
-Chd|        NORMA4N                       source/interfaces/inter3d1/norma1.F
-Chd|        NORMV3                        source/interfaces/inter3d1/i24tools.F
-Chd|====================================================================
+      !||====================================================================
+      !||    i25neigh_removeallbut1   ../starter/source/interfaces/inter3d1/i25neigh.F
+      !||--- called by ------------------------------------------------------
+      !||    i25neigh_seg_en          ../starter/source/interfaces/inter3d1/i25neigh.F
+      !||--- calls      -----------------------------------------------------
+      !||    norma4n                  ../starter/source/interfaces/inter3d1/norma1.F
+      !||    normv3                   ../starter/source/interfaces/inter3d1/i24tools.F
+      !||====================================================================
       SUBROUTINE I25NEIGH_REMOVEALLBUT1(N,IC,ISELF,IRECT,X ,I1,I2,IRR)
 C----6---------------------------------------------------------------7---------8
 C   I m p l i c i t   T y p e s
@@ -1423,12 +1418,11 @@ c        print *,'***warning** No valid Neighbour Segs of',N,' candidats'
 C----6---------------------------------------------------------------7---------8
       RETURN
       END
-Chd|====================================================================
-Chd|  I25NEIGH_SEG_OPP              source/interfaces/inter3d1/i25neigh.F
-Chd|-- called by -----------
-Chd|        I25NEIGH_SEG_EN               source/interfaces/inter3d1/i25neigh.F
-Chd|-- calls ---------------
-Chd|====================================================================
+      !||====================================================================
+      !||    i25neigh_seg_opp   ../starter/source/interfaces/inter3d1/i25neigh.F
+      !||--- called by ------------------------------------------------------
+      !||    i25neigh_seg_en    ../starter/source/interfaces/inter3d1/i25neigh.F
+      !||====================================================================
       SUBROUTINE I25NEIGH_SEG_OPP(EI,EJ,IRECT,X ,IOP)
 C----6---------------------------------------------------------------7---------8
 C   I m p l i c i t   T y p e s
@@ -1529,14 +1523,15 @@ C-----------------------------------------------
 C----6---------------------------------------------------------------7---------8
       RETURN
       END
-Chd|====================================================================
-Chd|  I25NEIGH_MSG_ERR              source/interfaces/inter3d1/i25neigh.F
-Chd|-- called by -----------
-Chd|        I25NEIGH                      source/interfaces/inter3d1/i25neigh.F
-Chd|-- calls ---------------
-Chd|        ANCMSG                        source/output/message/message.F
-Chd|        MESSAGE_MOD                   share/message_module/message_mod.F
-Chd|====================================================================
+      !||====================================================================
+      !||    i25neigh_msg_err   ../starter/source/interfaces/inter3d1/i25neigh.F
+      !||--- called by ------------------------------------------------------
+      !||    i25neigh           ../starter/source/interfaces/inter3d1/i25neigh.F
+      !||--- calls      -----------------------------------------------------
+      !||    ancmsg             ../starter/share/message_module/inter_ancmsg_mod.F
+      !||--- uses       -----------------------------------------------------
+      !||    message_mod        ../starter/share/message_module/message_mod.F
+      !||====================================================================
       SUBROUTINE I25NEIGH_MSG_ERR(I1,I2,ITAB,IRR)
       USE MESSAGE_MOD
 C-----------------------------------------------

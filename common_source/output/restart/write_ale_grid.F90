@@ -26,11 +26,21 @@
 !! \brief Save buffer for restart file.
 !! \details  necessary buffer specific to family of options /ALE/GRID/...
 !
+      !||====================================================================
+      !||    write_ale_grid   ../common_source/output/restart/write_ale_grid.F90
+      !||--- called by ------------------------------------------------------
+      !||    ddsplit          ../starter/source/restart/ddsplit/ddsplit.F
+      !||    wrrestp          ../engine/source/output/restart/wrrestp.F
+      !||--- calls      -----------------------------------------------------
+      !||    write_db         ../engine/source/output/tools/write_db.F
+      !||--- uses       -----------------------------------------------------
+      !||    ale_mod          ../common_source/modules/ale/ale_mod.F
+      !||====================================================================
       subroutine write_ale_grid()
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Modules
 ! ----------------------------------------------------------------------------------------------------------------------
-      use ale_mod , only : ale
+        use ale_mod , only : ale
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Included files
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -43,22 +53,22 @@
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Local variables
 ! ----------------------------------------------------------------------------------------------------------------------
-      my_real, dimension(16) :: rtmp
+        my_real, dimension(16) :: rtmp
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Body
-! ----------------------------------------------------------------------------------------------------------------------                   
+! ----------------------------------------------------------------------------------------------------------------------
 
-      ! NWALE=7 => /ALE/GRID/MASSFLOW
-      !   when starting from a restart file we need to read these value to get thet state from previous cycle
-      if(ale%grid%nwale == 7)then
-        rtmp(1:3) = ale%grid%massflow_data%eigenvec(1:3,1)
-        rtmp(4:6) = ale%grid%massflow_data%eigenvec(1:3,2)
-        rtmp(7:9) = ale%grid%massflow_data%eigenvec(1:3,3)
-        rtmp(10:15) = ale%grid%massflow_data%beta0(1:6)
-        rtmp(16) = ale%grid%massflow_data%ms_elem_mean_0
-        call write_db(rtmp,16)
-      endif
+        ! NWALE=7 => /ALE/GRID/MASSFLOW
+        !   when starting from a restart file we need to read these value to get thet state from previous cycle
+        if(ale%grid%nwale == 7)then
+          rtmp(1:3) = ale%grid%massflow_data%eigenvec(1:3,1)
+          rtmp(4:6) = ale%grid%massflow_data%eigenvec(1:3,2)
+          rtmp(7:9) = ale%grid%massflow_data%eigenvec(1:3,3)
+          rtmp(10:15) = ale%grid%massflow_data%beta0(1:6)
+          rtmp(16) = ale%grid%massflow_data%ms_elem_mean_0
+          call write_db(rtmp,16)
+        endif
 
 ! ----------------------------------------------------------------------------------------------------------------------
-      return
+        return
       end

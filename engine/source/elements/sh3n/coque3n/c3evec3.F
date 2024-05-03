@@ -20,15 +20,17 @@ Copyright>
 Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
-Chd|====================================================================
-Chd|  C3EVEC3                       source/elements/sh3n/coque3n/c3evec3.F
-Chd|-- called by -----------
-Chd|        C3FORC3                       source/elements/sh3n/coque3n/c3forc3.F
-Chd|        C3FORC3_CRK                   source/elements/xfem/c3forc3_crk.F
-Chd|-- calls ---------------
-Chd|        CLSKEW3                       source/elements/sh3n/coquedk/cdkcoor3.F
-Chd|        ELBUFDEF_MOD                  ../common_source/modules/mat_elem/elbufdef_mod.F
-Chd|====================================================================
+      !||====================================================================
+      !||    c3evec3          ../starter/source/elements/sh3n/coque3n/c3evec3.F
+      !||--- called by ------------------------------------------------------
+      !||    c3epsini         ../starter/source/elements/sh3n/coque3n/c3epsini.F
+      !||    c3fint_reg_ini   ../starter/source/elements/sh3n/coque3n/c3fint_reg_ini.F
+      !||    c3init3          ../starter/source/elements/sh3n/coque3n/c3init3.F
+      !||    cdkinit3         ../starter/source/elements/sh3n/coquedk/cdkinit3.F
+      !||    fsigtini         ../starter/source/constraints/fxbody/fsigtini.F
+      !||    inirig_mat       ../starter/source/elements/initia/inirig_mat.F
+      !||    inivoid          ../starter/source/elements/initia/inivoid.F
+      !||====================================================================
       SUBROUTINE C3EVEC3(ELBUF_STR,DIR_A    ,DIR_B   ,JFT      ,JLT      ,
      .                   IREP     ,E1X0     ,E1Y0    ,E1Z0     ,E2X0     ,
      .                   E2Y0     ,E2Z0     ,E3X0    ,E3Y0     ,E3Z0     ,
@@ -512,11 +514,13 @@ C-------------Ej0 is used in mulawc for user'laws (99)
 c-----------
       RETURN
       END
-Chd|====================================================================
-Chd|  C3NEWVE3                      source/elements/sh3n/coque3n/c3evec3.F
-Chd|-- called by -----------
-Chd|-- calls ---------------
-Chd|====================================================================
+      !||====================================================================
+      !||    c3newve3   ../starter/source/elements/sh3n/coque3n/c3epsini.F
+      !||--- called by ------------------------------------------------------
+      !||    c3epsini   ../starter/source/elements/sh3n/coque3n/c3epsini.F
+      !||--- calls      -----------------------------------------------------
+      !||    cdkevec3   ../starter/source/elements/sh3n/coquedk/cdkevec3.F
+      !||====================================================================
       SUBROUTINE C3NEWVE3(JFT  ,JLT  ,TG3  ,ECOS   ,ESIN   )
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
@@ -548,12 +552,11 @@ C=======================================================================
 c-----------
       RETURN
       END
-Chd|====================================================================
-Chd|  SHROTO3                       source/elements/sh3n/coque3n/c3evec3.F
-Chd|-- called by -----------
-Chd|        C3FORC3                       source/elements/sh3n/coque3n/c3forc3.F
-Chd|-- calls ---------------
-Chd|====================================================================
+      !||====================================================================
+      !||    shroto3   ../engine/source/elements/sh3n/coque3n/c3evec3.F
+      !||--- called by ------------------------------------------------------
+      !||    c3forc3   ../engine/source/elements/sh3n/coque3n/c3forc3.F
+      !||====================================================================
       SUBROUTINE SHROTO3(JFT,JLT,ECOS,ESIN,EXX,
      .                     EYY,EXY,EXZ,EYZ,KXX,
      .                     KYY,KXY)
@@ -616,12 +619,11 @@ C
 C
       RETURN
       END
-Chd|====================================================================
-Chd|  SHTROTO3                      source/elements/sh3n/coque3n/c3evec3.F
-Chd|-- called by -----------
-Chd|        C3FORC3                       source/elements/sh3n/coque3n/c3forc3.F
-Chd|-- calls ---------------
-Chd|====================================================================
+      !||====================================================================
+      !||    shtroto3   ../starter/source/elements/sh3n/coque3n/c3epsini.F
+      !||--- called by ------------------------------------------------------
+      !||    c3epsini   ../starter/source/elements/sh3n/coque3n/c3epsini.F
+      !||====================================================================
       SUBROUTINE SHTROTO3(JFT,JLT,ECOS,ESIN,GSTR,
      .                    F_DEF,ISMSTR,NEL)
 C-----------------------------------------------
@@ -681,12 +683,11 @@ C------Exy :2*exy
 C
       RETURN
       END
-Chd|====================================================================
-Chd|  C3SROTO3                      source/elements/sh3n/coque3n/c3evec3.F
-Chd|-- called by -----------
-Chd|        C3FORC3                       source/elements/sh3n/coque3n/c3forc3.F
-Chd|-- calls ---------------
-Chd|====================================================================
+      !||====================================================================
+      !||    c3sroto3   ../engine/source/elements/sh3n/coque3n/c3evec3.F
+      !||--- called by ------------------------------------------------------
+      !||    c3forc3    ../engine/source/elements/sh3n/coque3n/c3forc3.F
+      !||====================================================================
       SUBROUTINE C3SROTO3(JFT  ,JLT  ,ECOS ,ESIN      ,FOR,
      .                    MOM  ,NFOR ,NMOM ,IFRAM_OLD ,NEL)
 C-----------------------------------------------

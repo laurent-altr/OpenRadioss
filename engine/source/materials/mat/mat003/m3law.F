@@ -27,12 +27,11 @@ C|-- appelee par -----------
 C|         MMAIN                           /matera/mmain.F
 C|-- appelle ---------------
 C|============================================================
-Chd|====================================================================
-Chd|  M3LAW                         source/materials/mat/mat003/m3law.F
-Chd|-- called by -----------
-Chd|        MMAIN                         source/materials/mat_share/mmain.F
-Chd|-- calls ---------------
-Chd|====================================================================
+      !||====================================================================
+      !||    m3law   ../engine/source/materials/mat/mat003/m3law.F
+      !||--- called by ------------------------------------------------------
+      !||    mmain   ../engine/source/materials/mat_share/mmain.F
+      !||====================================================================
       SUBROUTINE M3LAW(
      1   PM,      OFF,     SIG,     EPSEQ,
      2   MAT,     NGL,     SSP,     D1,

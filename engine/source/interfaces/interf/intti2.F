@@ -20,15 +20,16 @@ Copyright>
 Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
-Chd|====================================================================
-Chd|  INTTI2                        source/interfaces/interf/intti2.F
-Chd|-- called by -----------
-Chd|        RESOL                         source/engine/resol.F         
-Chd|-- calls ---------------
-Chd|        INTTI12V                      source/interfaces/interf/intti12.F
-Chd|        INTTI2V                       source/interfaces/interf/intti2v.F
-Chd|        INTBUFDEF_MOD                 ../common_source/modules/intbufdef_mod.F
-Chd|====================================================================
+      !||====================================================================
+      !||    intti2          ../engine/source/interfaces/interf/intti2.F
+      !||--- called by ------------------------------------------------------
+      !||    resol           ../engine/source/engine/resol.F
+      !||--- calls      -----------------------------------------------------
+      !||    intti12v        ../engine/source/interfaces/interf/intti12.F
+      !||    intti2v         ../engine/source/interfaces/interf/intti2v.F
+      !||--- uses       -----------------------------------------------------
+      !||    intbufdef_mod   ../common_source/modules/intbufdef_mod.F
+      !||====================================================================
       SUBROUTINE INTTI2(IPARI,X     ,V      ,
      .                  A    ,VR    ,AR    ,KHIE  ,MS     ,
      .                  IN   ,WEIGHT,WA    ,SKEW  ,

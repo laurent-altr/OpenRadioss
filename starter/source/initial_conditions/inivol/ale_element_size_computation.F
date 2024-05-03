@@ -20,12 +20,11 @@ Copyright>
 Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
-Chd|====================================================================
-Chd|  ALE_ELEMENT_SIZE_COMPUTATION  source/initial_conditions/inivol/ale_element_size_computation.F
-Chd|-- called by -----------
-Chd|        INITIA                        source/elements/initia/initia.F
-Chd|-- calls ---------------
-Chd|====================================================================
+      !||====================================================================
+      !||    ale_element_size_computation   ../starter/source/initial_conditions/inivol/ale_element_size_computation.F
+      !||--- called by ------------------------------------------------------
+      !||    initia                         ../starter/source/elements/initia/initia.F
+      !||====================================================================
         SUBROUTINE ALE_ELEMENT_SIZE_COMPUTATION(IPARG,IXS,IXQ,IXTG,
      .                                          ELEMENT_SIZE,MIN_MAX_POSITION,X,
      .                                          ALE_ELEMENT_NUMBER,ALE_NODE_NUMBER,LIST_ALE_NODE)

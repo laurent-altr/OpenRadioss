@@ -20,15 +20,16 @@ Copyright>
 Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
-Chd|====================================================================
-Chd|  W_GROUP_STR                   source/output/restart/w_group_str.F
-Chd|-- called by -----------
-Chd|        WRRESTP                       source/output/restart/wrrestp.F
-Chd|-- calls ---------------
-Chd|        W_GR_ENTITY                   source/output/restart/w_gr_entity.F
-Chd|        GROUPDEF_MOD                  ../common_source/modules/groupdef_mod.F
-Chd|        GROUP_MOD                     share/modules/group_mod.F     
-Chd|====================================================================
+      !||====================================================================
+      !||    w_group_str     ../starter/source/restart/ddsplit/w_group_str.F
+      !||--- called by ------------------------------------------------------
+      !||    ddsplit         ../starter/source/restart/ddsplit/ddsplit.F
+      !||--- calls      -----------------------------------------------------
+      !||    w_gr_entity_e   ../starter/source/restart/ddsplit/w_gr_entity.F
+      !||    w_gr_entity_n   ../starter/source/restart/ddsplit/w_gr_entity.F
+      !||    w_gr_entity_p   ../starter/source/restart/ddsplit/w_gr_entity.F
+      !||--- uses       -----------------------------------------------------
+      !||====================================================================
       SUBROUTINE W_GROUP_STR
 C-----------------------------------------------
 C   M o d u l e s

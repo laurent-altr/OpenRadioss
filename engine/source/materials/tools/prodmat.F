@@ -21,17 +21,9 @@ Copyright>        As an alternative to this open-source version, Altair also off
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
 C This subroutines computes C(NEL,3,3) which is the product [C] = [A][B]
-Chd|====================================================================
-Chd|  PRODMAT                       source/materials/tools/prodmat.F
-Chd|-- called by -----------
-Chd|        CALCMATB                      source/materials/mat/mat100/calcmatb.F
-Chd|        POLYSTRESS2                   source/materials/mat/mat100/sigpoly.F
-Chd|        POLYSTREST2                   source/materials/mat/mat100/sigpoly.F
-Chd|        SIGEPS100                     source/materials/mat/mat100/sigeps100.F
-Chd|        SIGEPS42                      source/materials/mat/mat042/sigeps42.F
-Chd|        SIGEPS95                      source/materials/mat/mat095/sigeps95.F
-Chd|-- calls ---------------
-Chd|====================================================================
+      !||====================================================================
+      !||    prodmat   ../starter/source/materials/mat/mat087/law87_upd.F
+      !||====================================================================
       SUBROUTINE PRODMAT(A, B, C, NEL)
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s

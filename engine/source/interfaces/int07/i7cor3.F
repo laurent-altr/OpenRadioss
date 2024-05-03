@@ -20,16 +20,19 @@ Copyright>
 Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
-Chd|====================================================================
-Chd|  I7COR3                        source/interfaces/int07/i7cor3.F
-Chd|-- called by -----------
-Chd|        I10MAINF                      source/interfaces/int10/i10mainf.F
-Chd|        I18MAIN_KINE_I                source/interfaces/int18/i18main_kine.F
-Chd|        I7MAINF                       source/interfaces/int07/i7mainf.F
-Chd|        I7MAIN_LMULT                  source/interfaces/int07/i7main_lmult.F
-Chd|-- calls ---------------
-Chd|        TRI7BOX                       share/modules/tri7box.F       
-Chd|====================================================================
+      !||====================================================================
+      !||    i7cor3       ../starter/source/interfaces/inter3d1/i7cor3.F
+      !||--- called by ------------------------------------------------------
+      !||    i20ini3      ../starter/source/interfaces/inter3d1/i20ini3.F
+      !||    i24buc1      ../starter/source/interfaces/inter3d1/i24buc1.F
+      !||    i24tri       ../starter/source/interfaces/inter3d1/i24tri.F
+      !||    i25tri       ../starter/source/interfaces/inter3d1/i25tri.F
+      !||    i7buc1       ../starter/source/interfaces/inter3d1/i7buc1.F
+      !||    i7buc_vox1   ../starter/source/interfaces/inter3d1/i7buc_vox1.F
+      !||    i7tri        ../starter/source/interfaces/inter3d1/i7tri.F
+      !||    i7trivox1    ../starter/source/interfaces/inter3d1/i7trivox1.F
+      !||    inint3       ../starter/source/interfaces/inter3d1/inint3.F
+      !||====================================================================
       SUBROUTINE I7COR3(
      1           JLT        ,X           ,IRECT      ,NSV       ,CAND_E   ,
      2           CAND_N     ,STF         ,STFN       ,X1        ,X2       ,

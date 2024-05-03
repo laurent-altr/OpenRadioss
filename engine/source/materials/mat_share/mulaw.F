@@ -20,133 +20,26 @@ Copyright>
 Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
-Chd|====================================================================
-Chd|  MULAW_MOD                     source/materials/mat_share/mulaw.F
-Chd|-- called by -----------
-Chd|        MMAIN                         source/materials/mat_share/mmain.F
-Chd|-- calls ---------------
-Chd|====================================================================
+      !||====================================================================
+      !||    mulaw_mod   ../engine/source/materials/mat_share/mulaw.F
+      !||--- called by ------------------------------------------------------
+      !||    mmain       ../engine/source/materials/mat_share/mmain.F
+      !||====================================================================
       MODULE MULAW_MOD
       CONTAINS
-Chd|====================================================================
-Chd|  MULAW                         source/materials/mat_share/mulaw.F
-Chd|-- called by -----------
-Chd|        MMAIN                         source/materials/mat_share/mmain.F
-Chd|-- calls ---------------
-Chd|        ANCMSG                        source/output/message/message.F
-Chd|        ARRET                         source/system/arret.F         
-Chd|        ENG_USERLIB_FLAW              source/user_interface/dyn_userlib.c
-Chd|        EPSF2U                        source/materials/mat/mat033/sigeps33.F
-Chd|        FAIL_BIQUAD_S                 source/materials/fail/biquad/fail_biquad_s.F
-Chd|        FAIL_CHANGCHANG_S             source/materials/fail/changchang/fail_changchang_s.F
-Chd|        FAIL_COCKROFT_S               source/materials/fail/cockroft_latham/fail_cockroft_s.F
-Chd|        FAIL_EMC                      source/materials/fail/emc/fail_emc.F
-Chd|        FAIL_ENERGY_S                 source/materials/fail/energy/fail_energy_s.F
-Chd|        FAIL_GENE1_S                  source/materials/fail/gene1/fail_gene1_s.F
-Chd|        FAIL_HOFFMAN_S                source/materials/fail/hoffman/fail_hoffman_s.F
-Chd|        FAIL_INIEVO_S                 source/materials/fail/inievo/fail_inievo_s.F
-Chd|        FAIL_JOHNSON                  source/materials/fail/johnson_cook/fail_johnson.F
-Chd|        FAIL_MAXSTRAIN_S              source/materials/fail/max_strain/fail_maxstrain_s.F
-Chd|        FAIL_MULLINS_OR_S             source/materials/fail/mullins_or/fail_mullins_OR_s.F
-Chd|        FAIL_ORTHBIQUAD_S             source/materials/fail/orthbiquad/fail_orthbiquad_s.F
-Chd|        FAIL_ORTHENERG_S              source/materials/fail/orthenerg/fail_orthenerg_s.F
-Chd|        FAIL_ORTHSTRAIN               source/materials/fail/orthstrain/fail_orthstrain_s.F
-Chd|        FAIL_RTCL_S                   source/materials/fail/rtcl/fail_rtcl_s.F
-Chd|        FAIL_SAHRAEI_S                source/materials/fail/sahraei/fail_sahraei_s.F
-Chd|        FAIL_SPALLING_S               source/materials/fail/spalling/fail_spalling_s.F
-Chd|        FAIL_SYAZWAN_S                source/materials/fail/syazwan/fail_syazwan_s.F
-Chd|        FAIL_TAB2_S                   source/materials/fail/tabulated/fail_tab2_s.F
-Chd|        FAIL_TAB_S                    source/materials/fail/tabulated/fail_tab_s.F
-Chd|        FAIL_TBUTCHER_S               source/materials/fail/tuler_butcher/fail_tbutcher_s.F
-Chd|        FAIL_TENSSTRAIN_S             source/materials/fail/tensstrain/fail_tensstrain_s.F
-Chd|        FAIL_TSAIHILL_S               source/materials/fail/tsaihill/fail_tsaihill_s.F
-Chd|        FAIL_TSAIWU_S                 source/materials/fail/tsaiwu/fail_tsaiwu_s.F
-Chd|        FAIL_VISUAL_S                 source/materials/fail/visual/fail_visual_s.F
-Chd|        FAIL_WIERZBICKI_S             source/materials/fail/wierzbicki/fail_wierzbicki_s.F
-Chd|        FAIL_WILKINS_S                source/materials/fail/wilkins/fail_wilkins_s.F
-Chd|        FMQVISCB                      source/materials/mat_share/fmqviscb.F
-Chd|        MDTSPH                        source/materials/mat_share/mdtsph.F
-Chd|        MQVISCB                       source/materials/mat_share/mqviscb.F
-Chd|        MREPLOC                       source/materials/mat_share/mreploc.F
-Chd|        MROTENS                       source/materials/mat_share/mrotens.F
-Chd|        MROTENSNS                     source/materials/mat_share/mrotens.F
-Chd|        MSTRAIN_RATE                  source/materials/mat_share/mstrain_rate.F
-Chd|        NSVISUL                       source/materials/mat_share/nsvisul.F
-Chd|        SIGEPS100                     source/materials/mat/mat100/sigeps100.F
-Chd|        SIGEPS101                     source/materials/mat/mat101/sigeps101.F
-Chd|        SIGEPS102                     source/materials/mat/mat102/sigeps102.F
-Chd|        SIGEPS103                     source/materials/mat/mat103/sigeps103.F
-Chd|        SIGEPS104                     source/materials/mat/mat104/sigeps104.F
-Chd|        SIGEPS105                     source/materials/mat/mat105/sigeps105.F
-Chd|        SIGEPS106                     source/materials/mat/mat106/sigeps106.F
-Chd|        SIGEPS107                     source/materials/mat/mat107/sigeps107.F
-Chd|        SIGEPS109                     source/materials/mat/mat109/sigeps109.F
-Chd|        SIGEPS111                     source/materials/mat/mat111/sigeps111.F
-Chd|        SIGEPS112                     source/materials/mat/mat112/sigeps112.F
-Chd|        SIGEPS115                     source/materials/mat/mat115/sigeps115.F
-Chd|        SIGEPS120                     source/materials/mat/mat120/sigeps120.F
-Chd|        SIGEPS121                     source/materials/mat/mat121/sigeps121.F
-Chd|        SIGEPS122                     source/materials/mat/mat122/sigeps122.F
-Chd|        SIGEPS124                     source/materials/mat/mat124/sigeps124.F
-Chd|        SIGEPS187                     source/materials/mat/mat187/sigeps187.F
-Chd|        SIGEPS190                     source/materials/mat/mat190/sigeps190.F
-Chd|        SIGEPS28                      source/materials/mat/mat028/sigeps28.F
-Chd|        SIGEPS33                      source/materials/mat/mat033/sigeps33.F
-Chd|        SIGEPS34                      source/materials/mat/mat034/sigeps34.F
-Chd|        SIGEPS35                      source/materials/mat/mat035/sigeps35.F
-Chd|        SIGEPS36                      source/materials/mat/mat036/sigeps36.F
-Chd|        SIGEPS37                      source/materials/mat/mat037/sigeps37.F
-Chd|        SIGEPS38                      source/materials/mat/mat038/sigeps38.F
-Chd|        SIGEPS40                      source/materials/mat/mat040/sigeps40.F
-Chd|        SIGEPS41                      source/materials/mat/mat041/sigeps41.F
-Chd|        SIGEPS42                      source/materials/mat/mat042/sigeps42.F
-Chd|        SIGEPS44                      source/materials/mat/mat044/sigeps44.F
-Chd|        SIGEPS45                      source/materials/mat/mat045/sigeps45.F
-Chd|        SIGEPS48                      source/materials/mat/mat048/sigeps48.F
-Chd|        SIGEPS50                      source/materials/mat/mat050/sigeps50.F
-Chd|        SIGEPS51                      source/materials/mat/mat051/sigeps51.F
-Chd|        SIGEPS52                      source/materials/mat/mat052/sigeps52.F
-Chd|        SIGEPS53                      source/materials/mat/mat053/sigeps53.F
-Chd|        SIGEPS56                      source/materials/mat/mat056/sigeps56.F
-Chd|        SIGEPS60                      source/materials/mat/mat060/sigeps60.F
-Chd|        SIGEPS62                      source/materials/mat/mat062/sigeps62.F
-Chd|        SIGEPS65                      source/materials/mat/mat065/sigeps65.F
-Chd|        SIGEPS66                      source/materials/mat/mat066/sigeps66.F
-Chd|        SIGEPS67                      source/materials/mat/mat067/sigeps67.F
-Chd|        SIGEPS68                      source/materials/mat/mat068/sigeps68.F
-Chd|        SIGEPS69                      source/materials/mat/mat069/sigeps69.F
-Chd|        SIGEPS70                      source/materials/mat/mat070/sigeps70.F
-Chd|        SIGEPS71                      source/materials/mat/mat071/sigeps71.F
-Chd|        SIGEPS72                      source/materials/mat/mat072/sigeps72.F
-Chd|        SIGEPS74                      source/materials/mat/mat074/sigeps74.F
-Chd|        SIGEPS75                      source/materials/mat/mat075/sigeps75.F
-Chd|        SIGEPS76                      source/materials/mat/mat076/sigeps76.F
-Chd|        SIGEPS77                      source/materials/mat/mat077/sigeps77.F
-Chd|        SIGEPS78                      source/materials/mat/mat078/sigeps78.F
-Chd|        SIGEPS79                      source/materials/mat/mat079/sigeps79.F
-Chd|        SIGEPS80                      source/materials/mat/mat080/sigeps80.F
-Chd|        SIGEPS81                      source/materials/mat/mat081/sigeps81.F
-Chd|        SIGEPS82                      source/materials/mat/mat082/sigeps82.F
-Chd|        SIGEPS84                      source/materials/mat/mat084/sigeps84.F
-Chd|        SIGEPS88                      source/materials/mat/mat088/sigeps88.F
-Chd|        SIGEPS90                      source/materials/mat/mat090/sigeps90.F
-Chd|        SIGEPS92                      source/materials/mat/mat092/sigeps92.F
-Chd|        SIGEPS93                      source/materials/mat/mat093/sigeps93.F
-Chd|        SIGEPS94                      source/materials/mat/mat094/sigeps94.F
-Chd|        SIGEPS95                      source/materials/mat/mat095/sigeps95.F
-Chd|        SIGEPS96                      source/materials/mat/mat096/sigeps96.F
-Chd|        SIGEPS97                      source/materials/mat/mat097/sigeps97.F
-Chd|        SREPLOC3                      source/elements/solid/solide/sreploc3.F
-Chd|        STARTIME                      source/system/timer.F         
-Chd|        STOPTIME                      source/system/timer.F         
-Chd|        VISCMAIN                      source/materials/visc/viscmain.F
-Chd|        ALE_CONNECTIVITY_MOD          ../common_source/modules/ale/ale_connectivity_mod.F
-Chd|        MAT_ELEM_MOD                  ../common_source/modules/mat_elem/mat_elem_mod.F
-Chd|        MESSAGE_MOD                   share/message_module/message_mod.F
-Chd|        NLOCAL_REG_MOD                ../common_source/modules/nlocal_reg_mod.F
-Chd|        SIGEPS100_MOD                 source/materials/mat/mat100/sigeps100.F
-Chd|        TABLE_MOD                     share/modules/table_mod.F     
-Chd|====================================================================
+      !||====================================================================
+      !||    mulaw              ../starter/source/materials/mat_share/mulaw.F
+      !||--- called by ------------------------------------------------------
+      !||    mmain              ../starter/source/materials/mat_share/mmain.F
+      !||--- calls      -----------------------------------------------------
+      !||    sigeps35           ../starter/source/materials/mat/mat035/sigeps35.F
+      !||    sigeps37           ../starter/source/materials/mat/mat037/sigeps37.F
+      !||    sigeps38           ../starter/source/materials/mat/mat038/sigeps38.F
+      !||    sigeps42           ../starter/source/materials/mat/mat042/sigeps42.F
+      !||    sigeps70           ../starter/source/materials/mat/mat070/sigeps70.F
+      !||    sigeps90           ../starter/source/materials/mat/mat090/sigeps90.F
+      !||--- uses       -----------------------------------------------------
+      !||====================================================================
       SUBROUTINE MULAW(
      1   NFT,         MTN,         JCVT,        PM,
      2   OFF,         SIG,         EINT,        RHO,

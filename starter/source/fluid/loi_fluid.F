@@ -20,12 +20,9 @@ Copyright>
 Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
-Chd|====================================================================
-Chd|  LOI_FLUID                     source/fluid/loi_fluid.F      
-Chd|-- called by -----------
-Chd|        QDLEN2                        source/elements/solid_2d/quad/qdlen2.F
-Chd|-- calls ---------------
-Chd|====================================================================
+      !||====================================================================
+      !||    loi_fluid   ../starter/source/fluid/loi_fluid.F
+      !||====================================================================
       LOGICAL FUNCTION LOI_FLUID(MLN)
 #include      "implicit_f.inc"
       INTEGER MLN

@@ -20,86 +20,77 @@ Copyright>
 Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
-Chd|====================================================================
-Chd|  WRITE_DB                      source/restart/ddsplit/wrrest.F
-Chd|-- called by -----------
-Chd|        COMPRESS_R_NNZ                ../common_source/comm/compress_nnz.F
-Chd|        PBLAST_WRITE_ENGINE           ../common_source/modules/loads/pblast_mod.F
-Chd|        PBLAST_WRITE_STARTER          ../common_source/modules/loads/pblast_mod.F
-Chd|        WRITE_REAL                    ../common_source/comm/write_mod.F
-Chd|        WRITE_REAL_1D                 ../common_source/comm/write_mod.F
-Chd|        WRITE_REAL_2D                 ../common_source/comm/write_mod.F
-Chd|        WRITE_REAL_3D                 ../common_source/comm/write_mod.F
-Chd|        WRITE_UNITS                   ../common_source/comm/write_units.F
-Chd|        CONVWREST                     source/restart/ddsplit/wrrest.F
-Chd|        COPY_RVAL                     source/restart/ddsplit/inter_tools.F
-Chd|        DDSPLIT                       source/restart/ddsplit/ddsplit.F
-Chd|        DSWREST                       source/restart/ddsplit/wrrest.F
-Chd|        DSWRESTP                      source/restart/ddsplit/wrrest.F
-Chd|        EIGWREST                      source/restart/ddsplit/wrrest.F
-Chd|        EIGWRESTP                     source/restart/ddsplit/wrrest.F
-Chd|        FVWRESTP                      source/restart/ddsplit/fvwrestp.F
-Chd|        FXBWRESTP                     source/restart/ddsplit/wrrest.F
-Chd|        FXTEMPWREST                   source/restart/ddsplit/wrrest.F
-Chd|        INTFRIC_WRESTR                source/interfaces/intbuf/intbufFric_ini_starter.F
-Chd|        INTSTAMP_WRESTR               share/modules1/intstamp_mod.F 
-Chd|        NFWREST                       source/restart/ddsplit/wrrest.F
-Chd|        NFWRESTP                      source/restart/ddsplit/wrrest.F
-Chd|        PLYXFEM_WREST                 source/restart/ddsplit/wrrest.F
-Chd|        RIGMATWREST                   source/restart/ddsplit/wrrest.F
-Chd|        SPLIT_CAND_RVAL               source/restart/ddsplit/inter_tools.F
-Chd|        SPLIT_NODE_RVAL               source/restart/ddsplit/inter_tools.F
-Chd|        SPLIT_SEG_RVAL_I20            source/restart/ddsplit/inter_tools.F
-Chd|        SPLIT_XSAV                    source/restart/ddsplit/inter_tools.F
-Chd|        SPMD_USERWI_REST              source/user_interface/user_windows_tools.F
-Chd|        TABLE_WRESTR                  source/tools/curve/table_tools.F
-Chd|        THCWREST                      source/restart/ddsplit/wrrest.F
-Chd|        WRITE_DB_DEBUG                source/output/tools/write_debug.F
-Chd|        WRITE_ELGROUP_PARAM           source/restart/ddsplit/write_elgroup_param.F
-Chd|        WRITE_FAILPARAM               source/materials/fail/write_failparam.F
-Chd|        WRITE_MATPARAM                source/materials/mat/write_matparam.F
-Chd|        WRITE_MAT_TABLE               source/materials/tools/write_mat_table.F
-Chd|        WRITE_NLOC_STRUCT             source/restart/ddsplit/write_nloc_struct.F
-Chd|        WRITE_PCYL                    source/loads/general/load_pcyl/write_pcyl.F
-Chd|        WRITE_SENSORS                 source/tools/sensor/write_sensors.F
-Chd|        WRITE_VISCPARAM               source/materials/mat/write_viscparam.F
-Chd|        W_ALELAG                      source/restart/ddsplit/w_alelag.F
-Chd|        W_ANIM_CRK                    source/restart/ddsplit/w_anim_crk.F
-Chd|        W_AVUPLY                      source/restart/ddsplit/w_avuply.F
-Chd|        W_BID                         source/restart/ddsplit/w_bid.F
-Chd|        W_BUFBRIC_22                  source/interfaces/inter3d1/w_bufbric_22.F
-Chd|        W_BUFEL                       source/restart/ddsplit/w_bufel.F
-Chd|        W_CLUSTER                     source/restart/ddsplit/w_cluster.F
-Chd|        W_DISP0_VEL0_CLOAD            source/restart/ddsplit/w_disp0_vel0_cload.F
-Chd|        W_DRAPE                       source/restart/ddsplit/w_drape.F
-Chd|        W_ELBUF_STR                   source/restart/ddsplit/w_elbuf_str.F
-Chd|        W_FAC                         source/restart/ddsplit/w_fac.F
-Chd|        W_FBFT                        source/restart/ddsplit/w_fbft.F
-Chd|        W_FCONV                       source/restart/ddsplit/w_fconv.F
-Chd|        W_FIXVEL                      source/restart/ddsplit/w_fixvel.F
-Chd|        W_FRADIA                      source/restart/ddsplit/w_fradia.F
-Chd|        W_FRBE3                       source/restart/ddsplit/w_frbe3.F
-Chd|        W_FTHFLUX                     source/restart/ddsplit/w_fthflux.F
-Chd|        W_KNOTLOC                     source/restart/ddsplit/w_knotloc.F
-Chd|        W_OUTMAXN                     source/restart/ddsplit/w_outmaxn.F
-Chd|        W_PXFEM                       source/restart/ddsplit/w_pxfem.F
-Chd|        W_R3NLOC                      source/restart/ddsplit/w_r3nloc.F
-Chd|        W_RELOC                       source/restart/ddsplit/w_reloc.F
-Chd|        W_RELOC2                      source/restart/ddsplit/w_reloc2.F
-Chd|        W_RFILLOC                     source/restart/ddsplit/w_rfilloc.F
-Chd|        W_RNLOC                       source/restart/ddsplit/w_rnloc.F
-Chd|        W_RNNLOC                      source/restart/ddsplit/w_rnnloc.F
-Chd|        W_RSPH                        source/restart/ddsplit/w_rsph.F
-Chd|        W_RWAR                        source/restart/ddsplit/w_rwar.F
-Chd|        W_SEATBELTS                   source/restart/ddsplit/w_seatbelts.F
-Chd|        W_SECBUF                      source/restart/ddsplit/w_secbuf.F
-Chd|        W_SKWSPH                      source/restart/ddsplit/w_skwsph.F
-Chd|        W_SKWSUB                      source/restart/ddsplit/w_skwsub.F
-Chd|        W_STACK                       source/restart/ddsplit/w_stack.F
-Chd|        W_TABMAT_PROP                 source/restart/ddsplit/w_tabmat_prop.F
-Chd|-- calls ---------------
-Chd|        WRITE_DB_C                    ../common_source/tools/input_output/write_routtines.c
-Chd|====================================================================
+      !||====================================================================
+      !||    write_db               ../starter/source/restart/ddsplit/wrrest.F
+      !||--- called by ------------------------------------------------------
+      !||    convwrest              ../starter/source/restart/ddsplit/wrrest.F
+      !||    copy_rval              ../starter/source/restart/ddsplit/inter_tools.F
+      !||    ddsplit                ../starter/source/restart/ddsplit/ddsplit.F
+      !||    dswrest                ../starter/source/restart/ddsplit/wrrest.F
+      !||    dswrestp               ../starter/source/restart/ddsplit/wrrest.F
+      !||    eigwrest               ../starter/source/restart/ddsplit/wrrest.F
+      !||    eigwrestp              ../starter/source/restart/ddsplit/wrrest.F
+      !||    fvwrestp               ../starter/source/restart/ddsplit/fvwrestp.F
+      !||    fxbwrestp              ../starter/source/restart/ddsplit/wrrest.F
+      !||    fxtempwrest            ../starter/source/restart/ddsplit/wrrest.F
+      !||    intfric_wrestr         ../starter/source/interfaces/intbuf/intbufFric_ini_starter.F
+      !||    intstamp_wrestr        ../starter/share/modules1/intstamp_mod.F
+      !||    nfwrest                ../starter/source/restart/ddsplit/wrrest.F
+      !||    nfwrestp               ../starter/source/restart/ddsplit/wrrest.F
+      !||    plyxfem_wrest          ../starter/source/restart/ddsplit/wrrest.F
+      !||    rigmatwrest            ../starter/source/restart/ddsplit/wrrest.F
+      !||    split_cand_rval        ../starter/source/restart/ddsplit/inter_tools.F
+      !||    split_node_rval        ../starter/source/restart/ddsplit/inter_tools.F
+      !||    split_seg_rval_i20     ../starter/source/restart/ddsplit/inter_tools.F
+      !||    split_xsav             ../starter/source/restart/ddsplit/inter_tools.F
+      !||    spmd_userwi_rest       ../starter/source/user_interface/user_windows_tools.F
+      !||    table_wrestr           ../starter/source/tools/curve/table_tools.F
+      !||    thcwrest               ../starter/source/restart/ddsplit/wrrest.F
+      !||    w_alelag               ../starter/source/restart/ddsplit/w_alelag.F
+      !||    w_anim_crk             ../starter/source/restart/ddsplit/w_anim_crk.F
+      !||    w_avuply               ../starter/source/restart/ddsplit/w_avuply.F
+      !||    w_bid                  ../starter/source/restart/ddsplit/w_bid.F
+      !||    w_bufbric_22           ../starter/source/interfaces/inter3d1/w_bufbric_22.F
+      !||    w_bufel                ../starter/source/restart/ddsplit/w_bufel.F
+      !||    w_cluster              ../starter/source/restart/ddsplit/w_cluster.F
+      !||    w_disp0_vel0_cload     ../starter/source/restart/ddsplit/w_disp0_vel0_cload.F
+      !||    w_drape                ../starter/source/restart/ddsplit/w_drape.F
+      !||    w_elbuf_str            ../starter/source/restart/ddsplit/w_elbuf_str.F
+      !||    w_fac                  ../starter/source/restart/ddsplit/w_fac.F
+      !||    w_fbft                 ../starter/source/restart/ddsplit/w_fbft.F
+      !||    w_fconv                ../starter/source/restart/ddsplit/w_fconv.F
+      !||    w_fixvel               ../starter/source/restart/ddsplit/w_fixvel.F
+      !||    w_fradia               ../starter/source/restart/ddsplit/w_fradia.F
+      !||    w_frbe3                ../starter/source/restart/ddsplit/w_frbe3.F
+      !||    w_fthflux              ../starter/source/restart/ddsplit/w_fthflux.F
+      !||    w_knotloc              ../starter/source/restart/ddsplit/w_knotloc.F
+      !||    w_outmaxn              ../starter/source/restart/ddsplit/w_outmaxn.F
+      !||    w_pxfem                ../starter/source/restart/ddsplit/w_pxfem.F
+      !||    w_r3nloc               ../starter/source/restart/ddsplit/w_r3nloc.F
+      !||    w_reloc                ../starter/source/restart/ddsplit/w_reloc.F
+      !||    w_reloc2               ../starter/source/restart/ddsplit/w_reloc2.F
+      !||    w_rfilloc              ../starter/source/restart/ddsplit/w_rfilloc.F
+      !||    w_rnloc                ../starter/source/restart/ddsplit/w_rnloc.F
+      !||    w_rnnloc               ../starter/source/restart/ddsplit/w_rnnloc.F
+      !||    w_rsph                 ../starter/source/restart/ddsplit/w_rsph.F
+      !||    w_rwar                 ../starter/source/restart/ddsplit/w_rwar.F
+      !||    w_seatbelts            ../starter/source/restart/ddsplit/w_seatbelts.F
+      !||    w_secbuf               ../starter/source/restart/ddsplit/w_secbuf.F
+      !||    w_skwsph               ../starter/source/restart/ddsplit/w_skwsph.F
+      !||    w_skwsub               ../starter/source/restart/ddsplit/w_skwsub.F
+      !||    w_stack                ../starter/source/restart/ddsplit/w_stack.F
+      !||    w_tabmat_prop          ../starter/source/restart/ddsplit/w_tabmat_prop.F
+      !||    write_db_debug         ../starter/source/output/tools/write_debug.F
+      !||    write_elgroup_param    ../starter/source/restart/ddsplit/write_elgroup_param.F
+      !||    write_failparam        ../starter/source/materials/fail/write_failparam.F
+      !||    write_mat_table        ../starter/source/materials/tools/write_mat_table.F
+      !||    write_matparam         ../starter/source/materials/mat/write_matparam.F
+      !||    write_nloc_struct      ../starter/source/restart/ddsplit/write_nloc_struct.F
+      !||    write_pcyl             ../starter/source/loads/general/load_pcyl/write_pcyl.F
+      !||    write_sensors          ../starter/source/tools/sensor/write_sensors.F
+      !||    write_viscparam        ../starter/source/materials/mat/write_viscparam.F
+      !||--- calls      -----------------------------------------------------
+      !||====================================================================
       SUBROUTINE WRITE_DB(A,N)
 C ecriture nombre reel : routine tampon
 C-----------------------------------------------
@@ -167,20 +158,15 @@ C
       RETURN
       END
 
-Chd|====================================================================
-Chd|  WRITE_DPDB                    source/restart/ddsplit/wrrest.F
-Chd|-- called by -----------
-Chd|        WRITE_DOUBLE                  ../common_source/comm/write_mod.F
-Chd|        WRITE_DOUBLE_1D               ../common_source/comm/write_mod.F
-Chd|        WRITE_DOUBLE_2D               ../common_source/comm/write_mod.F
-Chd|        WRITE_DOUBLE_3D               ../common_source/comm/write_mod.F
-Chd|        DDSPLIT                       source/restart/ddsplit/ddsplit.F
-Chd|        INTSTAMP_WRESTR               share/modules1/intstamp_mod.F 
-Chd|        WRITE_SENSORS                 source/tools/sensor/write_sensors.F
-Chd|        W_ELBUF_STR                   source/restart/ddsplit/w_elbuf_str.F
-Chd|-- calls ---------------
-Chd|        WRITE_DB_C                    ../common_source/tools/input_output/write_routtines.c
-Chd|====================================================================
+      !||====================================================================
+      !||    write_dpdb        ../starter/source/restart/ddsplit/wrrest.F
+      !||--- called by ------------------------------------------------------
+      !||    ddsplit           ../starter/source/restart/ddsplit/ddsplit.F
+      !||    intstamp_wrestr   ../starter/share/modules1/intstamp_mod.F
+      !||    w_elbuf_str       ../starter/source/restart/ddsplit/w_elbuf_str.F
+      !||    write_sensors     ../starter/source/tools/sensor/write_sensors.F
+      !||--- calls      -----------------------------------------------------
+      !||====================================================================
       SUBROUTINE WRITE_DPDB(A,N)
 C ecriture nombre reel : routine tampon
 C-----------------------------------------------
@@ -224,19 +210,14 @@ C
       RETURN
       END
 
-Chd|====================================================================
-Chd|  READ_DB                       source/restart/ddsplit/wrrest.F
-Chd|-- called by -----------
-Chd|        DECOMPRESS_R_NNZ              ../common_source/comm/decompress_nnz.F
-Chd|        INTBUF_INI                    ../common_source/interf/intbuf_ini.F
-Chd|        PBLAST_LOAD                   ../common_source/modules/loads/pblast_mod.F
-Chd|        READ_UNITS                    ../common_source/comm/write_units.F
-Chd|        INTSTAMP_RRESTR               share/modules1/intstamp_mod.F 
-Chd|        LEC_INIMAP1D_FILE             source/initial_conditions/inimap/lec_inimap1d_file.F
-Chd|        LEC_INIMAP2D_FILE             source/initial_conditions/inimap/lec_inimap2d_file.F
-Chd|-- calls ---------------
-Chd|        READ_DB_C                     ../common_source/tools/input_output/write_routtines.c
-Chd|====================================================================
+      !||====================================================================
+      !||    read_db             ../starter/source/restart/ddsplit/wrrest.F
+      !||--- called by ------------------------------------------------------
+      !||    intstamp_rrestr     ../starter/share/modules1/intstamp_mod.F
+      !||    lec_inimap1d_file   ../starter/source/initial_conditions/inimap/lec_inimap1d_file.F
+      !||    lec_inimap2d_file   ../starter/source/initial_conditions/inimap/lec_inimap2d_file.F
+      !||--- calls      -----------------------------------------------------
+      !||====================================================================
       SUBROUTINE READ_DB(A,N)
 C lecture nombre reel : routine tampon
 C-----------------------------------------------
@@ -305,13 +286,12 @@ C
       RETURN
       END
 
-Chd|====================================================================
-Chd|  READ_DPDB                     source/restart/ddsplit/wrrest.F
-Chd|-- called by -----------
-Chd|        INTSTAMP_RRESTR               share/modules1/intstamp_mod.F 
-Chd|-- calls ---------------
-Chd|        READ_DB_C                     ../common_source/tools/input_output/write_routtines.c
-Chd|====================================================================
+      !||====================================================================
+      !||    read_dpdb         ../starter/source/restart/ddsplit/wrrest.F
+      !||--- called by ------------------------------------------------------
+      !||    intstamp_rrestr   ../starter/share/modules1/intstamp_mod.F
+      !||--- calls      -----------------------------------------------------
+      !||====================================================================
       SUBROUTINE READ_DPDB(A,N)
 C lecture nombre reel : routine tampon
 C-----------------------------------------------
@@ -355,17 +335,15 @@ C
       END
 
 
-Chd|====================================================================
-Chd|  FXBWRESTP                     source/restart/ddsplit/wrrest.F
-Chd|-- called by -----------
-Chd|        DDSPLIT                       source/restart/ddsplit/ddsplit.F
-Chd|-- calls ---------------
-Chd|        DELETE_USER_FILE              source/user_interface/dyn_userlib.c
-Chd|        WRITE_DB                      source/restart/ddsplit/wrrest.F
-Chd|        WRITE_I_C                     ../common_source/tools/input_output/write_routtines.c
-Chd|        WRTSQI                        source/output/tools/wrtsqi.F  
-Chd|        WRTSQR                        source/output/tools/wrtsqr.F  
-Chd|====================================================================
+      !||====================================================================
+      !||    fxbwrestp          ../starter/source/restart/ddsplit/wrrest.F
+      !||--- called by ------------------------------------------------------
+      !||    ddsplit            ../starter/source/restart/ddsplit/ddsplit.F
+      !||--- calls      -----------------------------------------------------
+      !||    write_db           ../starter/source/restart/ddsplit/wrrest.F
+      !||    wrtsqi             ../starter/source/output/tools/wrtsqi.F
+      !||    wrtsqr             ../starter/source/output/tools/wrtsqr.F
+      !||====================================================================
       SUBROUTINE FXBWRESTP(
      .   FXBIPM_L , FXBRPM   , FXBNOD_L , FXBMOD_L, FXBGLM_L,
      .   FXBCPM_L , FXBCPS_L , FXBLM_L  , FXBFLS_L, FXBDLS_L,
@@ -531,15 +509,13 @@ C
       RETURN
       END
 
-Chd|====================================================================
-Chd|  EIGWREST                      source/restart/ddsplit/wrrest.F
-Chd|-- called by -----------
-Chd|-- calls ---------------
-Chd|        WRITE_DB                      source/restart/ddsplit/wrrest.F
-Chd|        WRITE_I_C                     ../common_source/tools/input_output/write_routtines.c
-Chd|        WRTSQI                        source/output/tools/wrtsqi.F  
-Chd|        WRTSQR                        source/output/tools/wrtsqr.F  
-Chd|====================================================================
+      !||====================================================================
+      !||    eigwrest    ../starter/source/restart/ddsplit/wrrest.F
+      !||--- calls      -----------------------------------------------------
+      !||    write_db    ../starter/source/restart/ddsplit/wrrest.F
+      !||    wrtsqi      ../starter/source/output/tools/wrtsqi.F
+      !||    wrtsqr      ../starter/source/output/tools/wrtsqr.F
+      !||====================================================================
       SUBROUTINE EIGWREST(EIGIPM, EIGIBUF, EIGRPM)      
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
@@ -603,14 +579,13 @@ C
 C
       RETURN
       END
-Chd|====================================================================
-Chd|  EIGWRESTP                     source/restart/ddsplit/wrrest.F
-Chd|-- called by -----------
-Chd|        DDSPLIT                       source/restart/ddsplit/ddsplit.F
-Chd|-- calls ---------------
-Chd|        WRITE_DB                      source/restart/ddsplit/wrrest.F
-Chd|        WRITE_I_C                     ../common_source/tools/input_output/write_routtines.c
-Chd|====================================================================
+      !||====================================================================
+      !||    eigwrestp   ../starter/source/restart/ddsplit/wrrest.F
+      !||--- called by ------------------------------------------------------
+      !||    ddsplit     ../starter/source/restart/ddsplit/ddsplit.F
+      !||--- calls      -----------------------------------------------------
+      !||    write_db    ../starter/source/restart/ddsplit/wrrest.F
+      !||====================================================================
       SUBROUTINE EIGWRESTP(EIGIPM, EIGIBUF, EIGRPM, LEIBUF_L,LEN_AM)      
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
@@ -644,16 +619,15 @@ C
       RETURN
       END
 
-Chd|====================================================================
-Chd|  DSWREST                       source/restart/ddsplit/wrrest.F
-Chd|-- called by -----------
-Chd|-- calls ---------------
-Chd|        WRITE_DB                      source/restart/ddsplit/wrrest.F
-Chd|        WRITE_I_C                     ../common_source/tools/input_output/write_routtines.c
-Chd|        WRTSQI                        source/output/tools/wrtsqi.F  
-Chd|        WRTSQR                        source/output/tools/wrtsqr.F  
-Chd|        DSGRAPH_MOD                   share/modules1/dsgraph_mod.F  
-Chd|====================================================================
+      !||====================================================================
+      !||    dswrest       ../starter/source/restart/ddsplit/wrrest.F
+      !||--- calls      -----------------------------------------------------
+      !||    write_db      ../starter/source/restart/ddsplit/wrrest.F
+      !||    wrtsqi        ../starter/source/output/tools/wrtsqi.F
+      !||    wrtsqr        ../starter/source/output/tools/wrtsqr.F
+      !||--- uses       -----------------------------------------------------
+      !||    dsgraph_mod   ../starter/share/modules1/dsgraph_mod.F
+      !||====================================================================
       SUBROUTINE DSWREST(GRAPHE)
 C-----------------------------------------------
 C   M o d u l e s
@@ -769,14 +743,13 @@ C
       RETURN
       END
 
-Chd|====================================================================
-Chd|  DSWRESTP                      source/restart/ddsplit/wrrest.F
-Chd|-- called by -----------
-Chd|-- calls ---------------
-Chd|        WRITE_DB                      source/restart/ddsplit/wrrest.F
-Chd|        WRITE_I_C                     ../common_source/tools/input_output/write_routtines.c
-Chd|        DSGRAPH_MOD                   share/modules1/dsgraph_mod.F  
-Chd|====================================================================
+      !||====================================================================
+      !||    dswrestp      ../starter/source/restart/ddsplit/wrrest.F
+      !||--- calls      -----------------------------------------------------
+      !||    write_db      ../starter/source/restart/ddsplit/wrrest.F
+      !||--- uses       -----------------------------------------------------
+      !||    dsgraph_mod   ../starter/share/modules1/dsgraph_mod.F
+      !||====================================================================
       SUBROUTINE DSWRESTP(PGRAPH,LEN_IA,LEN_AM)
 C-----------------------------------------------
 C   M o d u l e s
@@ -862,15 +835,13 @@ C
       RETURN
       END
 
-Chd|====================================================================
-Chd|  NFWREST                       source/restart/ddsplit/wrrest.F
-Chd|-- called by -----------
-Chd|-- calls ---------------
-Chd|        WRITE_DB                      source/restart/ddsplit/wrrest.F
-Chd|        WRITE_I_C                     ../common_source/tools/input_output/write_routtines.c
-Chd|        WRTSQI                        source/output/tools/wrtsqi.F  
-Chd|        WRTSQR                        source/output/tools/wrtsqr.F  
-Chd|====================================================================
+      !||====================================================================
+      !||    nfwrest     ../starter/source/restart/ddsplit/wrrest.F
+      !||--- calls      -----------------------------------------------------
+      !||    write_db    ../starter/source/restart/ddsplit/wrrest.F
+      !||    wrtsqi      ../starter/source/output/tools/wrtsqi.F
+      !||    wrtsqr      ../starter/source/output/tools/wrtsqr.F
+      !||====================================================================
       SUBROUTINE NFWREST(IFLOW, RFLOW)
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
@@ -909,14 +880,13 @@ C--------------------------------------
 C
       RETURN
       END
-Chd|====================================================================
-Chd|  NFWRESTP                      source/restart/ddsplit/wrrest.F
-Chd|-- called by -----------
-Chd|        DDSPLIT                       source/restart/ddsplit/ddsplit.F
-Chd|-- calls ---------------
-Chd|        WRITE_DB                      source/restart/ddsplit/wrrest.F
-Chd|        WRITE_I_C                     ../common_source/tools/input_output/write_routtines.c
-Chd|====================================================================
+      !||====================================================================
+      !||    nfwrestp    ../starter/source/restart/ddsplit/wrrest.F
+      !||--- called by ------------------------------------------------------
+      !||    ddsplit     ../starter/source/restart/ddsplit/ddsplit.F
+      !||--- calls      -----------------------------------------------------
+      !||    write_db    ../starter/source/restart/ddsplit/wrrest.F
+      !||====================================================================
       SUBROUTINE NFWRESTP(IFLOW, RFLOW,LEN_IA,LEN_AM)
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
@@ -951,13 +921,12 @@ C
 C
 
 C for shell heat transfer
-Chd|====================================================================
-Chd|  THCWREST                      source/restart/ddsplit/wrrest.F
-Chd|-- called by -----------
-Chd|-- calls ---------------
-Chd|        WRITE_DB                      source/restart/ddsplit/wrrest.F
-Chd|        WRTSQR                        source/output/tools/wrtsqr.F  
-Chd|====================================================================
+      !||====================================================================
+      !||    thcwrest   ../starter/source/restart/ddsplit/wrrest.F
+      !||--- calls      -----------------------------------------------------
+      !||    write_db   ../starter/source/restart/ddsplit/wrrest.F
+      !||    wrtsqr     ../starter/source/output/tools/wrtsqr.F
+      !||====================================================================
       SUBROUTINE THCWREST(MCP,TEMP)      
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
@@ -990,15 +959,13 @@ C--------------------------------------
       END
 
 C convection flux 
-Chd|====================================================================
-Chd|  CONVWREST                     source/restart/ddsplit/wrrest.F
-Chd|-- called by -----------
-Chd|-- calls ---------------
-Chd|        WRITE_DB                      source/restart/ddsplit/wrrest.F
-Chd|        WRITE_I_C                     ../common_source/tools/input_output/write_routtines.c
-Chd|        WRTSQI                        source/output/tools/wrtsqi.F  
-Chd|        WRTSQR                        source/output/tools/wrtsqr.F  
-Chd|====================================================================
+      !||====================================================================
+      !||    convwrest   ../starter/source/restart/ddsplit/wrrest.F
+      !||--- calls      -----------------------------------------------------
+      !||    write_db    ../starter/source/restart/ddsplit/wrrest.F
+      !||    wrtsqi      ../starter/source/output/tools/wrtsqi.F
+      !||    wrtsqr      ../starter/source/output/tools/wrtsqr.F
+      !||====================================================================
       SUBROUTINE CONVWREST(IBCV,FCONV)      
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
@@ -1032,15 +999,13 @@ C--------------------------------------
       RETURN
       END
 C fixed temperature 
-Chd|====================================================================
-Chd|  FXTEMPWREST                   source/restart/ddsplit/wrrest.F
-Chd|-- called by -----------
-Chd|-- calls ---------------
-Chd|        WRITE_DB                      source/restart/ddsplit/wrrest.F
-Chd|        WRITE_I_C                     ../common_source/tools/input_output/write_routtines.c
-Chd|        WRTSQI                        source/output/tools/wrtsqi.F  
-Chd|        WRTSQR                        source/output/tools/wrtsqr.F  
-Chd|====================================================================
+      !||====================================================================
+      !||    fxtempwrest   ../starter/source/restart/ddsplit/wrrest.F
+      !||--- calls      -----------------------------------------------------
+      !||    write_db      ../starter/source/restart/ddsplit/wrrest.F
+      !||    wrtsqi        ../starter/source/output/tools/wrtsqi.F
+      !||    wrtsqr        ../starter/source/output/tools/wrtsqr.F
+      !||====================================================================
       SUBROUTINE FXTEMPWREST(IBFT,FBFT)      
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
@@ -1075,15 +1040,13 @@ C--------------------------------------
       END
 
 C for rigid_ material     
-Chd|====================================================================
-Chd|  RIGMATWREST                   source/restart/ddsplit/wrrest.F
-Chd|-- called by -----------
-Chd|-- calls ---------------
-Chd|        WRITE_DB                      source/restart/ddsplit/wrrest.F
-Chd|        WRITE_I_C                     ../common_source/tools/input_output/write_routtines.c
-Chd|        WRTSQI                        source/output/tools/wrtsqi.F  
-Chd|        WRTSQR                        source/output/tools/wrtsqr.F  
-Chd|====================================================================
+      !||====================================================================
+      !||    rigmatwrest   ../starter/source/restart/ddsplit/wrrest.F
+      !||--- calls      -----------------------------------------------------
+      !||    write_db      ../starter/source/restart/ddsplit/wrrest.F
+      !||    wrtsqi        ../starter/source/output/tools/wrtsqi.F
+      !||    wrtsqr        ../starter/source/output/tools/wrtsqr.F
+      !||====================================================================
       SUBROUTINE RIGMATWREST(RBYM  ,IRBYM    ,LCRBYM, WEIGHT)      
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
@@ -1122,15 +1085,13 @@ C--------------------------------------
       END
 
 C for shell composite xfem 
-Chd|====================================================================
-Chd|  PLYXFEM_WREST                 source/restart/ddsplit/wrrest.F
-Chd|-- called by -----------
-Chd|-- calls ---------------
-Chd|        WRITE_DB                      source/restart/ddsplit/wrrest.F
-Chd|        WRITE_I_C                     ../common_source/tools/input_output/write_routtines.c
-Chd|        WRTSQI                        source/output/tools/wrtsqi.F  
-Chd|        WRTSQR                        source/output/tools/wrtsqr.F  
-Chd|====================================================================
+      !||====================================================================
+      !||    plyxfem_wrest   ../starter/source/restart/ddsplit/wrrest.F
+      !||--- calls      -----------------------------------------------------
+      !||    write_db        ../starter/source/restart/ddsplit/wrrest.F
+      !||    wrtsqi          ../starter/source/output/tools/wrtsqi.F
+      !||    wrtsqr          ../starter/source/output/tools/wrtsqr.F
+      !||====================================================================
       SUBROUTINE PLYXFEM_WREST(MS_PLY,ZI_PLY,IEL,INOD,ICODE,ISKEW)      
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s

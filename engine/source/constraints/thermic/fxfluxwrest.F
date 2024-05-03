@@ -20,16 +20,16 @@ Copyright>
 Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
-Chd|====================================================================
-Chd|  FXFLUXWREST                   source/constraints/thermic/fxfluxwrest.F
-Chd|-- called by -----------
-Chd|        RESOL                         source/engine/resol.F         
-Chd|-- calls ---------------
-Chd|        WRITE_DB                      source/output/tools/write_db.F
-Chd|        WRITE_I_C                     ../common_source/tools/input_output/write_routtines.c
-Chd|        WRTSQI                        source/output/tools/wrtsqi.F  
-Chd|        WRTSQR                        source/output/tools/wrtsqr.F  
-Chd|====================================================================
+      !||====================================================================
+      !||    fxfluxwrest   ../engine/source/constraints/thermic/fxfluxwrest.F
+      !||--- called by ------------------------------------------------------
+      !||    resol         ../engine/source/engine/resol.F
+      !||--- calls      -----------------------------------------------------
+      !||    write_db      ../engine/source/output/tools/write_db.F
+      !||    write_i_c     ../common_source/tools/input_output/write_routtines.c
+      !||    wrtsqi        ../engine/source/output/tools/wrtsqi.F
+      !||    wrtsqr        ../engine/source/output/tools/wrtsqr.F
+      !||====================================================================
       SUBROUTINE FXFLUXWREST(IBFFLUX, FBFFLUX)
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s

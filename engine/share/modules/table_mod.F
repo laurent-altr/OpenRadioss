@@ -20,127 +20,83 @@ Copyright>
 Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
-Chd|====================================================================
-Chd|  TABLE_MOD                     share/modules/table_mod.F     
-Chd|-- called by -----------
-Chd|        TABLE4D_MOD                   ../common_source/modules/table4d_mod.F
-Chd|        ALEMAIN                       source/ale/alemain.F          
-Chd|        BFORC2                        source/ale/bimat/bforc2.F     
-Chd|        C3FORC3                       source/elements/sh3n/coque3n/c3forc3.F
-Chd|        C3FORC3_CRK                   source/elements/xfem/c3forc3_crk.F
-Chd|        CBAFORC3                      source/elements/shell/coqueba/cbaforc3.F
-Chd|        CDK6FORC3                     source/elements/sh3n/coquedk6/cdk6forc3.F
-Chd|        CDKFORC3                      source/elements/sh3n/coquedk/cdkforc3.F
-Chd|        CFORC3                        source/elements/shell/coque/cforc3.F
-Chd|        CFORC3_CRK                    source/elements/xfem/cforc3_crk.F
-Chd|        CMAIN3                        source/materials/mat_share/cmain3.F
-Chd|        CMAIN3PINCH                   source/elements/shell/coqueba/cmain3pinch.F
-Chd|        CZFORC3                       source/elements/shell/coquez/czforc3.F
-Chd|        CZFORC3_CRK                   source/elements/xfem/czforc3_crk.F
-Chd|        FAIL_GENE1_C                  source/materials/fail/gene1/fail_gene1_c.F
-Chd|        FAIL_GENE1_S                  source/materials/fail/gene1/fail_gene1_s.F
-Chd|        FAIL_INIEVO_C                 source/materials/fail/inievo/fail_inievo_c.F
-Chd|        FAIL_INIEVO_S                 source/materials/fail/inievo/fail_inievo_s.F
-Chd|        FAIL_TAB2_C                   source/materials/fail/tabulated/fail_tab2_c.F
-Chd|        FAIL_TAB2_S                   source/materials/fail/tabulated/fail_tab2_s.F
-Chd|        FAIL_TAB_C                    source/materials/fail/tabulated/fail_tab_c.F
-Chd|        FAIL_TAB_S                    source/materials/fail/tabulated/fail_tab_s.F
-Chd|        FAIL_TAB_XFEM                 source/materials/fail/tabulated/fail_tab_xfem.F
-Chd|        FORINT                        source/elements/forint.F      
-Chd|        FORINTC                       source/elements/forintc.F     
-Chd|        FORINTP                       source/elements/forintp.F     
-Chd|        GENH3D                        source/output/h3d/h3d_results/genh3d.F
-Chd|        H3D_PRE_SKIN_SCALAR           source/output/h3d/h3d_results/h3d_skin_scalar.F
-Chd|        H3D_SKIN_SCALAR               source/output/h3d/h3d_results/h3d_skin_scalar.F
-Chd|        H3D_SKIN_VECTOR               source/output/h3d/h3d_results/h3d_skin_vector.F
-Chd|        IG3DUFORC3                    source/elements/ige3d/ig3duforc3.F
-Chd|        LAW119_MEMBRANE               source/materials/mat/mat119/law119_membrane.F
-Chd|        LECFUN                        source/tools/curve/lecfun.F   
-Chd|        LECTUR                        source/input/lectur.F         
-Chd|        MAT107C_NEWTON                source/materials/mat/mat107/mat107c_newton.F
-Chd|        MAT107C_NICE                  source/materials/mat/mat107/mat107c_nice.F
-Chd|        MAT107_NEWTON                 source/materials/mat/mat107/mat107_newton.F
-Chd|        MAT107_NICE                   source/materials/mat/mat107/mat107_nice.F
-Chd|        MAT112C_XIA_NEWTON            source/materials/mat/mat112/mat112c_xia_newton.F
-Chd|        MAT112C_XIA_NICE              source/materials/mat/mat112/mat112c_xia_nice.F
-Chd|        MAT112_XIA_NEWTON             source/materials/mat/mat112/mat112_xia_newton.F
-Chd|        MAT112_XIA_NICE               source/materials/mat/mat112/mat112_xia_nice.F
-Chd|        MMAIN                         source/materials/mat_share/mmain.F
-Chd|        MMAIN8                        source/materials/mat_share/mmain8.F
-Chd|        MULAW                         source/materials/mat_share/mulaw.F
-Chd|        MULAW8                        source/materials/mat_share/mulaw8.F
-Chd|        MULAWC                        source/materials/mat_share/mulawc.F
-Chd|        MULAWGLC                      source/materials/mat_share/mulawglc.F
-Chd|        MULAWGLCPINCH                 source/elements/shell/coqueba/mulawglcpinch.F
-Chd|        PRESSURE_CYL                  source/loads/general/load_pcyl/pressure_cyl.F
-Chd|        PRESS_SEG3                    source/loads/general/load_pcyl/press_seg3.F
-Chd|        Q4FORC2                       source/elements/solid_2d/quad4/q4forc2.F
-Chd|        QFORC2                        source/elements/solid_2d/quad/qforc2.F
-Chd|        R23FORC3                      source/elements/spring/r23forc3.F
-Chd|        R23LAW108                     source/elements/spring/r23law108.F
-Chd|        R23LAW113                     source/elements/spring/r23law113.F
-Chd|        R23LAW114                     source/elements/spring/r23law114.F
-Chd|        R3DEF3                        source/elements/spring/r3def3.F
-Chd|        RESOL                         source/engine/resol.F         
-Chd|        RFORC3                        source/elements/spring/rforc3.F
-Chd|        S10FORC3                      source/elements/solid/solide10/s10forc3.F
-Chd|        S16FORC3                      source/elements/thickshell/solide16/s16forc3.F
-Chd|        S20FORC3                      source/elements/solid/solide20/s20forc3.F
-Chd|        S4FORC3                       source/elements/solid/solide4/s4forc3.F
-Chd|        S6CFORC3                      source/elements/thickshell/solide6c/s6cforc3.F
-Chd|        S8CFORC3                      source/elements/thickshell/solide8c/s8cforc3.F
-Chd|        S8EFORC3                      source/elements/solid/solide8e/s8eforc3.F
-Chd|        S8FORC3                       source/elements/solid/solide8/s8forc3.F
-Chd|        S8SFORC3                      source/elements/solid/solide8s/s8sforc3.F
-Chd|        S8ZFORC3                      source/elements/solid/solide8z/s8zforc3.F
-Chd|        SCFORC3                       source/elements/thickshell/solidec/scforc3.F
-Chd|        SFORC3                        source/elements/solid/solide/sforc3.F
-Chd|        SIGEPS107                     source/materials/mat/mat107/sigeps107.F
-Chd|        SIGEPS107C                    source/materials/mat/mat107/sigeps107c.F
-Chd|        SIGEPS109                     source/materials/mat/mat109/sigeps109.F
-Chd|        SIGEPS109C                    source/materials/mat/mat109/sigeps109c.F
-Chd|        SIGEPS110C                    source/materials/mat/mat110/sigeps110c.F
-Chd|        SIGEPS110C_LITE_NEWTON        source/materials/mat/mat110/sigeps110c_lite_newton.F
-Chd|        SIGEPS110C_LITE_NICE          source/materials/mat/mat110/sigeps110c_lite_nice.F
-Chd|        SIGEPS110C_NEWTON             source/materials/mat/mat110/sigeps110c_newton.F
-Chd|        SIGEPS110C_NICE               source/materials/mat/mat110/sigeps110c_nice.F
-Chd|        SIGEPS112                     source/materials/mat/mat112/sigeps112.F
-Chd|        SIGEPS112C                    source/materials/mat/mat112/sigeps112c.F
-Chd|        SIGEPS119C                    source/materials/mat/mat119/sigeps119c.F
-Chd|        SIGEPS120                     source/materials/mat/mat120/sigeps120.F
-Chd|        SIGEPS120_CONNECT_MAIN        source/materials/mat/mat120/sigeps120_connect_main.F
-Chd|        SIGEPS120_CONNECT_TAB_DP      source/materials/mat/mat120/sigeps120_connect_tab_dp.F
-Chd|        SIGEPS120_CONNECT_TAB_VM      source/materials/mat/mat120/sigeps120_connect_tab_vm.F
-Chd|        SIGEPS120_TAB_DP              source/materials/mat/mat120/sigeps120_tab_dp.F
-Chd|        SIGEPS120_TAB_VM              source/materials/mat/mat120/sigeps120_tab_vm.F
-Chd|        SIGEPS52                      source/materials/mat/mat052/sigeps52.F
-Chd|        SIGEPS52C                     source/materials/mat/mat052/sigeps52c.F
-Chd|        SIGEPS58C                     source/materials/mat/mat058/sigeps58c.F
-Chd|        SIGEPS73C                     source/materials/mat/mat073/sigeps73c.F
-Chd|        SIGEPS74                      source/materials/mat/mat074/sigeps74.F
-Chd|        SIGEPS80                      source/materials/mat/mat080/sigeps80.F
-Chd|        SIGEPS80C                     source/materials/mat/mat080/sigeps80c.F
-Chd|        SORTIE_MAIN                   source/output/sortie_main.F   
-Chd|        SPSTRES                       source/elements/sph/spstres.F 
-Chd|        SUFORC3                       source/user_interface/suforc3.F
-Chd|        SUSER43                       source/elements/solid/sconnect/suser43.F
-Chd|        SZFORC3                       source/elements/solid/solidez/szforc3.F
-Chd|        TABLE2D_VINTERP_LOG           source/tools/curve/table2d_vinterp_log.F
-Chd|        TABLE_INTERP                  source/tools/curve/table_tools.F
-Chd|        TABLE_INTERP_DYDX             source/tools/curve/table_tools.F
-Chd|        TABLE_INTERP_LAW76            source/tools/curve/table_tools.F
-Chd|        TABLE_RRESTI                  source/tools/curve/table_tools.F
-Chd|        TABLE_RRESTR                  source/tools/curve/table_tools.F
-Chd|        TABLE_VINTERP                 source/tools/curve/table_tools.F
-Chd|        TABLE_WRESTI                  source/tools/curve/table_tools.F
-Chd|        TABLE_WRESTR                  source/tools/curve/table_tools.F
-Chd|        TABLE_ZERO                    source/tools/curve/table_tools.F
-Chd|        USERMAT_SHELL                 source/materials/mat_share/usermat_shell.F
-Chd|        USERMAT_SOLID                 source/materials/mat_share/usermat_solid.F
-Chd|        GET_U_NUMTABLE                source/user_interface/utable.F
-Chd|        TABLE_GLOB_MOD                share/modules/table_glob_mod.F
-Chd|-- calls ---------------
-Chd|====================================================================
+      !||====================================================================
+      !||    table_mod                 ../starter/share/modules1/table_mod.F
+      !||--- called by ------------------------------------------------------
+      !||    calc_uniax                ../starter/source/materials/mat/mat098/lossfun_98.F
+      !||    calc_uniax_2              ../starter/source/materials/mat/mat098/lossfun_98.F
+      !||    ddsplit                   ../starter/source/restart/ddsplit/ddsplit.F
+      !||    fail_tab2sys              ../starter/source/materials/tools/fail_tab2sys.F
+      !||    fct_fiber                 ../starter/source/materials/mat/mat098/lossfun_98.F
+      !||    fct_fiber_2               ../starter/source/materials/mat/mat098/lossfun_98.F
+      !||    fsdcod                    ../starter/source/system/fsdcod.F
+      !||    func_inters_c             ../starter/source/tools/curve/func_inters.F
+      !||    func_inters_shear         ../starter/source/tools/curve/func_inters.F
+      !||    func_maxy                 ../starter/source/tools/curve/func_maxy.F
+      !||    func_slope                ../starter/source/tools/curve/func_slope.F
+      !||    hm_read_fail              ../starter/source/materials/fail/hm_read_fail.F
+      !||    hm_read_fail_tab1         ../starter/source/materials/fail/tabulated/hm_read_fail_tab1.F
+      !||    hm_read_funct             ../starter/source/tools/curve/hm_read_funct.F
+      !||    hm_read_mat               ../starter/source/materials/mat/hm_read_mat.F
+      !||    hm_read_mat190            ../starter/source/materials/mat/mat190/hm_read_mat190.F
+      !||    hm_read_mat76             ../starter/source/materials/mat/mat076/hm_read_mat76.F
+      !||    hm_read_mat80             ../starter/source/materials/mat/mat080/hm_read_mat80.F
+      !||    hm_read_mat90             ../starter/source/materials/mat/mat090/hm_read_mat90.F
+      !||    hm_read_move_funct        ../starter/source/tools/curve/hm_read_move_funct.F
+      !||    hm_read_pcyl              ../starter/source/loads/general/load_pcyl/hm_read_pcyl.F
+      !||    hm_read_table1            ../starter/source/tools/curve/hm_read_table.F
+      !||    hm_read_table1_0          ../starter/source/tools/curve/hm_read_table1_0.F
+      !||    hm_read_table1_1          ../starter/source/tools/curve/hm_read_table1_1.F
+      !||    hm_read_table2            ../starter/source/tools/curve/hm_read_table.F
+      !||    hm_read_table2_0          ../starter/source/tools/curve/hm_read_table2_0.F
+      !||    hm_read_table2_1          ../starter/source/tools/curve/hm_read_table2_1.F
+      !||    hm_read_visc              ../starter/source/materials/visc/hm_read_visc.F
+      !||    hm_read_visc_prony        ../starter/source/materials/visc/hm_read_visc_prony.F
+      !||    inter_dcod_function       ../starter/source/interfaces/reader/inter_dcod_function.F
+      !||    law100_upd_ab             ../starter/source/materials/mat/mat100/law100_upd.F
+      !||    law100_upd_nht            ../starter/source/materials/mat/mat100/law100_upd.F
+      !||    law108_upd                ../starter/source/materials/mat/mat108/law108_upd.F
+      !||    law111_upd                ../starter/source/materials/mat/mat111/law111_upd.F
+      !||    law112_upd                ../starter/source/materials/mat/mat112/law112_upd.F
+      !||    law113_upd                ../starter/source/materials/mat/mat113/law113_upd.F
+      !||    law114_upd                ../starter/source/materials/mat/mat114/law114_upd.F
+      !||    law119_upd                ../starter/source/materials/mat/mat119/law119_upd.F
+      !||    law120_upd                ../starter/source/materials/mat/mat120/law120_upd.F
+      !||    law158_upd                ../starter/source/materials/mat/mat158/law158_upd.F
+      !||    law36_upd                 ../starter/source/materials/mat/mat036/law36_upd.F
+      !||    law42_upd                 ../starter/source/materials/mat/mat042/law42_upd.F
+      !||    law58_upd                 ../starter/source/materials/mat/mat058/law58_upd.F
+      !||    law62_upd                 ../starter/source/materials/mat/mat062/law62_upd.F
+      !||    law69_upd                 ../starter/source/materials/mat/mat069/law69_upd.F
+      !||    law77_upd                 ../starter/source/materials/mat/mat077/law77_upd.F
+      !||    law87_upd                 ../starter/source/materials/mat/mat087/law87_upd.F
+      !||    law88_upd                 ../starter/source/materials/mat/mat088/law88_upd.F
+      !||    law90_upd                 ../starter/source/materials/mat/mat090/law90_upd.F
+      !||    law92_upd                 ../starter/source/materials/mat/mat092/law92_upd.F
+      !||    lm_least_square_prony     ../starter/source/materials/visc/hm_read_visc_prony.F
+      !||    lm_least_square_prony_2   ../starter/source/materials/visc/hm_read_visc_prony.F
+      !||    lossfun_98                ../starter/source/materials/mat/mat098/lossfun_98.F
+      !||    matfun_usr2sys            ../starter/source/materials/tools/matfun_usr2sys.F
+      !||    mattab_usr2sys            ../starter/source/materials/tools/mattab_usr2sys.F
+      !||    read_ebcs                 ../starter/source/boundary_conditions/ebcs/read_ebcs.F
+      !||    read_material_models      ../starter/source/materials/read_material_models.F
+      !||    split_ebcs                ../starter/source/boundary_conditions/ebcs/split_ebcs.F
+      !||    st_qaprint_driver         ../starter/source/output/qaprint/st_qaprint_driver.F
+      !||    st_qaprint_model_tools    ../starter/source/output/qaprint/st_qaprint_model_tools.F
+      !||    table2d_intersect         ../starter/source/tools/curve/table2d_intersect.F
+      !||    table_glob_mod            ../starter/share/modules1/table_glob_mod.F
+      !||    table_interp              ../starter/share/modules1/table_mod.F
+      !||    table_interp_law76        ../starter/share/modules1/table_mod.F
+      !||    table_inters              ../starter/source/tools/curve/func_inters.F
+      !||    table_vinterp             ../starter/share/modules1/table_mod.F
+      !||    table_wresti              ../starter/source/tools/curve/table_tools.F
+      !||    table_wrestr              ../starter/source/tools/curve/table_tools.F
+      !||    table_zero                ../starter/source/tools/curve/table_tools.F
+      !||    unify_x                   ../starter/source/tools/curve/func_slope.F
+      !||    updfail                   ../starter/source/materials/updfail.F
+      !||    updmat                    ../starter/source/materials/updmat.F
+      !||    ymax                      ../starter/source/materials/mat/mat100/law100_upd.F
+      !||====================================================================
       MODULE TABLE_MOD
 C-----------------------------------------------
 C   m y _ r e a l
@@ -162,65 +118,23 @@ C---------
       END TYPE TTABLE
 C-----------------------------------------------
       END MODULE TABLE_MOD
-Chd|====================================================================
-Chd|  INTERFACE_TABLE_MOD           share/modules/table_mod.F     
-Chd|-- called by -----------
-Chd|        FAIL_GENE1_C                  source/materials/fail/gene1/fail_gene1_c.F
-Chd|        FAIL_GENE1_S                  source/materials/fail/gene1/fail_gene1_s.F
-Chd|        FAIL_INIEVO_C                 source/materials/fail/inievo/fail_inievo_c.F
-Chd|        FAIL_INIEVO_S                 source/materials/fail/inievo/fail_inievo_s.F
-Chd|        FAIL_TAB2_C                   source/materials/fail/tabulated/fail_tab2_c.F
-Chd|        FAIL_TAB2_S                   source/materials/fail/tabulated/fail_tab2_s.F
-Chd|        FAIL_TAB_C                    source/materials/fail/tabulated/fail_tab_c.F
-Chd|        FAIL_TAB_S                    source/materials/fail/tabulated/fail_tab_s.F
-Chd|        FAIL_TAB_XFEM                 source/materials/fail/tabulated/fail_tab_xfem.F
-Chd|        GET_TABLE_VALUE               source/user_interface/utable.F
-Chd|        GET_TABLE_VALUE_DYDX          source/user_interface/utable.F
-Chd|        GET_U_TABLE                   source/user_interface/utable.F
-Chd|        GET_U_VTABLE                  source/user_interface/utable.F
-Chd|        GET_VTABLE_VALUE              source/user_interface/utable.F
-Chd|        LAW119_MEMBRANE               source/materials/mat/mat119/law119_membrane.F
-Chd|        MAT107C_NEWTON                source/materials/mat/mat107/mat107c_newton.F
-Chd|        MAT107C_NICE                  source/materials/mat/mat107/mat107c_nice.F
-Chd|        MAT107_NEWTON                 source/materials/mat/mat107/mat107_newton.F
-Chd|        MAT107_NICE                   source/materials/mat/mat107/mat107_nice.F
-Chd|        MAT112C_XIA_NEWTON            source/materials/mat/mat112/mat112c_xia_newton.F
-Chd|        MAT112C_XIA_NICE              source/materials/mat/mat112/mat112c_xia_nice.F
-Chd|        MAT112_XIA_NEWTON             source/materials/mat/mat112/mat112_xia_newton.F
-Chd|        MAT112_XIA_NICE               source/materials/mat/mat112/mat112_xia_nice.F
-Chd|        R3DEF3                        source/elements/spring/r3def3.F
-Chd|        RESOL                         source/engine/resol.F         
-Chd|        SIGEPS107                     source/materials/mat/mat107/sigeps107.F
-Chd|        SIGEPS107C                    source/materials/mat/mat107/sigeps107c.F
-Chd|        SIGEPS109                     source/materials/mat/mat109/sigeps109.F
-Chd|        SIGEPS109C                    source/materials/mat/mat109/sigeps109c.F
-Chd|        SIGEPS110C                    source/materials/mat/mat110/sigeps110c.F
-Chd|        SIGEPS110C_LITE_NEWTON        source/materials/mat/mat110/sigeps110c_lite_newton.F
-Chd|        SIGEPS110C_LITE_NICE          source/materials/mat/mat110/sigeps110c_lite_nice.F
-Chd|        SIGEPS110C_NEWTON             source/materials/mat/mat110/sigeps110c_newton.F
-Chd|        SIGEPS110C_NICE               source/materials/mat/mat110/sigeps110c_nice.F
-Chd|        SIGEPS112                     source/materials/mat/mat112/sigeps112.F
-Chd|        SIGEPS112C                    source/materials/mat/mat112/sigeps112c.F
-Chd|        SIGEPS119C                    source/materials/mat/mat119/sigeps119c.F
-Chd|        SIGEPS120                     source/materials/mat/mat120/sigeps120.F
-Chd|        SIGEPS120_CONNECT_MAIN        source/materials/mat/mat120/sigeps120_connect_main.F
-Chd|        SIGEPS120_CONNECT_TAB_DP      source/materials/mat/mat120/sigeps120_connect_tab_dp.F
-Chd|        SIGEPS120_CONNECT_TAB_VM      source/materials/mat/mat120/sigeps120_connect_tab_vm.F
-Chd|        SIGEPS120_TAB_DP              source/materials/mat/mat120/sigeps120_tab_dp.F
-Chd|        SIGEPS120_TAB_VM              source/materials/mat/mat120/sigeps120_tab_vm.F
-Chd|        SIGEPS52                      source/materials/mat/mat052/sigeps52.F
-Chd|        SIGEPS52C                     source/materials/mat/mat052/sigeps52c.F
-Chd|        SIGEPS58C                     source/materials/mat/mat058/sigeps58c.F
-Chd|        SIGEPS73C                     source/materials/mat/mat073/sigeps73c.F
-Chd|        SIGEPS74                      source/materials/mat/mat074/sigeps74.F
-Chd|        SIGEPS80                      source/materials/mat/mat080/sigeps80.F
-Chd|        SIGEPS80C                     source/materials/mat/mat080/sigeps80c.F
-Chd|-- calls ---------------
-Chd|====================================================================
+      !||====================================================================
+      !||    interface_table_mod   ../starter/share/modules1/table_mod.F
+      !||--- called by ------------------------------------------------------
+      !||    hm_read_table2        ../starter/source/tools/curve/hm_read_table.F
+      !||    hm_read_table2_0      ../starter/source/tools/curve/hm_read_table2_0.F
+      !||    hm_read_table2_1      ../starter/source/tools/curve/hm_read_table2_1.F
+      !||    law190_upd            ../starter/source/materials/mat/mat190/law190_upd.F
+      !||====================================================================
       MODULE INTERFACE_TABLE_MOD
 C-----------------------------------------------
       INTERFACE
 C
+      !||====================================================================
+      !||    table_interp   ../starter/share/modules1/table_mod.F
+      !||--- uses       -----------------------------------------------------
+      !||    table_mod      ../starter/share/modules1/table_mod.F
+      !||====================================================================
         SUBROUTINE TABLE_INTERP(TABLE,XX,YY)
         USE TABLE_MOD
         TYPE(TTABLE) TABLE
@@ -230,6 +144,11 @@ C
      .         YY
         END SUBROUTINE TABLE_INTERP
 C
+      !||====================================================================
+      !||    table_vinterp   ../starter/share/modules1/table_mod.F
+      !||--- uses       -----------------------------------------------------
+      !||    table_mod       ../starter/share/modules1/table_mod.F
+      !||====================================================================
         SUBROUTINE TABLE_VINTERP(TABLE,DIMX,NEL,IPOS,XX,YY,DYDX)
         USE TABLE_MOD
         TYPE(TTABLE) TABLE
@@ -240,6 +159,28 @@ C
         my_real ,DIMENSION(NEL)              :: YY, DYDX
         END SUBROUTINE TABLE_VINTERP
 C
+      !||====================================================================
+      !||    table2d_vinterp_log      ../engine/share/modules/table_mod.F
+      !||--- called by ------------------------------------------------------
+      !||    fail_gene1_c             ../engine/source/materials/fail/gene1/fail_gene1_c.F
+      !||    fail_gene1_s             ../engine/source/materials/fail/gene1/fail_gene1_s.F
+      !||    mat107_newton            ../engine/source/materials/mat/mat107/mat107_newton.F
+      !||    mat107_nice              ../engine/source/materials/mat/mat107/mat107_nice.F
+      !||    mat107c_newton           ../engine/source/materials/mat/mat107/mat107c_newton.F
+      !||    mat107c_nice             ../engine/source/materials/mat/mat107/mat107c_nice.F
+      !||    mat112_xia_newton        ../engine/source/materials/mat/mat112/mat112_xia_newton.F
+      !||    mat112_xia_nice          ../engine/source/materials/mat/mat112/mat112_xia_nice.F
+      !||    mat112c_xia_newton       ../engine/source/materials/mat/mat112/mat112c_xia_newton.F
+      !||    mat112c_xia_nice         ../engine/source/materials/mat/mat112/mat112c_xia_nice.F
+      !||    sigeps109                ../engine/source/materials/mat/mat109/sigeps109.F
+      !||    sigeps109c               ../engine/source/materials/mat/mat109/sigeps109c.F
+      !||    sigeps110c_lite_newton   ../engine/source/materials/mat/mat110/sigeps110c_lite_newton.F
+      !||    sigeps110c_lite_nice     ../engine/source/materials/mat/mat110/sigeps110c_lite_nice.F
+      !||    sigeps110c_newton        ../engine/source/materials/mat/mat110/sigeps110c_newton.F
+      !||    sigeps110c_nice          ../engine/source/materials/mat/mat110/sigeps110c_nice.F
+      !||--- uses       -----------------------------------------------------
+      !||    table_mod                ../engine/share/modules/table_mod.F
+      !||====================================================================
         SUBROUTINE TABLE2D_VINTERP_LOG(TABLE,ISMOOTH,DIMX,NEL,IPOS,XX,YY,DYDX1,DYDX2)
         USE TABLE_MOD
         TYPE(TTABLE) TABLE
@@ -251,6 +192,11 @@ C
         my_real ,DIMENSION(NEL)              :: YY, DYDX1, DYDX2
         END SUBROUTINE TABLE2D_VINTERP_LOG
 C
+      !||====================================================================
+      !||    table_interp_law76   ../starter/share/modules1/table_mod.F
+      !||--- uses       -----------------------------------------------------
+      !||    table_mod            ../starter/share/modules1/table_mod.F
+      !||====================================================================
         SUBROUTINE TABLE_INTERP_LAW76(TABLE,IPOS2,XX,R2,DYDX,YY)
         USE TABLE_MOD
         TYPE(TTABLE) TABLE

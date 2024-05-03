@@ -27,12 +27,11 @@ C|-- appelee par -----------
 C|         CBAFORC3                         /coqueba/cbaforc3.F
 C|============================================================
 C|---
-Chd|====================================================================
-Chd|  CBADEF_PLY                    source/properties/composite_options/stack/cbadef_ply.F
-Chd|-- called by -----------
-Chd|        CBAFORC3                      source/elements/shell/coqueba/cbaforc3.F
-Chd|-- calls ---------------
-Chd|====================================================================
+      !||====================================================================
+      !||    cbadef_ply   ../engine/source/properties/composite_options/stack/cbadef_ply.F
+      !||--- called by ------------------------------------------------------
+      !||    cbaforc3     ../engine/source/elements/shell/coqueba/cbaforc3.F
+      !||====================================================================
       SUBROUTINE CBADEF_PLY(JFT,JLT,NG, NPT,NPLAT,IPLAT,VQ,
      1                  VXYZ,VETA,VKSI,BM,BC,TC,DT1C,
      2                  EXX, EYY , EYZ, EZX)
@@ -258,12 +257,11 @@ C
        RETURN
        END
 C
-Chd|====================================================================
-Chd|  CBADEFSH_PLY                  source/properties/composite_options/stack/cbadef_ply.F
-Chd|-- called by -----------
-Chd|        CBAFORC3                      source/elements/shell/coqueba/cbaforc3.F
-Chd|-- calls ---------------
-Chd|====================================================================
+      !||====================================================================
+      !||    cbadefsh_ply   ../engine/source/properties/composite_options/stack/cbadef_ply.F
+      !||--- called by ------------------------------------------------------
+      !||    cbaforc3       ../engine/source/elements/shell/coqueba/cbaforc3.F
+      !||====================================================================
         SUBROUTINE CBADEFSH_PLY(JFT,JLT,NPT ,NPLAT, IPLAT,X13 ,X24 ,
      .                        Y13 ,Y24, VXYZ,DT1C, EXY )
 C---+----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8

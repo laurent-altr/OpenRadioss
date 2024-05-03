@@ -20,16 +20,16 @@ Copyright>
 Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
-Chd|====================================================================
-Chd|  FXFLUXRREST                   source/constraints/thermic/fxfluxrrest.F
-Chd|-- called by -----------
-Chd|        RADIOSS2                      source/engine/radioss2.F      
-Chd|-- calls ---------------
-Chd|        READ_DB                       source/output/tools/read_db.F 
-Chd|        READ_I_C                      ../common_source/tools/input_output/write_routtines.c
-Chd|        REDSQI                        source/output/tools/redsqi.F  
-Chd|        REDSQR                        source/output/tools/redsqr.F  
-Chd|====================================================================
+      !||====================================================================
+      !||    fxfluxrrest   ../engine/source/constraints/thermic/fxfluxrrest.F
+      !||--- called by ------------------------------------------------------
+      !||    radioss2      ../engine/source/engine/radioss2.F
+      !||--- calls      -----------------------------------------------------
+      !||    read_db       ../engine/source/output/tools/read_db.F
+      !||    read_i_c      ../common_source/tools/input_output/write_routtines.c
+      !||    redsqi        ../engine/source/output/tools/redsqi.F
+      !||    redsqr        ../engine/source/output/tools/redsqr.F
+      !||====================================================================
       SUBROUTINE FXFLUXRREST(IBFFLUX, FBFFLUX)
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s

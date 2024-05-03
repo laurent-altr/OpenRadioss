@@ -21,15 +21,16 @@ Copyright>        As an alternative to this open-source version, Altair also off
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
 C
-Chd|====================================================================
-Chd|  W_RSPH                        source/restart/ddsplit/w_rsph.F
-Chd|-- called by -----------
-Chd|        DDSPLIT                       source/restart/ddsplit/ddsplit.F
-Chd|-- calls ---------------
-Chd|        ANCMSG                        source/output/message/message.F
-Chd|        WRITE_DB                      source/restart/ddsplit/wrrest.F
-Chd|        MESSAGE_MOD                   share/message_module/message_mod.F
-Chd|====================================================================
+      !||====================================================================
+      !||    w_rsph        ../starter/source/restart/ddsplit/w_rsph.F
+      !||--- called by ------------------------------------------------------
+      !||    ddsplit       ../starter/source/restart/ddsplit/ddsplit.F
+      !||--- calls      -----------------------------------------------------
+      !||    ancmsg        ../starter/share/message_module/inter_ancmsg_mod.F
+      !||    write_db      ../starter/source/restart/ddsplit/wrrest.F
+      !||--- uses       -----------------------------------------------------
+      !||    message_mod   ../starter/share/message_module/message_mod.F
+      !||====================================================================
       SUBROUTINE W_RSPH(SPBUF ,NUMSPH_L,CEPSP,PROC,
      2                  VSPHIO,LEN_AM,SSPHVELN_L)
       USE MESSAGE_MOD

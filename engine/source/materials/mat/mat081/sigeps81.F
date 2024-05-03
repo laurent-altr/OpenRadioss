@@ -20,14 +20,11 @@ Copyright>
 Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
-Chd|====================================================================
-Chd|  SIGEPS81                      source/materials/mat/mat081/sigeps81.F
-Chd|-- called by -----------
-Chd|        MULAW                         source/materials/mat_share/mulaw.F
-Chd|-- calls ---------------
-Chd|        FCRIT                         source/materials/mat/mat081/sigeps81.F
-Chd|        FINTER                        source/tools/curve/finter.F   
-Chd|====================================================================
+      !||====================================================================
+      !||    sigeps81   ../engine/source/materials/mat/mat081/sigeps81.F
+      !||--- called by ------------------------------------------------------
+      !||    mulaw      ../engine/source/materials/mat_share/mulaw.F
+      !||====================================================================
       SUBROUTINE SIGEPS81 (
      1     NEL    ,NUPARAM,NUVAR   ,NFUNC   ,IFUNC   ,NGL    , 
      2     NPF    ,TF     ,TIME    ,UPARAM  ,RHO0    ,RHO    ,
@@ -731,14 +728,9 @@ c----------------------------------------------
 c-----------
       RETURN
       END
-Chd|====================================================================
-Chd|  FCRIT                         source/materials/mat/mat081/sigeps81.F
-Chd|-- called by -----------
-Chd|        FAIL_INIEVO_C                 source/materials/fail/inievo/fail_inievo_c.F
-Chd|        FAIL_INIEVO_S                 source/materials/fail/inievo/fail_inievo_s.F
-Chd|        SIGEPS81                      source/materials/mat/mat081/sigeps81.F
-Chd|-- calls ---------------
-Chd|====================================================================
+      !||====================================================================
+      !||    fcrit   ../engine/source/materials/mat/mat081/sigeps81.F
+      !||====================================================================
       my_real FUNCTION FCRIT(P,U,TGB,COH,PA,P0,PBMPA2,Q)
 #include      "implicit_f.inc"
       my_real P,P0,U,TGB,COH,PA,PBMPA2,Q

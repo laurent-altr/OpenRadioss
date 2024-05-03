@@ -20,16 +20,20 @@ Copyright>
 Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
-Chd|====================================================================
-Chd|  I7TRI                         source/interfaces/intsort/i7tri.F
-Chd|-- called by -----------
-Chd|        I7BUCE                        source/interfaces/intsort/i7buce.F
-Chd|-- calls ---------------
-Chd|        I7DSTK                        source/interfaces/intsort/i7dstk.F
-Chd|        I7STO                         source/interfaces/intsort/i7sto.F
-Chd|        SPMD_OLDNUMCD                 source/mpi/interfaces/spmd_i7tool.F
-Chd|        TRI7BOX                       share/modules/tri7box.F       
-Chd|====================================================================
+      !||====================================================================
+      !||    i7tri         ../starter/source/interfaces/inter3d1/i7tri.F
+      !||--- called by ------------------------------------------------------
+      !||    i7buc1        ../starter/source/interfaces/inter3d1/i7buc1.F
+      !||--- calls      -----------------------------------------------------
+      !||    ancmsg        ../starter/share/message_module/inter_ancmsg_mod.F
+      !||    i7cmp3        ../starter/source/interfaces/inter3d1/i7cmp3.F
+      !||    i7cor3        ../starter/source/interfaces/inter3d1/i7cor3.F
+      !||    i7dst3        ../starter/source/interfaces/inter3d1/i7dst3.F
+      !||    i7dstk        ../starter/source/interfaces/inter3d1/i7dstk.F
+      !||    i7pen3        ../starter/source/interfaces/inter3d1/i7pen3.F
+      !||--- uses       -----------------------------------------------------
+      !||    message_mod   ../starter/share/message_module/message_mod.F
+      !||====================================================================
       SUBROUTINE I7TRI(
      1      ADD   ,NSN    ,RENUM  ,NSNR     ,ISZNSNR  ,
      2      IRECT ,X      ,STF    ,STFN     ,XYZM     ,

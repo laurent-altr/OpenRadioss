@@ -20,22 +20,22 @@ Copyright>
 Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
-Chd|====================================================================
-Chd|  SRCOOR3                       source/elements/solid/solide/srcoor3.F
-Chd|-- called by -----------
-Chd|        S8CFORC3                      source/elements/thickshell/solide8c/s8cforc3.F
-Chd|        S8EFORC3                      source/elements/solid/solide8e/s8eforc3.F
-Chd|        S8ZFORC3                      source/elements/solid/solide8z/s8zforc3.F
-Chd|        SCFORC3                       source/elements/thickshell/solidec/scforc3.F
-Chd|        SFORC3                        source/elements/solid/solide/sforc3.F
-Chd|        SZFORC3                       source/elements/solid/solidez/szforc3.F
-Chd|-- calls ---------------
-Chd|        SCORTHO3                      source/elements/thickshell/solidec/scortho3.F
-Chd|        SORTHDIR3                     source/elements/solid/solide/sorthdir3.F
-Chd|        SORTHO3                       source/elements/solid/solide/sortho3.F
-Chd|        SREPISO3                      source/elements/solid/solide/srepiso3.F
-Chd|        SRROTA3                       source/elements/solid/solide/srrota3.F
-Chd|====================================================================
+      !||====================================================================
+      !||    srcoor3            ../starter/source/elements/solid/solide/srcoor3.F
+      !||--- called by ------------------------------------------------------
+      !||    inisoldist         ../starter/source/initial_conditions/inivol/inisoldist.F
+      !||    multifluid_init3   ../starter/source/multifluid/multifluid_init3.F
+      !||    s8cinit3           ../starter/source/elements/thickshell/solide8c/s8cinit3.F
+      !||    s8zinit3           ../starter/source/elements/solid/solide8z/s8zinit3.F
+      !||    sinit3             ../starter/source/elements/solid/solide/sinit3.F
+      !||    suinit3            ../starter/source/elements/elbuf_init/suinit3.F
+      !||--- calls      -----------------------------------------------------
+      !||    mod_close          ../starter/source/elements/solid/solide/mod_close.F
+      !||    sortho3            ../starter/source/elements/solid/solide/sortho3.F
+      !||    srepiso3           ../starter/source/elements/solid/solide/srepiso3.F
+      !||--- uses       -----------------------------------------------------
+      !||    message_mod        ../starter/share/message_module/message_mod.F
+      !||====================================================================
       SUBROUTINE SRCOOR3(X   ,IXS   ,V     ,W     ,GAMA0 ,GAMA  ,
      .   X1    ,X2    ,X3    ,X4    ,X5    ,X6    ,X7    ,X8    ,
      .   Y1    ,Y2    ,Y3    ,Y4    ,Y5    ,Y6    ,Y7    ,Y8    ,

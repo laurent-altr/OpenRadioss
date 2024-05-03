@@ -20,14 +20,11 @@ Copyright>
 Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
-Chd|====================================================================
-Chd|  SDEFO3                        source/elements/solid/solide/sdefo3.F
-Chd|-- called by -----------
-Chd|        SFORC3                        source/elements/solid/solide/sforc3.F
-Chd|        SZFORC3                       source/elements/solid/solidez/szforc3.F
-Chd|-- calls ---------------
-Chd|        ALEANIM_MOD                   share/modules/aleanim_mod.F   
-Chd|====================================================================
+      !||====================================================================
+      !||    sdefo3     ../starter/source/elements/solid/solide/sdefo3.F
+      !||--- called by ------------------------------------------------------
+      !||    srefsta3   ../starter/source/elements/solid/solide/srefsta3.F
+      !||====================================================================
       SUBROUTINE SDEFO3(
      1   PX1,     PX2,     PX3,     PX4,
      2   PY1,     PY2,     PY3,     PY4,

@@ -20,16 +20,18 @@ Copyright>
 Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
-Chd|====================================================================
-Chd|  REALLOC_MOD                   share/modules1/realloc_mod.F  
-Chd|-- called by -----------
-Chd|        I11TRIVOX1                    source/interfaces/inter3d1/i11trivox1.F
-Chd|        I25TRIVOX_EDG                 source/interfaces/inter3d1/i25trivox_edg.F
-Chd|-- calls ---------------
-Chd|====================================================================
+      !||====================================================================
+      !||    realloc_mod     ../starter/share/modules1/realloc_mod.F
+      !||--- called by ------------------------------------------------------
+      !||    i11trivox1      ../starter/source/interfaces/inter3d1/i11trivox1.F
+      !||    i25trivox_edg   ../starter/source/interfaces/inter3d1/i25trivox_edg.F
+      !||====================================================================
       MODULE REALLOC_MOD
       CONTAINS
 
+      !||====================================================================
+      !||    ireallocate   ../starter/share/modules1/realloc_mod.F
+      !||====================================================================
         FUNCTION IREALLOCATE(ptr, new_size)
 !reallocate INTEGER ARRAY
 C-----------------------------------------------
@@ -54,9 +56,15 @@ C-----------------------------------------------
         IREALLOCATE(1:old_size) = ptr(1:old_size)
         DEALLOCATE(ptr)
 
+      !||====================================================================
+      !||    ireallocate   ../starter/share/modules1/realloc_mod.F
+      !||====================================================================
         END FUNCTION IREALLOCATE
 C-----------------------------------------------
 
+      !||====================================================================
+      !||    jreallocate   ../starter/share/modules1/realloc_mod.F
+      !||====================================================================
         FUNCTION JREALLOCATE(ptr, new_size)
 !reallocate MY_REAL ARRAY
 C-----------------------------------------------
@@ -83,6 +91,9 @@ C-----------------------------------------------
         JREALLOCATE(1:old_size) = ptr(1:new_size)
         DEALLOCATE(ptr) 
 
+      !||====================================================================
+      !||    jreallocate   ../starter/share/modules1/realloc_mod.F
+      !||====================================================================
         END FUNCTION JREALLOCATE
 C-----------------------------------------------
       END MODULE REALLOC_MOD

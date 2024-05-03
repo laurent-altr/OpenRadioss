@@ -20,20 +20,20 @@ Copyright>
 Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
-Chd|====================================================================
-Chd|  FAIL_GENE1_S                  source/materials/fail/gene1/fail_gene1_s.F
-Chd|-- called by -----------
-Chd|        MMAIN                         source/materials/mat_share/mmain.F
-Chd|        MULAW                         source/materials/mat_share/mulaw.F
-Chd|        USERMAT_SOLID                 source/materials/mat_share/usermat_solid.F
-Chd|-- calls ---------------
-Chd|        TABLE2D_VINTERP_LOG           source/tools/curve/table2d_vinterp_log.F
-Chd|        TABLE_VINTERP                 source/tools/curve/table_tools.F
-Chd|        FINTER                        source/tools/curve/finter.F   
-Chd|        ELBUFDEF_MOD                  ../common_source/modules/mat_elem/elbufdef_mod.F
-Chd|        INTERFACE_TABLE_MOD           share/modules/table_mod.F     
-Chd|        TABLE_MOD                     share/modules/table_mod.F     
-Chd|====================================================================
+      !||====================================================================
+      !||    fail_gene1_s          ../engine/source/materials/fail/gene1/fail_gene1_s.F
+      !||--- called by ------------------------------------------------------
+      !||    mmain                 ../engine/source/materials/mat_share/mmain.F
+      !||    mulaw                 ../engine/source/materials/mat_share/mulaw.F
+      !||    usermat_solid         ../engine/source/materials/mat_share/usermat_solid.F
+      !||--- calls      -----------------------------------------------------
+      !||    table2d_vinterp_log   ../engine/share/modules/table_mod.F
+      !||    table_vinterp         ../engine/share/modules/table_mod.F
+      !||--- uses       -----------------------------------------------------
+      !||    elbufdef_mod          ../common_source/modules/mat_elem/elbufdef_mod.F
+      !||    interface_table_mod   ../engine/share/modules/table_mod.F
+      !||    table_mod             ../engine/share/modules/table_mod.F
+      !||====================================================================
       SUBROUTINE FAIL_GENE1_S (
      1     NEL      ,NUPARAM  ,NUVAR    ,NFUNC    ,IFUNC    ,LOFF     ,
      2     NPF      ,TF       ,TIME     ,TIMESTEP ,UPARAM   ,IPG      ,

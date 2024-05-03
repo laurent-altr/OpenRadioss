@@ -20,22 +20,14 @@ Copyright>
 Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
-Chd|====================================================================
-Chd|  TABLE_GLOB_MOD                share/modules/table_glob_mod.F
-Chd|-- called by -----------
-Chd|        GET_TABLE_VALUE               source/user_interface/utable.F
-Chd|        GET_TABLE_VALUE_DYDX          source/user_interface/utable.F
-Chd|        GET_U_TABLE                   source/user_interface/utable.F
-Chd|        GET_U_VTABLE                  source/user_interface/utable.F
-Chd|        GET_VTABLE_VALUE              source/user_interface/utable.F
-Chd|        RADIOSS2                      source/engine/radioss2.F      
-Chd|        RDRESB                        source/output/restart/rdresb.F
-Chd|        RESOL_HEAD                    source/engine/resol_head.F    
-Chd|        WRRESTP                       source/output/restart/wrrestp.F
-Chd|        GET_U_NUMTABLE                source/user_interface/utable.F
-Chd|-- calls ---------------
-Chd|        TABLE_MOD                     share/modules/table_mod.F     
-Chd|====================================================================
+      !||====================================================================
+      !||    table_glob_mod   ../starter/share/modules1/table_glob_mod.F
+      !||--- called by ------------------------------------------------------
+      !||    iniguser         ../starter/source/system/iniguser.F
+      !||    lectur           ../starter/source/starter/lectur.F
+      !||--- uses       -----------------------------------------------------
+      !||    table_mod        ../starter/share/modules1/table_mod.F
+      !||====================================================================
       MODULE TABLE_GLOB_MOD
 C-----------------------------------------------
 C   M o d u l e s

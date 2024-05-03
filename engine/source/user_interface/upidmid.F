@@ -20,12 +20,15 @@ Copyright>
 Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
-Chd|====================================================================
-Chd|  UPIDMID_DUM                   source/user_interface/upidmid.F
-Chd|-- called by -----------
-Chd|        RADIOSS2                      source/engine/radioss2.F      
-Chd|-- calls ---------------
-Chd|====================================================================
+      !||====================================================================
+      !||    upidmid_dum         ../engine/source/user_interface/upidmid.F
+      !||--- called by ------------------------------------------------------
+      !||    radioss2            ../engine/source/engine/radioss2.F
+      !||--- calls      -----------------------------------------------------
+      !||    get_var_user_f      ../engine/source/user_interface/eng_callback_c.c
+      !||    get_var_user_f_sp   ../engine/source/user_interface/eng_callback_c.c
+      !||    get_var_user_i      ../engine/source/user_interface/eng_callback_c.c
+      !||====================================================================
       SUBROUTINE UPIDMID_DUM(IERR)
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
@@ -40,17 +43,6 @@ C   S o u r c e   L i n e s
 C-----------------------------------------------       
        IERR=0
       END
-Chd|====================================================================
-Chd|  GET_U_MAT                     source/user_interface/upidmid.F
-Chd|-- called by -----------
-Chd|        RUSER36                       source/elements/spring/ruser36.F
-Chd|        GET_U_MAT                     source/user_interface/upidmid.F
-Chd|-- calls ---------------
-Chd|        GET_VAR_USER_F                source/user_interface/eng_callback_c.c
-Chd|        GET_VAR_USER_F_SP             source/user_interface/eng_callback_c.c
-Chd|        GET_VAR_USER_I                source/user_interface/eng_callback_c.c
-Chd|        GET_U_MAT                     source/user_interface/upidmid.F
-Chd|====================================================================
       my_real FUNCTION 
      .      GET_U_MAT(IVAR,IM)
 C-----------------------------------------------
@@ -106,30 +98,6 @@ C
       RETURN
       END
 C  029
-Chd|====================================================================
-Chd|  GET_U_GEO                     source/user_interface/upidmid.F
-Chd|-- called by -----------
-Chd|        JOINT_BLOCK_STIFFNESS         source/elements/joint/joint_block_stiffness.F
-Chd|        RSKEW33                       source/elements/joint/rskew33.F
-Chd|        RUSER32                       source/elements/spring/ruser32.F
-Chd|        RUSER33                       source/elements/joint/ruser33.F
-Chd|        RUSER35                       source/elements/spring/ruser35.F
-Chd|        RUSER36                       source/elements/spring/ruser36.F
-Chd|        RUSER44                       source/elements/spring/ruser44.F
-Chd|        RUSER46                       source/elements/spring/ruser46.F
-Chd|        SPADAH                        source/elements/sph/spadah.F  
-Chd|        SPCOMPL                       source/elements/sph/spcompl.F 
-Chd|        SPLISSV                       source/elements/sph/splissv.F 
-Chd|        SPONOF1                       source/elements/sph/sponof1.F 
-Chd|        SPSCOMP                       source/elements/sph/spcompl.F 
-Chd|        SPSTABW                       source/elements/sph/spstab.F  
-Chd|        XFORC28                       source/elements/xelem/xforc28.F
-Chd|        GET_U_GEO                     source/user_interface/upidmid.F
-Chd|-- calls ---------------
-Chd|        GET_VAR_USER_F                source/user_interface/eng_callback_c.c
-Chd|        GET_VAR_USER_F_SP             source/user_interface/eng_callback_c.c
-Chd|        GET_U_GEO                     source/user_interface/upidmid.F
-Chd|====================================================================
       my_real FUNCTION 
      .      GET_U_GEO(IVAR,IP)
 C-----------------------------------------------
@@ -184,22 +152,13 @@ C
       RETURN
       END
 
-Chd|====================================================================
-Chd|  GET_U_PNU                     source/user_interface/upidmid.F
-Chd|-- called by -----------
-Chd|        RUSER32                       source/elements/spring/ruser32.F
-Chd|        RUSER33                       source/elements/joint/ruser33.F
-Chd|        RUSER35                       source/elements/spring/ruser35.F
-Chd|        RUSER36                       source/elements/spring/ruser36.F
-Chd|        RUSER44                       source/elements/spring/ruser44.F
-Chd|        RUSER46                       source/elements/spring/ruser46.F
-Chd|        XFORC28                       source/elements/xelem/xforc28.F
-Chd|        GET_U_PNU                     source/user_interface/upidmid.F
-Chd|-- calls ---------------
-Chd|        GET_VAR_USER_F                source/user_interface/eng_callback_c.c
-Chd|        GET_VAR_USER_F_SP             source/user_interface/eng_callback_c.c
-Chd|        GET_U_PNU                     source/user_interface/upidmid.F
-Chd|====================================================================
+      !||====================================================================
+      !||    get_u_pnu           ../starter/source/user_interface/uaccess.F
+      !||--- calls      -----------------------------------------------------
+      !||    ancmsg              ../starter/share/message_module/inter_ancmsg_mod.F
+      !||--- uses       -----------------------------------------------------
+      !||    message_mod         ../starter/share/message_module/message_mod.F
+      !||====================================================================
       INTEGER FUNCTION GET_U_PNU(IVAR,IP,K)
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
@@ -254,15 +213,13 @@ C       GET_U_PNU = NINT(BUFGEO(NINT(GEO(K,IP))-1+IVAR))
 C
       RETURN
       END
-Chd|====================================================================
-Chd|  GET_U_MNU                     source/user_interface/upidmid.F
-Chd|-- called by -----------
-Chd|        RUSER36                       source/elements/spring/ruser36.F
-Chd|        GET_U_MNU                     source/user_interface/upidmid.F
-Chd|-- calls ---------------
-Chd|        GET_VAR_USER_I                source/user_interface/eng_callback_c.c
-Chd|        GET_U_MNU                     source/user_interface/upidmid.F
-Chd|====================================================================
+      !||====================================================================
+      !||    get_u_mnu        ../starter/source/user_interface/uaccess.F
+      !||--- calls      -----------------------------------------------------
+      !||    ancmsg           ../starter/share/message_module/inter_ancmsg_mod.F
+      !||--- uses       -----------------------------------------------------
+      !||    message_mod      ../starter/share/message_module/message_mod.F
+      !||====================================================================
       INTEGER FUNCTION GET_U_MNU(IVAR,IM,K)
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
@@ -302,13 +259,10 @@ C
       RETURN
       END
 
-Chd|====================================================================
-Chd|  GET_U_PID                     source/user_interface/upidmid.F
-Chd|-- called by -----------
-Chd|        GET_U_P                       source/user_interface/upidmid.F
-Chd|-- calls ---------------
-Chd|        GET_VAR_USER_I                source/user_interface/eng_callback_c.c
-Chd|====================================================================
+      !||====================================================================
+      !||    get_u_pid        ../starter/source/user_interface/uaccess.F
+      !||--- calls      -----------------------------------------------------
+      !||====================================================================
       INTEGER FUNCTION GET_U_PID(IP)
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
@@ -336,13 +290,10 @@ C     GET_U_PID = NINT(GEO(40,IP))
 C---
       RETURN
       END
-Chd|====================================================================
-Chd|  GET_U_MID                     source/user_interface/upidmid.F
-Chd|-- called by -----------
-Chd|        GET_U_M                       source/user_interface/upidmid.F
-Chd|-- calls ---------------
-Chd|        GET_VAR_USER_I                source/user_interface/eng_callback_c.c
-Chd|====================================================================
+      !||====================================================================
+      !||    get_u_mid        ../starter/source/user_interface/uaccess.F
+      !||--- calls      -----------------------------------------------------
+      !||====================================================================
       INTEGER FUNCTION GET_U_MID(IM)
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
@@ -369,12 +320,9 @@ C---
       RETURN
       END
 
-Chd|====================================================================
-Chd|  GET_U_M                       source/user_interface/upidmid.F
-Chd|-- called by -----------
-Chd|-- calls ---------------
-Chd|        GET_U_MID                     source/user_interface/upidmid.F
-Chd|====================================================================
+      !||====================================================================
+      !||    get_u_m   ../starter/source/user_interface/uaccess.F
+      !||====================================================================
       INTEGER FUNCTION GET_U_M(MID)
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
@@ -406,12 +354,9 @@ C-----------------------------------------------
       RETURN
       END
 
-Chd|====================================================================
-Chd|  GET_U_P                       source/user_interface/upidmid.F
-Chd|-- called by -----------
-Chd|-- calls ---------------
-Chd|        GET_U_PID                     source/user_interface/upidmid.F
-Chd|====================================================================
+      !||====================================================================
+      !||    get_u_p   ../starter/source/user_interface/uaccess.F
+      !||====================================================================
       INTEGER FUNCTION GET_U_P(PID)
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
@@ -443,11 +388,9 @@ C-----------------------------------------------
       RETURN
       END
 C
-Chd|====================================================================
-Chd|  GET_U_PROC                    source/user_interface/upidmid.F
-Chd|-- called by -----------
-Chd|-- calls ---------------
-Chd|====================================================================
+      !||====================================================================
+      !||    get_u_proc   ../engine/source/user_interface/upidmid.F
+      !||====================================================================
       INTEGER FUNCTION GET_U_PROC()
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
@@ -465,11 +408,9 @@ C
       RETURN
       END
 C
-Chd|====================================================================
-Chd|  GET_U_TASK                    source/user_interface/upidmid.F
-Chd|-- called by -----------
-Chd|-- calls ---------------
-Chd|====================================================================
+      !||====================================================================
+      !||    get_u_task   ../engine/source/user_interface/upidmid.F
+      !||====================================================================
       INTEGER FUNCTION GET_U_TASK()
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s

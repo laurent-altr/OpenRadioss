@@ -20,23 +20,20 @@ Copyright>
 Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
-Chd|====================================================================
-Chd|  I24FOR3E                      source/interfaces/int24/i24for3e.F
-Chd|-- called by -----------
-Chd|-- calls ---------------
-Chd|====================================================================
+      !||====================================================================
+      !||    i24for3e   ../engine/source/interfaces/int24/i24for3e.F
+      !||====================================================================
       SUBROUTINE I24FOR3E() 
       RETURN
       END
 C
-Chd|====================================================================
-Chd|  I24FORC_FIC                   source/interfaces/int24/i24for3e.F
-Chd|-- called by -----------
-Chd|        I24ASS0                       source/interfaces/int24/i24for3.F
-Chd|        I24ASS2                       source/interfaces/int24/i24for3.F
-Chd|        I24SMS2                       source/interfaces/int24/i24for3.F
-Chd|-- calls ---------------
-Chd|====================================================================
+      !||====================================================================
+      !||    i24forc_fic   ../engine/source/interfaces/int24/i24for3e.F
+      !||--- called by ------------------------------------------------------
+      !||    i24ass0       ../engine/source/interfaces/int24/i24for3.F
+      !||    i24ass2       ../engine/source/interfaces/int24/i24for3.F
+      !||    i24sms2       ../engine/source/interfaces/int24/i24for3.F
+      !||====================================================================
       SUBROUTINE I24FORC_FIC(NPT     ,IRTSE   ,NSNE    ,IS2SE   ,IS2PT   ,
      +                       NS      ,NFIC    ,FICI    ,FICS    ,IXSS    )
 C============================================================================
@@ -138,13 +135,13 @@ C---------left side
 C-----------
       RETURN
       END
-Chd|====================================================================
-Chd|  I24FOR1_FIC                   source/interfaces/int24/i24for3e.F
-Chd|-- called by -----------
-Chd|        I24FOR3                       source/interfaces/int24/i24for3.F
-Chd|-- calls ---------------
-Chd|        TRI7BOX                       share/modules/tri7box.F       
-Chd|====================================================================
+      !||====================================================================
+      !||    i24for1_fic   ../engine/source/interfaces/int24/i24for3e.F
+      !||--- called by ------------------------------------------------------
+      !||    i24for3       ../engine/source/interfaces/int24/i24for3.F
+      !||--- uses       -----------------------------------------------------
+      !||    tri7box       ../engine/share/modules/tri7box.F
+      !||====================================================================
       SUBROUTINE I24FOR1_FIC(NPT     ,IRTSE   ,NSNE    ,IS2SE   ,IS2PT   ,
      +                       NS      ,FXI     ,FYI     ,FZI     ,FOR1    ,
      +                       INEGA   )
@@ -275,13 +272,13 @@ C-----------
       RETURN
       END
 
-Chd|====================================================================
-Chd|  I24FOR1_FICR                  source/interfaces/int24/i24for3e.F
-Chd|-- called by -----------
-Chd|        I24FOR3                       source/interfaces/int24/i24for3.F
-Chd|-- calls ---------------
-Chd|        TRI7BOX                       share/modules/tri7box.F       
-Chd|====================================================================
+      !||====================================================================
+      !||    i24for1_ficr   ../engine/source/interfaces/int24/i24for3e.F
+      !||--- called by ------------------------------------------------------
+      !||    i24for3        ../engine/source/interfaces/int24/i24for3.F
+      !||--- uses       -----------------------------------------------------
+      !||    tri7box        ../engine/share/modules/tri7box.F
+      !||====================================================================
       SUBROUTINE I24FOR1_FICR(NPT     ,IRTSE   ,NSNE    ,IS2SE   ,IS2PT   ,
      +                       NS      ,FXI     ,FYI     ,FZI     ,FOR1    ,
      +                       INEGA  ,NI )
@@ -413,14 +410,15 @@ C-----------
       RETURN
       END
 
-Chd|====================================================================
-Chd|  I24XVFIC_UPD                  source/interfaces/int24/i24for3e.F
-Chd|-- called by -----------
-Chd|        I24E2E_FICTIVE_NODES_UPDATE   source/interfaces/int24/i24for3e.F
-Chd|-- calls ---------------
-Chd|        I24XFIC_INI                   source/interfaces/int24/i24for3e.F
-Chd|        INTBUFDEF_MOD                 ../common_source/modules/intbufdef_mod.F
-Chd|====================================================================
+      !||====================================================================
+      !||    i24xvfic_upd                  ../engine/source/interfaces/int24/i24for3e.F
+      !||--- called by ------------------------------------------------------
+      !||    i24e2e_fictive_nodes_update   ../engine/source/interfaces/int24/i24for3e.F
+      !||--- calls      -----------------------------------------------------
+      !||    i24xfic_ini                   ../engine/source/interfaces/int24/i24for3e.F
+      !||--- uses       -----------------------------------------------------
+      !||    intbufdef_mod                 ../common_source/modules/intbufdef_mod.F
+      !||====================================================================
       SUBROUTINE I24XVFIC_UPD(IPARI  ,INTBUF_TAB   ,X    ,V ,NPT ,ITAB )
 C-----------------------------------------------
 C   M o d u l e s
@@ -454,13 +452,13 @@ C=======================================================================
 C-----------
       RETURN
       END
-Chd|====================================================================
-Chd|  I24XFIC_INI                   source/interfaces/int24/i24for3e.F
-Chd|-- called by -----------
-Chd|        I24XVFIC_UPD                  source/interfaces/int24/i24for3e.F
-Chd|-- calls ---------------
-Chd|        I24FIC_GETN                   source/interfaces/int24/i24for3e.F
-Chd|====================================================================
+      !||====================================================================
+      !||    i24xfic_ini   ../starter/source/interfaces/inter3d1/i24surfi.F
+      !||--- called by ------------------------------------------------------
+      !||    i24buc1       ../starter/source/interfaces/inter3d1/i24buc1.F
+      !||--- calls      -----------------------------------------------------
+      !||    i24fic_getn   ../starter/source/interfaces/inter3d1/i24surfi.F
+      !||====================================================================
       SUBROUTINE I24XFIC_INI(NRTSE   ,IRTSE   ,NSNE    ,IS2SE   ,IS2PT   ,
      4                       NSN     ,NSV     ,X       ,XFIC ,NPT , ITAB ,FLG)
 C============================================================================
@@ -566,13 +564,12 @@ C---------left side
 C-----------
       RETURN
       END
-Chd|====================================================================
-Chd|  I24FICS_INI                   source/interfaces/int24/i24for3e.F
-Chd|-- called by -----------
-Chd|        I24E2E_FICTIVE_NODES_UPDATE   source/interfaces/int24/i24for3e.F
-Chd|-- calls ---------------
-Chd|        I24FIC_GETN                   source/interfaces/int24/i24for3e.F
-Chd|====================================================================
+      !||====================================================================
+      !||    i24fics_ini   ../starter/source/interfaces/inter3d1/i24surfi.F
+      !||--- called by ------------------------------------------------------
+      !||    i24stsecnd    ../starter/source/interfaces/inter3d1/i24stslav.F
+      !||    inint3        ../starter/source/interfaces/inter3d1/inint3.F
+      !||====================================================================
       SUBROUTINE I24FICS_INI(IRTSE   ,NSNE    ,IS2SE   ,IS2PT  ,NSN     ,
      4                       NSV     ,S       ,FICS    ,NPT   ,ITAB )
 C============================================================================
@@ -645,15 +642,18 @@ C---------left side
 C-----------
       RETURN
       END
-Chd|====================================================================
-Chd|  I24FIC_GETN                   source/interfaces/int24/i24for3e.F
-Chd|-- called by -----------
-Chd|        I24COR3                       source/interfaces/int24/i24cor3.F
-Chd|        I24FICS_INI                   source/interfaces/int24/i24for3e.F
-Chd|        I24TRIVOX                     source/interfaces/intsort/i24trivox.F
-Chd|        I24XFIC_INI                   source/interfaces/int24/i24for3e.F
-Chd|-- calls ---------------
-Chd|====================================================================
+      !||====================================================================
+      !||    i24fic_getn                      ../starter/source/interfaces/inter3d1/i24surfi.F
+      !||--- called by ------------------------------------------------------
+      !||    i24isegpt_ini                    ../starter/source/interfaces/inter3d1/i24surfi.F
+      !||    i24pen3                          ../starter/source/interfaces/inter3d1/i24pen3.F
+      !||    i24tri                           ../starter/source/interfaces/inter3d1/i24tri.F
+      !||    i24xfic_ini                      ../starter/source/interfaces/inter3d1/i24surfi.F
+      !||    iwcontdd_type24                  ../starter/source/spmd/domain_decomposition/iwcontdd_type24.F
+      !||    update_weight_inter_type_24_25   ../starter/source/spmd/domain_decomposition/update_weight_inter_type_24_25.F
+      !||--- calls      -----------------------------------------------------
+      !||    arret                            ../starter/source/system/arret.F
+      !||====================================================================
       SUBROUTINE I24FIC_GETN(NS      ,IRTSE   ,IS2SE   ,IE    ,NS1     ,
      4                       NS2     )
 C============================================================================
@@ -694,15 +694,16 @@ C-----------
       RETURN
       END
 
-Chd|====================================================================
-Chd|  I24E2E_FICTIVE_NODES_UPDATE   source/interfaces/int24/i24for3e.F
-Chd|-- called by -----------
-Chd|        RESOL                         source/engine/resol.F         
-Chd|-- calls ---------------
-Chd|        I24FICS_INI                   source/interfaces/int24/i24for3e.F
-Chd|        I24XVFIC_UPD                  source/interfaces/int24/i24for3e.F
-Chd|        INTBUFDEF_MOD                 ../common_source/modules/intbufdef_mod.F
-Chd|====================================================================
+      !||====================================================================
+      !||    i24e2e_fictive_nodes_update   ../engine/source/interfaces/int24/i24for3e.F
+      !||--- called by ------------------------------------------------------
+      !||    resol                         ../engine/source/engine/resol.F
+      !||--- calls      -----------------------------------------------------
+      !||    i24fics_ini                   ../engine/source/interfaces/int24/i24for3e.F
+      !||    i24xvfic_upd                  ../engine/source/interfaces/int24/i24for3e.F
+      !||--- uses       -----------------------------------------------------
+      !||    intbufdef_mod                 ../common_source/modules/intbufdef_mod.F
+      !||====================================================================
       SUBROUTINE I24E2E_FICTIVE_NODES_UPDATE(INTLIST,NBINTC,IPARI,INTBUF_TAB,
      *            X,V,MS,ITAB)
 C-----------------------------------------------

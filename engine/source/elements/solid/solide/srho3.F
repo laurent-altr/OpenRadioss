@@ -20,29 +20,12 @@ Copyright>
 Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
-Chd|====================================================================
-Chd|  SRHO3                         source/elements/solid/solide/srho3.F
-Chd|-- called by -----------
-Chd|        IG3DUFORC3                    source/elements/ige3d/ig3duforc3.F
-Chd|        S10FORC3                      source/elements/solid/solide10/s10forc3.F
-Chd|        S16FORC3                      source/elements/thickshell/solide16/s16forc3.F
-Chd|        S20FORC3                      source/elements/solid/solide20/s20forc3.F
-Chd|        S4FORC3                       source/elements/solid/solide4/s4forc3.F
-Chd|        S6CFORC3                      source/elements/thickshell/solide6c/s6cforc3.F
-Chd|        S8CFORC3                      source/elements/thickshell/solide8c/s8cforc3.F
-Chd|        S8EFORC3                      source/elements/solid/solide8e/s8eforc3.F
-Chd|        S8SFORC3                      source/elements/solid/solide8s/s8sforc3.F
-Chd|        S8ZFORC3                      source/elements/solid/solide8z/s8zforc3.F
-Chd|        SCFORC3                       source/elements/thickshell/solidec/scforc3.F
-Chd|        SFORC3                        source/elements/solid/solide/sforc3.F
-Chd|        SZFORC3                       source/elements/solid/solidez/szforc3.F
-Chd|-- calls ---------------
-Chd|        ANCMSG                        source/output/message/message.F
-Chd|        ARRET                         source/system/arret.F         
-Chd|        ALE_MOD                       ../common_source/modules/ale/ale_mod.F
-Chd|        I22BUFBRIC_MOD                ../common_source/modules/interfaces/cut-cell-search_mod.F
-Chd|        MESSAGE_MOD                   share/message_module/message_mod.F
-Chd|====================================================================
+      !||====================================================================
+      !||    srho3       ../starter/source/elements/solid/solide/srho3.F
+      !||--- called by ------------------------------------------------------
+      !||    s4refsta3   ../starter/source/elements/solid/solide4/s4refsta3.F
+      !||    srefsta3    ../starter/source/elements/solid/solide/srefsta3.F
+      !||====================================================================
       SUBROUTINE SRHO3(
      1   PM,        VOLO,      RHON,      EINT,
      2   DIVDE,     FLUX,      FLU1,      VOLN,

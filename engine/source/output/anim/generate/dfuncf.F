@@ -20,15 +20,13 @@ Copyright>
 Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
-Chd|====================================================================
-Chd|  DFUNCF                        source/output/anim/generate/dfuncf.F
-Chd|-- called by -----------
-Chd|        GENANI                        source/output/anim/generate/genani.F
-Chd|-- calls ---------------
-Chd|        SPMD_R4GET_PARTN              source/mpi/anim/spmd_r4get_partn.F
-Chd|        WRITE_R_C                     ../common_source/tools/input_output/write_routtines.c
-Chd|        ELBUFDEF_MOD                  ../common_source/modules/mat_elem/elbufdef_mod.F
-Chd|====================================================================
+      !||====================================================================
+      !||    dfuncf         ../starter/source/output/anim/dfuncf.F
+      !||--- called by ------------------------------------------------------
+      !||    genani1        ../starter/source/output/anim/genani1.F
+      !||--- calls      -----------------------------------------------------
+      !||--- uses       -----------------------------------------------------
+      !||====================================================================
       SUBROUTINE DFUNCF(ELBUF_TAB ,FUNC  ,IFUNC  ,IPARG    ,GEO  ,
      .                  IXT       ,IXP   ,IXR    ,MASS     ,PM   ,
      .                  EL2FA     ,NBF   ,IADP   ,NBPART   ,EHOUR,
@@ -495,15 +493,16 @@ C + X-ELEMENTS
  
       RETURN
       END
-Chd|====================================================================
-Chd|  DFUNGPS1                      source/output/anim/generate/dfuncf.F
-Chd|-- called by -----------
-Chd|        GENANI                        source/output/anim/generate/genani.F
-Chd|-- calls ---------------
-Chd|        INITBUF                       share/resol/initbuf.F         
-Chd|        ELBUFDEF_MOD                  ../common_source/modules/mat_elem/elbufdef_mod.F
-Chd|        INITBUF_MOD                   share/resol/initbuf.F         
-Chd|====================================================================
+      !||====================================================================
+      !||    dfungps1       ../engine/source/output/anim/generate/dfuncf.F
+      !||--- called by ------------------------------------------------------
+      !||    genani         ../engine/source/output/anim/generate/genani.F
+      !||--- calls      -----------------------------------------------------
+      !||    initbuf        ../engine/share/resol/initbuf.F
+      !||--- uses       -----------------------------------------------------
+      !||    elbufdef_mod   ../common_source/modules/mat_elem/elbufdef_mod.F
+      !||    initbuf_mod    ../engine/share/resol/initbuf.F
+      !||====================================================================
       SUBROUTINE DFUNGPS1(ELBUF_TAB ,FUNC     ,IFUNC   ,IPARG   ,GEO     ,
      .                    IXS       ,IXS10    ,IXS16   ,IXS20   ,IXQ     ,
      .                    IXC       ,IXTG     ,IXT     ,IXP     ,IXR     ,
@@ -764,15 +763,16 @@ C
 C-----------------------------------------------
       RETURN
       END
-Chd|====================================================================
-Chd|  DFUNGPS2                      source/output/anim/generate/dfuncf.F
-Chd|-- called by -----------
-Chd|        GENANI                        source/output/anim/generate/genani.F
-Chd|-- calls ---------------
-Chd|        INITBUF                       share/resol/initbuf.F         
-Chd|        ELBUFDEF_MOD                  ../common_source/modules/mat_elem/elbufdef_mod.F
-Chd|        INITBUF_MOD                   share/resol/initbuf.F         
-Chd|====================================================================
+      !||====================================================================
+      !||    dfungps2       ../engine/source/output/anim/generate/dfuncf.F
+      !||--- called by ------------------------------------------------------
+      !||    genani         ../engine/source/output/anim/generate/genani.F
+      !||--- calls      -----------------------------------------------------
+      !||    initbuf        ../engine/share/resol/initbuf.F
+      !||--- uses       -----------------------------------------------------
+      !||    elbufdef_mod   ../common_source/modules/mat_elem/elbufdef_mod.F
+      !||    initbuf_mod    ../engine/share/resol/initbuf.F
+      !||====================================================================
       SUBROUTINE DFUNGPS2(ELBUF_TAB ,FUNC    ,IFUNC   ,IPARG   ,GEO     ,
      .                    IXS       ,IXS10   ,IXS16   ,IXS20   ,IXQ     ,
      .                    IXC       ,IXTG    ,IXT     ,IXP     ,IXR     ,

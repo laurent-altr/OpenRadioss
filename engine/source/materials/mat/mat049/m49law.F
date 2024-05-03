@@ -27,12 +27,11 @@ C|-- appelee par -----------
 C|         MMAIN                           /matera/mmain.F
 C|-- appelle ---------------
 C|============================================================
-Chd|====================================================================
-Chd|  M49LAW                        source/materials/mat/mat049/m49law.F
-Chd|-- called by -----------
-Chd|        MMAIN                         source/materials/mat_share/mmain.F
-Chd|-- calls ---------------
-Chd|====================================================================
+      !||====================================================================
+      !||    m49law   ../engine/source/materials/mat/mat049/m49law.F
+      !||--- called by ------------------------------------------------------
+      !||    mmain    ../engine/source/materials/mat_share/mmain.F
+      !||====================================================================
       SUBROUTINE M49LAW(MAT    ,PM     ,OFF    ,SIG    ,EPXE ,
      2                  THETA  ,EPD    ,CXX    ,DF     ,D1   ,
      3                  D2     ,D3     ,D4     ,D5     ,D6   ,

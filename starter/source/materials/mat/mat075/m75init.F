@@ -27,14 +27,15 @@ C|-- appelee par -----------
 C|         MATINI                           /mater1/matini.F
 C|-- appelle ---------------
 C|============================================================
-Chd|====================================================================
-Chd|  M75INIT                       source/materials/mat/mat075/m75init.F
-Chd|-- called by -----------
-Chd|        MATINI                        source/materials/mat_share/matini.F
-Chd|-- calls ---------------
-Chd|        ANCMSG                        source/output/message/message.F
-Chd|        MESSAGE_MOD                   share/message_module/message_mod.F
-Chd|====================================================================
+      !||====================================================================
+      !||    m75init       ../starter/source/materials/mat/mat075/m75init.F
+      !||--- called by ------------------------------------------------------
+      !||    matini        ../starter/source/materials/mat_share/matini.F
+      !||--- calls      -----------------------------------------------------
+      !||    ancmsg        ../starter/share/message_module/inter_ancmsg_mod.F
+      !||--- uses       -----------------------------------------------------
+      !||    message_mod   ../starter/share/message_module/message_mod.F
+      !||====================================================================
       SUBROUTINE M75INIT(
      1      NEL    , NUPARAM, NUVAR   , NFUNC  , IFUNC  , NPF   ,
      2      TF     , UPARAM , RHO0    , VOLUME , EINT   ,UVAR   ,

@@ -23,27 +23,26 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 
 !> \brief OPTION /TH/SURF outputs of Pressure and Area needed Tabs 
 
-Chd|====================================================================
-Chd|  TH_SURF_MOD                   modules/interfaces/th_surf_mod.F
-Chd|-- called by -----------
-Chd|        TIME_HISTORY_MOD              common_source/modules/output/time_history_mod.F
-Chd|        TH_SURF_LOAD_PRESSURE         starter/source/output/th/th_surf_load_pressure.F
-Chd|        W_TH_SURF_LOADP               starter/source/restart/ddsplit/w_th_surf_loadp.F
-Chd|        W_TH_SURF_PLOAD               starter/source/restart/ddsplit/w_th_surf_pload.F
-Chd|        DYNA_INA                      engine/source/implicit/imp_dyna.F
-Chd|        DYNA_WEX                      engine/source/implicit/imp_dyna.F
-Chd|        FORCE                         engine/source/loads/general/force.F
-Chd|        FORCE_IMP                     engine/source/loads/general/force_imp.F
-Chd|        IMP_CHKM                      engine/source/implicit/imp_solv.F
-Chd|        IMP_SOLV                      engine/source/implicit/imp_solv.F
-Chd|        LOAD_PRESSURE                 engine/source/loads/general/load_pressure/load_pressure.F
-Chd|        PBLAST                        engine/source/loads/pblast/pblast.F
-Chd|        PBLAST_1                      engine/source/loads/pblast/pblast_1.F
-Chd|        PBLAST_2                      engine/source/loads/pblast/pblast_2.F
-Chd|        PBLAST_3                      engine/source/loads/pblast/pblast_3.F
-Chd|        PFLUID                        engine/source/loads/general/pfluid/pfluid.F
-Chd|-- calls ---------------
-Chd|====================================================================
+      !||====================================================================
+      !||    th_surf_mod             ../common_source/modules/interfaces/th_surf_mod.F
+      !||--- called by ------------------------------------------------------
+      !||    dyna_ina                ../engine/source/implicit/imp_dyna.F
+      !||    dyna_wex                ../engine/source/implicit/imp_dyna.F
+      !||    force                   ../engine/source/loads/general/force.F
+      !||    force_imp               ../engine/source/loads/general/force_imp.F
+      !||    imp_chkm                ../engine/source/implicit/imp_solv.F
+      !||    imp_solv                ../engine/source/implicit/imp_solv.F
+      !||    load_pressure           ../engine/source/loads/general/load_pressure/load_pressure.F
+      !||    pblast                  ../engine/source/loads/pblast/pblast.F
+      !||    pblast_1                ../engine/source/loads/pblast/pblast_1.F
+      !||    pblast_2                ../engine/source/loads/pblast/pblast_2.F
+      !||    pblast_3                ../engine/source/loads/pblast/pblast_3.F
+      !||    pfluid                  ../engine/source/loads/general/pfluid/pfluid.F
+      !||    th_surf_load_pressure   ../starter/source/output/th/th_surf_load_pressure.F
+      !||    time_history_mod        ../common_source/modules/output/time_history_mod.F
+      !||    w_th_surf_loadp         ../starter/source/restart/ddsplit/w_th_surf_loadp.F
+      !||    w_th_surf_pload         ../starter/source/restart/ddsplit/w_th_surf_pload.F
+      !||====================================================================
         MODULE TH_SURF_MOD
 C-----------------------------------------------
 C   m y _ r e a l
@@ -85,14 +84,14 @@ C---------------------------------------------
 
 !> \brief Writting TH/SURF tabs in restart file 
 
-Chd|====================================================================
-Chd|  THSURF_WRITE_RESTART          modules/interfaces/th_surf_mod.F
-Chd|-- called by -----------
-Chd|        DDSPLIT                       starter/source/restart/ddsplit/ddsplit.F
-Chd|        WRRESTP                       engine/source/output/restart/wrrestp.F
-Chd|-- calls ---------------
-Chd|        WRITE_I_C                     tools/input_output/write_routtines.c
-Chd|====================================================================
+      !||====================================================================
+      !||    thsurf_write_restart   ../common_source/modules/interfaces/th_surf_mod.F
+      !||--- called by ------------------------------------------------------
+      !||    ddsplit                ../starter/source/restart/ddsplit/ddsplit.F
+      !||    wrrestp                ../engine/source/output/restart/wrrestp.F
+      !||--- calls      -----------------------------------------------------
+      !||    write_i_c              ../common_source/tools/input_output/write_routtines.c
+      !||====================================================================
       SUBROUTINE THSURF_WRITE_RESTART(TH_SURF,IFLAG)
 
 C-----------------------------------------------
@@ -145,15 +144,15 @@ C-----------------------------------------------
 
 !> \brief Reading TH/SURF tabs in restart file 
 
-Chd|====================================================================
-Chd|  THSURF_READ_RESTART           modules/interfaces/th_surf_mod.F
-Chd|-- called by -----------
-Chd|        RDRESB                        engine/source/output/restart/rdresb.F
-Chd|-- calls ---------------
-Chd|        READ_I_C                      tools/input_output/write_routtines.c
-Chd|        MESSAGE_MOD                   starter/share/message_module/message_mod.F
-Chd|        MESSAGE_MOD                   engine/share/message_module/message_mod.F
-Chd|====================================================================
+      !||====================================================================
+      !||    thsurf_read_restart   ../common_source/modules/interfaces/th_surf_mod.F
+      !||--- called by ------------------------------------------------------
+      !||    rdresb                ../engine/source/output/restart/rdresb.F
+      !||--- calls      -----------------------------------------------------
+      !||    read_i_c              ../common_source/tools/input_output/write_routtines.c
+      !||--- uses       -----------------------------------------------------
+      !||    message_mod           ../engine/share/message_module/message_mod.F
+      !||====================================================================
       SUBROUTINE THSURF_READ_RESTART(TH_SURF)
 C-----------------------------------------------
 C   M o d u l e s

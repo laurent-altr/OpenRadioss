@@ -20,6 +20,9 @@ Copyright>
 Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
+      !||====================================================================
+      !||    my_isnan   ../engine/source/system/my_isnan.F
+      !||====================================================================
         FUNCTION MY_ISNAN(X) RESULT(BOOL)
 #ifdef COMP_ARMFLANG
         USE, INTRINSIC :: IEEE_ARITHMETIC 
@@ -33,4 +36,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 #else
         BOOL=ISNAN(X)
 #endif      
+      !||====================================================================
+      !||    my_isnan   ../engine/source/system/my_isnan.F
+      !||====================================================================
         END FUNCTION MY_ISNAN

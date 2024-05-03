@@ -20,14 +20,13 @@ Copyright>
 Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
-Chd|====================================================================
-Chd|  FAIL_TSAIHILL_S               source/materials/fail/tsaihill/fail_tsaihill_s.F
-Chd|-- called by -----------
-Chd|        MMAIN                         source/materials/mat_share/mmain.F
-Chd|        MULAW                         source/materials/mat_share/mulaw.F
-Chd|        USERMAT_SOLID                 source/materials/mat_share/usermat_solid.F
-Chd|-- calls ---------------
-Chd|====================================================================
+      !||====================================================================
+      !||    fail_tsaihill_s   ../engine/source/materials/fail/tsaihill/fail_tsaihill_s.F
+      !||--- called by ------------------------------------------------------
+      !||    mmain             ../engine/source/materials/mat_share/mmain.F
+      !||    mulaw             ../engine/source/materials/mat_share/mulaw.F
+      !||    usermat_solid     ../engine/source/materials/mat_share/usermat_solid.F
+      !||====================================================================
       SUBROUTINE FAIL_TSAIHILL_S(
      1     NEL     ,NUVAR   ,IP      ,ILAY    ,NPG     ,TIME    ,
      2     TIMESTEP,UPARAM  ,NGL     ,OFF     ,LOFF    ,NOFF    ,

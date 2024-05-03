@@ -20,6 +20,9 @@ Copyright>
 Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
+      !||====================================================================
+      !||    crossprod2d   ../engine/source/interfaces/int22/i22clip_tools.F
+      !||====================================================================
         function CrossProd2D( v1, v2)
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
@@ -38,11 +41,19 @@ C   S o u r c e   L i n e s
 C-----------------------------------------------         
           CrossProd2D = v1(1)*v2(2) - v1(2)*v2(1)
           return
+      !||====================================================================
+      !||    crossprod2d   ../engine/source/interfaces/int22/i22clip_tools.F
+      !||====================================================================
         end function CrossProd2D
 C----------------------------------------------- 
 
 
 
+      !||====================================================================
+      !||    polygonalclipping   ../engine/source/interfaces/int22/i22clip_tools.F
+      !||--- calls      -----------------------------------------------------
+      !||    clipedge            ../engine/source/interfaces/int22/i22clip_tools.F
+      !||====================================================================
         subroutine PolygonalClipping( basePolygon, clipPolygon, resultPolygon )
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
@@ -82,6 +93,11 @@ C-----------------------------------------------
 
 
 
+      !||====================================================================
+      !||    clipedge            ../engine/source/interfaces/int22/i22clip_tools.F
+      !||--- called by ------------------------------------------------------
+      !||    polygonalclipping   ../engine/source/interfaces/int22/i22clip_tools.F
+      !||====================================================================
         subroutine ClipEdge( polyg, p1, p2, resultPolyg )
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
@@ -102,11 +118,17 @@ C-----------------------------------------------
           my_real                      :: x1(2), x2(2), intersecPoint(2)
           integer  ::  i, k
           INTERFACE
+      !||====================================================================
+      !||    intersectp   ../engine/source/interfaces/int22/i22wetsurf.F
+      !||====================================================================
             function intersectP(a,b,c,d,iflg)
               my_real         , intent(inout) :: a(2),b(2),c(2),d(2)
               integer, intent(in)             :: iflg
               my_real          intersectP(2)
             end function
+      !||====================================================================
+      !||    is_on_1st_half_plane   ../engine/source/interfaces/int22/i22clip_tools.F
+      !||====================================================================
             function IS_ON_1ST_HALF_PLANE(a,b,c)
               my_real         , intent(inout) :: a(2),b(2),c(2)
               logical                         :: IS_ON_1ST_HALF_PLANE
@@ -156,6 +178,9 @@ C-----------------------------------------------
 
 
 
+      !||====================================================================
+      !||    intersectp   ../engine/source/interfaces/int22/i22wetsurf.F
+      !||====================================================================
         function intersectP( Seg_P1, Seg_P2, Line_P1, Line_P2, IFLG)
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
@@ -222,11 +247,17 @@ c22            write (*,FMT='(A,3F45.35)')        " *createnode ",Line_P1(1:2) ,
 c22            write (*,FMT='(A,3F45.35)')        " *createnode ",Line_P2(1:2) ,ZERO  
 c22          ENDIF
           
+      !||====================================================================
+      !||    intersectp   ../engine/source/interfaces/int22/i22wetsurf.F
+      !||====================================================================
         end function intersectP
 C----------------------------------------------- 
 
 
 
+      !||====================================================================
+      !||    is_on_1st_half_plane   ../engine/source/interfaces/int22/i22clip_tools.F
+      !||====================================================================
         function IS_ON_1ST_HALF_PLANE( point, p1, p2)
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
@@ -262,10 +293,16 @@ c            print *, "IS_ON_1ST_HALF_PLANE"
             IS_ON_1ST_HALF_PLANE = .false.
 c            print *, "NOT_ON_1ST_HALF_PLANE"
           end if
+      !||====================================================================
+      !||    is_on_1st_half_plane   ../engine/source/interfaces/int22/i22clip_tools.F
+      !||====================================================================
         end function IS_ON_1ST_HALF_PLANE
 C----------------------------------------------- 
 
 
+      !||====================================================================
+      !||    setclockwisepolyg   ../engine/source/interfaces/int22/i22clip_tools.F
+      !||====================================================================
         subroutine SetClockWisePolyg( Polyg, Area )
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
@@ -316,6 +353,9 @@ C-----------------------------------------------
 
 
 
+      !||====================================================================
+      !||    setcounterclockwisepolyg   ../engine/source/interfaces/int22/i22clip_tools.F
+      !||====================================================================
         subroutine SetCounterClockWisePolyg( Polyg, Area )
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s

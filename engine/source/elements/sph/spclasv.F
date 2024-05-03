@@ -20,18 +20,12 @@ Copyright>
 Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
-Chd|====================================================================
-Chd|  SPCLASV                       source/elements/sph/spclasv.F 
-Chd|-- called by -----------
-Chd|        SPHPREP                       source/elements/sph/sphprep.F 
-Chd|-- calls ---------------
-Chd|        MYQSORT                       ../common_source/tools/sort/myqsort.F
-Chd|        MY_BARRIER                    source/system/machine.F       
-Chd|        SPMD_ALLGLOB_ISUM9            source/mpi/generic/spmd_allglob_isum9.F
-Chd|        SPMD_SPHGETH                  source/mpi/elements/spmd_sph.F
-Chd|        SPHBOX                        share/modules/sphbox.F        
-Chd|        SPH_STRUCT_MOD                share/modules/sph_struct_mod.F
-Chd|====================================================================
+      !||====================================================================
+      !||    spclasv   ../starter/source/elements/sph/spclasv.F
+      !||--- called by ------------------------------------------------------
+      !||    sptri     ../starter/source/elements/sph/sptri.F
+      !||--- calls      -----------------------------------------------------
+      !||====================================================================
       SUBROUTINE SPCLASV(X      ,SPBUF ,KXSP   ,IXSP   ,NOD2SP   ,
      1                   ISPSYM ,XSPSYM,WSP2SORT,ITASK  ,MYSPATRUE,
      2                   IREDUCE,KREDUCE,LGAUGE ,GAUGE ,ISORTSP)

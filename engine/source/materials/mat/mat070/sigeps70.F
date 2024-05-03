@@ -20,16 +20,15 @@ Copyright>
 Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
-Chd|====================================================================
-Chd|  SIGEPS70                      source/materials/mat/mat070/sigeps70.F
-Chd|-- called by -----------
-Chd|        MULAW                         source/materials/mat_share/mulaw.F
-Chd|-- calls ---------------
-Chd|        TABLE_MAT_VINTERP             source/materials/tools/table_mat_vinterp.F
-Chd|        VINTER2                       source/tools/curve/vinter.F   
-Chd|        MATPARAM_DEF_MOD              ../common_source/modules/mat_elem/matparam_def_mod.F
-Chd|        TABLE_MAT_VINTERP_MOD         source/materials/tools/table_mat_vinterp.F
-Chd|====================================================================
+      !||====================================================================
+      !||    sigeps70                ../starter/source/materials/mat/mat070/sigeps70.F
+      !||--- called by ------------------------------------------------------
+      !||    mulaw                   ../starter/source/materials/mat_share/mulaw.F
+      !||--- calls      -----------------------------------------------------
+      !||    table_mat_vinterp       ../starter/source/materials/tools/table_mat_vinterp.F
+      !||--- uses       -----------------------------------------------------
+      !||    table_mat_vinterp_mod   ../starter/source/materials/tools/table_mat_vinterp.F
+      !||====================================================================
       SUBROUTINE SIGEPS70(
      1   NEL,     NUPARAM, NUVAR,   MFUNC,
      2   KFUNC,   NPF,     TF,      TIME,

@@ -20,12 +20,11 @@ Copyright>
 Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
-Chd|====================================================================
-Chd|  PLY_PARAM_MOD                 modules/mat_elem/ply_param_mod.F
-Chd|-- called by -----------
-Chd|        PROP_PARAM_MOD                common_source/modules/mat_elem/prop_param_mod.F
-Chd|-- calls ---------------
-Chd|====================================================================
+      !||====================================================================
+      !||    ply_param_mod    ../common_source/modules/mat_elem/ply_param_mod.F
+      !||--- called by ------------------------------------------------------
+      !||    prop_param_mod   ../common_source/modules/mat_elem/prop_param_mod.F
+      !||====================================================================
       MODULE PLY_PARAM_MOD
 C----------------------------------------------------------------------- 
 #include "my_real.inc"

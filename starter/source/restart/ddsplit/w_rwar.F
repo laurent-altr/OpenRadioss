@@ -21,14 +21,13 @@ Copyright>        As an alternative to this open-source version, Altair also off
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
 C
-Chd|====================================================================
-Chd|  W_RWAR                        source/restart/ddsplit/w_rwar.F
-Chd|-- called by -----------
-Chd|        DDSPLIT                       source/restart/ddsplit/ddsplit.F
-Chd|-- calls ---------------
-Chd|        WRITE_DB                      source/restart/ddsplit/wrrest.F
-Chd|        NLOCAL                        source/spmd/node/ddtools.F    
-Chd|====================================================================
+      !||====================================================================
+      !||    w_rwar     ../starter/source/restart/ddsplit/w_rwar.F
+      !||--- called by ------------------------------------------------------
+      !||    ddsplit    ../starter/source/restart/ddsplit/ddsplit.F
+      !||--- calls      -----------------------------------------------------
+      !||    write_db   ../starter/source/restart/ddsplit/wrrest.F
+      !||====================================================================
       SUBROUTINE W_RWAR(NPRW    ,LPRW ,RWL, RWSAV,
      +                  LWSAV_L ,CEP, PROC,LEN_AM)
 C-----------------------------------------------

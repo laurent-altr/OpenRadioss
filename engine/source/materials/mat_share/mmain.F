@@ -20,143 +20,38 @@ Copyright>
 Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
-Chd|====================================================================
-Chd|  MMAIN_MOD                     source/materials/mat_share/mmain.F
-Chd|-- called by -----------
-Chd|        BFORC2                        source/ale/bimat/bforc2.F     
-Chd|        IG3DUFORC3                    source/elements/ige3d/ig3duforc3.F
-Chd|        Q4FORC2                       source/elements/solid_2d/quad4/q4forc2.F
-Chd|        QFORC2                        source/elements/solid_2d/quad/qforc2.F
-Chd|        S10FORC3                      source/elements/solid/solide10/s10forc3.F
-Chd|        S16FORC3                      source/elements/thickshell/solide16/s16forc3.F
-Chd|        S20FORC3                      source/elements/solid/solide20/s20forc3.F
-Chd|        S4FORC3                       source/elements/solid/solide4/s4forc3.F
-Chd|        S6CFORC3                      source/elements/thickshell/solide6c/s6cforc3.F
-Chd|        S8CFORC3                      source/elements/thickshell/solide8c/s8cforc3.F
-Chd|        S8EFORC3                      source/elements/solid/solide8e/s8eforc3.F
-Chd|        S8SFORC3                      source/elements/solid/solide8s/s8sforc3.F
-Chd|        S8ZFORC3                      source/elements/solid/solide8z/s8zforc3.F
-Chd|        SCFORC3                       source/elements/thickshell/solidec/scforc3.F
-Chd|        SFORC3                        source/elements/solid/solide/sforc3.F
-Chd|        SPSTRES                       source/elements/sph/spstres.F 
-Chd|        SZFORC3                       source/elements/solid/solidez/szforc3.F
-Chd|-- calls ---------------
-Chd|====================================================================
+      !||====================================================================
+      !||    mmain_mod    ../engine/source/materials/mat_share/mmain.F
+      !||--- called by ------------------------------------------------------
+      !||    bforc2       ../engine/source/ale/bimat/bforc2.F
+      !||    ig3duforc3   ../engine/source/elements/ige3d/ig3duforc3.F
+      !||    q4forc2      ../engine/source/elements/solid_2d/quad4/q4forc2.F
+      !||    qforc2       ../engine/source/elements/solid_2d/quad/qforc2.F
+      !||    s10forc3     ../engine/source/elements/solid/solide10/s10forc3.F
+      !||    s16forc3     ../engine/source/elements/thickshell/solide16/s16forc3.F
+      !||    s20forc3     ../engine/source/elements/solid/solide20/s20forc3.F
+      !||    s4forc3      ../engine/source/elements/solid/solide4/s4forc3.F
+      !||    s6cforc3     ../engine/source/elements/thickshell/solide6c/s6cforc3.F
+      !||    s8cforc3     ../engine/source/elements/thickshell/solide8c/s8cforc3.F
+      !||    s8eforc3     ../engine/source/elements/solid/solide8e/s8eforc3.F
+      !||    s8sforc3     ../engine/source/elements/solid/solide8s/s8sforc3.F
+      !||    s8zforc3     ../engine/source/elements/solid/solide8z/s8zforc3.F
+      !||    scforc3      ../engine/source/elements/thickshell/solidec/scforc3.F
+      !||    sforc3       ../engine/source/elements/solid/solide/sforc3.F
+      !||    spstres      ../engine/source/elements/sph/spstres.F
+      !||    szforc3      ../engine/source/elements/solid/solidez/szforc3.F
+      !||====================================================================
       MODULE MMAIN_MOD
       CONTAINS
-Chd|====================================================================
-Chd|  MMAIN                         source/materials/mat_share/mmain.F
-Chd|-- called by -----------
-Chd|        BFORC2                        source/ale/bimat/bforc2.F     
-Chd|        IG3DUFORC3                    source/elements/ige3d/ig3duforc3.F
-Chd|        Q4FORC2                       source/elements/solid_2d/quad4/q4forc2.F
-Chd|        QFORC2                        source/elements/solid_2d/quad/qforc2.F
-Chd|        S10FORC3                      source/elements/solid/solide10/s10forc3.F
-Chd|        S16FORC3                      source/elements/thickshell/solide16/s16forc3.F
-Chd|        S20FORC3                      source/elements/solid/solide20/s20forc3.F
-Chd|        S4FORC3                       source/elements/solid/solide4/s4forc3.F
-Chd|        S6CFORC3                      source/elements/thickshell/solide6c/s6cforc3.F
-Chd|        S8CFORC3                      source/elements/thickshell/solide8c/s8cforc3.F
-Chd|        S8EFORC3                      source/elements/solid/solide8e/s8eforc3.F
-Chd|        S8SFORC3                      source/elements/solid/solide8s/s8sforc3.F
-Chd|        S8ZFORC3                      source/elements/solid/solide8z/s8zforc3.F
-Chd|        SCFORC3                       source/elements/thickshell/solidec/scforc3.F
-Chd|        SFORC3                        source/elements/solid/solide/sforc3.F
-Chd|        SPSTRES                       source/elements/sph/spstres.F 
-Chd|        SZFORC3                       source/elements/solid/solidez/szforc3.F
-Chd|-- calls ---------------
-Chd|        ANCMSG                        source/output/message/message.F
-Chd|        ARRET                         source/system/arret.F         
-Chd|        ATUR17                        source/ale/turbulence/atur17.F
-Chd|        ATURBN                        source/ale/turbulence/aturbn.F
-Chd|        ENG_USERLIB_FLAW              source/user_interface/dyn_userlib.c
-Chd|        EOSMAIN                       ../common_source/eos/eosmain.F
-Chd|        EOSUPDA                       ../common_source/eos/eosupda.F
-Chd|        FAIL_BIQUAD_S                 source/materials/fail/biquad/fail_biquad_s.F
-Chd|        FAIL_CHANGCHANG_S             source/materials/fail/changchang/fail_changchang_s.F
-Chd|        FAIL_COCKROFT_S               source/materials/fail/cockroft_latham/fail_cockroft_s.F
-Chd|        FAIL_EMC                      source/materials/fail/emc/fail_emc.F
-Chd|        FAIL_ENERGY_S                 source/materials/fail/energy/fail_energy_s.F
-Chd|        FAIL_GENE1_S                  source/materials/fail/gene1/fail_gene1_s.F
-Chd|        FAIL_HASHIN_S                 source/materials/fail/hashin/fail_hashin_s.F
-Chd|        FAIL_HOFFMAN_S                source/materials/fail/hoffman/fail_hoffman_s.F
-Chd|        FAIL_INIEVO_S                 source/materials/fail/inievo/fail_inievo_s.F
-Chd|        FAIL_JOHNSON                  source/materials/fail/johnson_cook/fail_johnson.F
-Chd|        FAIL_LADEVEZE                 source/materials/fail/ladeveze/fail_ladeveze.F
-Chd|        FAIL_MAXSTRAIN_S              source/materials/fail/max_strain/fail_maxstrain_s.F
-Chd|        FAIL_ORTHBIQUAD_S             source/materials/fail/orthbiquad/fail_orthbiquad_s.F
-Chd|        FAIL_ORTHENERG_S              source/materials/fail/orthenerg/fail_orthenerg_s.F
-Chd|        FAIL_ORTHSTRAIN               source/materials/fail/orthstrain/fail_orthstrain_s.F
-Chd|        FAIL_PUCK_S                   source/materials/fail/puck/fail_puck_s.F
-Chd|        FAIL_RTCL_S                   source/materials/fail/rtcl/fail_rtcl_s.F
-Chd|        FAIL_SAHRAEI_S                source/materials/fail/sahraei/fail_sahraei_s.F
-Chd|        FAIL_SPALLING_S               source/materials/fail/spalling/fail_spalling_s.F
-Chd|        FAIL_SYAZWAN_S                source/materials/fail/syazwan/fail_syazwan_s.F
-Chd|        FAIL_TAB2_S                   source/materials/fail/tabulated/fail_tab2_s.F
-Chd|        FAIL_TAB_S                    source/materials/fail/tabulated/fail_tab_s.F
-Chd|        FAIL_TBUTCHER_S               source/materials/fail/tuler_butcher/fail_tbutcher_s.F
-Chd|        FAIL_TENSSTRAIN_S             source/materials/fail/tensstrain/fail_tensstrain_s.F
-Chd|        FAIL_TSAIHILL_S               source/materials/fail/tsaihill/fail_tsaihill_s.F
-Chd|        FAIL_TSAIWU_S                 source/materials/fail/tsaiwu/fail_tsaiwu_s.F
-Chd|        FAIL_VISUAL_S                 source/materials/fail/visual/fail_visual_s.F
-Chd|        FAIL_WIERZBICKI_S             source/materials/fail/wierzbicki/fail_wierzbicki_s.F
-Chd|        FAIL_WILKINS_S                source/materials/fail/wilkins/fail_wilkins_s.F
-Chd|        GRAY10                        source/materials/mat/mat016/gray10.F
-Chd|        GRAY20                        source/materials/mat/mat016/gray20.F
-Chd|        GRAY30                        source/materials/mat/mat016/gray30.F
-Chd|        M10LAW                        source/materials/mat/mat010/m10law.F
-Chd|        M11LAW                        source/materials/mat/mat011/m11law.F
-Chd|        M12LAW                        source/materials/mat/mat012/m12law.F
-Chd|        M13LAW                        source/materials/mat/mat013/m13law.F
-Chd|        M14LAW                        source/materials/mat/mat014/m14law.F
-Chd|        M16LAW                        source/materials/mat/mat016/m16law.F
-Chd|        M17LAW                        source/materials/mat/mat017/m17law.F
-Chd|        M18LAW                        source/materials/mat/mat018/m18law.F
-Chd|        M1LAW                         source/materials/mat/mat001/m1law.F
-Chd|        M1LAWI                        source/materials/mat/mat001/m1lawi.F
-Chd|        M1LAWTOT                      source/materials/mat/mat001/m1lawtot.F
-Chd|        M21LAW                        source/materials/mat/mat021/m21law.F
-Chd|        M22LAW                        source/materials/mat/mat022/m22law.F
-Chd|        M24LAW                        source/materials/mat/mat024/m24law.F
-Chd|        M25LAW                        source/materials/mat/mat025/m25law.F
-Chd|        M26LAW                        source/materials/mat/mat026/m26law.F
-Chd|        M2LAW                         source/materials/mat/mat002/m2law.F
-Chd|        M3LAW                         source/materials/mat/mat003/m3law.F
-Chd|        M46LAW                        source/materials/mat/mat046/m46law.F
-Chd|        M49LAW                        source/materials/mat/mat049/m49law.F
-Chd|        M4LAW                         source/materials/mat/mat004/m4law.F
-Chd|        M5LAW                         source/materials/mat/mat005/m5law.F
-Chd|        M6LAW                         source/materials/mat/mat006/m6law.F
-Chd|        MDTSPH                        source/materials/mat_share/mdtsph.F
-Chd|        MEINT                         source/materials/mat_share/meint.F
-Chd|        MJWL                          source/materials/mat/mat005/mjwl.F
-Chd|        MNSVIS                        source/materials/mat_share/mnsvis.F
-Chd|        MQVISC26                      source/materials/mat_share/mqvisc26.F
-Chd|        MQVISCB                       source/materials/mat_share/mqviscb.F
-Chd|        MREPLOC                       source/materials/mat_share/mreploc.F
-Chd|        MROTENS                       source/materials/mat_share/mrotens.F
-Chd|        MTHETA                        source/materials/mat_share/mtheta.F
-Chd|        MULAW                         source/materials/mat_share/mulaw.F
-Chd|        PUTSIGNOR3                    source/elements/solid/solide8z/putsignor3.F
-Chd|        PUT_ETFAC                     source/elements/solid/solide8z/put_etfac.F
-Chd|        SBOLTLAW                      source/elements/solid/solide/sboltlaw.F
-Chd|        SESA10                        source/materials/mat/mat026/sesa10.F
-Chd|        SESA20                        source/materials/mat/mat026/sesa20.F
-Chd|        SESA30                        source/materials/mat/mat026/sesa30.F
-Chd|        STARTIME                      source/system/timer.F         
-Chd|        STOPTIME                      source/system/timer.F         
-Chd|        USERMAT_SOLID                 source/materials/mat_share/usermat_solid.F
-Chd|        VISCMAIN                      source/materials/visc/viscmain.F
-Chd|        FINTER                        source/tools/curve/finter.F   
-Chd|        ALE_CONNECTIVITY_MOD          ../common_source/modules/ale/ale_connectivity_mod.F
-Chd|        ALE_MOD                       ../common_source/modules/ale/ale_mod.F
-Chd|        ANIM_MOD                      ../common_source/modules/anim_mod.F
-Chd|        MAT_ELEM_MOD                  ../common_source/modules/mat_elem/mat_elem_mod.F
-Chd|        MESSAGE_MOD                   share/message_module/message_mod.F
-Chd|        MULAW_MOD                     source/materials/mat_share/mulaw.F
-Chd|        NLOCAL_REG_MOD                ../common_source/modules/nlocal_reg_mod.F
-Chd|        TABLE_MOD                     share/modules/table_mod.F     
-Chd|====================================================================
+      !||====================================================================
+      !||    mmain          ../starter/source/materials/mat_share/mmain.F
+      !||--- called by ------------------------------------------------------
+      !||    s4refsta3      ../starter/source/elements/solid/solide4/s4refsta3.F
+      !||    srefsta3       ../starter/source/elements/solid/solide/srefsta3.F
+      !||--- calls      -----------------------------------------------------
+      !||    mulaw          ../starter/source/materials/mat_share/mulaw.F
+      !||--- uses       -----------------------------------------------------
+      !||====================================================================
       SUBROUTINE MMAIN(
      1   ELBUF_TAB,   NG,          PM,          GEO,
      2   FBID,        ALE_CONNECT, IX,          IPARG,

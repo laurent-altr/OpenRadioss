@@ -20,14 +20,6 @@ Copyright>
 Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
-Chd|====================================================================
-Chd|  S10MASS3                      source/elements/solid/solide10/s10mass3.F
-Chd|-- called by -----------
-Chd|        INIRIG_MAT                    source/elements/initia/inirig_mat.F
-Chd|        S10INIT3                      source/elements/solid/solide10/s10init3.F
-Chd|-- calls ---------------
-Chd|        S4FRACA10                     source/elements/solid/solide10/s10mass3.F
-Chd|====================================================================
       SUBROUTINE S10MASS3(
      1   MASS,MS ,PARTSAV,IPART  ,MSS ,VOLU,
      2   XX  ,YY ,ZZ     ,VX     ,VY  ,VZ  ,  
@@ -328,12 +320,6 @@ C
       RETURN
       END
 C
-Chd|====================================================================
-Chd|  S10MSI                        source/elements/solid/solide10/s10mass3.F
-Chd|-- called by -----------
-Chd|        S10INIT3                      source/elements/solid/solide10/s10init3.F
-Chd|-- calls ---------------
-Chd|====================================================================
       SUBROUTINE S10MSI(RHO,MASS,VOLU,DTELEM,STI,
      .                  OFF,SIG,EINT,
      .                  OFFG,SIGG,EINTG,RHOG,WIP,
@@ -400,13 +386,6 @@ C
 C
       RETURN
       END
-Chd|====================================================================
-Chd|  S4FRACA10                     source/elements/solid/solide10/s10mass3.F
-Chd|-- called by -----------
-Chd|        S10MASS3                      source/elements/solid/solide10/s10mass3.F
-Chd|-- calls ---------------
-Chd|        AREA_TRIA                     source/elements/solid/solide4/s4mass3.F
-Chd|====================================================================
       SUBROUTINE S4FRACA10(X,IX1 ,IX2,IX3 ,IX4 ,PTG   )
 C----------------------------------------------
 C     MASS PARTITION IN FUNCTION OF NODAL ANGLES by AREA

@@ -23,6 +23,9 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 
 
 
+      !||====================================================================
+      !||    checkvolume_8n   ../starter/source/elements/solid/solide/checksvolume.F
+      !||====================================================================
       FUNCTION CHECKVOLUME_8N(X,IXS)
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
@@ -108,6 +111,9 @@ C
 
       RETURN
       END
+      !||====================================================================
+      !||    checkvolume_6n   ../starter/source/elements/solid/solide/checksvolume.F
+      !||====================================================================
       FUNCTION CHECKVOLUME_6N(X,IXS)
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
@@ -181,6 +187,9 @@ C
       CHECKVOLUME_6N=ONE_OVER_8*(JAC1*JAC_59_68+JAC2*JAC_67_49+JAC3*JAC_48_57)
       RETURN
       END
+      !||====================================================================
+      !||    checkvolume_4n   ../starter/source/elements/solid/solide/checksvolume.F
+      !||====================================================================
       FUNCTION CHECKVOLUME_4N(X,IXS)
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s

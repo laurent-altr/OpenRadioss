@@ -22,17 +22,18 @@ Copyright>        software under a commercial license.  Contact Altair to discus
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
 
 
-Chd|====================================================================
-Chd|  SPMD_EXCH_I25                 source/mpi/interfaces/spmd_exch_i25.F
-Chd|-- called by -----------
-Chd|        RESOL                         source/engine/resol.F         
-Chd|-- calls ---------------
-Chd|        ANCMSG                        source/output/message/message.F
-Chd|        ARRET                         source/system/arret.F         
-Chd|        INTBUFDEF_MOD                 ../common_source/modules/intbufdef_mod.F
-Chd|        MESSAGE_MOD                   share/message_module/message_mod.F
-Chd|        TRI7BOX                       share/modules/tri7box.F       
-Chd|====================================================================
+      !||====================================================================
+      !||    spmd_exch_i25   ../engine/source/mpi/interfaces/spmd_exch_i25.F
+      !||--- called by ------------------------------------------------------
+      !||    resol           ../engine/source/engine/resol.F
+      !||--- calls      -----------------------------------------------------
+      !||    ancmsg          ../engine/share/message_module/inter_ancmsg_mod.F
+      !||    arret           ../engine/source/system/arret.F
+      !||--- uses       -----------------------------------------------------
+      !||    intbufdef_mod   ../common_source/modules/intbufdef_mod.F
+      !||    message_mod     ../engine/share/message_module/message_mod.F
+      !||    tri7box         ../engine/share/modules/tri7box.F
+      !||====================================================================
       SUBROUTINE SPMD_EXCH_I25(IPARI    ,INTBUF_TAB     ,ITAB,
      *                         IAD_ELEM ,FR_ELEM,INTLIST,NBINTC,
      *                         IAD_I25  ,FR_I25  ,SFR_I25,FLAG)

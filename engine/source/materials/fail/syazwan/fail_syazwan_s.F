@@ -20,15 +20,13 @@ Copyright>
 Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
-Chd|====================================================================
-Chd|  FAIL_SYAZWAN_S                source/materials/fail/syazwan/fail_syazwan_s.F
-Chd|-- called by -----------
-Chd|        MMAIN                         source/materials/mat_share/mmain.F
-Chd|        MULAW                         source/materials/mat_share/mulaw.F
-Chd|        USERMAT_SOLID                 source/materials/mat_share/usermat_solid.F
-Chd|-- calls ---------------
-Chd|        FINTER                        source/tools/curve/finter.F   
-Chd|====================================================================
+      !||====================================================================
+      !||    fail_syazwan_s   ../engine/source/materials/fail/syazwan/fail_syazwan_s.F
+      !||--- called by ------------------------------------------------------
+      !||    mmain            ../engine/source/materials/mat_share/mmain.F
+      !||    mulaw            ../engine/source/materials/mat_share/mulaw.F
+      !||    usermat_solid    ../engine/source/materials/mat_share/usermat_solid.F
+      !||====================================================================
       SUBROUTINE FAIL_SYAZWAN_S(
      1     NEL     ,UPARAM   ,NUPARAM ,UVAR    ,NUVAR   ,
      2     TIME    ,NGL      ,IPG     ,DPLA    ,TDELE   ,

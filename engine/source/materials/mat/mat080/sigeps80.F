@@ -20,18 +20,18 @@ Copyright>
 Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
-Chd|====================================================================
-Chd|  SIGEPS80                      source/materials/mat/mat080/sigeps80.F
-Chd|-- called by -----------
-Chd|        MULAW                         source/materials/mat_share/mulaw.F
-Chd|-- calls ---------------
-Chd|        KIRKALDYKINETICS              source/materials/mat/mat080/kirkaldykinetics.F
-Chd|        PHASEKINETIC2                 source/materials/mat/mat080/phasekinetic2.F
-Chd|        TABLE_VINTERP                 source/tools/curve/table_tools.F
-Chd|        FINTER                        source/tools/curve/finter.F   
-Chd|        INTERFACE_TABLE_MOD           share/modules/table_mod.F     
-Chd|        TABLE_MOD                     share/modules/table_mod.F     
-Chd|====================================================================
+      !||====================================================================
+      !||    sigeps80              ../engine/source/materials/mat/mat080/sigeps80.F
+      !||--- called by ------------------------------------------------------
+      !||    mulaw                 ../engine/source/materials/mat_share/mulaw.F
+      !||--- calls      -----------------------------------------------------
+      !||    kirkaldykinetics      ../engine/source/materials/mat/mat080/kirkaldykinetics.F
+      !||    phasekinetic2         ../engine/source/materials/mat/mat080/phasekinetic2.F
+      !||    table_vinterp         ../engine/share/modules/table_mod.F
+      !||--- uses       -----------------------------------------------------
+      !||    interface_table_mod   ../engine/share/modules/table_mod.F
+      !||    table_mod             ../engine/share/modules/table_mod.F
+      !||====================================================================
       SUBROUTINE SIGEPS80(
      1   NEL,     NUPARAM, NUVAR,   MFUNC,
      2   KFUNC,   NPF,     TF,      TIME,

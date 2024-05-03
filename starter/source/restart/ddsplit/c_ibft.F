@@ -21,13 +21,11 @@ Copyright>        As an alternative to this open-source version, Altair also off
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
 
-Chd|====================================================================
-Chd|  C_IBFT                        source/restart/ddsplit/c_ibft.F
-Chd|-- called by -----------
-Chd|        DDSPLIT                       source/restart/ddsplit/ddsplit.F
-Chd|-- calls ---------------
-Chd|        NLOCAL                        source/spmd/node/ddtools.F    
-Chd|====================================================================
+      !||====================================================================
+      !||    c_ibft    ../starter/source/restart/ddsplit/c_ibft.F
+      !||--- called by ------------------------------------------------------
+      !||    ddsplit   ../starter/source/restart/ddsplit/ddsplit.F
+      !||====================================================================
       SUBROUTINE C_IBFT(IBFT,NC,NFXTEMP_L,PROC,DD_LAGF)
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s

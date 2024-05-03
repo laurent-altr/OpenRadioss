@@ -21,21 +21,9 @@ Copyright>        As an alternative to this open-source version, Altair also off
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
 #include "my_real.inc"
-Chd|====================================================================
-Chd|  FINTER                        source/tools/curve/finter.F   
-Chd|-- called by -----------
-Chd|        CM58_REFSTA                   source/materials/mat/mat058/cm58_refsta.F
-Chd|        FCT_FIBER_2                   source/materials/mat/mat098/lossfun_98.F
-Chd|        INIMOM_FVM                    source/elements/solid/solide/inimom_fvm.F
-Chd|        LAW87_UPD                     source/materials/mat/mat087/law87_upd.F
-Chd|        M77INIT                       source/materials/mat/mat077/m77init.F
-Chd|        SIGEPS35                      source/materials/mat/mat035/sigeps35.F
-Chd|        SIGEPS38                      source/materials/mat/mat038/sigeps38.F
-Chd|        SIGEPS42                      source/materials/mat/mat042/sigeps42.F
-Chd|        SIGEPS70                      source/materials/mat/mat070/sigeps70.F
-Chd|        SIGEPS90                      source/materials/mat/mat090/sigeps90.F
-Chd|-- calls ---------------
-Chd|====================================================================
+      !||====================================================================
+      !||    finter   ../starter/source/tools/curve/finter.F
+      !||====================================================================
       my_real FUNCTION FINTER(IFUNC,XX,NPF,TF,DERI)
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s

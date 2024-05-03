@@ -20,15 +20,16 @@ Copyright>
 Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
-Chd|====================================================================
-Chd|  INT12W                        source/ale/inter/int12w.F     
-Chd|-- called by -----------
-Chd|        INTAL3                        source/ale/inter/intal3.F     
-Chd|-- calls ---------------
-Chd|        IN12R                         source/interfaces/interf/in12r.F
-Chd|        IQELA3                        source/ale/inter/iqela3.F     
-Chd|        INTBUFDEF_MOD                 ../common_source/modules/intbufdef_mod.F
-Chd|====================================================================
+      !||====================================================================
+      !||    int12w          ../engine/source/ale/inter/int12w.F
+      !||--- called by ------------------------------------------------------
+      !||    intal3          ../engine/source/ale/inter/intal3.F
+      !||--- calls      -----------------------------------------------------
+      !||    in12r           ../engine/source/interfaces/interf/in12r.F
+      !||    iqela3          ../engine/source/ale/inter/iqela3.F
+      !||--- uses       -----------------------------------------------------
+      !||    intbufdef_mod   ../common_source/modules/intbufdef_mod.F
+      !||====================================================================
       SUBROUTINE INT12W(
      1                  IPARI, INTBUF_TAB, X      ,V     ,A  ,
      2                  VG   , ICODE     ,IBCS    ,BCS )

@@ -20,34 +20,47 @@
 !Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 !Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 !Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
+      !||====================================================================
+      !||    defaults_mod         ../starter/source/modules/defaults_mod.F90
+      !||--- called by ------------------------------------------------------
+      !||    contrl               ../starter/source/starter/contrl.F
+      !||    elbuf_ini            ../starter/source/elements/elbuf_init/elbuf_ini.F
+      !||    hm_read_defshell     ../starter/source/general_controls/default_values/hm_read_defshell.F
+      !||    hm_read_prop11       ../starter/source/properties/shell/hm_read_prop11.F
+      !||    hm_read_properties   ../starter/source/properties/hm_read_properties.F
+      !||    lectur               ../starter/source/starter/lectur.F
+      !||    shell_offset_ini     ../starter/source/elements/shell/shell_offset/shell_offset_ini.F90
+      !||    shell_offsetp        ../starter/source/elements/shell/shell_offset/shell_offsetp.F90
+      !||    starter0             ../starter/source/starter/starter0.F
+      !||====================================================================
       module defaults_mod
 !=======================================================================================================================
 !!\brief default type : Hosts the variables for /DEF/xxx Starter Deck option
 !=======================================================================================================================
-        
-            ! Variables from /DEF/SHELL Option.
-            type shell_defaults_
-               integer ::  ioffset    !< 3: removing offset by projection in starter; 1: offset for contact (Engine)
-            end type  shell_defaults_
 
-            ! --------------------------------
-            ! Variables from /DEF/SOLID Option.
-            type solid_defaults_
-               integer ::  dummy    !< dummy variable to create the type - to be removed when /DEF_SOLID is merged in
-            end type  solid_defaults_
+        ! Variables from /DEF/SHELL Option.
+        type shell_defaults_
+          integer ::  ioffset    !< 3: removing offset by projection in starter; 1: offset for contact (Engine)
+        end type  shell_defaults_
 
-            ! --------------------------------
-            ! Variables from /DEF/INTER Option.
-            type interface_defaults_
-               integer ::  dummy    !< dummy variable to create the type - to be removed when /DEFAULT/INTER is merged in
-            end type  interface_defaults_
+        ! --------------------------------
+        ! Variables from /DEF/SOLID Option.
+        type solid_defaults_
+          integer ::  dummy    !< dummy variable to create the type - to be removed when /DEF_SOLID is merged in
+        end type  solid_defaults_
 
-            ! --------------------------------
-            ! Variables from /DEF/xxx Option.
-            type defaults_
-               type (shell_defaults_)     :: shell       !< /DEF_SHELL option
-               type (solid_defaults_)     :: solid       !< /DEF_SOLID option
-               type (interface_defaults_) :: interface   !< /DEFAULT/INTER option
-            end type  defaults_
+        ! --------------------------------
+        ! Variables from /DEF/INTER Option.
+        type interface_defaults_
+          integer ::  dummy    !< dummy variable to create the type - to be removed when /DEFAULT/INTER is merged in
+        end type  interface_defaults_
+
+        ! --------------------------------
+        ! Variables from /DEF/xxx Option.
+        type defaults_
+          type (shell_defaults_)     :: shell       !< /DEF_SHELL option
+          type (solid_defaults_)     :: solid       !< /DEF_SOLID option
+          type (interface_defaults_) :: interface   !< /DEFAULT/INTER option
+        end type  defaults_
 
       end module defaults_mod

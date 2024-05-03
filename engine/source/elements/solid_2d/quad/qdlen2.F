@@ -20,15 +20,15 @@ Copyright>
 Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
-Chd|====================================================================
-Chd|  QDLEN2                        source/elements/solid_2d/quad/qdlen2.F
-Chd|-- called by -----------
-Chd|        BFORC2                        source/ale/bimat/bforc2.F     
-Chd|        Q4FORC2                       source/elements/solid_2d/quad4/q4forc2.F
-Chd|        QFORC2                        source/elements/solid_2d/quad/qforc2.F
-Chd|-- calls ---------------
-Chd|        ALE_MOD                       ../common_source/modules/ale/ale_mod.F
-Chd|====================================================================
+      !||====================================================================
+      !||    qdlen2             ../starter/source/elements/solid_2d/quad/qdlen2.F
+      !||--- called by ------------------------------------------------------
+      !||    binit2             ../starter/source/ale/bimat/binit2.F
+      !||    multifluid_init2   ../starter/source/multifluid/multifluid_init2.F
+      !||    q4init2            ../starter/source/elements/solid_2d/quad4/q4init2.F
+      !||    qinit2             ../starter/source/elements/solid_2d/quad/qinit2.F
+      !||--- uses       -----------------------------------------------------
+      !||====================================================================
       SUBROUTINE QDLEN2(Y1,Y2,Y3,Y4,Z1,Z2,Z3,Z4,AIRE,DELTAX,IPARG)
 C-----------------------------------------------
 C   M o d u l e s

@@ -20,15 +20,24 @@
 !Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 !Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 !Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
+      !||====================================================================
+      !||    inter_sh_offset_mod   ../engine/source/modules/interfaces/sh_offset_mod.F90
+      !||--- called by ------------------------------------------------------
+      !||    inter_sh_offset_dim   ../engine/source/interfaces/shell_offset/inter_offset_dim.F90
+      !||    inter_sh_offset_ini   ../engine/source/interfaces/shell_offset/inter_offset_ini.F90
+      !||    offset_nproj          ../engine/source/interfaces/shell_offset/offset_nproj.F90
+      !||    resol                 ../engine/source/engine/resol.F
+      !||    resol_init            ../engine/source/engine/resol_init.F
+      !||====================================================================
       module inter_sh_offset_mod
-#include "my_real.inc"       
-                type sh_offset_
-                  integer ::  nsh_oset                                 ! number of offset shell to be projected
-                  integer, dimension(:,:) , allocatable :: ix_offset      ! (4,nsh_oset)  
-                  integer, dimension(:)  ,  allocatable :: intag       ! (numnod) node connected to offset shell 
-                  integer, dimension(:,:),  allocatable :: iad_offset    ! (2,nspmd+1) comm work array 
-                  integer, dimension(:)  ,  allocatable :: fr_offset     ! comm work array 
-                  my_real, dimension(:)  ,  allocatable :: offset_n    ! (numnod) nodal offset
-                  my_real, dimension(:,:) , allocatable :: norm_n      ! (3,numnod) nodal normal
-                end type  sh_offset_
+#include "my_real.inc"
+        type sh_offset_
+          integer ::  nsh_oset                                 ! number of offset shell to be projected
+          integer, dimension(:,:) , allocatable :: ix_offset      ! (4,nsh_oset)
+          integer, dimension(:)  ,  allocatable :: intag       ! (numnod) node connected to offset shell
+          integer, dimension(:,:),  allocatable :: iad_offset    ! (2,nspmd+1) comm work array
+          integer, dimension(:)  ,  allocatable :: fr_offset     ! comm work array
+          my_real, dimension(:)  ,  allocatable :: offset_n    ! (numnod) nodal offset
+          my_real, dimension(:,:) , allocatable :: norm_n      ! (3,numnod) nodal normal
+        end type  sh_offset_
       end module inter_sh_offset_mod

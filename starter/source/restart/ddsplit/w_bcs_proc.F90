@@ -26,11 +26,18 @@
 !! \brief Data pre-treatment before saving in RESTART FILE
 !! \details  necessary buffer specific to option /BCS/WALL/...
 !
+      !||====================================================================
+      !||    w_bcs_proc       ../starter/source/restart/ddsplit/w_bcs_proc.F90
+      !||--- called by ------------------------------------------------------
+      !||    ddsplit          ../starter/source/restart/ddsplit/ddsplit.F
+      !||--- calls      -----------------------------------------------------
+      !||--- uses       -----------------------------------------------------
+      !||====================================================================
       subroutine w_bcs_proc(bcs_per_proc,cel,scel,len_ia,len_am)
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Modules
 ! ----------------------------------------------------------------------------------------------------------------------
-      use bcs_mod , only : bcs_struct_
+        use bcs_mod , only : bcs_struct_
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Included files
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -39,40 +46,40 @@
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Arguments
 ! ----------------------------------------------------------------------------------------------------------------------
-      integer,intent(in) :: scel                       !< size for array definition
-      integer,intent(in),dimension(scel) :: cel        !< application : global_elem_id -> local_elem_id
-      type(bcs_struct_),intent(inout) :: bcs_per_proc  !< local data structure for bcs
-      integer,intent(inout) :: len_ia,len_am           !< buffer size for records (integer and real)
+        integer,intent(in) :: scel                       !< size for array definition
+        integer,intent(in),dimension(scel) :: cel        !< application : global_elem_id -> local_elem_id
+        type(bcs_struct_),intent(inout) :: bcs_per_proc  !< local data structure for bcs
+        integer,intent(inout) :: len_ia,len_am           !< buffer size for records (integer and real)
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Local variables
 ! ----------------------------------------------------------------------------------------------------------------------
-      integer, dimension(1) :: itmp
-      integer :: ilen,ii,jj,ielem
+        integer, dimension(1) :: itmp
+        integer :: ilen,ii,jj,ielem
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Body
-! ----------------------------------------------------------------------------------------------------------------------                   
+! ----------------------------------------------------------------------------------------------------------------------
 
-      itmp(1) = bcs_per_proc%num_wall
-      call write_i_c(itmp,1)
-      len_ia = len_ia + 1
+        itmp(1) = bcs_per_proc%num_wall
+        call write_i_c(itmp,1)
+        len_ia = len_ia + 1
 
-      if(bcs_per_proc%num_wall > 0)then
-        do ii=1,bcs_per_proc%num_wall
-          ilen = bcs_per_proc%wall(ii)%list%size
-          if(ilen > 0)then
-            do jj=1, ilen
-              ielem = bcs_per_proc%wall(ii)%list%elem(jj)
-              bcs_per_proc%wall(ii)%list%elem(jj) = cel(ielem) !local numbering
-            enddo
-          end if
-          
-          call write_bcs_wall(bcs_per_proc%wall(ii))
-          len_ia = len_ia + 7 + 3*ilen
-          len_am = len_am + 2
-          
-        enddo!next ii
-      endif
+        if(bcs_per_proc%num_wall > 0)then
+          do ii=1,bcs_per_proc%num_wall
+            ilen = bcs_per_proc%wall(ii)%list%size
+            if(ilen > 0)then
+              do jj=1, ilen
+                ielem = bcs_per_proc%wall(ii)%list%elem(jj)
+                bcs_per_proc%wall(ii)%list%elem(jj) = cel(ielem) !local numbering
+              enddo
+            end if
+
+            call write_bcs_wall(bcs_per_proc%wall(ii))
+            len_ia = len_ia + 7 + 3*ilen
+            len_am = len_am + 2
+
+          enddo!next ii
+        endif
 
 ! ----------------------------------------------------------------------------------------------------------------------
-      return
+        return
       end subroutine w_bcs_proc

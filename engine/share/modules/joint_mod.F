@@ -20,17 +20,18 @@ Copyright>
 Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
-Chd|====================================================================
-Chd|  JOINT_MOD                     share/modules/joint_mod.F     
-Chd|-- called by -----------
-Chd|        CJOINT                        source/constraints/general/cyl_joint/cjoint.F
-Chd|        DEALLOCATE_JOINT              source/constraints/general/cyl_joint/deallocate_joint.F
-Chd|        READ_JOINT                    source/output/restart/read_joint.F
-Chd|        SPMD_SPLIT_COMM_JOINT         source/mpi/init/spmd_split_comm_joint.F
-Chd|        TELESC                        source/constraints/general/cyl_joint/telesc.F
-Chd|        WRITE_JOINT                   source/output/restart/write_joint.F
-Chd|-- calls ---------------
-Chd|====================================================================
+      !||====================================================================
+      !||    joint_mod          ../starter/share/modules1/joint_mod.F
+      !||--- called by ------------------------------------------------------
+      !||    ddsplit            ../starter/source/restart/ddsplit/ddsplit.F
+      !||    deallocate_joint   ../starter/source/constraints/general/cyl_joint/deallocate_joint.F
+      !||    hm_read_cyljoint   ../starter/source/constraints/general/cyl_joint/hm_read_cyljoint.F
+      !||    init_joint         ../starter/source/constraints/general/cyl_joint/init_joint.F
+      !||    lectur             ../starter/source/starter/lectur.F
+      !||    print_joint        ../starter/source/constraints/general/cyl_joint/split_joint.F
+      !||    split_joint        ../starter/source/constraints/general/cyl_joint/split_joint.F
+      !||    write_joint        ../starter/source/constraints/general/cyl_joint/write_joint.F
+      !||====================================================================
         MODULE JOINT_MOD
 #include "my_real.inc"
 !$COMMENT

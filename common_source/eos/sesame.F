@@ -31,15 +31,15 @@ C|         MINTP_RT                         /mate26/mintp_rt.F
 C|         MINTP1_RT                          /dfs/mintp1_rt.F
 C|============================================================
 C---+----1----+----2----+----3----+----4----+----5----+----6----+----7--
-Chd|====================================================================
-Chd|  SESAME                        eos/sesame.F                  
-Chd|-- called by -----------
-Chd|        EOSMAIN                       common_source/eos/eosmain.F   
-Chd|-- calls ---------------
-Chd|        MINTP1_RT                     eos/mintp1_rt.F               
-Chd|        MINTP_RE                      eos/mintp_re.F                
-Chd|        MINTP_RT                      eos/mintp_rt.F                
-Chd|====================================================================
+      !||====================================================================
+      !||    sesame      ../common_source/eos/sesame.F
+      !||--- called by ------------------------------------------------------
+      !||    eosmain     ../common_source/eos/eosmain.F
+      !||--- calls      -----------------------------------------------------
+      !||    mintp1_rt   ../common_source/eos/mintp1_rt.F
+      !||    mintp_re    ../common_source/eos/mintp_re.F
+      !||    mintp_rt    ../common_source/eos/mintp_rt.F
+      !||====================================================================
       SUBROUTINE SESAME(IFLAG,NEL, PM   ,OFF  ,EINT ,RHO  ,RHO0  , 
      2                  ESPE ,DVOL ,MAT  ,PNEW ,DPDM ,DPDE  ,THETA ,
      3                  BUFMAT)

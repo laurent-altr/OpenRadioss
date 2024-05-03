@@ -20,13 +20,13 @@ Copyright>
 Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
-Chd|====================================================================
-Chd|  INI_IFRONT                    source/spmd/node/ddtools.F    
-Chd|-- called by -----------
-Chd|        LECTUR                        source/starter/lectur.F       
-Chd|-- calls ---------------
-Chd|        FRONT_MOD                     share/modules1/front_mod.F    
-Chd|====================================================================
+      !||====================================================================
+      !||    ini_ifront   ../starter/source/spmd/node/ddtools.F
+      !||--- called by ------------------------------------------------------
+      !||    lectur       ../starter/source/starter/lectur.F
+      !||--- uses       -----------------------------------------------------
+      !||    front_mod    ../starter/share/modules1/front_mod.F
+      !||====================================================================
       SUBROUTINE INI_IFRONT()
 C-----------------------------------------------
 C   M o d u l e s
@@ -59,15 +59,16 @@ C-----------------------------------------------
 C
       RETURN
       END      
-Chd|====================================================================
-Chd|  REALLOC_IFRONT                source/spmd/node/ddtools.F    
-Chd|-- called by -----------
-Chd|        IFRONTPLUS                    source/spmd/node/frontplus.F  
-Chd|-- calls ---------------
-Chd|        ANCMSG                        source/output/message/message.F
-Chd|        FRONT_MOD                     share/modules1/front_mod.F    
-Chd|        MESSAGE_MOD                   share/message_module/message_mod.F
-Chd|====================================================================
+      !||====================================================================
+      !||    realloc_ifront   ../starter/source/spmd/node/ddtools.F
+      !||--- called by ------------------------------------------------------
+      !||    ifrontplus       ../starter/source/spmd/node/frontplus.F
+      !||--- calls      -----------------------------------------------------
+      !||    ancmsg           ../starter/share/message_module/inter_ancmsg_mod.F
+      !||--- uses       -----------------------------------------------------
+      !||    front_mod        ../starter/share/modules1/front_mod.F
+      !||    message_mod      ../starter/share/message_module/message_mod.F
+      !||====================================================================
       SUBROUTINE REALLOC_IFRONT()
 C-----------------------------------------------
 C   M o d u l e s
@@ -125,28 +126,28 @@ c set new size of SIFRONT
       
       RETURN
       END     
-Chd|====================================================================
-Chd|  PLIST_IFRONT                  source/spmd/node/ddtools.F    
-Chd|-- called by -----------
-Chd|        C_IRBE2                       source/restart/ddsplit/c_irbe2.F
-Chd|        DOMAIN_DECOMPOSITION_PCYL     source/loads/general/load_pcyl/domain_decomposition_pcyl.F
-Chd|        GET_SIZE_NUMNOD_LOCAL         source/spmd/get_size_tag.F    
-Chd|        IGRSURF_SPLIT                 source/spmd/igrsurf_split.F   
-Chd|        PREPARE_SPLIT_I21             source/restart/ddsplit/inter_tools.F
-Chd|        R2R_DOMDEC                    source/coupling/rad2rad/r2r_domdec.F
-Chd|        SPLIT_CAND_I20                source/restart/ddsplit/inter_tools.F
-Chd|        SPLIT_CAND_I24                source/restart/ddsplit/inter_tools.F
-Chd|        SPLIT_CAND_I25                source/restart/ddsplit/inter_tools.F
-Chd|        SPLIT_CAND_I7                 source/restart/ddsplit/inter_tools.F
-Chd|        SPLIT_CFD_SOLIDE              source/spmd/split_cfd_solide.F
-Chd|        SPLIT_JOINT                   source/constraints/general/cyl_joint/split_joint.F
-Chd|        SPMD_USERWI_REST              source/user_interface/user_windows_tools.F
-Chd|        W_FI                          source/restart/ddsplit/w_fi.F 
-Chd|        W_FRONT                       source/restart/ddsplit/w_front.F
-Chd|        print_JOINT                   source/constraints/general/cyl_joint/split_joint.F
-Chd|-- calls ---------------
-Chd|        FRONT_MOD                     share/modules1/front_mod.F    
-Chd|====================================================================
+      !||====================================================================
+      !||    plist_ifront                ../starter/source/spmd/node/ddtools.F
+      !||--- called by ------------------------------------------------------
+      !||    c_irbe2                     ../starter/source/restart/ddsplit/c_irbe2.F
+      !||    domain_decomposition_pcyl   ../starter/source/loads/general/load_pcyl/domain_decomposition_pcyl.F
+      !||    get_size_numnod_local       ../starter/source/spmd/get_size_tag.F
+      !||    igrsurf_split               ../starter/source/spmd/igrsurf_split.F
+      !||    prepare_split_i21           ../starter/source/restart/ddsplit/inter_tools.F
+      !||    print_joint                 ../starter/source/constraints/general/cyl_joint/split_joint.F
+      !||    r2r_domdec                  ../starter/source/coupling/rad2rad/r2r_domdec.F
+      !||    split_cand_i20              ../starter/source/restart/ddsplit/inter_tools.F
+      !||    split_cand_i24              ../starter/source/restart/ddsplit/inter_tools.F
+      !||    split_cand_i25              ../starter/source/restart/ddsplit/inter_tools.F
+      !||    split_cand_i7               ../starter/source/restart/ddsplit/inter_tools.F
+      !||    split_cfd_solide            ../starter/source/spmd/split_cfd_solide.F
+      !||    split_joint                 ../starter/source/constraints/general/cyl_joint/split_joint.F
+      !||    spmd_userwi_rest            ../starter/source/user_interface/user_windows_tools.F
+      !||    w_fi                        ../starter/source/restart/ddsplit/w_fi.F
+      !||    w_front                     ../starter/source/restart/ddsplit/w_front.F
+      !||--- uses       -----------------------------------------------------
+      !||    front_mod                   ../starter/share/modules1/front_mod.F
+      !||====================================================================
       SUBROUTINE PLIST_IFRONT(TAB,N,CPT)
 C returns in "TAB" list of SPMD domains on which node N is sticked
 C CPT is the number of SPMD domains on which node N is sticked
@@ -192,13 +193,13 @@ c list of procs for node N
       
       RETURN
       END    
-Chd|====================================================================
-Chd|  C_IFRONT                      source/spmd/node/ddtools.F    
-Chd|-- called by -----------
-Chd|        C_FRONT                       source/restart/ddsplit/c_front.F
-Chd|-- calls ---------------
-Chd|        FRONT_MOD                     share/modules1/front_mod.F    
-Chd|====================================================================
+      !||====================================================================
+      !||    c_ifront    ../starter/source/spmd/node/ddtools.F
+      !||--- called by ------------------------------------------------------
+      !||    c_front     ../starter/source/restart/ddsplit/c_front.F
+      !||--- uses       -----------------------------------------------------
+      !||    front_mod   ../starter/share/modules1/front_mod.F
+      !||====================================================================
       SUBROUTINE C_IFRONT(N,CPT)
 c returns in CPT the number of procs on which node N is sticked      
 C-----------------------------------------------
@@ -242,100 +243,11 @@ c list of procs for node N
       
       RETURN
       END                  
-Chd|====================================================================
-Chd|  NLOCAL                        source/spmd/node/ddtools.F    
-Chd|-- called by -----------
-Chd|        C_CRKEDGE                     source/restart/ddsplit/c_crkedge.F
-Chd|        C_DAMPVREL                    source/restart/ddsplit/c_dampvrel.F
-Chd|        C_DOMS10                      source/spmd/domdec2.F         
-Chd|        C_FRONT                       source/restart/ddsplit/c_front.F
-Chd|        C_FVBAG                       source/airbag/c_fvbag.F       
-Chd|        C_FXBODY2                     source/restart/ddsplit/c_fxbody.F
-Chd|        C_IBCSCYC                     source/restart/ddsplit/c_ibcscyc.F
-Chd|        C_IBFT                        source/restart/ddsplit/c_ibft.F
-Chd|        C_IBFV                        source/restart/ddsplit/c_ibfv.F
-Chd|        C_IBVEL                       source/restart/ddsplit/c_ibvel.F
-Chd|        C_ICFIELD                     source/restart/ddsplit/c_icfield.F
-Chd|        C_ICNDS10                     source/restart/ddsplit/c_icnds10.F
-Chd|        C_ILOADP                      source/restart/ddsplit/c_iloadp.F
-Chd|        C_IRBE2                       source/restart/ddsplit/c_irbe2.F
-Chd|        C_IRBE3                       source/restart/ddsplit/c_irbe3.F
-Chd|        C_JOINT_SMS                   source/constraints/general/cyl_joint/write_count_joint_sms.F
-Chd|        C_LLINK                       source/restart/ddsplit/c_llink.F
-Chd|        C_MAD                         source/restart/ddsplit/c_mad.F
-Chd|        C_PORO                        source/restart/ddsplit/c_poro.F
-Chd|        C_RBYK                        source/restart/ddsplit/c_rbyk.F
-Chd|        C_RBYMK                       source/restart/ddsplit/c_rbymk.F
-Chd|        C_RWALL                       source/restart/ddsplit/c_rwall.F
-Chd|        C_SEATBELTS                   source/restart/ddsplit/c_seatbelts.F
-Chd|        C_SECTIO                      source/restart/ddsplit/c_sectio.F
-Chd|        C_VOIS                        source/restart/ddsplit/c_vois.F
-Chd|        DOMDEC2                       source/spmd/domdec2.F         
-Chd|        FILLCNE                       source/spmd/domdec2.F         
-Chd|        FLOWDEC                       source/fluid/flowdec.F        
-Chd|        F_NODLOC2                     source/restart/ddsplit/f_nodloc2.F
-Chd|        GLOBVARS                      source/spmd/globvars.F        
-Chd|        HM_READ_RBE2                  source/constraints/general/rbe2/hm_read_rbe2.F
-Chd|        HM_READ_RIVET                 source/elements/reader/hm_read_rivet.F
-Chd|        INIEND                        source/interfaces/inter3d1/iniend.F
-Chd|        INIEND2D                      source/interfaces/inter3d1/iniend.F
-Chd|        INIRBE3                       source/constraints/general/rbe3/hm_read_rbe3.F
-Chd|        INI_SEATBELT                  source/tools/seatbelts/ini_seatbelt.F
-Chd|        IPARI_L_INI                   source/restart/ddsplit/ipari_l_ini.F
-Chd|        PREPARE_SPLIT_CAND_I21        source/restart/ddsplit/inter_tools.F
-Chd|        PREPARE_SPLIT_I11             source/restart/ddsplit/inter_tools.F
-Chd|        PREPARE_SPLIT_I20             source/restart/ddsplit/inter_tools.F
-Chd|        PREPARE_SPLIT_I21             source/restart/ddsplit/inter_tools.F
-Chd|        PREPARE_SPLIT_I25             source/restart/ddsplit/inter_tools.F
-Chd|        PREPARE_SPLIT_I8              source/restart/ddsplit/inter_tools.F
-Chd|        PREPARE_SPLIT_I9              source/restart/ddsplit/inter_tools.F
-Chd|        PRE_CNDPON                    source/elements/solid/solide10/dim_s10edg.F
-Chd|        R2R_DOMDEC                    source/coupling/rad2rad/r2r_domdec.F
-Chd|        R2R_SPLIT                     source/coupling/rad2rad/r2r_split.F
-Chd|        SPLIT_CAND_I11                source/restart/ddsplit/inter_tools.F
-Chd|        SPLIT_CAND_I20                source/restart/ddsplit/inter_tools.F
-Chd|        SPLIT_CAND_I20_EDGE           source/restart/ddsplit/inter_tools.F
-Chd|        SPLIT_CAND_I24                source/restart/ddsplit/inter_tools.F
-Chd|        SPLIT_CAND_I25                source/restart/ddsplit/inter_tools.F
-Chd|        SPLIT_JOINT                   source/constraints/general/cyl_joint/split_joint.F
-Chd|        SPLIT_REMNODE_I24             source/restart/ddsplit/inter_tools.F
-Chd|        SPLIT_XSAV                    source/restart/ddsplit/inter_tools.F
-Chd|        SPMDSET                       source/constraints/general/rbody/spmdset.F
-Chd|        SPMD_USERWI_REST              source/user_interface/user_windows_tools.F
-Chd|        THPINIT                       source/output/th/thpinit.F    
-Chd|        WRWEIGHT_RM                   source/restart/ddsplit/wrweight_rm.F
-Chd|        W_DAMPVREL                    source/restart/ddsplit/w_dampvrel.F
-Chd|        W_FBFT                        source/restart/ddsplit/w_fbft.F
-Chd|        W_FI                          source/restart/ddsplit/w_fi.F 
-Chd|        W_FIXVEL                      source/restart/ddsplit/w_fixvel.F
-Chd|        W_FRBE3                       source/restart/ddsplit/w_frbe3.F
-Chd|        W_FRONT                       source/restart/ddsplit/w_front.F
-Chd|        W_IBCSCYC                     source/restart/ddsplit/w_ibcscyc.F
-Chd|        W_IBFT                        source/restart/ddsplit/w_ibft.F
-Chd|        W_IBFV                        source/restart/ddsplit/w_ibfv.F
-Chd|        W_IBVEL                       source/restart/ddsplit/w_ibvel.F
-Chd|        W_ICNDS10                     source/restart/ddsplit/w_icnds10.F
-Chd|        W_IRBE2                       source/restart/ddsplit/w_irbe2.F
-Chd|        W_IRBE3                       source/restart/ddsplit/w_irbe3.F
-Chd|        W_IRIVET                      source/restart/ddsplit/w_irivet.F
-Chd|        W_ISKN                        source/restart/ddsplit/w_iskn.F
-Chd|        W_JOINT_SMS                   source/constraints/general/cyl_joint/write_count_joint_sms.F
-Chd|        W_LLINK                       source/restart/ddsplit/w_llink.F
-Chd|        W_MAD                         source/restart/ddsplit/w_mad.F
-Chd|        W_MAIN_PROC_WEIGHT            source/restart/ddsplit/w_master_proc_weight.F
-Chd|        W_PON                         source/restart/ddsplit/w_pon.F
-Chd|        W_PORO                        source/restart/ddsplit/w_poro.F
-Chd|        W_RBYK                        source/restart/ddsplit/w_rbyk.F
-Chd|        W_RBYMK                       source/restart/ddsplit/w_rbymk.F
-Chd|        W_RWALL                       source/restart/ddsplit/w_rwall.F
-Chd|        W_RWAR                        source/restart/ddsplit/w_rwar.F
-Chd|        W_SEATBELTS                   source/restart/ddsplit/w_seatbelts.F
-Chd|        W_SECBUF                      source/restart/ddsplit/w_secbuf.F
-Chd|        W_SECTIO                      source/restart/ddsplit/w_sectio.F
-Chd|        W_TH                          source/restart/ddsplit/w_th.F 
-Chd|-- calls ---------------
-Chd|        FRONT_MOD                     share/modules1/front_mod.F    
-Chd|====================================================================
+      !||====================================================================
+      !||    nlocal      ../starter/source/spmd/node/ddtools.F
+      !||--- uses       -----------------------------------------------------
+      !||    front_mod   ../starter/share/modules1/front_mod.F
+      !||====================================================================
       INTEGER FUNCTION NLOCAL(N,P)  
 C returns 1 if node N is sticked on SPMD domain P, else returns 0
 C-----------------------------------------------
@@ -386,15 +298,13 @@ C-----------------------------------------------
       RETURN 
       END      
 
-Chd|====================================================================
-Chd|  SET_FRONT8                    source/spmd/node/ddtools.F    
-Chd|-- called by -----------
-Chd|        LECTUR                        source/starter/lectur.F       
-Chd|-- calls ---------------
-Chd|        FRONT_MOD                     share/modules1/front_mod.F    
-Chd|        INT8_MOD                      ../common_source/modules/interfaces/int8_mod.F
-Chd|        INTBUFDEF_MOD                 ../common_source/modules/intbufdef_mod.F
-Chd|====================================================================
+      !||====================================================================
+      !||    set_front8      ../starter/source/spmd/node/ddtools.F
+      !||--- called by ------------------------------------------------------
+      !||    lectur          ../starter/source/starter/lectur.F
+      !||--- uses       -----------------------------------------------------
+      !||    front_mod       ../starter/share/modules1/front_mod.F
+      !||====================================================================
       SUBROUTINE SET_FRONT8(IPARI,INTERCEP,INTBUF_TAB,T8,NBT8,ITAB)
 C-----------------------------------------------
 C   M o d u l e s
@@ -691,16 +601,14 @@ C--------------------------------------------------------------
 
       END
 
-Chd|====================================================================
-Chd|  SET_INTERCEP                  source/spmd/node/ddtools.F    
-Chd|-- called by -----------
-Chd|        LECTUR                        source/starter/lectur.F       
-Chd|-- calls ---------------
-Chd|        INTERSURFL                    source/spmd/node/ddtools.F    
-Chd|        FRONT_MOD                     share/modules1/front_mod.F    
-Chd|        INTBUFDEF_MOD                 ../common_source/modules/intbufdef_mod.F
-Chd|        MESSAGE_MOD                   share/message_module/message_mod.F
-Chd|====================================================================
+      !||====================================================================
+      !||    set_intercep    ../starter/source/spmd/node/ddtools.F
+      !||--- called by ------------------------------------------------------
+      !||    lectur          ../starter/source/starter/lectur.F
+      !||--- uses       -----------------------------------------------------
+      !||    front_mod       ../starter/share/modules1/front_mod.F
+      !||    message_mod     ../starter/share/message_module/message_mod.F
+      !||====================================================================
       SUBROUTINE SET_INTERCEP(IPARI,INTERCEP,FLAG,INTBUF_TAB,ITAB,CEP)
 C-----------------------------------------------
 C   M o d u l e s
@@ -932,16 +840,14 @@ C Allocate CEP INTERFACE
 
       END
       
-Chd|====================================================================
-Chd|  FILL_INTERCEP                 source/spmd/node/ddtools.F    
-Chd|-- called by -----------
-Chd|        LECTUR                        source/starter/lectur.F       
-Chd|-- calls ---------------
-Chd|        INTERSURFL                    source/spmd/node/ddtools.F    
-Chd|        FRONT_MOD                     share/modules1/front_mod.F    
-Chd|        INTBUFDEF_MOD                 ../common_source/modules/intbufdef_mod.F
-Chd|        MESSAGE_MOD                   share/message_module/message_mod.F
-Chd|====================================================================
+      !||====================================================================
+      !||    fill_intercep   ../starter/source/spmd/node/ddtools.F
+      !||--- called by ------------------------------------------------------
+      !||    lectur          ../starter/source/starter/lectur.F
+      !||--- uses       -----------------------------------------------------
+      !||    front_mod       ../starter/share/modules1/front_mod.F
+      !||    message_mod     ../starter/share/message_module/message_mod.F
+      !||====================================================================
       SUBROUTINE FILL_INTERCEP(IPARI,INTBUF_TAB,INTERCEP)
 C   new routine called right after domdec1 to be used by interface sorting
 C-----------------------------------------------
@@ -1015,15 +921,11 @@ C Allocate CEP INTERFACE
 
       END
 
-Chd|====================================================================
-Chd|  INTERSURFL                    source/spmd/node/ddtools.F    
-Chd|-- called by -----------
-Chd|        FILL_INTERCEP                 source/spmd/node/ddtools.F    
-Chd|        I24SETNODES                   source/interfaces/inter3d1/i24setnodes.F
-Chd|        SET_INTERCEP                  source/spmd/node/ddtools.F    
-Chd|-- calls ---------------
-Chd|        FRONT_MOD                     share/modules1/front_mod.F    
-Chd|====================================================================
+      !||====================================================================
+      !||    intersurfl   ../starter/source/spmd/node/ddtools.F
+      !||--- uses       -----------------------------------------------------
+      !||    front_mod    ../starter/share/modules1/front_mod.F
+      !||====================================================================
       INTEGER FUNCTION INTERSURFL(N1,N2,N3,N4)   
 C-----------------------------------------------
 C   M o d u l e s
@@ -1077,13 +979,13 @@ C-----------------------------------------------
         
       RETURN 
       END
-Chd|====================================================================
-Chd|  INI_IDDCONNECT                source/spmd/node/ddtools.F    
-Chd|-- called by -----------
-Chd|        DOMETIS                       source/spmd/domain_decomposition/grid2mat.F
-Chd|-- calls ---------------
-Chd|        FRONT_MOD                     share/modules1/front_mod.F    
-Chd|====================================================================
+      !||====================================================================
+      !||    ini_iddconnect   ../starter/source/spmd/node/ddtools.F
+      !||--- called by ------------------------------------------------------
+      !||    dometis          ../starter/source/spmd/domain_decomposition/grid2mat.F
+      !||--- uses       -----------------------------------------------------
+      !||    front_mod        ../starter/share/modules1/front_mod.F
+      !||====================================================================
       SUBROUTINE INI_IDDCONNECT(NELEM)
 C-----------------------------------------------
 C   M o d u l e s
@@ -1116,15 +1018,16 @@ C-----------------------------------------------
 C
       RETURN
       END
-Chd|====================================================================
-Chd|  REALLOC_IDDCONNECT            source/spmd/node/ddtools.F    
-Chd|-- called by -----------
-Chd|        IDDCONNECTPLUS                source/spmd/node/frontplus.F  
-Chd|-- calls ---------------
-Chd|        ANCMSG                        source/output/message/message.F
-Chd|        FRONT_MOD                     share/modules1/front_mod.F    
-Chd|        MESSAGE_MOD                   share/message_module/message_mod.F
-Chd|====================================================================
+      !||====================================================================
+      !||    realloc_iddconnect   ../starter/source/spmd/node/ddtools.F
+      !||--- called by ------------------------------------------------------
+      !||    iddconnectplus       ../starter/source/spmd/node/frontplus.F
+      !||--- calls      -----------------------------------------------------
+      !||    ancmsg               ../starter/share/message_module/inter_ancmsg_mod.F
+      !||--- uses       -----------------------------------------------------
+      !||    front_mod            ../starter/share/modules1/front_mod.F
+      !||    message_mod          ../starter/share/message_module/message_mod.F
+      !||====================================================================
       SUBROUTINE REALLOC_IDDCONNECT(NELEM)
 C-----------------------------------------------
 C   M o d u l e s
@@ -1180,14 +1083,14 @@ C-----------------------------------------------
       
       RETURN
       END
-Chd|====================================================================
-Chd|  C_IDDCONNECT                  source/spmd/node/ddtools.F    
-Chd|-- called by -----------
-Chd|        DOMETIS                       source/spmd/domain_decomposition/grid2mat.F
-Chd|        PLIST_BFS                     source/spmd/node/ddtools.F    
-Chd|-- calls ---------------
-Chd|        FRONT_MOD                     share/modules1/front_mod.F    
-Chd|====================================================================
+      !||====================================================================
+      !||    c_iddconnect   ../starter/source/spmd/node/ddtools.F
+      !||--- called by ------------------------------------------------------
+      !||    dometis        ../starter/source/spmd/domain_decomposition/grid2mat.F
+      !||    plist_bfs      ../starter/source/spmd/node/ddtools.F
+      !||--- uses       -----------------------------------------------------
+      !||    front_mod      ../starter/share/modules1/front_mod.F
+      !||====================================================================
       SUBROUTINE C_IDDCONNECT(N,CPT)
 C returns in CPT the number of connected nodes 
 C-----------------------------------------------
@@ -1231,13 +1134,13 @@ C-----------------------------------------------
       
       RETURN
       END
-Chd|====================================================================
-Chd|  PLIST_IDDCONNECT              source/spmd/node/ddtools.F    
-Chd|-- called by -----------
-Chd|        DOMETIS                       source/spmd/domain_decomposition/grid2mat.F
-Chd|-- calls ---------------
-Chd|        FRONT_MOD                     share/modules1/front_mod.F    
-Chd|====================================================================
+      !||====================================================================
+      !||    plist_iddconnect   ../starter/source/spmd/node/ddtools.F
+      !||--- called by ------------------------------------------------------
+      !||    dometis            ../starter/source/spmd/domain_decomposition/grid2mat.F
+      !||--- uses       -----------------------------------------------------
+      !||    front_mod          ../starter/share/modules1/front_mod.F
+      !||====================================================================
       SUBROUTINE PLIST_IDDCONNECT(ADJNCY,XADJ,N)
 C returns in "ADJNCY" nodes connected to node N
 C CPT is the number of nodes
@@ -1282,14 +1185,15 @@ C-----------------------------------------------
       
       RETURN
       END        
-Chd|====================================================================
-Chd|  PLIST_BFS                     source/spmd/node/ddtools.F    
-Chd|-- called by -----------
-Chd|        DOMETIS                       source/spmd/domain_decomposition/grid2mat.F
-Chd|-- calls ---------------
-Chd|        C_IDDCONNECT                  source/spmd/node/ddtools.F    
-Chd|        FRONT_MOD                     share/modules1/front_mod.F    
-Chd|====================================================================
+      !||====================================================================
+      !||    plist_bfs      ../starter/source/spmd/node/ddtools.F
+      !||--- called by ------------------------------------------------------
+      !||    dometis        ../starter/source/spmd/domain_decomposition/grid2mat.F
+      !||--- calls      -----------------------------------------------------
+      !||    c_iddconnect   ../starter/source/spmd/node/ddtools.F
+      !||--- uses       -----------------------------------------------------
+      !||    front_mod      ../starter/share/modules1/front_mod.F
+      !||====================================================================
       SUBROUTINE PLIST_BFS(NELEM,NCONNX,COLORS,ROOTS)
 C-----------------------------------------------
 C            MODULES

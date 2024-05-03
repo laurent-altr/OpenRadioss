@@ -21,30 +21,31 @@ Copyright>        As an alternative to this open-source version, Altair also off
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
 C  |         I10XSAVE                        /intsort/i10xsave.F
-Chd|====================================================================
-Chd|  I10MAIN_TRI                   source/interfaces/intsort/i10main_tri.F
-Chd|-- called by -----------
-Chd|        IMP_TRIPI                     source/implicit/imp_int_k.F   
-Chd|        INTTRI                        source/interfaces/intsort/inttri.F
-Chd|-- calls ---------------
-Chd|        ANCMSG                        source/output/message/message.F
-Chd|        ARRET                         source/system/arret.F         
-Chd|        I10BUCE                       source/interfaces/intsort/i10buce.F
-Chd|        I10TRC                        source/interfaces/intsort/i10trc.F
-Chd|        I10XSAVE                      source/interfaces/intsort/i10xsave.F
-Chd|        IMP_RNUMCD                    source/implicit/imp_int_k.F   
-Chd|        MY_BARRIER                    source/system/machine.F       
-Chd|        SPMD_RNUMCD10                 source/mpi/interfaces/spmd_i7tool.F
-Chd|        SPMD_TRI10BOX                 source/mpi/interfaces/spmd_int.F
-Chd|        SPMD_TRI10GAT                 source/mpi/interfaces/spmd_int.F
-Chd|        STARTIME                      source/system/timer.F         
-Chd|        STOPTIME                      source/system/timer.F         
-Chd|        UPGRADE_MULTIMP               ../common_source/interf/upgrade_multimp.F
-Chd|        H3D_MOD                       share/modules/h3d_mod.F       
-Chd|        INTBUFDEF_MOD                 ../common_source/modules/intbufdef_mod.F
-Chd|        INTBUFMOD                     share/modules/restart_mod.F   
-Chd|        MESSAGE_MOD                   share/message_module/message_mod.F
-Chd|====================================================================
+      !||====================================================================
+      !||    i10main_tri       ../engine/source/interfaces/intsort/i10main_tri.F
+      !||--- called by ------------------------------------------------------
+      !||    imp_tripi         ../engine/source/implicit/imp_int_k.F
+      !||    inttri            ../engine/source/interfaces/intsort/inttri.F
+      !||--- calls      -----------------------------------------------------
+      !||    ancmsg            ../engine/share/message_module/inter_ancmsg_mod.F
+      !||    arret             ../engine/source/system/arret.F
+      !||    i10buce           ../engine/source/interfaces/intsort/i10buce.F
+      !||    i10trc            ../engine/source/interfaces/intsort/i10trc.F
+      !||    i10xsave          ../engine/source/interfaces/intsort/i10xsave.F
+      !||    imp_rnumcd        ../engine/source/implicit/imp_int_k.F
+      !||    my_barrier        ../engine/source/system/machine.F
+      !||    spmd_rnumcd10     ../engine/source/mpi/interfaces/spmd_i7tool.F
+      !||    spmd_tri10box     ../engine/source/mpi/interfaces/spmd_int.F
+      !||    spmd_tri10gat     ../engine/source/mpi/interfaces/spmd_int.F
+      !||    startime          ../engine/source/system/timer.F
+      !||    stoptime          ../engine/source/system/timer.F
+      !||    upgrade_multimp   ../common_source/interf/upgrade_multimp.F
+      !||--- uses       -----------------------------------------------------
+      !||    h3d_mod           ../engine/share/modules/h3d_mod.F
+      !||    intbufdef_mod     ../common_source/modules/intbufdef_mod.F
+      !||    intbufmod         ../engine/share/modules/restart_mod.F
+      !||    message_mod       ../engine/share/message_module/message_mod.F
+      !||====================================================================
       SUBROUTINE I10MAIN_TRI(
      1                  IPARI   ,X       ,V       ,
      2                  MS      ,NIN     ,ITASK   ,MWAG    ,WEIGHT  ,

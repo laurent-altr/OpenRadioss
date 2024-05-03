@@ -20,14 +20,15 @@ Copyright>
 Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
-Chd|====================================================================
-Chd|  INTBUF_FRIC_INI_STARTER       source/interfaces/intbuf/intbufFric_ini_starter.F
-Chd|-- called by -----------
-Chd|        LECTUR                        source/starter/lectur.F       
-Chd|-- calls ---------------
-Chd|        INTBUF_FRIC_MOD               share/modules1/intbuf_fric_mod.F
-Chd|        MESSAGE_MOD                   share/message_module/message_mod.F
-Chd|====================================================================
+      !||====================================================================
+      !||    intbuf_fric_ini_starter   ../starter/source/interfaces/intbuf/intbufFric_ini_starter.F
+      !||--- called by ------------------------------------------------------
+      !||    lectur                    ../starter/source/starter/lectur.F
+      !||--- calls      -----------------------------------------------------
+      !||--- uses       -----------------------------------------------------
+      !||    intbuf_fric_mod           ../starter/share/modules1/intbuf_fric_mod.F
+      !||    message_mod               ../starter/share/message_module/message_mod.F
+      !||====================================================================
       SUBROUTINE INTBUF_FRIC_INI_STARTER(INTBUF_FRIC_TAB  )
 C-----------------------------------------------
 C   M o d u l e s
@@ -102,14 +103,14 @@ C-----
 
       END SUBROUTINE INTBUF_FRIC_INI_STARTER
 
-Chd|====================================================================
-Chd|  INTFRIC_WRESTI                source/interfaces/intbuf/intbufFric_ini_starter.F
-Chd|-- called by -----------
-Chd|        DDSPLIT                       source/restart/ddsplit/ddsplit.F
-Chd|-- calls ---------------
-Chd|        WRITE_I_C                     ../common_source/tools/input_output/write_routtines.c
-Chd|        INTBUF_FRIC_MOD               share/modules1/intbuf_fric_mod.F
-Chd|====================================================================
+      !||====================================================================
+      !||    intfric_wresti    ../starter/source/interfaces/intbuf/intbufFric_ini_starter.F
+      !||--- called by ------------------------------------------------------
+      !||    ddsplit           ../starter/source/restart/ddsplit/ddsplit.F
+      !||--- calls      -----------------------------------------------------
+      !||--- uses       -----------------------------------------------------
+      !||    intbuf_fric_mod   ../starter/share/modules1/intbuf_fric_mod.F
+      !||====================================================================
       SUBROUTINE INTFRIC_WRESTI(INTBUF_FRIC_TAB, LENI)
 C-----------------------------------------------
 C   M o d u l e s
@@ -181,14 +182,15 @@ C--------------------------------------
       END DO
       RETURN
       END SUBROUTINE INTFRIC_WRESTI
-Chd|====================================================================
-Chd|  INTFRIC_WRESTR                source/interfaces/intbuf/intbufFric_ini_starter.F
-Chd|-- called by -----------
-Chd|        DDSPLIT                       source/restart/ddsplit/ddsplit.F
-Chd|-- calls ---------------
-Chd|        WRITE_DB                      source/restart/ddsplit/wrrest.F
-Chd|        INTBUF_FRIC_MOD               share/modules1/intbuf_fric_mod.F
-Chd|====================================================================
+      !||====================================================================
+      !||    intfric_wrestr    ../starter/source/interfaces/intbuf/intbufFric_ini_starter.F
+      !||--- called by ------------------------------------------------------
+      !||    ddsplit           ../starter/source/restart/ddsplit/ddsplit.F
+      !||--- calls      -----------------------------------------------------
+      !||    write_db          ../starter/source/restart/ddsplit/wrrest.F
+      !||--- uses       -----------------------------------------------------
+      !||    intbuf_fric_mod   ../starter/share/modules1/intbuf_fric_mod.F
+      !||====================================================================
       SUBROUTINE INTFRIC_WRESTR(INTBUF_FRIC_TAB, LENR)
 C-----------------------------------------------
 C   M o d u l e s

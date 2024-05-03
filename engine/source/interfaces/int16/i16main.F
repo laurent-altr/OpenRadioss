@@ -20,33 +20,33 @@ Copyright>
 Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
-Chd|====================================================================
-Chd|  I16MAIN_MOD                   source/interfaces/int16/i16main.F
-Chd|-- called by -----------
-Chd|        I16CRIT                       source/interfaces/int16/i16crit.F
-Chd|        I16MAIN                       source/interfaces/int16/i16main.F
-Chd|-- calls ---------------
-Chd|====================================================================
+      !||====================================================================
+      !||    i16main_mod   ../engine/source/interfaces/int16/i16main.F
+      !||--- called by ------------------------------------------------------
+      !||    i16crit       ../engine/source/interfaces/int16/i16crit.F
+      !||    i16main       ../engine/source/interfaces/int16/i16main.F
+      !||====================================================================
       MODULE I16MAIN_MOD
 #include "my_real.inc"
         my_real :: XSLVG(7), XMSRG(7)
       END MODULE
-Chd|====================================================================
-Chd|  I16MAIN                       source/interfaces/int16/i16main.F
-Chd|-- called by -----------
-Chd|        LAG_MULT                      source/tools/lagmul/lag_mult.F
-Chd|-- calls ---------------
-Chd|        I10LAGM                       source/interfaces/int16/i10lagm.F
-Chd|        I16BUCE                       source/interfaces/int16/i16buce.F
-Chd|        I16CRIT                       source/interfaces/int16/i16crit.F
-Chd|        I16LAGM                       source/interfaces/int16/i16lagm.F
-Chd|        I20LAGM                       source/interfaces/int16/i20lagm.F
-Chd|        I8LAGM                        source/interfaces/int16/i8lagm.F
-Chd|        MY_BARRIER                    source/system/machine.F       
-Chd|        GROUPDEF_MOD                  ../common_source/modules/groupdef_mod.F
-Chd|        I16MAIN_MOD                   source/interfaces/int16/i16main.F
-Chd|        INTBUFDEF_MOD                 ../common_source/modules/intbufdef_mod.F
-Chd|====================================================================
+      !||====================================================================
+      !||    i16main         ../engine/source/interfaces/int16/i16main.F
+      !||--- called by ------------------------------------------------------
+      !||    lag_mult        ../engine/source/tools/lagmul/lag_mult.F
+      !||--- calls      -----------------------------------------------------
+      !||    i10lagm         ../engine/source/interfaces/int16/i10lagm.F
+      !||    i16buce         ../engine/source/interfaces/int16/i16buce.F
+      !||    i16crit         ../engine/source/interfaces/int16/i16crit.F
+      !||    i16lagm         ../engine/source/interfaces/int16/i16lagm.F
+      !||    i20lagm         ../engine/source/interfaces/int16/i20lagm.F
+      !||    i8lagm          ../engine/source/interfaces/int16/i8lagm.F
+      !||    my_barrier      ../engine/source/system/machine.F
+      !||--- uses       -----------------------------------------------------
+      !||    groupdef_mod    ../common_source/modules/groupdef_mod.F
+      !||    i16main_mod     ../engine/source/interfaces/int16/i16main.F
+      !||    intbufdef_mod   ../common_source/modules/intbufdef_mod.F
+      !||====================================================================
       SUBROUTINE I16MAIN(
      1          NIN    ,IPARI    ,INTBUF_TAB ,X      ,V      ,
      2          A      ,ITASK    ,IGRNOD     ,EMINX  ,WAT    ,

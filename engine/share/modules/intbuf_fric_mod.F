@@ -20,24 +20,41 @@ Copyright>
 Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
-Chd|====================================================================
-Chd|  INTBUF_FRIC_MOD               share/modules/intbuf_fric_mod.F
-Chd|-- called by -----------
-Chd|        I11MAINF                      source/interfaces/int11/i11mainf.F
-Chd|        I24MAINF                      source/interfaces/int24/i24main.F
-Chd|        I25MAINF                      source/interfaces/int25/i25mainf.F
-Chd|        I7MAINF                       source/interfaces/int07/i7mainf.F
-Chd|        INTFOP2                       source/interfaces/interf/intfop2.F
-Chd|        INTFRIC_RRESTI                share/modules/intbuf_fric_mod.F
-Chd|        INTFRIC_RRESTR                share/modules/intbuf_fric_mod.F
-Chd|        INTFRIC_WRESTI                share/modules/intbuf_fric_mod.F
-Chd|        INTFRIC_WRESTR                share/modules/intbuf_fric_mod.F
-Chd|        RESOL                         source/engine/resol.F         
-Chd|        RESOL_HEAD                    source/engine/resol_head.F    
-Chd|        WRRESTP                       source/output/restart/wrrestp.F
-Chd|        INTBUFFRIC_MOD                share/modules/restart_mod.F   
-Chd|-- calls ---------------
-Chd|====================================================================
+      !||====================================================================
+      !||    intbuf_fric_mod                 ../starter/share/modules1/intbuf_fric_mod.F
+      !||--- called by ------------------------------------------------------
+      !||    ddsplit                         ../starter/source/restart/ddsplit/ddsplit.F
+      !||    hm_read_friction_models         ../starter/source/interfaces/friction/reader/hm_read_friction_models.F
+      !||    hm_read_friction_orientations   ../starter/source/interfaces/friction/reader/hm_read_friction_orientations.F
+      !||    hm_read_inter_struct            ../starter/source/interfaces/reader/hm_read_inter_struct.F
+      !||    hm_read_inter_type07            ../starter/source/interfaces/int07/hm_read_inter_type07.F
+      !||    hm_read_inter_type11            ../starter/source/interfaces/int11/hm_read_inter_type11.F
+      !||    hm_read_inter_type24            ../starter/source/interfaces/int24/hm_read_inter_type24.F
+      !||    hm_read_inter_type25            ../starter/source/interfaces/int25/hm_read_inter_type25.F
+      !||    hm_read_interfaces              ../starter/source/interfaces/reader/hm_read_interfaces.F
+      !||    i11sti3                         ../starter/source/interfaces/inter3d1/i11sti3.F
+      !||    i24gapm                         ../starter/source/interfaces/inter3d1/i24sti3.F
+      !||    i24sti3                         ../starter/source/interfaces/inter3d1/i24sti3.F
+      !||    i25gapm                         ../starter/source/interfaces/inter3d1/i25sti3.F
+      !||    i25sti3                         ../starter/source/interfaces/inter3d1/i25sti3.F
+      !||    i25sti_edg                      ../starter/source/interfaces/inter3d1/i25sti_edg.F
+      !||    i7sti3                          ../starter/source/interfaces/inter3d1/i7sti3.F
+      !||    inint3                          ../starter/source/interfaces/inter3d1/inint3.F
+      !||    inintr                          ../starter/source/interfaces/interf1/inintr.F
+      !||    inintr_orthdirfric              ../starter/source/interfaces/interf1/inintr_orthdirfric.F
+      !||    intbuf_fric_copy                ../starter/source/interfaces/interf1/intbuf_fric_copy.F
+      !||    intbuf_fric_ini_starter         ../starter/source/interfaces/intbuf/intbufFric_ini_starter.F
+      !||    intbuf_ini_starter              ../starter/source/interfaces/intbuf/intbuf_ini_starter.F
+      !||    inter_dcod_friction             ../starter/source/interfaces/reader/inter_dcod_friction.F
+      !||    intfric_wresti                  ../starter/source/interfaces/intbuf/intbufFric_ini_starter.F
+      !||    intfric_wrestr                  ../starter/source/interfaces/intbuf/intbufFric_ini_starter.F
+      !||    lecint                          ../starter/source/interfaces/interf1/lecint.F
+      !||    lectur                          ../starter/source/starter/lectur.F
+      !||    split_interfaces                ../starter/source/restart/ddsplit/split_interfaces.F
+      !||    st_qaprint_driver               ../starter/source/output/qaprint/st_qaprint_driver.F
+      !||    st_qaprint_friction             ../starter/source/output/qaprint/st_qaprint_friction.F
+      !||    triintfric                      ../starter/source/interfaces/interf1/trintfric.F
+      !||====================================================================
       MODULE INTBUF_FRIC_MOD
 C-----------------------------------------------
 C   M o d u l e s
@@ -70,14 +87,14 @@ C-----------------------------------------------
 
 
 
-Chd|====================================================================
-Chd|  INTFRIC_WRESTI                share/modules/intbuf_fric_mod.F
-Chd|-- called by -----------
-Chd|        WRRESTP                       source/output/restart/wrrestp.F
-Chd|-- calls ---------------
-Chd|        WRITE_I_C                     ../common_source/tools/input_output/write_routtines.c
-Chd|        INTBUF_FRIC_MOD               share/modules/intbuf_fric_mod.F
-Chd|====================================================================
+      !||====================================================================
+      !||    intfric_wresti    ../starter/source/interfaces/intbuf/intbufFric_ini_starter.F
+      !||--- called by ------------------------------------------------------
+      !||    ddsplit           ../starter/source/restart/ddsplit/ddsplit.F
+      !||--- calls      -----------------------------------------------------
+      !||--- uses       -----------------------------------------------------
+      !||    intbuf_fric_mod   ../starter/share/modules1/intbuf_fric_mod.F
+      !||====================================================================
       SUBROUTINE INTFRIC_WRESTI(INTBUF_FRIC_TAB)
 C-----------------------------------------------
 C   M o d u l e s
@@ -136,14 +153,15 @@ C--------------------------------------
       END DO
       RETURN
       END SUBROUTINE INTFRIC_WRESTI
-Chd|====================================================================
-Chd|  INTFRIC_WRESTR                share/modules/intbuf_fric_mod.F
-Chd|-- called by -----------
-Chd|        WRRESTP                       source/output/restart/wrrestp.F
-Chd|-- calls ---------------
-Chd|        WRITE_DB                      source/output/tools/write_db.F
-Chd|        INTBUF_FRIC_MOD               share/modules/intbuf_fric_mod.F
-Chd|====================================================================
+      !||====================================================================
+      !||    intfric_wrestr    ../starter/source/interfaces/intbuf/intbufFric_ini_starter.F
+      !||--- called by ------------------------------------------------------
+      !||    ddsplit           ../starter/source/restart/ddsplit/ddsplit.F
+      !||--- calls      -----------------------------------------------------
+      !||    write_db          ../starter/source/restart/ddsplit/wrrest.F
+      !||--- uses       -----------------------------------------------------
+      !||    intbuf_fric_mod   ../starter/share/modules1/intbuf_fric_mod.F
+      !||====================================================================
       SUBROUTINE INTFRIC_WRESTR(INTBUF_FRIC_TAB)
 C-----------------------------------------------
 C   M o d u l e s
@@ -191,14 +209,15 @@ C--------------------------------------
       RETURN
       END SUBROUTINE INTFRIC_WRESTR
 
-Chd|====================================================================
-Chd|  INTFRIC_RRESTI                share/modules/intbuf_fric_mod.F
-Chd|-- called by -----------
-Chd|        RDRESB                        source/output/restart/rdresb.F
-Chd|-- calls ---------------
-Chd|        READ_I_C                      ../common_source/tools/input_output/write_routtines.c
-Chd|        INTBUF_FRIC_MOD               share/modules/intbuf_fric_mod.F
-Chd|====================================================================
+      !||====================================================================
+      !||    intfric_rresti    ../engine/share/modules/intbuf_fric_mod.F
+      !||--- called by ------------------------------------------------------
+      !||    rdresb            ../engine/source/output/restart/rdresb.F
+      !||--- calls      -----------------------------------------------------
+      !||    read_i_c          ../common_source/tools/input_output/write_routtines.c
+      !||--- uses       -----------------------------------------------------
+      !||    intbuf_fric_mod   ../engine/share/modules/intbuf_fric_mod.F
+      !||====================================================================
       SUBROUTINE INTFRIC_RRESTI(INTBUF_FRIC_TAB)
 C-----------------------------------------------
 C   M o d u l e s
@@ -273,14 +292,15 @@ C--------------------------------------
       RETURN
       END SUBROUTINE INTFRIC_RRESTI
 
-Chd|====================================================================
-Chd|  INTFRIC_RRESTR                share/modules/intbuf_fric_mod.F
-Chd|-- called by -----------
-Chd|        RDRESB                        source/output/restart/rdresb.F
-Chd|-- calls ---------------
-Chd|        READ_DB                       source/output/tools/read_db.F 
-Chd|        INTBUF_FRIC_MOD               share/modules/intbuf_fric_mod.F
-Chd|====================================================================
+      !||====================================================================
+      !||    intfric_rrestr    ../engine/share/modules/intbuf_fric_mod.F
+      !||--- called by ------------------------------------------------------
+      !||    rdresb            ../engine/source/output/restart/rdresb.F
+      !||--- calls      -----------------------------------------------------
+      !||    read_db           ../engine/source/output/tools/read_db.F
+      !||--- uses       -----------------------------------------------------
+      !||    intbuf_fric_mod   ../engine/share/modules/intbuf_fric_mod.F
+      !||====================================================================
       SUBROUTINE INTFRIC_RRESTR(INTBUF_FRIC_TAB)
 C-----------------------------------------------
 C   M o d u l e s

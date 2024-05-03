@@ -20,14 +20,13 @@ Copyright>
 Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
-Chd|====================================================================
-Chd|  IMP_INTBUFDEF                 share/modules/imp_mod_def.F   
-Chd|-- called by -----------
-Chd|        I24KE3                        source/interfaces/int24/i24ke3.F
-Chd|        IMP_INTBUF_INI                source/implicit/imp_solv.F    
-Chd|        IMP_INTBUF                    share/modules/imp_mod_def.F   
-Chd|-- calls ---------------
-Chd|====================================================================
+      !||====================================================================
+      !||    imp_intbufdef    ../engine/share/modules/imp_mod_def.F
+      !||--- called by ------------------------------------------------------
+      !||    i24ke3           ../engine/source/interfaces/int24/i24ke3.F
+      !||    imp_intbuf       ../engine/share/modules/imp_mod_def.F
+      !||    imp_intbuf_ini   ../engine/source/implicit/imp_solv.F
+      !||====================================================================
       MODULE IMP_INTBUFDEF 
 C----------------------------------------------------------------------- 
 #include "my_real.inc"      
@@ -68,25 +67,25 @@ C=======================================================================
 C=======================================================================
 c---------------
       END MODULE IMP_INTBUFDEF
-Chd|====================================================================
-Chd|  IMP_INTBUF                    share/modules/imp_mod_def.F   
-Chd|-- called by -----------
-Chd|        CP_IMPBUF                     source/implicit/produt_v.F    
-Chd|        DEALLOCM_IMP                  source/implicit/imp_solv.F    
-Chd|        DIM_INT7                      source/implicit/ind_glob_k.F  
-Chd|        DIM_INT_K                     source/implicit/ind_glob_k.F  
-Chd|        DIM_KINE_I                    source/implicit/ind_glob_k.F  
-Chd|        I24MAINF                      source/interfaces/int24/i24main.F
-Chd|        I24MAIN_TRI                   source/interfaces/intsort/i24main_tri.F
-Chd|        I25MAIN_TRI                   source/interfaces/intsort/i25main_tri.F
-Chd|        IMP_INT_K                     source/implicit/imp_int_k.F   
-Chd|        IND_INT_K                     source/implicit/ind_glob_k.F  
-Chd|        INI_BMINMA_IMP                source/implicit/imp_solv.F    
-Chd|        RESOL                         source/engine/resol.F         
-Chd|-- calls ---------------
-Chd|        IMP_INTBUFDEF                 share/modules/imp_mod_def.F   
-Chd|        INTBUFDEF_MOD                 ../common_source/modules/intbufdef_mod.F
-Chd|====================================================================
+      !||====================================================================
+      !||    imp_intbuf       ../engine/share/modules/imp_mod_def.F
+      !||--- called by ------------------------------------------------------
+      !||    cp_impbuf        ../engine/source/implicit/produt_v.F
+      !||    deallocm_imp     ../engine/source/implicit/imp_solv.F
+      !||    dim_int7         ../engine/source/implicit/ind_glob_k.F
+      !||    dim_int_k        ../engine/source/implicit/ind_glob_k.F
+      !||    dim_kine_i       ../engine/source/implicit/ind_glob_k.F
+      !||    i24main_tri      ../engine/source/interfaces/intsort/i24main_tri.F
+      !||    i24mainf         ../engine/source/interfaces/int24/i24main.F
+      !||    i25main_tri      ../engine/source/interfaces/intsort/i25main_tri.F
+      !||    imp_int_k        ../engine/source/implicit/imp_int_k.F
+      !||    ind_int_k        ../engine/source/implicit/ind_glob_k.F
+      !||    ini_bminma_imp   ../engine/source/implicit/imp_solv.F
+      !||    resol            ../engine/source/engine/resol.F
+      !||--- uses       -----------------------------------------------------
+      !||    imp_intbufdef    ../engine/share/modules/imp_mod_def.F
+      !||    intbufdef_mod    ../common_source/modules/intbufdef_mod.F
+      !||====================================================================
       MODULE IMP_INTBUF
         USE INTBUFDEF_MOD
         USE IMP_INTBUFDEF
@@ -94,15 +93,14 @@ Chd|====================================================================
         TYPE(IMP_INTBUF_STRUCT_),DIMENSION(:),ALLOCATABLE :: INTBUF_TAB_IMP
       my_real, DIMENSION(:,:), ALLOCATABLE :: BMINMA_IMP
       END MODULE IMP_INTBUF
-Chd|====================================================================
-Chd|  IMP_INTTD                     share/modules/imp_mod_def.F   
-Chd|-- called by -----------
-Chd|        CP_INTTD                      source/implicit/imp_int_k.F   
-Chd|        IMP_INT_K                     source/implicit/imp_int_k.F   
-Chd|        IMP_RNUMCD                    source/implicit/imp_int_k.F   
-Chd|        SAV_INTTD                     source/implicit/imp_int_k.F   
-Chd|-- calls ---------------
-Chd|====================================================================
+      !||====================================================================
+      !||    imp_inttd    ../engine/share/modules/imp_mod_def.F
+      !||--- called by ------------------------------------------------------
+      !||    cp_inttd     ../engine/source/implicit/imp_int_k.F
+      !||    imp_int_k    ../engine/source/implicit/imp_int_k.F
+      !||    imp_rnumcd   ../engine/source/implicit/imp_int_k.F
+      !||    sav_inttd    ../engine/source/implicit/imp_int_k.F
+      !||====================================================================
       MODULE IMP_INTTD
 C tableau de travail interface traverse detection 
       INTEGER, DIMENSION(:),ALLOCATABLE :: NS_IMP1,IAD1_NIN

@@ -20,86 +20,93 @@ Copyright>
 Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
-Chd|====================================================================
-Chd|  WRRESTP                       source/output/restart/wrrestp.F
-Chd|-- called by -----------
-Chd|        RESOL                         source/engine/resol.F         
-Chd|-- calls ---------------
-Chd|        COMPRESS_I_NNZ                ../common_source/comm/compress_nnz.F
-Chd|        COMPRESS_R_NNZ                ../common_source/comm/compress_nnz.F
-Chd|        CUR_FIL_C                     ../common_source/tools/input_output/write_routtines.c
-Chd|        EIGWREST                      source/output/restart/wrrest.F
-Chd|        FXBWREST                      source/output/restart/wrrest.F
-Chd|        INTFRIC_WRESTI                share/modules/intbuf_fric_mod.F
-Chd|        INTFRIC_WRESTR                share/modules/intbuf_fric_mod.F
-Chd|        INTSTAMP_WRESTI               share/modules/intstamp_mod.F  
-Chd|        INTSTAMP_WRESTR               share/modules/intstamp_mod.F  
-Chd|        OPEN_C                        ../common_source/tools/input_output/write_routtines.c
-Chd|        PBLAST_WRITE_ENGINE           ../common_source/modules/loads/pblast_mod.F
-Chd|        SPMD_GLOB_DMIN9               source/mpi/fluid/spmd_cfd.F   
-Chd|        SPMD_GLOB_DSUM9               source/mpi/interfaces/spmd_th.F
-Chd|        SPMD_SAVEFI                   source/mpi/interfaces/spmd_i7tool.F
-Chd|        SPMD_SAVESPH                  source/mpi/sph/spmd_sptool.F  
-Chd|        TABLE_WRESTI                  source/tools/curve/table_tools.F
-Chd|        TABLE_WRESTR                  source/tools/curve/table_tools.F
-Chd|        THSURF_WRITE_RESTART          ../common_source/modules/interfaces/th_surf_mod.F
-Chd|        USERWI_WRITE                  source/user_interface/userwindow_interface_routines.F
-Chd|        WRCOMI                        source/output/restart/wrcomm.F
-Chd|        WRCOMR                        source/output/restart/wrcomm.F
-Chd|        WRITE_C_C                     ../common_source/tools/input_output/write_routtines.c
-Chd|        WRITE_DB                      source/output/tools/write_db.F
-Chd|        WRITE_DPDB                    source/output/tools/write_db.F
-Chd|        WRITE_ELGROUP_PARAM           source/output/restart/write_elgroup_param.F
-Chd|        WRITE_INTBUF                  source/output/restart/write_intbuf.F
-Chd|        WRITE_I_C                     ../common_source/tools/input_output/write_routtines.c
-Chd|        WRITE_JOINT                   source/output/restart/write_joint.F
-Chd|        WRITE_MATPARAM                source/output/restart/write_matparam.F
-Chd|        WRITE_NLOC_STRUCT             source/output/restart/write_nloc_struct.F
-Chd|        WRITE_PCYL                    source/output/restart/write_pcyl.F
-Chd|        WRITE_SENSORS                 source/output/restart/write_sensors.F
-Chd|        WRITE_TH_RESTART              source/output/th/write_th_restart.F
-Chd|        W_BUFBRIC_22                  source/interfaces/int22/w_bufbric_22.F
-Chd|        W_CLUSTER                     source/output/cluster/w_cluster.F
-Chd|        W_ELBUF_STR                   source/elements/elbuf/w_elbuf_str.F
-Chd|        W_FAILWAVE                    source/output/restart/w_failwave.F
-Chd|        W_GROUP_STR                   source/output/restart/w_group_str.F
-Chd|        W_LINE_STR                    source/output/restart/w_line_str.F
-Chd|        W_SUBSET_STR                  source/output/restart/w_subset_str.F
-Chd|        W_SURF_STR                    source/output/restart/w_surf_str.F
-Chd|        ALE_CONNECTIVITY_MOD          ../common_source/modules/ale/ale_connectivity_mod.F
-Chd|        ALE_MOD                       ../common_source/modules/ale/ale_mod.F
-Chd|        CLUSTER_MOD                   share/modules/cluster_mod.F   
-Chd|        DAMP_MOD                      share/modules/damp_mod.F      
-Chd|        EBCS_MOD                      ../common_source/modules/boundary_conditions/ebcs_mod.F
-Chd|        ECND_MOD                      share/modules/ecdn_mod.F      
-Chd|        GROUPDEF_MOD                  ../common_source/modules/groupdef_mod.F
-Chd|        GROUP_MOD                     share/modules/group_mod.F     
-Chd|        H3D_MOD                       share/modules/h3d_mod.F       
-Chd|        INOUTFILE_MOD                 ../common_source/modules/inoutfile_mod.F
-Chd|        INT8_MOD                      ../common_source/modules/interfaces/int8_mod.F
-Chd|        INTBUFDEF_MOD                 ../common_source/modules/intbufdef_mod.F
-Chd|        INTBUFMOD                     share/modules/restart_mod.F   
-Chd|        INTBUF_FRIC_MOD               share/modules/intbuf_fric_mod.F
-Chd|        INTERFACES_MOD                ../common_source/modules/interfaces/interfaces_mod.F
-Chd|        INTSTAMP_GLOB_MOD             share/modules/intstamp_glob_mod.F
-Chd|        LOADS_MOD                     ../common_source/modules/loads/loads_mod.F
-Chd|        MAT_ELEM_MOD                  ../common_source/modules/mat_elem/mat_elem_mod.F
-Chd|        MONVOL_STRUCT_MOD             share/modules/monvol_struct_mod.F
-Chd|        MULTI_FVM_MOD                 ../common_source/modules/ale/multi_fvm_mod.F
-Chd|        OUTMAX_MOD                    ../common_source/modules/outmax_mod.F
-Chd|        OUTPUTS_MOD                   ../common_source/modules/outputs_mod.F
-Chd|        OUTPUT_MOD                    ../common_source/modules/output/output_mod.F
-Chd|        PBLAST_MOD                    ../common_source/modules/loads/pblast_mod.F
-Chd|        PINCHTYPE_MOD                 ../common_source/modules/pinchtype_mod.F
-Chd|        RESTMOD                       share/modules/restart_mod.F   
-Chd|        SEATBELT_MOD                  ../common_source/modules/seatbelt_mod.F
-Chd|        SENSOR_MOD                    share/modules/sensor_mod.F    
-Chd|        SMS_MOD                       share/modules/sms_mod.F       
-Chd|        SPH_MOD                       share/modules/sph_mod.F       
-Chd|        STATE_MOD                     ../common_source/modules/state_mod.F
-Chd|        TABLE_GLOB_MOD                share/modules/table_glob_mod.F
-Chd|        USER_WINDOWS_MOD              ../common_source/modules/user_windows_mod.F
-Chd|====================================================================
+      !||====================================================================
+      !||    wrrestp                ../engine/source/output/restart/wrrestp.F
+      !||--- called by ------------------------------------------------------
+      !||    resol                  ../engine/source/engine/resol.F
+      !||--- calls      -----------------------------------------------------
+      !||    compress_i_nnz         ../common_source/comm/compress_nnz.F
+      !||    compress_r_nnz         ../common_source/comm/compress_nnz.F
+      !||    cur_fil_c              ../common_source/tools/input_output/write_routtines.c
+      !||    eigwrest               ../engine/source/output/restart/wrrest.F
+      !||    fxbwrest               ../engine/source/output/restart/wrrest.F
+      !||    intfric_wresti         ../engine/share/modules/intbuf_fric_mod.F
+      !||    intfric_wrestr         ../engine/share/modules/intbuf_fric_mod.F
+      !||    intstamp_wresti        ../engine/share/modules/intstamp_mod.F
+      !||    intstamp_wrestr        ../engine/share/modules/intstamp_mod.F
+      !||    open_c                 ../common_source/tools/input_output/write_routtines.c
+      !||    pblast_write_engine    ../common_source/modules/loads/pblast_mod.F
+      !||    python_serialize       ../common_source/modules/python_mod.F90
+      !||    spmd_glob_dmin9        ../engine/source/mpi/fluid/spmd_cfd.F
+      !||    spmd_glob_dsum9        ../engine/source/mpi/interfaces/spmd_th.F
+      !||    spmd_savefi            ../engine/source/mpi/interfaces/spmd_i7tool.F
+      !||    spmd_savesph           ../engine/source/mpi/sph/spmd_sptool.F
+      !||    table_wresti           ../engine/source/tools/curve/table_tools.F
+      !||    table_wrestr           ../engine/source/tools/curve/table_tools.F
+      !||    thsurf_write_restart   ../common_source/modules/interfaces/th_surf_mod.F
+      !||    userwi_write           ../engine/source/user_interface/userwindow_interface_routines.F
+      !||    w_bufbric_22           ../engine/source/interfaces/int22/w_bufbric_22.F
+      !||    w_cluster              ../engine/source/output/cluster/w_cluster.F
+      !||    w_elbuf_str            ../engine/source/elements/elbuf/w_elbuf_str.F
+      !||    w_failwave             ../engine/source/output/restart/w_failwave.F
+      !||    w_group_str            ../engine/source/output/restart/w_group_str.F
+      !||    w_line_str             ../engine/source/output/restart/w_line_str.F
+      !||    w_subset_str           ../engine/source/output/restart/w_subset_str.F
+      !||    w_surf_str             ../engine/source/output/restart/w_surf_str.F
+      !||    wrcomi                 ../engine/source/output/restart/wrcomm.F
+      !||    wrcomr                 ../engine/source/output/restart/wrcomm.F
+      !||    write_ale_grid         ../common_source/output/restart/write_ale_grid.F90
+      !||    write_bcs_wall         ../common_source/output/restart/write_bcs_wall.F90
+      !||    write_c_c              ../common_source/tools/input_output/write_routtines.c
+      !||    write_db               ../engine/source/output/tools/write_db.F
+      !||    write_dpdb             ../engine/source/output/tools/write_db.F
+      !||    write_elgroup_param    ../engine/source/output/restart/write_elgroup_param.F
+      !||    write_i_c              ../common_source/tools/input_output/write_routtines.c
+      !||    write_intbuf           ../engine/source/output/restart/write_intbuf.F
+      !||    write_joint            ../engine/source/output/restart/write_joint.F
+      !||    write_matparam         ../engine/source/output/restart/write_matparam.F
+      !||    write_nloc_struct      ../engine/source/output/restart/write_nloc_struct.F
+      !||    write_pcyl             ../engine/source/output/restart/write_pcyl.F
+      !||    write_sensors          ../engine/source/output/restart/write_sensors.F
+      !||    write_th_restart       ../engine/source/output/th/write_th_restart.F
+      !||--- uses       -----------------------------------------------------
+      !||    ale_connectivity_mod   ../common_source/modules/ale/ale_connectivity_mod.F
+      !||    ale_mod                ../common_source/modules/ale/ale_mod.F
+      !||    bcs_mod                ../common_source/modules/boundary_conditions/bcs_mod.F90
+      !||    cluster_mod            ../engine/share/modules/cluster_mod.F
+      !||    damp_mod               ../engine/share/modules/damp_mod.F
+      !||    ebcs_mod               ../common_source/modules/boundary_conditions/ebcs_mod.F
+      !||    ecnd_mod               ../engine/share/modules/ecdn_mod.F
+      !||    group_mod              ../engine/share/modules/group_mod.F
+      !||    groupdef_mod           ../common_source/modules/groupdef_mod.F
+      !||    h3d_mod                ../engine/share/modules/h3d_mod.F
+      !||    inoutfile_mod          ../common_source/modules/inoutfile_mod.F
+      !||    int8_mod               ../common_source/modules/interfaces/int8_mod.F
+      !||    intbuf_fric_mod        ../engine/share/modules/intbuf_fric_mod.F
+      !||    intbufdef_mod          ../common_source/modules/intbufdef_mod.F
+      !||    intbufmod              ../engine/share/modules/restart_mod.F
+      !||    interfaces_mod         ../common_source/modules/interfaces/interfaces_mod.F
+      !||    intstamp_glob_mod      ../engine/share/modules/intstamp_glob_mod.F
+      !||    loads_mod              ../common_source/modules/loads/loads_mod.F
+      !||    mat_elem_mod           ../common_source/modules/mat_elem/mat_elem_mod.F
+      !||    monvol_struct_mod      ../engine/share/modules/monvol_struct_mod.F
+      !||    multi_fvm_mod          ../common_source/modules/ale/multi_fvm_mod.F
+      !||    names_and_titles_mod   ../common_source/modules/names_and_titles_mod.F
+      !||    outmax_mod             ../common_source/modules/outmax_mod.F
+      !||    output_mod             ../common_source/modules/output/output_mod.F
+      !||    outputs_mod            ../common_source/modules/outputs_mod.F
+      !||    pblast_mod             ../common_source/modules/loads/pblast_mod.F
+      !||    pinchtype_mod          ../common_source/modules/pinchtype_mod.F
+      !||    python_funct_mod       ../common_source/modules/python_mod.F90
+      !||    restmod                ../engine/share/modules/restart_mod.F
+      !||    seatbelt_mod           ../common_source/modules/seatbelt_mod.F
+      !||    sensor_mod             ../engine/share/modules/sensor_mod.F
+      !||    sms_mod                ../engine/share/modules/sms_mod.F
+      !||    sph_mod                ../engine/share/modules/sph_mod.F
+      !||    state_mod              ../common_source/modules/state_mod.F
+      !||    table_glob_mod         ../engine/share/modules/table_glob_mod.F
+      !||    user_windows_mod       ../common_source/modules/user_windows_mod.F
+      !||====================================================================
       SUBROUTINE WRRESTP(AF    ,IAF       ,XDP       ,ICH       ,ADDCNE,
      .           ELBUF_TAB     ,XFEM_TAB  ,INTBUF_TAB, MULTI_FVM,MAT_ELEM,
      .           H3D_DATA      ,INTBUF_FRIC_TAB,SUBSET,

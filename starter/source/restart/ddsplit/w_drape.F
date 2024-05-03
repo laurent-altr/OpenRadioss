@@ -20,15 +20,15 @@ Copyright>
 Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
-Chd|====================================================================
-Chd|  W_DRAPE                       source/restart/ddsplit/w_drape.F
-Chd|-- called by -----------
-Chd|        DDSPLIT                       source/restart/ddsplit/ddsplit.F
-Chd|-- calls ---------------
-Chd|        WRITE_DB                      source/restart/ddsplit/wrrest.F
-Chd|        WRITE_I_C                     ../common_source/tools/input_output/write_routtines.c
-Chd|        DRAPE_MOD                     share/modules1/drape_mod.F    
-Chd|====================================================================
+      !||====================================================================
+      !||    w_drape     ../starter/source/restart/ddsplit/w_drape.F
+      !||--- called by ------------------------------------------------------
+      !||    ddsplit     ../starter/source/restart/ddsplit/ddsplit.F
+      !||--- calls      -----------------------------------------------------
+      !||    write_db    ../starter/source/restart/ddsplit/wrrest.F
+      !||--- uses       -----------------------------------------------------
+      !||    drape_mod   ../starter/share/modules1/drape_mod.F
+      !||====================================================================
       SUBROUTINE W_DRAPE(DRAPE,INDX, CEP,P,NUMEL,NUMEL_L,NELDRP_L,LEN_IA,LEN_AM)          
          USE DRAPE_MOD
 C---------------------------------------------

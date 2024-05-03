@@ -21,13 +21,14 @@ Copyright>        As an alternative to this open-source version, Altair also off
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
 C==========================================================================
-Chd|====================================================================
-Chd|  SPMD_GLOB_MIN5                source/mpi/generic/spmd_glob_min5.F
-Chd|-- called by -----------
-Chd|        RESOL                         source/engine/resol.F         
-Chd|-- calls ---------------
-Chd|        INTBUFDEF_MOD                 ../common_source/modules/intbufdef_mod.F
-Chd|====================================================================
+      !||====================================================================
+      !||    spmd_glob_min5        ../engine/source/mpi/generic/spmd_glob_min5.F
+      !||--- called by ------------------------------------------------------
+      !||    resol                 ../engine/source/engine/resol.F
+      !||--- calls      -----------------------------------------------------
+      !||--- uses       -----------------------------------------------------
+      !||    intbufdef_mod         ../common_source/modules/intbufdef_mod.F
+      !||====================================================================
       SUBROUTINE SPMD_GLOB_MIN5(DT2  ,ITYPTS,NELTS,ICODT,IMSCH,
      .                         TSTOP,IWIOUT,MSTOP,ISMSCH,
      .                         INT24USE,NBINTC,INTLIST,IPARI,INTBUF_TAB)

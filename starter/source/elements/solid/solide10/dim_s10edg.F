@@ -20,12 +20,11 @@ Copyright>
 Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
-Chd|====================================================================
-Chd|  DIM_S10EDG                    source/elements/solid/solide10/dim_s10edg.F
-Chd|-- called by -----------
-Chd|        LECTUR                        source/starter/lectur.F       
-Chd|-- calls ---------------
-Chd|====================================================================
+      !||====================================================================
+      !||    dim_s10edg   ../starter/source/elements/solid/solide10/dim_s10edg.F
+      !||--- called by ------------------------------------------------------
+      !||    lectur       ../starter/source/starter/lectur.F
+      !||====================================================================
       SUBROUTINE DIM_S10EDG(NEDG, IXS10 ,IPARG ,ITAGND)
 C=======================================================================
 C-----------------------------------------------
@@ -82,12 +81,11 @@ C
 C
       RETURN
       END
-Chd|====================================================================
-Chd|  IND_S10EDG                    source/elements/solid/solide10/dim_s10edg.F
-Chd|-- called by -----------
-Chd|        LECTUR                        source/starter/lectur.F       
-Chd|-- calls ---------------
-Chd|====================================================================
+      !||====================================================================
+      !||    ind_s10edg   ../starter/source/elements/solid/solide10/dim_s10edg.F
+      !||--- called by ------------------------------------------------------
+      !||    lectur       ../starter/source/starter/lectur.F
+      !||====================================================================
       SUBROUTINE IND_S10EDG(ICNDS10, IXS, IXS10 ,IPARG,ITAGND)
 C=======================================================================
 C-----------------------------------------------
@@ -165,12 +163,11 @@ C                > NS10E : to be tagged first and be degenerated after
 C
       RETURN
       END
-Chd|====================================================================
-Chd|  REORD_ICND                    source/elements/solid/solide10/dim_s10edg.F
-Chd|-- called by -----------
-Chd|        LECTUR                        source/starter/lectur.F       
-Chd|-- calls ---------------
-Chd|====================================================================
+      !||====================================================================
+      !||    reord_icnd   ../starter/source/elements/solid/solide10/dim_s10edg.F
+      !||--- called by ------------------------------------------------------
+      !||    lectur       ../starter/source/starter/lectur.F
+      !||====================================================================
       SUBROUTINE REORD_ICND(ICNDS10, ITAGND)
 C=======================================================================
 C-----------------------------------------------
@@ -207,18 +204,17 @@ C
 C
       RETURN
       END
-Chd|====================================================================
-Chd|  REMOVE_ND                     source/elements/solid/solide10/dim_s10edg.F
-Chd|-- called by -----------
-Chd|        HM_READ_GRAV                  source/loads/general/grav/hm_read_grav.F
-Chd|        HM_READ_RWALL_CYL             source/constraints/general/rwall/hm_read_rwall_cyl.F
-Chd|        HM_READ_RWALL_LAGMUL          source/constraints/general/rwall/hm_read_rwall_lagmul.F
-Chd|        HM_READ_RWALL_PARAL           source/constraints/general/rwall/hm_read_rwall_paral.F
-Chd|        HM_READ_RWALL_PLANE           source/constraints/general/rwall/hm_read_rwall_plane.F
-Chd|        HM_READ_RWALL_SPHER           source/constraints/general/rwall/hm_read_rwall_spher.F
-Chd|        HM_READ_RWALL_THERM           source/constraints/general/rwall/hm_read_rwall_therm.F
-Chd|-- calls ---------------
-Chd|====================================================================
+      !||====================================================================
+      !||    remove_nd              ../starter/source/elements/solid/solide10/dim_s10edg.F
+      !||--- called by ------------------------------------------------------
+      !||    hm_read_grav           ../starter/source/loads/general/grav/hm_read_grav.F
+      !||    hm_read_rwall_cyl      ../starter/source/constraints/general/rwall/hm_read_rwall_cyl.F
+      !||    hm_read_rwall_lagmul   ../starter/source/constraints/general/rwall/hm_read_rwall_lagmul.F
+      !||    hm_read_rwall_paral    ../starter/source/constraints/general/rwall/hm_read_rwall_paral.F
+      !||    hm_read_rwall_plane    ../starter/source/constraints/general/rwall/hm_read_rwall_plane.F
+      !||    hm_read_rwall_spher    ../starter/source/constraints/general/rwall/hm_read_rwall_spher.F
+      !||    hm_read_rwall_therm    ../starter/source/constraints/general/rwall/hm_read_rwall_therm.F
+      !||====================================================================
       SUBROUTINE REMOVE_ND(NN, INN, ITAGND)
 C=======================================================================
 C-----------------------------------------------
@@ -248,11 +244,9 @@ C
 C
       RETURN
       END
-Chd|====================================================================
-Chd|  REMDEG_ND                     source/elements/solid/solide10/dim_s10edg.F
-Chd|-- called by -----------
-Chd|-- calls ---------------
-Chd|====================================================================
+      !||====================================================================
+      !||    remdeg_nd   ../starter/source/elements/solid/solide10/dim_s10edg.F
+      !||====================================================================
       SUBROUTINE REMDEG_ND(NN, INN, ITAGND)
 C=======================================================================
 C-----------------------------------------------
@@ -284,15 +278,15 @@ C
 C
       RETURN
       END
-Chd|====================================================================
-Chd|  RIGMODIF_ND                   source/elements/solid/solide10/dim_s10edg.F
-Chd|-- called by -----------
-Chd|        HM_READ_RBODY                 source/constraints/general/rbody/hm_read_rbody.F
-Chd|-- calls ---------------
-Chd|        ANCMSG                        source/output/message/message.F
-Chd|        INTAB                         source/interfaces/inter3d1/i24tools.F
-Chd|        MESSAGE_MOD                   share/message_module/message_mod.F
-Chd|====================================================================
+      !||====================================================================
+      !||    rigmodif_nd     ../starter/source/elements/solid/solide10/dim_s10edg.F
+      !||--- called by ------------------------------------------------------
+      !||    hm_read_rbody   ../starter/source/constraints/general/rbody/hm_read_rbody.F
+      !||--- calls      -----------------------------------------------------
+      !||    ancmsg          ../starter/share/message_module/inter_ancmsg_mod.F
+      !||--- uses       -----------------------------------------------------
+      !||    message_mod     ../starter/share/message_module/message_mod.F
+      !||====================================================================
       SUBROUTINE RIGMODIF_ND(NN, INN, ITAGND,ICNDS10,IU,TITR,ITAB)
 C=======================================================================
       USE MESSAGE_MOD
@@ -399,12 +393,11 @@ C
        END IF 
       RETURN
       END
-Chd|====================================================================
-Chd|  RIGMODIF1_ND                  source/elements/solid/solide10/dim_s10edg.F
-Chd|-- called by -----------
-Chd|        LECTUR                        source/starter/lectur.F       
-Chd|-- calls ---------------
-Chd|====================================================================
+      !||====================================================================
+      !||    rigmodif1_nd   ../starter/source/elements/solid/solide10/dim_s10edg.F
+      !||--- called by ------------------------------------------------------
+      !||    lectur         ../starter/source/starter/lectur.F
+      !||====================================================================
       SUBROUTINE RIGMODIF1_ND(NPBY,LPBY,ITAGND)
 C=======================================================================
 C-----------------------------------------------
@@ -448,14 +441,15 @@ C------removing Nd from LPBY(*)--degenerating--
 C
       RETURN
       END
-Chd|====================================================================
-Chd|  RBE2MODIF_ND                  source/elements/solid/solide10/dim_s10edg.F
-Chd|-- called by -----------
-Chd|        HM_READ_RBE2                  source/constraints/general/rbe2/hm_read_rbe2.F
-Chd|-- calls ---------------
-Chd|        ANCMSG                        source/output/message/message.F
-Chd|        MESSAGE_MOD                   share/message_module/message_mod.F
-Chd|====================================================================
+      !||====================================================================
+      !||    rbe2modif_nd   ../starter/source/elements/solid/solide10/dim_s10edg.F
+      !||--- called by ------------------------------------------------------
+      !||    hm_read_rbe2   ../starter/source/constraints/general/rbe2/hm_read_rbe2.F
+      !||--- calls      -----------------------------------------------------
+      !||    ancmsg         ../starter/share/message_module/inter_ancmsg_mod.F
+      !||--- uses       -----------------------------------------------------
+      !||    message_mod    ../starter/share/message_module/message_mod.F
+      !||====================================================================
       SUBROUTINE RBE2MODIF_ND(NN, INN, ITAGND,ICNDS10,IU,ITAB,ITAGM,M,ITAGIC)
 C=======================================================================
       USE MESSAGE_MOD
@@ -602,13 +596,13 @@ C
 C
       RETURN
       END
-Chd|====================================================================
-Chd|  RBE2MODIF1_ND                 source/elements/solid/solide10/dim_s10edg.F
-Chd|-- called by -----------
-Chd|        LECTUR                        source/starter/lectur.F       
-Chd|-- calls ---------------
-Chd|        MESSAGE_MOD                   share/message_module/message_mod.F
-Chd|====================================================================
+      !||====================================================================
+      !||    rbe2modif1_nd   ../starter/source/elements/solid/solide10/dim_s10edg.F
+      !||--- called by ------------------------------------------------------
+      !||    lectur          ../starter/source/starter/lectur.F
+      !||--- uses       -----------------------------------------------------
+      !||    message_mod     ../starter/share/message_module/message_mod.F
+      !||====================================================================
       SUBROUTINE RBE2MODIF1_ND(IRBE2,LRBE2,ITAGND)
 C=======================================================================
       USE MESSAGE_MOD
@@ -653,14 +647,15 @@ C-----
 C
       RETURN
       END
-Chd|====================================================================
-Chd|  BCSMODIF_ND                   source/elements/solid/solide10/dim_s10edg.F
-Chd|-- called by -----------
-Chd|        LECTUR                        source/starter/lectur.F       
-Chd|-- calls ---------------
-Chd|        ANCMSG                        source/output/message/message.F
-Chd|        MESSAGE_MOD                   share/message_module/message_mod.F
-Chd|====================================================================
+      !||====================================================================
+      !||    bcsmodif_nd   ../starter/source/elements/solid/solide10/dim_s10edg.F
+      !||--- called by ------------------------------------------------------
+      !||    lectur        ../starter/source/starter/lectur.F
+      !||--- calls      -----------------------------------------------------
+      !||    ancmsg        ../starter/share/message_module/inter_ancmsg_mod.F
+      !||--- uses       -----------------------------------------------------
+      !||    message_mod   ../starter/share/message_module/message_mod.F
+      !||====================================================================
       SUBROUTINE BCSMODIF_ND(ICODE, ITAGND,ICNDS10,ITAB)
 C=======================================================================
       USE MESSAGE_MOD
@@ -728,15 +723,15 @@ C----remove Nd from /BCS +degenerating
 C
       RETURN
       END
-Chd|====================================================================
-Chd|  FIXMODIF_ND                   source/elements/solid/solide10/dim_s10edg.F
-Chd|-- called by -----------
-Chd|        LECTUR                        source/starter/lectur.F       
-Chd|-- calls ---------------
-Chd|        ANCMSG                        source/output/message/message.F
-Chd|        SAMEFVID                      source/elements/solid/solide10/dim_s10edg.F
-Chd|        MESSAGE_MOD                   share/message_module/message_mod.F
-Chd|====================================================================
+      !||====================================================================
+      !||    fixmodif_nd   ../starter/source/elements/solid/solide10/dim_s10edg.F
+      !||--- called by ------------------------------------------------------
+      !||    lectur        ../starter/source/starter/lectur.F
+      !||--- calls      -----------------------------------------------------
+      !||    ancmsg        ../starter/share/message_module/inter_ancmsg_mod.F
+      !||--- uses       -----------------------------------------------------
+      !||    message_mod   ../starter/share/message_module/message_mod.F
+      !||====================================================================
       SUBROUTINE FIXMODIF_ND(IBFV, ITAGND,ICNDS10,ITAB)
 C=======================================================================
       USE MESSAGE_MOD
@@ -816,12 +811,9 @@ C
 C
       RETURN
       END
-Chd|====================================================================
-Chd|  SAMEFVID                      source/elements/solid/solide10/dim_s10edg.F
-Chd|-- called by -----------
-Chd|        FIXMODIF_ND                   source/elements/solid/solide10/dim_s10edg.F
-Chd|-- calls ---------------
-Chd|====================================================================
+      !||====================================================================
+      !||    samefvid   ../starter/source/elements/solid/solide10/dim_s10edg.F
+      !||====================================================================
       LOGICAL FUNCTION SAMEFVID(ID,IBFV,N)
 C----6---------------------------------------------------------------7---------8
 C   I m p l i c i t   T y p e s
@@ -853,15 +845,15 @@ C----6---------------------------------------------------------------7---------8
 C
       RETURN
       END
-Chd|====================================================================
-Chd|  INT2MODIF_ND                  source/elements/solid/solide10/dim_s10edg.F
-Chd|-- called by -----------
-Chd|        ININTR2                       source/interfaces/inter3d1/inintr2.F
-Chd|-- calls ---------------
-Chd|        ANCMSG                        source/output/message/message.F
-Chd|        INTBUFDEF_MOD                 ../common_source/modules/intbufdef_mod.F
-Chd|        MESSAGE_MOD                   share/message_module/message_mod.F
-Chd|====================================================================
+      !||====================================================================
+      !||    int2modif_nd    ../starter/source/elements/solid/solide10/dim_s10edg.F
+      !||--- called by ------------------------------------------------------
+      !||    inintr2         ../starter/source/interfaces/inter3d1/inintr2.F
+      !||--- calls      -----------------------------------------------------
+      !||    ancmsg          ../starter/share/message_module/inter_ancmsg_mod.F
+      !||--- uses       -----------------------------------------------------
+      !||    message_mod     ../starter/share/message_module/message_mod.F
+      !||====================================================================
       SUBROUTINE INT2MODIF_ND(IPARI,INTBUF_TAB,ITAGND,ICNDS10,ITAB)
 C-----------------------------------------------
 C   M o d u l e s
@@ -1137,13 +1129,11 @@ C
 c-----------
       RETURN
       END
-Chd|====================================================================
-Chd|  PRE_CNDPON                    source/elements/solid/solide10/dim_s10edg.F
-Chd|-- called by -----------
-Chd|        LECTUR                        source/starter/lectur.F       
-Chd|-- calls ---------------
-Chd|        NLOCAL                        source/spmd/node/ddtools.F    
-Chd|====================================================================
+      !||====================================================================
+      !||    pre_cndpon   ../starter/source/elements/solid/solide10/dim_s10edg.F
+      !||--- called by ------------------------------------------------------
+      !||    lectur       ../starter/source/starter/lectur.F
+      !||====================================================================
       SUBROUTINE PRE_CNDPON(ICNDS10,ADSKYCND,CEPCND,CELCND  ,ITAGND)
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
@@ -1255,12 +1245,11 @@ c        END DO
 C
       RETURN
       END
-Chd|====================================================================
-Chd|  FILLCNCND                     source/elements/solid/solide10/dim_s10edg.F
-Chd|-- called by -----------
-Chd|        LECTUR                        source/starter/lectur.F       
-Chd|-- calls ---------------
-Chd|====================================================================
+      !||====================================================================
+      !||    fillcncnd   ../starter/source/elements/solid/solide10/dim_s10edg.F
+      !||--- called by ------------------------------------------------------
+      !||    lectur      ../starter/source/starter/lectur.F
+      !||====================================================================
       SUBROUTINE FILLCNCND(CNCND  ,ADDCNCND, ICNDS10,ITAGND)
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
@@ -1300,12 +1289,11 @@ C ADDCNCND(I+1)-ADDCNCND(I): nb of node I (main)
 C
       RETURN
       END
-Chd|====================================================================
-Chd|  STIFN0_ND                     source/elements/solid/solide10/dim_s10edg.F
-Chd|-- called by -----------
-Chd|        LECTUR                        source/starter/lectur.F       
-Chd|-- calls ---------------
-Chd|====================================================================
+      !||====================================================================
+      !||    stifn0_nd   ../starter/source/elements/solid/solide10/dim_s10edg.F
+      !||--- called by ------------------------------------------------------
+      !||    lectur      ../starter/source/starter/lectur.F
+      !||====================================================================
       SUBROUTINE STIFN0_ND(ICNDS10,STIFN)
 C=======================================================================
 C-----------------------------------------------
@@ -1336,12 +1324,11 @@ C------put STIFN(ND)=0 for mscalling dt estimation
 C      
       RETURN
       END
-Chd|====================================================================
-Chd|  STIFN1_ND                     source/elements/solid/solide10/dim_s10edg.F
-Chd|-- called by -----------
-Chd|        LECTUR                        source/starter/lectur.F       
-Chd|-- calls ---------------
-Chd|====================================================================
+      !||====================================================================
+      !||    stifn1_nd   ../starter/source/elements/solid/solide10/dim_s10edg.F
+      !||--- called by ------------------------------------------------------
+      !||    lectur      ../starter/source/starter/lectur.F
+      !||====================================================================
       SUBROUTINE STIFN1_ND(ICNDS10,STIFN)
 C=======================================================================
 C-----------------------------------------------
@@ -1380,14 +1367,15 @@ C------condense STIFN(ND)
 C      
       RETURN
       END
-Chd|====================================================================
-Chd|  BCSCYCMODIF_ND                source/elements/solid/solide10/dim_s10edg.F
-Chd|-- called by -----------
-Chd|        LECTUR                        source/starter/lectur.F       
-Chd|-- calls ---------------
-Chd|        ANCMSG                        source/output/message/message.F
-Chd|        MESSAGE_MOD                   share/message_module/message_mod.F
-Chd|====================================================================
+      !||====================================================================
+      !||    bcscycmodif_nd   ../starter/source/elements/solid/solide10/dim_s10edg.F
+      !||--- called by ------------------------------------------------------
+      !||    lectur           ../starter/source/starter/lectur.F
+      !||--- calls      -----------------------------------------------------
+      !||    ancmsg           ../starter/share/message_module/inter_ancmsg_mod.F
+      !||--- uses       -----------------------------------------------------
+      !||    message_mod      ../starter/share/message_module/message_mod.F
+      !||====================================================================
       SUBROUTINE BCSCYCMODIF_ND(IBCSCYC,LBCSCYC,ITAGND,ITAB)
 C=======================================================================
       USE MESSAGE_MOD

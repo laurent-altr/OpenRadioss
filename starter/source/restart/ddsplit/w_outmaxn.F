@@ -21,14 +21,14 @@ Copyright>        As an alternative to this open-source version, Altair also off
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
 C
-Chd|====================================================================
-Chd|  W_OUTMAXN                     source/restart/ddsplit/w_outmaxn.F
-Chd|-- called by -----------
-Chd|        DDSPLIT                       source/restart/ddsplit/ddsplit.F
-Chd|-- calls ---------------
-Chd|        WRITE_DB                      source/restart/ddsplit/wrrest.F
-Chd|        OUTMAX_MOD                    ../common_source/modules/outmax_mod.F
-Chd|====================================================================
+      !||====================================================================
+      !||    w_outmaxn    ../starter/source/restart/ddsplit/w_outmaxn.F
+      !||--- called by ------------------------------------------------------
+      !||    ddsplit      ../starter/source/restart/ddsplit/ddsplit.F
+      !||--- calls      -----------------------------------------------------
+      !||    write_db     ../starter/source/restart/ddsplit/wrrest.F
+      !||--- uses       -----------------------------------------------------
+      !||====================================================================
       SUBROUTINE W_OUTMAXN(NUMNOD_L,LEN_AM)
 C-----------------------------------------------
 C   M o d u l e s
