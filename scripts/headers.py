@@ -48,42 +48,42 @@ class Subroutine:
             max_len = max(max_len, max([len(sub) for sub in self.callers_name]))
         if self.modules_name:
             max_len = max(max_len, max([len(sub) for sub in self.modules_name]))
-        self.header = f'      !Hd====================================================================\n'
-        self.header += f'      !Hd    {self.name.ljust(max_len)}   {self.path}\n'
+        self.header = f'      !||====================================================================\n'
+        self.header += f'      !||    {self.name.ljust(max_len)}   {self.path}\n'
         if self.callers_name:
-            self.header += f'      !Hd--- called by ------------------------------------------------------\n'
+            self.header += f'      !||--- called by ------------------------------------------------------\n'
 
         # loop over all callers by alphabetical order
         for caller in sorted(self.callers_name):
             #check if caller is in subroutines
             if caller in subroutines:
                 path=subroutines[caller].path
-                self.header += f'      !Hd    {caller.ljust(max_len)}   {path}\n'
+                self.header += f'      !||    {caller.ljust(max_len)}   {path}\n'
             else:
                 pass
-                #self.header += f'      !Hd    {caller.ljust(max_len)}   \n'
+                #self.header += f'      !||    {caller.ljust(max_len)}   \n'
         #if callees_name is not empty
         if self.callees_name:
-            self.header += f'      !Hd--- calls      -----------------------------------------------------\n'
+            self.header += f'      !||--- calls      -----------------------------------------------------\n'
              
             for callee in sorted(self.callees_name):
                 if(callee in subroutines):
                     path=subroutines[callee].path
-                    self.header += f'      !Hd    {callee.ljust(max_len)}   {path}\n'
+                    self.header += f'      !||    {callee.ljust(max_len)}   {path}\n'
                 else:   
-                    #self.header += f'      !Hd    {callee.ljust(max_len)}   \n'
+                    #self.header += f'      !||    {callee.ljust(max_len)}   \n'
                     pass
         # if modules_name is not empty
         if self.modules_name:
-            self.header += f'      !Hd--- uses       -----------------------------------------------------\n' 
+            self.header += f'      !||--- uses       -----------------------------------------------------\n' 
             for module in sorted(self.modules_name):
                 if(module in subroutines):
                     path=subroutines[module].path
-                    self.header += f'      !Hd    {module.ljust(max_len)}   {path}\n'
+                    self.header += f'      !||    {module.ljust(max_len)}   {path}\n'
                 else:
                     pass
-                    #self.header += f'      !Hd    {module.ljust(max_len)}\n'
-        self.header += f'      !Hd====================================================================\n'
+                    #self.header += f'      !||    {module.ljust(max_len)}\n'
+        self.header += f'      !||====================================================================\n'
 
 class CodeAnalyzer:
     def __init__(self):
@@ -110,7 +110,7 @@ class CodeAnalyzer:
         program_regex = re.compile(r'^\s*program\s+(\w+)', re.IGNORECASE)
         module_regex = re.compile(r'^\s*module\s+(\w+)', re.IGNORECASE)
 
-        header_regex = re.compile(r'^\s*!Hd', re.IGNORECASE)
+        header_regex = re.compile(r'^\s*!\|\|', re.IGNORECASE)
         for root, _, files in os.walk(path):
             for file in files:
                 # skip ISO-8859 text files
