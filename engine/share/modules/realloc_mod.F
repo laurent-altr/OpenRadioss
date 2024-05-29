@@ -31,14 +31,6 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
       !||====================================================================
       MODULE REALLOC_MOD
       CONTAINS
-        
-      !||====================================================================
-      !||    ireallocate     ../engine/share/modules/realloc_mod.F
-      !||--- called by ------------------------------------------------------
-      !||    i11trivox       ../engine/source/interfaces/intsort/i11trivox.F
-      !||    i22trivox       ../engine/source/interfaces/intsort/i22trivox.F
-      !||    i25trivox_edg   ../engine/source/interfaces/intsort/i25trivox_edg.F
-      !||====================================================================
       FUNCTION IREALLOCATE(ptr, new_size)
 !reallocate INTEGER ARRAY
 C-----------------------------------------------
