@@ -102,11 +102,12 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
      &                                    s_irem       ,
      &                                    next_nod      )
           USE COLLISION_MOD , ONLY : GROUP_SIZE
-          USE INTER7_FILTER_CAND_MOD
-          USE CONSTANT_MOD
+          USE INTER7_FILTER_CAND_MOD, ONLY : INTER7_FILTER_CAND
+          USE CONSTANT_MOD, ONLY : zero
           USE MY_ALLOC_MOD, ONLY : REALLOC 
 C-----------------------------------------------
           implicit none
+! the following include defines my_real as double precsiion or real(4) depending on compiler option
 #include "my_real.inc"
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
@@ -166,7 +167,6 @@ C-----------------------------------------------
           my_real, intent(in) :: gap_m_l(nrtm) !< gap for main nodes (???)
           my_real, intent(in) :: curv_max(nrtm) !< maximum curvature
           my_real, intent(in) :: xyzm(12) !< bounding box
-
           my_real, dimension(:), pointer,  intent(inout) :: cand_p !< penetration (???) size: ncontact
           my_real, dimension(:), pointer,  intent(inout) :: cand_f !< related to tied contact, cand force (???) size: ncontact
           my_real, intent(in) :: stf(nrtm) !< stiffness of segments (quadrangles or triangles)
@@ -194,7 +194,6 @@ C-----------------------------------------------
           integer first,last
           integer :: nb_voxel_on !< number of remote nodes in the bounding box
           integer, dimension(:), allocatable :: list_nb_voxel_on
-!         integer, dimension(GROUP_SIZE) :: prov_n, prov_e !< temporary list of candidates
           integer, dimension(:), allocatable :: prov_n, prov_e
           integer :: size_prov 
           integer :: ncontact_save
@@ -266,7 +265,7 @@ C=======================================================================
                 nb_voxel_on = nb_voxel_on + 1
                 ! 1d version of 3d potition, indexes starts at 1
                 list_nb_voxel_on(nb_voxel_on) = (iix-1)*(nby+2)*(nbz+2)+(iiy-1)*(nbz+2)+(iiz-1)
-                voxel(iix,iiy,iiz) = i ! first
+                voxel(iix,iiy,iiz)          = i ! first
                 next_nod(i)                 = 0 ! last one
                 last_nod(i)                 = 0 ! no last
               elseif(last_nod(first) == 0)then
@@ -550,6 +549,7 @@ c                   if(i_mem==2) jj = 0
 C         write(6,*) itask,'Number of candidates: ', j_stok,ncontact,ncontact_save
 
 
+!$OMP DO SCHEDULE(DYNAMIC)
           DO i=1, j_stok, GROUP_SIZE
           ! j = size of the current block
             j = min(GROUP_SIZE, j_stok - i + 1)
@@ -565,6 +565,7 @@ C         write(6,*) itask,'Number of candidates: ', j_stok,ncontact,ncontact_sa
      .                   nsnr,
      .                   xrem ,s_xrem)
           enddo
+!$OMP END DO
 
           deallocate(prov_n)
           deallocate(prov_e)
