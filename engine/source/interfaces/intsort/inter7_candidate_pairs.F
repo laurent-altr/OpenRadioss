@@ -204,9 +204,10 @@ C-----------------------------------------------
 C-----------------------------------------------
           nthreads = omp_get_num_threads()
           size_prov = 2 * ncontact/nthreads 
+          if(size_prov < GROUP_SIZE) size_prov = GROUP_SIZE
           ncontact_save = ncontact
-          allocate(prov_n(ncontact))
-          allocate(prov_e(ncontact))
+          allocate(prov_n(size_prov))
+          allocate(prov_e(size_prov))
 
 !$OMP BARRIER
 
@@ -501,7 +502,7 @@ C=======================================================================
                     if(j_stok > size_prov) then
                       CALL REALLOC(prov_n, size_prov, size_prov*2) 
                       CALL REALLOC(prov_e, size_prov, size_prov*2) 
-                      size_prov = 2*size_prov       
+                      size_prov = 2*size_prov + GROUP_SIZE       
                     endif
                     prov_n(j_stok) = jj
                     prov_e(j_stok) = ne
