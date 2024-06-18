@@ -33,7 +33,7 @@ Chd|====================================================================
 !! \brief computes the penetration between a chuck of secondary nodes and a main surface/segment
 !! \details the candidate for penetration are couple of secondary nodes and the main surface/segment
 !! the couple is the result of the broad phase collision detection, keeping all possible penetration
-!! for the given timestep, and also the possible penetration for the few next timesteps, until
+!! for the given timestep, and also the possible penetrations for the few next timesteps, until
 !! a secondary node has moved more than the margin (relatively to the main surface/segment)
         subroutine inter7_penetration(jlt   ,margin ,x1    ,x2     ,x3   ,
      .                    x4    ,y1    ,y2    ,y3     ,y4   ,
