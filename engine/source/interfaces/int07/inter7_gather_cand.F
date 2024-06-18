@@ -44,6 +44,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
      7                     ityp    ,gap_s_l,gap_m_l,
      8                     drad    ,dgapload, nsnr,
      9                     s_xrem, xrem)
+          ! GROUP_SIZE is a parameter (128)
           USE COLLISION_MOD ,  ONLY : GROUP_SIZE
 c-----------------------------------------------
 c   i m p l i c i t   t y p e s

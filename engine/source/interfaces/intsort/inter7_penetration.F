@@ -31,7 +31,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !! \brief computes the penetration between a chuck of secondary nodes and a main surface/segment
 !! \details the candidate for penetration are couple of secondary nodes and the main surface/segment
 !! the couple is the result of the broad phase collision detection, keeping all possible penetration
-!! for the given timestep, and also the possible penetration for the few next timesteps, until
+!! for the given timestep, and also the possible penetrations for the few next timesteps, until
 !! a secondary node has moved more than the margin (relatively to the main surface/segment)
       !||====================================================================
       !||    inter7_penetration   ../engine/source/interfaces/intsort/inter7_penetration.F
