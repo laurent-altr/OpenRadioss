@@ -37,12 +37,6 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
      6                   GAP_M   ,GAPV  ,GAPMAX,GAPMIN,CURV_MAX,
      7                   ITYP    ,NIN   ,GAP_S_L,GAP_M_L,INTTH,
      8                   DRAD    ,DGAPLOAD)
-C============================================================================
-C  cette routine est appelee par : I10STO(/int10/i10sto.F)
-C                                  I7STO(/int7/i7sto.F)
-C----------------------------------------------------------------------------
-C  cette routine appelle : -
-C============================================================================
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
