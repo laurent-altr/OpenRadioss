@@ -545,7 +545,6 @@ c                   if(i_mem==2) jj = 0
 C         write(6,*) itask,'Number of candidates: ', j_stok,ncontact,ncontact_save
 
 
-!$OMP DO SCHEDULE(DYNAMIC)
           DO i=1, j_stok, GROUP_SIZE
           ! j = size of the current block
             j = min(GROUP_SIZE, j_stok - i + 1)
@@ -561,7 +560,6 @@ C         write(6,*) itask,'Number of candidates: ', j_stok,ncontact,ncontact_sa
      .                   nsnr,
      .                   xrem ,s_xrem)
           enddo
-!$OMP END DO
 
           deallocate(prov_n)
           deallocate(prov_e)
