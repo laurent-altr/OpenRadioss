@@ -207,6 +207,8 @@ C-----------------------------------------------
           ncontact_save = ncontact
           allocate(prov_n(size_prov))
           allocate(prov_e(size_prov))
+          i_mem = 0
+
 
 !$OMP BARRIER
 
@@ -428,7 +430,6 @@ C=======================================================================
             do iz = iz1,iz2
               do iy = iy1,iy2
                 do ix = ix1,ix2
-                  if(i_mem==2) cycle
                   jj = voxel(ix,iy,iz)
                   do while(jj /= 0)
 
@@ -507,7 +508,6 @@ C=======================================================================
                     prov_e(j_stok) = ne
   200               continue
                     jj = next_nod(jj)
-c                   if(i_mem==2) jj = 0
                   enddo ! while(jj /= 0)
                 enddo ! x
               enddo  ! y
@@ -1167,6 +1167,7 @@ C-----------------------------------------------
           double precision :: start_time, end_time, elapsed_time
           double precision OMP_GET_WTIME
           external OMP_GET_WTIME
+
           i_mem = 0
           eshift = 0
           ii_stok_ref = 0
