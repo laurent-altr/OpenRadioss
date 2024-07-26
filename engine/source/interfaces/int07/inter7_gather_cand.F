@@ -26,6 +26,28 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
       !||    inter7_filter_cand       ../engine/source/interfaces/intsort/inter7_filter_cand.F
       !||====================================================================
       MODULE INTER7_GATHER_CAND_MOD
+         INTERFACE
+           SUBROUTINE cpp_inter7_gather_cand(jlt, x, irect, nsv, cand_e, cand_n, igap, gap, gapv,
+     .                                    gap_s, gap_m, curv_max, gapmax, gapmin, dgapload,
+     .                                    drad, x1, x2, x3, x4, y1, y2, y3, y4, z1, z2, z3,
+     .                                    z4, xi, yi, zi, gap_s_l, gap_m_l, s_xrem, nsnr,
+     .                                    xrem, ix1, ix2, ix3, ix4, ityp) bind(C, name="cpp_inter7_gather_cand")
+             USE, INTRINSIC :: ISO_C_BINDING
+             INTEGER(C_INT), VALUE :: jlt
+             INTEGER(C_INT), VALUE :: igap, s_xrem, nsnr, ityp
+             REAL(C_DOUBLE), VALUE :: gap, gapmax, gapmin, dgapload, drad
+             REAL(C_DOUBLE)  :: x(*), gapv(*), gap_s(*), gap_m(*), curv_max(*)
+             REAL(C_DOUBLE)  :: x1(*), x2(*), x3(*), x4(*)
+             REAL(C_DOUBLE)  :: y1(*), y2(*), y3(*), y4(*)
+             REAL(C_DOUBLE)  :: z1(*), z2(*), z3(*), z4(*)
+             REAL(C_DOUBLE)  :: xi(*), yi(*), zi(*)
+             REAL(C_DOUBLE)  :: gap_s_l(*), gap_m_l(*)
+             REAL(C_DOUBLE)  :: xrem(*)
+             INTEGER(C_INT)  :: irect(4,*), nsv(*), cand_e(*), cand_n(*)
+             INTEGER(C_INT)  :: ix1(*), ix2(*), ix3(*), ix4(*)
+           END SUBROUTINE cpp_inter7_gather_cand
+         END INTERFACE
+
       CONTAINS
       !||====================================================================
       !||    inter7_gather_cand   ../engine/source/interfaces/int07/inter7_gather_cand.F
@@ -115,6 +137,8 @@ C-----------------------------------------------
           if(igap==0)then
             do i=1,jlt
               gapv(i)=max(gap+dgapload,drad)
+              write(6,*) i,"LOC=",LOC(GAPV(i)),GAPV(i)
+
             end do
           elseif(igap == 3)then
             iadd = 9
