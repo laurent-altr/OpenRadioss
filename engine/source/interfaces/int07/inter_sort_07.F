@@ -246,8 +246,8 @@ C
 C
         IF(GOT_PREVIEW == 1) THEN
             CALL INTER7_COLLISION_DETECTION(
-     1      X      ,INTBUF_TAB%IRECTM,INTBUF_TAB%NSV       ,INACTI    ,INTBUF_TAB%CAND_P,
-     2      NMN_G  ,NRTM           ,NSN                  ,INTBUF_TAB%CAND_E,INTBUF_TAB%CAND_N,
+     1      X      ,INTBUF_TAB%IRECTM,INTBUF_TAB%NSV,INACTI,INTBUF_TAB%CAND_P,
+     2      NMN_G  ,NRTM,NSN,INTBUF_TAB%CAND_E,INTBUF_TAB%CAND_N,
      3      GAP    ,INTBUF_TAB%I_STOK(1) ,INTBUF_TAB%NCONTACT ,INTER_STRUCT(NIN)%BOX_LIMIT_MAIN,
      4      TZINF  ,INTER_STRUCT(NIN)%CAND_A  ,INTER_STRUCT(NIN)%CURV_MAX,
      6      ESHIFT      ,IFQ    ,INTBUF_TAB%IFPEN,
@@ -392,7 +392,7 @@ C utile si on revient
             MAXBOX = INTBUF_TAB%VARIABLES(maxbox_index)
             MINBOX = INTBUF_TAB%VARIABLES(minbox_index)
             TZINF  = INTBUF_TAB%VARIABLES(tzinf_index)
-            GOTO 50
+            !GOTO 50
         ENDIF
 C mise a - de dist temporairement pour reperage dans partie frontiere
         IF(NSPMD>1)THEN

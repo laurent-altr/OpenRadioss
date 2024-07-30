@@ -82,7 +82,7 @@ C-----------------------------------------------
       INTEGER, INTENT(in) :: TOTAL_NB_NRTM !< total number of segments
       integer, intent(in) :: s_cand_a
       INTEGER IRECT(4,*),NSV(*),CAND_A(s_cand_a), RENUM(*),NUM_IMP, ITASK
-      INTEGER, POINTER :: CAND_E(:),CAND_N(:),IFPEN(:)
+      INTEGER, DIMENSION(:),  ALLOCATABLE :: CAND_E,CAND_N,IFPEN
       INTEGER ::  KREMNOD(*),REMNOD(*)
       INTEGER NCONTACT,ESHIFT, IGAP, I_MEM,
      *        II_STOK, FLAGREMNODE, ITIED
@@ -93,7 +93,7 @@ C     REAL
      .   GAP,TZINF,
      .   GAPMIN, GAPMAX, BMINMA(12),CURV_MAX(NRTM),BGAPSMX
       my_real , INTENT(IN) :: DRAD,DGAPLOAD
-      my_real, pointer :: CAND_P(:), CAND_F(:)
+      my_real, dimension(:), allocatable :: CAND_P, CAND_F
       my_real
      .   X(3,*), STFN(*),
      .   STF(*), GAP_S(*), GAP_M(*), 
