@@ -13,7 +13,7 @@ extern "C" {
                             my_real *x4, my_real *y1, my_real *y2, my_real *y3,
                             my_real *y4, my_real *z1, my_real *z2, my_real *z3,
                             my_real *z4, my_real *xi, my_real *yi, my_real *zi,
-                            my_real *gap_s_l, my_real *gap_m_l, int s_xrem, 
+                            my_real *gap_s_l, my_real *gap_m_l, int s_xrem, int nsn, 
                             int nsnr, my_real *xrem, int *ix1, int *ix2, int *ix3, 
                             int *ix4, int ityp) {
         
@@ -22,19 +22,19 @@ extern "C" {
         if (igap == 0) {
             for (i = 0; i < jlt; ++i) {
                 // write the address of gapv[i] to the console
-                std::cout<<i<<" "<<gapv[i] << &gapv[i] << std::endl;
+                //std::cout<<i<<" "<<gapv[i] << &gapv[i] << std::endl;
                 gapv[i] = std::max(gap + dgapload, drad);
             }
         } else if (igap == 3) {
             for (i = 0; i < jlt; ++i) {
                 j = cand_n[i];
-                if (j <= nsnr) {
+                if (j <= nsn) {
                     gapv[i] = gap_s[j-1] + gap_m[cand_e[i]-1];
                     gapv[i] = std::min(gap_s_l[j-1] + gap_m_l[cand_e[i]-1], gapv[i]);
                 } else {
-                    ig = j - nsnr -1;
-                    gapv[i] = xrem[9 * s_xrem + ig] + gap_m[cand_e[i]-1];
-                    gapv[i] = std::min(xrem[10 * s_xrem + ig] + gap_m_l[cand_e[i]-1], gapv[i]);
+                    ig = j - nsn -1;
+                    gapv[i] = xrem[8 + ig*s_xrem] + gap_m[cand_e[i]-1];
+                    gapv[i] = std::min(xrem[ig*s_xrem+9] + gap_m_l[cand_e[i]-1], gapv[i]);
                 }
                 gapv[i] = std::min(gapv[i], gapmax);
                 gapv[i] = std::max(gapmin, gapv[i]);
@@ -43,11 +43,11 @@ extern "C" {
         } else {
             for (i = 0; i < jlt; ++i) {
                 j = cand_n[i];
-                if (j <= nsnr) {
+                if (j <= nsn) {
                     gapv[i] = gap_s[j-1] + gap_m[cand_e[i]-1];
                 } else {
-                    ig = j - nsnr -1;
-                    gapv[i] = xrem[9 * s_xrem + ig] + gap_m[cand_e[i]-1];
+                    ig = j - nsn -1;
+                    gapv[i] = xrem[(ig)*s_xrem + 8] + gap_m[cand_e[i]-1];
                 }
                 gapv[i] = std::min(gapv[i], gapmax);
                 gapv[i] = std::max(gapmin, gapv[i]);
@@ -57,16 +57,16 @@ extern "C" {
 
         for (i = 0; i < jlt; ++i) {
             j = cand_n[i] - 1;
-            if (j < nsnr) {
-                ig = nsv[j];
+            if (j < nsn) {
+                ig = nsv[j]-1;
                 xi[i] = x[3 * ig];
                 yi[i] = x[3 * ig + 1];
                 zi[i] = x[3 * ig + 2];
             } else {
-                ig = j - nsnr - 1;
-                xi[i] = xrem[ig];
-                yi[i] = xrem[s_xrem + ig];
-                zi[i] = xrem[2 * s_xrem + ig];
+                ig = j - nsn; 
+                xi[i] = xrem[(ig)*s_xrem];
+                yi[i] = xrem[(ig)*s_xrem + 1];
+                zi[i] = xrem[(ig)*s_xrem + 2];
             }
 
             l = cand_e[i] - 1;

@@ -30,11 +30,11 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
            SUBROUTINE cpp_inter7_gather_cand(jlt, x, irect, nsv, cand_e, cand_n, igap, gap, gapv,
      .                                    gap_s, gap_m, curv_max, gapmax, gapmin, dgapload,
      .                                    drad, x1, x2, x3, x4, y1, y2, y3, y4, z1, z2, z3,
-     .                                    z4, xi, yi, zi, gap_s_l, gap_m_l, s_xrem, nsnr,
+     .                                    z4, xi, yi, zi, gap_s_l, gap_m_l, s_xrem, nsn, nsnr,
      .                                    xrem, ix1, ix2, ix3, ix4, ityp) bind(C, name="cpp_inter7_gather_cand")
              USE, INTRINSIC :: ISO_C_BINDING
              INTEGER(C_INT), VALUE :: jlt
-             INTEGER(C_INT), VALUE :: igap, s_xrem, nsnr, ityp
+             INTEGER(C_INT), VALUE :: igap, s_xrem, nsn,nsnr, ityp
              REAL(C_DOUBLE), VALUE :: gap, gapmax, gapmin, dgapload, drad
              REAL(C_DOUBLE)  :: x(*), gapv(*), gap_s(*), gap_m(*), curv_max(*)
              REAL(C_DOUBLE)  :: x1(*), x2(*), x3(*), x4(*)

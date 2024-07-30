@@ -145,10 +145,10 @@ c    6                  gap_m   ,gapv ,gapmax, gapmin, curv_max,
 c    7                  itype   ,gap_s_l,gap_m_l,
 c    8                  drad    ,dgapload, nsnr,
 c    .                  s_xrem, xrem)
-           call cpp_inter7_gather_cand(j_stok, x, irect, nsv, cand_e, cand_n, igap, gap, gapv,
+           call cpp_inter7_gather_cand(j_stok, x, irect, nsv, prov_e, prov_n, igap, gap, gapv,
      .                                    gap_s, gap_m, curv_max, gapmax, gapmin, dgapload,
      .                                    drad, x1, x2, x3, x4, y1, y2, y3, y4, z1, z2, z3,
-     .                                    z4, xi, yi, zi, gap_s_l, gap_m_l, s_xrem, nsnr,
+     .                                    z4, xi, yi, zi, gap_s_l, gap_m_l, s_xrem,nsn, nsnr,
      .                                    xrem, ix1, ix2, ix3, ix4, itype)
 
           call inter7_penetration(j_stok ,margin ,x1    ,x2     ,x3   ,
