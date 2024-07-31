@@ -27,6 +27,39 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
       !||    inter7_filter_cand       ../engine/source/interfaces/intsort/inter7_filter_cand.F
       !||====================================================================
       MODULE INTER7_PENETRATION_MOD
+
+        interface 
+c    void cpp_inter7_penetration(
+c        const int jlt, const my_real margin,
+c        const my_real *x1, const my_real *x2, const my_real *x3, const my_real *x4,
+c        const my_real *y1, const my_real *y2, const my_real *y3, const my_real *y4,
+c        const my_real *z1, const my_real *z2, const my_real *z3, const my_real *z4,
+c        const my_real *xi, const my_real *yi, const my_real *zi,
+c        const my_real *gapv, my_real *pene,
+c        const int *ix3, const int *ix4)
+c    {
+
+         subroutine cpp_inter7_penetration(jlt   ,margin ,x1    ,x2     ,x3   ,
+     .                    x4    ,y1    ,y2    ,y3     ,y4   ,
+     .                    z1    ,z2    ,z3    ,z4     ,xi   ,
+     .                    yi    ,zi,  ix3,  ix4, pene  ,gapv) bind(C,name='cpp_inter7_penetration')
+          USE, INTRINSIC :: ISO_C_BINDING
+#include "my_real.inc"
+          implicit none
+          integer, intent(in), value :: jlt
+          my_real, value :: margin
+          my_real, intent(in) :: gapv(*)
+          my_real, intent(in) ::
+     .         x1(*), x2(*), x3(*), x4(*), !< x coordinates of the 4 nodes of the surface
+     .         y1(*), y2(*), y3(*), y4(*), !< y coordinates of the 4 nodes of the surface
+     .         z1(*), z2(*), z3(*), z4(*), !< z coordinates of the 4 nodes of the surface
+     .         xi(*), yi(*), zi(*)
+          my_real, intent(inout) ::  pene(*) !< secondary nodes and penetration
+          integer, intent(in) :: ix3(*), ix4(*) !< index of the 3rd and 4th nodes of the surface
+         end subroutine
+
+        
+        end interface
       contains
 !! \brief computes the penetration between a chuck of secondary nodes and a main surface/segment
 !! \details the candidate for penetration are couple of secondary nodes and the main surface/segment
@@ -97,7 +130,14 @@ c-----------------------------------------------
 ! the candidate for penetration are couple of secondary nodes and the main surface
 ! we keep the nodes that are in the zone of influence of the main surface
 ! we will perform a new collision detection when a node has moved more than the zone of influence (relatively to the main surface)
+        write(6,*) "in:gapv(1)=" ,gapv(1)
+        write(6,*) "in:pene(1)=" ,pene(1)
+        write(6,*) "in:ix3(1)=" ,ix3(1)
+        write(6,*) "in:ix4(1)=" ,ix4(1)
+        write(6,*) "in:margin=" ,margin
+
           do i = 1, jlt
+            write(6,*) "gapv(",i,")=",gapv(i), "margin=",margin
             zoneinf = gapv(i)+margin !< zone of influence: gap of the element + margin
             gap2(i)= zoneinf*zoneinf
           end do
@@ -323,7 +363,7 @@ c
         aaa    = one/max(em30,x02(i)*x02(i)+y02(i)*y02(i)+z02(i)*z02(i))
               hlc2(i)= lc2(i)*abs(lc2(i))*aaa
               hlb1(i)= lb1(i)*abs(lb1(i))*aaa
-        al2(i) = -(xi0*x02(i)+yi0*y02(i)+zi0*z02(i))*aaa
+              al2(i) = -(xi0*x02(i)+yi0*y02(i)+zi0*z02(i))*aaa
               al2(i) = max(zero,min(one,al2(i)))
         aaa    = one/max(em30,x03(i)*x03(i)+y03(i)*y03(i)+z03(i)*z03(i))
               hlc3(i)= lc3(i)*abs(lc3(i))*aaa
@@ -436,6 +476,19 @@ c
         ny1(i) = yi(i)-(y0(i) + lb1(i)*y01(i) + lc1(i)*y02(i))
         nz1(i) = zi(i)-(z0(i) + lb1(i)*z01(i) + lc1(i)*z02(i))
         p1(i) = nx1(i)*nx1(i) + ny1(i)*ny1(i) +nz1(i)*nz1(i)
+C        write(6,*) "xi(",i,")=",xi(i)
+C        write(6,*) "yi(",i,")=",yi(i)
+C        write(6,*) "zi(",i,")=",zi(i)
+C        write(6,*) "x0(",i,")=",x0(i)
+C        write(6,*) "lc1(",i,")=",lc1(i)
+C        write(6,*) "p(",i,")=",p1(i)
+C               std::cout<<"xi["<<i<<"] = "<<xi[i]<<std::endl;
+C               std::cout<<"yi["<<i<<"] = "<<yi[i]<<std::endl;
+C               std::cout<<"zi["<<i<<"] = "<<zi[i]<<std::endl;
+C               std::cout<<"x0["<<i<<"] = "<<x0[i]<<std::endl;
+C               std::cout<<"lc1["<<i<<"] = "<<lc1[i]<<std::endl;
+C               std::cout<<"p["<<i<<"] = "<<p1[i]<<std::endl;
+
         d1 = max(zero, gap2(i) - p1(i))
 c
         nx2(i) = xi(i)-(x0(i) + lb2(i)*x02(i) + lc2(i)*x03(i))
