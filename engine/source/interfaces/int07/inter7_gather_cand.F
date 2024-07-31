@@ -35,6 +35,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
              USE, INTRINSIC :: ISO_C_BINDING
              INTEGER(C_INT), VALUE :: jlt
              INTEGER(C_INT), VALUE :: igap, s_xrem, nsn,nsnr, ityp
+#ifdef MYREAL8
              REAL(C_DOUBLE), VALUE :: gap, gapmax, gapmin, dgapload, drad
              REAL(C_DOUBLE)  :: x(*), gapv(*), gap_s(*), gap_m(*), curv_max(*)
              REAL(C_DOUBLE)  :: x1(*), x2(*), x3(*), x4(*)
@@ -43,6 +44,17 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
              REAL(C_DOUBLE)  :: xi(*), yi(*), zi(*)
              REAL(C_DOUBLE)  :: gap_s_l(*), gap_m_l(*)
              REAL(C_DOUBLE)  :: xrem(*)
+#else
+             REAL(C_FLOAT), VALUE :: gap, gapmax, gapmin, dgapload, drad
+             REAL(C_FLOAT)  :: x(*), gapv(*), gap_s(*), gap_m(*), curv_max(*)
+             REAL(C_FLOAT)  :: x1(*), x2(*), x3(*), x4(*)
+             REAL(C_FLOAT)  :: y1(*), y2(*), y3(*), y4(*)
+             REAL(C_FLOAT)  :: z1(*), z2(*), z3(*), z4(*)
+             REAL(C_FLOAT)  :: xi(*), yi(*), zi(*)
+             REAL(C_FLOAT)  :: gap_s_l(*), gap_m_l(*)
+             REAL(C_FLOAT)  :: xrem(*)
+#endif
+
              INTEGER(C_INT)  :: irect(4,*), nsv(*), cand_e(*), cand_n(*)
              INTEGER(C_INT)  :: ix1(*), ix2(*), ix3(*), ix4(*)
            END SUBROUTINE cpp_inter7_gather_cand
@@ -137,7 +149,6 @@ C-----------------------------------------------
           if(igap==0)then
             do i=1,jlt
               gapv(i)=max(gap+dgapload,drad)
-              write(6,*) i,"LOC=",LOC(GAPV(i)),GAPV(i)
 
             end do
           elseif(igap == 3)then
