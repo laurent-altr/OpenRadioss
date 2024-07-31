@@ -57,7 +57,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 
           USE COLLISION_MOD , ONLY : GROUP_SIZE
           USE INTER7_GATHER_CAND_MOD ! , ONLY: CPP_INTER7_GATHER_CAND
-          USE INTER7_PENETRATION_MOD , ONLY: INTER7_PENETRATION
+          USE INTER7_PENETRATION_MOD ! , ONLY: INTER7_PENETRATION
           USE CONSTANT_MOD
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
@@ -151,11 +151,50 @@ c    .                  s_xrem, xrem)
      .                                    z4, xi, yi, zi, gap_s_l, gap_m_l, s_xrem,nsn, nsnr,
      .                                    xrem, ix1, ix2, ix3, ix4, itype)
 
-          call inter7_penetration(j_stok ,margin ,x1    ,x2     ,x3   ,
-     .                 x4    ,y1    ,y2    ,y3     ,y4   ,
-     .                 z1    ,z2    ,z3    ,z4     ,xi   ,
-     .                 ix3,   ix4,
-     .                 yi    ,zi    ,pene  ,gapv )
+
+C       write(6,*) "-gapv(1)=" ,gapv(1)
+C       write(6,*) "-pene(1)=" ,pene(1)
+C       write(6,*) "-ix3(1)=" ,ix3(1)
+C       write(6,*) "-ix4(1)=" ,ix4(1)
+C       write(6,*) "-margin=" ,margin
+C       std::cout<<"gapv[0] = "<<gapv[0]<<std::endl;
+C       std::cout<<"pene[0] = "<<pene[0]<<std::endl;
+C       std::cout<<"ix3[0] = "<<ix3[0]<<std::endl;
+C       std::cout<<"ix4[0] = "<<ix4[0]<<std::endl;
+C       std::cout<<"margin = "<<margin<<std::endl;
+
+
+          call cpp_inter7_penetration(j_stok ,margin ,
+     .                 x1    ,x2     ,x3   ,x4    ,
+     .                 y1    ,y2    ,y3    ,y4   ,
+     .                 z1    ,z2    ,z3    ,z4     ,
+     .                 xi   ,yi    ,zi    ,
+     .                 ix3  ,ix4    ,
+     .                 pene  ,gapv )
+
+
+c         jlt,   margin,
+c          *x1,   *x2,   *x3,   *x4,
+c          *y1,   *y2,   *y3,   *y4,
+c          *z1,   *z2,   *z3,   *z4,
+c          *xi,   *yi,   *zi,
+c         int *ix3,  int *ix4,
+c          *gapv,  *pene)
+
+C       write(6,*) "+gapv(1)=" ,gapv(1)
+C       write(6,*) "+pene(1)=" ,pene(1)
+C       write(6,*) "+ix3(1)=" ,ix3(1)
+C       write(6,*) "+ix4(1)=" ,ix4(1)
+C       write(6,*) "+margin=" ,margin
+
+
+C          call inter7_penetration(j_stok ,margin ,x1    ,x2     ,x3   ,
+C     .                 x4    ,y1    ,y2    ,y3     ,y4   ,
+C     .                 z1    ,z2    ,z3    ,z4     ,xi   ,
+C     .                 ix3,   ix4,
+C     .                 yi    ,zi    ,pene  ,gapv )
+
+
 c-----------------------------------------------
 c removal of old candidates already stored (initial penetration)
 c-----------------------------------------------
