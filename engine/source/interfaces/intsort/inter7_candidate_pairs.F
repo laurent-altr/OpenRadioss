@@ -102,7 +102,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
      &                                    s_irem       ,
      &                                    next_nod      )
           USE COLLISION_MOD , ONLY : GROUP_SIZE
-          USE INTER7_FILTER_CAND_MOD, ONLY : INTER7_FILTER_CAND
+          USE INTER7_FILTER_CAND_MOD !, ONLY : INTER7_FILTER_CAND
           USE CONSTANT_MOD, ONLY : zero
           USE MY_ALLOC_MOD, ONLY : REALLOC 
 C-----------------------------------------------
@@ -552,10 +552,10 @@ C         write(6,*) itask,'Number of candidates: ', j_stok,ncontact,ncontact_sa
           DO i=1, j_stok, GROUP_SIZE
           ! j = size of the current block
             j = min(GROUP_SIZE, j_stok - i + 1)
-            call inter7_filter_cand(
+            call cpp_inter7_filter_cand(
      1                   j,irect  ,x     ,nsv   ,ii_stok,
      2                   cand_n,cand_e ,ncontact,marge  ,
-     3                   prov_n(i) ,prov_e(i),eshift,inacti ,
+     3                   prov_n(i:i+j) ,prov_e(i:i+j),eshift,inacti ,
      4                   ifq   ,cand_a ,cand_p,ifpen ,nsn    ,
      5                   oldnum,nsnrold,igap  ,gap   ,gap_s  ,
      6                   gap_m ,gapmin ,gapmax,curv_max,
@@ -563,6 +563,12 @@ C         write(6,*) itask,'Number of candidates: ', j_stok,ncontact,ncontact_sa
      8                   cand_f ,dgapload,
      .                   nsnr,
      .                   xrem ,s_xrem)
+C        subroutine cpp_inter7_filter_cand(j_stok, irect, x, nsv, ii_stok, cand_n, cand_e, mulnsn, margin, 
+C     .                                      prov_n, prov_e, eshift, inacti, ifq, cand_a, cand_p, ifpen, nsn, 
+C     .                                      oldnum, nsnrold, igap, gap, gap_s, gap_m, gapmin, gapmax, curv_max, 
+C     .                                      gap_s_l, gap_m_l, drad, itied, cand_f, dgapload, nsnr, xrem, s_xrem) 
+C     .                                      bind(C, name="cpp_inter7_filter_cand")
+
           enddo
 
           deallocate(prov_n)
