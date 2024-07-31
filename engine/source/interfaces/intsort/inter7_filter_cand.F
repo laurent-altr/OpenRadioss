@@ -26,6 +26,60 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
       !||    inter7_candidate_pairs   ../engine/source/interfaces/intsort/inter7_candidate_pairs.F
       !||====================================================================
       MODULE INTER7_FILTER_CAND_MOD
+
+        interface
+        subroutine cpp_inter7_filter_cand(j_stok, irect, x, nsv, ii_stok, cand_n, cand_e, mulnsn, margin, 
+     .                                      prov_n, prov_e, eshift, inacti, ifq, cand_a, cand_p, ifpen, nsn, 
+     .                                      oldnum, nsnrold, igap, gap, gap_s, gap_m, gapmin, gapmax, curv_max, 
+     .                                      gap_s_l, gap_m_l, drad, itied, cand_f, dgapload, nsnr, xrem, s_xrem) 
+     .                                      bind(C, name="cpp_inter7_filter_cand")
+            use iso_c_binding, only: c_int, c_double
+            implicit none
+    
+            integer(c_int), value :: j_stok
+            integer(c_int), value :: mulnsn
+            integer(c_int), value :: eshift
+            integer(c_int), value :: inacti
+            integer(c_int), value :: ifq
+            integer(c_int), value :: nsn
+            integer(c_int), value :: nsnrold
+            integer(c_int), value :: igap
+            integer(c_int), value :: itied
+            integer(c_int), value :: nsnr
+            integer(c_int), value :: s_xrem
+    
+            real(c_double), value :: margin
+            real(c_double), value :: gap
+            real(c_double), value :: gapmin
+            real(c_double), value :: gapmax
+            real(c_double), value :: drad
+            real(c_double), value :: dgapload
+    
+            integer(c_int), intent(in) :: irect(4, *)
+            real(c_double), intent(in) :: x(3, *)
+            integer(c_int), intent(inout) :: ifpen(*)
+            integer(c_int), intent(in) :: nsv(*)
+            integer(c_int), intent(in) :: prov_n(j_stok)
+            integer(c_int), intent(in) :: prov_e(j_stok)
+            integer(c_int), intent(in) :: oldnum(*)
+            real(c_double), intent(in) :: gap_s(*)
+            real(c_double), intent(in) :: gap_m(*)
+            real(c_double), intent(in) :: curv_max(*)
+            real(c_double), intent(in) :: gap_s_l(*)
+            real(c_double), intent(in) :: gap_m_l(*)
+            real(c_double), intent(in) :: xrem(s_xrem, nsnr)
+    
+            integer(c_int), intent(inout) :: ii_stok
+            integer(c_int), intent(inout) :: cand_n(mulnsn)
+            integer(c_int), intent(inout) :: cand_e(mulnsn)
+            integer(c_int), intent(inout) :: cand_a(*)
+            real(c_double), intent(inout) :: cand_p(*)
+            real(c_double), intent(inout) :: cand_f(8, *)
+        end subroutine cpp_inter7_filter_cand
+        end interface
+
+
+
       contains
 !! \brief broad phase filtering of candidate pairs
 !! \details input: nodes and segment sharing the same voxel, output: filtered candidate pairs
@@ -152,17 +206,6 @@ c    .                  s_xrem, xrem)
      .                                    xrem, ix1, ix2, ix3, ix4, itype)
 
 
-C       write(6,*) "-gapv(1)=" ,gapv(1)
-C       write(6,*) "-pene(1)=" ,pene(1)
-C       write(6,*) "-ix3(1)=" ,ix3(1)
-C       write(6,*) "-ix4(1)=" ,ix4(1)
-C       write(6,*) "-margin=" ,margin
-C       std::cout<<"gapv[0] = "<<gapv[0]<<std::endl;
-C       std::cout<<"pene[0] = "<<pene[0]<<std::endl;
-C       std::cout<<"ix3[0] = "<<ix3[0]<<std::endl;
-C       std::cout<<"ix4[0] = "<<ix4[0]<<std::endl;
-C       std::cout<<"margin = "<<margin<<std::endl;
-
 
           call cpp_inter7_penetration(j_stok ,margin ,
      .                 x1    ,x2     ,x3   ,x4    ,
@@ -171,22 +214,6 @@ C       std::cout<<"margin = "<<margin<<std::endl;
      .                 xi   ,yi    ,zi    ,
      .                 ix3  ,ix4    ,
      .                 pene  ,gapv )
-
-
-c         jlt,   margin,
-c          *x1,   *x2,   *x3,   *x4,
-c          *y1,   *y2,   *y3,   *y4,
-c          *z1,   *z2,   *z3,   *z4,
-c          *xi,   *yi,   *zi,
-c         int *ix3,  int *ix4,
-c          *gapv,  *pene)
-
-C       write(6,*) "+gapv(1)=" ,gapv(1)
-C       write(6,*) "+pene(1)=" ,pene(1)
-C       write(6,*) "+ix3(1)=" ,ix3(1)
-C       write(6,*) "+ix4(1)=" ,ix4(1)
-C       write(6,*) "+margin=" ,margin
-
 
 C          call inter7_penetration(j_stok ,margin ,x1    ,x2     ,x3   ,
 C     .                 x4    ,y1    ,y2    ,y3     ,y4   ,

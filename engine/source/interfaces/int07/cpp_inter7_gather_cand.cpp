@@ -19,16 +19,16 @@ constexpr my_real em20 = 1e-20;
 
 extern "C"
 {
-    void cpp_inter7_gather_cand(int jlt, my_real *x, int *irect, int *nsv, int *cand_e,
+    void cpp_inter7_gather_cand(int jlt, const my_real *x, const int *irect, const int *nsv, int *cand_e,
                                 int *cand_n, int igap, my_real gap, my_real *gapv,
-                                my_real *gap_s, my_real *gap_m, my_real *curv_max,
+                                const my_real *gap_s, const my_real *gap_m, const my_real *curv_max,
                                 my_real gapmax, my_real gapmin, my_real dgapload,
                                 my_real drad, my_real *x1, my_real *x2, my_real *x3,
                                 my_real *x4, my_real *y1, my_real *y2, my_real *y3,
                                 my_real *y4, my_real *z1, my_real *z2, my_real *z3,
                                 my_real *z4, my_real *xi, my_real *yi, my_real *zi,
-                                my_real *gap_s_l, my_real *gap_m_l, int s_xrem, int nsn,
-                                int nsnr, my_real *xrem, int *ix1, int *ix2, int *ix3,
+                                const my_real *gap_s_l, const my_real *gap_m_l, int s_xrem, int nsn,
+                                int nsnr, const my_real *xrem, int *ix1, int *ix2, int *ix3,
                                 int *ix4, int ityp)
     {
 
@@ -39,7 +39,6 @@ extern "C"
             for (i = 0; i < jlt; ++i)
             {
                 // write the address of gapv[i] to the console
-                // std::cout<<i<<" "<<gapv[i] << &gapv[i] << std::endl;
                 gapv[i] = std::max(gap + dgapload, drad);
             }
         }
@@ -161,15 +160,8 @@ extern "C"
         my_real xi4[GROUP_SIZE], yi4[GROUP_SIZE], zi4[GROUP_SIZE];
         my_real zoneinf;
 
-//        std::cout<<"gapv[0] = "<<gapv[0]<<std::endl;
-//        std::cout<<"pene[0] = "<<pene[0]<<std::endl;
-//        std::cout<<"ix3[0] = "<<ix3[0]<<std::endl;
-//        std::cout<<"ix4[0] = "<<ix4[0]<<std::endl;
-//        std::cout<<"margin = "<<margin<<std::endl;
-
         for (int i = 0; i < jlt; ++i)
         {
-//            std::cout<<"gapv["<<i<<"] = "<<gapv[i]<<" margin = "<<margin<<std::endl;
             zoneinf = gapv[i] + margin; // zone of influence: gap of the element + margin
             gap2[i] = zoneinf * zoneinf;
         }
@@ -525,15 +517,6 @@ extern "C"
                ny1[i] = yi[i]-(y0[i] + lb1[i]*y01[i] + lc1[i]*y02[i]);
                nz1[i] = zi[i]-(z0[i] + lb1[i]*z01[i] + lc1[i]*z02[i]);
                p1[i] = nx1[i]*nx1[i] + ny1[i]*ny1[i] +nz1[i]*nz1[i];
-              // std::cout<<"xi["<<i<<"] = "<<xi[i]<<std::endl;
-              // std::cout<<"yi["<<i<<"] = "<<yi[i]<<std::endl;
-              // std::cout<<"zi["<<i<<"] = "<<zi[i]<<std::endl;
-              // std::cout<<"x0["<<i<<"] = "<<x0[i]<<std::endl;
-              // std::cout<<"lc1["<<i<<"] = "<<lc1[i]<<std::endl;
-              // std::cout<<"p["<<i<<"] = "<<p1[i]<<std::endl;
-              // write(6,* "gap2(",i,")=",gap2(i)
-              //std::cout<<"gap2["<<i<<"] = "<<gap2[i]<<std::endl;
-
                const my_real d1 = std::max(zero, gap2[i] - p1[i]);
                nx2[i] = xi[i]-(x0[i] + lb2[i]*x02[i] + lc2[i]*x03[i]);
                ny2[i] = yi[i]-(y0[i] + lb2[i]*y02[i] + lc2[i]*y03[i]);
@@ -551,8 +534,108 @@ extern "C"
                p4[i] = nx4[i]*nx4[i] + ny4[i]*ny4[i] +nz4[i]*nz4[i];
                const my_real d4 = std::max(zero, gap2[i] - p4[i]);
                pene[i] = std::max({d1,d2,d3,d4}); 
-               //std::cout<<"pene["<<i<<"] = "<<pene[i]<<std::endl;
             }
         }
     }
+
+
+
+
+
+
+void cpp_inter7_filter_cand(
+    int j_stok, const int* irect, const my_real* x, const int* nsv, int& ii_stok,
+    int* cand_n, int* cand_e, int mulnsn, my_real margin,
+    int* prov_n, int* prov_e, int eshift, int inacti,
+    int ifq, int* cand_a, my_real* cand_p, int* ifpen, int nsn,
+    const int* oldnum, int nsnrold, int igap, my_real gap, const my_real* gap_s,
+    const my_real* gap_m, my_real gapmin, my_real gapmax, const my_real* curv_max,
+    const my_real* gap_s_l, const my_real* gap_m_l, my_real drad, int itied,
+    my_real* cand_f, my_real dgapload, int nsnr, const my_real* xrem, int s_xrem) {
+
+    int i, k_stok, i_stok, n, ne, j;
+    int inacti_l, itied_l, ifq_l;
+    int j_start, j_end;
+    const int itype = 7;
+    my_real x1[GROUP_SIZE], x2[GROUP_SIZE], x3[GROUP_SIZE], x4[GROUP_SIZE];
+    my_real y1[GROUP_SIZE], y2[GROUP_SIZE], y3[GROUP_SIZE], y4[GROUP_SIZE];
+    my_real z1[GROUP_SIZE], z2[GROUP_SIZE], z3[GROUP_SIZE], z4[GROUP_SIZE];
+    my_real xi[GROUP_SIZE], yi[GROUP_SIZE], zi[GROUP_SIZE];
+    my_real pene[GROUP_SIZE], gapv[GROUP_SIZE];
+    int ix1[GROUP_SIZE], ix2[GROUP_SIZE], ix3[GROUP_SIZE], ix4[GROUP_SIZE];
+
+    cpp_inter7_gather_cand(j_stok, x, irect, nsv, prov_e, prov_n, igap, gap, gapv,
+                           gap_s, gap_m, curv_max, gapmax, gapmin, dgapload, drad,
+                           x1, x2, x3, x4, y1, y2, y3, y4, z1, z2, z3, z4,
+                           xi, yi, zi, gap_s_l, gap_m_l, s_xrem, nsn, nsnr,
+                           xrem, ix1, ix2, ix3, ix4, itype);
+
+    cpp_inter7_penetration(j_stok, margin, x1, x2, x3, x4,
+                           y1, y2, y3, y4, z1, z2, z3, z4,
+                           xi, yi, zi, ix3, ix4, pene, gapv);
+
+    if (inacti == 5 || inacti == 6 || inacti == 7 || ifq > 0 || itied != 0) {
+        for (i = 0; i < j_stok; ++i) {
+            if (pene[i] != zero) {
+                n = prov_n[i];
+                ne = prov_e[i] + eshift;
+                if (n > nsn) {
+                    n = oldnum[n - nsn-1] + nsn;
+                    if (n == nsn) n = nsn + nsnrold + 1;
+                }
+                j_start = cand_a[n-1];
+                j_end = cand_a[n] - 1;
+                for (j = j_start-1; j < j_end; ++j) {
+                    if (cand_e[j] == ne) {
+                        pene[i] = zero;
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    k_stok = 0;
+    for (i = 0; i < j_stok; ++i) {
+        if (pene[i] != zero) k_stok++;
+    }
+    if (k_stok == 0) return;
+
+    #pragma omp critical
+    {
+        i_stok = ii_stok;
+        ii_stok = i_stok + k_stok;
+    }
+
+    inacti_l = inacti;
+    itied_l = itied;
+    ifq_l = ifq;
+
+    for (i = 0; i < j_stok; ++i) {
+        if (pene[i] != zero) {
+            cand_n[i_stok] = prov_n[i];
+            cand_e[i_stok] = prov_e[i] + eshift;
+            if (ifq_l > 0) ifpen[i_stok] = 0;        
+            if (inacti_l == 5 || inacti_l == 6 || inacti_l == 7) cand_p[i_stok] = zero;
+            if (itied_l != 0) {
+                for (int k = 0; k < 8; ++k) {
+                    cand_f[k * mulnsn + i_stok] = zero;
+                }
+            }
+            i_stok++;
+        }
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
 }
