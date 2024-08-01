@@ -265,7 +265,7 @@ C=======================================================================
               if(first == 0)then
                 !empty cell
                 nb_voxel_on = nb_voxel_on + 1
-                ! 1d version of 3d potition, indexes starts at 1
+                ! 1d version of 3d position, indexes starts at 1
                 list_nb_voxel_on(nb_voxel_on) = (iix-1)*(nby+2)*(nbz+2)+(iiy-1)*(nbz+2)+(iiz-1)
                 voxel(iix,iiy,iiz)          = i ! first
                 next_nod(i)                 = 0 ! last one
@@ -500,8 +500,8 @@ C=======================================================================
 
                     j_stok = j_stok + 1
                     if(j_stok > size_prov) then
-                      CALL REALLOC(prov_n, size_prov, size_prov*2) 
-                      CALL REALLOC(prov_e, size_prov, size_prov*2) 
+                      call realloc(prov_n, size_prov, size_prov*2) 
+                      call realloc(prov_e, size_prov, size_prov*2) 
                       size_prov = 2*size_prov + GROUP_SIZE       
                     endif
                     prov_n(j_stok) = jj
