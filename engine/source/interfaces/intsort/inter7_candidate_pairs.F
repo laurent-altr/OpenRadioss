@@ -27,6 +27,139 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
       !||    main                         ../engine/unit_test/unit_test1.F
       !||====================================================================
       MODULE INTER7_CANDIDATE_PAIRS_MOD
+        interface
+        SUBROUTINE CPP_INTER7_CANDIDATE_PAIRS(
+     &                                    nsn          ,
+     &                                    oldnum       ,
+     &                                    nsnr         ,
+     &                                    isznsnr      ,
+     &                                    i_mem        ,
+     &                                    irect        ,
+     &                                    x            ,
+     &                                    stf          ,
+     &                                    stfn         ,
+     &                                    xyzm         ,
+     &                                    nsv          ,
+     &                                    ii_stok      ,
+     &                                    cand_n       ,
+     &                                    eshift       ,
+     &                                    cand_e       ,
+     &                                    ncontact       ,
+     &                                    tzinf        ,
+     &                                    gap_s_l      ,
+     &                                    gap_m_l      ,
+     &                                    voxel        ,
+     &                                    nbx          ,
+     &                                    nby          ,
+     &                                    nbz          ,
+     &                                    inacti       ,
+     &                                    ifq          ,
+     &                                    cand_a       ,
+     &                                    cand_p       ,
+     &                                    ifpen        ,
+     &                                    nrtm         ,
+     &                                    nsnrold      ,
+     &                                    igap         ,
+     &                                    gap          ,
+     &                                    gap_s        ,
+     &                                    gap_m        ,
+     &                                    gapmin       ,
+     &                                    gapmax       ,
+     &                                    marge        ,
+     &                                    curv_max     ,
+     &                                    itask        ,
+     &                                    bgapsmx      ,
+     &                                    s_kremnod    ,
+     &                                    kremnod      ,
+     &                                    s_remnod     ,
+     &                                    remnod       ,
+     &                                    flagremnode  ,
+     &                                    drad         ,
+     &                                    itied        ,
+     &                                    cand_f       ,
+     &                                    dgapload     ,
+     &                                    s_cand_a     ,
+     &                                    total_nb_nrtm,
+     &                                    numnod       ,
+     &                                    xrem         ,
+     &                                    s_xrem       ,
+     &                                    irem         ,
+     &                                    s_irem       ,
+     &                                    next_nod      ) BIND(C , NAME='cpp_inter7_candidate_pairs')
+          USE COLLISION_MOD , ONLY : GROUP_SIZE
+          USE INTER7_FILTER_CAND_MOD !, ONLY : INTER7_FILTER_CAND
+          USE CONSTANT_MOD, ONLY : zero
+          USE MY_ALLOC_MOD, ONLY : REALLOC 
+C-----------------------------------------------
+          implicit none
+! the following include defines my_real as double precsiion or real(4) depending on compiler option
+#include "my_real.inc"
+C-----------------------------------------------
+C   D u m m y   A r g u m e n t s
+C-----------------------------------------------
+          integer, intent(inout) :: i_mem !< error code when not enough memory
+          integer, intent(in), value :: eshift !< openmp shift for main segments
+          integer, intent(in), value :: nsn !< number of secondary nodes
+          integer, intent(in), value :: nsnr !< current number of remote secondary nodes
+          integer, intent(in), value :: nsnrold !< old number of remote secondary nodes
+          integer, intent(in), value :: isznsnr !< size of oldnum
+          integer, intent(in), value :: nrtm !< number of considered segment
+          integer, intent(in), value :: total_nb_nrtm !< total number of segments
+          integer, intent(in), value :: itask !< id of the current task
+          integer, intent(in), value :: nbx !< number of voxels in x
+          integer, intent(in), value :: nby !< number of voxels in y
+          integer, intent(in), value :: nbz !< number of voxels in z
+          integer, intent(in), value :: inacti !< inactivation of initial penetrations
+          integer, intent(in), value :: ifq !< friction model ?
+          integer, intent(in), value :: igap !< gap model ?
+          integer, intent(in), value :: flagremnode !< flag for removed nodes?
+          integer, intent(in), value :: itied !< tied contact ?
+          integer, intent(in), value :: numnod !< total number of nodes of the model
+          integer, intent(in), value :: s_xrem !< size of xrem
+          integer, intent(in), value :: s_irem !< size of xrem
+          integer, intent(in), value :: s_cand_a !< size of cand_a
+          integer, intent(in), value :: s_kremnod !< 2 * nrtm + 1 if option is used
+          integer, intent(in), value :: s_remnod !< size of remnod
+          integer, intent(inout) :: ncontact !< maximum numbrer of candidates (size of cand_n)
+          integer, intent(inout) :: ii_stok !< number of candidates found
+
+          integer, intent(in) :: nsv(nsn) !< global secondary node numbers
+          integer, intent(in) :: oldnum(isznsnr) !< renumbering ?
+          integer, intent(in) :: kremnod(s_kremnod) !< list of removed nodes
+          integer, intent(in) :: remnod(s_remnod) !< list of removed nodes
+          integer, intent(in) :: irect(4,nrtm) !< node id (from 1 to NUMNOD) for each segment (1:nrtm)
+
+          integer, dimension(:), allocatable,   intent(inout) :: cand_n !< list of candidates (secondary) size: ncontact
+          integer, dimension(:), allocatable,   intent(inout) :: cand_e !< list of candidates (main) size: ncontact
+          integer, dimension(:), allocatable,   intent(inout) :: ifpen !< something related to friction (???) size: ncontact
+          integer, intent(inout) :: cand_a(s_cand_a) !< (???)
+          integer, intent(inout) :: irem(s_irem,nsnr) !< remote (spmd) integer data
+          integer, intent(inout) :: voxel(nbx+2,nby+2,nbz+2) !< contain the first node of each voxel
+          integer, intent(inout) :: next_nod(nsn+nsnr) !< next node in the same voxel
+
+          my_real, intent(in), value :: gap !< gap (???)
+          my_real, intent(in), value :: gapmin !< minimum gap
+          my_real, intent(in), value :: gapmax !< maximum gap
+          my_real, intent(in), value :: bgapsmx!< overestimation of gap_s
+          my_real, intent(in), value :: marge !< margin
+          my_real, intent(in), value :: tzinf !< some kind of length for "zone of influence" ?
+          my_real, intent(in), value :: drad !< radiation distance (thermal analysis)
+          my_real, intent(in), value :: dgapload !< gap load (???)
+          my_real, intent(in) :: x(3,numnod) !< coordinates of nodes all
+          my_real, intent(in) :: gap_s(nsn) !< gap for secondary nodes
+          my_real, intent(in) :: gap_m(nrtm) !< gap for main nodes
+          my_real, intent(in) :: gap_s_l(nsn) !< gap for secondary nodes (???)
+          my_real, intent(in) :: gap_m_l(nrtm) !< gap for main nodes (???)
+          my_real, intent(in) :: curv_max(nrtm) !< maximum curvature
+          my_real, intent(in) :: xyzm(12) !< bounding box
+          my_real, dimension(:), allocatable,  intent(inout) :: cand_p !< penetration (???) size: ncontact
+          my_real, dimension(:), allocatable,  intent(inout) :: cand_f !< related to tied contact, cand force (???) size: ncontact
+          my_real, intent(in) :: stf(nrtm) !< stiffness of segments (quadrangles or triangles)
+          my_real, intent(inout) :: stfn(nsn) !< stiffness secondary nodes
+          my_real, intent(inout) :: xrem(s_xrem,nsnr) !< remote (spmd) real data
+        END SUBROUTINE 
+        END INTERFACE
+C
       CONTAINS
 
 !! \brief get the list of candidates for all segment
