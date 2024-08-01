@@ -1027,50 +1027,6 @@ extern "C"
         }
 
 
-/*
-C         write(6,*) itask,'Number of candidates: ', j_stok,ncontact,ncontact_save
-
-
-          DO i=1, j_stok, GROUP_SIZE
-          ! j = size of the current block
-            j = min(GROUP_SIZE, j_stok - i + 1)
-            call cpp_inter7_filter_cand(
-     1                   j,irect  ,x     ,nsv   ,ii_stok,
-     2                   cand_n,cand_e ,ncontact,marge  ,
-     3                   prov_n(i:i+j) ,prov_e(i:i+j),eshift,inacti ,
-     4                   ifq   ,cand_a ,cand_p,ifpen ,nsn    ,
-     5                   oldnum,nsnrold,igap  ,gap   ,gap_s  ,
-     6                   gap_m ,gapmin ,gapmax,curv_max,
-     7                   gap_s_l,gap_m_l,drad,itied    ,
-     8                   cand_f ,dgapload,
-     .                   nsnr,
-     .                   xrem ,s_xrem)
-          enddo
-
-          deallocate(prov_n)
-          deallocate(prov_e)
-
-C=======================================================================
-C 5   VOXEL RESET
-C=======================================================================
-!$OMP BARRIER
-          if(total_nb_nrtm>0 .and. allocated(list_nb_voxel_on)) then
-            do jj = 1, nb_voxel_on
-              j = list_nb_voxel_on(jj)
-              k = j
-              iiz =  mod(k,nbz+2) + 1
-              ! iz [1,nbz+2]
-              k = (k-iiz+1)/(nbz+2)
-              iiy =  mod(k,nby+2) + 1
-              k = (k-iiy+1)/(nby+2)
-              iix = mod(k,nbx+2) + 1
-              voxel(iix,iiy,iiz) = 0
-            enddo
-            deallocate(list_nb_voxel_on)
-          endif
-!$OMP BARRIER
-*/
-
     } // end of cpp_inter7_candidate_pairs
 
 }
