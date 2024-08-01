@@ -205,7 +205,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
           module procedure my_alloc_8_pdouble_3d
         end interface my_alloc
         interface realloc
-          module procedure integer_realloc,ptr_integer_realloc                                                                        
+          module procedure integer_realloc,ptr_integer_realloc
           module procedure double_realloc,ptr_double_realloc
           module procedure real_realloc,ptr_real_realloc
         end interface  
@@ -1581,6 +1581,38 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
             deallocate(a)
             call move_alloc(temp, a)
         end subroutine integer_realloc
+
+        subroutine fortran_integer_realloc(a, oldsize, newsize) bind(C)
+            use iso_c_binding
+            implicit none
+            integer(C_INT), dimension(:), allocatable :: a           !< the array to be reallocated
+            integer(C_INT) :: oldsize                                !< the current size of the array
+            integer(C_INT) :: newsize                                !< the new size of the array
+            integer(C_INT), dimension(:), allocatable :: temp        !< temporary array for copying values
+            allocate(temp(newsize))
+            temp(1:oldsize) = a
+            deallocate(a)
+            call move_alloc(temp, a)
+        end subroutine fortran_integer_realloc
+        subroutine fortran_real_realloc(a, oldsize, newsize) bind(C)
+            use iso_c_binding
+            implicit none
+#ifdef MYREAL8
+            real(C_DOUBLE), dimension(:), allocatable :: a           !< the array to be reallocated
+            real(C_DOUBLE), dimension(:), allocatable :: temp        !< temporary array for copying values
+#else
+            real(C_FLOAT) , dimension(:), allocatable :: a           !< the array to be reallocated
+            real(C_FLOAT), dimension(:), allocatable :: temp        !< temporary array for copying values
+#endif
+            integer(C_INT) :: oldsize                                !< the current size of the array
+            integer(C_INT) :: newsize                                !< the new size of the array
+            allocate(temp(newsize))
+            temp(1:oldsize) = a
+            deallocate(a)
+            call move_alloc(temp, a)
+        end subroutine fortran_real_realloc 
+
+
         subroutine double_realloc(a, oldsize, newsize)
             implicit none
             double precision, dimension(:), allocatable :: a      !< the array to be reallocated
