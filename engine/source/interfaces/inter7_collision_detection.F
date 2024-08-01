@@ -60,7 +60,7 @@ C============================================================================
 C   M o d u l e s
 C-----------------------------------------------
       USE TRI7BOX
-      USE INTER7_CANDIDATE_PAIRS_MOD
+      USE INTER7_CANDIDATE_PAIRS_MOD, ONLY : CPP_INTER7_CANDIDATE_PAIRS
       USE MESSAGE_MOD
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
@@ -109,6 +109,7 @@ C     REAL
      .        XYZM(6,2), MARGE, AAA
       INTEGER NBX,NBY,NBZ ! number of cells in each direction
       INTEGER (KIND=8) :: NBX8,NBY8,NBZ8,RES8,LVOXEL8
+      INTEGER :: SIREM, SXREM
 
 C-----------------------------------------------
 C   S o u r c e  L i n e s
@@ -203,7 +204,23 @@ C
       endif
       call MY_BARRIER
 
-       CALL INTER7_CANDIDATE_PAIRS(
+C       CALL INTER7_CANDIDATE_PAIRS(
+C     1   NSN     ,PREV_REMOTE_NUMBER ,NSNR     ,S_PREV_REMOTE_NUMBER  ,I_MEM   ,
+C     2   IRECT   ,X        ,STF      ,STFN     ,XYZM    ,
+C     3   NSV     ,II_STOK  ,CAND_N   ,ESHIFT   ,CAND_E  ,
+C     4   NCONTACT,TZINF    ,GAP_S_L  ,GAP_M_L ,
+C     5   VOXEL1  ,NBX      ,NBY      ,NBZ      ,
+C     6   INACTI  ,IFQ      ,CAND_A,CAND_P   ,IFPEN   ,
+C     7   NRTM    ,NSNROLD  ,IGAP     ,GAP      ,GAP_S   ,
+C     8   GAP_M   ,GAPMIN   ,GAPMAX   ,MARGE    ,CURV_MAX,
+C     9   ITASK    ,BGAPSMX  ,S_KREMNOD, KREMNOD  ,S_REMNOD, REMNOD  ,
+C     A   FLAGREMNODE,DRAD   ,ITIED    ,CAND_F  ,
+C     B   DGAPLOAD, s_cand_a, 
+C     C   TOTAL_NB_NRTM,  NUMNOD, XREM, SIZE(XREM,1), 
+C     D   IREM, size(irem,1), NEXT_NOD)
+        SXREM = SIZE(XREM,1)
+        SIREM = SIZE(IREM,1)
+        CALL CPP_INTER7_CANDIDATE_PAIRS(
      1   NSN     ,PREV_REMOTE_NUMBER ,NSNR     ,S_PREV_REMOTE_NUMBER  ,I_MEM   ,
      2   IRECT   ,X        ,STF      ,STFN     ,XYZM    ,
      3   NSV     ,II_STOK  ,CAND_N   ,ESHIFT   ,CAND_E  ,
@@ -215,8 +232,9 @@ C
      9   ITASK    ,BGAPSMX  ,S_KREMNOD, KREMNOD  ,S_REMNOD, REMNOD  ,
      A   FLAGREMNODE,DRAD   ,ITIED    ,CAND_F  ,
      B   DGAPLOAD, s_cand_a, 
-     C   TOTAL_NB_NRTM,  NUMNOD, XREM, SIZE(XREM,1), 
-     D   IREM, size(irem,1), NEXT_NOD)
+     C   TOTAL_NB_NRTM,  NUMNOD, XREM, SXREM, 
+     D   IREM, SIREM, NEXT_NOD)
+
 
         IF(ITASK==0)  THEN
             IF(ALLOCATED(NEXT_NOD)) DEALLOCATE(NEXT_NOD)
