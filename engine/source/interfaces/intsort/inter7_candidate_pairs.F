@@ -55,8 +55,6 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
      &                                    inacti       ,
      &                                    ifq          ,
      &                                    cand_a       ,
-     &                                    cand_p       ,
-     &                                    ifpen        ,
      &                                    nrtm         ,
      &                                    nsnrold      ,
      &                                    igap         ,
@@ -76,7 +74,6 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
      &                                    flagremnode  ,
      &                                    drad         ,
      &                                    itied        ,
-     &                                    cand_f       ,
      &                                    dgapload     ,
      &                                    s_cand_a     ,
      &                                    total_nb_nrtm,
@@ -87,9 +84,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
      &                                    s_irem       ,
      &                                    next_nod      ) BIND(C , NAME='cpp_inter7_candidate_pairs')
           USE COLLISION_MOD , ONLY : GROUP_SIZE
-          USE INTER7_FILTER_CAND_MOD !, ONLY : INTER7_FILTER_CAND
-          USE CONSTANT_MOD, ONLY : zero
-          USE MY_ALLOC_MOD, ONLY : REALLOC 
+          USE iso_c_binding
 C-----------------------------------------------
           implicit none
 ! the following include defines my_real as double precsiion or real(4) depending on compiler option
@@ -129,9 +124,13 @@ C-----------------------------------------------
           integer, intent(in) :: remnod(s_remnod) !< list of removed nodes
           integer, intent(in) :: irect(4,nrtm) !< node id (from 1 to NUMNOD) for each segment (1:nrtm)
 
-          integer, dimension(:), allocatable,   intent(inout) :: cand_n !< list of candidates (secondary) size: ncontact
-          integer, dimension(:), allocatable,   intent(inout) :: cand_e !< list of candidates (main) size: ncontact
-          integer, dimension(:), allocatable,   intent(inout) :: ifpen !< something related to friction (???) size: ncontact
+C         integer, dimension(:), allocatable,   intent(inout) :: cand_n !< list of candidates (secondary) size: ncontact
+C         integer, dimension(:), allocatable,   intent(inout) :: cand_e !< list of candidates (main) size: ncontact
+C         integer, dimension(:), allocatable,   intent(inout) :: ifpen !< something related to friction (???) size: ncontact
+          type(c_ptr), intent(out) :: cand_n !< list of candidates (secondary) size: ncontact
+          type(c_ptr), intent(out) :: cand_e !< list of candidates (main) size: ncontact
+
+
           integer, intent(inout) :: cand_a(s_cand_a) !< (???)
           integer, intent(inout) :: irem(s_irem,nsnr) !< remote (spmd) integer data
           integer, intent(inout) :: voxel(nbx+2,nby+2,nbz+2) !< contain the first node of each voxel
@@ -152,8 +151,8 @@ C-----------------------------------------------
           my_real, intent(in) :: gap_m_l(nrtm) !< gap for main nodes (???)
           my_real, intent(in) :: curv_max(nrtm) !< maximum curvature
           my_real, intent(in) :: xyzm(12) !< bounding box
-          my_real, dimension(:), allocatable,  intent(inout) :: cand_p !< penetration (???) size: ncontact
-          my_real, dimension(:), allocatable,  intent(inout) :: cand_f !< related to tied contact, cand force (???) size: ncontact
+c         my_real, dimension(:), allocatable,  intent(inout) :: cand_p !< penetration (???) size: ncontact
+c         my_real, dimension(:), allocatable,  intent(inout) :: cand_f !< related to tied contact, cand force (???) size: ncontact
           my_real, intent(in) :: stf(nrtm) !< stiffness of segments (quadrangles or triangles)
           my_real, intent(inout) :: stfn(nsn) !< stiffness secondary nodes
           my_real, intent(inout) :: xrem(s_xrem,nsnr) !< remote (spmd) real data
@@ -203,8 +202,6 @@ C
      &                                    inacti       ,
      &                                    ifq          ,
      &                                    cand_a       ,
-     &                                    cand_p       ,
-     &                                    ifpen        ,
      &                                    nrtm         ,
      &                                    nsnrold      ,
      &                                    igap         ,
@@ -224,7 +221,6 @@ C
      &                                    flagremnode  ,
      &                                    drad         ,
      &                                    itied        ,
-     &                                    cand_f       ,
      &                                    dgapload     ,
      &                                    s_cand_a     ,
      &                                    total_nb_nrtm,
@@ -279,7 +275,6 @@ C-----------------------------------------------
 
           integer, dimension(:), allocatable,   intent(inout) :: cand_n !< list of candidates (secondary) size: ncontact
           integer, dimension(:), allocatable,   intent(inout) :: cand_e !< list of candidates (main) size: ncontact
-          integer, dimension(:), allocatable,   intent(inout) :: ifpen !< something related to friction (???) size: ncontact
           integer, intent(inout) :: cand_a(s_cand_a) !< (???)
           integer, intent(inout) :: irem(s_irem,nsnr) !< remote (spmd) integer data
           integer, intent(inout) :: voxel(nbx+2,nby+2,nbz+2) !< contain the first node of each voxel
@@ -300,8 +295,6 @@ C-----------------------------------------------
           my_real, intent(in) :: gap_m_l(nrtm) !< gap for main nodes (???)
           my_real, intent(in) :: curv_max(nrtm) !< maximum curvature
           my_real, intent(in) :: xyzm(12) !< bounding box
-          my_real, dimension(:), allocatable,  intent(inout) :: cand_p !< penetration (???) size: ncontact
-          my_real, dimension(:), allocatable,  intent(inout) :: cand_f !< related to tied contact, cand force (???) size: ncontact
           my_real, intent(in) :: stf(nrtm) !< stiffness of segments (quadrangles or triangles)
           my_real, intent(inout) :: stfn(nsn) !< stiffness secondary nodes
           my_real, intent(inout) :: xrem(s_xrem,nsnr) !< remote (spmd) real data
@@ -388,12 +381,19 @@ C=======================================================================
               if(x(2,j) > ymax)  cycle
               if(x(3,j) < zmin)  cycle
               if(x(3,j) > zmax)  cycle
+             !std::cout<<"coord: "<<x[0 + (j - 1) * 3]<<" "<<x[1 + (j - 1) * 3]<<" "<<x[2 + (j - 1) * 3]<<std::endl;  
+              !std::cout<<"coord: "<<x(1,j)<<" "<<x(2,j)<<" "<<x(3,j)<<std::endl;
+              !write(6,*) "coord: ",x(1,j)," ",x(2,j)," ",x(3,j)
+
               iix=int(nbx*(x(1,j)-xminb)/(xmaxb-xminb))
               iiy=int(nby*(x(2,j)-yminb)/(ymaxb-yminb))
               iiz=int(nbz*(x(3,j)-zminb)/(zmaxb-zminb))
               iix=max(1,2+min(nbx,iix))
               iiy=max(1,2+min(nby,iiy))
               iiz=max(1,2+min(nbz,iiz))
+!              std::cout<<"iix: "<<iix<<" iiy: "<<iiy<<" iiz: "<<iiz<<std::endl;
+               write(6,*) "iix: ",iix," iiy: ",iiy," iiz: ",iiz
+
               first = voxel(iix,iiy,iiz)
               if(first == 0)then
                 !empty cell
@@ -560,11 +560,20 @@ C=======================================================================
             iy2=max(1,2+min(nby,iy2))
             iz2=max(1,2+min(nbz,iz2))
 
+
+!            std::cout<<"ne ="<<ne;
+!            std::cout<<"ix1 = "<<ix1<<" ix2 = "<<ix2<<" iy1 = "<<iy1<<" iy2 = "<<iy2<<" iz1 = "<<iz1<<" iz2 = "<<iz2<<std::endl;
+!           write(6,*) "ne =",ne
+c           write(6,*) "ix1 = ",ix1," ix2 = ",ix2," iy1 = ",iy1," iy2 = ",iy2," iz1 = ",iz1," iz2 = ",iz2
+
+
             do iz = iz1,iz2
               do iy = iy1,iy2
                 do ix = ix1,ix2
                   jj = voxel(ix,iy,iz)
                   do while(jj /= 0)
+C/                           std::cout<<"ne = "<<ne<<" jj = "<<jj<<std::endl;
+c                   write(6,*)  "ne = ",ne," jj = ",jj
 
                     if(jj<=nsn)then
                       ! local node
@@ -607,6 +616,12 @@ C=======================================================================
                         aaa = marge+curv_max(ne)+max(min(gapmax,max(gapmin,xrem(9,j)+gap_m(ne)))+dgapload,drad)
                       endif
                     endif
+c                           std::cout<<"xs = "<<xs<<" ys = "<<ys<<" zs = "<<zs<<std::endl;
+c                           std::cout<<"xmin = "<<xmin<<" xmax = "<<xmax<<" ymin = "<<ymin<<" ymax = "<<ymax<<" zmin = "<<zmin<<" zmax = "<<zmax<<std::endl;
+c                           std::cout<<"aaa = "<<aaa<<std::endl;
+c                   write(6,*) "xs = ",xs," ys = ",ys," zs = ",zs
+c                   write(6,*) "xmin = ",xmin," xmax = ",xmax," ymin = ",ymin," ymax = ",ymax," zmin = ",zmin," zmax = ",zmax
+c                   write(6,*) "aaa = ",aaa
 
                     if(xs<=xmine-aaa)goto 200
                     if(xs>=xmaxe+aaa)goto 200
@@ -639,6 +654,9 @@ C=======================================================================
                     endif
                     prov_n(j_stok) = jj
                     prov_e(j_stok) = ne
+C/                            std::cout<<"j_stok = "<<j_stok<<" jj = "<<jj<<" ne = "<<ne<<std::endl;                                                    
+c                   write(6,*) "j_stok = ",j_stok," jj = ",jj," ne = ",ne
+
   200               continue
                     jj = next_nod(jj)
                   enddo ! while(jj /= 0)
@@ -659,6 +677,7 @@ C=======================================================================
           ncontact = ncontact - j_stok
 !$OMP END CRITICAL
 !$OMP BARRIER
+          write(6,*) "NCONTACT=",ncontact
 
           if(itask == 0) then 
             if(ncontact < 0) then
@@ -668,9 +687,11 @@ C=======================================================================
               ! upgrade arrays to ncontact size
               call realloc(cand_n, ncontact_save, ncontact)
               call realloc(cand_e, ncontact_save, ncontact)
-              if(ifq .ne.0)  call realloc(ifpen, ncontact_save, ncontact)
-              if(inacti == 5 .or. inacti == 6 .or. inacti == 7)  call  realloc(cand_p, ncontact_save, ncontact)
-              if(itied .ne. 0) call realloc(cand_f, 8*ncontact_save, 8*ncontact)
+              write(6,*) "REALLOC NECESSARY: ncontact = ",ncontact," ncontact_save = ",ncontact_save
+
+c             if(ifq .ne.0)  call realloc(ifpen, ncontact_save, ncontact)
+c             if(inacti == 5 .or. inacti == 6 .or. inacti == 7)  call  realloc(cand_p, ncontact_save, ncontact)
+c             if(itied .ne. 0) call realloc(cand_f, 8*ncontact_save, 8*ncontact)
             else 
 !$omp critical
               ncontact = ncontact_save
@@ -689,11 +710,11 @@ C         write(6,*) itask,'Number of candidates: ', j_stok,ncontact,ncontact_sa
      1                   j,irect  ,x     ,nsv   ,ii_stok,
      2                   cand_n,cand_e ,ncontact,marge  ,
      3                   prov_n(i:i+j) ,prov_e(i:i+j),eshift,inacti ,
-     4                   ifq   ,cand_a ,cand_p,ifpen ,nsn    ,
+     4                   ifq   ,cand_a ,nsn    ,
      5                   oldnum,nsnrold,igap  ,gap   ,gap_s  ,
      6                   gap_m ,gapmin ,gapmax,curv_max,
      7                   gap_s_l,gap_m_l,drad,itied    ,
-     8                   cand_f ,dgapload,
+     8                   dgapload,
      .                   nsnr,
      .                   xrem ,s_xrem)
 C        subroutine cpp_inter7_filter_cand(j_stok, irect, x, nsv, ii_stok, cand_n, cand_e, mulnsn, margin, 
@@ -1413,8 +1434,6 @@ C-----------------------------------------------
      &                                    inacti       ,
      &                                    ifq          ,
      &                                    cand_a       ,
-     &                                    cand_p       ,
-     &                                    ifpen        ,
      &                                    nrtm         ,
      &                                    nsnrold      ,
      &                                    igap         ,
@@ -1434,7 +1453,6 @@ C-----------------------------------------------
      &                                    flagremnode  ,
      &                                    drad         ,
      &                                    itied        ,
-     &                                    cand_f       ,
      &                                    dgapload     ,
      &                                    s_cand_a     ,
      &                                    total_nb_nrtm,
