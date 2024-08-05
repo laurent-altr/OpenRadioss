@@ -29,9 +29,9 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 
         interface
         subroutine cpp_inter7_filter_cand(j_stok, irect, x, nsv, ii_stok, cand_n, cand_e, mulnsn, margin, 
-     .                                      prov_n, prov_e, eshift, inacti, ifq, cand_a, cand_p, ifpen, nsn, 
+     .                                      prov_n, prov_e, eshift, inacti, ifq, cand_a,   nsn, 
      .                                      oldnum, nsnrold, igap, gap, gap_s, gap_m, gapmin, gapmax, curv_max, 
-     .                                      gap_s_l, gap_m_l, drad, itied, cand_f, dgapload, nsnr, xrem, s_xrem) 
+     .                                      gap_s_l, gap_m_l, drad, itied,  dgapload, nsnr, xrem, s_xrem) 
      .                                      bind(C, name="cpp_inter7_filter_cand")
             use iso_c_binding, only: c_int, c_double
             implicit none
@@ -57,7 +57,6 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
     
             integer(c_int), intent(in) :: irect(4, *)
             real(c_double), intent(in) :: x(3, *)
-            integer(c_int), intent(inout) :: ifpen(*)
             integer(c_int), intent(in) :: nsv(*)
             integer(c_int), intent(in) :: prov_n(j_stok)
             integer(c_int), intent(in) :: prov_e(j_stok)
@@ -73,8 +72,6 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
             integer(c_int), intent(inout) :: cand_n(mulnsn)
             integer(c_int), intent(inout) :: cand_e(mulnsn)
             integer(c_int), intent(inout) :: cand_a(*)
-            real(c_double), intent(inout) :: cand_p(*)
-            real(c_double), intent(inout) :: cand_f(8, *)
         end subroutine cpp_inter7_filter_cand
         end interface
 
