@@ -69,6 +69,7 @@ C-----------------------------------------------
       USE INTER7_CANDIDATE_PAIRS_MOD
       USE MESSAGE_MOD
       USE iso_c_binding
+      USE my_alloc_mod, only: realloc
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -119,6 +120,7 @@ C     REAL
       INTEGER :: SIREM, SXREM
       INTEGER(C_INT), POINTER :: C_CAND_E(:), C_CAND_N(:)
       TYPE(C_PTR) :: PTR_CAND_E, PTR_CAND_N
+      INTEGER :: NCONTACT_SAVE
 
 C-----------------------------------------------
 C   S o u r c e  L i n e s
@@ -212,15 +214,6 @@ C
        end if
       endif
       call MY_BARRIER
-        IF(ITASK==0)  THEN
-            write(6,*) "Size of cand_n", size(cand_n),"II_STOK"       ,II_STOK,"size(cande)",size(cand_e) 
-            write(6,*) "LOC(cand_n)", LOC(cand_n(13)), "LOC(cand_e)", LOC(cand_e(13))
-
-            DO I = 1, II_STOK
-                  write(*,*) 'CAND_N', CAND_N(I), 'CAND_E', CAND_E(I)
-            ENDDO
-      ENDIF
-
 
 C       CALL INTER7_CANDIDATE_PAIRS(
 C    1   NSN     ,PREV_REMOTE_NUMBER ,NSNR     ,S_PREV_REMOTE_NUMBER  ,I_MEM   ,
@@ -238,71 +231,72 @@ C    C   TOTAL_NB_NRTM,  NUMNOD, XREM, SIZE(XREM,1),
 C    D   IREM, size(irem,1), NEXT_NOD)
 
         SXREM = SIZE(XREM,1)
-       SIREM = SIZE(IREM,1)
+        SIREM = SIZE(IREM,1)
 c        print_address(oldnum, std::to_string(__LINE__)+" oldnum");
 c       print_address(nsv, std::to_string(__LINE__)+" nsv");
 c       print_address(irect, std::to_string(__LINE__)+" irect");
 c       print_address(x, std::to_string(__LINE__)+" x");
 c       print_address(stf, std::to_string(__LINE__)+" stf");
 c       print_address(stfn, std::to_string(__LINE__)+" stfn");
-        write(6,*) "LOC(nsn)=" , LOC(nsn)
-        write(6,*) "LOC(PREV_REMOTE_NUMBER)=" , LOC(PREV_REMOTE_NUMBER)
-        write(6,*) "LOC(NSNR)=" , LOC(NSNR)
-        write(6,*) "LOC(S_PREV_REMOTE_NUMBER)=" , LOC(S_PREV_REMOTE_NUMBER)
-        write(6,*) "LOC(I_MEM)=" , LOC(I_MEM)
-        write(6,*) "LOC(IRECT)=" , LOC(IRECT)
-        write(6,*) "LOC(X)=" , LOC(X)
-        write(6,*) "LOC(STF)=" , LOC(STF)
-        write(6,*) "LOC(STFN)=" , LOC(STFN)
-        write(6,*) "LOC(XYZM)=" , LOC(XYZM)
-        write(6,*) "LOC(NSV)=" , LOC(NSV)
-        write(6,*) "LOC(II_STOK)=" , LOC(II_STOK)     
-        write(6,*) "LOC(CAND_N)=" , LOC(PTR_CAND_N)
-        write(6,*) "LOC(ESHIFT)=" , LOC(ESHIFT)
-        write(6,*) "LOC(CAND_E)=" , LOC(PTR_ CAND_E)
-        write(6,*) "LOC(NCONTACT)=" , LOC(NCONTACT)
-        write(6,*) "LOC(TZINF)=" , LOC(TZINF)
-        write(6,*) "LOC(GAP_S_L)=" , LOC(GAP_S_L)
-        write(6,*) "LOC(GAP_M_L)=" , LOC(GAP_M_L)
-        write(6,*) "LOC(VOXEL1)=" , LOC(VOXEL1)
-        write(6,*) "LOC(NBX)=" , LOC(NBX)
-        write(6,*) "LOC(NBY)=" , LOC(NBY)
-        write(6,*) "LOC(NBZ)=" , LOC(NBZ)
-        write(6,*) "LOC(INACTI)=" , LOC(INACTI)
-        write(6,*) "LOC(IFQ)=" , LOC(IFQ)
-        write(6,*) "LOC(CAND_A)=" , LOC(CAND_A)
-        write(6,*) "LOC(CAND_P)=" , LOC(CAND_P)
-        write(6,*) "LOC(IFPEN)=" , LOC(IFPEN)
-        write(6,*) "LOC(NRTM)=" , LOC(NRTM)
-        write(6,*) "LOC(NSNROLD)=" , LOC(NSNROLD)
-        write(6,*) "LOC(IGAP)=" , LOC(IGAP)
-        write(6,*) "LOC(GAP)=" , LOC(GAP)
-        write(6,*) "LOC(GAP_S)=" , LOC(GAP_S)
-        write(6,*) "LOC(GAP_M)=" , LOC(GAP_M)
-        write(6,*) "LOC(GAPMIN)=" , LOC(GAPMIN)
-        write(6,*) "LOC(GAPMAX)=" , LOC(GAPMAX)
-        write(6,*) "LOC(MARGE)=" , LOC(MARGE)
-        write(6,*) "LOC(CURV_MAX)=" , LOC(CURV_MAX)
-        write(6,*) "LOC(ITASK)=" , LOC(ITASK)
-        write(6,*) "LOC(BGAPSMX)=" , LOC(BGAPSMX)
-        write(6,*) "LOC(S_KREMNOD)=" , LOC(S_KREMNOD)
-        write(6,*) "LOC(KREMNOD)=" , LOC(KREMNOD)
-        write(6,*) "LOC(S_REMNOD)=" , LOC(S_REMNOD)
-        write(6,*) "LOC(REMNOD)=" , LOC(REMNOD)
-        write(6,*) "LOC(FLAGREMNODE)=" , LOC(FLAGREMNODE)
-        write(6,*) "LOC(DRAD)=" , LOC(DRAD)
-        write(6,*) "LOC(ITIED)=" , LOC(ITIED)
-        write(6,*) "LOC(CAND_F)=" , LOC(CAND_F)
-        write(6,*) "LOC(DGAPLOAD)=" , LOC(DGAPLOAD)
-        write(6,*) "LOC(s_cand_a)=" , LOC(s_cand_a)
-        write(6,*) "LOC(TOTAL_NB_NRTM)=" , LOC(TOTAL_NB_NRTM)
-        write(6,*) "LOC(NUMNOD)=" , LOC(NUMNOD)
-        write(6,*) "LOC(XREM)=" , LOC(XREM)
-        write(6,*) "LOC(SXREM)=" , LOC(SXREM)
-        write(6,*) "LOC(IREM)=" , LOC(IREM)
-        write(6,*) "LOC(SIREM)=" , LOC(SIREM)
-        write(6,*) "LOC(NEXT_NOD)=" , LOC(NEXT_NOD)
+       !write(6,*) "LOC(nsn)=" , LOC(nsn)
+       !write(6,*) "LOC(PREV_REMOTE_NUMBER)=" , LOC(PREV_REMOTE_NUMBER)
+       !write(6,*) "LOC(NSNR)=" , LOC(NSNR)
+       !write(6,*) "LOC(S_PREV_REMOTE_NUMBER)=" , LOC(S_PREV_REMOTE_NUMBER)
+       !write(6,*) "LOC(I_MEM)=" , LOC(I_MEM)
+       !write(6,*) "LOC(IRECT)=" , LOC(IRECT)
+       !write(6,*) "LOC(X)=" , LOC(X)
+       !write(6,*) "LOC(STF)=" , LOC(STF)
+       !write(6,*) "LOC(STFN)=" , LOC(STFN)
+       !write(6,*) "LOC(XYZM)=" , LOC(XYZM)
+       !write(6,*) "LOC(NSV)=" , LOC(NSV)
+       !write(6,*) "LOC(II_STOK)=" , LOC(II_STOK)     
+       !write(6,*) "LOC(CAND_N)=" , LOC(PTR_CAND_N)
+       !write(6,*) "LOC(ESHIFT)=" , LOC(ESHIFT)
+       !write(6,*) "LOC(CAND_E)=" , LOC(PTR_ CAND_E)
+       !write(6,*) "LOC(NCONTACT)=" , LOC(NCONTACT)
+       !write(6,*) "LOC(TZINF)=" , LOC(TZINF)
+       !write(6,*) "LOC(GAP_S_L)=" , LOC(GAP_S_L)
+       !write(6,*) "LOC(GAP_M_L)=" , LOC(GAP_M_L)
+       !write(6,*) "LOC(VOXEL1)=" , LOC(VOXEL1)
+       !write(6,*) "LOC(NBX)=" , LOC(NBX)
+       !write(6,*) "LOC(NBY)=" , LOC(NBY)
+       !write(6,*) "LOC(NBZ)=" , LOC(NBZ)
+       !write(6,*) "LOC(INACTI)=" , LOC(INACTI)
+       !write(6,*) "LOC(IFQ)=" , LOC(IFQ)
+       !write(6,*) "LOC(CAND_A)=" , LOC(CAND_A)
+       !write(6,*) "LOC(CAND_P)=" , LOC(CAND_P)
+       !write(6,*) "LOC(IFPEN)=" , LOC(IFPEN)
+       !write(6,*) "LOC(NRTM)=" , LOC(NRTM)
+       !write(6,*) "LOC(NSNROLD)=" , LOC(NSNROLD)
+       !write(6,*) "LOC(IGAP)=" , LOC(IGAP)
+       !write(6,*) "LOC(GAP)=" , LOC(GAP)
+       !write(6,*) "LOC(GAP_S)=" , LOC(GAP_S)
+       !write(6,*) "LOC(GAP_M)=" , LOC(GAP_M)
+       !write(6,*) "LOC(GAPMIN)=" , LOC(GAPMIN)
+       !write(6,*) "LOC(GAPMAX)=" , LOC(GAPMAX)
+       !write(6,*) "LOC(MARGE)=" , LOC(MARGE)
+       !write(6,*) "LOC(CURV_MAX)=" , LOC(CURV_MAX)
+       !write(6,*) "LOC(ITASK)=" , LOC(ITASK)
+       !write(6,*) "LOC(BGAPSMX)=" , LOC(BGAPSMX)
+       !write(6,*) "LOC(S_KREMNOD)=" , LOC(S_KREMNOD)
+       !write(6,*) "LOC(KREMNOD)=" , LOC(KREMNOD)
+       !write(6,*) "LOC(S_REMNOD)=" , LOC(S_REMNOD)
+       !write(6,*) "LOC(REMNOD)=" , LOC(REMNOD)
+       !write(6,*) "LOC(FLAGREMNODE)=" , LOC(FLAGREMNODE)
+       !write(6,*) "LOC(DRAD)=" , LOC(DRAD)
+       !write(6,*) "LOC(ITIED)=" , LOC(ITIED)
+       !write(6,*) "LOC(CAND_F)=" , LOC(CAND_F)
+       !write(6,*) "LOC(DGAPLOAD)=" , LOC(DGAPLOAD)
+       !write(6,*) "LOC(s_cand_a)=" , LOC(s_cand_a)
+       !write(6,*) "LOC(TOTAL_NB_NRTM)=" , LOC(TOTAL_NB_NRTM)
+       !write(6,*) "LOC(NUMNOD)=" , LOC(NUMNOD)
+       !write(6,*) "LOC(XREM)=" , LOC(XREM)
+       !write(6,*) "LOC(SXREM)=" , LOC(SXREM)
+       !write(6,*) "LOC(IREM)=" , LOC(IREM)
+       !write(6,*) "LOC(SIREM)=" , LOC(SIREM)
+       !write(6,*) "LOC(NEXT_NOD)=" , LOC(NEXT_NOD)
 
+        NCONTACT_SAVE = NCONTACT
         CALL CPP_INTER7_CANDIDATE_PAIRS(
      1   NSN     ,PREV_REMOTE_NUMBER ,NSNR     ,S_PREV_REMOTE_NUMBER  ,I_MEM   ,
      2   IRECT   ,X        ,STF      ,STFN     ,XYZM    ,
@@ -318,27 +312,34 @@ c       print_address(stfn, std::to_string(__LINE__)+" stfn");
      C   TOTAL_NB_NRTM,  NUMNOD, XREM, SXREM, 
      D   IREM, SIREM, NEXT_NOD)
 
-        write(6,*) "C_ASSOCIATED(PTR_CAND_N)", C_ASSOCIATED(PTR_CAND_N)
+       !write(6,*) "C_ASSOCIATED(PTR_CAND_N)", C_ASSOCIATED(PTR_CAND_N)
 
          CALL c_f_pointer(PTR_CAND_N, C_CAND_N,[ii_stok])
          call c_f_pointer(PTR_CAND_E, C_CAND_E,[ii_stok])
       
          ! check the address of the arrays C_CAND_N and C_CAND_E
          ! write the pointers to the arrays C_CAND_N and C_CAND_E
-         write(6,*) "ASSOCIATED(C_CAND_N)", ASSOCIATED(C_CAND_N)
+       ! write(6,*) "ASSOCIATED(C_CAND_N)", ASSOCIATED(C_CAND_N)
 
-        write(6,*) "C_CAND_E(1)=" , C_CAND_E(1), "C_CAND_N(1)=" , C_CAND_N(1)
+       !write(6,*) "C_CAND_E(1)=" , C_CAND_E(1), "C_CAND_N(1)=" , C_CAND_N(1)
         IF(ITASK==0)  THEN
-            write(6,*) "Size of cand_n", size(cand_n),"II_STOK"       ,II_STOK,"size(cande)",size(cand_e) 
+       !    write(6,*) "Size of cand_n", size(cand_n),"II_STOK"       ,II_STOK,"size(cande)",size(cand_e) 
+              IF(II_STOK > NCONTACT_SAVE) THEN
+                NCONTACT = II_STOK
+                call realloc(cand_n, ncontact_save, ncontact)
+                call realloc(cand_e, ncontact_save, ncontact)
+                if(ifq .ne.0)  call realloc(ifpen, ncontact_save, ncontact)
+                if(inacti == 5 .or. inacti == 6 .or. inacti == 7)  call  realloc(cand_p, ncontact_save, ncontact)
+                if(itied .ne. 0) call realloc(cand_f, 8*ncontact_save, 8*ncontact)
+              ENDIF
+
           do i=1,II_STOK
-              write(6,*) i,'CAND_N', C_CAND_N(i), 'CAND_E', C_CAND_E(i)
-              CALL flush(6)
+       !      CALL flush(6)
               CAND_N(i) = C_CAND_N(i)
               CAND_E(i) = C_CAND_E(i)
               if(ifq > 0)ifpen(i)  = 0
               if(inacti==5 .or. inacti==6 .or. inacti==7) cand_p(i) = zero
               if(itied /= 0) cand_f(8*(i-1):8*i)=zero
-
           enddo
 
           call free_c_int(PTR_CAND_N)
@@ -346,7 +347,6 @@ c       print_address(stfn, std::to_string(__LINE__)+" stfn");
 
 c           DO I = 1, II_STOK
 c                 write(*,*) 'CAND_N', CAND_N(I), 'CAND_E', CAND_E(I)
-
 c           ENDDO
             IF(ALLOCATED(NEXT_NOD)) DEALLOCATE(NEXT_NOD)
             IF(ALLOCATED(PREV_REMOTE_NUMBER)) DEALLOCATE(PREV_REMOTE_NUMBER)
