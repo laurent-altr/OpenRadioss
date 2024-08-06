@@ -82,7 +82,9 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
      &                                    s_xrem       ,
      &                                    irem         ,
      &                                    s_irem       ,
-     &                                    next_nod      ) BIND(C , NAME='cpp_inter7_candidate_pairs')
+     &                                    next_nod     ,
+     &                                    cand_n_prev,
+     &                                    cand_e_prev ) BIND(C , NAME='cpp_inter7_candidate_pairs')
           USE COLLISION_MOD , ONLY : GROUP_SIZE
           USE iso_c_binding
 C-----------------------------------------------
@@ -135,6 +137,8 @@ C         integer, dimension(:), allocatable,   intent(inout) :: ifpen !< someth
           integer, intent(inout) :: irem(s_irem,nsnr) !< remote (spmd) integer data
           integer, intent(inout) :: voxel(nbx+2,nby+2,nbz+2) !< contain the first node of each voxel
           integer, intent(inout) :: next_nod(nsn+nsnr) !< next node in the same voxel
+          integer, intent(in) :: cand_n_prev(ncontact) !< list of candidates (secondary) size: ncontact
+          integer, intent(in) :: cand_e_prev(ncontact) !< list of candidates (main) size: ncontact
 
           my_real, intent(in), value :: gap !< gap (???)
           my_real, intent(in), value :: gapmin !< minimum gap
