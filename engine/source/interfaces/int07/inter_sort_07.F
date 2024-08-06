@@ -259,6 +259,7 @@ C
      E      ITIED ,INTBUF_TAB%CAND_F,DGAPLOADP,
      F      NRTM, INTER_STRUCT(NIN)%SIZE_CAND_A,
      .      INTBUF_TAB%S_KREMNODE, INTBUF_TAB%S_REMNODE)
+
             IF(INTBUF_TAB%NCONTACT > NCONT * MULTIMP) THEN
               WRITE(6,*) "REALLOCATION: ",INTBUF_TAB%NCONTACT," ",NCONT*MULTIMP
               ! arrays have been reallocated within INTER7_COLLISION_DETECTION, without margin
