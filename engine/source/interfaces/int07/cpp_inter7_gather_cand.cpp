@@ -713,7 +713,9 @@ extern "C"
                                             int s_xrem       ,
                                              int *irem         ,
                                             int s_irem       ,
-                                            int *next_nod      ) 
+                                            int *next_nod    ,
+                                            int *cand_n_prev,
+                                            int *cand_e_prev) 
 
     {
         //print address of all arguments
@@ -773,6 +775,7 @@ extern "C"
 
         *i_mem = 0;
         int ncontact_save = *ncontact;
+        const int ii_stok_save = ii_stok;
 
         // The global bounding box contains all the nodes
         // Some nodes may by higly distant from the impact zone
@@ -1078,22 +1081,27 @@ extern "C"
 
         if (itask == 0)
         {
-              cand_n= static_cast<int*>(std::malloc(j_stok * sizeof(int)));
+              cand_n= static_cast<int*>(std::malloc((ii_stok_save+j_stok) * sizeof(int)));
               if(cand_n == nullptr)
               {
                   std::cout<<"allocation failed"<<std::endl;
               }
-              cand_e= static_cast<int*>(std::malloc(j_stok * sizeof(int)));
+              cand_e= static_cast<int*>(std::malloc((ii_stok_save+j_stok) * sizeof(int)));
               //std::cout<<"allocation of size "<<j_stok<<std::endl;
               if(cand_e == nullptr)
               {
                   std::cout<<"allocation failed"<<std::endl;
               }
               // fill with zeros
-              for(int i = 0 ; i < j_stok ; ++i)
+              for(int i = ii_stok_save; i < ii_stok_save+j_stok ; ++i)
               {
                   cand_n[i] = 0;
                   cand_e[i] = 0;
+              }
+              for(int i = 0 ; i < ii_stok_save ; ++i)
+              {
+                  cand_n[i] = cand_n_prev[i];
+                  cand_e[i] = cand_e_prev[i];
               }
         }
 #pragma omp barrier
@@ -1162,7 +1170,7 @@ extern "C"
 
 //        print_address(cand_n,"LOC(cand_n)");
 //        print_address(cand_e,"LOC(cand_e)");
-//        std::cout<<"cand_n[0] = "<<cand_n[0]<<" cand_e[0] = "<<cand_e[0]<<std::endl;
+//          if(ii_stok > 0) std::cout<<"cand_e[0] = "<<cand_e[0]<<" cand_n[0] = "<<cand_n[0]<<std::endl;
 
 
     } // end of cpp_inter7_candidate_pairs
