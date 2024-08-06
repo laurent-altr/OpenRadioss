@@ -650,7 +650,7 @@ extern "C"
                 //print_address(cand_n[i_stok], std::to_string(__LINE__)+" cand_n");
                 cand_n[i_stok] = prov_n[i];
                 cand_e[i_stok] = prov_e[i] + eshift;
-                std::cout<<"cand_n["<<i_stok<<"] = "<<cand_n[i_stok]<<"  cand_e["<<i_stok<<"] = "<<cand_e[i_stok]<<std::endl;
+                //std::cout<<"cand_n["<<i_stok<<"] = "<<cand_n[i_stok]<<"  cand_e["<<i_stok<<"] = "<<cand_e[i_stok]<<std::endl;
 
                 i_stok++;
             }
@@ -717,59 +717,59 @@ extern "C"
 
     {
         //print address of all arguments
-        print_address(nsn,"LOC(nsn)");
-        print_address(oldnum,"LOC(oldnum)");
-        print_address(nsnr,"LOC(nsnr)");
-        print_address(isznsnr,"LOC(isznsnr)");
-        print_address(i_mem,"LOC(i_mem)");
-        print_address(irect,"LOC(irect)");
-        print_address(x,"LOC(x)");
-        print_address(stf,"LOC(stf)");
-        print_address(stfn,"LOC(stfn)");
-        print_address(xyzm,"LOC(xyzm)");
-        print_address(nsv,"LOC(nsv)");
-        print_address(ii_stok,"LOC(ii_stok)");
-        print_address(cand_n,"LOC(cand_e)");
-        print_address(eshift,"LOC(eshift)");
-        print_address(cand_e,"LOC(cand_e)");
-        print_address(ncontact,"LOC(ncontact)");
-        print_address(tzinf,"LOC(tzinf)");
-        print_address(gap_s_l,"LOC(gap_s_l)");
-        print_address(gap_m_l,"LOC(gap_m_l)");
-        print_address(voxel,"LOC(voxel)");
-        print_address(nbx,"LOC(nbx)");
-        print_address(nby,"LOC(nby)");
-        print_address(nbz,"LOC(nbz)");
-        print_address(inacti,"LOC(inacti)");
-        print_address(ifq,"LOC(ifq)");
-        print_address(cand_a,"LOC(cand_a)");
-        print_address(nrtm,"LOC(nrtm)");
-        print_address(nsnrold,"LOC(nsnrold)");
-        print_address(igap,"LOC(igap)");
-        print_address(gap,"LOC(gap)");
-        print_address(gap_s,"LOC(gap_s)");
-        print_address(gap_m,"LOC(gap_m)");
-        print_address(gapmin,"LOC(gapmin)");
-        print_address(gapmax,"LOC(gapmax)");
-        print_address(marge,"LOC(marge)");
-        print_address(curv_max,"LOC(curv_max)");
-        print_address(itask,"LOC(itask)");
-        print_address(bgapsmx,"LOC(bgapsmx)");
-        print_address(s_kremnod,"LOC(s_kremnod)");
-        print_address(kremnod,"LOC(kremnod)");
-        print_address(s_remnod,"LOC(s_remnod)");
-        print_address(remnod,"LOC(remnod)");
-        print_address(flagremnode,"LOC(flagremnode)");
-        print_address(drad,"LOC(drad)");
-        print_address(itied,"LOC(itied)");
-        print_address(dgapload,"LOC(dgapload)");
-        print_address(s_cand_a,"LOC(s_cand_a)");
-        print_address(total_nb_nrtm,"LOC(total_nb_nrtm)");
-        print_address(numnod,"LOC(numnod)");
-        print_address(xrem,"LOC(xrem)");
-        print_address(s_xrem,"LOC(s_xrem)");
-        print_address(irem,"LOC(irem)");
-        print_address(next_nod,"LOC(next_nod)");
+       // print_address(nsn,"LOC(nsn)");
+       // print_address(oldnum,"LOC(oldnum)");
+       // print_address(nsnr,"LOC(nsnr)");
+       // print_address(isznsnr,"LOC(isznsnr)");
+       // print_address(i_mem,"LOC(i_mem)");
+       // print_address(irect,"LOC(irect)");
+       // print_address(x,"LOC(x)");
+       // print_address(stf,"LOC(stf)");
+       // print_address(stfn,"LOC(stfn)");
+       // print_address(xyzm,"LOC(xyzm)");
+       // print_address(nsv,"LOC(nsv)");
+       // print_address(ii_stok,"LOC(ii_stok)");
+       // print_address(cand_n,"LOC(cand_e)");
+       // print_address(eshift,"LOC(eshift)");
+       // print_address(cand_e,"LOC(cand_e)");
+       // print_address(ncontact,"LOC(ncontact)");
+       // print_address(tzinf,"LOC(tzinf)");
+       // print_address(gap_s_l,"LOC(gap_s_l)");
+       // print_address(gap_m_l,"LOC(gap_m_l)");
+       // print_address(voxel,"LOC(voxel)");
+       // print_address(nbx,"LOC(nbx)");
+       // print_address(nby,"LOC(nby)");
+       // print_address(nbz,"LOC(nbz)");
+       // print_address(inacti,"LOC(inacti)");
+       // print_address(ifq,"LOC(ifq)");
+       // print_address(cand_a,"LOC(cand_a)");
+       // print_address(nrtm,"LOC(nrtm)");
+       // print_address(nsnrold,"LOC(nsnrold)");
+       // print_address(igap,"LOC(igap)");
+       // print_address(gap,"LOC(gap)");
+       // print_address(gap_s,"LOC(gap_s)");
+       // print_address(gap_m,"LOC(gap_m)");
+       // print_address(gapmin,"LOC(gapmin)");
+       // print_address(gapmax,"LOC(gapmax)");
+       // print_address(marge,"LOC(marge)");
+       // print_address(curv_max,"LOC(curv_max)");
+       // print_address(itask,"LOC(itask)");
+       // print_address(bgapsmx,"LOC(bgapsmx)");
+       // print_address(s_kremnod,"LOC(s_kremnod)");
+       // print_address(kremnod,"LOC(kremnod)");
+       // print_address(s_remnod,"LOC(s_remnod)");
+       // print_address(remnod,"LOC(remnod)");
+       // print_address(flagremnode,"LOC(flagremnode)");
+       // print_address(drad,"LOC(drad)");
+       // print_address(itied,"LOC(itied)");
+       // print_address(dgapload,"LOC(dgapload)");
+       // print_address(s_cand_a,"LOC(s_cand_a)");
+       // print_address(total_nb_nrtm,"LOC(total_nb_nrtm)");
+       // print_address(numnod,"LOC(numnod)");
+       // print_address(xrem,"LOC(xrem)");
+       // print_address(s_xrem,"LOC(s_xrem)");
+       // print_address(irem,"LOC(irem)");
+       // print_address(next_nod,"LOC(next_nod)");
 
         *i_mem = 0;
         int ncontact_save = *ncontact;
@@ -1084,7 +1084,7 @@ extern "C"
                   std::cout<<"allocation failed"<<std::endl;
               }
               cand_e= static_cast<int*>(std::malloc(j_stok * sizeof(int)));
-              std::cout<<"allocation of size "<<j_stok<<std::endl;
+              //std::cout<<"allocation of size "<<j_stok<<std::endl;
               if(cand_e == nullptr)
               {
                   std::cout<<"allocation failed"<<std::endl;
@@ -1160,9 +1160,9 @@ extern "C"
             delete[] list_nb_voxel_on;
         }
 
-        print_address(cand_n,"LOC(cand_n)");
-        print_address(cand_e,"LOC(cand_e)");
-        std::cout<<"cand_n[0] = "<<cand_n[0]<<" cand_e[0] = "<<cand_e[0]<<std::endl;
+//        print_address(cand_n,"LOC(cand_n)");
+//        print_address(cand_e,"LOC(cand_e)");
+//        std::cout<<"cand_n[0] = "<<cand_n[0]<<" cand_e[0] = "<<cand_e[0]<<std::endl;
 
 
     } // end of cpp_inter7_candidate_pairs
