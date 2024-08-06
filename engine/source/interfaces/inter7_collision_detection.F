@@ -296,6 +296,7 @@ c       print_address(stfn, std::to_string(__LINE__)+" stfn");
        !write(6,*) "LOC(SIREM)=" , LOC(SIREM)
        !write(6,*) "LOC(NEXT_NOD)=" , LOC(NEXT_NOD)
 
+        !write(6,*) "II_STOK BEFORE=", II_STOK
         NCONTACT_SAVE = NCONTACT
         CALL CPP_INTER7_CANDIDATE_PAIRS(
      1   NSN     ,PREV_REMOTE_NUMBER ,NSNR     ,S_PREV_REMOTE_NUMBER  ,I_MEM   ,
@@ -310,19 +311,24 @@ c       print_address(stfn, std::to_string(__LINE__)+" stfn");
      A   FLAGREMNODE,DRAD   ,ITIED    ,
      B   DGAPLOAD, s_cand_a, 
      C   TOTAL_NB_NRTM,  NUMNOD, XREM, SXREM, 
-     D   IREM, SIREM, NEXT_NOD)
+     D   IREM, SIREM, NEXT_NOD, CAND_N, CAND_E)
+      !write(6,*) "II_STOK AFTER=", II_STOK
+
 
        !write(6,*) "C_ASSOCIATED(PTR_CAND_N)", C_ASSOCIATED(PTR_CAND_N)
 
-         CALL c_f_pointer(PTR_CAND_N, C_CAND_N,[ii_stok])
-         call c_f_pointer(PTR_CAND_E, C_CAND_E,[ii_stok])
       
          ! check the address of the arrays C_CAND_N and C_CAND_E
          ! write the pointers to the arrays C_CAND_N and C_CAND_E
        ! write(6,*) "ASSOCIATED(C_CAND_N)", ASSOCIATED(C_CAND_N)
 
-       !write(6,*) "C_CAND_E(1)=" , C_CAND_E(1), "C_CAND_N(1)=" , C_CAND_N(1)
-        IF(ITASK==0)  THEN
+         IF(ITASK==0)  THEN
+        if(ii_stok > 0) then
+         CALL c_f_pointer(PTR_CAND_N, C_CAND_N,[ii_stok])
+         call c_f_pointer(PTR_CAND_E, C_CAND_E,[ii_stok])
+          !write(6,*) "C_CAND_E(1)=" , C_CAND_E(1), "C_CAND_N(1)=" , C_CAND_N(1)
+
+
        !    write(6,*) "Size of cand_n", size(cand_n),"II_STOK"       ,II_STOK,"size(cande)",size(cand_e) 
               IF(II_STOK > NCONTACT_SAVE) THEN
                 NCONTACT = II_STOK
@@ -341,6 +347,7 @@ c       print_address(stfn, std::to_string(__LINE__)+" stfn");
               if(inacti==5 .or. inacti==6 .or. inacti==7) cand_p(i) = zero
               if(itied /= 0) cand_f(8*(i-1):8*i)=zero
           enddo
+      ENDIF
 
           call free_c_int(PTR_CAND_N)
           call free_c_int(PTR_CAND_E)
@@ -350,7 +357,7 @@ c                 write(*,*) 'CAND_N', CAND_N(I), 'CAND_E', CAND_E(I)
 c           ENDDO
             IF(ALLOCATED(NEXT_NOD)) DEALLOCATE(NEXT_NOD)
             IF(ALLOCATED(PREV_REMOTE_NUMBER)) DEALLOCATE(PREV_REMOTE_NUMBER)
-        ENDIF
+      ENDIF
 C
       RETURN
       END
