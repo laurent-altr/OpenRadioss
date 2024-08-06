@@ -392,7 +392,7 @@ C=======================================================================
               iiy=max(1,2+min(nby,iiy))
               iiz=max(1,2+min(nbz,iiz))
 !              std::cout<<"iix: "<<iix<<" iiy: "<<iiy<<" iiz: "<<iiz<<std::endl;
-               write(6,*) "iix: ",iix," iiy: ",iiy," iiz: ",iiz
+               !write(6,*) "iix: ",iix," iiy: ",iiy," iiz: ",iiz
 
               first = voxel(iix,iiy,iiz)
               if(first == 0)then
