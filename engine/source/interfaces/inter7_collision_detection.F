@@ -121,6 +121,7 @@ C     REAL
       INTEGER(C_INT), POINTER :: C_CAND_E(:), C_CAND_N(:)
       TYPE(C_PTR) :: PTR_CAND_E, PTR_CAND_N
       INTEGER :: NCONTACT_SAVE
+      INTEGER :: II_STOK_SAVE
 
 C-----------------------------------------------
 C   S o u r c e  L i n e s
@@ -298,6 +299,7 @@ c       print_address(stfn, std::to_string(__LINE__)+" stfn");
 
         !write(6,*) "II_STOK BEFORE=", II_STOK
         NCONTACT_SAVE = NCONTACT
+        II_STOK_SAVE = II_STOK
         CALL CPP_INTER7_CANDIDATE_PAIRS(
      1   NSN     ,PREV_REMOTE_NUMBER ,NSNR     ,S_PREV_REMOTE_NUMBER  ,I_MEM   ,
      2   IRECT   ,X        ,STF      ,STFN     ,XYZM    ,
@@ -347,6 +349,13 @@ c       print_address(stfn, std::to_string(__LINE__)+" stfn");
               if(inacti==5 .or. inacti==6 .or. inacti==7) cand_p(i) = zero
               if(itied /= 0) cand_f(8*(i-1):8*i)=zero
           enddo
+          do i=II_STOK_SAVE+1,II_STOK
+       !      CALL flush(6)
+              if(ifq > 0)ifpen(i)  = 0
+              if(inacti==5 .or. inacti==6 .or. inacti==7) cand_p(i) = zero
+              if(itied /= 0) cand_f(8*(i-1):8*i)=zero
+          enddo
+
       ENDIF
 
           call free_c_int(PTR_CAND_N)
