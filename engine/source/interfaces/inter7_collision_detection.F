@@ -345,9 +345,9 @@ c       print_address(stfn, std::to_string(__LINE__)+" stfn");
        !      CALL flush(6)
               CAND_N(i) = C_CAND_N(i)
               CAND_E(i) = C_CAND_E(i)
-              if(ifq > 0)ifpen(i)  = 0
-              if(inacti==5 .or. inacti==6 .or. inacti==7) cand_p(i) = zero
-              if(itied /= 0) cand_f(8*(i-1):8*i)=zero
+C             if(ifq > 0)ifpen(i)  = 0
+C             if(inacti==5 .or. inacti==6 .or. inacti==7) cand_p(i) = zero
+C             if(itied /= 0) cand_f(8*(i-1):8*i)=zero
           enddo
           do i=II_STOK_SAVE+1,II_STOK
        !      CALL flush(6)

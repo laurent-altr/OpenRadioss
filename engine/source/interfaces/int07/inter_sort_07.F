@@ -243,6 +243,21 @@ C
         ENDIF
 #endif
         IF (IMONM > 0 .AND. ITASK == 0) CALL STARTIME(30,1)
+
+c       DO I = 1, INTBUF_TAB%i_stok(1)
+c         write(700, "(4I10)") I,INTBUF_TAB%CAND_N(I),INTBUF_TAB%CAND_E(I),INTBUF_TAB%IFPEN(i)                                                    
+c         write(700, "(8Z20)") INTBUF_TAB%CAND_F(8*I-7:8*I)
+c         write(700,*) "CAND_F(1) = ",INTBUF_TAB%CAND_F(8*I-7)
+c         write(700,*) "CAND_F(2) = ",INTBUF_TAB%CAND_F(8*I-6)
+c         write(700,*) "CAND_F(3) = ",INTBUF_TAB%CAND_F(8*I-5)
+c         write(700,*) "CAND_F(4) = ",INTBUF_TAB%CAND_F(8*I-4)
+c         write(700,*) "CAND_F(5) = ",INTBUF_TAB%CAND_F(8*I-3)
+c         write(700,*) "CAND_F(6) = ",INTBUF_TAB%CAND_F(8*I-2)
+c         write(700,*) "CAND_F(7) = ",INTBUF_TAB%CAND_F(8*I-1)
+c         write(700,*) "CAND_F(8) = ",INTBUF_TAB%CAND_F(8*I)
+c         write(700, *) "CAND_P=",INTBUF_TAB%CAND_P(i)
+c       ENDDO
+
 C
         IF(GOT_PREVIEW == 1) THEN
             CALL INTER7_COLLISION_DETECTION(
@@ -279,7 +294,9 @@ C
 !$OMP END SINGLE
             ENDIF
 
-        ELSE IF(INTBUF_TAB%METRIC%ALGO == ALGO_VOXEL .OR.  INTBUF_TAB%METRIC%ALGO == TRY_ALGO_VOXEL) THEN
+        ELSE IF (.TRUE.) THEN 
+
+C       ELSE IF(INTBUF_TAB%METRIC%ALGO == ALGO_VOXEL .OR.  INTBUF_TAB%METRIC%ALGO == TRY_ALGO_VOXEL) THEN
             FIRST = 1 + ITASK*(NRTM/NTHREAD)
             LAST = FIRST + NRTM_T - 1
             IF(ITASK==NTHREAD-1) LAST=NRTM
@@ -319,6 +336,21 @@ C
      E ITIED ,INTBUF_TAB%CAND_F,DGAPLOADP)
 
         ENDIF
+
+c       DO I = 1, INTBUF_TAB%i_stok(1)
+c         write(700, "(4I10)") I,INTBUF_TAB%CAND_N(I),INTBUF_TAB%CAND_E(I),INTBUF_TAB%IFPEN(i)                                                    
+c         write(700, "(8Z20)") INTBUF_TAB%CAND_F(8*I-7:8*I)
+c         write(700,*) "CAND_F(1) = ",INTBUF_TAB%CAND_F(8*I-7)
+c         write(700,*) "CAND_F(2) = ",INTBUF_TAB%CAND_F(8*I-6)
+c         write(700,*) "CAND_F(3) = ",INTBUF_TAB%CAND_F(8*I-5)
+c         write(700,*) "CAND_F(4) = ",INTBUF_TAB%CAND_F(8*I-4)
+c         write(700,*) "CAND_F(5) = ",INTBUF_TAB%CAND_F(8*I-3)
+c         write(700,*) "CAND_F(6) = ",INTBUF_TAB%CAND_F(8*I-2)
+c         write(700,*) "CAND_F(7) = ",INTBUF_TAB%CAND_F(8*I-1)
+c         write(700,*) "CAND_F(8) = ",INTBUF_TAB%CAND_F(8*I)
+
+c         write(700, *) "CAND_P=",INTBUF_TAB%CAND_P(i)
+c       ENDDO
       
         IF (I_MEM >= 1 )THEN
 #include "lockon.inc"
