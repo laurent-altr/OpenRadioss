@@ -811,9 +811,9 @@ extern "C"
 
             bgapsmx_local *= 1.1;
 
-            const int nbx_local = std::min(100,std::max(1, int((xmaxb - xminb) / bgapsmx_local)));
-            const int nby_local = std::min(100,std::max(1, int((ymaxb - yminb) / bgapsmx_local)));
-            const int nbz_local = std::min(100,std::max(1, int((zmaxb - zminb) / bgapsmx_local)));
+            const int nbx_local = std::min(nbx,std::max(1, int((xmaxb - xminb) / bgapsmx_local)));
+            const int nby_local = std::min(nby,std::max(1, int((ymaxb - yminb) / bgapsmx_local)));
+            const int nbz_local = std::min(nbz,std::max(1, int((zmaxb - zminb) / bgapsmx_local)));
 
 //            if ((nbx+2) * (nby+2) * (nbz+2) < (nbx_local+2) * (nby_local+2) * (nbz_local+2))
             {
