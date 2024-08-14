@@ -813,7 +813,7 @@ extern "C"
             const int nby_local = std::min(150,std::max(1, int((ymaxb - yminb) / bgapsmx_local)));
             const int nbz_local = std::min(150,std::max(1, int((zmaxb - zminb) / bgapsmx_local)));
 
-            if ((nbx+2) * (nby+2) * (nbz+2) < (nbx_local+2) * (nby_local+2) * (nbz_local+2))
+//            if ((nbx+2) * (nby+2) * (nbz+2) < (nbx_local+2) * (nby_local+2) * (nbz_local+2))
             {
                 for (int i = (nbx+2) * (nby+2) * (nbz+2); i < (nbx_local+2) * (nby_local+2) * (nbz_local+2); i++)
                 {
