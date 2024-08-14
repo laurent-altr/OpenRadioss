@@ -800,20 +800,25 @@ extern "C"
 
         if (igap > 0)
         {
+            bgapsmx_local = 0;
             for (int i = 0; i < nsn; i++)
             {
                 bgapsmx_local = std::max(bgapsmx_local, gap_s[i]);
             }
             for (int i = 0; i < nsnr; i++)
             {
-                bgapsmx_local = std::max(bgapsmx_local, xrem[8 + (i - 1) * s_xrem]);
+                bgapsmx_local = std::max(bgapsmx_local, xrem[8 + (i) * s_xrem]);
             }
 
             bgapsmx_local *= 1.1;
 
-            const int nbx_local = std::min(nbx,std::max(1+nbx/2, int((xmaxb - xminb) / bgapsmx_local)));
-            const int nby_local = std::min(nby,std::max(1+nby/2, int((ymaxb - yminb) / bgapsmx_local)));
-            const int nbz_local = std::min(nbz,std::max(1+nby/2, int((zmaxb - zminb) / bgapsmx_local)));
+//           if ((nbx+2) * (nby+2) * (nbz+2) < (nbx_local+2) * (nby_local+2) * (nbz_local+2))
+            double ratio = 8000000.0 / ((nbx + 2) * (nby + 2) * (nbz + 2));
+            ratio = std::max(2.0, std::min(1.0, ratio));
+
+            const int nbx_local = std::min( (int) (ratio * nbx),std::max(1+nbx/2, int((xmaxb - xminb) / bgapsmx_local)));
+            const int nby_local = std::min( (int) (ratio * nby),std::max(1+nby/2, int((ymaxb - yminb) / bgapsmx_local)));
+            const int nbz_local = std::min( (int) (ratio * nbz),std::max(1+nby/2, int((zmaxb - zminb) / bgapsmx_local)));
 
 //            if ((nbx+2) * (nby+2) * (nbz+2) < (nbx_local+2) * (nby_local+2) * (nbz_local+2))
             {
