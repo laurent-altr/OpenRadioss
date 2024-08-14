@@ -819,6 +819,7 @@ extern "C"
                 {
                     voxel[i] = 0;
                 }
+                std::cout<<"nbx="<<nbx<<" nby="<<nby<<" nbz="<<nbz<<" nbx_local="<<nbx_local<<" nby_local="<<nby_local<<" nbz_local="<<nbz_local<<std::endl;
                 nbx = nbx_local;
                 nby = nby_local;
                 nbz = nbz_local;
