@@ -806,6 +806,18 @@ extern "C"
         // start an open single section
         int *list_nb_voxel_on = nullptr; 
         int nb_voxel_on = 0;
+        // fine grid is  (nbx+2)*(nby+2)*(nbz+2)
+        // coarse grid is ncx,ncy,ncz
+        const int ncx = nbx / 4;
+        const int ncy = nby / 4;
+        const int ncz = nbz / 4;
+        //std::vector<int> coarse_voxel(ncx * ncy * ncz, 0);
+    
+
+        auto fine_to_coarse = [ncx, ncy, ncz](int i, int j, int k)
+        {
+            return (i - 1) / 4 + 1 + (j - 1) / 4 + 1 * ncx + (k - 1) / 4 + 1 * ncx * ncy;
+        };
 
 #pragma omp barrier
 
@@ -848,7 +860,11 @@ extern "C"
                    //std::cout<<"iix="<<iix<<" iiy="<<iiy<<" iiz="<<iiz<<std::endl;
 
                     int first = voxel[to1D(iix, iiy, iiz)];
-                    if(igap > 0 ){bgapsmx_local = std::max(bgapsmx_local, gap_s[i]);}
+                    if (igap > 0)
+                    {
+                        bgapsmx_local = std::max(bgapsmx_local, gap_s[i]);
+                        //coarse_voxel[fine_to_coarse(iix, iiy, iiz)] = std::max(coarse_voxel[fine_to_coarse(iix, iiy, iiz)], int(gap_s[i]));
+                    }
                     if (first == 0)
                     {
                         // empty cell
