@@ -797,6 +797,35 @@ extern "C"
         const my_real xmaxb = xyzm[10 - 1];
         const my_real ymaxb = xyzm[11 - 1];
         const my_real zmaxb = xyzm[12 - 1];
+
+        if (igap > 0)
+        {
+            for (int i = 0; i < nsn; i++)
+            {
+                bgapsmx_local = std::max(bgapsmx_local, gap_s[i]);
+            }
+            for (int i = 0; i < nsnr; i++)
+            {
+                bgapsmx_local = std::max(bgapsmx_local, xrem[8 + (i - 1) * s_xrem]);
+            }
+
+            const int nbx_local = std::min(150,std::max(1, int((xmaxb - xminb) / bgapsmx_local)));
+            const int nby_local = std::min(150,std::max(1, int((ymaxb - yminb) / bgapsmx_local)));
+            const int nbz_local = std::min(150,std::max(1, int((zmaxb - zminb) / bgapsmx_local)));
+
+            if ((nbx+2) * (nby+2) * (nbz+2) < (nbx_local+2) * (nby_local+2) * (nbz_local+2))
+            {
+                for (int i = (nbx+2) * (nby+2) * (nbz+2); i < (nbx_local+2) * (nby_local+2) * (nbz_local+2); i++)
+                {
+                    voxel[i] = 0;
+                }
+                nbx = nbx_local;
+                nby = nby_local;
+                nbz = nbz_local;
+            }
+        }
+
+
         // Lambda function to convert 3D indices to 1D index
         auto to1D = [nbx, nby](int i, int j, int k)
         {
@@ -806,18 +835,6 @@ extern "C"
         // start an open single section
         int *list_nb_voxel_on = nullptr; 
         int nb_voxel_on = 0;
-        // fine grid is  (nbx+2)*(nby+2)*(nbz+2)
-        // coarse grid is ncx,ncy,ncz
-        const int ncx = nbx / 4;
-        const int ncy = nby / 4;
-        const int ncz = nbz / 4;
-        //std::vector<int> coarse_voxel(ncx * ncy * ncz, 0);
-    
-
-        auto fine_to_coarse = [ncx, ncy, ncz](int i, int j, int k)
-        {
-            return (i - 1) / 4 + 1 + (j - 1) / 4 + 1 * ncx + (k - 1) / 4 + 1 * ncx * ncy;
-        };
 
 #pragma omp barrier
 
@@ -860,11 +877,6 @@ extern "C"
                    //std::cout<<"iix="<<iix<<" iiy="<<iiy<<" iiz="<<iiz<<std::endl;
 
                     int first = voxel[to1D(iix, iiy, iiz)];
-                    if (igap > 0)
-                    {
-                        bgapsmx_local = std::max(bgapsmx_local, gap_s[i]);
-                        //coarse_voxel[fine_to_coarse(iix, iiy, iiz)] = std::max(coarse_voxel[fine_to_coarse(iix, iiy, iiz)], int(gap_s[i]));
-                    }
                     if (first == 0)
                     {
                         // empty cell
@@ -909,7 +921,6 @@ extern "C"
                     iix = std::max(1,2+std::min(nbx, iix));
                     iiy = std::max(1,2+std::min(nby, iiy));
                     iiz = std::max(1,2+std::min(nbz, iiz));
-                    if(igap > 0){bgapsmx_local = std::max(bgapsmx_local, xrem[8 + (i - 1) * s_xrem]);}
                     int first = voxel[to1D(iix, iiy, iiz)];
                     int j = nsn + i;
                     if (first == 0)
