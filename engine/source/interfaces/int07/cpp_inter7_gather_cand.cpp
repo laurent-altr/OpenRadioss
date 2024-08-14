@@ -809,9 +809,11 @@ extern "C"
                 bgapsmx_local = std::max(bgapsmx_local, xrem[8 + (i - 1) * s_xrem]);
             }
 
-            const int nbx_local = std::min(150,std::max(1, int((xmaxb - xminb) / bgapsmx_local)));
-            const int nby_local = std::min(150,std::max(1, int((ymaxb - yminb) / bgapsmx_local)));
-            const int nbz_local = std::min(150,std::max(1, int((zmaxb - zminb) / bgapsmx_local)));
+            bgapsmx_local *= 1.1;
+
+            const int nbx_local = std::min(100,std::max(1, int((xmaxb - xminb) / bgapsmx_local)));
+            const int nby_local = std::min(100,std::max(1, int((ymaxb - yminb) / bgapsmx_local)));
+            const int nbz_local = std::min(100,std::max(1, int((zmaxb - zminb) / bgapsmx_local)));
 
 //            if ((nbx+2) * (nby+2) * (nbz+2) < (nbx_local+2) * (nby_local+2) * (nbz_local+2))
             {
@@ -819,8 +821,8 @@ extern "C"
                 {
                     voxel[i] = 0;
                 }
-                std::cout<<"bgapsmx="<<bgapsmx<<" bgapsmx_local="<<bgapsmx_local;
-                std::cout<<" nbx="<<nbx<<" nby="<<nby<<" nbz="<<nbz<<" nbx_local="<<nbx_local<<" nby_local="<<nby_local<<" nbz_local="<<nbz_local<<std::endl;
+                //std::cout<<"bgapsmx="<<bgapsmx<<" bgapsmx_local="<<bgapsmx_local;
+                //std::cout<<" nbx="<<nbx<<" nby="<<nby<<" nbz="<<nbz<<" nbx_local="<<nbx_local<<" nby_local="<<nby_local<<" nbz_local="<<nbz_local<<std::endl;
             
                 nbx = nbx_local;
                 nby = nby_local;
