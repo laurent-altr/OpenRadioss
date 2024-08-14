@@ -363,15 +363,15 @@ C
             dy = (BMINMA(8)-BMINMA(11))/REAL(NBY)
             dz = (BMINMA(9)-BMINMA(12))/REAL(NBZ)
             if(dx > bgapsmx) then
-              NBX8 = IDNINT((BMINMA(7)-BMINMA(10))/bgapsmx,KIND=8)
+              NBX8 = IDNINT((BMINMA(7)-BMINMA(10))/bgapsmx)
               NBX8 = MAX(1,MIN(150,MAX(NBX8,1)))
             endif 
             if(dy > bgapsmx) then
-              NBY8 = IDNINT((BMINMA(8)-BMINMA(11))/bgapsmx,KIND=8)
+              NBY8 = IDNINT((BMINMA(8)-BMINMA(11))/bgapsmx)
               NBY8 = MAX(1,MIN(150,MAX(NBY8,1)))
             endif
             if(dz > bgapsmx) then
-              NBZ8 = IDNINT((BMINMA(9)-BMINMA(12))/bgapsmx,KIND=8)
+              NBZ8 = IDNINT((BMINMA(9)-BMINMA(12))/bgapsmx)
               NBZ8 = MAX(1,MIN(150,MAX(NBZ8,1)))
             endif
             NBX = NBX8
