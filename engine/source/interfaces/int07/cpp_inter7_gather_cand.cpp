@@ -776,6 +776,7 @@ extern "C"
         *i_mem = 0;
         int ncontact_save = *ncontact;
         const int ii_stok_save = ii_stok;
+        my_real bgapsmx_local = 0;
 
         // The global bounding box contains all the nodes
         // Some nodes may by higly distant from the impact zone
@@ -847,6 +848,7 @@ extern "C"
                    //std::cout<<"iix="<<iix<<" iiy="<<iiy<<" iiz="<<iiz<<std::endl;
 
                     int first = voxel[to1D(iix, iiy, iiz)];
+                    if(igap > 0 ){bgapsmx_local = std::max(bgapsmx_local, gap_s[i]);}
                     if (first == 0)
                     {
                         // empty cell
@@ -891,6 +893,7 @@ extern "C"
                     iix = std::max(1,2+std::min(nbx, iix));
                     iiy = std::max(1,2+std::min(nby, iiy));
                     iiz = std::max(1,2+std::min(nbz, iiz));
+                    if(igap > 0){bgapsmx_local = std::max(bgapsmx_local, xrem[8 + (i - 1) * s_xrem]);}
                     int first = voxel[to1D(iix, iiy, iiz)];
                     int j = nsn + i;
                     if (first == 0)
@@ -943,42 +946,71 @@ extern "C"
             }
             else
             {
-                aaa = marge + curv_max[ne] + std::max(std::min(gapmax, std::max(gapmin, bgapsmx + gap_m[ne])) + dgapload, drad);
+                aaa = marge + curv_max[ne] + std::max(std::min(gapmax, std::max(gapmin, bgapsmx_local + gap_m[ne])) + dgapload, drad);
             }
-            const int m1 = irect[0 + ne * 4];
-            const int m2 = irect[1 + ne * 4];
-            const int m3 = irect[2 + ne * 4];
-            const int m4 = irect[3 + ne * 4];
-            const my_real xx1 = x[0 + (m1 - 1) * 3];
-            const my_real xx2 = x[0 + (m2 - 1) * 3];
-            const my_real xx3 = x[0 + (m3 - 1) * 3];
-            const my_real xx4 = x[0 + (m4 - 1) * 3];
+            const int m1 = irect[0 + ne * 4] - 1;
+            const int m2 = irect[1 + ne * 4] - 1;
+            const int m3 = irect[2 + ne * 4] - 1;
+            const int m4 = irect[3 + ne * 4] - 1;
+            const my_real xx1 = x[0 + (m1) * 3];
+            const my_real xx2 = x[0 + (m2) * 3];
+            const my_real xx3 = x[0 + (m3) * 3];
+            const my_real xx4 = x[0 + (m4) * 3];
             const my_real xmaxe = std::max({xx1, xx2, xx3, xx4});
             const my_real xmine = std::min({xx1, xx2, xx3, xx4});
-            const my_real yy1 = x[1 + (m1 - 1) * 3];
-            const my_real yy2 = x[1 + (m2 - 1) * 3];
-            const my_real yy3 = x[1 + (m3 - 1) * 3];
-            const my_real yy4 = x[1 + (m4 - 1) * 3];
+            const my_real yy1 = x[1 + (m1) * 3];
+            const my_real yy2 = x[1 + (m2) * 3];
+            const my_real yy3 = x[1 + (m3) * 3];
+            const my_real yy4 = x[1 + (m4) * 3];
             const my_real ymaxe = std::max({yy1, yy2, yy3, yy4});
             const my_real ymine = std::min({yy1, yy2, yy3, yy4});
-            const my_real zz1 = x[2 + (m1 - 1) * 3];
-            const my_real zz2 = x[2 + (m2 - 1) * 3];
-            const my_real zz3 = x[2 + (m3 - 1) * 3];
-            const my_real zz4 = x[2 + (m4 - 1) * 3];
+            const my_real zz1 = x[2 + (m1) * 3];
+            const my_real zz2 = x[2 + (m2) * 3];
+            const my_real zz3 = x[2 + (m3) * 3];
+            const my_real zz4 = x[2 + (m4) * 3];
             const my_real zmaxe = std::max({zz1, zz2, zz3, zz4});
             const my_real zmine = std::min({zz1, zz2, zz3, zz4});
             const my_real sx = (yy3 - yy1) * (zz4 - zz2) - (zz3 - zz1) * (yy4 - yy2);
             const my_real sy = (zz3 - zz1) * (xx4 - xx2) - (xx3 - xx1) * (zz4 - zz2);
             const my_real sz = (xx3 - xx1) * (yy4 - yy2) - (yy3 - yy1) * (xx4 - xx2);
             const my_real s2 = sx * sx + sy * sy + sz * sz;
-            int ix1 = 0, ix2 = 0, iy1 = 0, iy2 = 0, iz1 = 0, iz2 = 0;
+            int ix1, ix2, iy1, iy2, iz1, iz2 ;
 
-            ix1 = (nbx > 1) ? int(nbx * (xmine - aaa - xminb) / (xmaxb - xminb)) : -2;
-            ix2 = (nbx > 1) ? int(nbx * (xmaxe + aaa - xminb) / (xmaxb - xminb)) : 1;
-            iy1 = (nby > 1) ? int(nby * (ymine - aaa - yminb) / (ymaxb - yminb)) : -2;
-            iy2 = (nby > 1) ? int(nby * (ymaxe + aaa - yminb) / (ymaxb - yminb)) : 1;
-            iz1 = (nbz > 1) ? int(nbz * (zmine - aaa - zminb) / (zmaxb - zminb)) : -2;
-            iz2 = (nbz > 1) ? int(nbz * (zmaxe + aaa - zminb) / (zmaxb - zminb)) : 1;
+            if (nbx > 1)
+            {
+                const my_real inv_xrange = 1.0 / (xmaxb - xminb);
+                ix1 = int(nbx * (xmine - aaa - xminb) * inv_xrange);
+                ix2 = int(nbx * (xmaxe + aaa - xminb) * inv_xrange);
+            }
+            else
+            {
+                ix1 = -2;
+                ix2 = 1;
+            }
+
+            if (nby > 1)
+            {
+                const my_real inv_yrange = 1.0 / (ymaxb - yminb);
+                iy1 = int(nby * (ymine - aaa - yminb) * inv_yrange);
+                iy2 = int(nby * (ymaxe + aaa - yminb) * inv_yrange);
+            }
+            else
+            {
+                iy1 = -2;
+                iy2 = 1;
+            }
+
+            if (nbz > 1)
+            {
+                const my_real inv_zrange = 1.0 / (zmaxb - zminb);
+                iz1 = int(nbz * (zmine - aaa - zminb) * inv_zrange);
+                iz2 = int(nbz * (zmaxe + aaa - zminb) * inv_zrange);
+            }
+            else
+            {
+                iz1 = -2;
+                iz2 = 1;
+            }
 
             ix1 = std::max(1, 2 + std::min(nbx, ix1));
             iy1 = std::max(1, 2 + std::min(nby, iy1));
@@ -1005,7 +1037,7 @@ extern "C"
                             my_real zs = zero;
                             if (jj <= nsn) // local node
                             {
-                                const int nn = nsv[jj - 1];
+                                const int nn = nsv[jj - 1] -1;
                                 if (nn == m1)
                                     continue;
                                 if (nn == m2)
@@ -1015,23 +1047,23 @@ extern "C"
                                 if (nn == m4)
                                     continue;
 
-                                xs = x[0 + (nn - 1) * 3];
-                                ys = x[1 + (nn - 1) * 3];
-                                zs = x[2 + (nn - 1) * 3];
+                                xs = x[0 + (nn) * 3];
+                                ys = x[1 + (nn) * 3];
+                                zs = x[2 + (nn) * 3];
                                 if (igap != 0)
                                 {
-                                    aaa = marge + curv_max[ne] + std::max(std::min(gapmax, std::max(gapmin, bgapsmx + gap_m[ne])) + dgapload, drad);
+                                    aaa = marge + curv_max[ne] + std::max(std::min(gapmax, std::max(gapmin, gap_s[jj - 1] + gap_m[ne])) + dgapload, drad);
                                 }
                             }
                             else // remote spmd node
                             {
-                                const int j = jj - nsn;
-                                xs = xrem[0 + (j - 1) * s_xrem];
-                                ys = xrem[1 + (j - 1) * s_xrem];
-                                zs = xrem[2 + (j - 1) * s_xrem];
+                                const int j = jj - nsn -1;
+                                xs = xrem[0 + (j) * s_xrem];
+                                ys = xrem[1 + (j) * s_xrem];
+                                zs = xrem[2 + (j) * s_xrem];
                                 if (igap != 0)
                                 {
-                                    aaa = marge + curv_max[ne] + std::max(std::min(gapmax, std::max(gapmin, xrem[8 + (j - 1) * s_xrem] + gap_m[ne])) + dgapload, drad);
+                                    aaa = marge + curv_max[ne] + std::max(std::min(gapmax, std::max(gapmin, xrem[8 + (j) * s_xrem] + gap_m[ne])) + dgapload, drad);
                                 }
                             }
 
