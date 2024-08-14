@@ -122,6 +122,8 @@ C     REAL
       TYPE(C_PTR) :: PTR_CAND_E, PTR_CAND_N
       INTEGER :: NCONTACT_SAVE
       INTEGER :: II_STOK_SAVE
+      my_real :: dx, dy, dz
+      my_real :: bgap 
 
 C-----------------------------------------------
 C   S o u r c e  L i n e s
@@ -194,13 +196,38 @@ C
       NBZ8=NBZ
       RES8=(NBX8+2)*(NBY8+2)*(NBZ8+2)
       
+!$OMP SINGLE
+      IF(IGAP > 0) THEN 
+! Make sure that the cell size is ~ bgapmax
+            dx = (BMINMA(7)-BMINMA(10))/REAL(NBX)
+            dy = (BMINMA(8)-BMINMA(11))/REAL(NBY)
+            dz = (BMINMA(9)-BMINMA(12))/REAL(NBZ)
+            bgap = bgapsmx * 1.0D0
+            if(dx > bgap) then
+              NBX8 = IDNINT((BMINMA(7)-BMINMA(10))/bgap)
+              NBX8 = MAX(1,MIN(150,MAX(NBX8,1)))
+            endif 
+            if(dy > bgap) then
+              NBY8 = IDNINT((BMINMA(8)-BMINMA(11))/bgap)
+              NBY8 = MAX(1,MIN(150,MAX(NBY8,1)))
+            endif
+            if(dz > bgap) then
+              NBZ8 = IDNINT((BMINMA(9)-BMINMA(12))/bgap)
+              NBZ8 = MAX(1,MIN(150,MAX(NBZ8,1)))
+            endif
+            NBX = NBX8
+            NBY = NBY8
+            NBZ = NBZ8
+      ENDIF 
+!$OMP END SINGLE
+
       IF(RES8 > LVOXEL8) THEN
         NBX = MIN(100,MAX(NBX8,1))
         NBY = MIN(100,MAX(NBY8,1))
         NBZ = MIN(100,MAX(NBZ8,1))
       ENDIF
 
-      ! redundancy in smp
+
 !$OMP SINGLE
       DO I=1,(NBX+2)*(NBY+2)*(NBZ+2)
         VOXEL1(I)=0
