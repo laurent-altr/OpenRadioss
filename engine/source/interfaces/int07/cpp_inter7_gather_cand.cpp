@@ -822,8 +822,8 @@ extern "C"
 
 //            if ((nbx+2) * (nby+2) * (nbz+2) < (nbx_local+2) * (nby_local+2) * (nbz_local+2))
             {
-                  std::cout<<"bgapsmx="<<bgapsmx<<" bgapsmx_local="<<bgapsmx_local<<" dx "<< (xmaxb - xminb)<< " dy "<< (ymaxb - yminb)<< " dz "<< (zmaxb - zminb)<<std::endl;
-                  std::cout<<" nbx="<<nbx<<" nby="<<nby<<" nbz="<<nbz<<" nbx_local="<<nbx_local<<" nby_local="<<nby_local<<" nbz_local="<<nbz_local<<std::endl;
+//                  std::cout<<"bgapsmx="<<bgapsmx<<" bgapsmx_local="<<bgapsmx_local<<" dx "<< (xmaxb - xminb)<< " dy "<< (ymaxb - yminb)<< " dz "<< (zmaxb - zminb)<<std::endl;
+//                  std::cout<<" nbx="<<nbx<<" nby="<<nby<<" nbz="<<nbz<<" nbx_local="<<nbx_local<<" nby_local="<<nby_local<<" nbz_local="<<nbz_local<<std::endl;
             
                   nbx = nbx_local;
                   nby = nby_local;
