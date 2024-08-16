@@ -31,7 +31,8 @@ void print_address(T *var, std::string name)
 
 // scale voxel dimensions to fit within the allocated size in Fortran code
 void scale_dimensions(int &nbx, int &nby, int &nbz) {
-    const long long max_volume = std::min(static_cast<long long>(8000000), static_cast<long long>(nbx+2) * (nby+2) * (nbz+2)*2);
+    const long long cell_max = static_cast<long long>(1.2 *static_cast<long long>(nbx+2) * (nby+2) * (nbz+2)) ; 
+    const long long max_volume = std::min(static_cast<long long>(8000000), cell_max);
 
     long long current_volume = static_cast<long long>(nbx+2) * (nby+2) * (nbz+2);
 
@@ -865,14 +866,12 @@ extern "C"
                     voxel[i] = 0;
                 }
                 }
-            } else
-            {
-            std::cout<<"nbx_local="<<nbx_local<<" nby_local="<<nby_local<<" nbz_local="<<nbz_local;
-            std::cout<<" nbx="<<nbx<<" nby="<<nby<<" nbz="<<nbz;
+            } 
+              std::cout<<"nbx_local="<<nbx_local<<" nby_local="<<nby_local<<" nbz_local="<<nbz_local;
+              std::cout<<" nbx="<<nbx<<" nby="<<nby<<" nbz="<<nbz;
                   nbx = nbx_local;
                   nby = nby_local;
                   nbz = nbz_local;
-            }
         }
 
 
