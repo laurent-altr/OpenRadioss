@@ -814,7 +814,7 @@ extern "C"
 
 //           if ((nbx+2) * (nby+2) * (nbz+2) < (nbx_local+2) * (nby_local+2) * (nbz_local+2))
             double ratio = 8000000.0 / ((nbx + 2) * (nby + 2) * (nbz + 2));
-            ratio = std::max(4.0, std::min(0.5, ratio));
+            ratio = std::max(0.5, std::min(2.0, ratio));
 
             const int nbx_local = std::min( (int) (ratio * nbx),std::max(1+nbx/2, int((xmaxb - xminb) / bgapsmx_local)));
             const int nby_local = std::min( (int) (ratio * nby),std::max(1+nby/2, int((ymaxb - yminb) / bgapsmx_local)));
@@ -824,10 +824,13 @@ extern "C"
             {
 
                 const int oldsize = (nbx + 2) * (nby + 2) * (nbz + 2);
-                const int newsize = (nbx_local + 2) * (nby_local + 2) * (nbz_local + 2);
+                const int newsize = (nbx_local + 2) * (nby_local + 2) * (nbz_local + 2)
+#pragma omp single 
+                {
                 for(int i = oldsize; i < newsize; i++)
                 {   // set all the new cells to 0
                     voxel[i] = 0;
+                }
                 }
             }
 
