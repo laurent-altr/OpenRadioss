@@ -824,7 +824,7 @@ extern "C"
             {
 
                 const int oldsize = (nbx + 2) * (nby + 2) * (nbz + 2);
-                const int newsize = (nbx_local + 2) * (nby_local + 2) * (nbz_local + 2)
+                const int newsize = (nbx_local + 2) * (nby_local + 2) * (nbz_local + 2);
 #pragma omp single 
                 {
                 for(int i = oldsize; i < newsize; i++)
