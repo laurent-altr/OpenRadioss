@@ -196,31 +196,31 @@ C
       NBZ8=NBZ
       RES8=(NBX8+2)*(NBY8+2)*(NBZ8+2)
       
-!$OMP SINGLE
-      IF(IGAP > 0) THEN 
-! Make sure that the cell size is ~ bgapmax
-            dx = (BMINMA(7)-BMINMA(10))/REAL(NBX)
-            dy = (BMINMA(8)-BMINMA(11))/REAL(NBY)
-            dz = (BMINMA(9)-BMINMA(12))/REAL(NBZ)
-            bgap = bgapsmx * 1.0D0
-            if(dx > bgap) then
-              NBX8 = IDNINT((BMINMA(7)-BMINMA(10))/bgap)
-              NBX8 = MAX(1,MIN(150,MAX(NBX8,1)))
-            endif 
-            if(dy > bgap) then
-              NBY8 = IDNINT((BMINMA(8)-BMINMA(11))/bgap)
-              NBY8 = MAX(1,MIN(150,MAX(NBY8,1)))
-            endif
-            if(dz > bgap) then
-              NBZ8 = IDNINT((BMINMA(9)-BMINMA(12))/bgap)
-              NBZ8 = MAX(1,MIN(150,MAX(NBZ8,1)))
-            endif
-            NBX = NBX8
-            NBY = NBY8
-            NBZ = NBZ8
-            RES8=(NBX8+2)*(NBY8+2)*(NBZ8+2)
-      ENDIF 
-!$OMP END SINGLE
+C!$OMP SINGLE
+C      IF(IGAP > 0) THEN 
+C! Make sure that the cell size is ~ bgapmax
+C            dx = (BMINMA(7)-BMINMA(10))/REAL(NBX)
+C            dy = (BMINMA(8)-BMINMA(11))/REAL(NBY)
+C            dz = (BMINMA(9)-BMINMA(12))/REAL(NBZ)
+C            bgap = bgapsmx * 1.0D0
+C            if(dx > bgap) then
+C              NBX8 = IDNINT((BMINMA(7)-BMINMA(10))/bgap)
+C              NBX8 = MAX(1,MIN(150,MAX(NBX8,1)))
+C            endif 
+C            if(dy > bgap) then
+C              NBY8 = IDNINT((BMINMA(8)-BMINMA(11))/bgap)
+C              NBY8 = MAX(1,MIN(150,MAX(NBY8,1)))
+C            endif
+C            if(dz > bgap) then
+C              NBZ8 = IDNINT((BMINMA(9)-BMINMA(12))/bgap)
+C              NBZ8 = MAX(1,MIN(150,MAX(NBZ8,1)))
+C            endif
+C            NBX = NBX8
+C            NBY = NBY8
+C            NBZ = NBZ8
+C            RES8=(NBX8+2)*(NBY8+2)*(NBZ8+2)
+C      ENDIF 
+C!$OMP END SINGLE
 
 C
       IF(RES8 > LVOXEL8) THEN
