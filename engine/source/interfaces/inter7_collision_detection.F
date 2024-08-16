@@ -218,8 +218,10 @@ C
             NBX = NBX8
             NBY = NBY8
             NBZ = NBZ8
+            RES8=(NBX8+2)*(NBY8+2)*(NBZ8+2)
       ENDIF 
 !$OMP END SINGLE
+
 C
       IF(RES8 > LVOXEL8) THEN
         NBX = MIN(100,MAX(NBX8,1))

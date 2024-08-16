@@ -377,6 +377,7 @@ C
             NBX = NBX8
             NBY = NBY8
             NBZ = NBZ8
+            RES8=(NBX8+2)*(NBY8+2)*(NBZ8+2)
       ENDIF 
       
       IF(RES8 > LVOXEL8) THEN
