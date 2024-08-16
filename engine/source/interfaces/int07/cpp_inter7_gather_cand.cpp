@@ -871,7 +871,8 @@ extern "C"
             int nbx_local =  int((xmaxb - xminb) / bgapsmx_local);
             int nby_local =  int((ymaxb - yminb) / bgapsmx_local);
             int nbz_local =  int((zmaxb - zminb) / bgapsmx_local);
-            const int ratio = get_environment_variable_as_int("NBX"); 
+            //const int ratio = get_environment_variable_as_int("NBX"); 
+            const int ratio = 8;
             const long long cell_max = static_cast<long long>(nbx+2)*(nby+2)*(nbz+2) * static_cast<long long>(ratio);
             scale_dimensions(nbx_local, nby_local, nbz_local, cell_max);  
 

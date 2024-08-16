@@ -253,6 +253,9 @@ cc      SAVE INIVOXEL, VOXEL
 cc      DATA INIVOXEL /1/
       INTEGER NBX,NBY,NBZ
       INTEGER (KIND=8) :: NBX8,NBY8,NBZ8,RES8,LVOXEL8
+      character(len=20) :: env_value
+      integer :: status
+      integer :: ratio
 
 C-----------------------------------------------
 C   S o u r c e  L i n e s
@@ -362,6 +365,8 @@ C
             dx = (BMINMA(7)-BMINMA(10))/REAL(NBX)
             dy = (BMINMA(8)-BMINMA(11))/REAL(NBY)
             dz = (BMINMA(9)-BMINMA(12))/REAL(NBZ)
+            call get_environment_variable('RATIO', env_value, status)
+            read(env_value, *) ratio
             if(dx > bgapsmx) then
               NBX8 = IDNINT((BMINMA(7)-BMINMA(10))/bgapsmx)
               NBX8 = MAX(1,MIN(150,MAX(NBX8,1)))
@@ -374,9 +379,9 @@ C
               NBZ8 = IDNINT((BMINMA(9)-BMINMA(12))/bgapsmx)
               NBZ8 = MAX(1,MIN(150,MAX(NBZ8,1)))
             endif
-            NBX = NBX8
-            NBY = NBY8
-            NBZ = NBZ8
+            NBX = NINT((NBX8*RATIO)/100.0D0)  
+            NBY = NINT((NBY8*RATIO)/100.0D0) 
+            NBZ = NINT((NBZ8*RATIO)/100.0D0)
             RES8=(NBX8+2)*(NBY8+2)*(NBZ8+2)
       ENDIF 
       
