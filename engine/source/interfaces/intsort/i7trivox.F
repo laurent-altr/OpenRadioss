@@ -310,7 +310,6 @@ C=======================================================================
           ENDIF
         ENDDO
       END IF !ITASK == 0
-      IF(IGAP >0) BGAPSMX = 0
       CALL MY_BARRIER ! Barrier to wait task0 treatment
 
       IF(FIRST_TEST(NIN)) THEN
@@ -325,17 +324,6 @@ C=======================================================================
         CALL MY_BARRIER
       ENDIF
 
-      IF(IGAP > 0) THEN
-!$OMP DO SCHEDULE(GUIDED) REDUCTION(max:BGAPSMX)
-        DO i = 1, NSN + NSNR
-          if(i < NSN) then
-            BGAPSMX = max(BGAPSMX, GAP_S(i))
-          else
-            BGAPSMX = max(BGAPSMX, XREM(9, i-NSN))
-          endif
-        ENDDO
-!$OMP END DO 
-      ENDIF
 
 
 C=======================================================================

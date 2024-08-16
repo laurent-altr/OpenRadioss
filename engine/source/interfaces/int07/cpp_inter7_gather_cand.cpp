@@ -7,6 +7,7 @@
 #include <cstdint>
 #include <stdexcept>
 #include <string>
+#include <numeric>
 #ifdef MYREAL8
 typedef double my_real;
 #else
@@ -48,7 +49,60 @@ int get_environment_variable_as_int(const std::string& var_name) {
         throw std::runtime_error("Value out of range for environment variable " + var_name);
     }
 }
+// Function to calculate median
+double calculate_median(std::vector<double> data) {
+    std::sort(data.begin(), data.end());
+    if (data.size() % 2 == 0) {
+        return (data[data.size() / 2 - 1] + data[data.size() / 2]) / 2.0;
+    } else {
+        return data[data.size() / 2];
+    }
+}
+    void compute_coordinates(int &nbx, const my_real xmaxb, const my_real xminb, int &ix1, const my_real xmine, my_real aaa, int &ix2, const my_real xmaxe, int &nby, const my_real ymaxb, const my_real yminb, int &iy1, const my_real ymine, int &iy2, const my_real ymaxe, int &nbz, const my_real zmaxb, const my_real zminb, int &iz1, const my_real zmine, int &iz2, const my_real zmaxe)
+    {
+        if (nbx > 1)
+        {
+            const my_real inv_xrange = 1.0 / (xmaxb - xminb);
+            ix1 = int(nbx * (xmine - aaa - xminb) * inv_xrange);
+            ix2 = int(nbx * (xmaxe + aaa - xminb) * inv_xrange);
+        }
+        else
+        {
+            ix1 = -2;
+            ix2 = 1;
+        }
 
+        if (nby > 1)
+        {
+            const my_real inv_yrange = 1.0 / (ymaxb - yminb);
+            iy1 = int(nby * (ymine - aaa - yminb) * inv_yrange);
+            iy2 = int(nby * (ymaxe + aaa - yminb) * inv_yrange);
+        }
+        else
+        {
+            iy1 = -2;
+            iy2 = 1;
+        }
+
+        if (nbz > 1)
+        {
+            const my_real inv_zrange = 1.0 / (zmaxb - zminb);
+            iz1 = int(nbz * (zmine - aaa - zminb) * inv_zrange);
+            iz2 = int(nbz * (zmaxe + aaa - zminb) * inv_zrange);
+        }
+        else
+        {
+            iz1 = -2;
+            iz2 = 1;
+        }
+
+        ix1 = std::max(1, 2 + std::min(nbx, ix1));
+        iy1 = std::max(1, 2 + std::min(nby, iy1));
+        iz1 = std::max(1, 2 + std::min(nbz, iz1));
+        ix2 = std::max(1, 2 + std::min(nbx, ix2));
+        iy2 = std::max(1, 2 + std::min(nby, iy2));
+        iz2 = std::max(1, 2 + std::min(nbz, iz2));
+    }
 
 // scale voxel dimensions to fit within the allocated size in Fortran code
 void scale_dimensions(int &nbx, int &nby, int &nbz, long long cell_max) {
@@ -712,64 +766,63 @@ extern "C"
     }
 
 
-
-          void cpp_inter7_candidate_pairs(
-                                            int nsn          ,
-                                            int * oldnum       ,
-                                            int nsnr         ,
-                                            int isznsnr      ,
-                                            int * i_mem        ,
-                                            int * irect        ,
-                                            my_real *x            ,
-                                            my_real *stf          ,
-                                            my_real *stfn         ,
-                                            my_real *xyzm         ,
-                                            int * nsv          ,
-                                            int &ii_stok      ,
-                                            int *&cand_n       ,
-                                            int eshift       ,
-                                            int *& cand_e       ,
-                                            int * ncontact       ,
-                                            my_real tzinf        ,
-                                             my_real * gap_s_l      ,
-                                             my_real * gap_m_l      ,
-                                            int *voxel        ,
-                                            int nbx          ,
-                                            int nby          ,
-                                            int nbz          ,
-                                            int inacti       ,
-                                            int ifq          ,
-                                            int *cand_a       ,
-                                            int nrtm         ,
-                                            int nsnrold      ,
-                                            int igap         ,
-                                            my_real gap          ,
-                                            my_real * gap_s        ,
-                                            my_real *gap_m        ,
-                                            my_real gapmin       ,
-                                            my_real gapmax       ,
-                                            my_real marge        ,
-                                             my_real *curv_max     ,
-                                            int itask        ,
-                                            my_real bgapsmx      ,
-                                            int s_kremnod    ,
-                                            int *kremnod      ,
-                                            int s_remnod     ,
-                                            int *remnod       ,
-                                            int flagremnode  ,
-                                            my_real drad         ,
-                                            int itied        ,
-                                            my_real dgapload     ,
-                                            int s_cand_a     ,
-                                            int total_nb_nrtm,
-                                            int numnod       ,
-                                             my_real *xrem         ,
-                                            int s_xrem       ,
-                                             int *irem         ,
-                                            int s_irem       ,
-                                            int *next_nod    ,
-                                            int *cand_n_prev,
-                                            int *cand_e_prev) 
+    void cpp_inter7_candidate_pairs(
+        int nsn,
+        int *oldnum,
+        int nsnr,
+        int isznsnr,
+        int *i_mem,
+        int *irect,
+        my_real *x,
+        my_real *stf,
+        my_real *stfn,
+        my_real *xyzm,
+        int *nsv,
+        int &ii_stok,
+        int *&cand_n,
+        int eshift,
+        int *&cand_e,
+        int *ncontact,
+        my_real tzinf,
+        my_real *gap_s_l,
+        my_real *gap_m_l,
+        int *voxel,
+        int nbx,
+        int nby,
+        int nbz,
+        int inacti,
+        int ifq,
+        int *cand_a,
+        int nrtm,
+        int nsnrold,
+        int igap,
+        my_real gap,
+        my_real *gap_s,
+        my_real *gap_m,
+        my_real gapmin,
+        my_real gapmax,
+        my_real marge,
+        my_real *curv_max,
+        int itask,
+        my_real bgapsmx,
+        int s_kremnod,
+        int *kremnod,
+        int s_remnod,
+        int *remnod,
+        int flagremnode,
+        my_real drad,
+        int itied,
+        my_real dgapload,
+        int s_cand_a,
+        int total_nb_nrtm,
+        int numnod,
+        my_real *xrem,
+        int s_xrem,
+        int *irem,
+        int s_irem,
+        int *next_nod,
+        int *cand_n_prev,
+        int *cand_e_prev)
 
     {
         //print address of all arguments
@@ -855,14 +908,24 @@ extern "C"
         if (igap > 0)
         {
             bgapsmx_local = 0;
+            std::vector<double> allgaps;
             for (int i = 0; i < nsn; i++)
             {
                 bgapsmx_local = std::max(bgapsmx_local, gap_s[i]);
+                allgaps.push_back(gap_s[i]);
             }
             for (int i = 0; i < nsnr; i++)
             {
                 bgapsmx_local = std::max(bgapsmx_local, xrem[8 + (i) * s_xrem]);
+                allgaps.push_back(xrem[8 + (i) * s_xrem]);
             }
+
+            // print mean, max and avg 
+            std::cout<<"mean="<<std::accumulate(allgaps.begin(), allgaps.end(), 0.0) / allgaps.size();
+            std::cout<<" max="<<*std::max_element(allgaps.begin(), allgaps.end());
+            std::cout<<" min ="<<*std::min_element(allgaps.begin(), allgaps.end());
+            std::cout<<" median="<<calculate_median(allgaps)<<std::endl;
+
 
             bgapsmx_local *= 1.1;
 
@@ -889,8 +952,11 @@ extern "C"
                 }
                 }
             } 
-                  //std::cout<<"nbx_local="<<nbx_local<<" nby_local="<<nby_local<<" nbz_local="<<nbz_local;
-                  //std::cout<<" nbx="<<nbx<<" nby="<<nby<<" nbz="<<nbz<<std::endl;
+                  std::cout<<"nbx_local="<<nbx_local<<" nby_local="<<nby_local<<" nbz_local="<<nbz_local;
+                  std::cout<<" nbx="<<nbx<<" nby="<<nby<<" nbz="<<nbz<<std::endl;
+                  std::cout<<"dx="<<(xmaxb - xminb)/static_cast<double>(nbx+2);
+                  std::cout<<" dy="<<(ymaxb - yminb)/static_cast<double>(nby+2);
+                  std::cout<<" dz="<<(zmaxb - zminb)/static_cast<double>(nbz+2)<<std::endl;
                   nbx = nbx_local;
                   nby = nby_local;
                   nbz = nbz_local;
@@ -906,6 +972,7 @@ extern "C"
         // start an open single section
         int *list_nb_voxel_on = nullptr; 
         int nb_voxel_on = 0;
+        my_real *gap_voxel = nullptr;
 
 #pragma omp barrier
 
@@ -913,6 +980,7 @@ extern "C"
         {
             // Allocate the list of voxel with at least one node
             list_nb_voxel_on = new int[(nbx + 2) * (nby + 2) * (nbz + 2)];
+            gap_voxel = new my_real[(nbx + 2) * (nby + 2) * (nbz + 2)];
             if (total_nb_nrtm > 0)
             {
                 int *last_nod = new int[nsn + nsnr];
@@ -944,6 +1012,25 @@ extern "C"
                     iix = std::max(1, 2 + std::min(nbx, iix));
                     iiy = std::max(1, 2 + std::min(nby, iiy));
                     iiz = std::max(1, 2 + std::min(nbz, iiz));
+                    //propagate the gap to all neighboring within a distance of bgapsmx_local
+                    // smallest number of cells such as the distance in x is larger than bgapsmx_local
+                    if (igap > 0)
+                    {
+                        int incx = (1+int(bgapsmx_local / ((xmaxb - xminb) / nbx))); 
+                        int incy = (1+int(bgapsmx_local / ((ymaxb - yminb) / nby)));
+                        int incz = (1+int(bgapsmx_local / ((zmaxb - zminb) / nbz)));
+                        if(incx > 1 || incy > 1 || incz > 1) std::cout<<"incx="<<incx<<" incy="<<incy<<" incz="<<incz<<std::endl;
+                        for (int nx = std::max(1, iix - incx); nx <= std::min(nbx, iix + incx); nx++)
+                        {
+                            for (int ny = std::max(1, iiy - incy); ny <= std::min(nby, iiy + incy); ny++)
+                            {
+                                for (int nz = std::max(1, iiz - incz); nz <= std::min(nbz, iiz + incz); nz++)
+                                {
+                                    gap_voxel[to1D(nx, ny, nz)] = std::max(gap_s[j - 1], gap_voxel[to1D(nx, ny, nz)]);
+                                }
+                            }
+                        }
+                    }
 
                    //std::cout<<"iix="<<iix<<" iiy="<<iiy<<" iiz="<<iiz<<std::endl;
 
@@ -992,6 +1079,24 @@ extern "C"
                     iix = std::max(1,2+std::min(nbx, iix));
                     iiy = std::max(1,2+std::min(nby, iiy));
                     iiz = std::max(1,2+std::min(nbz, iiz));
+                    if (igap > 0)
+                    {
+                        int incx = (1+int(bgapsmx_local / ((xmaxb - xminb) / nbx))); 
+                        int incy = (1+int(bgapsmx_local / ((ymaxb - yminb) / nby)));
+                        int incz = (1+int(bgapsmx_local / ((zmaxb - zminb) / nbz)));
+                        //if(incx > 1 || incy > 1 || incz > 1) std::cout<<"incx="<<incx<<" incy="<<incy<<" incz="<<incz<<std::endl;
+                        for (int nx = std::max(1, iix - incx); nx <= std::min(nbx, iix + incx); nx++)
+                        {
+                            for (int ny = std::max(1, iiy - incy); ny <= std::min(nby, iiy + incy); ny++)
+                            {
+                                for (int nz = std::max(1, iiz - incz); nz <= std::min(nbz, iiz + incz); nz++)
+                                {
+                                    gap_voxel[to1D(nx, ny, nz)] = std::max(xrem[8 + (i - 1) * s_xrem], gap_voxel[to1D(nx, ny, nz)]);
+                                }
+                            }
+                        }
+                    }
+
                     int first = voxel[to1D(iix, iiy, iiz)];
                     int j = nsn + i;
                     if (first == 0)
@@ -1044,7 +1149,7 @@ extern "C"
             }
             else
             {
-                aaa = marge + curv_max[ne] + std::max(std::min(gapmax, std::max(gapmin, bgapsmx_local + gap_m[ne])) + dgapload, drad);
+                aaa = marge + curv_max[ne] + std::max(std::min(gapmax, std::max(gapmin,  gap_m[ne])) + dgapload, drad);
             }
             const int m1 = irect[0 + ne * 4] - 1;
             const int m2 = irect[1 + ne * 4] - 1;
@@ -1074,48 +1179,25 @@ extern "C"
             const my_real s2 = sx * sx + sy * sy + sz * sz;
             int ix1, ix2, iy1, iy2, iz1, iz2 ;
 
-            if (nbx > 1)
+            if (igap > 0)
             {
-                const my_real inv_xrange = 1.0 / (xmaxb - xminb);
-                ix1 = int(nbx * (xmine - aaa - xminb) * inv_xrange);
-                ix2 = int(nbx * (xmaxe + aaa - xminb) * inv_xrange);
+                aaa = 0.0;
+                compute_coordinates(nbx, xmaxb, xminb, ix1, xmine, aaa, ix2, xmaxe, nby, ymaxb, yminb, iy1, ymine, iy2, ymaxe, nbz, zmaxb, zminb, iz1, zmine, iz2, zmaxe);
+                for (int iz = iz1; iz <= iz2; ++iz)
+                {
+                    for (int iy = iy1; iy <= iy2; ++iy)
+                    {
+                        for (int ix = ix1; ix <= ix2; ++ix)
+                        {
+                            const my_real g = gap_voxel[to1D(ix, iy, iz)];
+                            aaa = std::max(aaa, marge + curv_max[ne] + std::max(std::min(gapmax, std::max(gapmin, g + gap_m[ne])) + dgapload, drad));
+                        }
+                    }
+                }
             }
-            else
-            {
-                ix1 = -2;
-                ix2 = 1;
-            }
-
-            if (nby > 1)
-            {
-                const my_real inv_yrange = 1.0 / (ymaxb - yminb);
-                iy1 = int(nby * (ymine - aaa - yminb) * inv_yrange);
-                iy2 = int(nby * (ymaxe + aaa - yminb) * inv_yrange);
-            }
-            else
-            {
-                iy1 = -2;
-                iy2 = 1;
-            }
-
-            if (nbz > 1)
-            {
-                const my_real inv_zrange = 1.0 / (zmaxb - zminb);
-                iz1 = int(nbz * (zmine - aaa - zminb) * inv_zrange);
-                iz2 = int(nbz * (zmaxe + aaa - zminb) * inv_zrange);
-            }
-            else
-            {
-                iz1 = -2;
-                iz2 = 1;
-            }
-
-            ix1 = std::max(1, 2 + std::min(nbx, ix1));
-            iy1 = std::max(1, 2 + std::min(nby, iy1));
-            iz1 = std::max(1, 2 + std::min(nbz, iz1));
-            ix2 = std::max(1, 2 + std::min(nbx, ix2));
-            iy2 = std::max(1, 2 + std::min(nby, iy2));
-            iz2 = std::max(1, 2 + std::min(nbz, iz2));
+            compute_coordinates(nbx, xmaxb, xminb, ix1, xmine, aaa, ix2, xmaxe, nby, ymaxb, yminb, iy1, ymine, iy2, ymaxe, nbz, zmaxb, zminb, iz1, zmine, iz2, zmaxe);
+            const my_real maxaaa =  marge + curv_max[ne] + std::max(std::min(gapmax, std::max(gapmin, bgapsmx + gap_m[ne])) + dgapload, drad); 
+            if(igap > 0 && aaa < maxaaa){std::cout<<"aaa "<<aaa<<" / "<< maxaaa<<" gapmax="<<bgapsmx <<std::endl;}
 
             //std::cout<<"ix1 = "<<ix1<<" ix2 = "<<ix2<<" iy1 = "<<iy1<<" iy2 = "<<iy2<<" iz1 = "<<iz1<<" iz2 = "<<iz2<<std::endl;
             for (int iz = iz1; iz <= iz2; ++iz)
@@ -1296,12 +1378,12 @@ extern "C"
                 voxel[j] = 0;
             }
             delete[] list_nb_voxel_on;
+            delete[] gap_voxel;
         }
 
 //        print_address(cand_n,"LOC(cand_n)");
 //        print_address(cand_e,"LOC(cand_e)");
 //          if(ii_stok > 0) std::cout<<"cand_e[0] = "<<cand_e[0]<<" cand_n[0] = "<<cand_n[0]<<std::endl;
-
 
     } // end of cpp_inter7_candidate_pairs
 
