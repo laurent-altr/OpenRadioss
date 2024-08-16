@@ -865,12 +865,14 @@ extern "C"
                     voxel[i] = 0;
                 }
                 }
-            }
+            } else
+            {
             std::cout<<"nbx_local="<<nbx_local<<" nby_local="<<nby_local<<" nbz_local="<<nbz_local;
             std::cout<<" nbx="<<nbx<<" nby="<<nby<<" nbz="<<nbz;
                   nbx = nbx_local;
                   nby = nby_local;
                   nbz = nbz_local;
+            }
         }
 
 
