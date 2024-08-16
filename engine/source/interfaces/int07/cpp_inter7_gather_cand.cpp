@@ -29,6 +29,37 @@ void print_address(T *var, std::string name)
     std::cout <<  name << "=" << reinterpret_cast<std::uintptr_t>(var) << std::endl; 
 }
 
+void scale_dimensions(int &nbx, int &nby, int &nbz) {
+    const long long max_volume = 8000000; // defined in Fortran code as the maximum number of cells
+    long long current_volume = static_cast<long long>(nbx+2) * (nby+2) * (nbz+2);
+
+    if (current_volume > max_volume) {
+        // Calculate the scaling factor
+        double scale_factor = std::cbrt(static_cast<double>(max_volume) / current_volume);
+
+        // Scale each dimension using the scale factor
+        nbx = std::max(1, static_cast<int>(nbx * scale_factor));
+        nby = std::max(1, static_cast<int>(nby * scale_factor));
+        nbz = std::max(1, static_cast<int>(nbz * scale_factor));
+
+        // Recalculate the current volume after scaling
+        current_volume = static_cast<long long>(nbx+2) * (nby+2) * (nbz+2);
+
+        // Adjust dimensions if the product is still greater than max_volume
+        while (current_volume > max_volume) {
+            if (nbx >= nby && nbx >= nbz && nbx > 1) {
+                nbx--;
+            } else if (nby >= nbx && nby >= nbz && nby > 1) {
+                nby--;
+            } else if (nbz >= nbx && nbz >= nby && nbz > 1) {
+                nbz--;
+            }
+            current_volume = static_cast<long long>(nbx+2) * (nby+2) * (nbz+2);
+        }
+    }
+}
+
+
 extern "C"
 {
     void fortran_integer_realloc(int* a, int *oldsize, int * newsize);
@@ -813,12 +844,12 @@ extern "C"
             bgapsmx_local *= 1.1;
 
 //           if ((nbx+2) * (nby+2) * (nbz+2) < (nbx_local+2) * (nby_local+2) * (nbz_local+2))
-            double ratio = 8000000.0 / ((nbx + 2) * (nby + 2) * (nbz + 2));
-            ratio = std::max(0.5, std::min(2.0, ratio));
 
-            const int nbx_local = std::min( (int) (ratio * nbx),std::max(1+nbx/2, int((xmaxb - xminb) / bgapsmx_local)));
-            const int nby_local = std::min( (int) (ratio * nby),std::max(1+nby/2, int((ymaxb - yminb) / bgapsmx_local)));
-            const int nbz_local = std::min( (int) (ratio * nbz),std::max(1+nby/2, int((zmaxb - zminb) / bgapsmx_local)));
+            int nbx_local =  int((xmaxb - xminb) / bgapsmx_local);
+            int nby_local =  int((ymaxb - yminb) / bgapsmx_local);
+            int nbz_local =  int((zmaxb - zminb) / bgapsmx_local);
+
+            scale_dimensions(nbx_local, nby_local, nbz_local);
 
             if ((nbx+2) * (nby+2) * (nbz+2) < (nbx_local+2) * (nby_local+2) * (nbz_local+2))
             {
@@ -833,8 +864,6 @@ extern "C"
                 }
                 }
             }
-
-           // VOXEL[i] = 0 is missing 
                   nbx = nbx_local;
                   nby = nby_local;
                   nbz = nbz_local;
