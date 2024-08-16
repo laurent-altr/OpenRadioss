@@ -30,8 +30,7 @@ void print_address(T *var, std::string name)
 }
 
 // scale voxel dimensions to fit within the allocated size in Fortran code
-void scale_dimensions(int &nbx, int &nby, int &nbz) {
-    const long long cell_max = static_cast<long long>(1.2 *static_cast<long long>(nbx+2) * (nby+2) * (nbz+2)) ; 
+void scale_dimensions(int &nbx, int &nby, int &nbz, long long cell_max) {
     const long long max_volume = std::min(static_cast<long long>(8000000), cell_max);
 
     long long current_volume = static_cast<long long>(nbx+2) * (nby+2) * (nbz+2);
@@ -851,8 +850,8 @@ extern "C"
             int nbx_local =  int((xmaxb - xminb) / bgapsmx_local);
             int nby_local =  int((ymaxb - yminb) / bgapsmx_local);
             int nbz_local =  int((zmaxb - zminb) / bgapsmx_local);
-
-            scale_dimensions(nbx_local, nby_local, nbz_local);
+            const long long cell_max = static_cast<long long>(nbx+2)*(nby+2)*(nbz+2) * static_cast<long long>(2);
+            scale_dimensions(nbx_local, nby_local, nbz_local, cell_max);  
 
             if ((nbx+2) * (nby+2) * (nbz+2) < (nbx_local+2) * (nby_local+2) * (nbz_local+2))
             {
@@ -868,7 +867,7 @@ extern "C"
                 }
             } 
               std::cout<<"nbx_local="<<nbx_local<<" nby_local="<<nby_local<<" nbz_local="<<nbz_local;
-              std::cout<<" nbx="<<nbx<<" nby="<<nby<<" nbz="<<nbz;
+              std::cout<<" nbx="<<nbx<<" nby="<<nby<<" nbz="<<nbz<<std::endl;
                   nbx = nbx_local;
                   nby = nby_local;
                   nbz = nbz_local;
