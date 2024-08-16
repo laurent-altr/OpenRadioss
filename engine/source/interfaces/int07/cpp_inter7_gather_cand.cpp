@@ -814,21 +814,27 @@ extern "C"
 
 //           if ((nbx+2) * (nby+2) * (nbz+2) < (nbx_local+2) * (nby_local+2) * (nbz_local+2))
             double ratio = 8000000.0 / ((nbx + 2) * (nby + 2) * (nbz + 2));
-            ratio = std::max(2.0, std::min(1.0, ratio));
+            ratio = std::max(4.0, std::min(0.5, ratio));
 
             const int nbx_local = std::min( (int) (ratio * nbx),std::max(1+nbx/2, int((xmaxb - xminb) / bgapsmx_local)));
             const int nby_local = std::min( (int) (ratio * nby),std::max(1+nby/2, int((ymaxb - yminb) / bgapsmx_local)));
             const int nbz_local = std::min( (int) (ratio * nbz),std::max(1+nby/2, int((zmaxb - zminb) / bgapsmx_local)));
 
-//            if ((nbx+2) * (nby+2) * (nbz+2) < (nbx_local+2) * (nby_local+2) * (nbz_local+2))
+            if ((nbx+2) * (nby+2) * (nbz+2) < (nbx_local+2) * (nby_local+2) * (nbz_local+2))
             {
-//                  std::cout<<"bgapsmx="<<bgapsmx<<" bgapsmx_local="<<bgapsmx_local<<" dx "<< (xmaxb - xminb)<< " dy "<< (ymaxb - yminb)<< " dz "<< (zmaxb - zminb)<<std::endl;
-//                  std::cout<<" nbx="<<nbx<<" nby="<<nby<<" nbz="<<nbz<<" nbx_local="<<nbx_local<<" nby_local="<<nby_local<<" nbz_local="<<nbz_local<<std::endl;
-            
+
+                const int oldsize = (nbx + 2) * (nby + 2) * (nbz + 2);
+                const int newsize = (nbx_local + 2) * (nby_local + 2) * (nbz_local + 2);
+                for(int i = oldsize; i < newsize; i++)
+                {   // set all the new cells to 0
+                    voxel[i] = 0;
+                }
+            }
+
+           // VOXEL[i] = 0 is missing 
                   nbx = nbx_local;
                   nby = nby_local;
                   nbz = nbz_local;
-            }
         }
 
 
