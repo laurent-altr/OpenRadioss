@@ -5,6 +5,8 @@
 #include <cmath>
 #include <cassert>
 #include <cstdint>
+#include <stdexcept>
+#include <string>
 #ifdef MYREAL8
 typedef double my_real;
 #else
@@ -28,6 +30,25 @@ void print_address(T *var, std::string name)
 {
     std::cout <<  name << "=" << reinterpret_cast<std::uintptr_t>(var) << std::endl; 
 }
+
+int get_environment_variable_as_int(const std::string& var_name) {
+    const char* value = std::getenv(var_name.c_str());
+    if (value == nullptr) {
+        // The environment variable is not set
+        throw std::runtime_error("Environment variable " + var_name + " is not set.");
+    }
+
+    try {
+        // Convert the string value to an integer
+        int int_value = std::stoi(value);
+        return int_value;
+    } catch (const std::invalid_argument& e) {
+        throw std::runtime_error("Invalid integer value for environment variable " + var_name);
+    } catch (const std::out_of_range& e) {
+        throw std::runtime_error("Value out of range for environment variable " + var_name);
+    }
+}
+
 
 // scale voxel dimensions to fit within the allocated size in Fortran code
 void scale_dimensions(int &nbx, int &nby, int &nbz, long long cell_max) {
@@ -850,7 +871,8 @@ extern "C"
             int nbx_local =  int((xmaxb - xminb) / bgapsmx_local);
             int nby_local =  int((ymaxb - yminb) / bgapsmx_local);
             int nbz_local =  int((zmaxb - zminb) / bgapsmx_local);
-            const long long cell_max = static_cast<long long>(nbx+2)*(nby+2)*(nbz+2) * static_cast<long long>(2);
+            const int ratio = get_environment_variable_as_int("NBX"); 
+            const long long cell_max = static_cast<long long>(nbx+2)*(nby+2)*(nbz+2) * static_cast<long long>(ratio);
             scale_dimensions(nbx_local, nby_local, nbz_local, cell_max);  
 
             if ((nbx+2) * (nby+2) * (nbz+2) < (nbx_local+2) * (nby_local+2) * (nbz_local+2))
@@ -866,8 +888,8 @@ extern "C"
                 }
                 }
             } 
-              std::cout<<"nbx_local="<<nbx_local<<" nby_local="<<nby_local<<" nbz_local="<<nbz_local;
-              std::cout<<" nbx="<<nbx<<" nby="<<nby<<" nbz="<<nbz<<std::endl;
+                  //std::cout<<"nbx_local="<<nbx_local<<" nby_local="<<nby_local<<" nbz_local="<<nbz_local;
+                  //std::cout<<" nbx="<<nbx<<" nby="<<nby<<" nbz="<<nbz<<std::endl;
                   nbx = nbx_local;
                   nby = nby_local;
                   nbz = nbz_local;
