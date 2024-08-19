@@ -9,7 +9,6 @@
 #include <iostream>
 #include <unordered_map>
 #include <vector>
-
 class VoxelGrid
 {
 public:
@@ -38,6 +37,7 @@ public:
     inline bool getBit(size_t x, size_t y, size_t z) const
     {
         const size_t index = convert3DTo1D(x, y, z);
+        std::cout << "Index: " << index << std::endl;
         return bitArray.getBit(index);
     }
 
@@ -186,34 +186,84 @@ private:
     const size_t xSize, ySize, zSize; // Dimensions of the VoxelGrid
 
     // Convert 3D coordinates to a 1D index where 64 consecutive bits correspond to an 8x8x8 block
-    inline size_t convert3DTo1D(size_t x, size_t y, size_t z) const {
-        // Calculate the coarse block coordinates (8x8x8 blocks)
-        const size_t blockX = x / 8;
-        const size_t blockY = y / 8;
-        const size_t blockZ = z / 8;
+//    inline size_t convert3DTo1D(size_t x, size_t y, size_t z) const {
+//        // Calculate the coarse block coordinates (8x8x8 blocks)
+//        const size_t blockX = x / 8;
+//        const size_t blockY = y / 8;
+//        const size_t blockZ = z / 8;
+//
+//        // Calculate the fine block coordinates within the 8x8x8 block (2x2x2 sub-block)
+//        const size_t fineX = (x % 8) / 2;
+//        const size_t fineY = (y % 8) / 2;
+//        const size_t fineZ = (z % 8) / 2;
+//
+//        // Calculate the bit position within the 2x2x2 sub-block
+//        const size_t bitX = x % 2;
+//        const size_t bitY = y % 2;
+//        const size_t bitZ = z % 2;
+//
+//        // Coarse block index in the grid
+//        const size_t blockIndex = (blockZ * (ySize / 8) * (xSize / 8)) + (blockY * (xSize / 8)) + blockX;
+//
+//        // Fine block index within the 8x8x8 block (each block is 64 bits, or 8 * 2x2x2 blocks)
+//        const size_t fineBlockIndex = (fineZ * 4) + (fineY * 2) + fineX;
+//
+//        // Bit index within the 2x2x2 sub-block (using Z-order curve or Morton order)
+//        const size_t bitIndex = (bitZ << 2) | (bitY << 1) | bitX;
+//
+//        // Combine the block index, fine block index, and bit index to get the final 1D index
+//        return (blockIndex * 64) + (fineBlockIndex * 8) + bitIndex;
+//    }
 
-        // Calculate the fine block coordinates within the 8x8x8 block (2x2x2 sub-block)
-        const size_t fineX = (x % 8) / 2;
-        const size_t fineY = (y % 8) / 2;
-        const size_t fineZ = (z % 8) / 2;
 
-        // Calculate the bit position within the 2x2x2 sub-block
-        const size_t bitX = x % 2;
-        const size_t bitY = y % 2;
-        const size_t bitZ = z % 2;
+inline size_t convert3DTo1D(size_t x, size_t y, size_t z) const {
+    // Calculate the coarse block coordinates (4x4x4 blocks)
+    const size_t blockX = x >> 2;  // Equivalent to x / 4
+    const size_t blockY = y >> 2;  // Equivalent to y / 4
+    const size_t blockZ = z >> 2;  // Equivalent to z / 4
 
-        // Coarse block index in the grid
-        const size_t blockIndex = (blockZ * (ySize / 8) * (xSize / 8)) + (blockY * (xSize / 8)) + blockX;
+    // Calculate the fine block coordinates within the 4x4x4 block (2x2x2 sub-block)
+    const size_t fineX = (x >> 1) & 0x1;  // Extract the bit corresponding to (x % 4) / 2
+    const size_t fineY = (y >> 1) & 0x1;  // Extract the bit corresponding to (y % 4) / 2
+    const size_t fineZ = (z >> 1) & 0x1;  // Extract the bit corresponding to (z % 4) / 2
 
-        // Fine block index within the 8x8x8 block (each block is 64 bits, or 8 * 2x2x2 blocks)
-        const size_t fineBlockIndex = (fineZ * 4) + (fineY * 2) + fineX;
+    // Calculate the bit position within the 2x2x2 sub-block
+    const size_t bitX = x & 0x1;  // Extract the least significant bit (x % 2)
+    const size_t bitY = y & 0x1;  // Extract the least significant bit (y % 2)
+    const size_t bitZ = z & 0x1;  // Extract the least significant bit (z % 2)
 
-        // Bit index within the 2x2x2 sub-block (using Z-order curve or Morton order)
-        const size_t bitIndex = (bitZ << 2) | (bitY << 1) | bitX;
 
-        // Combine the block index, fine block index, and bit index to get the final 1D index
-        return (blockIndex * 64) + (fineBlockIndex * 8) + bitIndex;
-    }
+//    std::cout<<"BlockX: "<<blockX<<" BlockY: "<<blockY<<" BlockZ: "<<blockZ<<std::endl;
+//    std::cout<<"FineX: "<<fineX<<" FineY: "<<fineY<<" FineZ: "<<fineZ<<std::endl;
+//    std::cout<<"BitX: "<<bitX<<" BitY: "<<bitY<<" BitZ: "<<bitZ<<std::endl;
+    // global id ; block x, block y , block z ; fine x, fine y, fine z ; bit x, bit y, bit z
+    // 0         ;       0,        0,       0 ;      0,       0,      0; 0,      0,      0
+    // 1         ;       0,        0,       0 ;      0,       0,      0; 1,      0,      0
+    // 2         ;       0,        0,       0 ;      0,       0,      0; 0,      1,      0
+    // 3         ;       0,        0,       0 ;      0,       0,      0; 1,      1,      0
+    // 4         ;       0,        0,       0 ;      0,       0,      0; 0,      0,      1                                                                 
+    // 5         ;       0,        0,       0 ;      0,       0,      0; 1,      0,      1
+    // 6         ;       0,        0,       0 ;      0,       0,      0; 0,      1,      1
+    // 7         ;       0,        0,       0 ;      0,       0,      0; 1,      1,      1
+    // 8         ;       0,        0,       0 ;      0,       0,      0; 0,      0,      0
+    // 9         ;       0,        0,       0 ;      0,       0,      0; 1,      0,      0
+    // 10        ;       0,        0,       0 ;      0,       0,      0; 0,      1,      0
+    // 64        ;       1,        0,       0 ;      0,       0,      0; 0,      0,      0
+    // 65        ;       1,        0,       0 ;      0,       0,      0; 1,      0,      0
+
+    // Coarse block index in the grid
+    const size_t blockIndex = (blockZ * (ySize >> 2) * (xSize >> 2)) + (blockY * (xSize >> 2)) + blockX;
+
+    // Fine block index within the 4x4x4 block (each block is 64 bits, or 8 * 2x2x2 blocks)
+    const size_t fineBlockIndex = (fineZ << 2) | (fineY << 1) | fineX;
+
+    // Bit index within the 2x2x2 sub-block (using Z-order curve or Morton order)
+    const size_t bitIndex = (bitZ << 2) | (bitY << 1) | bitX;
+
+    // Combine the block index, fine block index, and bit index to get the final 1D index
+    return (blockIndex << 6) + (fineBlockIndex << 3) + bitIndex;
+}
+
 
     // Efficiently reset the grid by only clearing bits that correspond to non-empty cells
     void reset() {
