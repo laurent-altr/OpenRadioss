@@ -5,6 +5,10 @@
 #include <cmath>
 #include <cassert>
 #include <cstdint>
+#include <stdexcept>
+#include <string>
+#include <numeric>
+#include "voxelgrid.h"
 #ifdef MYREAL8
 typedef double my_real;
 #else
@@ -28,6 +32,111 @@ void print_address(T *var, std::string name)
 {
     std::cout <<  name << "=" << reinterpret_cast<std::uintptr_t>(var) << std::endl; 
 }
+
+int get_environment_variable_as_int(const std::string& var_name) {
+    const char* value = std::getenv(var_name.c_str());
+    if (value == nullptr) {
+        // The environment variable is not set
+        throw std::runtime_error("Environment variable " + var_name + " is not set.");
+    }
+
+    try {
+        // Convert the string value to an integer
+        int int_value = std::stoi(value);
+        return int_value;
+    } catch (const std::invalid_argument& e) {
+        throw std::runtime_error("Invalid integer value for environment variable " + var_name);
+    } catch (const std::out_of_range& e) {
+        throw std::runtime_error("Value out of range for environment variable " + var_name);
+    }
+}
+// Function to calculate median
+double calculate_median(std::vector<double> data) {
+    std::sort(data.begin(), data.end());
+    if (data.size() % 2 == 0) {
+        return (data[data.size() / 2 - 1] + data[data.size() / 2]) / 2.0;
+    } else {
+        return data[data.size() / 2];
+    }
+}
+    inline void compute_coordinates(int &nbx, const my_real xmaxb, const my_real xminb, size_t &ix1, const my_real xmine, my_real aaa, size_t &ix2, const my_real xmaxe, int &nby, const my_real ymaxb, const my_real yminb, size_t &iy1, const my_real ymine, size_t &iy2, const my_real ymaxe, int &nbz, const my_real zmaxb, const my_real zminb, size_t &iz1, const my_real zmine, size_t &iz2, const my_real zmaxe)
+    {
+        int lx1,lx2,ly1,ly2,lz1,lz2;
+        if (nbx > 1)
+        {
+            const my_real inv_xrange = 1.0 / (xmaxb - xminb);
+            lx1 = int(nbx * (xmine - aaa - xminb) * inv_xrange);
+            lx2 = int(nbx * (xmaxe + aaa - xminb) * inv_xrange);
+        }
+        else
+        {
+            lx1 = -2;
+            lx2 = 1;
+        }
+
+        if (nby > 1)
+        {
+            const my_real inv_yrange = 1.0 / (ymaxb - yminb);
+            ly1 = int(nby * (ymine - aaa - yminb) * inv_yrange);
+            ly2 = int(nby * (ymaxe + aaa - yminb) * inv_yrange);
+        }
+        else
+        {
+            ly1 = -2;
+            ly2 = 1;
+        }
+
+        if (nbz > 1)
+        {
+            const my_real inv_zrange = 1.0 / (zmaxb - zminb);
+            lz1 = int(nbz * (zmine - aaa - zminb) * inv_zrange);
+            lz2 = int(nbz * (zmaxe + aaa - zminb) * inv_zrange);
+        }
+        else
+        {
+            lz1 = -2;
+            lz2 = 1;
+        }
+        ix1 = static_cast<size_t>(std::max(1, 2 + std::min(nbx, lx1)));
+        iy1 = static_cast<size_t>(std::max(1, 2 + std::min(nby, ly1)));
+        iz1 = static_cast<size_t>(std::max(1, 2 + std::min(nbz, lz1)));
+        ix2 = static_cast<size_t>(std::max(1, 2 + std::min(nbx, lx2)));
+        iy2 = static_cast<size_t>(std::max(1, 2 + std::min(nby, ly2)));
+        iz2 = static_cast<size_t>(std::max(1, 2 + std::min(nbz, lz2)));
+    }
+
+// scale voxel dimensions to fit within the allocated size in Fortran code
+void scale_dimensions(int &nbx, int &nby, int &nbz, long long cell_max) {
+    const long long max_volume = std::min(static_cast<long long>(8000000), cell_max);
+
+    long long current_volume = static_cast<long long>(nbx+2) * (nby+2) * (nbz+2);
+
+    if (current_volume > max_volume) {
+        // Calculate the scaling factor
+        double scale_factor = std::cbrt(static_cast<double>(max_volume) / current_volume);
+
+        // Scale each dimension using the scale factor
+        nbx = std::max(1, static_cast<int>(nbx * scale_factor));
+        nby = std::max(1, static_cast<int>(nby * scale_factor));
+        nbz = std::max(1, static_cast<int>(nbz * scale_factor));
+
+        // Recalculate the current volume after scaling
+        current_volume = static_cast<long long>(nbx+2) * (nby+2) * (nbz+2);
+
+        // Adjust dimensions if the product is still greater than max_volume
+        while (current_volume > max_volume) {
+            if (nbx >= nby && nbx >= nbz && nbx > 1) {
+                nbx--;
+            } else if (nby >= nbx && nby >= nbz && nby > 1) {
+                nby--;
+            } else if (nbz >= nbx && nbz >= nby && nbz > 1) {
+                nbz--;
+            }
+            current_volume = static_cast<long long>(nbx+2) * (nby+2) * (nbz+2);
+        }
+    }
+}
+
 
 extern "C"
 {
@@ -796,25 +905,38 @@ extern "C"
         const my_real xmaxb = xyzm[10 - 1];
         const my_real ymaxb = xyzm[11 - 1];
         const my_real zmaxb = xyzm[12 - 1];
+       //  
+       //  01234567
+       //  |------|       
+
+        // nbx_fine+2 must be a multiple of 8
+        size_t nbx_fine =static_cast<size_t>(8 * (nbx +2));  
+        size_t nby_fine =static_cast<size_t>(8 * (nby +2));
+        size_t nbz_fine =static_cast<size_t>(8 * (nbz +2));
+        std::cout<<"dx="<<(xmaxb - xminb)/static_cast<double>(nbx+2);
+        std::cout<<"dy="<<(ymaxb - yminb)/static_cast<double>(nby+2);
+        std::cout<<"dz="<<(zmaxb - zminb)/static_cast<double>(nbz+2)<<std::endl;
+        constexpr size_t numInts = 64*256*256; //32MB
+        VoxelGrid& voxelGrid = VoxelGrid::getInstance(numInts, nbx_fine, nby_fine, nbz_fine);
+        nbx = static_cast<int>(nbx_fine - 2);
+        nby = static_cast<int>(nby_fine - 2);
+        nbz = static_cast<int>(nbz_fine - 2);
         // Lambda function to convert 3D indices to 1D index
         auto to1D = [nbx, nby](int i, int j, int k)
         {
             return (i - 1) + (j - 1) * (nbx + 2) + (k - 1) * (nbx + 2) * (nby + 2);
         };
 
+
         // start an open single section
-        int *list_nb_voxel_on = nullptr; 
-        int nb_voxel_on = 0;
 
 #pragma omp barrier
 
 #pragma omp single
         {
             // Allocate the list of voxel with at least one node
-            list_nb_voxel_on = new int[(nbx + 2) * (nby + 2) * (nbz + 2)];
             if (total_nb_nrtm > 0)
             {
-                int *last_nod = new int[nsn + nsnr];
                 for (int i = 1; i <= nsn; i++)
                 {
                     int iix = 0;
@@ -843,35 +965,9 @@ extern "C"
                     iix = std::max(1, 2 + std::min(nbx, iix));
                     iiy = std::max(1, 2 + std::min(nby, iiy));
                     iiz = std::max(1, 2 + std::min(nbz, iiz));
-
                    //std::cout<<"iix="<<iix<<" iiy="<<iiy<<" iiz="<<iiz<<std::endl;
 
-                    int first = voxel[to1D(iix, iiy, iiz)];
-                    if (first == 0)
-                    {
-                        // empty cell
-                        list_nb_voxel_on[nb_voxel_on] = to1D(iix, iiy, iiz);
-                        nb_voxel_on++;
-                        voxel[to1D(iix, iiy, iiz)] = i; // first
-                        next_nod[i - 1] = 0;            // last one
-                        last_nod[i - 1] = 0;            // no last
-                    }
-                    else if (last_nod[first - 1] == 0)
-                    {
-                        // cell containing one node
-                        // add as next node
-                        next_nod[first - 1] = i; // next
-                        last_nod[first - 1] = i; // last
-                        next_nod[i - 1] = 0;     // last one
-                    }
-                    else
-                    {
-                        // jump to the last node of the cell
-                        int last = last_nod[first - 1]; // last node in this voxel
-                        next_nod[last - 1] = i;         // next
-                        last_nod[first - 1] = i;        // last
-                        next_nod[i - 1] = 0;            // last one
-                    }
+                    voxelGrid.addVertexToCell(iix, iiy, iiz, i);
                 }
                 for (int i = 1; i <= nsnr; ++i)
                 {
@@ -891,36 +987,11 @@ extern "C"
                     iix = std::max(1,2+std::min(nbx, iix));
                     iiy = std::max(1,2+std::min(nby, iiy));
                     iiz = std::max(1,2+std::min(nbz, iiz));
+
                     int first = voxel[to1D(iix, iiy, iiz)];
                     int j = nsn + i;
-                    if (first == 0)
-                    {
-                        // empty cell
-                        list_nb_voxel_on[nb_voxel_on] = to1D(iix, iiy, iiz);
-                        nb_voxel_on++;
-                        voxel[to1D(iix, iiy, iiz)] = j; // first
-                        next_nod[j - 1] = 0;            // last one
-                        last_nod[j - 1] = 0;            // no last
-                    }
-                    else if (last_nod[first - 1] == 0)
-                    {
-                        // cell containing one node
-                        // add as next node
-                        next_nod[first - 1] = j; // next
-                        last_nod[first - 1] = j; // last
-                        next_nod[j - 1] = 0;     // last one
-                    }
-                    else
-                    {
-                        // jump to the last node of the cell
-                        int last = last_nod[first - 1]; // last node in this voxel
-                        next_nod[last - 1] = j;         // next
-                        last_nod[first - 1] = j;        // last
-                        next_nod[j - 1] = 0;            // last one
-                    }
+                    voxelGrid.addVertexToCell(j, iix, iiy, iiz);
                 }
-                // free last_nod
-                delete[] last_nod;
             }
         } // end of single section
 
@@ -971,33 +1042,23 @@ extern "C"
             const my_real sy = (zz3 - zz1) * (xx4 - xx2) - (xx3 - xx1) * (zz4 - zz2);
             const my_real sz = (xx3 - xx1) * (yy4 - yy2) - (yy3 - yy1) * (xx4 - xx2);
             const my_real s2 = sx * sx + sy * sy + sz * sz;
-            int ix1 = 0, ix2 = 0, iy1 = 0, iy2 = 0, iz1 = 0, iz2 = 0;
+            size_t ix1, ix2, iy1, iy2, iz1, iz2 ;
 
-            ix1 = (nbx > 1) ? int(nbx * (xmine - aaa - xminb) / (xmaxb - xminb)) : -2;
-            ix2 = (nbx > 1) ? int(nbx * (xmaxe + aaa - xminb) / (xmaxb - xminb)) : 1;
-            iy1 = (nby > 1) ? int(nby * (ymine - aaa - yminb) / (ymaxb - yminb)) : -2;
-            iy2 = (nby > 1) ? int(nby * (ymaxe + aaa - yminb) / (ymaxb - yminb)) : 1;
-            iz1 = (nbz > 1) ? int(nbz * (zmine - aaa - zminb) / (zmaxb - zminb)) : -2;
-            iz2 = (nbz > 1) ? int(nbz * (zmaxe + aaa - zminb) / (zmaxb - zminb)) : 1;
-
-            ix1 = std::max(1, 2 + std::min(nbx, ix1));
-            iy1 = std::max(1, 2 + std::min(nby, iy1));
-            iz1 = std::max(1, 2 + std::min(nbz, iz1));
-            ix2 = std::max(1, 2 + std::min(nbx, ix2));
-            iy2 = std::max(1, 2 + std::min(nby, iy2));
-            iz2 = std::max(1, 2 + std::min(nbz, iz2));
+            compute_coordinates(nbx, xmaxb, xminb, ix1, xmine, aaa, ix2, xmaxe, nby, ymaxb, yminb, iy1, ymine, iy2, ymaxe, nbz, zmaxb, zminb, iz1, zmine, iz2, zmaxe);
 
             //std::cout<<"ix1 = "<<ix1<<" ix2 = "<<ix2<<" iy1 = "<<iy1<<" iy2 = "<<iy2<<" iz1 = "<<iz1<<" iz2 = "<<iz2<<std::endl;
-            for (int iz = iz1; iz <= iz2; ++iz)
+            for (size_t iz = iz1; iz <= iz2; ++iz)
             {
-                for (int iy = iy1; iy <= iy2; ++iy)
+                for (size_t iy = iy1; iy <= iy2; ++iy)
                 {
-                    for (int ix = ix1; ix <= ix2; ++ix)
+                    for (size_t ix = ix1; ix <= ix2; ++ix)
                     {
-                        int jj = voxel[to1D(ix, iy, iz)];
-                        //std::cout<<"ne = "<<ne<<" jj = "<<jj<<std::endl;
-                        for (; jj != 0; jj = next_nod[jj - 1])
+                        //int jj = voxel[to1D(ix, iy, iz)];
+                        //for (; jj != 0; jj = next_nod[jj - 1])
+                        if( voxelGrid.getBit(ix, iy, iz))
                         {
+                           for(const auto& jj : voxelGrid.getCell(ix, iy, iz))
+                           {
                            //std::cout<<"ne = "<<ne<<" jj = "<<jj<<std::endl;
 
                             my_real xs = zero;
@@ -1072,6 +1133,7 @@ extern "C"
                             //std::cout<<"j_stok = "<<j_stok<<" jj = "<<jj<<" ne = "<<ne<<std::endl;                                                    
                             prov_n.push_back(jj);
                             prov_e.push_back(ne+1);
+                           }
                         } // jj
                     } // ix
                 } // iy
@@ -1148,6 +1210,8 @@ extern "C"
         delete[] prov_n_array;
         delete[] prov_e_array;
 
+        voxelGrid.clear();
+
 //#pragma omp single
 //        {
 //            for(int i = 0 ; i < ii_stok ; ++i)
@@ -1156,17 +1220,6 @@ extern "C"
 //            }
 //        }
 
-
-#pragma omp barrier
-        if (total_nb_nrtm >0 && nb_voxel_on > 0 && list_nb_voxel_on != nullptr)
-        {    // flush to 0
-            for(int jj = 0 ; jj < nb_voxel_on ; ++jj)
-            {
-                int j = list_nb_voxel_on[jj];
-                voxel[j] = 0;
-            }
-            delete[] list_nb_voxel_on;
-        }
 
 //        print_address(cand_n,"LOC(cand_n)");
 //        print_address(cand_e,"LOC(cand_e)");
