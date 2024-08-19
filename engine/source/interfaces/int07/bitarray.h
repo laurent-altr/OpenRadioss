@@ -35,7 +35,9 @@ public:
     inline bool getBit(size_t index) const {
         const size_t byteIndex = index / 8;
         const size_t bitOffset = index % 8;
-        return bits[byteIndex] & (static_cast<uint8_t>(1) << bitOffset);
+        const bool result = bits[byteIndex] & (static_cast<uint8_t>(1) << bitOffset);
+        std::cout<<"ByteIndex: "<<byteIndex<<" BitOffset: "<<bitOffset<<" Result: "<<result<<std::endl;
+        return result;
     }
 
     // Sets or clears the bit at the specified index

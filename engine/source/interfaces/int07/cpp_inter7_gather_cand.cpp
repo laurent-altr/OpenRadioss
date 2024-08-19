@@ -33,23 +33,6 @@ void print_address(T *var, std::string name)
     std::cout <<  name << "=" << reinterpret_cast<std::uintptr_t>(var) << std::endl; 
 }
 
-int get_environment_variable_as_int(const std::string& var_name) {
-    const char* value = std::getenv(var_name.c_str());
-    if (value == nullptr) {
-        // The environment variable is not set
-        throw std::runtime_error("Environment variable " + var_name + " is not set.");
-    }
-
-    try {
-        // Convert the string value to an integer
-        int int_value = std::stoi(value);
-        return int_value;
-    } catch (const std::invalid_argument& e) {
-        throw std::runtime_error("Invalid integer value for environment variable " + var_name);
-    } catch (const std::out_of_range& e) {
-        throw std::runtime_error("Value out of range for environment variable " + var_name);
-    }
-}
 // Function to calculate median
 double calculate_median(std::vector<double> data) {
     std::sort(data.begin(), data.end());
@@ -910,13 +893,14 @@ extern "C"
        //  |------|       
 
         // nbx_fine+2 must be a multiple of 8
-        size_t nbx_fine =static_cast<size_t>(8 * (nbx +2));  
-        size_t nby_fine =static_cast<size_t>(8 * (nby +2));
-        size_t nbz_fine =static_cast<size_t>(8 * (nbz +2));
-        std::cout<<"dx="<<(xmaxb - xminb)/static_cast<double>(nbx+2);
-        std::cout<<"dy="<<(ymaxb - yminb)/static_cast<double>(nby+2);
-        std::cout<<"dz="<<(zmaxb - zminb)/static_cast<double>(nbz+2)<<std::endl;
+        size_t nbx_fine =static_cast<size_t>(4 * (nbx +2));  
+        size_t nby_fine =static_cast<size_t>(4 * (nby +2));
+        size_t nbz_fine =static_cast<size_t>(4 * (nbz +2));
+       // std::cout<<"dx="<<(xmaxb - xminb)/static_cast<double>(nbx+2);
+       // std::cout<<"dy="<<(ymaxb - yminb)/static_cast<double>(nby+2);
+       // std::cout<<"dz="<<(zmaxb - zminb)/static_cast<double>(nbz+2)<<std::endl;
         constexpr size_t numInts = 64*256*256; //32MB
+        //std::cout<<"nbx_fine="<<nbx_fine<<" nby_fine="<<nby_fine<<" nbz_fine="<<nbz_fine<<std::endl;
         VoxelGrid& voxelGrid = VoxelGrid::getInstance(numInts, nbx_fine, nby_fine, nbz_fine);
         nbx = static_cast<int>(nbx_fine - 2);
         nby = static_cast<int>(nby_fine - 2);
@@ -965,9 +949,13 @@ extern "C"
                     iix = std::max(1, 2 + std::min(nbx, iix));
                     iiy = std::max(1, 2 + std::min(nby, iiy));
                     iiz = std::max(1, 2 + std::min(nbz, iiz));
-                   //std::cout<<"iix="<<iix<<" iiy="<<iiy<<" iiz="<<iiz<<std::endl;
+                    //std::cout<<"iix="<<iix<<" iiy="<<iiy<<" iiz="<<iiz<<" i="<<i<<std::endl;
 
-                    voxelGrid.addVertexToCell(iix, iiy, iiz, i);
+                    const size_t jx = static_cast<size_t>(iix);
+                    const size_t jy = static_cast<size_t>(iiy);
+                    const size_t jz = static_cast<size_t>(iiz);
+
+                    voxelGrid.addVertexToCell(jx, jy, jz, i);
                 }
                 for (int i = 1; i <= nsnr; ++i)
                 {
@@ -990,7 +978,11 @@ extern "C"
 
                     int first = voxel[to1D(iix, iiy, iiz)];
                     int j = nsn + i;
-                    voxelGrid.addVertexToCell(j, iix, iiy, iiz);
+                    const size_t jx = static_cast<size_t>(iix);
+                    const size_t jy = static_cast<size_t>(iiy);
+                    const size_t jz = static_cast<size_t>(iiz);
+
+                    voxelGrid.addVertexToCell(jx, jy, jz,j);
                 }
             }
         } // end of single section
@@ -1059,7 +1051,8 @@ extern "C"
                         {
                            for(const auto& jj : voxelGrid.getCell(ix, iy, iz))
                            {
-                           //std::cout<<"ne = "<<ne<<" jj = "<<jj<<std::endl;
+                           // std::cout<<" cell coordinates "<<ix<<" "<<iy<<" "<<iz<<"  ";
+                           // std::cout<<"ne = "<<ne<<" jj = "<<jj<<std::endl;
 
                             my_real xs = zero;
                             my_real ys = zero;
