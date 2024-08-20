@@ -42,6 +42,28 @@ double calculate_median(std::vector<double> data) {
         return data[data.size() / 2];
     }
 }
+
+void adjustDimensions(size_t& nbx, size_t& nby, size_t& nbz, size_t numInts) {
+    size_t currentProduct = nbx * nby * nbz;
+    if (currentProduct <= numInts) {
+        return;
+    }
+    constexpr size_t four = static_cast<size_t>(4);
+    double scaleFactor = std::cbrt(static_cast<double>(numInts) / currentProduct);
+    nbx = std::max(four, static_cast<size_t>(std::round(nbx * scaleFactor / 4.0)) * four );
+    nby = std::max(four, static_cast<size_t>(std::round(nby * scaleFactor / 4.0)) * four );
+    nbz = std::max(four, static_cast<size_t>(std::round(nbz * scaleFactor / 4.0)) * four );
+    currentProduct = nbx * nby * nbz;
+    while (currentProduct > numInts) {
+        scaleFactor = std::cbrt(static_cast<double>(numInts) / currentProduct);
+	if(nbx > four ) nbx -= four;
+        if(nby > four ) nby -= four;
+        if(nbz > four ) nbz -= four;
+        currentProduct = nbx * nby * nbz;
+    }
+}
+
+
     inline void compute_coordinates(int &nbx, const my_real xmaxb, const my_real xminb, size_t &ix1, const my_real xmine, my_real aaa, size_t &ix2, const my_real xmaxe, int &nby, const my_real ymaxb, const my_real yminb, size_t &iy1, const my_real ymine, size_t &iy2, const my_real ymaxe, int &nbz, const my_real zmaxb, const my_real zminb, size_t &iz1, const my_real zmine, size_t &iz2, const my_real zmaxe)
     {
         int lx1,lx2,ly1,ly2,lz1,lz2;
@@ -86,6 +108,13 @@ double calculate_median(std::vector<double> data) {
         ix2 = static_cast<size_t>(std::max(1, 2 + std::min(nbx, lx2)));
         iy2 = static_cast<size_t>(std::max(1, 2 + std::min(nby, ly2)));
         iz2 = static_cast<size_t>(std::max(1, 2 + std::min(nbz, lz2)));
+        ix1--;
+        iy1--;
+        iz1--;
+        ix2--;
+        iy2--;
+        iz2--;
+
     }
 
 // scale voxel dimensions to fit within the allocated size in Fortran code
@@ -899,9 +928,11 @@ extern "C"
        // std::cout<<"dx="<<(xmaxb - xminb)/static_cast<double>(nbx+2);
        // std::cout<<"dy="<<(ymaxb - yminb)/static_cast<double>(nby+2);
        // std::cout<<"dz="<<(zmaxb - zminb)/static_cast<double>(nbz+2)<<std::endl;
-        constexpr size_t numInts = 64*256*256; //32MB
-        //std::cout<<"nbx_fine="<<nbx_fine<<" nby_fine="<<nby_fine<<" nbz_fine="<<nbz_fine<<std::endl;
+        constexpr size_t numInts = 128*256*256; //64MB
+	adjustDimensions(nbx_fine, nby_fine, nbz_fine,numInts);
         VoxelGrid& voxelGrid = VoxelGrid::getInstance(numInts, nbx_fine, nby_fine, nbz_fine);
+        voxelGrid.resize(nbx_fine,nby_fine,nbz_fine);
+        //if( nbx_fine > 135 && nby_fine > 201 ) std::cout<<"Init value: "<<VoxelGrid.getBit(136,201,39)<<std::endl;
         nbx = static_cast<int>(nbx_fine - 2);
         nby = static_cast<int>(nby_fine - 2);
         nbz = static_cast<int>(nbz_fine - 2);
@@ -951,11 +982,12 @@ extern "C"
                     iiz = std::max(1, 2 + std::min(nbz, iiz));
                     //std::cout<<"iix="<<iix<<" iiy="<<iiy<<" iiz="<<iiz<<" i="<<i<<std::endl;
 
-                    const size_t jx = static_cast<size_t>(iix);
-                    const size_t jy = static_cast<size_t>(iiy);
-                    const size_t jz = static_cast<size_t>(iiz);
+                    const size_t jx = static_cast<size_t>(iix-1);
+                    const size_t jy = static_cast<size_t>(iiy-1);
+                    const size_t jz = static_cast<size_t>(iiz-1);
 
                     voxelGrid.addVertexToCell(jx, jy, jz, i);
+
                 }
                 for (int i = 1; i <= nsnr; ++i)
                 {
@@ -976,11 +1008,11 @@ extern "C"
                     iiy = std::max(1,2+std::min(nby, iiy));
                     iiz = std::max(1,2+std::min(nbz, iiz));
 
-                    int first = voxel[to1D(iix, iiy, iiz)];
+                    //int first = voxel[to1D(iix, iiy, iiz)];
                     int j = nsn + i;
-                    const size_t jx = static_cast<size_t>(iix);
-                    const size_t jy = static_cast<size_t>(iiy);
-                    const size_t jz = static_cast<size_t>(iiz);
+                    const size_t jx = static_cast<size_t>(iix-1);
+                    const size_t jy = static_cast<size_t>(iiy-1);
+                    const size_t jz = static_cast<size_t>(iiz-1);
 
                     voxelGrid.addVertexToCell(jx, jy, jz,j);
                 }
@@ -1038,6 +1070,7 @@ extern "C"
 
             compute_coordinates(nbx, xmaxb, xminb, ix1, xmine, aaa, ix2, xmaxe, nby, ymaxb, yminb, iy1, ymine, iy2, ymaxe, nbz, zmaxb, zminb, iz1, zmine, iz2, zmaxe);
 
+
             //std::cout<<"ix1 = "<<ix1<<" ix2 = "<<ix2<<" iy1 = "<<iy1<<" iy2 = "<<iy2<<" iz1 = "<<iz1<<" iz2 = "<<iz2<<std::endl;
             for (size_t iz = iz1; iz <= iz2; ++iz)
             {
@@ -1051,8 +1084,6 @@ extern "C"
                         {
                            for(const auto& jj : voxelGrid.getCell(ix, iy, iz))
                            {
-                           // std::cout<<" cell coordinates "<<ix<<" "<<iy<<" "<<iz<<"  ";
-                           // std::cout<<"ne = "<<ne<<" jj = "<<jj<<std::endl;
 
                             my_real xs = zero;
                             my_real ys = zero;

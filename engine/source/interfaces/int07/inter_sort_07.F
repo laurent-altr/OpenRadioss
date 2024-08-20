@@ -244,6 +244,8 @@ C
 #endif
         IF (IMONM > 0 .AND. ITASK == 0) CALL STARTIME(30,1)
 C
+C        write(6,*) NOINT,ISPMD,INTBUF_TAB%VARIABLES(bgapsmx_index)
+
         IF(GOT_PREVIEW == 1) THEN
             CALL INTER7_COLLISION_DETECTION(
      1      X      ,INTBUF_TAB%IRECTM,INTBUF_TAB%NSV,INACTI,INTBUF_TAB%CAND_P,
@@ -279,7 +281,7 @@ C
 !$OMP END SINGLE
             ENDIF
 
-        ELSE IF(INTBUF_TAB%METRIC%ALGO == ALGO_VOXEL .OR.  INTBUF_TAB%METRIC%ALGO == TRY_ALGO_VOXEL) THEN
+        ELSE IF(.TRUE.) THEN
             FIRST = 1 + ITASK*(NRTM/NTHREAD)
             LAST = FIRST + NRTM_T - 1
             IF(ITASK==NTHREAD-1) LAST=NRTM
@@ -319,7 +321,13 @@ C
      E ITIED ,INTBUF_TAB%CAND_F,DGAPLOADP)
 
         ENDIF
+
+        DO I=1,INTBUF_TAB%I_STOK(1)
+                write(700+ISPMD,'(4I10)') NOINT,I,INTBUF_TAB%CAND_E(I),INTBUF_TAB%CAND_N(i)
+        ENDDO
       
+        
+
         IF (I_MEM >= 1 )THEN
 #include "lockon.inc"
             I_MEMG = I_MEM

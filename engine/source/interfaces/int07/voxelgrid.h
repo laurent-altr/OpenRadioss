@@ -25,6 +25,14 @@ public:
         return *instance;
     }
 
+    void resize(size_t x, size_t y, size_t z)
+    {
+       clear();
+       xSize = x;
+       ySize = y;
+       zSize = z; 
+    }
+
 
     // Set a bit using 3D coordinates
     inline void setBit(size_t x, size_t y, size_t z, bool value)
@@ -37,7 +45,6 @@ public:
     inline bool getBit(size_t x, size_t y, size_t z) const
     {
         const size_t index = convert3DTo1D(x, y, z);
-        std::cout << "Index: " << index << std::endl;
         return bitArray.getBit(index);
     }
 
@@ -82,6 +89,9 @@ public:
         }
         else
         {
+            std::cout<<"Error: Empty vector "<<cell_id<<" ";
+            std::cout<<x<<" "<<y<<" "<<z<<"bit: ";
+            std::cout<<bitArray.getBit(cell_id)<<std::endl;
             return empty_vector;
         }
     }
@@ -104,7 +114,8 @@ public:
         const size_t cell_id = convert3DTo1D(x, y, z);
 
         // Check the cache
-        if (cell_id == lastCellID && lastCellPtr) {
+        //if (cell_id == lastCellID && lastCellPtr) {
+        if(false){
             lastCellPtr->push_back(vertex_id);
             lastCellPtr = &cells[cell_id]; // Re-assign after potential reallocation
         } else {
@@ -129,7 +140,7 @@ public:
     void addVerticesToCell(size_t x, size_t y, size_t z, std::vector<int>&& vertex_ids) {
         const size_t cell_id = convert3DTo1D(x, y, z);
         // Check the cache
-        if (cell_id == lastCellID && lastCellPtr) {
+        if (false) {
             lastCellPtr->insert(lastCellPtr->end(), std::make_move_iterator(vertex_ids.begin()), std::make_move_iterator(vertex_ids.end()));
         } else {
             auto it = cells.find(cell_id);
@@ -183,7 +194,7 @@ private:
     mutable size_t lastCellID;  // Last accessed cell ID
     mutable std::vector<int>* lastCellPtr;  // Pointer to the last accessed cell's vector
 
-    const size_t xSize, ySize, zSize; // Dimensions of the VoxelGrid
+    size_t xSize, ySize, zSize; // Dimensions of the VoxelGrid
 
     // Convert 3D coordinates to a 1D index where 64 consecutive bits correspond to an 8x8x8 block
 //    inline size_t convert3DTo1D(size_t x, size_t y, size_t z) const {
@@ -215,8 +226,10 @@ private:
 //        return (blockIndex * 64) + (fineBlockIndex * 8) + bitIndex;
 //    }
 
-
 inline size_t convert3DTo1D(size_t x, size_t y, size_t z) const {
+    return z * (xSize * ySize) + y * xSize + x;
+}
+inline size_t convert3DTo1D_test(size_t x, size_t y, size_t z) const {
     // Calculate the coarse block coordinates (4x4x4 blocks)
     const size_t blockX = x >> 2;  // Equivalent to x / 4
     const size_t blockY = y >> 2;  // Equivalent to y / 4
@@ -233,24 +246,6 @@ inline size_t convert3DTo1D(size_t x, size_t y, size_t z) const {
     const size_t bitZ = z & 0x1;  // Extract the least significant bit (z % 2)
 
 
-//    std::cout<<"BlockX: "<<blockX<<" BlockY: "<<blockY<<" BlockZ: "<<blockZ<<std::endl;
-//    std::cout<<"FineX: "<<fineX<<" FineY: "<<fineY<<" FineZ: "<<fineZ<<std::endl;
-//    std::cout<<"BitX: "<<bitX<<" BitY: "<<bitY<<" BitZ: "<<bitZ<<std::endl;
-    // global id ; block x, block y , block z ; fine x, fine y, fine z ; bit x, bit y, bit z
-    // 0         ;       0,        0,       0 ;      0,       0,      0; 0,      0,      0
-    // 1         ;       0,        0,       0 ;      0,       0,      0; 1,      0,      0
-    // 2         ;       0,        0,       0 ;      0,       0,      0; 0,      1,      0
-    // 3         ;       0,        0,       0 ;      0,       0,      0; 1,      1,      0
-    // 4         ;       0,        0,       0 ;      0,       0,      0; 0,      0,      1                                                                 
-    // 5         ;       0,        0,       0 ;      0,       0,      0; 1,      0,      1
-    // 6         ;       0,        0,       0 ;      0,       0,      0; 0,      1,      1
-    // 7         ;       0,        0,       0 ;      0,       0,      0; 1,      1,      1
-    // 8         ;       0,        0,       0 ;      0,       0,      0; 0,      0,      0
-    // 9         ;       0,        0,       0 ;      0,       0,      0; 1,      0,      0
-    // 10        ;       0,        0,       0 ;      0,       0,      0; 0,      1,      0
-    // 64        ;       1,        0,       0 ;      0,       0,      0; 0,      0,      0
-    // 65        ;       1,        0,       0 ;      0,       0,      0; 1,      0,      0
-
     // Coarse block index in the grid
     const size_t blockIndex = (blockZ * (ySize >> 2) * (xSize >> 2)) + (blockY * (xSize >> 2)) + blockX;
 
@@ -261,7 +256,8 @@ inline size_t convert3DTo1D(size_t x, size_t y, size_t z) const {
     const size_t bitIndex = (bitZ << 2) | (bitY << 1) | bitX;
 
     // Combine the block index, fine block index, and bit index to get the final 1D index
-    return (blockIndex << 6) + (fineBlockIndex << 3) + bitIndex;
+    const size_t cell_id =  (blockIndex << 6) + (fineBlockIndex << 3) + bitIndex;
+    return cell_id;
 }
 
 
