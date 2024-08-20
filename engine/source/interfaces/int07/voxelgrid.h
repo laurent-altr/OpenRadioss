@@ -36,7 +36,7 @@ public:
     {
         // rehash the cells
         //cells.max_load_factor(0.5); // Lower the load factor to reduce collisions
-        cells.rehash(cells.size()*10);
+        cells.rehash(cells.size()*2);
      //   std::call_once(print_collisions, [&]()
      //                  { analyze_collisions(); });
     }
@@ -110,12 +110,12 @@ public:
     }
 
     // Get the vector of vertex indices in a cell
-    const std::vector<int> &getCell(size_t x, size_t y, size_t z) 
+    inline const std::vector<int> &getCell(size_t x, size_t y, size_t z) const
     {
         const size_t cell_id = convert3DTo1D(x, y, z);
-        // I know that the cell exists, I can use [] instad of find
-        const auto& it =cells[cell_id];
-        return it;
+        //const auto& it =cells[cell_id];
+        //return it;
+        return cells.at(cell_id);
 
     }
     // Get the vector of vertex indices in a cell
