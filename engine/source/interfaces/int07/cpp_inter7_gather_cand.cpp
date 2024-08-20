@@ -1019,6 +1019,8 @@ extern "C"
             }
         } // end of single section
 
+
+        voxelGrid.finalize();
 #pragma omp barrier
         int j_stok = 0;
         std::vector<int> prov_n;
