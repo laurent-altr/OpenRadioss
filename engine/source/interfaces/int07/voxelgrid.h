@@ -37,8 +37,8 @@ public:
         // rehash the cells
         //cells.max_load_factor(0.5); // Lower the load factor to reduce collisions
         cells.rehash(cells.size()*10);
-        std::call_once(print_collisions, [&]()
-                       { analyze_collisions(); });
+     //   std::call_once(print_collisions, [&]()
+     //                  { analyze_collisions(); });
     }
 
     void analyze_collisions()
@@ -110,21 +110,13 @@ public:
     }
 
     // Get the vector of vertex indices in a cell
-    const std::vector<int> &getCell(size_t x, size_t y, size_t z) const
+    const std::vector<int> &getCell(size_t x, size_t y, size_t z) 
     {
         const size_t cell_id = convert3DTo1D(x, y, z);
-        auto it = cells.find(cell_id);
-        if (it != cells.end())
-        {
-            return it->second;
-        }
-        else
-        {
-            std::cout << "Error: Empty vector " << cell_id << " ";
-            std::cout << x << " " << y << " " << z << "bit: ";
-            std::cout << bitArray.getBit(cell_id) << std::endl;
-            return empty_vector;
-        }
+        // I know that the cell exists, I can use [] instad of find
+        const auto& it =cells[cell_id];
+        return it;
+
     }
     // Get the vector of vertex indices in a cell
     const std::vector<int> &getCell(size_t cell_id) const
