@@ -40,6 +40,42 @@ public:
         return result;
     }
 
+inline bool getBits(size_t index, size_t number) const {
+    size_t byteIndex = index / 8;
+    size_t bitOffset = index % 8;
+
+    // Check bits in the first byte (partial byte if bitOffset > 0)
+    if (bitOffset > 0) {
+        size_t bitsToCheck = std::min(number, 8 - bitOffset);
+        uint8_t mask = (0xFF >> (8 - bitsToCheck)) << bitOffset;
+        if (bits[byteIndex] & mask) {
+            return true;
+        }
+        number -= bitsToCheck;
+        ++byteIndex;
+    }
+
+    // Check full bytes
+    while (number >= 8) {
+        if (bits[byteIndex]) {
+            return true;
+        }
+        number -= 8;
+        ++byteIndex;
+    }
+
+    // Check remaining bits in the last byte
+    if (number > 0) {
+        uint8_t mask = 0xFF >> (8 - number);
+        if (bits[byteIndex] & mask) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+
     // Sets or clears the bit at the specified index
     inline void setBit(size_t index, bool value) {
         const size_t byteIndex = index / 8;

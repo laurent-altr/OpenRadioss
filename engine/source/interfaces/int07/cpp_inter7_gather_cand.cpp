@@ -931,7 +931,8 @@ extern "C"
         constexpr size_t numInts = 128*256*256; //64MB
 	adjustDimensions(nbx_fine, nby_fine, nbz_fine,numInts);
         VoxelGrid& voxelGrid = VoxelGrid::getInstance(numInts, nbx_fine, nby_fine, nbz_fine);
-        voxelGrid.resize(nbx_fine,nby_fine,nbz_fine);
+        const size_t max_size = nsn + nsnr;
+        voxelGrid.resize(nbx_fine,nby_fine,nbz_fine,max_size);
         //if( nbx_fine > 135 && nby_fine > 201 ) std::cout<<"Init value: "<<VoxelGrid.getBit(136,201,39)<<std::endl;
         nbx = static_cast<int>(nbx_fine - 2);
         nby = static_cast<int>(nby_fine - 2);
@@ -1078,10 +1079,10 @@ extern "C"
             {
                 for (size_t iy = iy1; iy <= iy2; ++iy)
                 {
+                    if(true)
+                    {
                     for (size_t ix = ix1; ix <= ix2; ++ix)
                     {
-                        //int jj = voxel[to1D(ix, iy, iz)];
-                        //for (; jj != 0; jj = next_nod[jj - 1])
                         if( voxelGrid.getBit(ix, iy, iz))
                         {
                            for(const auto& jj : voxelGrid.getCell(ix, iy, iz))
@@ -1107,7 +1108,7 @@ extern "C"
                                 zs = x[2 + (nn - 1) * 3];
                                 if (igap != 0)
                                 {
-                                    aaa = marge + curv_max[ne] + std::max(std::min(gapmax, std::max(gapmin, bgapsmx + gap_m[ne])) + dgapload, drad);
+                                    aaa = marge + curv_max[ne] + std::max(std::min(gapmax, std::max(gapmin, gap_s[ jj - 1 ] + gap_m[ne])) + dgapload, drad);
                                 }
                             }
                             else // remote spmd node
@@ -1162,6 +1163,7 @@ extern "C"
                            }
                         } // jj
                     } // ix
+                    }
                 } // iy
             } // iz
         } // end of parallel for loop

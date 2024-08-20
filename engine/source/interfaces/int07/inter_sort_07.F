@@ -322,9 +322,9 @@ C        write(6,*) NOINT,ISPMD,INTBUF_TAB%VARIABLES(bgapsmx_index)
 
         ENDIF
 
-        DO I=1,INTBUF_TAB%I_STOK(1)
-                write(700+ISPMD,'(4I10)') NOINT,I,INTBUF_TAB%CAND_E(I),INTBUF_TAB%CAND_N(i)
-        ENDDO
+C       DO I=1,INTBUF_TAB%I_STOK(1)
+C               write(700+ISPMD,'(4I10)') NOINT,I,INTBUF_TAB%CAND_E(I),INTBUF_TAB%CAND_N(i)
+C       ENDDO
       
         
 

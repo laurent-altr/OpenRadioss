@@ -24,12 +24,13 @@ public:
         return *instance;
     }
 
-    void resize(size_t x, size_t y, size_t z)
+    void resize(size_t x, size_t y, size_t z, size_t map_max_size)
     {
         clear();
         xSize = x;
         ySize = y;
         zSize = z;
+        cells.reserve(map_max_size);
     }
 
     void finalize()
@@ -70,6 +71,11 @@ public:
     {
         const size_t index = convert3DTo1D(x, y, z);
         bitArray.setBit(index, value);
+    }
+    inline bool getBits(size_t x, size_t y, size_t z, size_t number) const
+    {
+        const size_t index = convert3DTo1D(x, y, z);
+        return bitArray.getBits(index, number);
     }
 
     // Get a bit using 3D coordinates
