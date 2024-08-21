@@ -443,7 +443,7 @@ C
          END IF
 C
          DIST0 = INTBUF_TAB(I)%VARIABLES(5) - SQRT(XX**2+XY**2+XZ**2)
-C         DIST0 = - 1.0D0
+         DIST0 = - 1.0D0
 C
 C Test sur pas de temps sur l'interface
 C

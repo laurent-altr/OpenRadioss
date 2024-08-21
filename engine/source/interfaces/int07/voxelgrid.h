@@ -7,7 +7,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <iostream>
-#include <unordered_map>
+#include <map>
 #include <vector>
 class VoxelGrid
 {
@@ -30,41 +30,40 @@ public:
         xSize = x;
         ySize = y;
         zSize = z;
-        cells.reserve(map_max_size);
     }
 
     void finalize()
     {
         // rehash the cells
         //cells.max_load_factor(0.5); // Lower the load factor to reduce collisions
-        cells.rehash(cells.size()*2);
+    //    cells.rehash(cells.size()*2);
      //   std::call_once(print_collisions, [&]()
      //                  { analyze_collisions(); });
     }
 
-    void analyze_collisions()
-    {
-        size_t bucket_count = cells.bucket_count();
-        size_t total_elements = cells.size();
-        size_t collisions = 0;
-
-        for (size_t i = 0; i < bucket_count; ++i)
-        {
-            size_t bucket_size = cells.bucket_size(i);
-            if (bucket_size > 1)
-            {
-                collisions += (bucket_size - 1); // Count collisions (extra elements in the bucket)
-            }
-        }
-
-        double load_factor = cells.load_factor();
-
-        std::cout << "Total buckets: " << bucket_count << std::endl;
-        std::cout << "Total elements: " << total_elements << std::endl;
-        std::cout << "Total collisions: " << collisions << std::endl;
-        std::cout << "Load factor: " << load_factor << std::endl;
-        std::cout << "Average bucket size: " << (double)total_elements / bucket_count << std::endl;
-    }
+//    void analyze_collisions()
+//    {
+//        size_t bucket_count = cells.bucket_count();
+//        size_t total_elements = cells.size();
+//        size_t collisions = 0;
+//
+//        for (size_t i = 0; i < bucket_count; ++i)
+//        {
+//            size_t bucket_size = cells.bucket_size(i);
+//            if (bucket_size > 1)
+//            {
+//                collisions += (bucket_size - 1); // Count collisions (extra elements in the bucket)
+//            }
+//        }
+//
+//        double load_factor = cells.load_factor();
+//
+//        std::cout << "Total buckets: " << bucket_count << std::endl;
+//        std::cout << "Total elements: " << total_elements << std::endl;
+//        std::cout << "Total collisions: " << collisions << std::endl;
+//        std::cout << "Load factor: " << load_factor << std::endl;
+//        std::cout << "Average bucket size: " << (double)total_elements / bucket_count << std::endl;
+//    }
 
     // Set a bit using 3D coordinates
     inline void setBit(size_t x, size_t y, size_t z, bool value)
@@ -219,6 +218,24 @@ public:
         lastCellID = 0;
         lastCellPtr = nullptr;
     }
+      std::vector<int> getChunk(size_t xMin, size_t xMax, size_t y, size_t z) const {
+
+        size_t minKey = convert3DTo1D(xMin,y,z);
+        size_t maxKey = convert3DTo1D(xMax,y,z);
+        std::vector<int> result;
+
+        // Find the first key that is not less than minKey
+        auto it = cells.lower_bound(minKey);
+
+        // Iterate through the map, concatenating vectors within the specified range
+        while (it != cells.end() && it->first <= maxKey) {
+            result.insert(result.end(), it->second.begin(), it->second.end());
+            ++it;
+        }
+
+        // Move the result to avoid copying
+        return std::move(result);
+    }
 
 private:
     VoxelGrid(size_t numInts, size_t xDim, size_t yDim, size_t zDim)
@@ -234,7 +251,7 @@ private:
 
 
     BitArray bitArray;                                  // Private BitArray instance for managing bits
-    std::unordered_map<size_t, std::vector<int>> cells; // A cell contains the vector of the vertex indices it contains
+    std::map<size_t, std::vector<int>> cells; // A cell contains the vector of the vertex indices it contains
     static const std::vector<int> empty_vector;         // Empty vector to return when the cell is not found
 
     // Cache for the last accessed cell
