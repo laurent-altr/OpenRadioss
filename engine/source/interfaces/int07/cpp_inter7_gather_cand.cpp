@@ -942,6 +942,7 @@ extern "C"
         {
             return (i - 1) + (j - 1) * (nbx + 2) + (k - 1) * (nbx + 2) * (nby + 2);
         };
+        size_t nb_cand_tot = 0;
 
 
         // start an open single section
@@ -1157,7 +1158,9 @@ extern "C"
                                     continue;
                             }
                             j_stok++;
-                            //std::cout<<"j_stok = "<<j_stok<<" jj = "<<jj<<" ne = "<<ne<<std::endl;                                                    
+                            nb_cand_tot++;
+                            //std::cout<<"j_stok = "<<j_stok<<" jj = "<<jj<<" ne = "<<ne+1<<std::endl;                                                    
+                            //std::cout<<" ne = "<<ne+1<<" jj = "<<jj<<std::endl;
                             prov_n.push_back(jj);
                             prov_e.push_back(ne+1);
                            }
@@ -1200,7 +1203,7 @@ extern "C"
             int *prov_e_array = new int[GROUP_SIZE];
 
 
-
+        std::cout<<"NB_CAND_TOT ="<<nb_cand_tot<<std::endl;
         for(int i = 0 ; i < j_stok ; i+= GROUP_SIZE)
         {
 //    void cpp_inter7_filter_cand(

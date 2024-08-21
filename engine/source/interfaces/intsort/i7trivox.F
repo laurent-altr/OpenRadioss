@@ -149,6 +149,8 @@ c provisoire
       INTEGER FIRST,NEW,LAST,IERROR
       LOGICAL DBG_type18_fvm
       SAVE IIX,IIY,IIZ
+      INTEGER(8) :: NB_CAND_TOT
+      NB_CAND_TOT = 0
 C-----------------------------------------------
       IF(ITASK == 0)THEN
         REMOTE_S_NODE = 0
@@ -501,6 +503,12 @@ C=======================================================================
                 J_STOK = J_STOK + 1
                 PROV_N(J_STOK) = JJ
                 PROV_E(J_STOK) = NE
+C/    std::cout<<"j_stok = "<<j_stok<<" jj = "<<jj<<" ne = "<<ne<<std::endl;                                                    
+
+                NB_CAND_TOT = NB_CAND_TOT + 1
+                !write(6,*) "j_stok = ",NB_CAND_TOT," jj = ",JJ," ne = ",NE
+!                write(6,*) "ne = ",NE," jj = ",JJ
+
                 IF(J_STOK == NVSIZ)THEN
                   CALL I7STO(
      1               NVSIZ ,IRECT  ,X     ,NSV   ,II_STOK,
@@ -531,6 +539,8 @@ C=======================================================================
 C=======================================================================
 C 4   STORAGE
 C=======================================================================
+      NB_CAND_TOT = NB_CAND_TOT
+      write(6,*)'NB_CAND_TOT = ',NB_CAND_TOT
       IF(J_STOK/=0)CALL I7STO(
      1              J_STOK,IRECT  ,X     ,NSV   ,II_STOK,
      2              CAND_N,CAND_E ,MULNSN,NOINT ,MARGE  ,
