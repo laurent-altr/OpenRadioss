@@ -35,11 +35,8 @@ public:
 
     void finalize()
     {
-        // rehash the cells
-        //cells.max_load_factor(0.5); // Lower the load factor to reduce collisions
+
         cells.rehash(cells.size()*2);
-     //   std::call_once(print_collisions, [&]()
-     //                  { analyze_collisions(); });
     }
 
     void analyze_collisions()
@@ -88,21 +85,21 @@ public:
     // Set a byte using 3D coordinates (starting at a specific 3D index)
     inline void setByte(size_t x, size_t y, size_t z, uint8_t value)
     {
-        const size_t byteIndex = convert3DTo1D(x, y, z) / 8;
+        const size_t byteIndex = convert3DTo1D_coarse(x, y, z);
         bitArray.setByte(byteIndex, value);
     }
 
     // Get a byte using 3D coordinates (starting at a specific 3D index)
     inline const uint8_t &getByte(size_t x, size_t y, size_t z) const
     {
-        const size_t byteIndex = convert3DTo1D(x, y, z) / 8;
+        const size_t byteIndex = convert3DTo1D_coarse(x, y, z);
         return bitArray.getByte(byteIndex);
     }
 
     // Get 8 bits corresponding to a 2x2x2 block
     inline const uint8_t &get8bits(size_t x, size_t y, size_t z) const
     {
-        const size_t byteIndex = convert3DTo1D(x * 2, y * 2, z * 2) / 8;
+        const size_t byteIndex = convert3DTo1D_coarse(x, y, z);              
         return bitArray.getByte(byteIndex);
     }
 
@@ -143,33 +140,15 @@ public:
     {
         const size_t cell_id = convert3DTo1D(x, y, z);
 
-        // Check the cache
-        // if (cell_id == lastCellID && lastCellPtr) {
-        if (false)
+        auto it = cells.find(cell_id);
+        if (it != cells.end())
         {
-            lastCellPtr->push_back(vertex_id);
-            lastCellPtr = &cells[cell_id]; // Re-assign after potential reallocation
+            it->second.push_back(vertex_id);
         }
         else
         {
-            auto it = cells.find(cell_id);
-            if (it != cells.end())
-            {
-                it->second.push_back(vertex_id);
-                // Update the cache
-                lastCellID = cell_id;
-                lastCellPtr = &it->second;
-            }
-            else
-            {
-                cells[cell_id] = {vertex_id};
-                // Update the cache
-                lastCellID = cell_id;
-                lastCellPtr = &cells[cell_id];
-            }
+            cells[cell_id] = {vertex_id};
         }
-
-        // Update the bitArray based on the current state of the cell
         updateBitArray(cell_id);
     }
 
@@ -177,27 +156,14 @@ public:
     {
         const size_t cell_id = convert3DTo1D(x, y, z);
         // Check the cache
-        if (false)
+        auto it = cells.find(cell_id);
+        if (it != cells.end())
         {
-            lastCellPtr->insert(lastCellPtr->end(), std::make_move_iterator(vertex_ids.begin()), std::make_move_iterator(vertex_ids.end()));
+            it->second.insert(it->second.end(), std::make_move_iterator(vertex_ids.begin()), std::make_move_iterator(vertex_ids.end()));
         }
         else
         {
-            auto it = cells.find(cell_id);
-            if (it != cells.end())
-            {
-                it->second.insert(it->second.end(), std::make_move_iterator(vertex_ids.begin()), std::make_move_iterator(vertex_ids.end()));
-                // Update the cache
-                lastCellID = cell_id;
-                lastCellPtr = &it->second;
-            }
-            else
-            {
-                cells[cell_id] = std::move(vertex_ids);
-                // Update the cache
-                lastCellID = cell_id;
-                lastCellPtr = &cells[cell_id];
-            }
+            cells[cell_id] = std::move(vertex_ids);
         }
         // Update the bitArray based on the current state of the cell
         updateBitArray(cell_id);
@@ -215,98 +181,63 @@ public:
         // Clear the cells map
         cells.clear();
 
-        // Reset the cache
-        lastCellID = 0;
-        lastCellPtr = nullptr;
     }
 
 private:
     VoxelGrid(size_t numInts, size_t xDim, size_t yDim, size_t zDim)
         : bitArray(numInts),
-          lastCellID(0), lastCellPtr(nullptr),
-          xSize(xDim), ySize(yDim), zSize(zDim) {}
+          xSize(xDim), ySize(yDim), zSize(zDim) {
+          halfXSize = xDim >> 1;
+          halfYSize = yDim >> 1;
+          halfXYSize = halfXSize * halfYSize;
+          }
 
     // Static instance pointer and flag for thread-safe initialization
     static std::unique_ptr<VoxelGrid> instance;
     static std::once_flag initInstanceFlag;
     static std::once_flag print_collisions;
 
-
-
     BitArray bitArray;                                  // Private BitArray instance for managing bits
     std::unordered_map<size_t, std::vector<int>> cells; // A cell contains the vector of the vertex indices it contains
     static const std::vector<int> empty_vector;         // Empty vector to return when the cell is not found
 
-    // Cache for the last accessed cell
-    mutable size_t lastCellID;             // Last accessed cell ID
-    mutable std::vector<int> *lastCellPtr; // Pointer to the last accessed cell's vector
-
     size_t xSize, ySize, zSize; // Dimensions of the VoxelGrid
+    // Precompute the shifts and multiplications
+    size_t halfXSize;
+    size_t halfYSize;
+    size_t halfXYSize;
 
-    // Convert 3D coordinates to a 1D index where 64 consecutive bits correspond to an 8x8x8 block
-    //    inline size_t convert3DTo1D(size_t x, size_t y, size_t z) const {
-    //        // Calculate the coarse block coordinates (8x8x8 blocks)
-    //        const size_t blockX = x / 8;
-    //        const size_t blockY = y / 8;
-    //        const size_t blockZ = z / 8;
-    //
-    //        // Calculate the fine block coordinates within the 8x8x8 block (2x2x2 sub-block)
-    //        const size_t fineX = (x % 8) / 2;
-    //        const size_t fineY = (y % 8) / 2;
-    //        const size_t fineZ = (z % 8) / 2;
-    //
-    //        // Calculate the bit position within the 2x2x2 sub-block
-    //        const size_t bitX = x % 2;
-    //        const size_t bitY = y % 2;
-    //        const size_t bitZ = z % 2;
-    //
-    //        // Coarse block index in the grid
-    //        const size_t blockIndex = (blockZ * (ySize / 8) * (xSize / 8)) + (blockY * (xSize / 8)) + blockX;
-    //
-    //        // Fine block index within the 8x8x8 block (each block is 64 bits, or 8 * 2x2x2 blocks)
-    //        const size_t fineBlockIndex = (fineZ * 4) + (fineY * 2) + fineX;
-    //
-    //        // Bit index within the 2x2x2 sub-block (using Z-order curve or Morton order)
-    //        const size_t bitIndex = (bitZ << 2) | (bitY << 1) | bitX;
-    //
-    //        // Combine the block index, fine block index, and bit index to get the final 1D index
-    //        return (blockIndex * 64) + (fineBlockIndex * 8) + bitIndex;
-    //    }
 
+//    inline size_t convert3DTo1D(size_t x, size_t y, size_t z) const
+//    {
+//        return z * (xSize * ySize) + y * xSize + x;
+//    }
     inline size_t convert3DTo1D(size_t x, size_t y, size_t z) const
     {
-        return z * (xSize * ySize) + y * xSize + x;
-    }
-    inline size_t convert3DTo1D_test(size_t x, size_t y, size_t z) const
-    {
-        // Calculate the coarse block coordinates (4x4x4 blocks)
-        const size_t blockX = x >> 2; // Equivalent to x / 4
-        const size_t blockY = y >> 2; // Equivalent to y / 4
-        const size_t blockZ = z >> 2; // Equivalent to z / 4
-
-        // Calculate the fine block coordinates within the 4x4x4 block (2x2x2 sub-block)
-        const size_t fineX = (x >> 1) & 0x1; // Extract the bit corresponding to (x % 4) / 2
-        const size_t fineY = (y >> 1) & 0x1; // Extract the bit corresponding to (y % 4) / 2
-        const size_t fineZ = (z >> 1) & 0x1; // Extract the bit corresponding to (z % 4) / 2
-
-        // Calculate the bit position within the 2x2x2 sub-block
-        const size_t bitX = x & 0x1; // Extract the least significant bit (x % 2)
-        const size_t bitY = y & 0x1; // Extract the least significant bit (y % 2)
-        const size_t bitZ = z & 0x1; // Extract the least significant bit (z % 2)
-
-        // Coarse block index in the grid
-        const size_t blockIndex = (blockZ * (ySize >> 2) * (xSize >> 2)) + (blockY * (xSize >> 2)) + blockX;
-
-        // Fine block index within the 4x4x4 block (each block is 64 bits, or 8 * 2x2x2 blocks)
+    
+        // Calculate the block coordinates and fine block coordinates in one step
+        const size_t blockX = x >> 1;
+        const size_t blockY = y >> 1;
+        const size_t blockZ = z >> 1;
+        const size_t fineX = x & 0x1;
+        const size_t fineY = y & 0x1;
+        const size_t fineZ = z & 0x1;
+    
+        // Combine the block index and fine block index calculations
+        const size_t blockIndex = (blockZ * halfXYSize) + (blockY * halfXSize) + blockX;
         const size_t fineBlockIndex = (fineZ << 2) | (fineY << 1) | fineX;
-
-        // Bit index within the 2x2x2 sub-block (using Z-order curve or Morton order)
-        const size_t bitIndex = (bitZ << 2) | (bitY << 1) | bitX;
-
-        // Combine the block index, fine block index, and bit index to get the final 1D index
-        const size_t cell_id = (blockIndex << 6) + (fineBlockIndex << 3) + bitIndex;
+    
+        // Combine the block index and fine block index to get the final 1D index
+        const size_t cell_id = (blockIndex << 3) + fineBlockIndex;
         return cell_id;
     }
+
+    // input are in coarse coordinates
+    inline size_t convert3DTo1D_coarse(size_t x, size_t y, size_t z) const
+    {
+        return z * (halfXYSize) + y * halfXSize + x;
+    }
+
 
     // Efficiently reset the grid by only clearing bits that correspond to non-empty cells
     void reset()
@@ -319,10 +250,6 @@ private:
         }
         // Clear the cells map
         cells.clear();
-
-        // Reset the cache
-        lastCellID = 0;
-        lastCellPtr = nullptr;
     }
 
     // Helper function to update the bitArray when a cell becomes non-empty

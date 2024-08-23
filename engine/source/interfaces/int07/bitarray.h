@@ -4,6 +4,18 @@
 #include <cstdint>
 #include <iostream>
 #include <cstring>
+#include <array>
+
+constexpr std::array<std::array<size_t, 3>, 8> triplets = {{
+    {0, 0, 0},
+    {1, 0, 0},
+    {0, 1, 0},
+    {1, 1, 0},
+    {0, 0, 1},
+    {1, 0, 1},
+    {0, 1, 1},
+    {1, 1, 1}
+}};
 
 class BitArray {
 public:
