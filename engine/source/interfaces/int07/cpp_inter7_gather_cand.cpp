@@ -8,6 +8,7 @@
 #include <stdexcept>
 #include <string>
 #include <numeric>
+#include <bitset>
 #include "voxelgrid.h"
 #ifdef MYREAL8
 typedef double my_real;
@@ -1085,6 +1086,7 @@ extern "C"
             size_t iy2_coarse = iy2 / 2;
             size_t iz1_coarse = iz1 / 2;
             size_t iz2_coarse = iz2 / 2;
+            //print ix1,ix2,iy1,iy2,iz1,iz2
             for (size_t iz = iz1_coarse; iz <= iz2_coarse; ++iz)
             {
                 for (size_t iy = iy1_coarse; iy <= iy2_coarse; ++iy)
@@ -1094,6 +1096,8 @@ extern "C"
                         const uint8_t coarse_cell_mask = voxelGrid.get8bits(ix, iy, iz);
                         if (coarse_cell_mask > 0)
                         {
+
+
                             for (int imask = 0; imask < 8; ++imask)
                             {
                                 if (coarse_cell_mask & (1 << imask))
