@@ -326,6 +326,20 @@ C=======================================================================
             ENDIF
 !         ENDIF
         ENDDO
+
+        DO IZ = 1, NBZ+2
+          DO IY = 1, NBY+2
+            NEXT = VOXEL(NBX+2,IY,IZ)
+            DO IX = NBX+2,1,-1
+              IF(VOXEL(IX,IY,IZ) ==  0) THEN
+                 VOXEL(IX,IY,IZ) = -NEXT
+              ELSE IF(VOXEL(IX,IY,IZ) > 0) THEN
+                 NEXT = -VOXEL(IX,IY,IZ)
+              ENDIF
+            ENDDO
+          ENDDO
+        ENDDO
+
       END IF !ITASK == 0
 
       CALL MY_BARRIER ! Barrier to wait task0 treatment
@@ -446,11 +460,17 @@ C=======================================================================
               ! nbpelem = nbpelem + 1
               IX = IX1
               JJ = VOXEL(IX,IY,IZ)
-              DO WHILE (JJ ==0)
-                IX = IX + 1
-                IF(IX > IX2) EXIT
-                JJ = VOXEL(IX,IY,IZ)
-              ENDDO
+c             DO WHILE (JJ ==0)
+c               IX = IX + 1
+c               IF(IX > IX2) EXIT
+c               JJ = VOXEL(IX,IY,IZ)
+c             ENDDO
+              IF (JJ < 0) THEN
+                ! if voxel(iy,iz) is negative, it means that the current voxel is empty, and the next node in the x direction is stored in the negative value of the voxel
+                JJ = -JJ
+                IX = IIX(JJ) ! update IX
+                IF (IX > IX2) JJ = 0
+              ENDIF
               DO WHILE(JJ /= 0)
                 DELNOD = 0
                 !nnpelem = nnpelem + 1
@@ -540,8 +560,9 @@ C=======================================================================
 
                 JJ = NEXT_NOD(JJ)
 
-                IF(JJ .NE. 0) IX = IIX(ABS(JJ))
+                IF(JJ .NE. 0) IX = IIX(ABS(JJ)) ! update IX
                 IF(JJ < 0) THEN
+                  ! next voxel: negative flag
                   JJ = -JJ
                 ENDIF
                 IF(IX > IX2) JJ = 0
@@ -577,20 +598,23 @@ C=======================================================================
       ! Barrier to avoid reinitialization before end of sorting
       CALL MY_BARRIER
       IF(TOTAL_NB_NRTM>0) THEN
-        NSNF = 1 + ITASK*NSN / NTHREAD
-        NSNL = (ITASK+1)*NSN / NTHREAD
-        DO I=NSNF,NSNL
-            IF(IIX(I)/=0)THEN
-              VOXEL(IIX(I),IIY(I),IIZ(I))=0
-            ENDIF
-        ENDDO
-        NSNF = 1 + ITASK*REMOTE_S_NODE / NTHREAD
-        NSNL = (ITASK+1)*REMOTE_S_NODE / NTHREAD
-        IF(ITASK+1==NTHREAD) NSNL=REMOTE_S_NODE
-        DO JJ = NSNF, NSNL
-            J = LIST_REMOTE_S_NODE(JJ)
-            VOXEL(IIX(NSN+J),IIY(NSN+J),IIZ(NSN+J))=0
-        ENDDO
+C        NSNF = 1 + ITASK*NSN / NTHREAD
+C        NSNL = (ITASK+1)*NSN / NTHREAD
+C        DO I=NSNF,NSNL
+C            IF(IIX(I)/=0)THEN
+C              VOXEL(IIX(I),IIY(I),IIZ(I))=0
+C            ENDIF
+C        ENDDO
+C        NSNF = 1 + ITASK*REMOTE_S_NODE / NTHREAD
+C        NSNL = (ITASK+1)*REMOTE_S_NODE / NTHREAD
+C        IF(ITASK+1==NTHREAD) NSNL=REMOTE_S_NODE
+C        DO JJ = NSNF, NSNL
+C            J = LIST_REMOTE_S_NODE(JJ)
+C            VOXEL(IIX(NSN+J),IIY(NSN+J),IIZ(NSN+J))=0
+C        ENDDO
+!$OMP SINGLE
+          VOXEL(1:NBX+2,1:NBY+2,1:NBZ+2) = 0
+!$OMP END SINGLE
       ENDIF
       CALL MY_BARRIER()
 
