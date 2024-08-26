@@ -265,6 +265,7 @@ C 2   REMOTE NODE CLUSTERING
 C=======================================================================
         DO J = 1, NSNR
 
+          IIX(NSN+J) = 0
           IF(XREM(1,J) < XMIN)  CYCLE
           IF(XREM(1,J) > XMAX)  CYCLE
           IF(XREM(2,J) < YMIN)  CYCLE
@@ -307,6 +308,23 @@ C=======================================================================
             LAST_NOD(FIRST) = NSN+J ! last
             NEXT_NOD(NSN+J)     = 0 ! last one
           ENDIF
+        ENDDO
+
+        DO I = 1, NSN + NSNR
+!         IF(LAST_NOD(I) >= 0) THEN
+            IF(NEXT_NOD(I) == 0 .AND. IIX(i) > 0) THEN
+            ! the last node to the cell, points to the first node of the next cell 
+              IF(IIX(i) < NBX+2) THEN
+                J = 1
+                NEXT = VOXEL(IIX(I)+J,IIY(I),IIZ(I))                            
+                do while(NEXT == 0 .AND. IIX(I)+J <= NBX+2)
+                  NEXT = VOXEL(IIX(I)+J,IIY(I),IIZ(I))
+                  J = J + 1
+                enddo
+                IF(NEXT >0) NEXT_NOD(I) = - NEXT ! negative flag to indicate the next cell
+              ENDIF
+            ENDIF
+!         ENDIF
         ENDDO
       END IF !ITASK == 0
 
@@ -423,14 +441,18 @@ C=======================================================================
 
         DO IZ = IZ1,IZ2
           DO IY = IY1,IY2
-            DO IX = IX1,IX2
+!           DO IX = IX1,IX2
 
               ! nbpelem = nbpelem + 1
-
+              IX = IX1
               JJ = VOXEL(IX,IY,IZ)
+              DO WHILE (JJ ==0)
+                IX = IX + 1
+                IF(IX > IX2) EXIT
+                JJ = VOXEL(IX,IY,IZ)
+              ENDDO
               DO WHILE(JJ /= 0)
                 DELNOD = 0
-
                 !nnpelem = nnpelem + 1
                 IF(JJ<=NSN)THEN
                   NN=NSV(JJ)
@@ -515,9 +537,16 @@ C=======================================================================
                   J_STOK = 0
                 ENDIF
   200           CONTINUE
+
                 JJ = NEXT_NOD(JJ)
+
+                IF(JJ .NE. 0) IX = IIX(ABS(JJ))
+                IF(JJ < 0) THEN
+                  JJ = -JJ
+                ENDIF
+                IF(IX > IX2) JJ = 0
               ENDDO ! WHILE(JJ /= 0)
-            ENDDO ! X
+!           ENDDO ! X
           ENDDO  ! Y
         ENDDO   ! Z
         IF(FLAGREMNODE == 2) THEN
