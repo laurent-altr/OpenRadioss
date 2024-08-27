@@ -154,6 +154,7 @@ C-----------------------------------------------
         REMOTE_S_NODE = 0
         CPT_VOX0 = 0
         ALLOCATE(NEXT_NOD(NSN+NSNR),STAT=IERROR)
+        NEXT_NOD(1:NSN+NSNR) = 0
         IF(IERROR/=0) THEN
           CALL ANCMSG(MSGID=19,ANMODE=ANINFO,
      .        C1='(/INTER/TYPE7)')
@@ -390,7 +391,7 @@ C=======================================================================
                   NEXT = VOXEL(IIX(I)+J,IIY(I),IIZ(I))
                   J = J + 1
                 enddo
-                IF(NEXT >0) NEXT_NOD(I) = - NEXT ! negative flag to indicate the next cell
+                IF(NEXT >0) NEXT_NOD(I) = -NEXT ! negative flag to indicate the next cell
               ENDIF
             ENDIF
 !         ENDIF
