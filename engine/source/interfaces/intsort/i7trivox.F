@@ -154,7 +154,7 @@ C-----------------------------------------------
         REMOTE_S_NODE = 0
         CPT_VOX0 = 0
         ALLOCATE(NEXT_NOD(NSN+NSNR),STAT=IERROR)
-        NEXT_NOD(1:NSN+NSNR) = 0
+        NEXT_NOD(1:NSN+NSNR) = -HUGE(I)
         IF(IERROR/=0) THEN
           CALL ANCMSG(MSGID=19,ANMODE=ANINFO,
      .        C1='(/INTER/TYPE7)')
@@ -267,7 +267,7 @@ C-----------------------------------------------
         DO IZ = IZ1,IZ2
           DO IY = IY1,IY2
             DO IX = IX1,IX2
-              VOXEL(IX,IY,IZ) = -1
+              VOXEL(IX,IY,IZ) = -HUGE(i)
             ENDDO
           ENDDO
         ENDDO
@@ -308,7 +308,7 @@ C=======================================================================
               CPT_VOX0 = CPT_VOX0 +1
             ENDIF
           ENDIF
-          IF(FIRST == -1)THEN
+          IF(FIRST == -HUGE(i))THEN
             !empty cell
             VOXEL(IIX(I),IIY(I),IIZ(I)) = I ! first
             NEXT_NOD(I)                 = 0 ! last one
@@ -361,7 +361,7 @@ C=======================================================================
             ENDIF
           ENDIF
 
-          IF(FIRST == -1)THEN
+          IF(FIRST == -HUGE(I))THEN
             ! empty cell
             VOXEL(IIX(NSN+J),IIY(NSN+J),IIZ(NSN+J)) = NSN+J ! first
             NEXT_NOD(NSN+J)     = 0 ! last one
@@ -387,7 +387,7 @@ C=======================================================================
               IF(IIX(i) < NBX+2) THEN
                 J = 1
                 NEXT = VOXEL(IIX(I)+J,IIY(I),IIZ(I))                            
-                do while(NEXT == -1 .AND. IIX(I)+J <= NBX+2)
+                do while(NEXT == -HUGE(i) .AND. IIX(I)+J <= NBX+2)
                   NEXT = VOXEL(IIX(I)+J,IIY(I),IIZ(I))
                   J = J + 1
                 enddo
@@ -399,9 +399,9 @@ C=======================================================================
 
         DO IZ = 1, NBZ+2
           DO IY = 1, NBY+2
-            NEXT = VOXEL(NBX+2,IY,IZ)
-            DO IX = NBX+1,1,-1
-              IF(VOXEL(IX,IY,IZ) ==  -1) THEN
+            NEXT = 0                  
+            DO IX = NBX+2,1,-1
+              IF(VOXEL(IX,IY,IZ) ==  -HUGE(I)) THEN
               ! that voxel will be checked by main segment, but is empty
                  VOXEL(IX,IY,IZ) = -NEXT
               ELSE IF(VOXEL(IX,IY,IZ) > 0) THEN
@@ -535,13 +535,13 @@ C               IX = IX + 1
 C               IF(IX > IX2) EXIT
 C               JJ = VOXEL(IX,IY,IZ)
 C             ENDDO
-c             IF(JJ < 0) JJ = 0
               IF (JJ < 0) THEN
                 ! if voxel(iy,iz) is negative, it means that the current voxel is empty, and the next node in the x direction is stored in the negative value of the voxel
                 JJ = -JJ
                 IX = IIX(JJ) ! update IX
                 IF (IX > IX2) JJ = 0
               ENDIF
+
               DO WHILE(JJ /= 0)
                 DELNOD = 0
                 !nnpelem = nnpelem + 1
@@ -629,6 +629,7 @@ c             IF(JJ < 0) JJ = 0
                 ENDIF
   200           CONTINUE
 
+                I = JJ
                 JJ = NEXT_NOD(JJ)
 
                 IF(JJ .NE. 0) IX = IIX(ABS(JJ)) ! update IX
