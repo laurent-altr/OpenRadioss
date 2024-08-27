@@ -361,7 +361,7 @@ C=======================================================================
             ENDIF
           ENDIF
 
-          IF(FIRST == 0)THEN
+          IF(FIRST == -1)THEN
             ! empty cell
             VOXEL(IIX(NSN+J),IIY(NSN+J),IIZ(NSN+J)) = NSN+J ! first
             NEXT_NOD(NSN+J)     = 0 ! last one
