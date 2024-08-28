@@ -205,74 +205,6 @@ C-----------------------------------------------
       IF(NSPMD>1.AND.(INACTI==5.OR.INACTI==6.OR.INACTI==7.OR.IFQ>0.OR.ITIED/=0)) THEN
         CALL SPMD_OLDNUMCD(RENUM,OLDNUM,ISZNSNR,NSNROLD)
       END IF
-      DO NE=1,NRTM
-        IF(STF(NE) == ZERO)CYCLE ! on ne retient pas les facettes detruites
-        IF(IGAP == 0)THEN
-          AAA = TZINF+CURV_MAX(NE)
-        ELSE
-          AAA = MARGE+CURV_MAX(NE)+MAX(MIN(GAPMAX,MAX(GAPMIN,BGAPSMX+GAP_M(NE)))+DGAPLOAD,DRAD)
-        ENDIF
-        !il est possible d'ameliorer l'algo en decoupant la facette
-        !en 2(4,3,6,9...) si la facette est grande devant AAA et inclinee
-        M1 = IRECT(1,NE)
-        M2 = IRECT(2,NE)
-        M3 = IRECT(3,NE)
-        M4 = IRECT(4,NE)
-        XX1=X(1,M1)
-        XX2=X(1,M2)
-        XX3=X(1,M3)
-        XX4=X(1,M4)
-        XMAXE=MAX(XX1,XX2,XX3,XX4)
-        XMINE=MIN(XX1,XX2,XX3,XX4)
-        YY1=X(2,M1)
-        YY2=X(2,M2)
-        YY3=X(2,M3)
-        YY4=X(2,M4)
-        YMAXE=MAX(YY1,YY2,YY3,YY4)
-        YMINE=MIN(YY1,YY2,YY3,YY4)
-        ZZ1=X(3,M1)
-        ZZ2=X(3,M2)
-        ZZ3=X(3,M3)
-        ZZ4=X(3,M4)
-        ZMAXE=MAX(ZZ1,ZZ2,ZZ3,ZZ4)
-        ZMINE=MIN(ZZ1,ZZ2,ZZ3,ZZ4)
-        !indice des voxels occupes par la facette
-        IF(NBX>1) THEN
-          IX1=INT(NBX*(XMINE-AAA-XMINB)/(XMAXB-XMINB))
-          IX2=INT(NBX*(XMAXE+AAA-XMINB)/(XMAXB-XMINB))
-        ELSE
-          IX1=-2
-          IX2=1
-        ENDIF
-        IF(NBY>1) THEN
-          IY1=INT(NBY*(YMINE-AAA-YMINB)/(YMAXB-YMINB))
-          IY2=INT(NBY*(YMAXE+AAA-YMINB)/(YMAXB-YMINB))
-        ELSE
-          IY1=-2
-          IY2=1
-        ENDIF
-        IF(NBZ>1) THEN
-          IZ1=INT(NBZ*(ZMINE-AAA-ZMINB)/(ZMAXB-ZMINB))
-          IZ2=INT(NBZ*(ZMAXE+AAA-ZMINB)/(ZMAXB-ZMINB))
-        ELSE
-          IZ1=-2
-          IZ2=1
-        ENDIF
-        IX1=MAX(1,2+MIN(NBX,IX1))
-        IY1=MAX(1,2+MIN(NBY,IY1))
-        IZ1=MAX(1,2+MIN(NBZ,IZ1))
-        IX2=MAX(1,2+MIN(NBX,IX2))
-        IY2=MAX(1,2+MIN(NBY,IY2))
-        IZ2=MAX(1,2+MIN(NBZ,IZ2))
-        DO IZ = IZ1,IZ2
-          DO IY = IY1,IY2
-            DO IX = IX1,IX2
-              VOXEL(IX,IY,IZ) = -HUGE(i)
-            ENDDO
-          ENDDO
-        ENDDO
-      ENDDO
-      CALL MY_BARRIER
 C=======================================================================
 C 1   NODE CLUSTERING
 C=======================================================================
@@ -300,7 +232,7 @@ C=======================================================================
           IIY(I)=MAX(1,2+MIN(NBY,IIY(I)))
           IIZ(I)=MAX(1,2+MIN(NBZ,IIZ(I)))
           FIRST = VOXEL(IIX(I),IIY(I),IIZ(I))
-          IF(FIRST == 0) CYCLE ! No main segment require this cell
+          IF(FIRST < 0) FIRST = 0
           IF(TEST_V0) THEN
 ! count the number of SECONDARY nodes outiside the reduced box
             IF(IIX(I) ==  1    .OR.  IIY(I) ==  1    .OR. IIZ(I) == 1 .AND.
@@ -308,12 +240,17 @@ C=======================================================================
               CPT_VOX0 = CPT_VOX0 +1
             ENDIF
           ENDIF
-          IF(FIRST == -HUGE(i))THEN
+          IF(FIRST == 0)THEN
             !empty cell
             VOXEL(IIX(I),IIY(I),IIZ(I)) = I ! first
+            IF(IIX(I) > 1) THEN
+              IF(VOXEL(IIX(I)-1,IIY(I),IIZ(I)) == 0) THEN 
+                VOXEL(IIX(I)-1,IIY(I),IIZ(I)) = -I ! first
+              ENDIF
+            ENDIF
             NEXT_NOD(I)                 = 0 ! last one
             LAST_NOD(I)                 = 0 ! no last
-          ELSEIF(LAST_NOD(FIRST) == 0)THEN
+          ELSEIF(LAST_NOD(FIRST) == 0) THEN
             !cell containing one node
             !add as next node
             NEXT_NOD(FIRST) = I ! next
@@ -350,7 +287,7 @@ C=======================================================================
           IIZ(NSN+J)=MAX(1,2+MIN(NBZ,IIZ(NSN+J)))
 
           FIRST = VOXEL(IIX(NSN+J),IIY(NSN+J),IIZ(NSN+J))
-          IF(FIRST == 0) CYCLE ! No main segment require this cell
+          IF(FIRST < 0) FIRST = 0
           REMOTE_S_NODE = REMOTE_S_NODE + 1
           LIST_REMOTE_S_NODE( REMOTE_S_NODE ) = J
           IF(TEST_V0) THEN
@@ -361,9 +298,14 @@ C=======================================================================
             ENDIF
           ENDIF
 
-          IF(FIRST == -HUGE(I))THEN
+          IF(FIRST == 0)THEN
             ! empty cell
             VOXEL(IIX(NSN+J),IIY(NSN+J),IIZ(NSN+J)) = NSN+J ! first
+            IF(IIX(NSN+J) > 1) THEN
+              IF(VOXEL(IIX(NSN+J)-1,IIY(NSN+J),IIZ(NSN+J)) == 0) THEN
+                VOXEL(IIX(NSN+J)-1,IIY(NSN+J),IIZ(NSN+J)) = -(NSN+J) ! first
+              ENDIF
+            ENDIF
             NEXT_NOD(NSN+J)     = 0 ! last one
             LAST_NOD(NSN+J)     = 0 ! no last
           ELSEIF(LAST_NOD(FIRST) == 0)THEN
@@ -396,100 +338,9 @@ C=======================================================================
             ENDIF
 !         ENDIF
         ENDDO
-
-C       DO IZ = 1, NBZ+2
-C         DO IY = 1, NBY+2
-C           NEXT = 0                  
-C           DO IX = NBX+2,1,-1
-C             IF(VOXEL(IX,IY,IZ) ==  -HUGE(I)) THEN
-C             ! that voxel will be checked by main segment, but is empty
-C                VOXEL(IX,IY,IZ) = -NEXT
-C             ELSE IF(VOXEL(IX,IY,IZ) > 0) THEN
-C                NEXT = -VOXEL(IX,IY,IZ)
-C             ENDIF
-C           ENDDO
-C         ENDDO
-C       ENDDO
       END IF !ITASK == 0
 
       CALL MY_BARRIER ! Barrier to wait task0 treatment
-
-      DO NE=1,NRTM
-        IF(STF(NE) == ZERO)CYCLE ! on ne retient pas les facettes detruites
-        IF(IGAP == 0)THEN
-          AAA = TZINF+CURV_MAX(NE)
-        ELSE
-          AAA = MARGE+CURV_MAX(NE)+MAX(MIN(GAPMAX,MAX(GAPMIN,BGAPSMX+GAP_M(NE)))+DGAPLOAD,DRAD)
-        ENDIF
-        M1 = IRECT(1,NE)
-        M2 = IRECT(2,NE)
-        M3 = IRECT(3,NE)
-        M4 = IRECT(4,NE)
-        XX1=X(1,M1)
-        XX2=X(1,M2)
-        XX3=X(1,M3)
-        XX4=X(1,M4)
-        XMAXE=MAX(XX1,XX2,XX3,XX4)
-        XMINE=MIN(XX1,XX2,XX3,XX4)
-        YY1=X(2,M1)
-        YY2=X(2,M2)
-        YY3=X(2,M3)
-        YY4=X(2,M4)
-        YMAXE=MAX(YY1,YY2,YY3,YY4)
-        YMINE=MIN(YY1,YY2,YY3,YY4)
-        ZZ1=X(3,M1)
-        ZZ2=X(3,M2)
-        ZZ3=X(3,M3)
-        ZZ4=X(3,M4)
-        ZMAXE=MAX(ZZ1,ZZ2,ZZ3,ZZ4)
-        ZMINE=MIN(ZZ1,ZZ2,ZZ3,ZZ4)
-        IF(NBX>1) THEN
-          IX1=INT(NBX*(XMINE-AAA-XMINB)/(XMAXB-XMINB))
-          IX2=INT(NBX*(XMAXE+AAA-XMINB)/(XMAXB-XMINB))
-        ELSE
-          IX1=-2
-          IX2=1
-        ENDIF
-        IF(NBY>1) THEN
-          IY1=INT(NBY*(YMINE-AAA-YMINB)/(YMAXB-YMINB))
-          IY2=INT(NBY*(YMAXE+AAA-YMINB)/(YMAXB-YMINB))
-        ELSE
-          IY1=-2
-          IY2=1
-        ENDIF
-        IF(NBZ>1) THEN
-          IZ1=INT(NBZ*(ZMINE-AAA-ZMINB)/(ZMAXB-ZMINB))
-          IZ2=INT(NBZ*(ZMAXE+AAA-ZMINB)/(ZMAXB-ZMINB))
-        ELSE
-          IZ1=-2
-          IZ2=1
-        ENDIF
-        IX1=MAX(1,2+MIN(NBX,IX1))
-        IY1=MAX(1,2+MIN(NBY,IY1))
-        IZ1=MAX(1,2+MIN(NBZ,IZ1))
-        IX2=MAX(1,2+MIN(NBX,IX2))
-        IY2=MAX(1,2+MIN(NBY,IY2))
-        IZ2=MAX(1,2+MIN(NBZ,IZ2))
-        DO IZ = IZ1,IZ2
-          DO IY = IY1,IY2
-            DO IX = IX1,IX2
-            IF( VOXEL(IX,IY,IZ) .EQ. -HUGE(I) ) THEN
-            NEXT = 0
-            L = IX + 1
-            DO WHILE( L<= NBX+2 .AND. NEXT == 0 )
-              IF(VOXEL(L,IY,IZ) .NE. -HUGE(I)) THEN
-                 NEXT = VOXEL(L,IY,IZ)
-              ENDIF
-              L = L + 1
-            ENDDO
-            VOXEL(IX,IY,IZ) = -ABS(NEXT)
-            ENDIF
-          ENDDO
-        ENDDO
-      ENDDO
-      ENDDO
-      CALL MY_BARRIER
-
 
       IF(FIRST_TEST(NIN)) THEN
 !During the first sorting, we use the reduced box
@@ -595,23 +446,16 @@ C=======================================================================
         IY2=MAX(1,2+MIN(NBY,IY2))
         IZ2=MAX(1,2+MIN(NBZ,IZ2))
 
-        !nbpelem = 0
-        !nnpelem = 0
-        !nnr0pelem = 0
-        !nnrpelem = 0
-
         DO IZ = IZ1,IZ2
           DO IY = IY1,IY2
-!           DO IX = IX1,IX2
-
-              ! nbpelem = nbpelem + 1
               IX = IX1
               JJ = VOXEL(IX,IY,IZ)
-C             DO WHILE (JJ  < 0)
-C               IX = IX + 1
-C               IF(IX > IX2) EXIT
-C               JJ = VOXEL(IX,IY,IZ)
-C             ENDDO
+              DO WHILE (JJ  == 0)
+                IX = IX + 2
+                IF(IX > IX2) EXIT
+                JJ = VOXEL(IX,IY,IZ)
+              ENDDO
+
               IF (JJ < 0) THEN
                 ! if voxel(iy,iz) is negative, it means that the current voxel is empty, and the next node in the x direction is stored in the negative value of the voxel
                 JJ = -JJ
