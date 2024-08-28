@@ -138,7 +138,8 @@ C-----------------------------------------------
      .   D1X,D1Y,D1Z,D2X,D2Y,D2Z,DD1,DD2,D2,A2,GS
 c provisoire
       INTEGER  LAST_NOD(NSN+NSNR)
-      INTEGER  IX,IY,IZ,NEXT,M1,M2,M3,M4,
+      INTEGER  IX,IY,IZ,NEXT                        
+      INTEGER :: MM(4),
      .         IX1,IY1,IZ1,IX2,IY2,IZ2
       INTEGER,  DIMENSION(:),ALLOCATABLE :: IIX,IIY,IIZ
       my_real
@@ -381,29 +382,29 @@ C=======================================================================
         ENDIF
         !il est possible d'ameliorer l'algo en decoupant la facette
         !en 2(4,3,6,9...) si la facette est grande devant AAA et inclinee
-        M1 = IRECT(1,NE)
-        M2 = IRECT(2,NE)
-        M3 = IRECT(3,NE)
-        M4 = IRECT(4,NE)
+        MM(1) = IRECT(1,NE)
+        MM(2) = IRECT(2,NE)
+        MM(3) = IRECT(3,NE)
+        MM(4) = IRECT(4,NE)
 
-        XX1=X(1,M1)
-        XX2=X(1,M2)
-        XX3=X(1,M3)
-        XX4=X(1,M4)
+        XX1=X(1,MM(1))
+        XX2=X(1,MM(2))
+        XX3=X(1,MM(3))
+        XX4=X(1,MM(4))
         XMAXE=MAX(XX1,XX2,XX3,XX4)
         XMINE=MIN(XX1,XX2,XX3,XX4)
 
-        YY1=X(2,M1)
-        YY2=X(2,M2)
-        YY3=X(2,M3)
-        YY4=X(2,M4)
+        YY1=X(2,MM(1))
+        YY2=X(2,MM(2))
+        YY3=X(2,MM(3))
+        YY4=X(2,MM(4))
         YMAXE=MAX(YY1,YY2,YY3,YY4)
         YMINE=MIN(YY1,YY2,YY3,YY4)
 
-        ZZ1=X(3,M1)
-        ZZ2=X(3,M2)
-        ZZ3=X(3,M3)
-        ZZ4=X(3,M4)
+        ZZ1=X(3,MM(1))
+        ZZ2=X(3,MM(2))
+        ZZ3=X(3,MM(3))
+        ZZ4=X(3,MM(4))
         ZMAXE=MAX(ZZ1,ZZ2,ZZ3,ZZ4)
         ZMINE=MIN(ZZ1,ZZ2,ZZ3,ZZ4)
 
@@ -468,12 +469,7 @@ C=======================================================================
                 !nnpelem = nnpelem + 1
                 IF(JJ<=NSN)THEN
                   NN=NSV(JJ)
-
-                  IF(NN == M1)GOTO 200
-                  IF(NN == M2)GOTO 200
-                  IF(NN == M3)GOTO 200
-                  IF(NN == M4)GOTO 200
-
+                  IF (ANY(MM == NN)) GOTO 200
                   IF(FLAGREMNODE == 2) THEN
                     IF( TAGREMNODE(NSV(JJ)) == 1)GOTO 200
                   ENDIF
@@ -506,12 +502,11 @@ C=======================================================================
                   ENDIF
                 ENDIF
 
-                IF(XS<=XMINE-AAA)GOTO 200
-                IF(XS>=XMAXE+AAA)GOTO 200
-                IF(YS<=YMINE-AAA)GOTO 200
-                IF(YS>=YMAXE+AAA)GOTO 200
-                IF(ZS<=ZMINE-AAA)GOTO 200
-                IF(ZS>=ZMAXE+AAA)GOTO 200
+                IF (XS <= XMINE - AAA .OR. XS >= XMAXE + AAA .OR.  
+     .              YS <= YMINE - AAA .OR. YS >= YMAXE + AAA .OR.  
+     .              ZS <= ZMINE - AAA .OR. ZS >= ZMAXE + AAA) THEN
+                  GOTO 200
+                ENDIF
 
                 !sousestimation de la distance**2 pour elimination de candidats
                 !nnr0pelem = nnr0pelem + 1
@@ -550,7 +545,6 @@ C=======================================================================
                 ENDIF
   200           CONTINUE
 
-                I = JJ
                 JJ = NEXT_NOD(JJ)
 
                 IF(JJ < 0) THEN
