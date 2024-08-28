@@ -246,6 +246,21 @@ C=======================================================================
             IF(IIX(I) > 1) THEN
               IF(VOXEL(IIX(I)-1,IIY(I),IIZ(I)) == 0) THEN 
                 VOXEL(IIX(I)-1,IIY(I),IIZ(I)) = -I ! first
+                IF(IIX(I) > 2) THEN
+                  IF(VOXEL(IIX(I)-2,IIY(I),IIZ(I)) <= 0) THEN 
+                    VOXEL(IIX(I)-2,IIY(I),IIZ(I)) = -I ! first
+                    IF(IIX(I) > 3) THEN
+                      IF(VOXEL(IIX(I)-3,IIY(I),IIZ(I)) <= 0) THEN 
+                        VOXEL(IIX(I)-3,IIY(I),IIZ(I)) = -I ! first
+                        IF(IIX(I) > 4) THEN
+                          IF(VOXEL(IIX(I)-4,IIY(I),IIZ(I)) <= 0) THEN 
+                            VOXEL(IIX(I)-4,IIY(I),IIZ(I)) = -I ! first
+                          ENDIF
+                        ENDIF
+                      ENDIF
+                    ENDIF
+                  ENDIF
+                ENDIF
               ENDIF
             ENDIF
             NEXT_NOD(I)                 = 0 ! last one
@@ -304,8 +319,26 @@ C=======================================================================
             IF(IIX(NSN+J) > 1) THEN
               IF(VOXEL(IIX(NSN+J)-1,IIY(NSN+J),IIZ(NSN+J)) == 0) THEN
                 VOXEL(IIX(NSN+J)-1,IIY(NSN+J),IIZ(NSN+J)) = -(NSN+J) ! first
+                IF(IIX(NSN+J) > 2) THEN
+                  IF(VOXEL(IIX(NSN+J)-2,IIY(NSN+J),IIZ(NSN+J)) <= 0) THEN
+                    VOXEL(IIX(NSN+J)-2,IIY(NSN+J),IIZ(NSN+J)) = -(NSN+J) ! first
+                    IF(IIX(NSN+J) > 3) THEN
+                      IF(VOXEL(IIX(NSN+J)-3,IIY(NSN+J),IIZ(NSN+J)) <= 0) THEN
+                        VOXEL(IIX(NSN+J)-3,IIY(NSN+J),IIZ(NSN+J)) = -(NSN+J) ! first
+                        IF(IIX(NSN+J) > 4) THEN
+                          IF(VOXEL(IIX(NSN+J)-4,IIY(NSN+J),IIZ(NSN+J)) <= 0) THEN
+                            VOXEL(IIX(NSN+J)-4,IIY(NSN+J),IIZ(NSN+J)) = -(NSN+J) ! first
+                          ENDIF
+                        ENDIF
+                      ENDIF
+                    ENDIF
+                  ENDIF
+                ENDIF
               ENDIF
             ENDIF
+
+
+
             NEXT_NOD(NSN+J)     = 0 ! last one
             LAST_NOD(NSN+J)     = 0 ! no last
           ELSEIF(LAST_NOD(FIRST) == 0)THEN
@@ -451,7 +484,7 @@ C=======================================================================
               IX = IX1
               JJ = VOXEL(IX,IY,IZ)
               DO WHILE (JJ  == 0)
-                IX = IX + 2
+                IX = IX + 4
                 IF(IX > IX2) EXIT
                 JJ = VOXEL(IX,IY,IZ)
               ENDDO
