@@ -138,7 +138,7 @@ C-----------------------------------------------
      .   D1X,D1Y,D1Z,D2X,D2Y,D2Z,DD1,DD2,D2,A2,GS
 c provisoire
       INTEGER  LAST_NOD(NSN+NSNR)
-      INTEGER  IX,IY,IZ,NEXT                        
+      INTEGER  IX,IY,IZ,NEXT                         
       INTEGER :: MM(4),
      .         IX1,IY1,IZ1,IX2,IY2,IZ2
       INTEGER,  DIMENSION(:),ALLOCATABLE :: IIX,IIY,IIZ
@@ -465,11 +465,15 @@ C=======================================================================
               ENDIF
 
               DO WHILE(JJ /= 0)
-                DELNOD = 0
+                IF(FLAGREMNODE==2) DELNOD = 0
                 !nnpelem = nnpelem + 1
                 IF(JJ<=NSN)THEN
                   NN=NSV(JJ)
-                  IF (ANY(MM == NN)) GOTO 200
+                  IF (MM(1) == NN) GOTO 200
+                  IF (MM(2) == NN) GOTO 200
+                  IF (MM(3) == NN) GOTO 200
+                  IF (MM(4) == NN) GOTO 200
+
                   IF(FLAGREMNODE == 2) THEN
                     IF( TAGREMNODE(NSV(JJ)) == 1)GOTO 200
                   ENDIF
@@ -502,11 +506,12 @@ C=======================================================================
                   ENDIF
                 ENDIF
 
-                IF (XS <= XMINE - AAA .OR. XS >= XMAXE + AAA .OR.  
-     .              YS <= YMINE - AAA .OR. YS >= YMAXE + AAA .OR.  
-     .              ZS <= ZMINE - AAA .OR. ZS >= ZMAXE + AAA) THEN
-                  GOTO 200
-                ENDIF
+                IF(XS<=XMINE-AAA)GOTO 200
+                IF(XS>=XMAXE+AAA)GOTO 200
+                IF(YS<=YMINE-AAA)GOTO 200
+                IF(YS>=YMAXE+AAA)GOTO 200
+                IF(ZS<=ZMINE-AAA)GOTO 200
+                IF(ZS>=ZMAXE+AAA)GOTO 200
 
                 !sousestimation de la distance**2 pour elimination de candidats
                 !nnr0pelem = nnr0pelem + 1
