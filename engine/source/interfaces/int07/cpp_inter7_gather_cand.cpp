@@ -573,7 +573,7 @@ extern "C"
     {
 
         int i, k_stok, i_stok, n, ne, j;
-        int inacti_l, itied_l, ifq_l;
+//        int inacti_l, itied_l, ifq_l;
         int j_start, j_end;
         const int itype = 7;
         my_real x1[GROUP_SIZE], x2[GROUP_SIZE], x3[GROUP_SIZE], x4[GROUP_SIZE];
@@ -635,14 +635,13 @@ extern "C"
 
 #pragma omp critical
         {
-            i_stok = ii_stok;
-            ii_stok = i_stok + k_stok;
-        }
-
-        inacti_l = inacti;
-        itied_l = itied;
-        ifq_l = ifq;
-
+        i_stok = ii_stok;
+        ii_stok = i_stok + k_stok;
+	std::cout<<"ii_stok = "<<ii_stok<<std::endl;
+	std::cout<<"k_stok = "<<k_stok<<std::endl;
+//        inacti_l = inacti;
+//        itied_l = itied;
+//        ifq_l = ifq;
         for (i = 0; i < j_stok; ++i)
         {
             if (pene[i] != zero)
@@ -655,6 +654,7 @@ extern "C"
                 i_stok++;
             }
         }
+	}
     }
 
 
@@ -1078,22 +1078,33 @@ extern "C"
             } // iz
         } // end of parallel for loop
 
+#pragma omp critical
+	{
+	std::cout<<"local j_stok = "<<j_stok<<std::endl;
+	}
 
+#pragma atomic
+	{
+	ii_stok = ii_stok + j_stok;
+	}
+
+#pragma omp barrier
         if (itask == 0)
         {
-              cand_n= static_cast<int*>(std::malloc((ii_stok_save+j_stok) * sizeof(int)));
+              cand_n= static_cast<int*>(std::malloc((ii_stok) * sizeof(int)));
+	      std::cout<<"CAND_N allocation of size "<<ii_stok<<std::endl;
               if(cand_n == nullptr)
               {
                   std::cout<<"allocation failed"<<std::endl;
               }
-              cand_e= static_cast<int*>(std::malloc((ii_stok_save+j_stok) * sizeof(int)));
+              cand_e= static_cast<int*>(std::malloc((ii_stok) * sizeof(int)));
               //std::cout<<"allocation of size "<<j_stok<<std::endl;
               if(cand_e == nullptr)
               {
                   std::cout<<"allocation failed"<<std::endl;
               }
               // fill with zeros
-              for(int i = ii_stok_save; i < ii_stok_save+j_stok ; ++i)
+              for(int i = ii_stok_save; i < ii_stok ; ++i)
               {
                   cand_n[i] = 0;
                   cand_e[i] = 0;
@@ -1102,9 +1113,12 @@ extern "C"
               {
                   cand_n[i] = cand_n_prev[i];
                   cand_e[i] = cand_e_prev[i];
+		  //std::cout<<"cand_n["<<i<<"]="<<cand_n[i]<<" cand_e["<<i<<"]="<<cand_e[i]<<std::endl;
               }
+	      ii_stok = ii_stok_save;
         }
 #pragma omp barrier
+
 
             int *prov_n_array = new int[GROUP_SIZE];
             int *prov_e_array = new int[GROUP_SIZE];
