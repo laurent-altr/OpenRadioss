@@ -102,6 +102,7 @@ C-----------------------------------------------
             INTER_STRUCT(NIN)%BOX_LIMIT_MAIN(7:12) = ZERO
             NRTM = IPARI(4,NIN)
             IF(.NOT.ALLOCATED(INTER_STRUCT(NIN)%CURV_MAX)) ALLOCATE(INTER_STRUCT(NIN)%CURV_MAX(NRTM))
+            write(6,*) __FILE__,__LINE__,NRTM
         ENDIF
 
         CALL MY_BARRIER()

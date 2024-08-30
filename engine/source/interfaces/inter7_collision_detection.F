@@ -118,8 +118,8 @@ C     REAL
       INTEGER NBX,NBY,NBZ ! number of cells in each direction
       INTEGER (KIND=8) :: NBX8,NBY8,NBZ8,RES8,LVOXEL8
       INTEGER :: SIREM, SXREM
-      INTEGER(C_INT), POINTER :: C_CAND_E(:), C_CAND_N(:)
-      TYPE(C_PTR) :: PTR_CAND_E, PTR_CAND_N
+      INTEGER(C_INT), POINTER,SAVE :: C_CAND_E(:), C_CAND_N(:)
+      TYPE(C_PTR), SAVE :: PTR_CAND_E, PTR_CAND_N
       INTEGER :: NCONTACT_SAVE
 
 C-----------------------------------------------
@@ -321,16 +321,18 @@ c       print_address(stfn, std::to_string(__LINE__)+" stfn");
          ! check the address of the arrays C_CAND_N and C_CAND_E
          ! write the pointers to the arrays C_CAND_N and C_CAND_E
        ! write(6,*) "ASSOCIATED(C_CAND_N)", ASSOCIATED(C_CAND_N)
+         CALL MY_BARRIER
 
          IF(ITASK==0)  THEN
         if(ii_stok > 0) then
          CALL c_f_pointer(PTR_CAND_N, C_CAND_N,[ii_stok])
          call c_f_pointer(PTR_CAND_E, C_CAND_E,[ii_stok])
-          !write(6,*) "C_CAND_E(1)=" , C_CAND_E(1), "C_CAND_N(1)=" , C_CAND_N(1)
+           write(6,*) "C_CAND_E(1)=" , C_CAND_E(1), "C_CAND_N(1)=" , C_CAND_N(1)
 
 
-       !    write(6,*) "Size of cand_n", size(cand_n),"II_STOK"       ,II_STOK,"size(cande)",size(cand_e) 
+            write(6,*) "Size of cand_n", size(cand_n),"II_STOK"       ,II_STOK,"size(cande)",size(cand_e) 
               IF(II_STOK > NCONTACT_SAVE) THEN
+                write(6,*) "II_STOK", II_STOK, "NCONTACT_SAVE", NCONTACT_SAVE
                 NCONTACT = II_STOK
                 call realloc(cand_n, ncontact_save, ncontact)
                 call realloc(cand_e, ncontact_save, ncontact)
@@ -348,7 +350,6 @@ c       print_address(stfn, std::to_string(__LINE__)+" stfn");
               if(itied /= 0) cand_f(8*(i-1):8*i)=zero
           enddo
       ENDIF
-
           call free_c_int(PTR_CAND_N)
           call free_c_int(PTR_CAND_E)
 
@@ -358,6 +359,8 @@ c           ENDDO
             IF(ALLOCATED(NEXT_NOD)) DEALLOCATE(NEXT_NOD)
             IF(ALLOCATED(PREV_REMOTE_NUMBER)) DEALLOCATE(PREV_REMOTE_NUMBER)
       ENDIF
+      CALL MY_BARRIER
+
 C
       RETURN
       END

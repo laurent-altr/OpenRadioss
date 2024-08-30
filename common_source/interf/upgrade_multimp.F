@@ -1767,9 +1767,10 @@ C Set Global parameters
 
 C=======================================================================
       IF (ITY == 7)THEN
-C       write(6,*) __FILE__,__LINE__,"!!!! REALLOCATION !!!!",IFQ,INTBUF_TAB%S_IFPEN,NEW_SIZE
+        write(6,*) __FILE__,__LINE__,"!!!! REALLOCATION!!!!",INTBUF_TAB%S_CAND_E,NEW_SIZE
 C=======================================================================
         ! CAND_E
+
         CALL REALLOC(INTBUF_TAB%CAND_E,INTBUF_TAB%S_CAND_E,NEW_SIZE)
         INTBUF_TAB%S_CAND_E = NEW_SIZE                         
         ! CAND_N
