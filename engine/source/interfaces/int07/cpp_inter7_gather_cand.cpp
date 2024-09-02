@@ -26,16 +26,15 @@ void print_address(T &var, std::string name)
 template <typename T>
 void print_address(T *var, std::string name)
 {
-    std::cout <<  name << "=" << reinterpret_cast<std::uintptr_t>(var) << std::endl; 
+    std::cout << name << "=" << reinterpret_cast<std::uintptr_t>(var) << std::endl;
 }
 
 extern "C"
 {
-    void fortran_integer_realloc(int* a, int *oldsize, int * newsize);
-    void fortran_real_realloc(my_real* a, int *oldsize, int* newsize);
+    void fortran_integer_realloc(int *a, int *oldsize, int *newsize);
+    void fortran_real_realloc(my_real *a, int *oldsize, int *newsize);
 
-
-    void free_c_int(int *& a)
+    void free_c_int(int *&a)
     {
         std::free(a);
         a = nullptr;
@@ -559,8 +558,6 @@ extern "C"
         }
     }
 
-
-
     void cpp_inter7_filter_cand(
         int j_stok, const int *irect, const my_real *x, const int *nsv, int &ii_stok,
         int *cand_n, int *cand_e, int mulnsn, my_real margin,
@@ -573,7 +570,7 @@ extern "C"
     {
 
         int i, k_stok, i_stok, n, ne, j;
-//        int inacti_l, itied_l, ifq_l;
+        //        int inacti_l, itied_l, ifq_l;
         int j_start, j_end;
         const int itype = 7;
         my_real x1[GROUP_SIZE], x2[GROUP_SIZE], x3[GROUP_SIZE], x4[GROUP_SIZE];
@@ -582,9 +579,6 @@ extern "C"
         my_real xi[GROUP_SIZE], yi[GROUP_SIZE], zi[GROUP_SIZE];
         my_real pene[GROUP_SIZE], gapv[GROUP_SIZE];
         int ix1[GROUP_SIZE], ix2[GROUP_SIZE], ix3[GROUP_SIZE], ix4[GROUP_SIZE];
-
-
-
 
         cpp_inter7_gather_cand(j_stok, x, irect, nsv, prov_e, prov_n, igap, gap, gapv,
                                gap_s, gap_m, curv_max, gapmax, gapmin, dgapload, drad,
@@ -635,143 +629,141 @@ extern "C"
 
 #pragma omp critical
         {
-        i_stok = ii_stok;
-        ii_stok = i_stok + k_stok;
-//	std::cout<<"ii_stok = "<<ii_stok<<std::endl;
-//	std::cout<<"k_stok = "<<k_stok<<std::endl;
-//        inacti_l = inacti;
-//        itied_l = itied;
-//        ifq_l = ifq;
-        for (i = 0; i < j_stok; ++i)
-        {
-            if (pene[i] != zero)
+            i_stok = ii_stok;
+            ii_stok = i_stok + k_stok;
+            //	std::cout<<"ii_stok = "<<ii_stok<<std::endl;
+            //	std::cout<<"k_stok = "<<k_stok<<std::endl;
+            //        inacti_l = inacti;
+            //        itied_l = itied;
+            //        ifq_l = ifq;
+            for (i = 0; i < j_stok; ++i)
             {
-                //print_address(cand_n[i_stok], std::to_string(__LINE__)+" cand_n");
-                cand_n[i_stok] = prov_n[i];
-                cand_e[i_stok] = prov_e[i] + eshift;
-                //std::cout<<"cand_n["<<i_stok<<"] = "<<cand_n[i_stok]<<"  cand_e["<<i_stok<<"] = "<<cand_e[i_stok]<<std::endl;
+                if (pene[i] != zero)
+                {
+                    // print_address(cand_n[i_stok], std::to_string(__LINE__)+" cand_n");
+                    cand_n[i_stok] = prov_n[i];
+                    cand_e[i_stok] = prov_e[i] + eshift;
+                    // std::cout<<"cand_n["<<i_stok<<"] = "<<cand_n[i_stok]<<"  cand_e["<<i_stok<<"] = "<<cand_e[i_stok]<<std::endl;
 
-                i_stok++;
+                    i_stok++;
+                }
             }
         }
-	}
     }
 
-
-
-          void cpp_inter7_candidate_pairs(
-                                            int nsn          ,
-                                            int * oldnum       ,
-                                            int nsnr         ,
-                                            int isznsnr      ,
-                                            int * i_mem        ,
-                                            int * irect        ,
-                                            my_real *x            ,
-                                            my_real *stf          ,
-                                            my_real *stfn         ,
-                                            my_real *xyzm         ,
-                                            int * nsv          ,
-                                            int &ii_stok      ,
-                                            int *&cand_n       ,
-                                            int eshift       ,
-                                            int *& cand_e       ,
-                                            int * ncontact       ,
-                                            my_real tzinf        ,
-                                             my_real * gap_s_l      ,
-                                             my_real * gap_m_l      ,
-                                            int *voxel        ,
-                                            int nbx          ,
-                                            int nby          ,
-                                            int nbz          ,
-                                            int inacti       ,
-                                            int ifq          ,
-                                            int *cand_a       ,
-                                            int nrtm         ,
-                                            int nsnrold      ,
-                                            int igap         ,
-                                            my_real gap          ,
-                                            my_real * gap_s        ,
-                                            my_real *gap_m        ,
-                                            my_real gapmin       ,
-                                            my_real gapmax       ,
-                                            my_real marge        ,
-                                             my_real *curv_max     ,
-                                            int itask        ,
-                                            my_real bgapsmx      ,
-                                            int s_kremnod    ,
-                                            int *kremnod      ,
-                                            int s_remnod     ,
-                                            int *remnod       ,
-                                            int flagremnode  ,
-                                            my_real drad         ,
-                                            int itied        ,
-                                            my_real dgapload     ,
-                                            int s_cand_a     ,
-                                            int total_nb_nrtm,
-                                            int numnod       ,
-                                             my_real *xrem         ,
-                                            int s_xrem       ,
-                                             int *irem         ,
-                                            int s_irem       ,
-                                            int *next_nod    ,
-                                            int *cand_n_prev,
-                                            int *cand_e_prev) 
+    void cpp_inter7_candidate_pairs(
+        int nsn,
+        int *oldnum,
+        int nsnr,
+        int isznsnr,
+        int *i_mem,
+        int *irect,
+        my_real *x,
+        my_real *stf,
+        my_real *stfn,
+        my_real *xyzm,
+        int *nsv,
+        int &ii_stok,
+        int *&cand_n,
+        int eshift,
+        int *&cand_e,
+        int *ncontact,
+        my_real tzinf,
+        my_real *gap_s_l,
+        my_real *gap_m_l,
+        int *voxel,
+        int nbx,
+        int nby,
+        int nbz,
+        int inacti,
+        int ifq,
+        int *cand_a,
+        int nrtm,
+        int nsnrold,
+        int igap,
+        my_real gap,
+        my_real *gap_s,
+        my_real *gap_m,
+        my_real gapmin,
+        my_real gapmax,
+        my_real marge,
+        my_real *curv_max,
+        int itask,
+        my_real bgapsmx,
+        int s_kremnod,
+        int *kremnod,
+        int s_remnod,
+        int *remnod,
+        int flagremnode,
+        my_real drad,
+        int itied,
+        my_real dgapload,
+        int s_cand_a,
+        int total_nb_nrtm,
+        int numnod,
+        my_real *xrem,
+        int s_xrem,
+        int *irem,
+        int s_irem,
+        int *next_nod,
+        int *cand_n_prev,
+        int *cand_e_prev)
 
     {
-        //print address of all arguments
-       // print_address(nsn,"LOC(nsn)");
-       // print_address(oldnum,"LOC(oldnum)");
-       // print_address(nsnr,"LOC(nsnr)");
-       // print_address(isznsnr,"LOC(isznsnr)");
-       // print_address(i_mem,"LOC(i_mem)");
-       // print_address(irect,"LOC(irect)");
-       // print_address(x,"LOC(x)");
-       // print_address(stf,"LOC(stf)");
-       // print_address(stfn,"LOC(stfn)");
-       // print_address(xyzm,"LOC(xyzm)");
-       // print_address(nsv,"LOC(nsv)");
-       // print_address(ii_stok,"LOC(ii_stok)");
-       // print_address(cand_n,"LOC(cand_e)");
-       // print_address(eshift,"LOC(eshift)");
-       // print_address(cand_e,"LOC(cand_e)");
-       // print_address(ncontact,"LOC(ncontact)");
-       // print_address(tzinf,"LOC(tzinf)");
-       // print_address(gap_s_l,"LOC(gap_s_l)");
-       // print_address(gap_m_l,"LOC(gap_m_l)");
-       // print_address(voxel,"LOC(voxel)");
-       // print_address(nbx,"LOC(nbx)");
-       // print_address(nby,"LOC(nby)");
-       // print_address(nbz,"LOC(nbz)");
-       // print_address(inacti,"LOC(inacti)");
-       // print_address(ifq,"LOC(ifq)");
-       // print_address(cand_a,"LOC(cand_a)");
-       // print_address(nrtm,"LOC(nrtm)");
-       // print_address(nsnrold,"LOC(nsnrold)");
-       // print_address(igap,"LOC(igap)");
-       // print_address(gap,"LOC(gap)");
-       // print_address(gap_s,"LOC(gap_s)");
-       // print_address(gap_m,"LOC(gap_m)");
-       // print_address(gapmin,"LOC(gapmin)");
-       // print_address(gapmax,"LOC(gapmax)");
-       // print_address(marge,"LOC(marge)");
-       // print_address(curv_max,"LOC(curv_max)");
-       // print_address(itask,"LOC(itask)");
-       // print_address(bgapsmx,"LOC(bgapsmx)");
-       // print_address(s_kremnod,"LOC(s_kremnod)");
-       // print_address(kremnod,"LOC(kremnod)");
-       // print_address(s_remnod,"LOC(s_remnod)");
-       // print_address(remnod,"LOC(remnod)");
-       // print_address(flagremnode,"LOC(flagremnode)");
-       // print_address(drad,"LOC(drad)");
-       // print_address(itied,"LOC(itied)");
-       // print_address(dgapload,"LOC(dgapload)");
-       // print_address(s_cand_a,"LOC(s_cand_a)");
-       // print_address(total_nb_nrtm,"LOC(total_nb_nrtm)");
-       // print_address(numnod,"LOC(numnod)");
-       // print_address(xrem,"LOC(xrem)");
-       // print_address(s_xrem,"LOC(s_xrem)");
-       // print_address(irem,"LOC(irem)");
-       // print_address(next_nod,"LOC(next_nod)");
+        // print address of all arguments
+        // print_address(nsn,"LOC(nsn)");
+        // print_address(oldnum,"LOC(oldnum)");
+        // print_address(nsnr,"LOC(nsnr)");
+        // print_address(isznsnr,"LOC(isznsnr)");
+        // print_address(i_mem,"LOC(i_mem)");
+        // print_address(irect,"LOC(irect)");
+        // print_address(x,"LOC(x)");
+        // print_address(stf,"LOC(stf)");
+        // print_address(stfn,"LOC(stfn)");
+        // print_address(xyzm,"LOC(xyzm)");
+        // print_address(nsv,"LOC(nsv)");
+        // print_address(ii_stok,"LOC(ii_stok)");
+        // print_address(cand_n,"LOC(cand_e)");
+        // print_address(eshift,"LOC(eshift)");
+        // print_address(cand_e,"LOC(cand_e)");
+        // print_address(ncontact,"LOC(ncontact)");
+        // print_address(tzinf,"LOC(tzinf)");
+        // print_address(gap_s_l,"LOC(gap_s_l)");
+        // print_address(gap_m_l,"LOC(gap_m_l)");
+        // print_address(voxel,"LOC(voxel)");
+        // print_address(nbx,"LOC(nbx)");
+        // print_address(nby,"LOC(nby)");
+        // print_address(nbz,"LOC(nbz)");
+        // print_address(inacti,"LOC(inacti)");
+        // print_address(ifq,"LOC(ifq)");
+        // print_address(cand_a,"LOC(cand_a)");
+        // print_address(nrtm,"LOC(nrtm)");
+        // print_address(nsnrold,"LOC(nsnrold)");
+        // print_address(igap,"LOC(igap)");
+        // print_address(gap,"LOC(gap)");
+        // print_address(gap_s,"LOC(gap_s)");
+        // print_address(gap_m,"LOC(gap_m)");
+        // print_address(gapmin,"LOC(gapmin)");
+        // print_address(gapmax,"LOC(gapmax)");
+        // print_address(marge,"LOC(marge)");
+        // print_address(curv_max,"LOC(curv_max)");
+        // print_address(itask,"LOC(itask)");
+        // print_address(bgapsmx,"LOC(bgapsmx)");
+        // print_address(s_kremnod,"LOC(s_kremnod)");
+        // print_address(kremnod,"LOC(kremnod)");
+        // print_address(s_remnod,"LOC(s_remnod)");
+        // print_address(remnod,"LOC(remnod)");
+        // print_address(flagremnode,"LOC(flagremnode)");
+        // print_address(drad,"LOC(drad)");
+        // print_address(itied,"LOC(itied)");
+        // print_address(dgapload,"LOC(dgapload)");
+        // print_address(s_cand_a,"LOC(s_cand_a)");
+        // print_address(total_nb_nrtm,"LOC(total_nb_nrtm)");
+        // print_address(numnod,"LOC(numnod)");
+        // print_address(xrem,"LOC(xrem)");
+        // print_address(s_xrem,"LOC(s_xrem)");
+        // print_address(irem,"LOC(irem)");
+        // print_address(next_nod,"LOC(next_nod)");
 
         *i_mem = 0;
         int ncontact_save = *ncontact;
@@ -803,7 +795,7 @@ extern "C"
         };
 
         // start an open single section
-        int *list_nb_voxel_on = nullptr; 
+        int *list_nb_voxel_on = nullptr;
         int nb_voxel_on = 0;
 
 #pragma omp barrier
@@ -836,7 +828,6 @@ extern "C"
                     if (x[2 + (j - 1) * 3] > zmax)
                         continue;
 
-
                     iix = int(nbx * (x[0 + (j - 1) * 3] - xminb) / (xmaxb - xminb));
                     iiy = int(nby * (x[1 + (j - 1) * 3] - yminb) / (ymaxb - yminb));
                     iiz = int(nbz * (x[2 + (j - 1) * 3] - zminb) / (zmaxb - zminb));
@@ -844,7 +835,7 @@ extern "C"
                     iiy = std::max(1, 2 + std::min(nby, iiy));
                     iiz = std::max(1, 2 + std::min(nbz, iiz));
 
-                   //std::cout<<"iix="<<iix<<" iiy="<<iiy<<" iiz="<<iiz<<std::endl;
+                    // std::cout<<"iix="<<iix<<" iiy="<<iiy<<" iiz="<<iiz<<std::endl;
 
                     int first = voxel[to1D(iix, iiy, iiz)];
                     if (first == 0)
@@ -888,9 +879,9 @@ extern "C"
                     int iix = int(nbx * (xrem[0 + (i - 1) * s_xrem] - xminb) / (xmaxb - xminb));
                     int iiy = int(nby * (xrem[1 + (i - 1) * s_xrem] - yminb) / (ymaxb - yminb));
                     int iiz = int(nbz * (xrem[2 + (i - 1) * s_xrem] - zminb) / (zmaxb - zminb));
-                    iix = std::max(1,2+std::min(nbx, iix));
-                    iiy = std::max(1,2+std::min(nby, iiy));
-                    iiz = std::max(1,2+std::min(nbz, iiz));
+                    iix = std::max(1, 2 + std::min(nbx, iix));
+                    iiy = std::max(1, 2 + std::min(nby, iiy));
+                    iiz = std::max(1, 2 + std::min(nbz, iiz));
                     int first = voxel[to1D(iix, iiy, iiz)];
                     int j = nsn + i;
                     if (first == 0)
@@ -924,10 +915,9 @@ extern "C"
             }
         } // end of single section
 
-
-        std::vector<bool> tag_remnode; 
+        std::vector<bool> tag_remnode;
         // allocate a vector of bool of size numnod, initialized to false
-        if(flagremnode == 2)
+        if (flagremnode == 2)
         {
             tag_remnode.resize(numnod, false);
         }
@@ -945,15 +935,14 @@ extern "C"
                 continue; // the segment is deleted/eroded
                           //            if(stf(ne) == zero)cycle ! the segment is deleted/eroded
 
-            if(flagremnode == 2)
+            if (flagremnode == 2)
             {
-                const int k = kremnod[2 * ne]; 
-                const int l = kremnod[2 * ne + 1]; 
-                for(int i = k; i < l; ++i)
+                const int k = kremnod[2 * ne];
+                const int l = kremnod[2 * ne + 1];
+                for (int i = k; i < l; ++i)
                 {
-                    tag_remnode[remnod[i]-1] = true;
+                    tag_remnode[remnod[i] - 1] = true;
                 }
-                
             }
             my_real aaa = zero;
             if (igap == 0)
@@ -1006,7 +995,7 @@ extern "C"
             iy2 = std::max(1, 2 + std::min(nby, iy2));
             iz2 = std::max(1, 2 + std::min(nbz, iz2));
 
-            //std::cout<<"ix1 = "<<ix1<<" ix2 = "<<ix2<<" iy1 = "<<iy1<<" iy2 = "<<iy2<<" iz1 = "<<iz1<<" iz2 = "<<iz2<<std::endl;
+            // std::cout<<"ix1 = "<<ix1<<" ix2 = "<<ix2<<" iy1 = "<<iy1<<" iy2 = "<<iy2<<" iz1 = "<<iz1<<" iz2 = "<<iz2<<std::endl;
             for (int iz = iz1; iz <= iz2; ++iz)
             {
                 for (int iy = iy1; iy <= iy2; ++iy)
@@ -1014,10 +1003,10 @@ extern "C"
                     for (int ix = ix1; ix <= ix2; ++ix)
                     {
                         int jj = voxel[to1D(ix, iy, iz)];
-                        //std::cout<<"ne = "<<ne<<" jj = "<<jj<<std::endl;
+                        // std::cout<<"ne = "<<ne<<" jj = "<<jj<<std::endl;
                         for (; jj != 0; jj = next_nod[jj - 1])
                         {
-                           //std::cout<<"ne = "<<ne<<" jj = "<<jj<<std::endl;
+                            // std::cout<<"ne = "<<ne<<" jj = "<<jj<<std::endl;
 
                             my_real xs = zero;
                             my_real ys = zero;
@@ -1034,14 +1023,13 @@ extern "C"
                                 if (nn == m4)
                                     continue;
 
-                                if(flagremnode == 2)
+                                if (flagremnode == 2)
                                 {
-                                    if(tag_remnode[nsv[jj-1]] == true)
+                                    if (tag_remnode[nsv[jj - 1]] == true)
                                     {
                                         continue;
                                     }
                                 }
-
 
                                 xs = x[0 + (nn - 1) * 3];
                                 ys = x[1 + (nn - 1) * 3];
@@ -1058,33 +1046,31 @@ extern "C"
                                 ys = xrem[1 + (j - 1) * s_xrem];
                                 zs = xrem[2 + (j - 1) * s_xrem];
 
-                                if(flagremnode == 2)
+                                if (flagremnode == 2)
                                 {
-                                    const int nn = irem[0 + (j- 1) * s_irem];
+                                    const int nn = irem[0 + (j - 1) * s_irem];
                                     const int k = kremnod[2 * (ne - 1)];
                                     const int l = kremnod[2 * (ne - 1) + 1];
                                     bool is_found = false;
-                                    for(int m = k; m < l; ++m)
+                                    for (int m = k; m < l; ++m)
                                     {
                                         const int uid = -irem[1 + (j - 1) * s_irem];
-                                        if(remnod[m] == uid)
+                                        if (remnod[m] == uid)
                                         {
                                             is_found = true;
                                             break;
                                         }
                                     }
-                                    if(is_found)
+                                    if (is_found)
                                     {
                                         continue;
                                     }
-
                                 }
 
                                 if (igap != 0)
                                 {
                                     aaa = marge + curv_max[ne] + std::max(std::min(gapmax, std::max(gapmin, xrem[8 + (j - 1) * s_xrem] + gap_m[ne])) + dgapload, drad);
                                 }
-    
                             }
 
                             if (xs <= xmine - aaa)
@@ -1117,91 +1103,87 @@ extern "C"
                                     continue;
                             }
                             j_stok++;
-                            //std::cout<<"j_stok = "<<j_stok<<" jj = "<<jj<<" ne = "<<ne<<std::endl;                                                    
+                            // std::cout<<"j_stok = "<<j_stok<<" jj = "<<jj<<" ne = "<<ne<<std::endl;
                             prov_n.push_back(jj);
-                            prov_e.push_back(ne+1);
+                            prov_e.push_back(ne + 1);
                         } // jj
                     } // ix
                 } // iy
             } // iz
-            if(flagremnode == 2) 
+            if (flagremnode == 2)
             {
-                const int k = kremnod[2 * ne]; 
-                const int l = kremnod[2 * ne + 1]; 
-                for(int i = k; i < l; ++i)
+                const int k = kremnod[2 * ne];
+                const int l = kremnod[2 * ne + 1];
+                for (int i = k; i < l; ++i)
                 {
-                    tag_remnode[remnod[i]-1] = false;
+                    tag_remnode[remnod[i] - 1] = false;
                 }
             }
         } // end of parallel for loop
 
-
 #pragma atomic
-	{
-	ii_stok = ii_stok + j_stok;
-	}
+        {
+            ii_stok = ii_stok + j_stok;
+        }
 
 #pragma omp barrier
         if (itask == 0)
         {
-              cand_n= static_cast<int*>(std::malloc((ii_stok) * sizeof(int)));
-              if(cand_n == nullptr)
-              {
-                  std::cout<<"allocation failed"<<std::endl;
-              }
-              cand_e= static_cast<int*>(std::malloc((ii_stok) * sizeof(int)));
-              //std::cout<<"allocation of size "<<j_stok<<std::endl;
-              if(cand_e == nullptr)
-              {
-                  std::cout<<"allocation failed"<<std::endl;
-              }
-              // fill with zeros
-              for(int i = ii_stok_save; i < ii_stok ; ++i)
-              {
-                  cand_n[i] = 0;
-                  cand_e[i] = 0;
-              }
-              for(int i = 0 ; i < ii_stok_save ; ++i)
-              {
-                  cand_n[i] = cand_n_prev[i];
-                  cand_e[i] = cand_e_prev[i];
-		  //std::cout<<"cand_n["<<i<<"]="<<cand_n[i]<<" cand_e["<<i<<"]="<<cand_e[i]<<std::endl;
-              }
-	      ii_stok = ii_stok_save;
+            cand_n = static_cast<int *>(std::malloc((ii_stok) * sizeof(int)));
+            if (cand_n == nullptr)
+            {
+                std::cout << "allocation failed" << std::endl;
+            }
+            cand_e = static_cast<int *>(std::malloc((ii_stok) * sizeof(int)));
+            // std::cout<<"allocation of size "<<j_stok<<std::endl;
+            if (cand_e == nullptr)
+            {
+                std::cout << "allocation failed" << std::endl;
+            }
+            // fill with zeros
+            for (int i = ii_stok_save; i < ii_stok; ++i)
+            {
+                cand_n[i] = 0;
+                cand_e[i] = 0;
+            }
+            for (int i = 0; i < ii_stok_save; ++i)
+            {
+                cand_n[i] = cand_n_prev[i];
+                cand_e[i] = cand_e_prev[i];
+                // std::cout<<"cand_n["<<i<<"]="<<cand_n[i]<<" cand_e["<<i<<"]="<<cand_e[i]<<std::endl;
+            }
+            ii_stok = ii_stok_save;
         }
 #pragma omp barrier
 
+        int *prov_n_array = new int[GROUP_SIZE];
+        int *prov_e_array = new int[GROUP_SIZE];
 
-            int *prov_n_array = new int[GROUP_SIZE];
-            int *prov_e_array = new int[GROUP_SIZE];
-
-
-
-        for(int i = 0 ; i < j_stok ; i+= GROUP_SIZE)
+        for (int i = 0; i < j_stok; i += GROUP_SIZE)
         {
-//    void cpp_inter7_filter_cand(
-//        int j_stok, const int *irect, const my_real *x, const int *nsv, int &ii_stok,
-//        int *cand_n, int *cand_e, int mulnsn, my_real margin,
-//        int *prov_n, int *prov_e, int eshift, int inacti,
-//        int ifq, int *cand_a, my_real *cand_p, int *ifpen, int nsn,
-//        const int *oldnum, int nsnrold, int igap, my_real gap, const my_real *gap_s,
-//        const my_real *gap_m, my_real gapmin, my_real gapmax, const my_real *curv_max,
-//        const my_real *gap_s_l, const my_real *gap_m_l, my_real drad, int itied,
-//        my_real *cand_f, my_real dgapload, int nsnr, const my_real *xrem, int s_xrem)
-//    {
-            //copy prov_n.data into int * array
+            //    void cpp_inter7_filter_cand(
+            //        int j_stok, const int *irect, const my_real *x, const int *nsv, int &ii_stok,
+            //        int *cand_n, int *cand_e, int mulnsn, my_real margin,
+            //        int *prov_n, int *prov_e, int eshift, int inacti,
+            //        int ifq, int *cand_a, my_real *cand_p, int *ifpen, int nsn,
+            //        const int *oldnum, int nsnrold, int igap, my_real gap, const my_real *gap_s,
+            //        const my_real *gap_m, my_real gapmin, my_real gapmax, const my_real *curv_max,
+            //        const my_real *gap_s_l, const my_real *gap_m_l, my_real drad, int itied,
+            //        my_real *cand_f, my_real dgapload, int nsnr, const my_real *xrem, int s_xrem)
+            //    {
+            // copy prov_n.data into int * array
             int j = std::min(GROUP_SIZE, j_stok - i);
             // points to prov_n[i]
-            for(int k = 0 ; k < j ; ++k)
+            for (int k = 0; k < j; ++k)
             {
-                prov_n_array[k] = prov_n[i+k];
-                prov_e_array[k] = prov_e[i+k];
+                prov_n_array[k] = prov_n[i + k];
+                prov_e_array[k] = prov_e[i + k];
             }
             cpp_inter7_filter_cand(
                 j, irect, x, nsv, ii_stok,
                 cand_n, cand_e, *ncontact, marge,
                 prov_n_array, prov_e_array, eshift, inacti,
-                ifq, cand_a,  nsn,
+                ifq, cand_a, nsn,
                 oldnum, nsnrold, igap, gap, gap_s,
                 gap_m, gapmin, gapmax, curv_max,
                 gap_s_l, gap_m_l, drad, itied,
@@ -1209,24 +1191,23 @@ extern "C"
                 nsnr, xrem, s_xrem);
         }
 
-//        print_address(cand_n, std::to_string(__LINE__)+" cand_n");
+        //        print_address(cand_n, std::to_string(__LINE__)+" cand_n");
 
         delete[] prov_n_array;
         delete[] prov_e_array;
 
-//#pragma omp single
-//        {
-//            for(int i = 0 ; i < ii_stok ; ++i)
-//            {
-//                std::cout<<"cand_n["<<i<<"] = "<<cand_n[i]<<" cand_e["<<i<<"] = "<<cand_e[i]<<std::endl;
-//            }
-//        }
-
+        // #pragma omp single
+        //         {
+        //             for(int i = 0 ; i < ii_stok ; ++i)
+        //             {
+        //                 std::cout<<"cand_n["<<i<<"] = "<<cand_n[i]<<" cand_e["<<i<<"] = "<<cand_e[i]<<std::endl;
+        //             }
+        //         }
 
 #pragma omp barrier
-        if (total_nb_nrtm >0 && nb_voxel_on > 0 && list_nb_voxel_on != nullptr)
-        {    // flush to 0
-            for(int jj = 0 ; jj < nb_voxel_on ; ++jj)
+        if (total_nb_nrtm > 0 && nb_voxel_on > 0 && list_nb_voxel_on != nullptr)
+        { // flush to 0
+            for (int jj = 0; jj < nb_voxel_on; ++jj)
             {
                 int j = list_nb_voxel_on[jj];
                 voxel[j] = 0;
@@ -1234,11 +1215,9 @@ extern "C"
             delete[] list_nb_voxel_on;
         }
 
-//        print_address(cand_n,"LOC(cand_n)");
-//        print_address(cand_e,"LOC(cand_e)");
-//          if(ii_stok > 0) std::cout<<"cand_e[0] = "<<cand_e[0]<<" cand_n[0] = "<<cand_n[0]<<std::endl;
-
+        //        print_address(cand_n,"LOC(cand_n)");
+        //        print_address(cand_e,"LOC(cand_e)");
+        //          if(ii_stok > 0) std::cout<<"cand_e[0] = "<<cand_e[0]<<" cand_n[0] = "<<cand_n[0]<<std::endl;
 
     } // end of cpp_inter7_candidate_pairs
-
 }
