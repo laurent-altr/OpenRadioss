@@ -245,11 +245,6 @@ C
         IF (IMONM > 0 .AND. ITASK == 0) CALL STARTIME(30,1)
 C
         IF(GOT_PREVIEW == 1) THEN
-            IF(INTER_STRUCT(NIN)%SIZE_CAND_A > 0) THEN
-                write(6,*) "SIZE(CAND_A) ", INTER_STRUCT(NIN)%SIZE_CAND_A
-                write(6,*) "CAND_A(end) ", INTER_STRUCT(NIN)%CAND_A(INTER_STRUCT(NIN)%SIZE_CAND_A)
-            ENDIF
-            write(6,*) "ALLOCATED(CAND_A) ", ALLOCATED(INTER_STRUCT(NIN)%CAND_A)
             CALL INTER7_COLLISION_DETECTION(
      1      X      ,INTBUF_TAB%IRECTM,INTBUF_TAB%NSV,INACTI,INTBUF_TAB%CAND_P,
      2      NMN_G  ,NRTM,NSN,INTBUF_TAB%CAND_E,INTBUF_TAB%CAND_N,
@@ -269,8 +264,6 @@ C
             IF(INTBUF_TAB%S_CAND_N < INTBUF_TAB%I_STOK(1)) THEN
               ! arrays have been reallocated within INTER7_COLLISION_DETECTION, without margin
               ! we update their size, and reallocate with a margin
-              write(6,*) "Old size of arrays: / ncontact ", INTBUF_TAB%S_CAND_N, INTBUF_TAB%NCONTACT
-              write(6,*) "istok(1) ", INTBUF_TAB%I_STOK(1)
               INTBUF_TAB%S_CAND_N = INTBUF_TAB%NCONTACT
               INTBUF_TAB%S_CAND_E = INTBUF_TAB%NCONTACT
               IF(INACTI == 5 .OR. INACTI == 6 .OR. INACTI == 7)  INTBUF_TAB%S_CAND_P = INTBUF_TAB%NCONTACT
@@ -280,10 +273,7 @@ C
               !NCONT * MULTIMP = old size of arrays
               !                              NEW contact        = old    
               !Compute MULTIMP such as INTBUF_TAB(NIN)%NCONTACT = NCONT * MULTIMP
-               write(6,*) "old multiple: ", MULTIMP 
-               MULTIMP = ceiling(dble(INTBUF_TAB%NCONTACT) / dble(NCONT)) + 1 
-               write(6,*) "new multiple: ", MULTIMP
-              write(6,*) "New size of arrays: ", MULTIMP * NCONT
+              MULTIMP = ceiling(dble(INTBUF_TAB%NCONTACT) / dble(NCONT)) + 1 
               CALL INTER7_REALLOC_INTBUF(NIN,MULTIMP,INTBUF_TAB)
 
               NCONT = INTBUF_TAB%I_STOK(1)

@@ -316,7 +316,6 @@ c       print_address(stfn, std::to_string(__LINE__)+" stfn");
 
 
        !write(6,*) "C_ASSOCIATED(PTR_CAND_N)", C_ASSOCIATED(PTR_CAND_N)
-
       
          ! check the address of the arrays C_CAND_N and C_CAND_E
          ! write the pointers to the arrays C_CAND_N and C_CAND_E
@@ -327,19 +326,14 @@ c       print_address(stfn, std::to_string(__LINE__)+" stfn");
         if(ii_stok > 0) then
          CALL c_f_pointer(PTR_CAND_N, C_CAND_N,[ii_stok])
          call c_f_pointer(PTR_CAND_E, C_CAND_E,[ii_stok])
-           write(6,*) "C_CAND_E(1)=" , C_CAND_E(1), "C_CAND_N(1)=" , C_CAND_N(1)
-
-
-            write(6,*) "Size of cand_n", size(cand_n),"II_STOK"       ,II_STOK,"size(cande)",size(cand_e) 
-              IF(II_STOK > NCONTACT_SAVE) THEN
-                write(6,*) "II_STOK", II_STOK, "NCONTACT_SAVE", NCONTACT_SAVE
-                NCONTACT = II_STOK
-                call realloc(cand_n, ncontact_save, ncontact)
-                call realloc(cand_e, ncontact_save, ncontact)
-                if(ifq .ne.0)  call realloc(ifpen, ncontact_save, ncontact)
-                if(inacti == 5 .or. inacti == 6 .or. inacti == 7)  call  realloc(cand_p, ncontact_save, ncontact)
-                if(itied .ne. 0) call realloc(cand_f, 8*ncontact_save, 8*ncontact)
-              ENDIF
+         IF(II_STOK > NCONTACT_SAVE) THEN
+           NCONTACT = II_STOK
+           call realloc(cand_n, ncontact_save, ncontact)
+           call realloc(cand_e, ncontact_save, ncontact)
+           if(ifq .ne.0)  call realloc(ifpen, ncontact_save, ncontact)
+           if(inacti == 5 .or. inacti == 6 .or. inacti == 7)  call  realloc(cand_p, ncontact_save, ncontact)
+           if(itied .ne. 0) call realloc(cand_f, 8*ncontact_save, 8*ncontact)
+         ENDIF
 
           do i=1,II_STOK
        !      CALL flush(6)

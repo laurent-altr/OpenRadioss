@@ -637,8 +637,8 @@ extern "C"
         {
         i_stok = ii_stok;
         ii_stok = i_stok + k_stok;
-	std::cout<<"ii_stok = "<<ii_stok<<std::endl;
-	std::cout<<"k_stok = "<<k_stok<<std::endl;
+//	std::cout<<"ii_stok = "<<ii_stok<<std::endl;
+//	std::cout<<"k_stok = "<<k_stok<<std::endl;
 //        inacti_l = inacti;
 //        itied_l = itied;
 //        ifq_l = ifq;
@@ -924,6 +924,14 @@ extern "C"
             }
         } // end of single section
 
+
+        std::vector<bool> tag_remnode; 
+        // allocate a vector of bool of size numnod, initialized to false
+        if(flagremnode == 2)
+        {
+            tag_remnode.resize(numnod, false);
+        }
+
 #pragma omp barrier
         int j_stok = 0;
         std::vector<int> prov_n;
@@ -936,6 +944,17 @@ extern "C"
             if (stf[ne] == zero)
                 continue; // the segment is deleted/eroded
                           //            if(stf(ne) == zero)cycle ! the segment is deleted/eroded
+
+            if(flagremnode == 2)
+            {
+                const int k = kremnod[2 * ne]; 
+                const int l = kremnod[2 * ne + 1]; 
+                for(int i = k; i < l; ++i)
+                {
+                    tag_remnode[remnod[i]-1] = true;
+                }
+                
+            }
             my_real aaa = zero;
             if (igap == 0)
             {
@@ -1015,6 +1034,15 @@ extern "C"
                                 if (nn == m4)
                                     continue;
 
+                                if(flagremnode == 2)
+                                {
+                                    if(tag_remnode[nsv[jj-1]] == true)
+                                    {
+                                        continue;
+                                    }
+                                }
+
+
                                 xs = x[0 + (nn - 1) * 3];
                                 ys = x[1 + (nn - 1) * 3];
                                 zs = x[2 + (nn - 1) * 3];
@@ -1029,15 +1057,35 @@ extern "C"
                                 xs = xrem[0 + (j - 1) * s_xrem];
                                 ys = xrem[1 + (j - 1) * s_xrem];
                                 zs = xrem[2 + (j - 1) * s_xrem];
+
+                                if(flagremnode == 2)
+                                {
+                                    const int nn = irem[0 + (j- 1) * s_irem];
+                                    const int k = kremnod[2 * (ne - 1)];
+                                    const int l = kremnod[2 * (ne - 1) + 1];
+                                    bool is_found = false;
+                                    for(int m = k; m < l; ++m)
+                                    {
+                                        const int uid = -irem[1 + (j - 1) * s_irem];
+                                        if(remnod[m] == uid)
+                                        {
+                                            is_found = true;
+                                            break;
+                                        }
+                                    }
+                                    if(is_found)
+                                    {
+                                        continue;
+                                    }
+
+                                }
+
                                 if (igap != 0)
                                 {
                                     aaa = marge + curv_max[ne] + std::max(std::min(gapmax, std::max(gapmin, xrem[8 + (j - 1) * s_xrem] + gap_m[ne])) + dgapload, drad);
                                 }
+    
                             }
-
-                           // std::cout<<"xs = "<<xs<<" ys = "<<ys<<" zs = "<<zs<<std::endl;
-                           // std::cout<<"xmin = "<<xmin<<" xmax = "<<xmax<<" ymin = "<<ymin<<" ymax = "<<ymax<<" zmin = "<<zmin<<" zmax = "<<zmax<<std::endl;
-                           // std::cout<<"aaa = "<<aaa<<std::endl;
 
                             if (xs <= xmine - aaa)
                                 continue;
@@ -1076,12 +1124,17 @@ extern "C"
                     } // ix
                 } // iy
             } // iz
+            if(flagremnode == 2) 
+            {
+                const int k = kremnod[2 * ne]; 
+                const int l = kremnod[2 * ne + 1]; 
+                for(int i = k; i < l; ++i)
+                {
+                    tag_remnode[remnod[i]-1] = false;
+                }
+            }
         } // end of parallel for loop
 
-#pragma omp critical
-	{
-	std::cout<<"local j_stok = "<<j_stok<<std::endl;
-	}
 
 #pragma atomic
 	{
@@ -1092,7 +1145,6 @@ extern "C"
         if (itask == 0)
         {
               cand_n= static_cast<int*>(std::malloc((ii_stok) * sizeof(int)));
-	      std::cout<<"CAND_N allocation of size "<<ii_stok<<std::endl;
               if(cand_n == nullptr)
               {
                   std::cout<<"allocation failed"<<std::endl;
