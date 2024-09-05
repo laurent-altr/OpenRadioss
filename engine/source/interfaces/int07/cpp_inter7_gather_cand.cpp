@@ -6,6 +6,7 @@
 #include <cassert>
 #include <array>
 #include <cstdint>
+#include <numeric>
 #ifdef MYREAL8
 typedef double my_real;
 #else
@@ -18,6 +19,7 @@ constexpr my_real one = 1.0;
 constexpr my_real zero = 0.0;
 constexpr my_real em30 = 1e-30;
 constexpr my_real em20 = 1e-20;
+constexpr int FINE_SIZE = 2048;
 
 template <typename T>
 void print_address(T &var, std::string name)
@@ -798,9 +800,9 @@ extern "C"
         // start an open single section
         int *list_nb_voxel_on = nullptr;
         int nb_voxel_on = 0;
-        std::array<size_t,1024> x_grid ={0};
-        std::array<size_t,1024> y_grid ={0};
-        std::array<size_t,1024> z_grid ={0};
+        std::array<size_t,FINE_SIZE> x_grid ={0};
+        std::array<size_t,FINE_SIZE> y_grid ={0};
+        std::array<size_t,FINE_SIZE> z_grid ={0};
 
 #pragma omp barrier
 
@@ -830,9 +832,9 @@ extern "C"
                     if (x[2 + (j - 1) * 3] > zmax)
                         continue;
 
-                    iix = int(1024 * (x[0 + (j - 1) * 3] - xmin) / (xmax - xmin));
-                    iiy = int(1024 * (x[1 + (j - 1) * 3] - ymin) / (ymax - ymin));
-                    iiz = int(1024 * (x[2 + (j - 1) * 3] - zmin) / (zmax - zmin));
+                    iix = int(FINE_SIZE * (x[0 + (j - 1) * 3] - xmin) / (xmax - xmin));
+                    iiy = int(FINE_SIZE * (x[1 + (j - 1) * 3] - ymin) / (ymax - ymin));
+                    iiz = int(FINE_SIZE * (x[2 + (j - 1) * 3] - zmin) / (zmax - zmin));
                     x_grid[iix]++;
                     y_grid[iiy]++;
                     z_grid[iiz]++;
@@ -851,47 +853,48 @@ extern "C"
                         continue;
                     if(xrem[2 + (i - 1) * s_xrem] > zmax)
                         continue;
-                    int iix = int(1024 * (xrem[0 + (i - 1) * s_xrem] - xmin) / (xmax - xmin));
-                    int iiy = int(1024 * (xrem[1 + (i - 1) * s_xrem] - ymin) / (ymax - ymin));
-                    int iiz = int(1024 * (xrem[2 + (i - 1) * s_xrem] - zmin) / (zmax - zmin));
+                    int iix = int(FINE_SIZE * (xrem[0 + (i - 1) * s_xrem] - xmin) / (xmax - xmin));
+                    int iiy = int(FINE_SIZE * (xrem[1 + (i - 1) * s_xrem] - ymin) / (ymax - ymin));
+                    int iiz = int(FINE_SIZE * (xrem[2 + (i - 1) * s_xrem] - zmin) / (zmax - zmin));
                     x_grid[iix]++;
                     y_grid[iiy]++;
                     z_grid[iiz]++;
                 }
             }
-            const int x_chunck =std::max(1,(nsn+nsnr) / (nbx+2));
-            const int y_chunck =std::max(1,(nsn+nsnr) / (nby+2));
-            const int z_chunck =std::max(1,(nsn+nsnr) / (nbz+2));
+            const int total_node = std::accumulate(x_grid.begin(), x_grid.end(),0);
+            const int x_chunck =std::max(1,(total_node) / (nbx+2));
+            const int y_chunck =std::max(1,(total_node) / (nby+2));
+            const int z_chunck =std::max(1,(total_node) / (nbz+2));
             size_t x_sum = 0;
             size_t y_sum = 0;
             size_t z_sum = 0;
-            size_t ix_cuur = 1;
-            size_t iy_cuur = 1;
-            size_t iz_cuur = 1;
-            for( size_t i = 0; i < 1024 ; ++i)
+            size_t ix_curr = 1;
+            size_t iy_curr = 1;
+            size_t iz_curr = 1;
+            for( size_t i = 0; i < FINE_SIZE ; ++i)
             {
+
                 x_sum += x_grid[i];
                 y_sum += y_grid[i];
                 z_sum += z_grid[i];
-                if( x_sum > x_chunck)
+                x_grid[i] = ix_curr;
+                y_grid[i] = iy_curr;
+                z_grid[i] = iz_curr;
+                if( x_sum >= x_chunck && ix_curr <= nbx+2)
                 {
                     x_sum = 0;
-                    ix_cuur++;
+                    ix_curr++;
                 }
-                if( y_sum > y_chunck)
+                if( y_sum >= y_chunck && iy_curr <= nby+2)
                 {
                     y_sum = 0;
-                    iy_cuur++;
+                    iy_curr++;
                 }   
-                if( z_sum > z_chunck)
+                if( z_sum >= z_chunck && iz_curr <= nbz+2)
                 {
                     z_sum = 0;
-                    iz_cuur++;
+                    iz_curr++;
                 }   
-                x_grid[i] = ix_cuur;
-                y_grid[i] = iy_cuur;
-                z_grid[i] = iz_cuur;
-            //    std::cout<<"x_grid["<<i<<"] = "<<x_grid[i]<<" y_grid["<<i<<"] = "<<y_grid[i]<<" z_grid["<<i<<"] = "<<z_grid[i]<<std::endl;
             }
 
 
@@ -928,9 +931,9 @@ extern "C"
                   //  iix = std::max(1, 2 + std::min(nbx, iix));
                   //  iiy = std::max(1, 2 + std::min(nby, iiy));
                   //  iiz = std::max(1, 2 + std::min(nbz, iiz));
-                    iix = int(1024 * (x[0 + (j - 1) * 3] - xmin) / (xmax - xmin));
-                    iiy = int(1024 * (x[1 + (j - 1) * 3] - ymin) / (ymax - ymin));
-                    iiz = int(1024 * (x[2 + (j - 1) * 3] - zmin) / (zmax - zmin));
+                    iix = int(FINE_SIZE * (x[0 + (j - 1) * 3] - xmin) / (xmax - xmin));
+                    iiy = int(FINE_SIZE * (x[1 + (j - 1) * 3] - ymin) / (ymax - ymin));
+                    iiz = int(FINE_SIZE * (x[2 + (j - 1) * 3] - zmin) / (zmax - zmin));
                     iix = x_grid[iix];
                     iiy = y_grid[iiy];
                     iiz = z_grid[iiz];
@@ -987,9 +990,9 @@ extern "C"
 //                    iix = std::max(1, 2 + std::min(nbx, iix));
 //                    iiy = std::max(1, 2 + std::min(nby, iiy));
 //                    iiz = std::max(1, 2 + std::min(nbz, iiz));
-                    int iix = int(1024 * (xrem[0 + (i - 1) * s_xrem] - xmin) / (xmax - xmin));
-                    int iiy = int(1024 * (xrem[1 + (i - 1) * s_xrem] - ymin) / (ymax - ymin));
-                    int iiz = int(1024 * (xrem[2 + (i - 1) * s_xrem] - zmin) / (zmax - zmin));
+                    int iix = int(FINE_SIZE * (xrem[0 + (i - 1) * s_xrem] - xmin) / (xmax - xmin));
+                    int iiy = int(FINE_SIZE * (xrem[1 + (i - 1) * s_xrem] - ymin) / (ymax - ymin));
+                    int iiz = int(FINE_SIZE * (xrem[2 + (i - 1) * s_xrem] - zmin) / (zmax - zmin));
                     iix = x_grid[iix];
                     iiy = y_grid[iiy];
                     iiz = z_grid[iiz];
@@ -1093,19 +1096,19 @@ extern "C"
             const my_real s2 = sx * sx + sy * sy + sz * sz;
             int ix1 = 0, ix2 = 0, iy1 = 0, iy2 = 0, iz1 = 0, iz2 = 0;
 
-            ix1 = int(1024 * (xmine - aaa - xmin) / (xmax - xmin));
-            ix2 = int(1024 * (xmaxe + aaa - xmin) / (xmax - xmin));
-            iy1 = int(1024 * (ymine - aaa - ymin) / (ymax - ymin));
-            iy2 = int(1024 * (ymaxe + aaa - ymin) / (ymax - ymin));
-            iz1 = int(1024 * (zmine - aaa - zmin) / (zmax - zmin));
-            iz2 = int(1024 * (zmaxe + aaa - zmin) / (zmax - zmin));
+            ix1 = int(FINE_SIZE * (xmine - aaa - xmin) / (xmax - xmin));
+            ix2 = int(FINE_SIZE * (xmaxe + aaa - xmin) / (xmax - xmin));
+            iy1 = int(FINE_SIZE * (ymine - aaa - ymin) / (ymax - ymin));
+            iy2 = int(FINE_SIZE * (ymaxe + aaa - ymin) / (ymax - ymin));
+            iz1 = int(FINE_SIZE * (zmine - aaa - zmin) / (zmax - zmin));
+            iz2 = int(FINE_SIZE * (zmaxe + aaa - zmin) / (zmax - zmin));
 
-            ix1 = std::min(std::max(0, ix1),1024-1);
-            ix2 = std::min(std::max(0, ix2),1024-1);
-            iy1 = std::min(std::max(0, iy1),1024-1);
-            iy2 = std::min(std::max(0, iy2),1024-1);
-            iz1 = std::min(std::max(0, iz1),1024-1);
-            iz2 = std::min(std::max(0, iz2),1024-1);
+            ix1 = std::min(std::max(0, ix1),FINE_SIZE-1);
+            ix2 = std::min(std::max(0, ix2),FINE_SIZE-1);
+            iy1 = std::min(std::max(0, iy1),FINE_SIZE-1);
+            iy2 = std::min(std::max(0, iy2),FINE_SIZE-1);
+            iz1 = std::min(std::max(0, iz1),FINE_SIZE-1);
+            iz2 = std::min(std::max(0, iz2),FINE_SIZE-1);
             ix1 = x_grid[ix1];
             ix2 = x_grid[ix2];
             iy1 = y_grid[iy1];
