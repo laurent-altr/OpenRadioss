@@ -215,6 +215,7 @@ C
             ! ---------------------------
             ENDIF
         END IF
+        ! Voxel remote secondary nodes
         ! ---------------------------
         CAND_N_OLD = INTBUF_TAB%I_STOK(1)
  40     CONTINUE
@@ -256,7 +257,7 @@ C
      D      INTBUF_TAB%KREMNODE,INTBUF_TAB%REMNODE,  IPARI(63,NIN),DRAD         ,
      E      ITIED ,INTBUF_TAB%CAND_F,DGAPLOADP,
      F      NRTM, INTER_STRUCT(NIN)%SIZE_CAND_A,
-     .      INTBUF_TAB%S_KREMNODE, INTBUF_TAB%S_REMNODE, NSPMD, NUMNOD)
+     .      INTBUF_TAB%S_KREMNODE, INTBUF_TAB%S_REMNODE, NSPMD, NUMNOD, INTER_STRUCT(nin))
 
         ELSE IF(INTBUF_TAB%METRIC%ALGO == ALGO_VOXEL .OR.  INTBUF_TAB%METRIC%ALGO == TRY_ALGO_VOXEL) THEN
             FIRST = 1 + ITASK*(NRTM/NTHREAD)

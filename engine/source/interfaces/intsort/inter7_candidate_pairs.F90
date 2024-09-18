@@ -100,7 +100,9 @@
      &                                    s_xrem       ,&
      &                                    irem         ,&
      &                                    s_irem       ,&
-     &                                    next_nod      )
+     &                                    next_nod      ,&
+     &                                    nb_voxel_on   ,&
+     &                                   list_nb_voxel_on)
           USE COLLISION_MOD , ONLY : GROUP_SIZE
           USE INTER7_FILTER_CAND_MOD
           USE CONSTANT_MOD
@@ -147,7 +149,7 @@
           integer, intent(inout) :: ifpen(mulnsn) !< something related to friction (???)
           integer, intent(inout) :: cand_a(s_cand_a) !< (???)
           integer, intent(inout) :: irem(s_irem,nsnr) !< remote (spmd) integer data
-          integer, intent(inout) :: voxel(nbx+2,nby+2,nbz+2) !< contain the first node of each voxel
+          integer, intent(inout) :: voxel((nbx+2)*(nby+2)*(nbz+2)) !< contain the first node of each voxel
           integer, intent(inout) :: next_nod(nsn+nsnr) !< next node in the same voxel
 
           my_real, intent(in), value :: gap !< gap (???)
@@ -171,6 +173,9 @@
           my_real, intent(in) :: stf(nrtm) !< stiffness of segments (quadrangles or triangles)
           my_real, intent(inout) :: stfn(nsn) !< stiffness secondary nodes
           my_real, intent(inout) :: xrem(s_xrem,nsnr) !< remote (spmd) real data
+          integer, intent(inout) :: nb_voxel_on !< number of remote nodes in the bounding box
+          integer, intent(inout) :: list_nb_voxel_on(nb_voxel_on)
+
 !-----------------------------------------------
 !   L o c a l   V a r i a b l e s
 !-----------------------------------------------
@@ -185,14 +190,8 @@
           integer :: iix, iiy, iiz
           my_real :: xminb, yminb, zminb, xmaxb, ymaxb, zmaxb, xmine, ymine, zmine, xmaxe, ymaxe, zmaxe, aaa
           integer :: first, last
-          integer :: nb_voxel_on !< number of remote nodes in the bounding box
-          integer, dimension(:), allocatable :: list_nb_voxel_on
           integer, dimension(GROUP_SIZE) :: prov_n, prov_e !< temporary list of candidates
-
-          if(itask == 0)then
-            allocate(list_nb_voxel_on((nbx+2)*(nby+2)*(nbz+2)))
-            nb_voxel_on = 0
-          end if
+          integer :: cellid
 
 !$OMP BARRIER
 
@@ -219,10 +218,12 @@
           ymaxb = xyzm(11)
           zmaxb = xyzm(12)
 
+
 !=======================================================================
 ! 1   Add local nodes to the cells
 !=======================================================================
           if(itask==0.and.total_nb_nrtm>0)then
+            nb_voxel_on = 0
             allocate(last_nod(nsn+nsnr))
             do i=1,nsn
               iix=0
@@ -239,16 +240,17 @@
               iix=int(nbx*(x(1,j)-xminb)/(xmaxb-xminb))
               iiy=int(nby*(x(2,j)-yminb)/(ymaxb-yminb))
               iiz=int(nbz*(x(3,j)-zminb)/(zmaxb-zminb))
-              iix=max(1,2+min(nbx,iix))
-              iiy=max(1,2+min(nby,iiy))
-              iiz=max(1,2+min(nbz,iiz))
-              first = voxel(iix,iiy,iiz)
+                iix=max(1,2+min(nbx,iix))
+                iiy=max(1,2+min(nby,iiy))
+                iiz=max(1,2+min(nbz,iiz))
+                cellid = (iiz-1)*(nbx+2)*(nby+2)+(iiy-1)*(nbx+2)+iix
+                first = voxel(cellid)
               if(first == 0)then
                 !empty cell
                 nb_voxel_on = nb_voxel_on + 1
                 ! 1d version of 3d potition, indexes starts at 1
-                list_nb_voxel_on(nb_voxel_on) = (iix-1)*(nby+2)*(nbz+2)+(iiy-1)*(nbz+2)+(iiz-1)
-                voxel(iix,iiy,iiz) = i ! first
+                list_nb_voxel_on(nb_voxel_on) = cellid
+                voxel(cellid) = i ! first
                 next_nod(i)                 = 0 ! last one
                 last_nod(i)                 = 0 ! no last
               elseif(last_nod(first) == 0)then
@@ -286,15 +288,16 @@
               iiy=max(1,2+min(nby,iiy))
               iiz=max(1,2+min(nbz,iiz))
 
-              first = voxel(iix,iiy,iiz)
+              cellid = (iiz-1)*(nbx+2)*(nby+2)+(iiy-1)*(nbx+2)+iix
+
+              first = voxel(cellid)
 
               if(first == 0)then
                 ! empty cell
                 nb_voxel_on = nb_voxel_on + 1
                 ! 1d version of 3d potition
-                list_nb_voxel_on( nb_voxel_on ) = (iix-1) * (nby+2) * (nbz+2) + (iiy-1) * (nbz+2) + (iiz-1)
-
-                voxel(iix,iiy,iiz) = nsn+j ! first
+                list_nb_voxel_on( nb_voxel_on ) = cellid 
+                voxel(cellid) = nsn+j ! first
                 next_nod(nsn+j)     = 0 ! last one
                 last_nod(nsn+j)     = 0 ! no last
               elseif(last_nod(first) == 0)then
@@ -413,7 +416,8 @@
               do iy = iy1,iy2
                 do ix = ix1,ix2
                   if(i_mem==2) cycle
-                  jj = voxel(ix,iy,iz)
+                  cellid = (iz-1)*(nbx+2)*(nby+2)+(iy-1)*(nbx+2)+ix
+                  jj = voxel(cellid)
                   do while(jj /= 0)
 
                     if(jj<=nsn)then
@@ -534,15 +538,8 @@
 !$OMP BARRIER
           if(total_nb_nrtm>0 .and. itask == 0) then
             do jj = 1, nb_voxel_on
-              j = list_nb_voxel_on(jj)
-              k = j
-              iiz =  mod(k,nbz+2) + 1
-              ! iz [1,nbz+2]
-              k = (k-iiz+1)/(nbz+2)
-              iiy =  mod(k,nby+2) + 1
-              k = (k-iiy+1)/(nby+2)
-              iix = mod(k,nbx+2) + 1
-              voxel(iix,iiy,iiz) = 0
+              cellid = list_nb_voxel_on(jj)
+              voxel(cellid) = 0
             enddo
           endif
 !$OMP BARRIER
@@ -552,7 +549,7 @@
           if(flagremnode == 2) then
             if(allocated(tagremnode)) deallocate(tagremnode)
           endif
-          if(itask == 0) deallocate(list_nb_voxel_on)
+!         if(itask == 0) deallocate(list_nb_voxel_on)
 
 !#ifndef NO_SERIALIZE
 !        if(nsn > 13602 .and. nrtm > 1800) then
@@ -1106,6 +1103,8 @@
           my_real, dimension(:), allocatable :: stf !< stiffness of segments (quadrangles or triangles)
           my_real, dimension(:), allocatable :: stfn !< stiffness secondary nodes
           my_real, dimension(:), allocatable :: cand_f,cand_p
+          integer, allocatable :: nb_voxel_on
+          integer, dimension(:), allocatable :: list_nb_voxel_on
 
           integer OMP_GET_THREAD_NUM, OMP_GET_NUM_THREADS
           external OMP_GET_THREAD_NUM, OMP_GET_NUM_THREADS
@@ -1195,9 +1194,11 @@
         do i=1,(nbx+2)*(nby+2)*(nbz+2)
           voxel(i)=0
         enddo
+        allocate(list_nb_voxel_on((nbx+2)*(nby+2)*(nbz+2)))
+        nb_voxel_on = 0
 !$OMP END SINGLE
          ITASK = OMP_GET_THREAD_NUM() 
-
+      
 
         call INTER7_CANDIDATE_PAIRS(&
      &                                    nsn          ,&
@@ -1256,7 +1257,9 @@
      &                                    s_xrem       ,&
      &                                    irem         ,&
      &                                    s_irem       ,&
-     &                                    next_nod      )
+     &                                    next_nod     ,&
+     &                                    nb_voxel_on, &
+     &                                    list_nb_voxel_on);
 
 !$OMP END PARALLEL
           end_time = OMP_GET_WTIME()

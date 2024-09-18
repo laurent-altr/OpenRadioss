@@ -235,7 +235,7 @@ C-----------------------------------------------
                 CALL MY_BARRIER()
             ENDIF
             ! -----------------------------
- 
+            
             ! -----------------------------
             ! wait comm R "send/rcv the colored cells" 
             ! and compute the number of secondary nodes needed by remote proc 
@@ -255,6 +255,8 @@ C-----------------------------------------------
             ! -----------------------------
         ENDDO
         ! -----------------------------
+        ! Fill the voxels with local seconadry nodes 
+
 
         ! -----------------------------
         ! wait comm S "send/rcv the colored cells"

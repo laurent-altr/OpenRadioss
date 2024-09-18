@@ -56,15 +56,17 @@
         &KREMNOD  ,REMNOD  ,FLAGREMNODE, DRAD ,&
         &ITIED    ,CAND_F  ,DGAPLOAD,&
         &TOTAL_NB_NRTM, s_cand_a,&
-        &S_KREMNOD, S_REMNOD, NSPMD, NUMNOD)
+        &S_KREMNOD, S_REMNOD, NSPMD, NUMNOD, inter_struct)
 
 !============================================================================
 !   M o d u l e s
 !-----------------------------------------------
+          USE voxel_dimensions_mod, only : compute_voxel_dimensions
+          USE INTER_STRUCT_MOD
           USE TRI7BOX
           USE INTER7_CANDIDATE_PAIRS_MOD
           USE MESSAGE_MOD
-          USE CONSTANT_MOD , ONLY : THREE_OVER_4, THIRD
+          USE CONSTANT_MOD , ONLY : THREE_OVER_4
 !-----------------------------------------------
 !   I m p l i c i t   T y p e s
 !-----------------------------------------------
@@ -73,32 +75,33 @@
 !-----------------------------------------------
 !   D u m m y   A r g u m e n t s
 !-----------------------------------------------
-          INTEGER :: NMN
-          INTEGER :: NSN
-          INTEGER :: NOINT
-          INTEGER :: INACTI
-          INTEGER :: IFQ
-          INTEGER :: NSNR
-          INTEGER :: NSNROLD
-          INTEGER :: RENUM_SIZ
-          INTEGER, INTENT(IN) :: NUMNOD
+          TYPE(inter_struct_type), INTENT(INOUT) :: inter_struct !< structure containing the interface sorting data
+          INTEGER :: NMN !< number of main nodes
+          INTEGER :: NSN !< number of secondary nodes
+          INTEGER :: NOINT !< number of the current interface
+          INTEGER :: INACTI !< inacti option
+          INTEGER :: IFQ !< friction option
+          INTEGER :: NSNR !< number of remote nodes
+          INTEGER :: NSNROLD !< number of old secondary nodes
+          INTEGER :: RENUM_SIZ !< size of renum array
+          INTEGER, INTENT(IN) :: NUMNOD !< global number of nodes
           INTEGER, INTENT(in) :: NRTM !< number of segments per threads
-          INTEGER, INTENT(in) :: TOTAL_NB_NRTM !< total number of segments
-          INTEGER, INTENT(in) :: s_cand_a
-          INTEGER :: IRECT(4,NRTM)
-          INTEGER :: NSV(NSN)
-          INTEGER :: CAND_A(s_cand_a)
-          INTEGER :: RENUM(RENUM_SIZ)
-          INTEGER :: NUM_IMP
-          INTEGER :: ITASK
-          INTEGER :: CAND_E(NCONTACT)
-          INTEGER :: CAND_N(NCONTACT)
+          INTEGER, INTENT(in) :: TOTAL_NB_NRTM !< total number of segments ! should be == to NRTM 
+          INTEGER, INTENT(in) :: s_cand_a !< size of cand_a array
+          INTEGER :: IRECT(4,NRTM) !< connectivity of the segments
+          INTEGER :: NSV(NSN) !< global id of the secondary nodes
+          INTEGER :: CAND_A(s_cand_a) !< ? 
+          INTEGER :: RENUM(RENUM_SIZ) !< ?
+          INTEGER :: NUM_IMP           !< 
+          INTEGER :: ITASK            !< OpenMP task id
+          INTEGER :: CAND_E(NCONTACT) !< segment id of the contact candidate
+          INTEGER :: CAND_N(NCONTACT) !< node id of the contact candidate
           INTEGER :: IFPEN(NCONTACT)
-          INTEGER :: KREMNOD(*)
-          INTEGER :: REMNOD(*)
-          INTEGER :: NCONTACT
-          INTEGER :: ESHIFT
-          INTEGER :: ILD
+          INTEGER :: KREMNOD(*) !< remnode option
+          INTEGER :: REMNOD(*) !< remnode option
+          INTEGER :: NCONTACT !< number of contact candidates
+          INTEGER :: ESHIFT !< OpenMP shift
+          INTEGER :: ILD      
           INTEGER :: NB_N_B
           INTEGER :: IGAP
           INTEGER :: NCONT
@@ -169,67 +172,18 @@
           END IF
           MARGE = TZINF-MAX(GAP+DGAPLOAD,DRAD) ! margin
 ! Work on the reduced box
-          IF( NMN /= 0 ) THEN
-            AAA = SQRT(NMN /&
-            &((BMINMA(7)-BMINMA(10))*(BMINMA(8)-BMINMA(11))&
-            &+(BMINMA(8)-BMINMA(11))*(BMINMA(9)-BMINMA(12))&
-            &+(BMINMA(9)-BMINMA(12))*(BMINMA(7)-BMINMA(10))))
-          ELSE
-            AAA = 0
-          ENDIF
+          call compute_voxel_dimensions(nmn, nrtm, inter_struct)
 
-          AAA = 0.75*AAA
 
-          NBX = NINT(AAA*(BMINMA(7)-BMINMA(10)))
-          NBY = NINT(AAA*(BMINMA(8)-BMINMA(11)))
-          NBZ = NINT(AAA*(BMINMA(9)-BMINMA(12)))
-!
-          NBX = MAX(NBX,1)
-          NBY = MAX(NBY,1)
-          NBZ = MAX(NBZ,1)
-
-          NBX8=NBX
-          NBY8=NBY
-          NBZ8=NBZ
-          RES8=(NBX8+2)*(NBY8+2)*(NBZ8+2)
-          LVOXEL8 = LVOXEL
-
-          IF(RES8 > LVOXEL8) THEN
-            AAA = LVOXEL
-            AAA = AAA/((NBX8+2)*(NBY8+2)*(NBZ8+2))
-            AAA = AAA**(THIRD)
-            NBX = INT((NBX+2)*AAA)-2
-            NBY = INT((NBY+2)*AAA)-2
-            NBZ = INT((NBZ+2)*AAA)-2
-            NBX = MAX(NBX,1)
-            NBY = MAX(NBY,1)
-            NBZ = MAX(NBZ,1)
-          ENDIF
-
-          NBX8=NBX
-          NBY8=NBY
-          NBZ8=NBZ
-          RES8=(NBX8+2)*(NBY8+2)*(NBZ8+2)
-
-          IF(RES8 > LVOXEL8) THEN
-            NBX = MIN(100,MAX(NBX8,1))
-            NBY = MIN(100,MAX(NBY8,1))
-            NBZ = MIN(100,MAX(NBZ8,1))
-          ENDIF
-
-          ! redundancy in smp
-!$OMP SINGLE
-          DO I=1,(NBX+2)*(NBY+2)*(NBZ+2)
-            VOXEL1(I)=0
-          ENDDO
-!$OMP END SINGLE NOWAIT
-          IF(ITASK == 0) THEN
+        IF(ITASK == 0) THEN
             ALLOCATE(NEXT_NOD(NSN+NSNR))
             ALLOCATE(PREV_REMOTE_NUMBER(S_PREV_REMOTE_NUMBER))
             ! find the old id of remote candidate nodes (inactive, ifq, itied)
             if(nspmd>1.and.(inacti==5.or.inacti==6.or.inacti==7.or.ifq>0.or.itied/=0)) then
               CALL SPMD_OLDNUMCD(RENUM,PREV_REMOTE_NUMBER,S_PREV_REMOTE_NUMBER,NSNROLD)
             end if
+            allocate(inter_struct%list_nb_voxel_on(nsn+nsnr))
+            inter_struct%nb_voxel_on = nsn+nsnr
           endif
           call MY_BARRIER
 
@@ -238,7 +192,7 @@
           &IRECT   ,X        ,STF      ,STFN     ,XYZM    ,&
           &NSV     ,II_STOK  ,CAND_N   ,ESHIFT   ,CAND_E  ,&
           &NCONTACT,TZINF    ,GAP_S_L  ,GAP_M_L ,&
-          &VOXEL1  ,NBX      ,NBY      ,NBZ      ,&
+          &inter_struct%VOXEL  ,inter_struct%NBX      ,inter_struct%NBY      ,inter_struct%NBZ      ,&
           &INACTI  ,IFQ      ,CAND_A,CAND_P   ,IFPEN   ,&
           &NRTM    ,NSNROLD  ,IGAP     ,GAP      ,GAP_S   ,&
           &GAP_M   ,GAPMIN   ,GAPMAX   ,MARGE    ,CURV_MAX,&
@@ -246,11 +200,12 @@
           &FLAGREMNODE,DRAD   ,ITIED    ,CAND_F  ,&
           &DGAPLOAD, s_cand_a,&
           &TOTAL_NB_NRTM,  NUMNOD, XREM, SIZE(XREM,1),&
-          &IREM, size(irem,1), NEXT_NOD)
+          &IREM, size(irem,1), NEXT_NOD, inter_struct%nb_voxel_on, inter_struct%list_nb_voxel_on)
 
           IF(ITASK==0)  THEN
             IF(ALLOCATED(NEXT_NOD)) DEALLOCATE(NEXT_NOD)
             IF(ALLOCATED(PREV_REMOTE_NUMBER)) DEALLOCATE(PREV_REMOTE_NUMBER)
+            if(allocated(inter_struct%list_nb_voxel_on)) deallocate(inter_struct%list_nb_voxel_on)
 
           ENDIF
 !     I_MEM = 2 ==> Not enough memory
