@@ -105,6 +105,7 @@
      &                                   list_nb_voxel_on)
           USE COLLISION_MOD , ONLY : GROUP_SIZE
           USE INTER7_FILTER_CAND_MOD
+          USE FILL_VOXEL_MOD
           USE CONSTANT_MOD
 !-----------------------------------------------
           implicit none
@@ -223,97 +224,25 @@
 ! 1   Add local nodes to the cells
 !=======================================================================
           if(itask==0.and.total_nb_nrtm>0)then
-            nb_voxel_on = 0
-            allocate(last_nod(nsn+nsnr))
-            do i=1,nsn
-              iix=0
-              iiy=0
-              iiz=0
-              if(stfn(i) == zero)cycle
-              j=nsv(i)
-              if(x(1,j) < xmin)  cycle
-              if(x(1,j) > xmax)  cycle
-              if(x(2,j) < ymin)  cycle
-              if(x(2,j) > ymax)  cycle
-              if(x(3,j) < zmin)  cycle
-              if(x(3,j) > zmax)  cycle
-              iix=int(nbx*(x(1,j)-xminb)/(xmaxb-xminb))
-              iiy=int(nby*(x(2,j)-yminb)/(ymaxb-yminb))
-              iiz=int(nbz*(x(3,j)-zminb)/(zmaxb-zminb))
-                iix=max(1,2+min(nbx,iix))
-                iiy=max(1,2+min(nby,iiy))
-                iiz=max(1,2+min(nbz,iiz))
-                cellid = (iiz-1)*(nbx+2)*(nby+2)+(iiy-1)*(nbx+2)+iix
-                first = voxel(cellid)
-              if(first == 0)then
-                !empty cell
-                nb_voxel_on = nb_voxel_on + 1
-                ! 1d version of 3d potition, indexes starts at 1
-                list_nb_voxel_on(nb_voxel_on) = cellid
-                voxel(cellid) = i ! first
-                next_nod(i)                 = 0 ! last one
-                last_nod(i)                 = 0 ! no last
-              elseif(last_nod(first) == 0)then
-                !cell containing one node
-                !add as next node
-                next_nod(first) = i ! next
-                last_nod(first) = i ! last
-                next_nod(i)     = 0 ! last one
-              else
-                !
-                !jump to the last node of the cell
-                last = last_nod(first) ! last node in this voxel
-                next_nod(last)  = i ! next
-                last_nod(first) = i ! last
-                next_nod(i)     = 0 ! last one
-              endif
-            enddo
-
-!=======================================================================
-! 2   Add remote (spmd) nodes to the cells
-!=======================================================================
-            do j = 1, nsnr
-
-              if(xrem(1,j) < xmin)  cycle
-              if(xrem(1,j) > xmax)  cycle
-              if(xrem(2,j) < ymin)  cycle
-              if(xrem(2,j) > ymax)  cycle
-              if(xrem(3,j) < zmin)  cycle
-              if(xrem(3,j) > zmax)  cycle
-
-              iix=int(nbx*(xrem(1,j)-xminb)/(xmaxb-xminb))
-              iiy=int(nby*(xrem(2,j)-yminb)/(ymaxb-yminb))
-              iiz=int(nbz*(xrem(3,j)-zminb)/(zmaxb-zminb))
-              iix=max(1,2+min(nbx,iix))
-              iiy=max(1,2+min(nby,iiy))
-              iiz=max(1,2+min(nbz,iiz))
-
-              cellid = (iiz-1)*(nbx+2)*(nby+2)+(iiy-1)*(nbx+2)+iix
-
-              first = voxel(cellid)
-
-              if(first == 0)then
-                ! empty cell
-                nb_voxel_on = nb_voxel_on + 1
-                ! 1d version of 3d potition
-                list_nb_voxel_on( nb_voxel_on ) = cellid 
-                voxel(cellid) = nsn+j ! first
-                next_nod(nsn+j)     = 0 ! last one
-                last_nod(nsn+j)     = 0 ! no last
-              elseif(last_nod(first) == 0)then
-                ! cell containing one node, add it as next node
-                next_nod(first) = nsn+j  ! next
-                last_nod(first) = nsn+j  ! last
-                next_nod(nsn+j)  = 0     ! last one
-              else
-                ! , jump to the last node of the cell
-                last = last_nod(first)  ! last node in this voxel
-                next_nod(last)  = nsn+j ! next
-                last_nod(first) = nsn+j ! last
-                next_nod(nsn+j)     = 0 ! last one
-              endif
-            enddo
-            deallocate(last_nod)
+             call flush(6)
+             call fill_voxel(&
+        &                    nsn,&
+        &                    nsnr,&
+        &                    nbx,&
+        &                    nby,&
+        &                    nbz,&
+        &                    nrtm,& 
+        &                    s_xrem,&
+        &                    numnod,&
+        &                    nsv,&
+        &                    voxel,&
+        &                    next_nod,&
+        &                    nb_voxel_on,&
+        &                    list_nb_voxel_on,&
+        &                    x,&
+        &                    stfn,&
+        &                    xrem,&
+        &                    xyzm)
           end if !itask == 0
 !$OMP BARRIER
 

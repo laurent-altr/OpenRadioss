@@ -124,6 +124,7 @@
             inter_struct%nbz = 0
             inter_struct%voxel_size = 0
           end if
+          write(6,*) 'nbx = ',nbx,' nby = ',nby,' nbz = ',nbz
 !$OMP END SINGLE NOWAIT
         end subroutine compute_voxel_dimensions
       end module voxel_dimensions_mod

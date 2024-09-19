@@ -20,6 +20,8 @@
 !Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 !Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 !Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
+     MODULE FILL_VOXEL_MOD
+      contains
      SUBROUTINE FILL_VOXEL(&
         &  nsn,&
         &  nsnr,&
@@ -59,22 +61,21 @@
           integer, intent(inout) :: nb_voxel_on
           integer, intent(inout) :: list_nb_voxel_on(nb_voxel_on)
           my_real, intent(in) :: x(3,numnod) 
-          my_real, intent(inout) :: stfn(nsn)
-          my_real, intent(inout) :: xrem(s_xrem,nsnr) 
+          my_real, intent(in) :: stfn(nsn)
+          my_real, intent(in) :: xrem(s_xrem,nsnr) 
           my_real, intent(in) :: xyzm(12)
 
 !-----------------------------------------------
 !   L o c a l   V a r i a b l e s
 !-----------------------------------------------
-          integer :: i,j, nn, ne, k, l, j_stok, jj, delnod, m
+          integer :: i,j
           my_real :: xmin, xmax, ymin, ymax, zmin, zmax
-          my_real :: xminb, xmaxb, yminb, ymaxb, zminb, zmaxb ! Reintroduced `xminb`, `xmaxb`, etc.
-          integer :: ix, iy, iz, m1, m2, m3, m4, ix1, iy1, iz1, ix2, iy2, iz2
+          my_real :: xminb, xmaxb, yminb, ymaxb, zminb, zmaxb 
+          integer :: ix, iy, iz
           integer :: first, last
           integer :: cellid
           integer, dimension(:), allocatable :: last_nod
 
-!$OMP BARRIER
 
 ! The global bounding box contains all the nodes
 ! Some nodes may be highly distant from the impact zone
@@ -102,6 +103,7 @@
 ! 1   Add local nodes to the cells
 !=======================================================================
           if(nrtm > 0)then
+            nb_voxel_on = 0
             allocate(last_nod(nsn+nsnr))
             do i=1,nsn
               if(stfn(i) == zero)cycle
@@ -178,5 +180,5 @@
             enddo
             deallocate(last_nod)
           endif
-!$OMP BARRIER
       END SUBROUTINE
+      END MODULE FILL_VOXEL_MOD
