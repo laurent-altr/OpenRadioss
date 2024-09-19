@@ -45,7 +45,7 @@
       !||====================================================================
         SUBROUTINE INTER7_COLLISION_DETECTION(&
         &X        ,IRECT   ,NSV     ,INACTI   ,CAND_P  ,&
-        &NMN      ,NRTM    ,NSN     ,CAND_E   ,CAND_N  ,&
+        &NRTM    ,NSN     ,CAND_E   ,CAND_N  ,&
         &GAP      ,NOINT   ,II_STOK ,NCONTACT ,BMINMA  ,&
         &TZINF    ,CAND_A,CURV_MAX, RENUM_SIZ,&
         &NB_N_B   ,ESHIFT  ,ILD     ,IFQ      ,IFPEN   ,&
@@ -66,6 +66,7 @@
           USE TRI7BOX
           USE INTER7_CANDIDATE_PAIRS_MOD
           USE MESSAGE_MOD
+          USE FILL_VOXEL_MOD, ONLY : FILL_VOXEL, FLAG_LOCAL, FLAG_REMOTE
           USE CONSTANT_MOD , ONLY : THREE_OVER_4
 !-----------------------------------------------
 !   I m p l i c i t   T y p e s
@@ -76,7 +77,6 @@
 !   D u m m y   A r g u m e n t s
 !-----------------------------------------------
           TYPE(inter_struct_type), INTENT(INOUT) :: inter_struct !< structure containing the interface sorting data
-          INTEGER :: NMN !< number of main nodes
           INTEGER :: NSN !< number of secondary nodes
           INTEGER :: NOINT !< number of the current interface
           INTEGER :: INACTI !< inacti option
@@ -162,24 +162,6 @@
           XYZM(4,2) = BMINMA(7)
           XYZM(5,2) = BMINMA(8)
           XYZM(6,2) = BMINMA(9)
-!! bounding box of the model
-!          xmin = xyzm(1)
-!          ymin = xyzm(2)
-!          zmin = xyzm(3)
-!          xmax = xyzm(4)
-!          ymax = xyzm(5)
-!          zmax = xyzm(6)
-!
-!! reduced bounding box of the model
-!! The reduced bounding box corresponds to voxel(2:nbx+1,2:nby+1,2:nbz+1), it contains cells of the same size
-!
-!          xminb = xyzm(7)
-!          yminb = xyzm(8)
-!          zminb = xyzm(9)
-!          xmaxb = xyzm(10)
-!          ymaxb = xyzm(11)
-!          zmaxb = xyzm(12)
-!
 
           I_MEM = 0
 !
@@ -191,39 +173,41 @@
           END IF
           MARGE = TZINF-MAX(GAP+DGAPLOAD,DRAD) ! margin
 ! Work on the reduced box
-          call compute_voxel_dimensions(nmn, nrtm, inter_struct)
 
 
         IF(ITASK == 0) THEN
-            ALLOCATE(NEXT_NOD(NSN+NSNR))
             ALLOCATE(PREV_REMOTE_NUMBER(S_PREV_REMOTE_NUMBER))
             ! find the old id of remote candidate nodes (inactive, ifq, itied)
             if(nspmd>1.and.(inacti==5.or.inacti==6.or.inacti==7.or.ifq>0.or.itied/=0)) then
               CALL SPMD_OLDNUMCD(RENUM,PREV_REMOTE_NUMBER,S_PREV_REMOTE_NUMBER,NSNROLD)
             end if
-            allocate(inter_struct%list_nb_voxel_on(nsn+nsnr))
-            inter_struct%nb_voxel_on = nsn+nsnr
+!           ALLOCATE(inter_struct%NEXT_NOD(NSN+NSNR))
+!           allocate(inter_struct%list_nb_voxel_on(nsn+nsnr))
+!           inter_struct%nb_voxel_on = nsn+nsnr
           endif
           call MY_BARRIER
           if(itask==0.and.nrtm>0)then
-             call fill_voxel(&
+             call fill_voxel(FLAG_REMOTE,&
         &                    nsn,&
         &                    nsnr,&
-        &                    nbx,&
-        &                    nby,&
-        &                    nbz,&
+        &                    inter_struct%nbx,&
+        &                    inter_struct%nby,&
+        &                    inter_struct%nbz,&
         &                    nrtm,& 
-        &                    s_xrem,&
+        &                    size(XREM,1),&
         &                    numnod,&
         &                    nsv,&
-        &                    voxel,&
-        &                    next_nod,&
-        &                    nb_voxel_on,&
-        &                    list_nb_voxel_on,&
+        &                    inter_struct%voxel,&
+        &                    inter_struct%next_nod,&
+        &                    inter_struct%size_node,&
+        &                    inter_struct%nb_voxel_on,&
+        &                    inter_struct%list_nb_voxel_on,&
+        &                    inter_struct%last_nod,&
         &                    x,&
         &                    stfn,&
         &                    xrem,&
-        &                    xyzm)
+        &                    inter_struct%box_limit_main)
+
           end if !itask == 0
 !$OMP BARRIER
 
@@ -231,7 +215,7 @@
 
           CALL INTER7_CANDIDATE_PAIRS(&
           &NSN     ,PREV_REMOTE_NUMBER ,NSNR     ,S_PREV_REMOTE_NUMBER  ,I_MEM   ,&
-          &IRECT   ,X        ,STF      ,STFN     ,XYZM    ,&
+          &IRECT   ,X        ,STF      ,XYZM    ,&
           &NSV     ,II_STOK  ,CAND_N   ,ESHIFT   ,CAND_E  ,&
           &NCONTACT,TZINF    ,GAP_S_L  ,GAP_M_L ,&
           &inter_struct%VOXEL  ,inter_struct%NBX      ,inter_struct%NBY      ,inter_struct%NBZ      ,&
@@ -242,10 +226,10 @@
           &FLAGREMNODE,DRAD   ,ITIED    ,CAND_F  ,&
           &DGAPLOAD, s_cand_a,&
           &TOTAL_NB_NRTM,  NUMNOD, XREM, SIZE(XREM,1),&
-          &IREM, size(irem,1), NEXT_NOD, inter_struct%nb_voxel_on, inter_struct%list_nb_voxel_on)
+          &IREM, size(irem,1), inter_struct%NEXT_NOD, inter_struct%nb_voxel_on, inter_struct%list_nb_voxel_on)
 
           IF(ITASK==0)  THEN
-            IF(ALLOCATED(NEXT_NOD)) DEALLOCATE(NEXT_NOD)
+            IF(ALLOCATED(inter_struct%NEXT_NOD)) DEALLOCATE(inter_struct%NEXT_NOD)
             IF(ALLOCATED(PREV_REMOTE_NUMBER)) DEALLOCATE(PREV_REMOTE_NUMBER)
             if(allocated(inter_struct%list_nb_voxel_on)) deallocate(inter_struct%list_nb_voxel_on)
 

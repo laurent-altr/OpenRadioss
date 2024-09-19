@@ -52,7 +52,6 @@
      &                                    irect        ,&
      &                                    x            ,&
      &                                    stf          ,&
-     &                                    stfn         ,&
      &                                    xyzm         ,&
      &                                    nsv          ,&
      &                                    ii_stok      ,&
@@ -105,7 +104,6 @@
      &                                   list_nb_voxel_on)
           USE COLLISION_MOD , ONLY : GROUP_SIZE
           USE INTER7_FILTER_CAND_MOD
-          USE FILL_VOXEL_MOD
           USE CONSTANT_MOD
 !-----------------------------------------------
           implicit none
@@ -172,7 +170,6 @@
           my_real, intent(inout) :: cand_p(mulnsn) !< penetration (???)
           my_real, intent(inout) :: cand_f(8*mulnsn) !< related to tied contact, cand force (???)
           my_real, intent(in) :: stf(nrtm) !< stiffness of segments (quadrangles or triangles)
-          my_real, intent(inout) :: stfn(nsn) !< stiffness secondary nodes
           my_real, intent(inout) :: xrem(s_xrem,nsnr) !< remote (spmd) real data
           integer, intent(inout) :: nb_voxel_on !< number of remote nodes in the bounding box
           integer, intent(inout) :: list_nb_voxel_on(nb_voxel_on)
@@ -1112,7 +1109,6 @@
      &                                    irect        ,&
      &                                    x            ,&
      &                                    stf          ,&
-     &                                    stfn         ,&
      &                                    xyzm         ,&
      &                                    nsv          ,&
      &                                    ii_stok      ,&

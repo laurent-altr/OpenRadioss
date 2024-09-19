@@ -74,7 +74,8 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
                 integer :: nbx, nby, nbz !< number of voxels in each direction is (nbx+2, nby+2, nbz+2)
                 integer :: nb_voxel_on !< number of non empty voxels
                 integer,dimension(:), allocatable :: list_nb_voxel_on !< list of non empty voxels
-                integer :: next_nod !< next_node(i) is the next node of node i in the same voxel cell
+                integer ::  size_node !< size of node arrays next_nod and last_nod
+                integer, dimension(:), allocatable :: next_nod !< next_node(i) is the next node of node i in the same voxel cell
                 integer, dimension(:), allocatable ::  last_nod
             END TYPE inter_struct_type  
         END MODULE INTER_STRUCT_MOD

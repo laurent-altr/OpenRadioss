@@ -68,6 +68,10 @@ C-----------------------------------------------
         USE INTBUFDEF_MOD  
         USE INTER_STRUCT_MOD
         USE INTER_SORTING_MOD
+        USE TRI7BOX
+        USE FILL_VOXEL_MOD, ONLY : FILL_VOXEL, FLAG_LOCAL, FLAG_REMOTE
+        USE VOXEL_DIMENSIONS_MOD, ONLY : COMPUTE_VOXEL_DIMENSIONS
+
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -113,6 +117,8 @@ C-----------------------------------------------
         INTEGER :: NB_REQUEST_COARSE_CELL   ! number of request for coarse cell comm
         INTEGER, DIMENSION(NB_INTER_SORTED) :: ARRAY_REQUEST_COARSE_CELL ! array of request
         INTEGER, DIMENSION(NB_INTER_SORTED) :: LIST_INTER_COARSE_CELL ! list of interface
+        my_real :: dummy_xrem(1,1)
+        integer :: nsn, nsnr, nrtm, nmn
 !   ----------------------------------------
 
         ! -----------------------------
@@ -250,7 +256,34 @@ C-----------------------------------------------
      .                 N,INTER_STRUCT,SORT_COMM,NODNX_SMS_SIZ,TEMP_SIZ)
 
                 ENDIF
-                CALL MY_BARRIER()
+!$OMP SINGLE
+                nrtm = IPARI(4,N)
+                nsn = IPARI(5,N)
+                nsnr = IPARI(24,N)
+                nmn = IPARI(6,N)
+                call compute_voxel_dimensions(nmn, nrtm, inter_struct(N))
+
+                call fill_voxel(FLAG_LOCAL, 
+     .                      nsn, 
+     .                      nsnr, 
+     .                      inter_struct(N)%nbx, 
+     .                      inter_struct(N)%nby, 
+     .                      inter_struct(N)%nbz, 
+     .                      nrtm,  
+     .                      1, 
+     .                      numnod, 
+     .                      intbuf_tab(N)%nsv, 
+     .                      inter_struct(N)%voxel, 
+     .                      inter_struct(N)%next_nod, 
+     .                      inter_struct(N)%size_node,
+     .                      inter_struct(N)%nb_voxel_on, 
+     .                      inter_struct(N)%list_nb_voxel_on, 
+     .                      inter_struct(N)%last_nod, 
+     .                      x, 
+     .                      intbuf_tab(N)%stfns, 
+     .                      dummy_xrem, 
+     .                      inter_struct(N)%box_limit_main)
+!$OMP END SINGLE
             ENDIF
             ! -----------------------------
         ENDDO
