@@ -205,6 +205,29 @@
             inter_struct%nb_voxel_on = nsn+nsnr
           endif
           call MY_BARRIER
+          if(itask==0.and.nrtm>0)then
+             call fill_voxel(&
+        &                    nsn,&
+        &                    nsnr,&
+        &                    nbx,&
+        &                    nby,&
+        &                    nbz,&
+        &                    nrtm,& 
+        &                    s_xrem,&
+        &                    numnod,&
+        &                    nsv,&
+        &                    voxel,&
+        &                    next_nod,&
+        &                    nb_voxel_on,&
+        &                    list_nb_voxel_on,&
+        &                    x,&
+        &                    stfn,&
+        &                    xrem,&
+        &                    xyzm)
+          end if !itask == 0
+!$OMP BARRIER
+
+
 
           CALL INTER7_CANDIDATE_PAIRS(&
           &NSN     ,PREV_REMOTE_NUMBER ,NSNR     ,S_PREV_REMOTE_NUMBER  ,I_MEM   ,&

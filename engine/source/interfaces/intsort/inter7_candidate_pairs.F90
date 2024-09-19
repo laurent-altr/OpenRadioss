@@ -220,31 +220,6 @@
           zmaxb = xyzm(12)
 
 
-!=======================================================================
-! 1   Add local nodes to the cells
-!=======================================================================
-          if(itask==0.and.total_nb_nrtm>0)then
-             call fill_voxel(&
-        &                    nsn,&
-        &                    nsnr,&
-        &                    nbx,&
-        &                    nby,&
-        &                    nbz,&
-        &                    nrtm,& 
-        &                    s_xrem,&
-        &                    numnod,&
-        &                    nsv,&
-        &                    voxel,&
-        &                    next_nod,&
-        &                    nb_voxel_on,&
-        &                    list_nb_voxel_on,&
-        &                    x,&
-        &                    stfn,&
-        &                    xrem,&
-        &                    xyzm)
-          end if !itask == 0
-!$OMP BARRIER
-
 
 !=======================================================================
 ! 3   FACE RECOVERY AND ENUMERATION OF CANDIDATE COUPLES
