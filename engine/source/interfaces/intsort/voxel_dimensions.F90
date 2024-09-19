@@ -112,7 +112,7 @@
               call my_alloc(inter_struct%voxel,res8)
               inter_struct%voxel_size = res8
             endif
-            do i=1,(nbx+2)*(nby+2)*(nbz+2)
+            do i=1,inter_struct%voxel_size
               inter_struct%voxel(i)=0
             enddo
             inter_struct%nbx = nbx

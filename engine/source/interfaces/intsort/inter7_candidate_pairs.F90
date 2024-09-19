@@ -436,7 +436,7 @@
 ! 5   VOXEL RESET
 !=======================================================================
 !$OMP BARRIER
-          if(total_nb_nrtm>0 .and. itask == 0) then
+          if(total_nb_nrtm>0 .and. itask == 0 .and. i_mem == 0) then
             do jj = 1, nb_voxel_on
               cellid = list_nb_voxel_on(jj)
               voxel(cellid) = 0
@@ -1003,7 +1003,7 @@
           my_real, dimension(:), allocatable :: stf !< stiffness of segments (quadrangles or triangles)
           my_real, dimension(:), allocatable :: stfn !< stiffness secondary nodes
           my_real, dimension(:), allocatable :: cand_f,cand_p
-          integer, allocatable :: nb_voxel_on
+          integer :: nb_voxel_on
           integer, dimension(:), allocatable :: list_nb_voxel_on
 
           integer OMP_GET_THREAD_NUM, OMP_GET_NUM_THREADS

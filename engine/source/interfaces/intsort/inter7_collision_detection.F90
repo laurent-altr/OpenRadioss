@@ -181,12 +181,31 @@
             if(nspmd>1.and.(inacti==5.or.inacti==6.or.inacti==7.or.ifq>0.or.itied/=0)) then
               CALL SPMD_OLDNUMCD(RENUM,PREV_REMOTE_NUMBER,S_PREV_REMOTE_NUMBER,NSNROLD)
             end if
-!           ALLOCATE(inter_struct%NEXT_NOD(NSN+NSNR))
-!           allocate(inter_struct%list_nb_voxel_on(nsn+nsnr))
-!           inter_struct%nb_voxel_on = nsn+nsnr
           endif
           call MY_BARRIER
           if(itask==0.and.nrtm>0)then
+!            call fill_voxel(FLAG_LOCAL,&
+!       &                    nsn,&
+!       &                    nsnr,&
+!       &                    inter_struct%nbx,&
+!       &                    inter_struct%nby,&
+!       &                    inter_struct%nbz,&
+!       &                    nrtm,& 
+!       &                    size(XREM,1),&
+!       &                    numnod,&
+!       &                    nsv,&
+!       &                    inter_struct%voxel,&
+!       &                    inter_struct%next_nod,&
+!       &                    inter_struct%size_node,&
+!       &                    inter_struct%nb_voxel_on,&
+!       &                    inter_struct%list_nb_voxel_on,&
+!       &                    inter_struct%last_nod,&
+!       &                    x,&
+!       &                    stfn,&
+!       &                    xrem,&
+!       &                    inter_struct%box_limit_main)
+
+ 
              call fill_voxel(FLAG_REMOTE,&
         &                    nsn,&
         &                    nsnr,&
@@ -229,11 +248,12 @@
           &IREM, size(irem,1), inter_struct%NEXT_NOD, inter_struct%nb_voxel_on, inter_struct%list_nb_voxel_on)
 
           IF(ITASK==0)  THEN
-            IF(ALLOCATED(inter_struct%NEXT_NOD)) DEALLOCATE(inter_struct%NEXT_NOD)
+!           IF(ALLOCATED(inter_struct%NEXT_NOD)) DEALLOCATE(inter_struct%NEXT_NOD)
             IF(ALLOCATED(PREV_REMOTE_NUMBER)) DEALLOCATE(PREV_REMOTE_NUMBER)
-            if(allocated(inter_struct%list_nb_voxel_on)) deallocate(inter_struct%list_nb_voxel_on)
+!           if(allocated(inter_struct%list_nb_voxel_on)) deallocate(inter_struct%list_nb_voxel_on)
 
           ENDIF
+
 !     I_MEM = 2 ==> Not enough memory
           IF (I_MEM ==2) RETURN
           IF(I_MEM==1)THEN

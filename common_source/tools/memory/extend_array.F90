@@ -28,7 +28,7 @@
         implicit none
         integer, parameter :: len_error_message = 100
         private :: build_error_message
-        private :: extend_integer_1d
+        private :: extend_array_integer_1d
         private :: check_error_and_write
         public :: extend_array
 
@@ -64,7 +64,6 @@
           end if
         end function build_error_message
 
-      !||====================================================================
         subroutine check_error_and_write(stat,msg)
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                     Arguments
@@ -85,7 +84,7 @@
         end subroutine check_error_and_write
 
 
-!! \brief Allocate a 1D array of real numbers
+!! \brief resize a 1D array of integer 
       !||====================================================================
       !||    extend_integer_1d        ../common_source/tools/memory/my_alloc.F
       !||--- calls      -----------------------------------------------------
@@ -120,7 +119,8 @@
             endif
             if(present(stat)) stat = ierr
             copy_size = oldsize
-            temp(1:copy_size) = a(1:copy_size)
+            if(copy_size >0) temp(1:copy_size) = a(1:copy_size)
+            temp(copy_size+1:newsize) = 0
             call move_alloc(temp, a)
           endif
         end subroutine extend_array_integer_1d

@@ -71,6 +71,7 @@ C-----------------------------------------------
         USE TRI7BOX
         USE FILL_VOXEL_MOD, ONLY : FILL_VOXEL, FLAG_LOCAL, FLAG_REMOTE
         USE VOXEL_DIMENSIONS_MOD, ONLY : COMPUTE_VOXEL_DIMENSIONS
+        USE COMMAND_LINE_ARGS_MOD, ONLY : GOT_PREVIEW
 
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
@@ -256,6 +257,8 @@ C-----------------------------------------------
      .                 N,INTER_STRUCT,SORT_COMM,NODNX_SMS_SIZ,TEMP_SIZ)
 
                 ENDIF
+            ENDIF
+            IF(NEED_TO_SORT > 0 .AND. GOT_PREVIEW==1) THEN
 !$OMP SINGLE
                 nrtm = IPARI(4,N)
                 nsn = IPARI(5,N)
@@ -289,7 +292,6 @@ C-----------------------------------------------
         ENDDO
         ! -----------------------------
         ! Fill the voxels with local seconadry nodes 
-
 
         ! -----------------------------
         ! wait comm S "send/rcv the colored cells"

@@ -45,6 +45,7 @@
         & xrem,&
         & box_limit_main)
           USE CONSTANT_MOD
+          USE EXTEND_ARRAY_MOD, ONLY : extend_array
 !-----------------------------------------------
           implicit none
 #include "my_real.inc"
@@ -107,14 +108,17 @@
 !=======================================================================
 ! 1   Add local nodes to the cells
 !=======================================================================
+
           if(nrtm > 0)then
+            if(.not. allocated(last_nod)) size_nod = 0
+            if(.not. allocated(next_nod)) size_nod = 0
+            if(.not. allocated(list_nb_voxel_on)) nb_voxel_on = 0
             if(flag == FLAG_LOCAL) then
               nb_voxel_on = 0
-              size_nod = nsn + nsnr
-              allocate(last_nod(size_nod))
-              allocate(next_nod(size_nod))
-              allocate(list_nb_voxel_on(size_nod))
-              write(6,*) 'nsn+nsnr',nsn+nsnr
+              call extend_array(last_nod, size_nod,nsn+nsnr)
+              call extend_array(next_nod, size_nod ,nsn+nsnr)
+              call extend_array(list_nb_voxel_on,size_nod,nsn+nsnr)
+              size_nod = nsn+nsnr
 
               do i=1,nsn
                 if(stfn(i) == zero)cycle
@@ -150,9 +154,12 @@
                   next_nod(i)     = 0 ! last one
                 endif
               enddo
-            elseif(flag == FLAG_REMOTE) then
-             write(6,*) 'nsn+nsnr',nsn+nsnr
-
+              
+            elseif(flag == FLAG_REMOTE .and. allocated(last_nod)) then
+              call extend_array(last_nod, size_nod ,nsn+nsnr)
+              call extend_array(next_nod, size_nod ,nsn+nsnr)
+              call extend_array(list_nb_voxel_on, nb_voxel_on,nsn+nsnr)
+              size_nod = nsn+nsnr
 
 !=======================================================================
 ! 2   Add remote (spmd) nodes to the cells
