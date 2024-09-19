@@ -114,11 +114,17 @@
             if(.not. allocated(next_nod)) size_nod = 0
             if(.not. allocated(list_nb_voxel_on)) nb_voxel_on = 0
             if(flag == FLAG_LOCAL) then
+
               nb_voxel_on = 0
               call extend_array(last_nod, size_nod,nsn+nsnr)
               call extend_array(next_nod, size_nod ,nsn+nsnr)
               call extend_array(list_nb_voxel_on,size_nod,nsn+nsnr)
+              next_nod = 0
+              list_nb_voxel_on = 0
               size_nod = nsn+nsnr
+              last_nod(1:nsn+nsnr) = 0
+              next_nod(1:nsn+nsnr) = 0
+              list_nb_voxel_on(1:nsn+nsnr) = 0
 
               do i=1,nsn
                 if(stfn(i) == zero)cycle

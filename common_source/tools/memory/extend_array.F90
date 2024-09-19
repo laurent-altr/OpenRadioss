@@ -122,6 +122,9 @@
             if(copy_size >0) temp(1:copy_size) = a(1:copy_size)
             temp(copy_size+1:newsize) = 0
             call move_alloc(temp, a)
+          else if(newsize == oldsize .and. newsize == 0 .and. .not. allocated(a)) then
+            allocate(a(1), stat=ierr)
+            if(present(stat)) stat = ierr
           endif
         end subroutine extend_array_integer_1d
 

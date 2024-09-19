@@ -253,7 +253,6 @@
 !           if(allocated(inter_struct%list_nb_voxel_on)) deallocate(inter_struct%list_nb_voxel_on)
 
           ENDIF
-
 !     I_MEM = 2 ==> Not enough memory
           IF (I_MEM ==2) RETURN
           IF(I_MEM==1)THEN
