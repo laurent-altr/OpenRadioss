@@ -162,6 +162,25 @@
           XYZM(4,2) = BMINMA(7)
           XYZM(5,2) = BMINMA(8)
           XYZM(6,2) = BMINMA(9)
+!! bounding box of the model
+!          xmin = xyzm(1)
+!          ymin = xyzm(2)
+!          zmin = xyzm(3)
+!          xmax = xyzm(4)
+!          ymax = xyzm(5)
+!          zmax = xyzm(6)
+!
+!! reduced bounding box of the model
+!! The reduced bounding box corresponds to voxel(2:nbx+1,2:nby+1,2:nbz+1), it contains cells of the same size
+!
+!          xminb = xyzm(7)
+!          yminb = xyzm(8)
+!          zminb = xyzm(9)
+!          xmaxb = xyzm(10)
+!          ymaxb = xyzm(11)
+!          zmaxb = xyzm(12)
+!
+
           I_MEM = 0
 !
           IF(INACTI==5.OR.INACTI==6.OR.INACTI==7.OR.&

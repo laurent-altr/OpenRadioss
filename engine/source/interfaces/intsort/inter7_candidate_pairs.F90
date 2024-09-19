@@ -224,7 +224,6 @@
 ! 1   Add local nodes to the cells
 !=======================================================================
           if(itask==0.and.total_nb_nrtm>0)then
-             call flush(6)
              call fill_voxel(&
         &                    nsn,&
         &                    nsnr,&
