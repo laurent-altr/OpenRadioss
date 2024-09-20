@@ -175,15 +175,15 @@
 ! Work on the reduced box
 
 
-        IF(ITASK == 0) THEN
-            ALLOCATE(PREV_REMOTE_NUMBER(S_PREV_REMOTE_NUMBER))
+        if(itask == 0) then
+            allocate(prev_remote_number(s_prev_remote_number))
             ! find the old id of remote candidate nodes (inactive, ifq, itied)
             if(nspmd>1.and.(inacti==5.or.inacti==6.or.inacti==7.or.ifq>0.or.itied/=0)) then
-              CALL SPMD_OLDNUMCD(RENUM,PREV_REMOTE_NUMBER,S_PREV_REMOTE_NUMBER,NSNROLD)
+              call spmd_oldnumcd(renum,prev_remote_number,s_prev_remote_number,nsnrold)
             end if
-          endif
-          call MY_BARRIER
-          if(itask==0.and.nrtm>0)then
+        endif
+!$OMP SINGLE
+          if(nrtm>0)then
 !            call fill_voxel(FLAG_LOCAL,&
 !       &                    nsn,&
 !       &                    nsnr,&
@@ -226,9 +226,8 @@
         &                    stfn,&
         &                    xrem,&
         &                    inter_struct%box_limit_main)
-
-          end if !itask == 0
-!$OMP BARRIER
+          ENDIF
+!$OMP END SINGLE
 
 
 

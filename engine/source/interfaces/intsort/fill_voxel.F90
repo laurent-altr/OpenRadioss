@@ -119,12 +119,13 @@
               call extend_array(last_nod, size_nod,nsn+nsnr)
               call extend_array(next_nod, size_nod ,nsn+nsnr)
               call extend_array(list_nb_voxel_on,size_nod,nsn+nsnr)
-              next_nod = 0
               list_nb_voxel_on = 0
-              size_nod = nsn+nsnr
-              last_nod(1:nsn+nsnr) = 0
-              next_nod(1:nsn+nsnr) = 0
-              list_nb_voxel_on(1:nsn+nsnr) = 0
+              size_nod = max(size_nod,nsn+nsnr)
+              if(nsn + nsnr > 0) then
+                last_nod(1:nsn+nsnr) = 0
+                next_nod(1:nsn+nsnr) = 0
+                list_nb_voxel_on(1:nsn+nsnr) = 0
+              endif
 
               do i=1,nsn
                 if(stfn(i) == zero)cycle
@@ -206,7 +207,7 @@
                 endif
               enddo
               deallocate(last_nod)
-            endif
-          endif
+            endif !< flag
+          endif !< nrtm
         END SUBROUTINE
       END MODULE FILL_VOXEL_MOD

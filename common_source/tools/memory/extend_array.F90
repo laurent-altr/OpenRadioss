@@ -29,12 +29,18 @@
         integer, parameter :: len_error_message = 100
         private :: build_error_message
         private :: extend_array_integer_1d
+        private :: reallocate_array_integer_1d
         private :: check_error_and_write
         public :: extend_array
 
+        !\extend the array, copy the values
         interface extend_array
           module procedure extend_array_integer_1d
         end interface extend_array
+        !\reallocate the array to a larger size if necessary, fill with zeros
+        interface reallocate_array
+          module procedure reallocate_array_integer_1d 
+        end interface reallocate_array
 
       contains
 
@@ -84,7 +90,7 @@
         end subroutine check_error_and_write
 
 
-!! \brief resize a 1D array of integer 
+!! \brief resize a 1D array of integer, copy the values 
       !||====================================================================
       !||    extend_integer_1d        ../common_source/tools/memory/my_alloc.F
       !||--- calls      -----------------------------------------------------
@@ -120,12 +126,51 @@
             if(present(stat)) stat = ierr
             copy_size = oldsize
             if(copy_size >0) temp(1:copy_size) = a(1:copy_size)
-            temp(copy_size+1:newsize) = 0
             call move_alloc(temp, a)
           else if(newsize == oldsize .and. newsize == 0 .and. .not. allocated(a)) then
             allocate(a(1), stat=ierr)
             if(present(stat)) stat = ierr
           endif
         end subroutine extend_array_integer_1d
+
+
+        subroutine reallocate_array_integer_1d(a, newsize, msg, stat)
+! ----------------------------------------------------------------------------------------------------------------------
+!                                                     Arguments
+! ----------------------------------------------------------------------------------------------------------------------
+          integer, dimension(:), allocatable, intent(inout) :: a !< The allocated array
+          integer, intent(in) :: newsize !< The new size of the array
+          character(len=len_error_message), optional, intent(in) :: msg !< The error message to print if the allocation fails
+          integer, optional, intent(out) :: stat !< The error code returned by the allocation
+! ----------------------------------------------------------------------------------------------------------------------
+!                                                   Local variables
+! ----------------------------------------------------------------------------------------------------------------------
+          integer :: ierr
+! ----------------------------------------------------------------------------------------------------------------------
+!                                                      Body
+! ----------------------------------------------------------------------------------------------------------------------
+          ! if the newsize is smaller than the old size, we do nothing except filling with zeros
+          if(newsize > size(a)) then
+            ierr = 0
+            if(allocated(a)) deallocate(a, stat=ierr)
+            if(.not. present(stat)) then
+              if(present(msg)) then
+                call check_error_and_write(ierr, msg=msg)
+              else
+                call check_error_and_write(ierr)
+              end if
+            endif
+            allocate(a(newsize), stat=ierr)
+            if(.not. present(stat)) then
+              if(present(msg)) then
+                call check_error_and_write(ierr, msg=msg)
+              else
+                call check_error_and_write(ierr)
+              end if
+            endif
+          endif
+          if(newsize > 0) a(1:newsize) = 0
+        end subroutine reallocate_array_integer_1d 
+
 
       end module extend_array_mod
