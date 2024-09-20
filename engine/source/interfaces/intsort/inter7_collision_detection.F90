@@ -66,7 +66,7 @@
           USE TRI7BOX
           USE INTER7_CANDIDATE_PAIRS_MOD
           USE MESSAGE_MOD
-          USE FILL_VOXEL_MOD, ONLY : FILL_VOXEL, FLAG_LOCAL, FLAG_REMOTE
+          USE FILL_VOXEL_MOD
           USE CONSTANT_MOD , ONLY : THREE_OVER_4
 !-----------------------------------------------
 !   I m p l i c i t   T y p e s
@@ -206,7 +206,7 @@
 !       &                    inter_struct%box_limit_main)
 
  
-             call fill_voxel(FLAG_REMOTE,&
+             call fill_voxel(FLAG_NONE,&
         &                    1, &
         &                    nsn,&
         &                    nsnr,&

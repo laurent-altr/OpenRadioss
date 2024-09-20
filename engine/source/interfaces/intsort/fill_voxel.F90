@@ -23,6 +23,7 @@
       MODULE FILL_VOXEL_MOD
         integer, parameter :: FLAG_REMOTE = 1
         integer, parameter :: FLAG_LOCAL = 0
+        integer, parameter :: FLAG_NONE = -1
       contains
         SUBROUTINE FILL_VOXEL(flag, &
         &  istart,&
@@ -73,7 +74,7 @@
           my_real, intent(in) :: stfn(nsn) !< secondary node stiffness
           my_real, intent(in) :: xrem(s_xrem,nsnr) !< remote node data
           my_real, intent(in) :: box_limit_main(12) !< bounding box of the main segments 
-          integer, dimension(:), allocatable, intent(inout) :: last_nod !< last node in the voxel
+          integer, dimension(:), allocatable, intent(inout) :: last_nod
 
 !-----------------------------------------------
 !   L o c a l   V a r i a b l e s
@@ -209,7 +210,132 @@
                 endif
               enddo
               deallocate(last_nod)
+            elseif (flag == FLAG_NONE) then
+              deallocate(last_nod)
             endif !< flag
           endif !< nrtm
         END SUBROUTINE
+        SUBROUTINE FILL_VOXEL_REMOTE( &
+        & istart,&
+        & iend,&
+        & nsn,&
+        & nsnr,&
+        & nbx,&
+        & nby,&
+        & nbz,&
+        & s_xrem,&
+        & voxel,&
+        & next_nod,&
+        & size_nod, &
+        & nb_voxel_on,&
+        & list_nb_voxel_on,&
+        & last_nod, &
+        & xrem,&
+        & box_limit_main)
+          USE CONSTANT_MOD
+          USE EXTEND_ARRAY_MOD, ONLY : extend_array
+!-----------------------------------------------
+          implicit none
+#include "my_real.inc"
+!-----------------------------------------------
+!   D u m m y   A r g u m e n t s
+!-----------------------------------------------
+          integer, intent(in), value :: istart !< starting index 
+          integer, intent(in), value :: iend !< ending index
+          integer, intent(in), value :: nsn !< number of local secondary nodes
+          integer, intent(in), value :: nsnr !< number of remote secondary nodes
+          integer, intent(in), value :: nbx !< number of cells in x direction
+          integer, intent(in), value :: nby !< number of cells in y direction
+          integer, intent(in), value :: nbz !< number of cells in z direction
+          integer, intent(in), value :: s_xrem !< number of double data for remote nodes
+          integer, intent(inout) :: voxel((nbx+2)*(nby+2)*(nbz+2)) !< voxel data structure
+          integer, dimension(:), allocatable, intent(inout) :: next_nod !< next node in the voxel
+          integer, intent(inout) :: size_nod !< size of the nod arrays
+          integer, intent(inout) :: nb_voxel_on !< number of voxels with nodes
+          integer, dimension(:), allocatable, intent(inout) :: list_nb_voxel_on !< list of voxels with nodes
+          my_real, intent(in) :: xrem(s_xrem,nsnr) !< remote node data
+          my_real, intent(in) :: box_limit_main(12) !< bounding box of the main segments 
+          integer, dimension(:), allocatable, intent(inout) :: last_nod
+!-----------------------------------------------
+!   L o c a l   V a r i a b l e s
+!-----------------------------------------------
+          integer :: i,j
+          my_real :: xmin, xmax, ymin, ymax, zmin, zmax
+          my_real :: xminb, xmaxb, yminb, ymaxb, zminb, zmaxb
+          integer :: ix, iy, iz
+          integer :: first, last
+          integer :: cellid
+
+! The global bounding box contains all the nodes
+! Some nodes may be highly distant from the impact zone
+! The domain is subdivided into cells (voxel)
+! All the cells have the same size, except the first and the last one in each direction
+
+! Bounding box of the model
+          xmin = box_limit_main(4)
+          ymin = box_limit_main(5)
+          zmin = box_limit_main(6)
+          xmax = box_limit_main(1)
+          ymax = box_limit_main(2)
+          zmax = box_limit_main(3)
+
+! reduced bounding box of the model
+! The reduced bounding box corresponds to voxel(2:nbx+1,2:nby+1,2:nbz+1), it contains cells of the same size
+          xminb = box_limit_main(10)
+          yminb = box_limit_main(11)
+          zminb = box_limit_main(12)
+          xmaxb = box_limit_main(7)
+          ymaxb = box_limit_main(8)
+          zmaxb = box_limit_main(9)
+
+!=======================================================================
+! 1   Add local nodes to the cells
+!=======================================================================
+            if(allocated(last_nod)) then
+              call extend_array(last_nod, size_nod ,nsn+nsnr)
+              call extend_array(next_nod, size_nod ,nsn+nsnr)
+              call extend_array(list_nb_voxel_on, nb_voxel_on,nsn+nsnr)
+              size_nod = max(size_nod,nsn+nsnr)
+!=======================================================================
+! 2   Add remote (spmd) nodes to the cells
+!=======================================================================
+              do j = istart, iend
+                if(xrem(1,j) < xmin)  cycle
+                if(xrem(1,j) > xmax)  cycle
+                if(xrem(2,j) < ymin)  cycle
+                if(xrem(2,j) > ymax)  cycle
+                if(xrem(3,j) < zmin)  cycle
+                if(xrem(3,j) > zmax)  cycle
+                ix=int(nbx*(xrem(1,j)-xminb)/(xmaxb-xminb))
+                iy=int(nby*(xrem(2,j)-yminb)/(ymaxb-yminb))
+                iz=int(nbz*(xrem(3,j)-zminb)/(zmaxb-zminb))
+                ix=max(1,2+min(nbx,ix))
+                iy=max(1,2+min(nby,iy))
+                iz=max(1,2+min(nbz,iz))
+
+                cellid = (iz-1)*(nbx+2)*(nby+2)+(iy-1)*(nbx+2)+ix
+
+                first = voxel(cellid)
+
+                if(first == 0)then
+                  nb_voxel_on = nb_voxel_on + 1
+                  list_nb_voxel_on( nb_voxel_on ) = cellid
+                  voxel(cellid) = nsn+j ! first
+                  next_nod(nsn+j)     = 0 ! last one
+                  last_nod(nsn+j)     = 0 ! no last
+                elseif(last_nod(first) == 0)then
+                  next_nod(first) = nsn+j  ! next
+                  last_nod(first) = nsn+j  ! last
+                  next_nod(nsn+j)  = 0     ! last one
+                else
+                  last = last_nod(first)  ! last node in this voxel
+                  next_nod(last)  = nsn+j ! next
+                  last_nod(first) = nsn+j ! last
+                  next_nod(nsn+j)     = 0 ! last one
+                endif
+              enddo
+              !deallocate(last_nod)
+            endif !< allocated last_nod 
+        END SUBROUTINE FILL_VOXEL_REMOTE
+
       END MODULE FILL_VOXEL_MOD
