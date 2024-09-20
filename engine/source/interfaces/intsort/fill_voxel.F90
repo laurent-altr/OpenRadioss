@@ -25,6 +25,7 @@
         integer, parameter :: FLAG_LOCAL = 0
       contains
         SUBROUTINE FILL_VOXEL(flag, &
+        &  istart,&
         &  nsn,&
         &  nsnr,&
         &  nbx,&
@@ -52,26 +53,27 @@
 !-----------------------------------------------
 !   D u m m y   A r g u m e n t s
 !-----------------------------------------------
-          integer, intent(in), value :: flag
-          integer, intent(in), value :: nsn
-          integer, intent(in), value :: nsnr
-          integer, intent(in), value :: nbx
-          integer, intent(in), value :: nby
-          integer, intent(in), value :: nbz
-          integer, intent(in), value :: nrtm
-          integer, intent(in), value :: s_xrem
-          integer, intent(in), value :: numnod
-          integer, intent(in) :: nsv(nsn)
-          integer, intent(inout) :: voxel((nbx+2)*(nby+2)*(nbz+2))
-          integer, dimension(:), allocatable, intent(inout) :: next_nod
-          integer, intent(inout) :: size_nod
-          integer, intent(inout) :: nb_voxel_on
-          integer, dimension(:), allocatable, intent(inout) :: list_nb_voxel_on
-          my_real, intent(in) :: x(3,numnod)
-          my_real, intent(in) :: stfn(nsn)
-          my_real, intent(in) :: xrem(s_xrem,nsnr)
-          my_real, intent(in) :: box_limit_main(12)
-          integer, dimension(:), allocatable, intent(inout) :: last_nod
+          integer, intent(in), value :: flag !< local or remote nodes
+          integer, intent(in), value :: istart !< starting index 
+          integer, intent(in), value :: nsn !< number of local secondary nodes
+          integer, intent(in), value :: nsnr !< number of remote secondary nodes
+          integer, intent(in), value :: nbx !< number of cells in x direction
+          integer, intent(in), value :: nby !< number of cells in y direction
+          integer, intent(in), value :: nbz !< number of cells in z direction
+          integer, intent(in), value :: nrtm !< number of segments (rectangles) 
+          integer, intent(in), value :: s_xrem !< number of double data for remote nodes
+          integer, intent(in), value :: numnod !< total number of nodes
+          integer, intent(in) :: nsv(nsn) !< secondary node list to global node list
+          integer, intent(inout) :: voxel((nbx+2)*(nby+2)*(nbz+2)) !< voxel data structure
+          integer, dimension(:), allocatable, intent(inout) :: next_nod !< next node in the voxel
+          integer, intent(inout) :: size_nod !< size of the nod arrays
+          integer, intent(inout) :: nb_voxel_on !< number of voxels with nodes
+          integer, dimension(:), allocatable, intent(inout) :: list_nb_voxel_on !< list of voxels with nodes
+          my_real, intent(in) :: x(3,numnod) !< global node coordinates
+          my_real, intent(in) :: stfn(nsn) !< secondary node stiffness
+          my_real, intent(in) :: xrem(s_xrem,nsnr) !< remote node data
+          my_real, intent(in) :: box_limit_main(12) !< bounding box of the main segments 
+          integer, dimension(:), allocatable, intent(inout) :: last_nod !< last node in the voxel
 
 !-----------------------------------------------
 !   L o c a l   V a r i a b l e s
@@ -127,7 +129,7 @@
                 list_nb_voxel_on(1:nsn+nsnr) = 0
               endif
 
-              do i=1,nsn
+              do i=istart,nsn
                 if(stfn(i) == zero)cycle
                 j=nsv(i)
                 if(x(1,j) < xmin)  cycle
@@ -166,12 +168,12 @@
               call extend_array(last_nod, size_nod ,nsn+nsnr)
               call extend_array(next_nod, size_nod ,nsn+nsnr)
               call extend_array(list_nb_voxel_on, nb_voxel_on,nsn+nsnr)
-              size_nod = nsn+nsnr
+              size_nod = max(size_nod,nsn+nsnr)
 
 !=======================================================================
 ! 2   Add remote (spmd) nodes to the cells
 !=======================================================================
-              do j = 1, nsnr
+              do j = istart, nsnr
                 if(xrem(1,j) < xmin)  cycle
                 if(xrem(1,j) > xmax)  cycle
                 if(xrem(2,j) < ymin)  cycle

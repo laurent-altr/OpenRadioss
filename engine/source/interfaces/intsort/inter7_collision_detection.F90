@@ -207,6 +207,7 @@
 
  
              call fill_voxel(FLAG_REMOTE,&
+        &                    1, &
         &                    nsn,&
         &                    nsnr,&
         &                    inter_struct%nbx,&

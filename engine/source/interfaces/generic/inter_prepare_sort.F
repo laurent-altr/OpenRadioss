@@ -267,6 +267,7 @@ C-----------------------------------------------
                 call compute_voxel_dimensions(nmn, nrtm, inter_struct(N))
 
                 call fill_voxel(FLAG_LOCAL, 
+     .                      1,
      .                      nsn, 
      .                      nsnr, 
      .                      inter_struct(N)%nbx, 
