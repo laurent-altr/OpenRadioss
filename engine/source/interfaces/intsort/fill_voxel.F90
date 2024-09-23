@@ -25,7 +25,7 @@
         integer, parameter :: FLAG_LOCAL = 0
         integer, parameter :: FLAG_NONE = -1
       contains
-        SUBROUTINE FILL_VOXEL(flag, &
+        SUBROUTINE FILL_VOXEL_LOCAL(&
         &  istart,&
         &  nsn,&
         &  nsnr,&
@@ -33,7 +33,6 @@
         &  nby,&
         &  nbz,&
         &  nrtm,&
-        &  s_xrem,&
         &  numnod,&
         & nsv,&
         & voxel,&
@@ -44,7 +43,6 @@
         & last_nod, &
         & x,&
         & stfn,&
-        & xrem,&
         & box_limit_main)
           USE CONSTANT_MOD
           USE EXTEND_ARRAY_MOD, ONLY : extend_array
@@ -54,7 +52,6 @@
 !-----------------------------------------------
 !   D u m m y   A r g u m e n t s
 !-----------------------------------------------
-          integer, intent(in), value :: flag !< local or remote nodes
           integer, intent(in), value :: istart !< starting index 
           integer, intent(in), value :: nsn !< number of local secondary nodes
           integer, intent(in), value :: nsnr !< number of remote secondary nodes
@@ -62,7 +59,6 @@
           integer, intent(in), value :: nby !< number of cells in y direction
           integer, intent(in), value :: nbz !< number of cells in z direction
           integer, intent(in), value :: nrtm !< number of segments (rectangles) 
-          integer, intent(in), value :: s_xrem !< number of double data for remote nodes
           integer, intent(in), value :: numnod !< total number of nodes
           integer, intent(in) :: nsv(nsn) !< secondary node list to global node list
           integer, intent(inout) :: voxel((nbx+2)*(nby+2)*(nbz+2)) !< voxel data structure
@@ -72,7 +68,6 @@
           integer, dimension(:), allocatable, intent(inout) :: list_nb_voxel_on !< list of voxels with nodes
           my_real, intent(in) :: x(3,numnod) !< global node coordinates
           my_real, intent(in) :: stfn(nsn) !< secondary node stiffness
-          my_real, intent(in) :: xrem(s_xrem,nsnr) !< remote node data
           my_real, intent(in) :: box_limit_main(12) !< bounding box of the main segments 
           integer, dimension(:), allocatable, intent(inout) :: last_nod
 
@@ -116,8 +111,6 @@
             if(.not. allocated(last_nod)) size_nod = 0
             if(.not. allocated(next_nod)) size_nod = 0
             if(.not. allocated(list_nb_voxel_on)) nb_voxel_on = 0
-            if(flag == FLAG_LOCAL) then
-
               nb_voxel_on = 0
               call extend_array(last_nod, size_nod,nsn+nsnr)
               call extend_array(next_nod, size_nod ,nsn+nsnr)
@@ -164,55 +157,6 @@
                   next_nod(i)     = 0 ! last one
                 endif
               enddo
-              
-            elseif(flag == FLAG_REMOTE .and. allocated(last_nod)) then
-              call extend_array(last_nod, size_nod ,nsn+nsnr)
-              call extend_array(next_nod, size_nod ,nsn+nsnr)
-              call extend_array(list_nb_voxel_on, nb_voxel_on,nsn+nsnr)
-              size_nod = max(size_nod,nsn+nsnr)
-
-!=======================================================================
-! 2   Add remote (spmd) nodes to the cells
-!=======================================================================
-              do j = istart, nsnr
-                if(xrem(1,j) < xmin)  cycle
-                if(xrem(1,j) > xmax)  cycle
-                if(xrem(2,j) < ymin)  cycle
-                if(xrem(2,j) > ymax)  cycle
-                if(xrem(3,j) < zmin)  cycle
-                if(xrem(3,j) > zmax)  cycle
-                ix=int(nbx*(xrem(1,j)-xminb)/(xmaxb-xminb))
-                iy=int(nby*(xrem(2,j)-yminb)/(ymaxb-yminb))
-                iz=int(nbz*(xrem(3,j)-zminb)/(zmaxb-zminb))
-                ix=max(1,2+min(nbx,ix))
-                iy=max(1,2+min(nby,iy))
-                iz=max(1,2+min(nbz,iz))
-
-                cellid = (iz-1)*(nbx+2)*(nby+2)+(iy-1)*(nbx+2)+ix
-
-                first = voxel(cellid)
-
-                if(first == 0)then
-                  nb_voxel_on = nb_voxel_on + 1
-                  list_nb_voxel_on( nb_voxel_on ) = cellid
-                  voxel(cellid) = nsn+j ! first
-                  next_nod(nsn+j)     = 0 ! last one
-                  last_nod(nsn+j)     = 0 ! no last
-                elseif(last_nod(first) == 0)then
-                  next_nod(first) = nsn+j  ! next
-                  last_nod(first) = nsn+j  ! last
-                  next_nod(nsn+j)  = 0     ! last one
-                else
-                  last = last_nod(first)  ! last node in this voxel
-                  next_nod(last)  = nsn+j ! next
-                  last_nod(first) = nsn+j ! last
-                  next_nod(nsn+j)     = 0 ! last one
-                endif
-              enddo
-              deallocate(last_nod)
-            elseif (flag == FLAG_NONE) then
-              deallocate(last_nod)
-            endif !< flag
           endif !< nrtm
         END SUBROUTINE
         SUBROUTINE FILL_VOXEL_REMOTE( &
@@ -291,7 +235,6 @@
 !=======================================================================
 ! 1   Add local nodes to the cells
 !=======================================================================
-            if(allocated(last_nod)) then
               call extend_array(last_nod, size_nod ,nsn+nsnr)
               call extend_array(next_nod, size_nod ,nsn+nsnr)
               call extend_array(list_nb_voxel_on, nb_voxel_on,nsn+nsnr)
@@ -335,7 +278,6 @@
                 endif
               enddo
               !deallocate(last_nod)
-            endif !< allocated last_nod 
         END SUBROUTINE FILL_VOXEL_REMOTE
 
       END MODULE FILL_VOXEL_MOD

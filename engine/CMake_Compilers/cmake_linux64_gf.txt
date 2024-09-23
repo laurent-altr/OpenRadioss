@@ -25,7 +25,7 @@ if ( DEFINED MPI )
   if ( mpiver STREQUAL "smp")
      set (mpi_suf "" )
   elseif ( mpiver STREQUAL "ompi")
-      set( unused_dummy_arg "-Werror=unused-dummy-argument") 
+#      set( unused_dummy_arg "-Werror=unused-dummy-argument") 
       set (mpi_inc "-I/opt/openmpi/include/")
       set (mpi_lib "-L/opt/openmpi/lib -lmpi -lmpi_mpifh" )
 
@@ -152,7 +152,7 @@ endif()
 
 set(opt_flag "${opt_flag} ${mumps_flag} ${mumps_inc}")
 #set( strict "-fallow-argument-mismatch -Waliasing -Wunused-dummy-argument -Werror=unused-dummy-argument -Wdo-subscript -Warray-bounds -Wtabs -Werror=tabs -pedantic-errors -Wsurprising -Wuse-without-only -Werror=use-without-only") 
-set( strict " -Werror=aliasing -Werror=unused-dummy-argument -Werror=do-subscript -Werror=array-bounds -Werror=tabs -Werror=surprising ")
+set( strict " -Werror=aliasing  -Werror=do-subscript -Werror=array-bounds -Werror=tabs -Werror=surprising ")
 set( strict_wo_mpi " -Werror=aliasing ${unused_dummy_arg} -Werror=do-subscript -Werror=array-bounds -Werror=tabs -Werror=surprising ") 
 
 

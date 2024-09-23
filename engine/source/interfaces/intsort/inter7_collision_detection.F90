@@ -206,27 +206,27 @@
 !       &                    inter_struct%box_limit_main)
 
  
-             call fill_voxel(FLAG_NONE,&
-        &                    1, &
-        &                    nsn,&
-        &                    nsnr,&
-        &                    inter_struct%nbx,&
-        &                    inter_struct%nby,&
-        &                    inter_struct%nbz,&
-        &                    nrtm,& 
-        &                    size(XREM,1),&
-        &                    numnod,&
-        &                    nsv,&
-        &                    inter_struct%voxel,&
-        &                    inter_struct%next_nod,&
-        &                    inter_struct%size_node,&
-        &                    inter_struct%nb_voxel_on,&
-        &                    inter_struct%list_nb_voxel_on,&
-        &                    inter_struct%last_nod,&
-        &                    x,&
-        &                    stfn,&
-        &                    xrem,&
-        &                    inter_struct%box_limit_main)
+!            call fill_voxel(FLAG_NONE,&
+!       &                    1, &
+!       &                    nsn,&
+!       &                    nsnr,&
+!       &                    inter_struct%nbx,&
+!       &                    inter_struct%nby,&
+!       &                    inter_struct%nbz,&
+!       &                    nrtm,& 
+!       &                    size(XREM,1),&
+!       &                    numnod,&
+!       &                    nsv,&
+!       &                    inter_struct%voxel,&
+!       &                    inter_struct%next_nod,&
+!       &                    inter_struct%size_node,&
+!       &                    inter_struct%nb_voxel_on,&
+!       &                    inter_struct%list_nb_voxel_on,&
+!       &                    inter_struct%last_nod,&
+!       &                    x,&
+!       &                    stfn,&
+!       &                    xrem,&
+!       &                    inter_struct%box_limit_main)
           ENDIF
 !$OMP END SINGLE
 
