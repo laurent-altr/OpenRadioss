@@ -198,23 +198,14 @@ C-----------------------------------------------
         ENDIF
         ! -----------------------------
 
+
+        IF(NEED_TO_SORT>0)THEN
+          IF(NSPMD > 0 .AND. ITASK == 0) THEN
         ! -----------------------------
         ! exchange of coarse_grid : waiting part + check if 2 processors need to communicate
-        IF(NSPMD>1.AND.NEED_TO_SORT>0)THEN
-            IF(ITASK==0) THEN
-                CALL SPMD_COARSE_CELL_EXCHANGE(NB_INTER_SORTED,LIST_INTER_SORTED,IRECVFROM,ISENDTO,2,
+           CALL SPMD_COARSE_CELL_EXCHANGE(NB_INTER_SORTED,LIST_INTER_SORTED,IRECVFROM,ISENDTO,2,
      .                       IPARI,SORT_COMM,NB_REQUEST_COARSE_CELL,ARRAY_REQUEST_COARSE_CELL,LIST_INTER_COARSE_CELL)
-            ENDIF
-        ENDIF
-        CALL MY_BARRIER()
-        ! -----------------------------
-
-        ! -----------------------------
-        ! exchange of number of colored cells (fine grid) + creation of voxel of secondary nodes
-!$OMP SINGLE
-        IF(NEED_TO_SORT>0)THEN
-          IF(NSPMD > 0) THEN
-          !$OMP TASK
+        !
           DO KK=1,NB_INTER_SORTED
             N = LIST_INTER_SORTED(KK)
             ! -----------------------------
@@ -250,9 +241,9 @@ C-----------------------------------------------
              ENDDO
             ENDIF
             ENDIF
-            !$OMP END TASK
+
             IF(NEED_TO_SORT > 0 .AND. GOT_PREVIEW==1) THEN
-            !$OMP TASKLOOP PRIVATE(KK,N,NSN,NSNR,NRTM,NMN)
+!$OMP SINGLE
             DO KK=1,NB_INTER_SORTED 
                 N = LIST_INTER_SORTED(KK)
                 nrtm = IPARI(4,N)
@@ -281,9 +272,8 @@ C-----------------------------------------------
      .                      intbuf_tab(N)%stfns, 
      .                      inter_struct(N)%box_limit_main)
             ENDDO   
-            !$OMP END TASKLOOP
-            ENDIF
 !$OMP END SINGLE
+            ENDIF
 
             ! -----------------------------
 
