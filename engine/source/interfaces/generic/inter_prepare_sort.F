@@ -211,35 +211,29 @@ C-----------------------------------------------
 
         ! -----------------------------
         ! exchange of number of colored cells (fine grid) + creation of voxel of secondary nodes
-        DO KK=1,NB_INTER_SORTED
+!$OMP SINGLE
+        IF(NEED_TO_SORT>0)THEN
+          IF(NSPMD > 0) THEN
+          !$OMP TASK
+          DO KK=1,NB_INTER_SORTED
             N = LIST_INTER_SORTED(KK)
             ! -----------------------------
             ! exchange of number of colored cells (fine grid)
-            IF(NSPMD>1.AND.NEED_TO_SORT>0)THEN
-                IF(ITASK==0) THEN
                     CALL SPMD_CELL_LIST_EXCHANGE(IRECVFROM,ISENDTO,1,WEIGHT,IAD_ELEM,
      .                 FR_ELEM,X,V,MS,TEMP,
      .                 KINET,NODNX_SMS,ITAB,INTBUF_TAB,IPARI,
      .                 N,INTER_STRUCT,SORT_COMM,NODNX_SMS_SIZ,TEMP_SIZ)   !   size of cell list
-                ENDIF
-                CALL MY_BARRIER()
-            ENDIF
             ! -----------------------------
 
             ! -----------------------------
             ! creation of voxel of secondary nodes 
             ! wait comm R "exchange of number of colored cells" & send/rcv the colored cells
-            IF(NSPMD>1.AND.NEED_TO_SORT>0)THEN
-                IF(ITASK==0) THEN
                     CALL INTER_VOXEL_CREATION(IPARI,INTBUF_TAB,X,N,SORT_COMM)! create the voxel of secondary nodes
                     CALL SPMD_CELL_LIST_EXCHANGE(IRECVFROM,ISENDTO,2,WEIGHT,IAD_ELEM,
      .                 FR_ELEM,X,V,MS,TEMP,
      .                 KINET,NODNX_SMS,ITAB,INTBUF_TAB,IPARI,
      .                 N,INTER_STRUCT,SORT_COMM,NODNX_SMS_SIZ,TEMP_SIZ) !   mpi wait size of cell list
 
-                ENDIF
-                CALL MY_BARRIER()
-            ENDIF
             ! -----------------------------
             
             ! -----------------------------
@@ -248,17 +242,19 @@ C-----------------------------------------------
             !             + comm of "number of secondary nodes needed by remote proc"
             !             + creation of the secondary node list 
             !             + initialize the S buffer of secondary node data (x & v)
-            IF(NSPMD>1.AND.NEED_TO_SORT>0)THEN
-                IF(ITASK==0) THEN
                     CALL SPMD_CELL_LIST_EXCHANGE(IRECVFROM,ISENDTO,3,WEIGHT,IAD_ELEM,
      .                 FR_ELEM,X,V,MS,TEMP,
      .                 KINET,NODNX_SMS,ITAB,INTBUF_TAB,IPARI,
      .                 N,INTER_STRUCT,SORT_COMM,NODNX_SMS_SIZ,TEMP_SIZ)
 
-                ENDIF
+             ENDDO
             ENDIF
+            ENDIF
+            !$OMP END TASK
             IF(NEED_TO_SORT > 0 .AND. GOT_PREVIEW==1) THEN
-!$OMP SINGLE
+            !$OMP TASKLOOP PRIVATE(KK,N,NSN,NSNR,NRTM,NMN)
+            DO KK=1,NB_INTER_SORTED 
+                N = LIST_INTER_SORTED(KK)
                 nrtm = IPARI(4,N)
                 nsn = IPARI(5,N)
                 nsnr = IPARI(24,N)
@@ -284,10 +280,13 @@ C-----------------------------------------------
      .                      x, 
      .                      intbuf_tab(N)%stfns, 
      .                      inter_struct(N)%box_limit_main)
-!$OMP END SINGLE
+            ENDDO   
+            !$OMP END TASKLOOP
             ENDIF
+!$OMP END SINGLE
+
             ! -----------------------------
-        ENDDO
+
         ! -----------------------------
         ! Fill the voxels with local seconadry nodes 
 

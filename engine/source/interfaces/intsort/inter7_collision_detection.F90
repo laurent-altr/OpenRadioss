@@ -66,7 +66,6 @@
           USE TRI7BOX
           USE INTER7_CANDIDATE_PAIRS_MOD
           USE MESSAGE_MOD
-          USE FILL_VOXEL_MOD
           USE CONSTANT_MOD , ONLY : THREE_OVER_4
 !-----------------------------------------------
 !   I m p l i c i t   T y p e s
