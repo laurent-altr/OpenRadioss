@@ -133,6 +133,7 @@ C-----------------------------------------------
                 INACTI = IPARI(22,N)        
                 TYPE18 = .FALSE.
                 IF(NTY == 7 .AND. INACTI ==7)TYPE18=.TRUE.
+                ! FILLS INTER_STRUCT%BOX_LIMIT_MAIN
                 CALL INTER_COUNT_NODE_CURV( N,ITASK,IPARI,INTBUF_TAB,
      1                                      X,INTER_STRUCT)
             ENDDO
@@ -226,26 +227,7 @@ C-----------------------------------------------
      .                 N,INTER_STRUCT,SORT_COMM,NODNX_SMS_SIZ,TEMP_SIZ) !   mpi wait size of cell list
 
             ! -----------------------------
-            
-            ! -----------------------------
-            ! wait comm R "send/rcv the colored cells" 
-            ! and compute the number of secondary nodes needed by remote proc 
-            !             + comm of "number of secondary nodes needed by remote proc"
-            !             + creation of the secondary node list 
-            !             + initialize the S buffer of secondary node data (x & v)
-                    CALL SPMD_CELL_LIST_EXCHANGE(IRECVFROM,ISENDTO,3,WEIGHT,IAD_ELEM,
-     .                 FR_ELEM,X,V,MS,TEMP,
-     .                 KINET,NODNX_SMS,ITAB,INTBUF_TAB,IPARI,
-     .                 N,INTER_STRUCT,SORT_COMM,NODNX_SMS_SIZ,TEMP_SIZ)
-
-             ENDDO
-            ENDIF
-            ENDIF
-
-            IF(NEED_TO_SORT > 0 .AND. GOT_PREVIEW==1) THEN
-!$OMP SINGLE
-            DO KK=1,NB_INTER_SORTED 
-                N = LIST_INTER_SORTED(KK)
+                if(GOT_PREVIEW == 1) THEN
                 nrtm = IPARI(4,N)
                 nsn = IPARI(5,N)
                 nsnr = IPARI(24,N)
@@ -271,9 +253,24 @@ C-----------------------------------------------
      .                      x, 
      .                      intbuf_tab(N)%stfns, 
      .                      inter_struct(N)%box_limit_main)
-            ENDDO   
-!$OMP END SINGLE
+                endif
+
+            
+            ! -----------------------------
+            ! wait comm R "send/rcv the colored cells" 
+            ! and compute the number of secondary nodes needed by remote proc 
+            !             + comm of "number of secondary nodes needed by remote proc"
+            !             + creation of the secondary node list 
+            !             + initialize the S buffer of secondary node data (x & v)
+                    CALL SPMD_CELL_LIST_EXCHANGE(IRECVFROM,ISENDTO,3,WEIGHT,IAD_ELEM,
+     .                 FR_ELEM,X,V,MS,TEMP,
+     .                 KINET,NODNX_SMS,ITAB,INTBUF_TAB,IPARI,
+     .                 N,INTER_STRUCT,SORT_COMM,NODNX_SMS_SIZ,TEMP_SIZ)
+
+             ENDDO
             ENDIF
+            ENDIF
+
 
             ! -----------------------------
 

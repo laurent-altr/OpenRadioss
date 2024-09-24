@@ -159,6 +159,156 @@
               enddo
           endif !< nrtm
         END SUBROUTINE
+ 
+       SUBROUTINE FILL_VOXEL_LOCAL_PARTIAL(&
+        & istart,&
+        & nsn,&
+        & nsv,&
+        & nsnr,&
+        & nrtm,&
+        & numnod,&
+        & x,&
+        & stfn,&
+        & s, &
+        & request)
+          USE INTER_STRUCT_MOD
+          USE CONSTANT_MOD
+          USE EXTEND_ARRAY_MOD, ONLY : extend_array
+!-----------------------------------------------
+          implicit none
+#include "my_real.inc"
+#ifdef MPI
+#include "mpif.h"
+#endif
+!-----------------------------------------------
+!   D u m m y   A r g u m e n t s
+!-----------------------------------------------
+          integer, intent(inout) :: istart !< starting index 
+          integer, intent(in), value :: nsn !< number of local secondary nodes
+          integer, intent(in) :: nsv(nsn) !< secondary node list to global node list 
+          integer, intent(in), value :: nsnr !< number of remote secondary nodes
+          integer, intent(in), value :: nrtm !< number of segments (rectangles) 
+          integer, intent(in), value :: numnod !< total number of nodes
+          my_real, intent(in) :: x(3,numnod) !< global node coordinates
+          my_real, intent(in) :: stfn(nsn) !< secondary node stiffness
+          TYPE(inter_struct_type), intent(inout) :: s !< structure for interface sorting comm
+          integer, intent(inout) :: request !< MPI request
+
+!-----------------------------------------------
+!   L o c a l   V a r i a b l e s
+!-----------------------------------------------
+          integer :: i,j
+          my_real :: xmin, xmax, ymin, ymax, zmin, zmax
+          my_real :: xminb, xmaxb, yminb, ymaxb, zminb, zmaxb
+          integer :: ix, iy, iz
+          integer :: first, last
+          integer :: cellid
+          integer, parameter :: chunk = 64
+          integer :: nchunks
+          integer :: chunk_size
+          integer :: ic, k
+          integer :: flag
+          integer :: ierr
+          flag = 0
+
+! The global bounding box contains all the nodes
+! Some nodes may be highly distant from the impact zone
+! The domain is subdivided into cells (voxel)
+! All the cells have the same size, except the first and the last one in each direction
+
+! Bounding box of the model
+          xmin = s%box_limit_main(4)
+          ymin = s%box_limit_main(5)
+          zmin = s%box_limit_main(6)
+          xmax = s%box_limit_main(1)
+          ymax = s%box_limit_main(2)
+          zmax = s%box_limit_main(3)
+
+! reduced bounding box of the model
+! The reduced bounding box corresponds to voxel(2:s%nbx+1,2:s%nby+1,2:s%nbz+1), it contains cells of the same size
+          xminb = s%box_limit_main(10)
+          yminb = s%box_limit_main(11)
+          zminb = s%box_limit_main(12)
+          xmaxb = s%box_limit_main(7)
+          ymaxb = s%box_limit_main(8)
+          zmaxb = s%box_limit_main(9)
+
+!=======================================================================
+! 1   Add local nodes to the cells
+!=======================================================================
+
+          if(nrtm > 0)then
+            if(.not. allocated(s%last_nod)) s%size_node = 0
+            if(.not. allocated(s%next_nod)) s%size_node = 0
+            if(.not. allocated(s%list_nb_voxel_on)) s%nb_voxel_on = 0
+              s%nb_voxel_on = 0
+              call extend_array(s%last_nod, s%size_node,nsn+nsnr)
+              call extend_array(s%next_nod, s%size_node ,nsn+nsnr)
+              call extend_array(s%list_nb_voxel_on,s%size_node,nsn+nsnr)
+              s%list_nb_voxel_on = 0
+              s%size_node = max(s%size_node,nsn+nsnr)
+              if(nsn + nsnr > 0) then
+                s%last_nod(1:nsn+nsnr) = 0
+                s%next_nod(1:nsn+nsnr) = 0
+                s%list_nb_voxel_on(1:nsn+nsnr) = 0
+              endif
+
+              !nchunks is the number of groups              
+              nchunks = (nsn + chunk - 1) / chunk
+              !do ic = istart, nchunks ! for each chunk
+               do while (flag == 0)
+# ifdef MPI
+                if(request /= MPI_REQUEST_NULL) then
+                  call MPI_Test(request, flag, MPI_STATUS_IGNORE, ierr)
+                endif
+#else
+                flag = 1
+#endif
+                if(flag == 0 .and. istart <= nchunks) then
+                  chunk_size = min(chunk, nsn - (istart-1)*chunk)
+                  do k=1,chunk_size
+                     i = (ic-1)*chunk + k 
+                     if(stfn(i) == zero)cycle
+                     j=nsv(i)
+                     if(x(1,j) < xmin)  cycle
+                     if(x(1,j) > xmax)  cycle
+                     if(x(2,j) < ymin)  cycle
+                     if(x(2,j) > ymax)  cycle
+                     if(x(3,j) < zmin)  cycle
+                     if(x(3,j) > zmax)  cycle
+                     ix=int(s%nbx*(x(1,j)-xminb)/(xmaxb-xminb))
+                     iy=int(s%nby*(x(2,j)-yminb)/(ymaxb-yminb))
+                     iz=int(s%nbz*(x(3,j)-zminb)/(zmaxb-zminb))
+                     ix=max(1,2+min(s%nbx,ix))
+                     iy=max(1,2+min(s%nby,iy))
+                     iz=max(1,2+min(s%nbz,iz))
+                     cellid = (iz-1)*(s%nbx+2)*(s%nby+2)+(iy-1)*(s%nbx+2)+ix
+                     first = s%voxel(cellid)
+                     if(first == 0)then
+                       s%nb_voxel_on = s%nb_voxel_on + 1
+                       s%list_nb_voxel_on(s%nb_voxel_on) = cellid
+                       s%voxel(cellid) = i ! first
+                       s%next_nod(i) = 0 ! last one
+                       s%last_nod(i) = 0 ! no last
+                     elseif(s%last_nod(first) == 0)then
+                       s%next_nod(first) = i ! next
+                       s%last_nod(first) = i ! last
+                       s%next_nod(i)     = 0 ! last one
+                     else
+                       last = s%last_nod(first) ! last node in this voxel
+                       s%next_nod(last)  = i ! next
+                       s%last_nod(first) = i ! last
+                       s%next_nod(i)     = 0 ! last one
+                     endif
+                  enddo !< k
+                  istart = istart + 1
+                else 
+                  flag = 1
+                endif !< flag
+            enddo
+          endif !< nrtm
+        END SUBROUTINE
+
         SUBROUTINE FILL_VOXEL_REMOTE( &
         & istart,&
         & iend,&
