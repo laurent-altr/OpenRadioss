@@ -37,7 +37,8 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
       !||    tri7box              ../engine/share/modules/tri7box.F
       !||====================================================================
       SUBROUTINE SPMD_CELL_EXCHANGE( NIN,ISENDTO,IRCVFROM,NSN,NSNR,IGAP,
-     1                               IFQ,INACTI,NSNFIOLD,INTTH,ITYP,
+     1                               IFQ,INACTI,NSNFIOLD,INTTH,ITYP,STFNS, NSV,
+     2                               NRTM, X,
      2                               ITIED,NMN,INTER_STRUCT,SORT_COMM, GOT_PREVIEW)
 !$COMMENT
 !       SPMD_CELL_EXCHANGE description :
@@ -85,6 +86,10 @@ C-----------------------------------------------
         INTEGER :: NMN
         TYPE(inter_struct_type), DIMENSION(NINTER), INTENT(inout) :: INTER_STRUCT   !   structure for interface
         TYPE(sorting_comm_type), DIMENSION(NINTER), INTENT(inout) :: SORT_COMM   ! structure for interface sorting comm
+        my_real :: stfns(nsn)
+        INTEGER :: NSV(NSN)
+        INTEGER :: NRTM
+        my_real :: X(3,NUMNOD)
 C-----------------------------------------------
 C   L o c a l  V a r i a b l e s
 C-----------------------------------------------
@@ -114,6 +119,7 @@ C-----------------------------------------------
       INTEGER :: ADRESS, LOCAL_RANK
       INTEGER :: SIZE_S
       INTEGER :: OFFSET(NSPMD)
+      INTEGER :: DUMMY(1)
 C-----------------------------------------------
 C   S o u r c e  L i n e s
 C-----------------------------------------------
@@ -135,7 +141,8 @@ C================================================================
       OFFSET(1:NSPMD) = NSNR+1 
 
 
-      IF(IRCVFROM(NIN,LOC_PROC)==0.AND.ISENDTO(NIN,LOC_PROC)==0) RETURN
+      IF(.NOT. (IRCVFROM(NIN,LOC_PROC)==0.AND.ISENDTO(NIN,LOC_PROC)==0))  THEN
+
       IF (IMONM > 0) CALL STARTIME(25,1)
 
       ! ---------------------------------------
@@ -197,6 +204,14 @@ C================================================================
         ENDIF
       ENDDO
 
+
+        ! -----------------------------
+        if(GOT_PREVIEW == 1) THEN
+        ! finish the last groups of secondary nodes, if any
+            CALL FILL_VOXEL_LOCAL_PARTIAL(nsn,nsv,nsnr,nrtm,numnod,x,stfns,INTER_STRUCT(NIN),DUMMY,0) 
+        ENDIF
+ 
+
       ! ---------------------------------------
       ! wait the rcv comm
       IF(IRCVFROM(NIN,LOC_PROC)/=0) THEN  !   nmn > 0
@@ -256,9 +271,17 @@ C================================================================
         ENDDO
       ENDIF
       ! ---------------------------------------
+      ELSE 
+
+        if(GOT_PREVIEW == 1) THEN
+        ! finish the last groups of secondary nodes, if any
+            CALL FILL_VOXEL_LOCAL_PARTIAL(nsn,nsv,nsnr,nrtm,numnod,x,stfns,INTER_STRUCT(NIN),DUMMY,0) 
+        ENDIF
+
+       ENDIF
 
       IF (IMONM > 0) CALL STOPTIME(25,1)
-C
 #endif
       RETURN
+
       END SUBROUTINE SPMD_CELL_EXCHANGE

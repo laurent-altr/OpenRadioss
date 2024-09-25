@@ -203,7 +203,8 @@ C -------------------------------------------------------------
             ! ---------------------------
             ! send/rcv the secondary node data
                 CALL SPMD_CELL_EXCHANGE( NIN,ISENDTO,IRCVFROM,NSN,NSNR,IPARI(21,NIN),
-     1                                   IFQ,INACTI,NSNFIOLD,IPARI(47,NIN),NTY,
+     1                                   IFQ,INACTI,NSNFIOLD,IPARI(47,NIN),NTY, intbuf_tab%stfns, intbuf_tab%nsv,
+     2                                   NRTM, X,
      2                                   ITIED,NMN,INTER_STRUCT,SORT_COMM, GOT_PREVIEW)
 C
                 IF(INACTI==5.OR.INACTI==6.OR.INACTI==7.OR.
