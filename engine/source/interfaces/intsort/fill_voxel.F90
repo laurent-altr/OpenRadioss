@@ -238,6 +238,7 @@
 !=======================================================================
 
           if(nrtm > 0)then
+
             if(s%istart == 1) then
             if(.not. allocated(s%last_nod)) s%size_node = 0
             if(.not. allocated(s%next_nod)) s%size_node = 0
@@ -265,6 +266,8 @@
                     call MPI_Testall(nrequests, requests, flag, MPI_STATUSES_IGNORE, ierr)
                   else
                     flag = 0 ! if no request: finish the job
+                    if((s%istart-1)*chunk+1 < nsn)write(6,*) 'start',(s%istart-1)*chunk+1,"nsn=",nsn,"nsnr=",nsnr
+
                   endif
 #else
                 flag = 0
