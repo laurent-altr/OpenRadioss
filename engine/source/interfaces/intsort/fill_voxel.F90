@@ -238,7 +238,7 @@
 !=======================================================================
 
           if(nrtm > 0)then
-           if((s%istart-1)*chunk+1 < nsn)write(6,*) 'start',(s%istart-1)*chunk+1,"nsn=",nsn,"nsnr=",nsnr
+           !if((s%istart-1)*chunk+1 < nsn)write(6,*) 'start',(s%istart-1)*chunk+1,"nsn=",nsn,"nsnr=",nsnr
 
             if(s%istart == 1) then
             if(.not. allocated(s%last_nod)) s%size_node = 0
@@ -396,7 +396,7 @@
 !=======================================================================
               call extend_array(last_nod, size_nod ,nsn+nsnr)
               call extend_array(next_nod, size_nod ,nsn+nsnr)
-              call extend_array(list_nb_voxel_on, nb_voxel_on,nsn+nsnr)
+              call extend_array(list_nb_voxel_on, size_nod,nsn+nsnr)
               size_nod = max(size_nod,nsn+nsnr)
 !=======================================================================
 ! 2   Add remote (spmd) nodes to the cells
