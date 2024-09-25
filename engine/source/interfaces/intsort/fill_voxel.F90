@@ -271,7 +271,6 @@
 #endif
                 if(flag == 0 .and. s%istart <= nchunks) then
                   chunk_size = min(chunk, nsn - (s%istart-1)*chunk)
-                  !write(6,*) flag,"i=",(s%istart-1)*chunk+1,"to",(s%istart-1)*chunk+chunk_size," / ",nsn
                   do k=1,chunk_size
                      i = (s%istart-1)*chunk + k
                      if(stfn(i) == zero)cycle
