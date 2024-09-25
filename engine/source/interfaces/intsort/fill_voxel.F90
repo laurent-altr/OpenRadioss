@@ -161,7 +161,6 @@
         END SUBROUTINE
  
        SUBROUTINE FILL_VOXEL_LOCAL_PARTIAL(&
-        & istart,&
         & nsn,&
         & nsv,&
         & nsnr,&
@@ -170,7 +169,8 @@
         & x,&
         & stfn,&
         & s, &
-        & request)
+        & requests, &
+        & nrequests)
           USE INTER_STRUCT_MOD
           USE CONSTANT_MOD
           USE EXTEND_ARRAY_MOD, ONLY : extend_array
@@ -183,7 +183,6 @@
 !-----------------------------------------------
 !   D u m m y   A r g u m e n t s
 !-----------------------------------------------
-          integer, intent(inout) :: istart !< starting index 
           integer, intent(in), value :: nsn !< number of local secondary nodes
           integer, intent(in) :: nsv(nsn) !< secondary node list to global node list 
           integer, intent(in), value :: nsnr !< number of remote secondary nodes
@@ -192,7 +191,8 @@
           my_real, intent(in) :: x(3,numnod) !< global node coordinates
           my_real, intent(in) :: stfn(nsn) !< secondary node stiffness
           TYPE(inter_struct_type), intent(inout) :: s !< structure for interface sorting comm
-          integer, intent(inout) :: request !< MPI request
+          integer, intent(in), value :: nrequests !< number of requests
+          integer, intent(inout) :: requests(nrequests) !< MPI request
 
 !-----------------------------------------------
 !   L o c a l   V a r i a b l e s
@@ -203,7 +203,7 @@
           integer :: ix, iy, iz
           integer :: first, last
           integer :: cellid
-          integer, parameter :: chunk = 64
+          integer, parameter :: chunk = 128
           integer :: nchunks
           integer :: chunk_size
           integer :: ic, k
@@ -238,6 +238,7 @@
 !=======================================================================
 
           if(nrtm > 0)then
+            if(s%istart == 1) then
             if(.not. allocated(s%last_nod)) s%size_node = 0
             if(.not. allocated(s%next_nod)) s%size_node = 0
             if(.not. allocated(s%list_nb_voxel_on)) s%nb_voxel_on = 0
@@ -252,22 +253,27 @@
                 s%next_nod(1:nsn+nsnr) = 0
                 s%list_nb_voxel_on(1:nsn+nsnr) = 0
               endif
+            endif
 
               !nchunks is the number of groups              
               nchunks = (nsn + chunk - 1) / chunk
               !do ic = istart, nchunks ! for each chunk
                do while (flag == 0)
 # ifdef MPI
-                if(request /= MPI_REQUEST_NULL) then
-                  call MPI_Test(request, flag, MPI_STATUS_IGNORE, ierr)
-                endif
+!                  call MPI_Test(request, flag, MPI_STATUS_IGNORE, ierr)
+                  if(nrequests > 0) then
+                    call MPI_Testall(nrequests, requests, flag, MPI_STATUSES_IGNORE, ierr)
+                  else
+                    flag = 0 ! if no request: finish the job
+                  endif
 #else
-                flag = 1
+                flag = 0
 #endif
-                if(flag == 0 .and. istart <= nchunks) then
-                  chunk_size = min(chunk, nsn - (istart-1)*chunk)
+                if(flag == 0 .and. s%istart <= nchunks) then
+                  chunk_size = min(chunk, nsn - (s%istart-1)*chunk)
+                  !write(6,*) flag,"i=",(s%istart-1)*chunk+1,"to",(s%istart-1)*chunk+chunk_size," / ",nsn
                   do k=1,chunk_size
-                     i = (ic-1)*chunk + k 
+                     i = (s%istart-1)*chunk + k
                      if(stfn(i) == zero)cycle
                      j=nsv(i)
                      if(x(1,j) < xmin)  cycle
@@ -301,7 +307,7 @@
                        s%next_nod(i)     = 0 ! last one
                      endif
                   enddo !< k
-                  istart = istart + 1
+                  s%istart = s%istart + 1
                 else 
                   flag = 1
                 endif !< flag

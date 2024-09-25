@@ -55,6 +55,7 @@
           integer :: i
 ! ----------------------------------------------------------------------------------------------------------------------
 
+          inter_struct%istart = 1 !< starting group
           if (nmn /= 0) then
             aaa = sqrt(nmn / &
             & ((inter_struct%box_limit_main(7) - inter_struct%box_limit_main(10)) *&

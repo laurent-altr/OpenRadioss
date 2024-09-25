@@ -69,7 +69,7 @@ C-----------------------------------------------
         USE INTER_STRUCT_MOD
         USE INTER_SORTING_MOD
         USE TRI7BOX
-        USE FILL_VOXEL_MOD, ONLY : FILL_VOXEL_LOCAL, FLAG_LOCAL, FLAG_REMOTE
+        USE FILL_VOXEL_MOD                                                  
         USE VOXEL_DIMENSIONS_MOD, ONLY : COMPUTE_VOXEL_DIMENSIONS
         USE COMMAND_LINE_ARGS_MOD, ONLY : GOT_PREVIEW
 
@@ -119,6 +119,7 @@ C-----------------------------------------------
         INTEGER, DIMENSION(NB_INTER_SORTED) :: ARRAY_REQUEST_COARSE_CELL ! array of request
         INTEGER, DIMENSION(NB_INTER_SORTED) :: LIST_INTER_COARSE_CELL ! list of interface
         integer :: nsn, nsnr, nrtm, nmn
+        integer :: DUMMY(1)
 !   ----------------------------------------
 
         ! -----------------------------
@@ -216,6 +217,13 @@ C-----------------------------------------------
      .                 KINET,NODNX_SMS,ITAB,INTBUF_TAB,IPARI,
      .                 N,INTER_STRUCT,SORT_COMM,NODNX_SMS_SIZ,TEMP_SIZ)   !   size of cell list
             ! -----------------------------
+                if(GOT_PREVIEW == 1) THEN
+                nrtm = IPARI(4,N)
+                nsn = IPARI(5,N)
+                nsnr = IPARI(24,N)
+                nmn = IPARI(6,N)
+                call compute_voxel_dimensions(nmn, nrtm, inter_struct(N))
+                endif
 
             ! -----------------------------
             ! creation of voxel of secondary nodes 
@@ -228,31 +236,29 @@ C-----------------------------------------------
 
             ! -----------------------------
                 if(GOT_PREVIEW == 1) THEN
-                nrtm = IPARI(4,N)
-                nsn = IPARI(5,N)
-                nsnr = IPARI(24,N)
-                nmn = IPARI(6,N)
-                call compute_voxel_dimensions(nmn, nrtm, inter_struct(N))
+                  CALL FILL_VOXEL_LOCAL_PARTIAL(nsn,intbuf_tab(n)%nsv,nsnr,nrtm,numnod,x,intbuf_tab(N)%stfns,INTER_STRUCT(N),
+     .                     sort_comm(n)%request_cell_rcv, sort_comm(n)%NB_REQUEST_CELL_RCV)
+ 
 
-                call fill_voxel_local( 
-     .                      1,
-     .                      nsn, 
-     .                      nsnr, 
-     .                      inter_struct(N)%nbx, 
-     .                      inter_struct(N)%nby, 
-     .                      inter_struct(N)%nbz, 
-     .                      nrtm,  
-     .                      numnod, 
-     .                      intbuf_tab(N)%nsv, 
-     .                      inter_struct(N)%voxel, 
-     .                      inter_struct(N)%next_nod, 
-     .                      inter_struct(N)%size_node,
-     .                      inter_struct(N)%nb_voxel_on, 
-     .                      inter_struct(N)%list_nb_voxel_on, 
-     .                      inter_struct(N)%last_nod, 
-     .                      x, 
-     .                      intbuf_tab(N)%stfns, 
-     .                      inter_struct(N)%box_limit_main)
+!               call fill_voxel_local( 
+!    .                      1,
+!    .                      nsn, 
+!    .                      nsnr, 
+!    .                      inter_struct(N)%nbx, 
+!    .                      inter_struct(N)%nby, 
+!    .                      inter_struct(N)%nbz, 
+!    .                      nrtm,  
+!    .                      numnod, 
+!    .                      intbuf_tab(N)%nsv, 
+!    .                      inter_struct(N)%voxel, 
+!    .                      inter_struct(N)%next_nod, 
+!    .                      inter_struct(N)%size_node,
+!    .                      inter_struct(N)%nb_voxel_on, 
+!    .                      inter_struct(N)%list_nb_voxel_on, 
+!    .                      inter_struct(N)%last_nod, 
+!    .                      x, 
+!    .                      intbuf_tab(N)%stfns, 
+!    .                      inter_struct(N)%box_limit_main)
                 endif
 
             
@@ -285,6 +291,12 @@ C-----------------------------------------------
             IF(NSPMD>1.AND.NEED_TO_SORT>0)THEN
                 IF(ITASK==0) THEN
                     ! wait comm S "send/rcv the colored cells"
+                if(GOT_PREVIEW == 1) THEN
+                  CALL FILL_VOXEL_LOCAL_PARTIAL(nsn,intbuf_tab(n)%nsv,nsnr,nrtm,numnod,x,intbuf_tab(N)%stfns,INTER_STRUCT(N),
+     .                     DUMMY, 0)
+                endif
+ 
+
                     CALL SPMD_CELL_LIST_EXCHANGE(IRECVFROM,ISENDTO,4,WEIGHT,IAD_ELEM,
      .                 FR_ELEM,X,V,MS,TEMP,
      .                 KINET,NODNX_SMS,ITAB,INTBUF_TAB,IPARI,

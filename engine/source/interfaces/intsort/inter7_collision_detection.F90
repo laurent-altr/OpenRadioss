@@ -62,6 +62,7 @@
 !   M o d u l e s
 !-----------------------------------------------
           USE voxel_dimensions_mod, only : compute_voxel_dimensions
+          USE FILL_VOXEL_MOD
           USE INTER_STRUCT_MOD
           USE TRI7BOX
           USE INTER7_CANDIDATE_PAIRS_MOD
@@ -141,6 +142,7 @@
           my_real XYZM(6,2), MARGE, AAA
           INTEGER NBX,NBY,NBZ ! number of cells in each direction
           INTEGER (KIND=8) :: NBX8,NBY8,NBZ8,RES8,LVOXEL8
+          INTEGER :: DUMMY(1)
 
 !-----------------------------------------------
 !   S o u r c e  L i n e s
@@ -183,6 +185,9 @@
         endif
 !$OMP SINGLE
           if(nrtm>0)then
+            ! finish to fill the voxel with local nondes
+            !     CALL FILL_VOXEL_LOCAL_PARTIAL(nsn,nsv,nsnr,nrtm,numnod,x,stfn,INTER_STRUCT, DUMMY, 0)
+
 !            call fill_voxel(FLAG_LOCAL,&
 !       &                    nsn,&
 !       &                    nsnr,&

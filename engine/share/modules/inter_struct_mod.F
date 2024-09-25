@@ -77,6 +77,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
                 integer ::  size_node !< size of node arrays next_nod and last_nod
                 integer, dimension(:), allocatable :: next_nod !< next_node(i) is the next node of node i in the same voxel cell
                 integer, dimension(:), allocatable ::  last_nod
+                integer :: istart !< next available space in next_nod and last_nod
             END TYPE inter_struct_type  
         END MODULE INTER_STRUCT_MOD
 

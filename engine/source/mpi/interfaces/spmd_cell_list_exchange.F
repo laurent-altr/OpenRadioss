@@ -320,10 +320,13 @@ C-----------------------------------------------
             IF(ISENDTO(NIN,LOC_PROC)/=0) ALREADY_SEND(1:NB_CELL_X,1:NB_CELL_Y,1:NB_CELL_Z) = .FALSE.
             ALLOCATE( INDEX_ALREADY_SEND(NB_CELL_X*NB_CELL_Y*NB_CELL_Z) )
             !   -------------------------
+               CALL MPI_WAITALL( SORT_COMM(NIN)%NB_REQUEST_CELL_RCV, SORT_COMM(NIN)%REQUEST_CELL_RCV,MPI_STATUSES_IGNORE,IERROR )
+
             DO KK=1,SORT_COMM(NIN)%NB_REQUEST_CELL_RCV
+                INDEX_R = KK 
                 !   wait the first message
-                CALL MPI_WAITANY( SORT_COMM(NIN)%NB_REQUEST_CELL_RCV,
-     .                            SORT_COMM(NIN)%REQUEST_CELL_RCV,INDEX_R,STATUS,IERROR )
+c               CALL MPI_WAITANY( SORT_COMM(NIN)%NB_REQUEST_CELL_RCV,
+c    .                            SORT_COMM(NIN)%REQUEST_CELL_RCV,INDEX_R,STATUS,IERROR )
 
                 REMOTE_PROC = SORT_COMM(NIN)%INDEX_RCV(INDEX_R)
                 IS_EXCHANGE_NEEDED = .TRUE.
@@ -333,7 +336,7 @@ C-----------------------------------------------
                 IF(ITIED/=0.AND.IRCVFROM(NIN,REMOTE_PROC)/=0)  IS_EXCHANGE_NEEDED = .TRUE.   ! itied option : force the exchange    
                 !   -------------------------
                 IF(IS_EXCHANGE_NEEDED) THEN
-                    !   send/rcv the number of secondary nodes
+                    !   ISEND the number of secondary nodes
                     !   prepare the S buffer of secondary nodes (x, v, temp ...)
                     CALL SPMD_CELL_SIZE_EXCHANGE(IRCVFROM,ISENDTO,WEIGHT,
      .                IAD_ELEM,FR_ELEM,X,V,MS,TEMP,KINET,NODNX_SMS,ITAB,INTBUF_TAB,IPARI,NIN,REMOTE_PROC,
