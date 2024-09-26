@@ -259,7 +259,8 @@ C-----------------------------------------------
                  if(GOT_PREVIEW == 1) THEN
                    nrtm = IPARI(4,N) ;   nsn = IPARI(5,N) ; nsnr = IPARI(24,N) ; nmn = IPARI(6,N)
                    call compute_voxel_dimensions(nmn, nrtm, inter_struct(N))
-                   CALL FILL_VOXEL_LOCAL_PARTIAL(nsn,intbuf_tab(n)%nsv,nsnr,nrtm,numnod,x,intbuf_tab(N)%stfns,INTER_STRUCT(N),DUMMY,0) 
+                   CALL FILL_VOXEL_LOCAL_PARTIAL(nsn,intbuf_tab(n)%nsv,nsnr,nrtm,numnod,x,
+     .                                           intbuf_tab(N)%stfns,INTER_STRUCT(N),DUMMY,0) 
                  ENDIF
               ENDDO
             ENDIF
