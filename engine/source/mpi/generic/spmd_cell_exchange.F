@@ -217,9 +217,9 @@ C================================================================
       IF(IRCVFROM(NIN,LOC_PROC)/=0) THEN  !   nmn > 0
        IF(NSNR>0) THEN   !   nsnr>0 only on proc with nmn>0
          DO L = 1, SORT_COMM(NIN)%NBIRECV
-          CALL MPI_WAITANY(SORT_COMM(NIN)%NBIRECV,REQ_RD,INDEXI,STATUS,IERROR)
+          CALL MPI_WAITANY(SORT_COMM(NIN)%NBIRECV,REQ_RD,INDEXI,STATUS,IERROR) !XREM
+
          ! CALL MPI_WAITANY(SORT_COMM(NIN)%NBIRECV,REQ_RD2,INDEXI,STATUS,IERROR)
-          CALL MPI_WAIT(REQ_RD2(INDEXI),STATUS,IERROR)
 
           if(GOT_PREVIEW==1) then
           call fill_voxel_remote(
@@ -240,6 +240,8 @@ C================================================================
      .                    xrem,
      .                    inter_struct(nin)%box_limit_main)
           endif
+          CALL MPI_WAIT(REQ_RD2(INDEXI),STATUS,IERROR) !IREM
+
     
          ENDDO
          !set specifics IREM and XREM indexes for INT24 sorting
