@@ -432,17 +432,17 @@
      &                   nsnr, nrtm, isznsnr,&
      &                   xrem ,s_xrem)
 
-!=======================================================================
-! 5   VOXEL RESET
-!=======================================================================
-!$OMP BARRIER
-          if(total_nb_nrtm>0 .and. itask == 0 .and. i_mem == 0) then
-            do jj = 1, nb_voxel_on
-              cellid = list_nb_voxel_on(jj)
-              voxel(cellid) = 0
-            enddo
-          endif
-!$OMP BARRIER
+!!=======================================================================
+!! 5   VOXEL RESET
+!!=======================================================================
+!!$OMP BARRIER
+!          if(total_nb_nrtm>0 .and. itask == 0 .and. i_mem == 0) then
+!            do jj = 1, nb_voxel_on
+!              cellid = list_nb_voxel_on(jj)
+!              voxel(cellid) = 0
+!            enddo
+!          endif
+!!$OMP BARRIER
 !=======================================================================
 ! 7   DEALLOCATE
 !=======================================================================
