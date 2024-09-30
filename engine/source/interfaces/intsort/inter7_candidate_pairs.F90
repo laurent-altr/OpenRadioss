@@ -190,8 +190,13 @@
           integer :: first, last
           integer, dimension(GROUP_SIZE) :: prov_n, prov_e !< temporary list of candidates
           integer :: cellid
+          integer :: nnz , ntot
 
 !$OMP BARRIER
+          if(nb_voxel_on == 0) then
+            write(6,*) "skip inter7_candidate_pairs"
+          return
+          endif
 
 ! The global bounding box contains all the nodes
 ! Some nodes may by higly distant from the impact zone
@@ -312,14 +317,18 @@
             iy2=max(1,2+min(nby,iy2))
             iz2=max(1,2+min(nbz,iz2))
 
+  
+            nnz = 0
+            ntot = 0
             do iz = iz1,iz2
               do iy = iy1,iy2
                 do ix = ix1,ix2
                   if(i_mem==2) cycle
                   cellid = (iz-1)*(nbx+2)*(nby+2)+(iy-1)*(nbx+2)+ix
                   jj = voxel(cellid)
+                  if(jj > 0) nnz = nnz + 1
                   do while(jj /= 0)
-
+                    ntot = ntot + 1
                     if(jj<=nsn)then
                       ! local node
                       nn=nsv(jj)
@@ -411,6 +420,7 @@
                 enddo ! x
               enddo  ! y
             enddo   ! z
+
             if(flagremnode == 2) then
               k = kremnod(2*(ne-1)+1)+1
               l = kremnod(2*(ne-1)+2)
