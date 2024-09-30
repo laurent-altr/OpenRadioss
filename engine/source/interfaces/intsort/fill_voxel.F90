@@ -203,7 +203,7 @@
           integer :: ix, iy, iz
           integer :: first, last
           integer :: cellid
-          integer, parameter :: chunk = 128
+          integer, parameter :: chunk = 32
           integer :: nchunks
           integer :: chunk_size
           integer :: ic, k
