@@ -325,6 +325,7 @@
             do iz = iz1,iz2
               do iy = iy1,iy2
                 ll = (iz-1)*(nbx+2)*(nby+2)+(iy-1)*(nbx+2)
+                if(ANY(voxel(ll+ix1:ll+ix2) /= 0)) then
                 do cellid = ll+ix1,ll+ix2
                   jj = voxel(cellid)
                   if(i_mem==2) cycle
@@ -427,6 +428,7 @@
                     jj = next_nod(jj)
                   enddo ! while(jj /= 0)
                 enddo ! x
+              endif
               enddo  ! y
             enddo   ! z
 
