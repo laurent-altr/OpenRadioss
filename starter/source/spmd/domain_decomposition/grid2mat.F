@@ -1002,9 +1002,11 @@ C
              IF(ICDDL/=0)RWD(NCOND*(I-1)+ICDDL)=RWD(NCOND*(I-1)+ICDDL)
      +                                         +DSDOF(N)*FAC
              IF(ICINTS/=0)
-     +         RWD(NCOND*(I-1)+ICINTS)=(RWD(NCOND*(I-1)+ICINTS)+ 1.0 * IWCONT(1,N))
+     +         RWD(NCOND*(I-1)+ICINTS)=RWD(NCOND*(I-1)+ICINTS)
+     +                                +IWCONT(1,N)*FAC
              IF(ICINTM/=0)
-     +         RWD(NCOND*(I-1)+ICINTM) = (RWD(NCOND*(I-1)+ICINTM) + 1.0 * IWCONT(2,N))
+     +         RWD(NCOND*(I-1)+ICINTM) = RWD(NCOND*(I-1)+ICINTM)
+     +                                 + IWCONT(2,N)*FAC
              IF(ICINT2/=0)
      +         RWD(NCOND*(I-1)+ICINT2)=RWD(NCOND*(I-1)+ICINT2)
      +                                +(IWCIN2(1,N)+IWCIN2(2,N))*FAC
@@ -1024,11 +1026,12 @@ C take care of non connected node
                NNC = NNC+ADSKY(N+1)-ADSKY(N)
                IF(ICDDL/=0)RWD(NCOND*(I-1)+ICDDL)=RWD(NCOND*(I-1)+ICDDL)
      +                                           +DSDOF(N)*FAC
-             IF(ICINTS/=0)
-     +         RWD(NCOND*(I-1)+ICINTS)=(RWD(NCOND*(I-1)+ICINTS)+ 1.0 * IWCONT(1,N))
-             IF(ICINTM/=0)
-     +         RWD(NCOND*(I-1)+ICINTM) = (RWD(NCOND*(I-1)+ICINTM) + 1.0 * IWCONT(2,N))
-
+               IF(ICINTS/=0)
+     +           RWD(NCOND*(I-1)+ICINTS)=RWD(NCOND*(I-1)+ICINTS)
+     +                                  +IWCONT(1,N)*FAC
+               IF(ICINTM/=0)
+     +           RWD(NCOND*(I-1)+ICINTM) = RWD(NCOND*(I-1)+ICINTM)
+     +                                   + IWCONT(2,N)*FAC
                IF(ICINT2/=0)
      +           RWD(NCOND*(I-1)+ICINT2)=RWD(NCOND*(I-1)+ICINT2)
      +                                  +(IWCIN2(1,N)+IWCIN2(2,N))*FAC
@@ -1051,12 +1054,12 @@ C take care of non connected node
             NNC = NNC+ADSKY(N+1)-ADSKY(N)
             IF(ICDDL/=0)RWD(NCOND*(I-1)+ICDDL)=RWD(NCOND*(I-1)+ICDDL)
      +                                        +DSDOF(N)*FAC
-             IF(ICINTS/=0)
-     +         RWD(NCOND*(I-1)+ICINTS)=(RWD(NCOND*(I-1)+ICINTS)+ 1.0 * IWCONT(1,N))
-             IF(ICINTM/=0)
-     +         RWD(NCOND*(I-1)+ICINTM) = (RWD(NCOND*(I-1)+ICINTM) + 1.0 * IWCONT(2,N))
-
-
+            IF(ICINTS/=0)
+     +        RWD(NCOND*(I-1)+ICINTS)=RWD(NCOND*(I-1)+ICINTS)
+     +                               +IWCONT(1,N)*FAC
+            IF(ICINTM/=0)
+     +        RWD(NCOND*(I-1)+ICINTM) = RWD(NCOND*(I-1)+ICINTM)
+     +                                + IWCONT(2,N)*FAC
             IF(ICINT2/=0)
      +        RWD(NCOND*(I-1)+ICINT2)=RWD(NCOND*(I-1)+ICINT2)
      +                               +(IWCIN2(1,N)+IWCIN2(2,N))*FAC
@@ -1091,13 +1094,12 @@ C
             NNC = NNC+ADSKY(N+1)-ADSKY(N)
             IF(ICDDL/=0)RWD(NCOND*(I+OFF-1)+ICDDL) =
      +                  RWD(NCOND*(I+OFF-1)+ICDDL) + DSDOF(N)*FAC
-             IF(ICINTS/=0)
-     +         RWD(NCOND*(I-1+OFF)+ICINTS)=(RWD(NCOND*(I-1+OFF)+ICINTS)+ 1.0 * IWCONT(1,N))
-             IF(ICINTM/=0)
-     +         RWD(NCOND*(I-1+OFF)+ICINTM) = (RWD(NCOND*(I-1+OFF)+ICINTM) + 1.0 * IWCONT(2,N))
-
-
-
+            IF(ICINTS/=0)
+     +        RWD(NCOND*(I+OFF-1)+ICINTS) = RWD(NCOND*(I+OFF-1)+ICINTS)
+     +                                    + IWCONT(1,N)*FAC
+            IF(ICINTM/=0)
+     +        RWD(NCOND*(I+OFF-1)+ICINTM) = RWD(NCOND*(I+OFF-1)+ICINTM)
+     +                                    + IWCONT(2,N)*FAC
             IF(ICINT2/=0)
      +        RWD(NCOND*(I+OFF-1)+ICINT2) = RWD(NCOND*(I+OFF-1)+ICINT2)
      +                                    + (IWCIN2(1,N)+IWCIN2(2,N))*FAC
@@ -1121,13 +1123,12 @@ C
             NNC = NNC+ADSKY(N+1)-ADSKY(N)
             IF(ICDDL/=0)RWD(NCOND*(I+OFF-1)+ICDDL)  = 
      +                  RWD(NCOND*(I+OFF-1)+ICDDL) + DSDOF(N)*FAC
-             IF(ICINTS/=0)
-     +         RWD(NCOND*(I-1+OFF)+ICINTS)=(RWD(NCOND*(I-1+OFF)+ICINTS)+ 1.0 * IWCONT(1,N))
-             IF(ICINTM/=0)
-     +         RWD(NCOND*(I-1+OFF)+ICINTM) = (RWD(NCOND*(I-1+OFF)+ICINTM) + 1.0 * IWCONT(2,N))
-
-
-
+            IF(ICINTS/=0)
+     +        RWD(NCOND*(I+OFF-1)+ICINTS) = RWD(NCOND*(I+OFF-1)+ICINTS)
+     +                                    + IWCONT(1,N)*FAC
+            IF(ICINTM/=0)
+     +        RWD(NCOND*(I+OFF-1)+ICINTM) = RWD(NCOND*(I+OFF-1)+ICINTM)
+     +                                    + IWCONT(2,N)*FAC
             IF(ICINT2/=0)
      +        RWD(NCOND*(I+OFF-1)+ICINT2) = RWD(NCOND*(I+OFF-1)+ICINT2)
      +                                    + (IWCIN2(1,N)+IWCIN2(2,N))*FAC
@@ -1151,11 +1152,12 @@ C
             NNC = NNC+ADSKY(N+1)-ADSKY(N)
             IF(ICDDL/=0)RWD(NCOND*(I+OFF-1)+ICDDL) = 
      +                  RWD(NCOND*(I+OFF-1)+ICDDL) + DSDOF(N)*FAC
-             IF(ICINTS/=0)
-     +         RWD(NCOND*(I-1+OFF)+ICINTS)=(RWD(NCOND*(I-1+OFF)+ICINTS) + 1.0 * IWCONT(1,N))
-             IF(ICINTM/=0)
-     +         RWD(NCOND*(I-1+OFF)+ICINTM) = (RWD(NCOND*(I-1+OFF)+ICINTM) + 1.0 * IWCONT(2,N))
-
+            IF(ICINTS/=0)
+     +        RWD(NCOND*(I+OFF-1)+ICINTS) = RWD(NCOND*(I+OFF-1)+ICINTS)
+     +                                    + IWCONT(1,N)*FAC
+            IF(ICINTM/=0)
+     +        RWD(NCOND*(I+OFF-1)+ICINTM) = RWD(NCOND*(I+OFF-1)+ICINTM)
+     +                                    + IWCONT(2,N)*FAC
             IF(ICINT2/=0)
      +        RWD(NCOND*(I+OFF-1)+ICINT2) = RWD(NCOND*(I+OFF-1)+ICINT2)
      +                                    + (IWCIN2(1,N)+IWCIN2(2,N))*FAC
@@ -1179,12 +1181,12 @@ C
             NNC = NNC+ADSKY(N+1)-ADSKY(N)
             IF(ICDDL/=0)RWD(NCOND*(I+OFF-1)+ICDDL) =
      +                  RWD(NCOND*(I+OFF-1)+ICDDL) + DSDOF(N)*FAC
-             IF(ICINTS/=0)
-     +         RWD(NCOND*(I-1+OFF)+ICINTS)=(RWD(NCOND*(I-1+OFF)+ICINTS) + 1.0 * IWCONT(1,N))
-             IF(ICINTM/=0)
-     +         RWD(NCOND*(I-1+OFF)+ICINTM) =(RWD(NCOND*(I-1+OFF)+ICINTM) + 1.0 * IWCONT(2,N))
-
-
+            IF(ICINTS/=0)
+     +        RWD(NCOND*(I+OFF-1)+ICINTS) = RWD(NCOND*(I+OFF-1)+ICINTS)
+     +                                    + IWCONT(1,N)*FAC
+            IF(ICINTM/=0)
+     +        RWD(NCOND*(I+OFF-1)+ICINTM) = RWD(NCOND*(I+OFF-1)+ICINTM)
+     +                                    + IWCONT(2,N)*FAC
             IF(ICINT2/=0)
      +        RWD(NCOND*(I+OFF-1)+ICINT2) = RWD(NCOND*(I+OFF-1)+ICINT2)
      +                                    + (IWCIN2(1,N)+IWCIN2(2,N))*FAC
@@ -1201,13 +1203,12 @@ C
             NNC = NNC+ADSKY(N+1)-ADSKY(N)
             IF(ICDDL/=0)RWD(NCOND*(I+OFF-1)+ICDDL) =
      +                  RWD(NCOND*(I+OFF-1)+ICDDL) + DSDOF(N)*FAC
-             IF(ICINTS/=0)
-     +         RWD(NCOND*(I-1+OFF)+ICINTS)=(RWD(NCOND*(I-1+OFF)+ICINTS)+ 1.0 * IWCONT(1,N))
-             IF(ICINTM/=0)
-     +         RWD(NCOND*(I-1+OFF)+ICINTM) = (RWD(NCOND*(I-1+OFF)+ICINTM) + 1.0 * IWCONT(2,N))
-
-
-
+            IF(ICINTS/=0)
+     +        RWD(NCOND*(I+OFF-1)+ICINTS) = RWD(NCOND*(I+OFF-1)+ICINTS)
+     +                                    + IWCONT(1,N)*FAC
+            IF(ICINTM/=0)
+     +        RWD(NCOND*(I+OFF-1)+ICINTM) = RWD(NCOND*(I+OFF-1)+ICINTM)
+     +                                    + IWCONT(2,N)*FAC
             IF(ICINT2/=0)
      +        RWD(NCOND*(I+OFF-1)+ICINT2) = RWD(NCOND*(I+OFF-1)+ICINT2)
      +                                    + (IWCIN2(1,N)+IWCIN2(2,N))*FAC
@@ -1231,12 +1232,12 @@ C
             NNC = NNC+ADSKY(N+1)-ADSKY(N)
             IF(ICDDL/=0)RWD(NCOND*(I+OFF-1)+ICDDL) =
      +                  RWD(NCOND*(I+OFF-1)+ICDDL) + DSDOF(N)*FAC
-             IF(ICINTS/=0)
-     +         RWD(NCOND*(I-1+OFF)+ICINTS)=RWD(NCOND*(I-1+OFF)+ICINTS)+ 1.0 * IWCONT(1,N)
-             IF(ICINTM/=0)
-     +         RWD(NCOND*(I-1+OFF)+ICINTM) = RWD(NCOND*(I-1+OFF)+ICINTM) + 1.0 * IWCONT(2,N)
-
-
+            IF(ICINTS/=0)
+     +        RWD(NCOND*(I+OFF-1)+ICINTS) = RWD(NCOND*(I+OFF-1)+ICINTS)
+     +                                    + IWCONT(1,N)*FAC
+            IF(ICINTM/=0)
+     +        RWD(NCOND*(I+OFF-1)+ICINTM) = RWD(NCOND*(I+OFF-1)+ICINTM)
+     +                                    + IWCONT(2,N)*FAC
             IF(ICINT2/=0)
      +        RWD(NCOND*(I+OFF-1)+ICINT2) = RWD(NCOND*(I+OFF-1)+ICINT2)
      +                                    + (IWCIN2(1,N)+IWCIN2(2,N))*FAC
@@ -1263,13 +1264,12 @@ C
             NNC = NNC+ADSKY(N+1)-ADSKY(N)
             IF(ICDDL/=0)RWD(NCOND*(I+OFF-1)+ICDDL) =
      +                  RWD(NCOND*(I+OFF-1)+ICDDL) + DSDOF(N)*FAC
-             IF(ICINTS/=0)
-     +         RWD(NCOND*(I-1+OFF)+ICINTS)=RWD(NCOND*(I-1+OFF)+ICINTS)+ 1.0 * IWCONT(1,N)
-             IF(ICINTM/=0)
-     +         RWD(NCOND*(I-1+OFF)+ICINTM) =RWD(NCOND*(I-1+OFF)+ICINTM)+ 1.0 * IWCONT(2,N)
-
-
-
+            IF(ICINTS/=0)
+     +        RWD(NCOND*(I+OFF-1)+ICINTS) = RWD(NCOND*(I+OFF-1)+ICINTS)
+     +                                    + IWCONT(1,N)*FAC
+            IF(ICINTM/=0)
+     +        RWD(NCOND*(I+OFF-1)+ICINTM) = RWD(NCOND*(I+OFF-1)+ICINTM)
+     +                                    + IWCONT(2,N)*FAC
             IF(ICINT2/=0)
      +        RWD(NCOND*(I+OFF-1)+ICINT2) = RWD(NCOND*(I+OFF-1)+ICINT2)
      +                                    + (IWCIN2(1,N)+IWCIN2(2,N))*FAC
