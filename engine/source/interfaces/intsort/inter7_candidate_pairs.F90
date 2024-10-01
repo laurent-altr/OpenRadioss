@@ -194,7 +194,6 @@
 
 !$OMP BARRIER
           if(nb_voxel_on == 0) then
-            write(6,*) "skip inter7_candidate_pairs"
           return
           endif
 
@@ -316,7 +315,12 @@
             ix2=max(1,2+min(nbx,ix2))
             iy2=max(1,2+min(nby,iy2))
             iz2=max(1,2+min(nbz,iz2))
-
+            
+            ! im1 = id secondary or -1 
+            ! im1 = inv_nsv(m1)
+            ! im2 = inv_nsv(m2)
+            ! im3 = inv_nsv(m3)
+            ! im4 = inv_nsv(m4)
   
             do iz = iz1,iz2
               do iy = iy1,iy2
@@ -329,10 +333,19 @@
                       ! local node
                       nn=nsv(jj)
 
+                      ! 
                       if(nn == m1)goto 200
                       if(nn == m2)goto 200
                       if(nn == m3)goto 200
                       if(nn == m4)goto 200
+
+
+                     !if(jj == im1)goto 200
+                     !if(jj == im2)goto 200
+                     !if(jj == im3)goto 200
+                     !if(jj == im4)goto 200
+
+
 
                       if(flagremnode == 2) then
                         if( tagremnode(nsv(jj)) == 1) goto 200
