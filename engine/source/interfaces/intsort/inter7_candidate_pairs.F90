@@ -190,7 +190,7 @@
           integer :: first, last
           integer, dimension(GROUP_SIZE) :: prov_n, prov_e !< temporary list of candidates
           integer :: cellid
-          integer :: ll
+          integer :: ll,llz
 
 !$OMP BARRIER
           if(nb_voxel_on == 0) then
@@ -323,12 +323,11 @@
             ! im4 = inv_nsv(m4)
   
             do iz = iz1,iz2
+              llz = (iz-1)*(nbx+2)*(nby+2)
               do iy = iy1,iy2
-                ll = (iz-1)*(nbx+2)*(nby+2)+(iy-1)*(nbx+2)
-                if(ANY(voxel(ll+ix1:ll+ix2) /= 0)) then
+                ll = llz + (iy-1)*(nbx+2)
                 do cellid = ll+ix1,ll+ix2
                   jj = voxel(cellid)
-                  if(i_mem==2) cycle
                   do while(jj /= 0)
                     if(jj<=nsn)then
                       ! local node
@@ -428,7 +427,6 @@
                     jj = next_nod(jj)
                   enddo ! while(jj /= 0)
                 enddo ! x
-              endif
               enddo  ! y
             enddo   ! z
 
