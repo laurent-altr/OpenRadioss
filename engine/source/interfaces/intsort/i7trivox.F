@@ -501,6 +501,7 @@ C=======================================================================
                 J_STOK = J_STOK + 1
                 PROV_N(J_STOK) = JJ
                 PROV_E(J_STOK) = NE
+                !write(6,*) "j_stok", J_STOK, "jj", JJ, "ne", NE
                 IF(J_STOK == NVSIZ)THEN
                   CALL I7STO(
      1               NVSIZ ,IRECT  ,X     ,NSV   ,II_STOK,

@@ -439,4 +439,247 @@
               !deallocate(last_nod)
         END SUBROUTINE FILL_VOXEL_REMOTE
 
+
+                SUBROUTINE ASSOCIATE_VOXEL_MAIN(s,&
+     &                                    irect        ,&
+     &                                    x            ,&
+     &                                    stf          ,&
+     &                                    tzinf        ,&
+     &                                    nrtm         ,&
+     &                                    igap         ,&
+     &                                    gap_m        ,&
+     &                                    gapmin       ,&
+     &                                    gapmax       ,&
+     &                                    marge        ,&
+     &                                    curv_max     ,&
+     &                                    bgapsmx      ,&
+     &                                    drad         ,&
+     &                                    dgapload     ,&
+     &                                    numnod       )
+          USE CONSTANT_MOD
+          USE INTER_STRUCT_MOD
+!-----------------------------------------------
+          implicit none
+#include "my_real.inc"
+!-----------------------------------------------
+!   D u m m y   A r g u m e n t s
+!-----------------------------------------------
+
+          TYPE(inter_struct_type), intent(inout) :: s !< structure for interface sorting comm
+          integer, target :: nrtm !< number of segments
+          integer, target :: igap !< gap model ?
+          integer, target :: numnod !< total number of nodes of the model
+          integer, target :: irect(4,nrtm) !< node id (from 1 to NUMNOD) for each segment (1:nrtm)
+          my_real, target :: gapmin !< minimum gap
+          my_real, target :: gapmax !< maximum gap
+          my_real, target :: bgapsmx!< overestimation of gap_s
+          my_real, target :: marge !< margin
+          my_real, target :: tzinf !< some kind of length for "zone of influence" ?
+          my_real, target :: drad !< radiation distance (thermal analysis)
+          my_real, target :: dgapload !< gap load (???)
+          my_real, target :: x(3,numnod) !< coordinates of nodes all
+          my_real, target :: gap_m(nrtm) !< gap for main nodes
+          my_real, target :: curv_max(nrtm) !< maximum curvature
+          my_real, target :: stf(nrtm) !< stiffness of segments (quadrangles or triangles)
+
+          s%ptr%nrtm => nrtm
+          s%ptr%igap => igap
+          !write(6,*) 'nrtm=',nrtm,'igap=',igap
+          s%ptr%numnod => numnod
+          s%ptr%irect => irect
+          s%ptr%gapmin => gapmin
+          s%ptr%gapmax => gapmax
+          s%ptr%bgapsmx => bgapsmx
+          s%ptr%marge => marge
+          s%ptr%tzinf => tzinf
+          s%ptr%drad => drad
+          s%ptr%dgapload => dgapload
+          s%ptr%x => x
+          s%ptr%gap_m => gap_m
+          s%ptr%curv_max => curv_max
+          s%ptr%stf => stf
+         
+          end subroutine ASSOCIATE_VOXEL_MAIN
+
+
+        SUBROUTINE FILL_VOXEL_MAIN(s)!,&
+!    &                                    irect        ,&
+!    &                                    x            ,&
+!    &                                    stf          ,&
+!    &                                    tzinf        ,&
+!    &                                    nrtm         ,&
+!    &                                    igap         ,&
+!    &                                    gap_m        ,&
+!    &                                    gapmin       ,&
+!    &                                    gapmax       ,&
+!    &                                    marge        ,&
+!    &                                    curv_max     ,&
+!    &                                    bgapsmx      ,&
+!    &                                    drad         ,&
+!    &                                    dgapload     ,&
+!    &                                    numnod       )
+          USE CONSTANT_MOD
+          USE INTER_STRUCT_MOD
+          USE MY_ALLOC_MOD, ONLY : my_alloc
+          use extend_array_mod, only : extend_array
+
+
+!-----------------------------------------------
+          implicit none
+#include "my_real.inc"
+!-----------------------------------------------
+!   D u m m y   A r g u m e n t s
+!-----------------------------------------------
+          TYPE(inter_struct_type), intent(inout) :: s !< structure for interface sorting comm
+!         integer, intent(in) :: nrtm !< number of segments
+!         integer, intent(in) :: igap !< gap model ?
+!         integer, intent(in) :: numnod !< total number of nodes of the model
+!         integer, intent(in) :: irect(4,nrtm) !< node id (from 1 to NUMNOD) for each segment (1:nrtm)
+!         my_real, intent(in) :: gapmin !< minimum gap
+!         my_real, intent(in) :: gapmax !< maximum gap
+!         my_real, intent(in) :: bgapsmx!< overestimation of gap_s
+!         my_real, intent(in) :: marge !< margin
+!         my_real, intent(in) :: tzinf !< some kind of length for "zone of influence" ?
+!         my_real, intent(in) :: drad !< radiation distance (thermal analysis)
+!         my_real, intent(in) :: dgapload !< gap load (???)
+!         my_real, intent(in) :: x(3,numnod) !< coordinates of nodes all
+!         my_real, intent(in) :: gap_m(nrtm) !< gap for main nodes
+!         my_real, intent(in) :: curv_max(nrtm) !< maximum curvature
+!         my_real, intent(in) :: stf(nrtm) !< stiffness of segments (quadrangles or triangles)
+
+!-----------------------------------------------
+!   L o c a l   V a r i a b l e s
+!-----------------------------------------------
+          integer :: i,j, nn, ne, k, l, jj, m
+          my_real :: xs, ys, zs, sx, sy, sz, s2
+          my_real :: xmin, xmax, ymin, ymax, zmin, zmax
+          my_real :: xx1, xx2, xx3, xx4, yy1, yy2, yy3, yy4, zz1, zz2, zz3, zz4
+          integer :: ix, iy, iz, m1, m2, m3, m4, ix1, iy1, iz1, ix2, iy2, iz2
+          my_real :: xminb, yminb, zminb, xmaxb, ymaxb, zmaxb, xmine, ymine, zmine, xmaxe, ymaxe, zmaxe, aaa
+          integer :: first, last
+          integer :: cellid
+          integer :: ll,llz
+
+! Bounding box of the model
+          xmin =s%box_limit_main(4)
+          ymin =s%box_limit_main(5)
+          zmin =s%box_limit_main(6)
+          xmax =s%box_limit_main(1)
+          ymax =s%box_limit_main(2)
+          zmax =s%box_limit_main(3)
+
+! reduced bounding box of the model
+! The reduced bounding box corresponds to voxel(2:nbx+1,2:nby+1,2:nbz+1), it contains cells of the same size
+          xminb =s%box_limit_main(10)
+          yminb =s%box_limit_main(11)
+          zminb =s%box_limit_main(12)
+          xmaxb =s%box_limit_main(7)
+          ymaxb =s%box_limit_main(8)
+          zmaxb =s%box_limit_main(9)
+
+!
+!=======================================================================
+! 3   FACE RECOVERY AND ENUMERATION OF CANDIDATE COUPLES
+!=======================================================================
+          do ne=1,s%ptr%nrtm
+            if(s%ptr%stf(ne) == zero)cycle ! the segment is deleted/eroded
+            if(s%ptr%igap == 0)then
+              aaa = s%ptr%tzinf+s%ptr%curv_max(ne)
+            else
+              aaa = s%ptr%marge+s%ptr%curv_max(ne)+max(min(s%ptr%gapmax,max(s%ptr%gapmin,s%ptr%bgapsmx+&
+              &s%ptr%gap_m(ne)))+s%ptr%dgapload,s%ptr%drad)
+            endif
+            m1 =s%ptr%irect(1,ne)
+            m2 =s%ptr%irect(2,ne)
+            m3 =s%ptr%irect(3,ne)
+            m4 =s%ptr%irect(4,ne)
+            xx1=s%ptr%x(1,m1)
+            xx2=s%ptr%x(1,m2)
+            xx3=s%ptr%x(1,m3)
+            xx4=s%ptr%x(1,m4)
+            xmaxe=max(xx1,xx2,xx3,xx4)
+            xmine=min(xx1,xx2,xx3,xx4)
+            yy1=s%ptr%x(2,m1)
+            yy2=s%ptr%x(2,m2)
+            yy3=s%ptr%x(2,m3)
+            yy4=s%ptr%x(2,m4)
+            ymaxe=max(yy1,yy2,yy3,yy4)
+            ymine=min(yy1,yy2,yy3,yy4)
+            zz1=s%ptr%x(3,m1)
+            zz2=s%ptr%x(3,m2)
+            zz3=s%ptr%x(3,m3)
+            zz4=s%ptr%x(3,m4)
+            zmaxe=max(zz1,zz2,zz3,zz4)
+            zmine=min(zz1,zz2,zz3,zz4)
+
+            ! surface (to trim candidate list)
+            sx = (yy3-yy1)*(zz4-zz2) - (zz3-zz1)*(yy4-yy2)
+            sy = (zz3-zz1)*(xx4-xx2) - (xx3-xx1)*(zz4-zz2)
+            sz = (xx3-xx1)*(yy4-yy2) - (yy3-yy1)*(xx4-xx2)
+            s2 = sx*sx + sy*sy + sz*sz
+
+            !find voxel_mains containing the bounding box of the segment
+            if(s%nbx>1) then
+              ix1=int(s%nbx*(xmine-aaa-xminb)/(xmaxb-xminb))
+              ix2=int(s%nbx*(xmaxe+aaa-xminb)/(xmaxb-xminb))
+            else
+              ix1=-2
+              ix2=1
+            endif
+
+            if(s%nby>1) then
+              iy1=int(s%nby*(ymine-aaa-yminb)/(ymaxb-yminb))
+              iy2=int(s%nby*(ymaxe+aaa-yminb)/(ymaxb-yminb))
+            else
+              iy1=-2
+              iy2=1
+            endif
+
+            if(s%nbz>1) then
+              iz1=int(s%nbz*(zmine-aaa-zminb)/(zmaxb-zminb))
+              iz2=int(s%nbz*(zmaxe+aaa-zminb)/(zmaxb-zminb))
+            else
+              iz1=-2
+              iz2=1
+            endif
+
+            ix1=max(1,2+min(s%nbx,ix1))
+            iy1=max(1,2+min(s%nby,iy1))
+            iz1=max(1,2+min(s%nbz,iz1))
+
+            ix2=max(1,2+min(s%nbx,ix2))
+            iy2=max(1,2+min(s%nby,iy2))
+            iz2=max(1,2+min(s%nbz,iz2))
+            
+            ! im1 = id secondary or -1 
+            ! im1 = inv_nsv(m1)
+            ! im2 = inv_nsv(m2)
+            ! im3 = inv_nsv(m3)
+            ! im4 = inv_nsv(m4)
+            do iz = iz1, iz2
+              do iy = iy1, iy2
+                do ix = ix1, ix2
+ 
+                cellid = (iz-1)*(s%nbx+2)*(s%nby+2)+(iy-1)*(s%nbx+2)+ix
+                ! append(s%main( compact_cellid(cellid) )%list,ne))
+                first = s%voxel_main(cellid)%nb + 1
+                if(.NOT. allocated(s%voxel_main(cellid)%list)) then
+                  call my_alloc(s%voxel_main(cellid)%list, 4)
+                end if
+                if(first > size(s%voxel_main(cellid)%list)) then
+                  call extend_array(s%voxel_main(cellid)%list, s%voxel_main(cellid)%nb , first*2)
+                endif
+                s%voxel_main(cellid)%nb = s%voxel_main(cellid)%nb + 1
+                s%voxel_main(cellid)%list(first) = ne
+ 
+                enddo ! x
+              enddo  ! y
+            enddo   ! z
+
+          enddo
+          return
+        end
+
+
+
       END MODULE FILL_VOXEL_MOD

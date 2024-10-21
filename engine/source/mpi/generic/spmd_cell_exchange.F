@@ -208,6 +208,7 @@ C================================================================
         ! -----------------------------
         if(GOT_PREVIEW == 1) THEN
         ! finish the last groups of secondary nodes, if any
+            CALL FILL_VOXEL_MAIN(INTER_STRUCT(NIN))
             CALL FILL_VOXEL_LOCAL_PARTIAL(nsn,nsv,nsnr,nrtm,numnod,x,stfns,INTER_STRUCT(NIN),DUMMY,0) 
         ENDIF
  

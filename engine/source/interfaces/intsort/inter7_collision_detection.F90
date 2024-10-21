@@ -236,12 +236,26 @@
 
 
 
-          CALL INTER7_CANDIDATE_PAIRS(&
+!         CALL INTER7_CANDIDATE_PAIRS(&
+!         &NSN     ,PREV_REMOTE_NUMBER ,NSNR     ,S_PREV_REMOTE_NUMBER  ,I_MEM   ,&
+!         &IRECT   ,X        ,STF      ,XYZM    ,&
+!         &NSV     ,II_STOK  ,CAND_N   ,ESHIFT   ,CAND_E  ,&
+!         &NCONTACT,TZINF    ,GAP_S_L  ,GAP_M_L ,&
+!         &inter_struct%VOXEL  ,inter_struct%NBX      ,inter_struct%NBY      ,inter_struct%NBZ      ,&
+!         &INACTI  ,IFQ      ,CAND_A,CAND_P   ,IFPEN   ,&
+!         &NRTM    ,NSNROLD  ,IGAP     ,GAP      ,GAP_S   ,&
+!         &GAP_M   ,GAPMIN   ,GAPMAX   ,MARGE    ,CURV_MAX,&
+!         &ITASK    ,BGAPSMX  ,S_KREMNOD, KREMNOD  ,S_REMNOD, REMNOD  ,&
+!         &FLAGREMNODE,DRAD   ,ITIED    ,CAND_F  ,&
+!         &DGAPLOAD, s_cand_a,&
+!         &TOTAL_NB_NRTM,  NUMNOD, XREM, SIZE(XREM,1),&
+!         &IREM, size(irem,1), inter_struct%NEXT_NOD, inter_struct%nb_voxel_on, inter_struct%list_nb_voxel_on)
+          CALL INTER7_CANDIDATE_PAIRS2(&
           &NSN     ,PREV_REMOTE_NUMBER ,NSNR     ,S_PREV_REMOTE_NUMBER  ,I_MEM   ,&
           &IRECT   ,X        ,STF      ,XYZM    ,&
           &NSV     ,II_STOK  ,CAND_N   ,ESHIFT   ,CAND_E  ,&
           &NCONTACT,TZINF    ,GAP_S_L  ,GAP_M_L ,&
-          &inter_struct%VOXEL  ,inter_struct%NBX      ,inter_struct%NBY      ,inter_struct%NBZ      ,&
+          &inter_struct%VOXEL, inter_struct%voxel_main  ,inter_struct%NBX      ,inter_struct%NBY      ,inter_struct%NBZ      ,&
           &INACTI  ,IFQ      ,CAND_A,CAND_P   ,IFPEN   ,&
           &NRTM    ,NSNROLD  ,IGAP     ,GAP      ,GAP_S   ,&
           &GAP_M   ,GAPMIN   ,GAPMAX   ,MARGE    ,CURV_MAX,&
@@ -249,7 +263,9 @@
           &FLAGREMNODE,DRAD   ,ITIED    ,CAND_F  ,&
           &DGAPLOAD, s_cand_a,&
           &TOTAL_NB_NRTM,  NUMNOD, XREM, SIZE(XREM,1),&
-          &IREM, size(irem,1), inter_struct%NEXT_NOD, inter_struct%nb_voxel_on, inter_struct%list_nb_voxel_on)
+          &IREM, size(irem,1), inter_struct%NEXT_NOD,inter_struct%nb_voxel_on, inter_struct%list_nb_voxel_on)
+
+
 
           IF(ITASK==0)  THEN
 !           IF(ALLOCATED(inter_struct%NEXT_NOD)) DEALLOCATE(inter_struct%NEXT_NOD)

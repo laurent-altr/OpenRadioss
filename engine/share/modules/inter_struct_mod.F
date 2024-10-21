@@ -45,6 +45,29 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
       !||====================================================================
         MODULE INTER_STRUCT_MOD
 #include      "my_real.inc"    
+
+
+            TYPE main_ptr
+              integer, pointer  :: nrtm !< number of segments
+              integer, pointer  :: igap !< gap model ?
+              integer, pointer  :: numnod !< total number of nodes of the model
+              integer, pointer :: irect(:,:) !< node id (from 1 to NUMNOD) for each segment (1:nrtm)
+              my_real, pointer :: gapmin !< minimum gap
+              my_real, pointer :: gapmax !< maximum gap
+              my_real, pointer :: bgapsmx!< overestimation of gap_s
+              my_real, pointer :: marge !< margin
+              my_real, pointer :: tzinf !< some kind of length for "zone of influence" ?
+              my_real, pointer :: drad !< radiation distance (thermal analysis)
+              my_real, pointer :: dgapload !< gap load (???)
+              my_real, pointer :: x(:,:) !< coordinates of nodes all
+              my_real, pointer :: gap_m(:) !< gap for main nodes
+              my_real, pointer :: curv_max(:) !< maximum curvature
+              my_real, pointer :: stf(:) !< stiffness of segments (quadrangles or triangles)
+            end TYPE main_ptr
+            type main_voxel
+              integer :: nb
+              integer, dimension(:), allocatable :: list
+            end type main_voxel
 !$COMMENT
 !       INTER_STRUCT_MOD :
 !              create the inter_struct_type
@@ -69,15 +92,17 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
                 INTEGER, DIMENSION(:), ALLOCATABLE :: NSNFIOLD
                 my_real, DIMENSION(12) :: BOX_LIMIT_MAIN
                 ! voxel structure
-                integer, dimension(:), allocatable :: voxel 
+                integer, dimension(:), allocatable :: voxel
                 integer :: voxel_size
                 integer :: nbx, nby, nbz !< number of voxels in each direction is (nbx+2, nby+2, nbz+2)
                 integer :: nb_voxel_on !< number of non empty voxels
                 integer,dimension(:), allocatable :: list_nb_voxel_on !< list of non empty voxels
                 integer ::  size_node !< size of node arrays next_nod and last_nod
                 integer, dimension(:), allocatable :: next_nod !< next_node(i) is the next node of node i in the same voxel cell
-                integer, dimension(:), allocatable ::  last_nod
+                integer, dimension(:), allocatable ::  last_nod             
                 integer :: istart !< next available space in next_nod and last_nod
+                TYPE(main_voxel), dimension(:), allocatable  :: voxel_main
+                TYPE(main_ptr) :: ptr
             END TYPE inter_struct_type  
         END MODULE INTER_STRUCT_MOD
 

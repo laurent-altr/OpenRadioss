@@ -109,17 +109,24 @@
 !$OMP SINGLE
           if(nrtm > 0) then
             if(allocated(inter_struct%voxel) .and. inter_struct%voxel_size < res8) deallocate(inter_struct%voxel)
+            if(allocated(inter_struct%voxel_main) .and. inter_struct%voxel_size < res8) deallocate(inter_struct%voxel_main)
+
+            inter_struct%nb_voxel_on = 0
             if(.not.allocated(inter_struct%voxel)) then
               call my_alloc(inter_struct%voxel,res8)
+              ALLOCATE(inter_struct%voxel_main(res8))
               inter_struct%voxel_size = res8
             endif
+
             do i=1,inter_struct%voxel_size
               inter_struct%voxel(i)=0
+              inter_struct%voxel_main(i)%nb=0
             enddo
             inter_struct%nbx = nbx
             inter_struct%nby = nby
             inter_struct%nbz = nbz
           else
+            inter_struct%nb_voxel_on = 0
             inter_struct%nbx = 0
             inter_struct%nby = 0
             inter_struct%nbz = 0

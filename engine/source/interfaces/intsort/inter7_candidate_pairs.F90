@@ -1190,6 +1190,453 @@
 
         end subroutine
 
+        SUBROUTINE INTER7_CANDIDATE_PAIRS2(&
+     &                                    nsn          ,&
+     &                                    oldnum       ,&
+     &                                    nsnr         ,&
+     &                                    isznsnr      ,&
+     &                                    i_mem        ,&
+     &                                    irect        ,&
+     &                                    x            ,&
+     &                                    stf          ,&
+     &                                    xyzm         ,&
+     &                                    nsv          ,&
+     &                                    ii_stok      ,&
+     &                                    cand_n       ,&
+     &                                    eshift       ,&
+     &                                    cand_e       ,&
+     &                                    mulnsn       ,&
+     &                                    tzinf        ,&
+     &                                    gap_s_l      ,&
+     &                                    gap_m_l      ,&
+     &                                    voxel_node        ,&
+     &                                    voxel_main,&
+     &                                    nbx          ,&
+     &                                    nby          ,&
+     &                                    nbz          ,&
+     &                                    inacti       ,&
+     &                                    ifq          ,&
+     &                                    cand_a       ,&
+     &                                    cand_p       ,&
+     &                                    ifpen        ,&
+     &                                    nrtm         ,&
+     &                                    nsnrold      ,&
+     &                                    igap         ,&
+     &                                    gap          ,&
+     &                                    gap_s        ,&
+     &                                    gap_m        ,&
+     &                                    gapmin       ,&
+     &                                    gapmax       ,&
+     &                                    marge        ,&
+     &                                    curv_max     ,&
+     &                                    itask        ,&
+     &                                    bgapsmx      ,&
+     &                                    s_kremnod    ,&
+     &                                    kremnod      ,&
+     &                                    s_remnod     ,&
+     &                                    remnod       ,&
+     &                                    flagremnode  ,&
+     &                                    drad         ,&
+     &                                    itied        ,&
+     &                                    cand_f       ,&
+     &                                    dgapload     ,&
+     &                                    s_cand_a     ,&
+     &                                    total_nb_nrtm,&
+     &                                    numnod       ,&
+     &                                    xrem         ,&
+     &                                    s_xrem       ,&
+     &                                    irem         ,&
+     &                                    s_irem       ,&
+     &                                    next_node      ,&
+     &                                    nb_voxel_node_on   ,&
+     &                                   list_nb_voxel_node_on)
+          USE COLLISION_MOD , ONLY : GROUP_SIZE
+          USE INTER7_FILTER_CAND_MOD
+          USE CONSTANT_MOD
+          USE inter_struct_mod, ONLY : main_voxel
+!-----------------------------------------------
+          implicit none
+#include "my_real.inc"
+!-----------------------------------------------
+!   D u m m y   A r g u m e n t s
+!-----------------------------------------------
+          integer, intent(inout) :: i_mem !< error code when not enough memory
+          integer, intent(in), value :: eshift !< openmp shift for main segments
+          integer, intent(in), value :: nsn !< number of node nodes
+          integer, intent(in), value :: nsnr !< current number of remote node nodes
+          integer, intent(in), value :: nsnrold !< old number of remote node nodes
+          integer, intent(in), value :: isznsnr !< size of oldnum
+          integer, intent(in), value :: nrtm !< number of considered segment
+          integer, intent(in), value :: total_nb_nrtm !< total number of segments
+          integer, intent(in), value :: itask !< id of the current task
+          integer, intent(in), value :: nbx !< number of voxel_nodes in x
+          integer, intent(in), value :: nby !< number of voxel_nodes in y
+          integer, intent(in), value :: nbz !< number of voxel_nodes in z
+          integer, intent(in), value :: inacti !< inactivation of initial penetrations
+          integer, intent(in), value :: ifq !< friction model ?
+          integer, intent(in), value :: igap !< gap model ?
+          integer, intent(in), value :: flagremnode !< flag for removed nodes?
+          integer, intent(in), value :: itied !< tied contact ?
+          integer, intent(in), value :: numnod !< total number of nodes of the model
+          integer, intent(in), value :: s_xrem !< size of xrem
+          integer, intent(in), value :: s_irem !< size of xrem
+          integer, intent(in), value :: s_cand_a !< size of cand_a
+          integer, intent(in), value :: s_kremnod !< 2 * nrtm + 1 if option is used
+          integer, intent(in), value :: s_remnod !< size of remnod
+          integer, intent(in), value :: mulnsn !< maximum numbrer of candidates (size of cand_n)
+          integer, intent(inout) :: ii_stok !< number of candidates found
+
+          integer, intent(in) :: nsv(nsn) !< global node node numbers
+          integer, intent(in) :: oldnum(isznsnr) !< renumbering ?
+          integer, intent(in) :: kremnod(s_kremnod) !< list of removed nodes
+          integer, intent(in) :: remnod(s_remnod) !< list of removed nodes
+          integer, intent(in) :: irect(4,nrtm) !< node id (from 1 to NUMNOD) for each segment (1:nrtm)
+
+          integer, intent(inout) :: cand_n(mulnsn) !< list of candidates (node)
+          integer, intent(inout) :: cand_e(mulnsn) !< list of candidates (main)
+          integer, intent(inout) :: ifpen(mulnsn) !< something related to friction (???)
+          integer, intent(inout) :: cand_a(s_cand_a) !< (???)
+          integer, intent(inout) :: irem(s_irem,nsnr) !< remote (spmd) integer data
+          integer, intent(inout) :: voxel_node((nbx+2)*(nby+2)*(nbz+2)) !< contain the first node of each voxel_node
+          type(main_voxel), intent(inout) :: voxel_main(*) !< contain the first main segment of each voxel_main
+          integer, intent(inout) :: next_node(nsn+nsnr) !< next node in the same voxel_node
+
+          my_real, intent(in), value :: gap !< gap (???)
+          my_real, intent(in), value :: gapmin !< minimum gap
+          my_real, intent(in), value :: gapmax !< maximum gap
+          my_real, intent(in), value :: bgapsmx!< overestimation of gap_s
+          my_real, intent(in), value :: marge !< margin
+          my_real, intent(in), value :: tzinf !< some kind of length for "zone of influence" ?
+          my_real, intent(in), value :: drad !< radiation distance (thermal analysis)
+          my_real, intent(in), value :: dgapload !< gap load (???)
+          my_real, intent(in) :: x(3,numnod) !< coordinates of nodes all
+          my_real, intent(in) :: gap_s(nsn) !< gap for node nodes
+          my_real, intent(in) :: gap_m(nrtm) !< gap for main nodes
+          my_real, intent(in) :: gap_s_l(nsn) !< gap for node nodes (???)
+          my_real, intent(in) :: gap_m_l(nrtm) !< gap for main nodes (???)
+          my_real, intent(in) :: curv_max(nrtm) !< maximum curvature
+          my_real, intent(in) :: xyzm(12) !< bounding box
+
+          my_real, intent(inout) :: cand_p(mulnsn) !< penetration (???)
+          my_real, intent(inout) :: cand_f(8*mulnsn) !< related to tied contact, cand force (???)
+          my_real, intent(in) :: stf(nrtm) !< stiffness of segments (quadrangles or triangles)
+          my_real, intent(inout) :: xrem(s_xrem,nsnr) !< remote (spmd) real data
+          integer, intent(inout) :: nb_voxel_node_on !< number of remote nodes in the bounding box
+          integer, intent(inout) :: list_nb_voxel_node_on(nb_voxel_node_on)
+
+!-----------------------------------------------
+!   L o c a l   V a r i a b l e s
+!-----------------------------------------------
+          integer :: i,j, nn, ne, k, l, j_stok, jj, delnod, m
+          integer, dimension(:), allocatable :: tagremnode
+          my_real :: xs, ys, zs, sx, sy, sz, s2
+          my_real :: xmin, xmax, ymin, ymax, zmin, zmax
+          my_real :: xx1, xx2, xx3, xx4, yy1, yy2, yy3, yy4, zz1, zz2, zz3, zz4
+          my_real :: d1x, d1y, d1z, d2x, d2y, d2z, dd1, dd2, d2, a2
+          integer, dimension(:), allocatable :: last_nod
+          integer :: ix, iy, iz, m1, m2, m3, m4, ix1, iy1, iz1, ix2, iy2, iz2
+          integer :: iix, iiy, iiz
+          my_real :: xminb, yminb, zminb, xmaxb, ymaxb, zmaxb, xmine, ymine, zmine, xmaxe, ymaxe, zmaxe, aaa
+          integer :: first, last
+          integer, dimension(GROUP_SIZE) :: prov_n, prov_e !< temporary list of candidates
+          integer :: cellid
+          integer :: lmain, ll,llz
+
+!$OMP BARRIER
+          if(nb_voxel_node_on == 0) then
+          return
+          endif
+
+! The global bounding box contains all the nodes
+! Some nodes may by higly distant from the impact zone
+! The domain is subdivided in cells (voxel_node)
+! All the cells have the sime size, except the first and the last one in each direction
+
+! bounding box of the model
+          xmin = xyzm(1)
+          ymin = xyzm(2)
+          zmin = xyzm(3)
+          xmax = xyzm(4)
+          ymax = xyzm(5)
+          zmax = xyzm(6)
+
+! reduced bounding box of the model
+! The reduced bounding box corresponds to voxel_node(2:nbx+1,2:nby+1,2:nbz+1), it contains cells of the same size
+
+          xminb = xyzm(7)
+          yminb = xyzm(8)
+          zminb = xyzm(9)
+          xmaxb = xyzm(10)
+          ymaxb = xyzm(11)
+          zmaxb = xyzm(12)
+
+
+
+!=======================================================================
+! 3   FACE RECOVERY AND ENUMERATION OF CANDIDATE COUPLES
+!=======================================================================
+          j_stok = 0
+          if(flagremnode == 2) then
+            allocate(tagremnode(numnod))
+            do i=1,numnod
+              tagremnode(i) = 0
+            enddo
+          endif
+!$OMP BARRIER
+!$OMP DO SCHEDULE(DYNAMIC)
+        do ll = 1, nb_voxel_node_on
+          cellid = list_nb_voxel_node_on(ll)
+!            ne = voxel_main(cellid)
+!            do while (ne /= 0) 
+            DO lmain = 1, voxel_main(cellid)%nb
+              ne = voxel_main(cellid)%list(lmain)
+              if(ne == 0)cycle
+!           if(stf(ne) == zero)cycle ! the segment is deleted/eroded
+            if(flagremnode == 2) then
+              k = kremnod(2*(ne-1)+1)+1
+              l = kremnod(2*(ne-1)+2)
+              do i=k,l
+                ! the segment ne cannot be in contact with the node remnod(i)
+                ! typically, remnod(i) contains nodes of neighboring elements
+                tagremnode(remnod(i)) = 1
+              enddo
+            endif
+            if(igap == 0)then
+              aaa = tzinf+curv_max(ne)
+            else
+              aaa = marge+curv_max(ne)+max(min(gapmax,max(gapmin,bgapsmx+gap_m(ne)))+dgapload,drad)
+            endif
+
+
+
+            m1 = irect(1,ne)
+            m2 = irect(2,ne)
+            m3 = irect(3,ne)
+            m4 = irect(4,ne)
+
+            xx1=x(1,m1)
+            xx2=x(1,m2)
+            xx3=x(1,m3)
+            xx4=x(1,m4)
+            xmaxe=max(xx1,xx2,xx3,xx4)
+            xmine=min(xx1,xx2,xx3,xx4)
+
+            yy1=x(2,m1)
+            yy2=x(2,m2)
+            yy3=x(2,m3)
+            yy4=x(2,m4)
+            ymaxe=max(yy1,yy2,yy3,yy4)
+            ymine=min(yy1,yy2,yy3,yy4)
+
+            zz1=x(3,m1)
+            zz2=x(3,m2)
+            zz3=x(3,m3)
+            zz4=x(3,m4)
+            zmaxe=max(zz1,zz2,zz3,zz4)
+            zmine=min(zz1,zz2,zz3,zz4)
+
+            ! surface (to trim candidate list)
+            sx = (yy3-yy1)*(zz4-zz2) - (zz3-zz1)*(yy4-yy2)
+            sy = (zz3-zz1)*(xx4-xx2) - (xx3-xx1)*(zz4-zz2)
+            sz = (xx3-xx1)*(yy4-yy2) - (yy3-yy1)*(xx4-xx2)
+            s2 = sx*sx + sy*sy + sz*sz
+                  jj = voxel_node(cellid)
+                  do while(jj /= 0)
+                    if(jj<=nsn)then
+                      ! local node
+                      nn=nsv(jj)
+
+                      ! 
+                      if(nn == m1)goto 200
+                      if(nn == m2)goto 200
+                      if(nn == m3)goto 200
+                      if(nn == m4)goto 200
+
+
+                     !if(jj == im1)goto 200
+                     !if(jj == im2)goto 200
+                     !if(jj == im3)goto 200
+                     !if(jj == im4)goto 200
+
+
+
+                      if(flagremnode == 2) then
+                        if( tagremnode(nsv(jj)) == 1) goto 200
+                      endif
+                      xs = x(1,nn)
+                      ys = x(2,nn)
+                      zs = x(3,nn)
+                      if(igap /= 0)then
+                        aaa = marge+curv_max(ne)+max(min(gapmax,max(gapmin,gap_s(jj)+gap_m(ne)))+dgapload,drad)
+                      endif
+                    else
+                      ! remote (SPMD) node: data are stored in irem/xrem (communicated earlier)
+                      j=jj-nsn
+                      delnod = 0
+                      if(flagremnode == 2) then
+                        k = kremnod(2*(ne-1)+2) + 1
+                        l = kremnod(2*(ne-1)+3)
+                        do m=k,l
+                          if(remnod(m) == -irem(2,j) ) then
+                            delnod = delnod + 1
+                            exit
+                          endif
+                        enddo
+                        if(delnod /= 0)goto 200
+                      endif
+
+                      xs = xrem(1,j)
+                      ys = xrem(2,j)
+                      zs = xrem(3,j)
+                      if(igap /= 0)then
+                        aaa = marge+curv_max(ne)+max(min(gapmax,max(gapmin,xrem(9,j)+gap_m(ne)))+dgapload,drad)
+                      endif
+                    endif
+
+                    if(xs<=xmine-aaa)goto 200
+                    if(xs>=xmaxe+aaa)goto 200
+                    if(ys<=ymine-aaa)goto 200
+                    if(ys>=ymaxe+aaa)goto 200
+                    if(zs<=zmine-aaa)goto 200
+                    if(zs>=zmaxe+aaa)goto 200
+
+                    ! underestimation of the distance**2 to eliminate candidates
+
+                    d1x = xs - xx1
+                    d1y = ys - yy1
+                    d1z = zs - zz1
+                    d2x = xs - xx2
+                    d2y = ys - yy2
+                    d2z = zs - zz2
+                    dd1 = d1x*sx+d1y*sy+d1z*sz
+                    dd2 = d2x*sx+d2y*sy+d2z*sz
+                    if(dd1*dd2 > zero)then
+                      d2 = min(dd1*dd1,dd2*dd2)
+                      a2 = aaa*aaa*s2
+                      if(d2 > a2)goto 200
+                    endif
+
+                    j_stok = j_stok + 1
+                    prov_n(j_stok) = jj
+                    prov_e(j_stok) = ne
+
+                    if(j_stok == GROUP_SIZE) then 
+                       ! filter prov_n, prov_e and append to cand_n, cand_e
+                       if(i_mem == 0) call inter7_filter_cand(&
+     &                   j_stok,irect  ,x     ,nsv   ,ii_stok,&
+     &                   cand_n,cand_e ,mulnsn,marge  ,&
+     &                   i_mem ,prov_n ,prov_e,eshift,inacti ,&
+     &                   ifq   ,cand_a ,cand_p,ifpen ,nsn    ,&
+     &                   oldnum,nsnrold,igap  ,gap   ,gap_s  ,&
+     &                   gap_m ,gapmin ,gapmax,curv_max,&
+     &                   gap_s_l,gap_m_l,drad,itied    ,&
+     &                   cand_f ,dgapload, numnod,&
+     &                   nsnr, nrtm, isznsnr,&
+     &                   xrem ,s_xrem)
+                         j_stok = 0
+                    endif
+ 
+  200               continue
+                    jj = next_node(jj)
+                  enddo ! while(jj /= 0)
+            if(flagremnode == 2) then
+              k = kremnod(2*(ne-1)+1)+1
+              l = kremnod(2*(ne-1)+2)
+              do i=k,l
+                tagremnode(remnod(i)) = 0
+              enddo
+            endif
+          enddo ! ne
+        enddo ! list_nb_voxel_node_on 
+ 
+!$OMP END DO
+          if(j_stok > 0 .and. i_mem == 0) call inter7_filter_cand(&
+     &                   j_stok,irect  ,x     ,nsv   ,ii_stok,&
+     &                   cand_n,cand_e ,mulnsn,marge  ,&
+     &                   i_mem ,prov_n ,prov_e,eshift,inacti ,&
+     &                   ifq   ,cand_a ,cand_p,ifpen ,nsn    ,&
+     &                   oldnum,nsnrold,igap  ,gap   ,gap_s  ,&
+     &                   gap_m ,gapmin ,gapmax,curv_max,&
+     &                   gap_s_l,gap_m_l,drad,itied    ,&
+     &                   cand_f ,dgapload, numnod,&
+     &                   nsnr, nrtm, isznsnr,&
+     &                   xrem ,s_xrem)
+
+!!=======================================================================
+!! 5   voxel_node RESET
+!!=======================================================================
+!!$OMP BARRIER
+!          if(total_nb_nrtm>0 .and. itask == 0 .and. i_mem == 0) then
+!            do jj = 1, nb_voxel_node_on
+!              cellid = list_nb_voxel_node_on(jj)
+!              voxel_node(cellid) = 0
+!            enddo
+!          endif
+!$OMP BARRIER
+!=======================================================================
+! 7   DEALLOCATE
+!=======================================================================
+          if(flagremnode == 2) then
+            if(allocated(tagremnode)) deallocate(tagremnode)
+          endif
+!         if(itask == 0) deallocate(list_nb_voxel_node_on)
+
+!#ifndef NO_SERIALIZE
+!        if(nsn > 13602 .and. nrtm > 1800) then
+!        call INTER7_SERIALIZE(      "t10m.dat", 
+!     &                                    nsn          ,
+!     &                                    oldnum       ,
+!     &                                    nsnr         ,
+!     &                                    isznsnr      ,
+!     &                                    irect        ,
+!     &                                    x            ,
+!     &                                    stf          ,
+!     &                                    stfn         ,
+!     &                                    xyzm         ,
+!     &                                    nsv          ,
+!     &                                    ii_stok      ,
+!     &                                    cand_n       ,
+!     &                                    cand_e       ,
+!     &                                    mulnsn       ,
+!     &                                    tzinf        ,
+!     &                                    gap_s_l      ,
+!     &                                    gap_m_l      ,
+!     &                                    nbx          ,
+!     &                                    nby          ,
+!     &                                    nbz          ,
+!     &                                    inacti       ,
+!     &                                    ifq          ,
+!     &                                    cand_a       ,
+!     &                                    nrtm         ,
+!     &                                    nsnrold      ,
+!     &                                    igap         ,
+!     &                                    gap          ,
+!     &                                    gap_s        ,
+!     &                                    gap_m        ,
+!     &                                    gapmin       ,
+!     &                                    gapmax       ,
+!     &                                    marge        ,
+!     &                                    curv_max     ,
+!     &                                    bgapsmx      ,
+!     &                                    s_kremnod    ,
+!     &                                    kremnod      ,
+!     &                                    s_remnod     ,
+!     &                                    remnod       ,
+!     &                                    flagremnode  ,
+!     &                                    drad         ,
+!     &                                    itied        ,
+!     &                                    dgapload     ,
+!     &                                    s_cand_a     ,
+!     &                                    total_nb_nrtm,
+!     &                                    numnod       )
+!        stop              
+!        endif
+!#endif
+
+          return
+        end
+
+
 
       END MODULE
 

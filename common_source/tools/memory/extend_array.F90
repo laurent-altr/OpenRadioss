@@ -32,6 +32,7 @@
         private :: reallocate_array_integer_1d
         private :: check_error_and_write
         public :: extend_array
+        public :: reallocate_array
 
         !\extend the array, copy the values
         interface extend_array

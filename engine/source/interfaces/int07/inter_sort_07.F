@@ -68,9 +68,9 @@ C-----------------------------------------------
         USE MULTI_FVM_MOD
         USE INTER_STRUCT_MOD
         USE INTER_SORTING_MOD
-        USE INTBUFDEF_MOD 
         USE INTER7_COLLISION_DETECTION_MOD
         use check_sorting_criteria_mod , only : check_sorting_criteria
+        USE FILL_VOXEL_MOD !, only : ASSOCIATE_VOXEL_MAIN
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -132,6 +132,7 @@ C-----------------------------------------------
         INTEGER :: FIRST, LAST
         INTEGER :: NSN,NMN,NTY,NRTM
         logical :: need_computation
+        my_real :: MARGE
 C-----------------------------------------------
         ! --------------
         ! check if the current interface needs to be sorted
@@ -159,6 +160,7 @@ C
         IFQ     =IPARI(31,NIN)
         INTTH   =IPARI(47,NIN)
         ITIED   =IPARI(85,NIN)
+        IGAP = IPARI(21,NIN)
       
         LOC_PROC=ISPMD+1      
         NCONTACT=MULTIMP*NCONT
@@ -195,6 +197,30 @@ C -------------------------------------------------------------
         CURV_MAX_MAX = INTER_STRUCT(NIN)%CURV_MAX_MAX
         RESULT = 0
         NMN_G = INTER_STRUCT(NIN)%NMN_G
+        MARGE = TZINF-MAX(GAP+DGAPLOADP,DRAD) ! margin
+
+        IF(GOT_PREVIEW==1) THEN
+        call ASSOCIATE_VOXEL_MAIN(INTER_STRUCT(NIN),
+     .                                    INTBUF_TAB%IRECTM        ,
+     .                                    x            ,
+     .                                    INTBUF_TAB%stfm         ,
+     .                                    tzinf        ,
+     .                                    nrtm         ,
+     .                                    igap         ,
+     .                                    INTBUF_TAB%gap_m        ,
+     .                                    gapmin       ,
+     .                                    gapmax       ,
+     .                                    marge        ,
+     .                                    INTER_STRUCT(NIN)%curv_max     ,
+     .                                    INTBUF_TAB%VARIABLES(bgapsmx_index),
+     .                                    drad         ,
+     .                                    dgaploadp     ,
+     .                                    numnod       )
+
+
+        IF(NSPMD == 1) CALL FILL_VOXEL_MAIN(inter_struct(NIN))
+        ENDIF
+      
 !$OMP END SINGLE
 
         IF(NSPMD > 1) THEN
@@ -259,6 +285,7 @@ C
      E      ITIED ,INTBUF_TAB%CAND_F,DGAPLOADP,
      F      NRTM, INTER_STRUCT(NIN)%SIZE_CAND_A,
      .      INTBUF_TAB%S_KREMNODE, INTBUF_TAB%S_REMNODE, NSPMD, NUMNOD, INTER_STRUCT(nin))
+
 
         ELSE IF(INTBUF_TAB%METRIC%ALGO == ALGO_VOXEL .OR.  INTBUF_TAB%METRIC%ALGO == TRY_ALGO_VOXEL) THEN
             FIRST = 1 + ITASK*(NRTM/NTHREAD)
