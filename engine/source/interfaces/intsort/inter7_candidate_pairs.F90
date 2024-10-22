@@ -1343,6 +1343,7 @@
           integer, dimension(GROUP_SIZE) :: prov_n, prov_e !< temporary list of candidates
           integer :: cellid
           integer :: lnode, lmain, ll,llz
+          integer :: lnode_block, lnode_block_end
 
 !$OMP BARRIER
           if(nb_voxel_node_on == 0) then
@@ -1446,7 +1447,9 @@
               !write(6,*) "cell id ",cellid," nb ",voxel_nodes(cellid)%nb
               aaa = tzinf + curv_max(ne)
 
-                if(j_stok + voxel_nodes(cellid)%nb > GROUP_SIZE) then
+
+                do lnode_block = 1, voxel_nodes(cellid)%nb, GROUP_SIZE
+                if(j_stok + voxel_nodes(cellid)%nb >= GROUP_SIZE) then
                   ! filter prov_n, prov_e and append to cand_n, cand_e
                   if(i_mem == 0) call inter7_filter_cand(&
                   &                   j_stok,irect  ,x     ,nsv   ,ii_stok,&
@@ -1461,9 +1464,10 @@
                   &                   xrem ,s_xrem)
                   j_stok = 0
                 endif
+                if(i_mem .ne. 0) cycle
 
-
-              do lnode = 1, voxel_nodes(cellid)%nb
+                lnode_block_end = min(lnode_block + GROUP_SIZE - 1, voxel_nodes(cellid)%nb)
+                do lnode = lnode_block, lnode_block_end
                 jj = voxel_nodes(cellid)%list(lnode)
                 !write(6,*) "jj ",jj," nsn ",nsn
                 if(jj<=nsn)then
@@ -1546,6 +1550,7 @@
                 !write(6,*) "jj ",jj," ne ",ne
 200             continue
               enddo ! while(jj /= 0)
+            enddo
 
 
               if(flagremnode == 2) then
