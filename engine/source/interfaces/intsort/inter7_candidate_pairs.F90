@@ -1209,7 +1209,7 @@
         &                                    tzinf        ,&
         &                                    gap_s_l      ,&
         &                                    gap_m_l      ,&
-        &                                    voxel_node        ,&
+        &                                    voxel_nodes       ,&
         &                                    voxel_main,&
         &                                    nbx          ,&
         &                                    nby          ,&
@@ -1253,7 +1253,7 @@
           USE COLLISION_MOD , ONLY : GROUP_SIZE
           USE INTER7_FILTER_CAND_MOD
           USE CONSTANT_MOD
-          USE inter_struct_mod, ONLY : main_voxel
+          USE inter_struct_mod, ONLY : voxel_
 !-----------------------------------------------
           implicit none
 #include "my_real.inc"
@@ -1297,8 +1297,8 @@
           integer, intent(inout) :: ifpen(mulnsn) !< something related to friction (???)
           integer, intent(inout) :: cand_a(s_cand_a) !< (???)
           integer, intent(inout) :: irem(s_irem,nsnr) !< remote (spmd) integer data
-          integer, intent(inout) :: voxel_node((nbx+2)*(nby+2)*(nbz+2)) !< contain the first node of each voxel_node
-          type(main_voxel), intent(inout) :: voxel_main(*) !< contain the first main segment of each voxel_main
+          type(voxel_), intent(inout) :: voxel_nodes(*) !< contain the first node of each voxel_node
+          type(voxel_), intent(inout) :: voxel_main(*) !< contain the first main segment of each voxel_main
           integer, intent(inout) :: next_node(nsn+nsnr) !< next node in the same voxel_node
 
           my_real, intent(in), value :: gap !< gap (???)
@@ -1342,7 +1342,7 @@
           integer :: first, last
           integer, dimension(GROUP_SIZE) :: prov_n, prov_e !< temporary list of candidates
           integer :: cellid
-          integer :: lmain, ll,llz
+          integer :: lnode, lmain, ll,llz
 
 !$OMP BARRIER
           if(nb_voxel_node_on == 0) then
@@ -1392,7 +1392,6 @@
 !            do while (ne /= 0)
             DO lmain = 1, voxel_main(cellid)%nb
               ne = voxel_main(cellid)%list(lmain)
-              if(ne == 0)cycle
               m1 = irect(1,ne)
               m2 = irect(2,ne)
               m3 = irect(3,ne)
@@ -1438,20 +1437,35 @@
                   tagremnode(remnod(i)) = 1
                 enddo
               endif
-              if(igap == 0)then
-                aaa = tzinf+curv_max(ne)
-              else
-                aaa = marge+curv_max(ne)+max(min(gapmax,max(gapmin,bgapsmx+gap_m(ne)))+dgapload,drad)
-              endif
 
               m1 = irect(1,ne)
               m2 = irect(2,ne)
               m3 = irect(3,ne)
               m4 = irect(4,ne)
 
+              !write(6,*) "cell id ",cellid," nb ",voxel_nodes(cellid)%nb
+              aaa = tzinf + curv_max(ne)
 
-              jj = voxel_node(cellid)
-              do while(jj /= 0)
+                if(j_stok + voxel_nodes(cellid)%nb > GROUP_SIZE) then
+                  ! filter prov_n, prov_e and append to cand_n, cand_e
+                  if(i_mem == 0) call inter7_filter_cand(&
+                  &                   j_stok,irect  ,x     ,nsv   ,ii_stok,&
+                  &                   cand_n,cand_e ,mulnsn,marge  ,&
+                  &                   i_mem ,prov_n ,prov_e,eshift,inacti ,&
+                  &                   ifq   ,cand_a ,cand_p,ifpen ,nsn    ,&
+                  &                   oldnum,nsnrold,igap  ,gap   ,gap_s  ,&
+                  &                   gap_m ,gapmin ,gapmax,curv_max,&
+                  &                   gap_s_l,gap_m_l,drad,itied    ,&
+                  &                   cand_f ,dgapload, numnod,&
+                  &                   nsnr, nrtm, isznsnr,&
+                  &                   xrem ,s_xrem)
+                  j_stok = 0
+                endif
+
+
+              do lnode = 1, voxel_nodes(cellid)%nb
+                jj = voxel_nodes(cellid)%list(lnode)
+                !write(6,*) "jj ",jj," nsn ",nsn
                 if(jj<=nsn)then
                   ! local node
                   nn=nsv(jj)
@@ -1529,26 +1543,11 @@
                 j_stok = j_stok + 1
                 prov_n(j_stok) = jj
                 prov_e(j_stok) = ne
-
-                if(j_stok == GROUP_SIZE) then
-                  ! filter prov_n, prov_e and append to cand_n, cand_e
-                  if(i_mem == 0) call inter7_filter_cand(&
-                  &                   j_stok,irect  ,x     ,nsv   ,ii_stok,&
-                  &                   cand_n,cand_e ,mulnsn,marge  ,&
-                  &                   i_mem ,prov_n ,prov_e,eshift,inacti ,&
-                  &                   ifq   ,cand_a ,cand_p,ifpen ,nsn    ,&
-                  &                   oldnum,nsnrold,igap  ,gap   ,gap_s  ,&
-                  &                   gap_m ,gapmin ,gapmax,curv_max,&
-                  &                   gap_s_l,gap_m_l,drad,itied    ,&
-                  &                   cand_f ,dgapload, numnod,&
-                  &                   nsnr, nrtm, isznsnr,&
-                  &                   xrem ,s_xrem)
-                  j_stok = 0
-                endif
-
+                !write(6,*) "jj ",jj," ne ",ne
 200             continue
-                jj = next_node(jj)
               enddo ! while(jj /= 0)
+
+
               if(flagremnode == 2) then
                 k = kremnod(2*(ne-1)+1)+1
                 l = kremnod(2*(ne-1)+2)

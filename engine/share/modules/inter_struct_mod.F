@@ -64,10 +64,10 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
               my_real, pointer :: curv_max(:) !< maximum curvature
               my_real, pointer :: stf(:) !< stiffness of segments (quadrangles or triangles)
             end TYPE main_ptr
-            type main_voxel
+            type voxel_
               integer :: nb
               integer, dimension(:), allocatable :: list
-            end type main_voxel
+            end type voxel_
 !$COMMENT
 !       INTER_STRUCT_MOD :
 !              create the inter_struct_type
@@ -101,7 +101,8 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
                 integer, dimension(:), allocatable :: next_nod !< next_node(i) is the next node of node i in the same voxel cell
                 integer, dimension(:), allocatable ::  last_nod             
                 integer :: istart !< next available space in next_nod and last_nod
-                TYPE(main_voxel), dimension(:), allocatable  :: voxel_main
+                TYPE(voxel_), dimension(:), allocatable  :: voxel_main
+                TYPE(voxel_), dimension(:), allocatable  :: voxel_nodes
                 TYPE(main_ptr) :: ptr
             END TYPE inter_struct_type  
         END MODULE INTER_STRUCT_MOD

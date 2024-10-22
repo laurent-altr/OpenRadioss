@@ -35,7 +35,7 @@
         &  nrtm,&
         &  numnod,&
         & nsv,&
-        & voxel,&
+        & voxel_nodes,&
         & next_nod,&
         & size_nod, &
         & nb_voxel_on,&
@@ -46,6 +46,8 @@
         & box_limit_main)
           USE CONSTANT_MOD
           USE EXTEND_ARRAY_MOD, ONLY : extend_array
+          USE inter_struct_mod, ONLY : voxel_
+          USE MY_ALLOC_MOD, ONLY : my_alloc
 !-----------------------------------------------
           implicit none
 #include "my_real.inc"
@@ -61,7 +63,7 @@
           integer, intent(in), value :: nrtm !< number of segments (rectangles) 
           integer, intent(in), value :: numnod !< total number of nodes
           integer, intent(in) :: nsv(nsn) !< secondary node list to global node list
-          integer, intent(inout) :: voxel((nbx+2)*(nby+2)*(nbz+2)) !< voxel data structure
+          type(voxel_), intent(inout) :: voxel_nodes(*) !< voxel data structure
           integer, dimension(:), allocatable, intent(inout) :: next_nod !< next node in the voxel
           integer, intent(inout) :: size_nod !< size of the nod arrays
           integer, intent(inout) :: nb_voxel_on !< number of voxels with nodes
@@ -112,14 +114,14 @@
             if(.not. allocated(next_nod)) size_nod = 0
             if(.not. allocated(list_nb_voxel_on)) nb_voxel_on = 0
               nb_voxel_on = 0
-              call extend_array(last_nod, size_nod,nsn+nsnr)
-              call extend_array(next_nod, size_nod ,nsn+nsnr)
+!             call extend_array(last_nod, size_nod,nsn+nsnr)
+!             call extend_array(next_nod, size_nod ,nsn+nsnr)
               call extend_array(list_nb_voxel_on,size_nod,nsn+nsnr)
               list_nb_voxel_on = 0
               size_nod = max(size_nod,nsn+nsnr)
               if(nsn + nsnr > 0) then
-                last_nod(1:nsn+nsnr) = 0
-                next_nod(1:nsn+nsnr) = 0
+!               last_nod(1:nsn+nsnr) = 0
+!               next_nod(1:nsn+nsnr) = 0
                 list_nb_voxel_on(1:nsn+nsnr) = 0
               endif
 
@@ -139,23 +141,21 @@
                 iy=max(1,2+min(nby,iy))
                 iz=max(1,2+min(nbz,iz))
                 cellid = (iz-1)*(nbx+2)*(nby+2)+(iy-1)*(nbx+2)+ix
-                first = voxel(cellid)
-                if(first == 0)then
+                first = voxel_nodes(cellid)%nb + 1
+                if(voxel_nodes(cellid)%nb == 0) then 
                   nb_voxel_on = nb_voxel_on + 1
                   list_nb_voxel_on(nb_voxel_on) = cellid
-                  voxel(cellid) = i ! first
-                  next_nod(i) = 0 ! last one
-                  last_nod(i) = 0 ! no last
-                elseif(last_nod(first) == 0)then
-                  next_nod(first) = i ! next
-                  last_nod(first) = i ! last
-                  next_nod(i)     = 0 ! last one
-                else
-                  last = last_nod(first) ! last node in this voxel
-                  next_nod(last)  = i ! next
-                  last_nod(first) = i ! last
-                  next_nod(i)     = 0 ! last one
                 endif
+                if(.NOT. allocated(voxel_nodes(cellid)%list)) then
+                  call my_alloc(voxel_nodes(cellid)%list, 4)
+                end if
+                if(first > size(voxel_nodes(cellid)%list)) then
+                  call extend_array(voxel_nodes(cellid)%list, voxel_nodes(cellid)%nb , first*2)
+                endif
+                voxel_nodes(cellid)%nb = voxel_nodes(cellid)%nb + 1
+                voxel_nodes(cellid)%list(first) =  i
+
+
               enddo
           endif !< nrtm
         END SUBROUTINE
@@ -174,6 +174,7 @@
           USE INTER_STRUCT_MOD
           USE CONSTANT_MOD
           USE EXTEND_ARRAY_MOD, ONLY : extend_array
+          USE MY_ALLOC_MOD, ONLY : my_alloc
 !-----------------------------------------------
           implicit none
 #include "my_real.inc"
@@ -241,20 +242,23 @@
            !if((s%istart-1)*chunk+1 < nsn)write(6,*) 'start',(s%istart-1)*chunk+1,"nsn=",nsn,"nsnr=",nsnr
 
             if(s%istart == 1) then
-            if(.not. allocated(s%last_nod)) s%size_node = 0
-            if(.not. allocated(s%next_nod)) s%size_node = 0
-            if(.not. allocated(s%list_nb_voxel_on)) s%nb_voxel_on = 0
+!           if(.not. allocated(s%last_nod)) s%size_node = 0
+!           if(.not. allocated(s%next_nod)) s%size_node = 0
+            if(.not. allocated(s%list_nb_voxel_on)) s%size_node = 0
+            if(.not. allocated(s%list_nb_voxel_on)) allocate(s%list_nb_voxel_on(nsn+nsnr))    
               s%nb_voxel_on = 0
-              call extend_array(s%last_nod, s%size_node,nsn+nsnr)
-              call extend_array(s%next_nod, s%size_node ,nsn+nsnr)
+!             call extend_array(s%last_nod, s%size_node,nsn+nsnr)
+!             call extend_array(s%next_nod, s%size_node ,nsn+nsnr)
               call extend_array(s%list_nb_voxel_on,s%size_node,nsn+nsnr)
-              s%list_nb_voxel_on = 0
               s%size_node = max(s%size_node,nsn+nsnr)
               if(nsn + nsnr > 0) then
-                s%last_nod(1:nsn+nsnr) = 0
-                s%next_nod(1:nsn+nsnr) = 0
+!               s%last_nod(1:nsn+nsnr) = 0
+!               s%next_nod(1:nsn+nsnr) = 0
                 s%list_nb_voxel_on(1:nsn+nsnr) = 0
               endif
+              do i = 1, (s%nbx+2)*(s%nby+2)*(s%nbz+2)
+                    s%voxel_nodes(i)%nb = 0
+              enddo
             endif
 
               !nchunks is the number of groups              
@@ -292,23 +296,23 @@
                      iy=max(1,2+min(s%nby,iy))
                      iz=max(1,2+min(s%nbz,iz))
                      cellid = (iz-1)*(s%nbx+2)*(s%nby+2)+(iy-1)*(s%nbx+2)+ix
-                     first = s%voxel(cellid)
-                     if(first == 0)then
-                       s%nb_voxel_on = s%nb_voxel_on + 1
-                       s%list_nb_voxel_on(s%nb_voxel_on) = cellid
-                       s%voxel(cellid) = i ! first
-                       s%next_nod(i) = 0 ! last one
-                       s%last_nod(i) = 0 ! no last
-                     elseif(s%last_nod(first) == 0)then
-                       s%next_nod(first) = i ! next
-                       s%last_nod(first) = i ! last
-                       s%next_nod(i)     = 0 ! last one
-                     else
-                       last = s%last_nod(first) ! last node in this voxel
-                       s%next_nod(last)  = i ! next
-                       s%last_nod(first) = i ! last
-                       s%next_nod(i)     = 0 ! last one
-                     endif
+                ! append(s%nodes( compact_cellid(cellid) )%list,ne))
+                first = s%voxel_nodes(cellid)%nb + 1
+                if(s%voxel_nodes(cellid)%nb == 0) then 
+                  s%nb_voxel_on = s%nb_voxel_on + 1
+                  s%list_nb_voxel_on(s%nb_voxel_on) = cellid
+                endif
+
+                if(.NOT. allocated(s%voxel_nodes(cellid)%list)) then
+                  call my_alloc(s%voxel_nodes(cellid)%list, 4)
+                end if
+                if(first > size(s%voxel_nodes(cellid)%list)) then
+                  call extend_array(s%voxel_nodes(cellid)%list, s%voxel_nodes(cellid)%nb , first*2)
+                endif
+                s%voxel_nodes(cellid)%nb = s%voxel_nodes(cellid)%nb + 1
+                s%voxel_nodes(cellid)%list(first) = i
+
+
                   enddo !< k
                   s%istart = s%istart + 1
                 else 
@@ -327,7 +331,7 @@
         & nby,&
         & nbz,&
         & s_xrem,&
-        & voxel,&
+        & voxel_nodes,&
         & next_nod,&
         & size_nod, &
         & nb_voxel_on,&
@@ -336,7 +340,9 @@
         & xrem,&
         & box_limit_main)
           USE CONSTANT_MOD
+          use inter_struct_mod, ONLY : voxel_
           USE EXTEND_ARRAY_MOD, ONLY : extend_array
+          USE MY_ALLOC_MOD, ONLY : my_alloc
 !-----------------------------------------------
           implicit none
 #include "my_real.inc"
@@ -351,7 +357,7 @@
           integer, intent(in), value :: nby !< number of cells in y direction
           integer, intent(in), value :: nbz !< number of cells in z direction
           integer, intent(in), value :: s_xrem !< number of double data for remote nodes
-          integer, intent(inout) :: voxel((nbx+2)*(nby+2)*(nbz+2)) !< voxel data structure
+          type(voxel_), intent(inout) :: voxel_nodes(*) !< voxel data structure
           integer, dimension(:), allocatable, intent(inout) :: next_nod !< next node in the voxel
           integer, intent(inout) :: size_nod !< size of the nod arrays
           integer, intent(inout) :: nb_voxel_on !< number of voxels with nodes
@@ -394,8 +400,8 @@
 !=======================================================================
 ! 1   Add local nodes to the cells
 !=======================================================================
-              call extend_array(last_nod, size_nod ,nsn+nsnr)
-              call extend_array(next_nod, size_nod ,nsn+nsnr)
+!             call extend_array(last_nod, size_nod ,nsn+nsnr)
+!             call extend_array(next_nod, size_nod ,nsn+nsnr)
               call extend_array(list_nb_voxel_on, size_nod,nsn+nsnr)
               size_nod = max(size_nod,nsn+nsnr)
 !=======================================================================
@@ -416,26 +422,21 @@
                 iz=max(1,2+min(nbz,iz))
 
                 cellid = (iz-1)*(nbx+2)*(nby+2)+(iy-1)*(nbx+2)+ix
-
-                first = voxel(cellid)
-
-                if(first == 0)then
+                first = voxel_nodes(cellid)%nb + 1
+                if(voxel_nodes(cellid)%nb == 0) then 
                   nb_voxel_on = nb_voxel_on + 1
-                  list_nb_voxel_on( nb_voxel_on ) = cellid
-                  voxel(cellid) = nsn+j ! first
-                  next_nod(nsn+j)     = 0 ! last one
-                  last_nod(nsn+j)     = 0 ! no last
-                elseif(last_nod(first) == 0)then
-                  next_nod(first) = nsn+j  ! next
-                  last_nod(first) = nsn+j  ! last
-                  next_nod(nsn+j)  = 0     ! last one
-                else
-                  last = last_nod(first)  ! last node in this voxel
-                  next_nod(last)  = nsn+j ! next
-                  last_nod(first) = nsn+j ! last
-                  next_nod(nsn+j)     = 0 ! last one
+                  list_nb_voxel_on(nb_voxel_on) = cellid
                 endif
-              enddo
+                if(.NOT. allocated(voxel_nodes(cellid)%list)) then
+                  call my_alloc(voxel_nodes(cellid)%list, 4)
+                end if
+                if(first > size(voxel_nodes(cellid)%list)) then
+                  call extend_array(voxel_nodes(cellid)%list, voxel_nodes(cellid)%nb , first*2)
+                endif
+                voxel_nodes(cellid)%nb = voxel_nodes(cellid)%nb + 1
+                voxel_nodes(cellid)%list(first) = nsn + j
+
+               enddo
               !deallocate(last_nod)
         END SUBROUTINE FILL_VOXEL_REMOTE
 

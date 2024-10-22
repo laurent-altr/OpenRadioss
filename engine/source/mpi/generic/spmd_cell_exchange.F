@@ -232,7 +232,7 @@ C================================================================
      .                    inter_struct(nin)%nby,
      .                    inter_struct(nin)%nbz,
      .                    size(XREM,1),
-     .                    inter_struct(nin)%voxel,
+     .                    inter_struct(nin)%voxel_nodes,
      .                    inter_struct(nin)%next_nod,
      .                    inter_struct(nin)%size_node,
      .                    inter_struct(nin)%nb_voxel_on,

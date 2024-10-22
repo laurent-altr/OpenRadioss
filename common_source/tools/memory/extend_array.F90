@@ -115,7 +115,18 @@
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                      Body
 ! ----------------------------------------------------------------------------------------------------------------------
-          if(newsize > oldsize) then  
+          if (.not. allocated(a) ) then
+            allocate(a(newsize), stat=ierr)
+            if(.not. present(stat)) then
+              if(present(msg)) then
+                call check_error_and_write(ierr, msg=msg)
+              else
+                call check_error_and_write(ierr)
+              end if
+            endif
+            if(present(stat)) stat = ierr
+
+          elseif(newsize > oldsize) then  
             allocate(temp(newsize), stat=ierr)
             if(.not. present(stat)) then
               if(present(msg)) then
