@@ -1433,17 +1433,16 @@
             enddo
             DO lmain = 1, voxel_main(cellid)%nb
               ne = voxel_main(cellid)%list(lmain)
-              if(ne == 0)cycle
-!           if(stf(ne) == zero)cycle ! the segment is deleted/eroded
-              if(flagremnode == 2) then
-                k = kremnod(2*(ne-1)+1)+1
-                l = kremnod(2*(ne-1)+2)
-                do i=k,l
-                  ! the segment ne cannot be in contact with the node remnod(i)
-                  ! typically, remnod(i) contains nodes of neighboring elements
-                  tagremnode(remnod(i)) = 1
-                enddo
-              endif
+              if(stf(ne) == zero)cycle ! the segment is deleted/eroded
+!             if(flagremnode == 2) then
+!               k = kremnod(2*(ne-1)+1)+1
+!               l = kremnod(2*(ne-1)+2)
+!               do i=k,l
+!                 ! the segment ne cannot be in contact with the node remnod(i)
+!                 ! typically, remnod(i) contains nodes of neighboring elements
+!                 tagremnode(remnod(i)) = 1
+!               enddo
+!             endif
 
               m1 = irect(1,ne)
               m2 = irect(2,ne)
@@ -1487,9 +1486,9 @@
                     if(nn == m3) cycle
                     if(nn == m4) cycle
 
-                    if(flagremnode == 2) then
-                      if( tagremnode(nsv(jj)) == 1)  cycle
-                    endif
+!                   if(flagremnode == 2) then
+!                     if( tagremnode(nsv(jj)) == 1)  cycle
+!                   endif
                     xs = x(1,nn)
                     ys = x(2,nn)
                     zs = x(3,nn)
@@ -1499,18 +1498,18 @@
                   else
                     ! remote (SPMD) node: data are stored in irem/xrem (communicated earlier)
                     j=jj-nsn
-                    delnod = 0
-                    if(flagremnode == 2) then
-                      k = kremnod(2*(ne-1)+2) + 1
-                      l = kremnod(2*(ne-1)+3)
-                      do m=k,l
-                        if(remnod(m) == -irem(2,j) ) then
-                          delnod = delnod + 1
-                          exit
-                        endif
-                      enddo
-                      if(delnod /= 0) cycle
-                    endif
+!                   delnod = 0
+!                   if(flagremnode == 2) then
+!                     k = kremnod(2*(ne-1)+2) + 1
+!                     l = kremnod(2*(ne-1)+3)
+!                     do m=k,l
+!                       if(remnod(m) == -irem(2,j) ) then
+!                         delnod = delnod + 1
+!                         exit
+!                       endif
+!                     enddo
+!                     if(delnod /= 0) cycle
+!                   endif
 
                     xs = xrem(1,j)
                     ys = xrem(2,j)
@@ -1563,13 +1562,13 @@
               enddo
 
 
-              if(flagremnode == 2) then
-                k = kremnod(2*(ne-1)+1)+1
-                l = kremnod(2*(ne-1)+2)
-                do i=k,l
-                  tagremnode(remnod(i)) = 0
-                enddo
-              endif
+!             if(flagremnode == 2) then
+!               k = kremnod(2*(ne-1)+1)+1
+!               l = kremnod(2*(ne-1)+2)
+!               do i=k,l
+!                 tagremnode(remnod(i)) = 0
+!               enddo
+!             endif
             enddo ! ne
           enddo ! list_nb_voxel_node_on
 
