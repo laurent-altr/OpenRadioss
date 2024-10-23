@@ -1453,6 +1453,7 @@
               !write(6,*) "cell id ",cellid," nb ",voxel_nodes(cellid)%nb
               aaa = tzinf + curv_max(ne)
 
+              
 
               do lnode_block = 1, voxel_nodes(cellid)%nb, GROUP_SIZE
                 if(j_stok + voxel_nodes(cellid)%nb >= GROUP_SIZE) then
@@ -1481,21 +1482,13 @@
                     nn=nsv(jj)
 
                     !
-                    if(nn == m1)goto 200
-                    if(nn == m2)goto 200
-                    if(nn == m3)goto 200
-                    if(nn == m4)goto 200
-
-
-                    !if(jj == im1)goto 200
-                    !if(jj == im2)goto 200
-                    !if(jj == im3)goto 200
-                    !if(jj == im4)goto 200
-
-
+                    if(nn == m1) cycle
+                    if(nn == m2) cycle
+                    if(nn == m3) cycle
+                    if(nn == m4) cycle
 
                     if(flagremnode == 2) then
-                      if( tagremnode(nsv(jj)) == 1) goto 200
+                      if( tagremnode(nsv(jj)) == 1)  cycle
                     endif
                     xs = x(1,nn)
                     ys = x(2,nn)
@@ -1516,7 +1509,7 @@
                           exit
                         endif
                       enddo
-                      if(delnod /= 0)goto 200
+                      if(delnod /= 0) cycle
                     endif
 
                     xs = xrem(1,j)
@@ -1527,12 +1520,12 @@
                     endif
                   endif
 
-                  if(xs<=xmine(lmain)-aaa)goto 200
-                  if(xs>=xmaxe(lmain)+aaa)goto 200
-                  if(ys<=ymine(lmain)-aaa)goto 200
-                  if(ys>=ymaxe(lmain)+aaa)goto 200
-                  if(zs<=zmine(lmain)-aaa)goto 200
-                  if(zs>=zmaxe(lmain)+aaa)goto 200
+                  if(xs<=xmine(lmain)-aaa) cycle
+                  if(xs>=xmaxe(lmain)+aaa) cycle
+                  if(ys<=ymine(lmain)-aaa) cycle
+                  if(ys>=ymaxe(lmain)+aaa) cycle
+                  if(zs<=zmine(lmain)-aaa) cycle
+                  if(zs>=zmaxe(lmain)+aaa) cycle
 
                   ! underestimation of the distance**2 to eliminate candidates
 
@@ -1547,39 +1540,26 @@
                   if(dd1*dd2 > zero)then
                     d2 = min(dd1*dd1,dd2*dd2)
                     a2 = aaa*aaa*s2(lmain)
-                    if(d2 > a2)goto 200
+                    if(d2 > a2) cycle
                   endif
-
-!                 j_stok = j_stok + 1
-!                 prov_n(j_stok) = jj
-!                 prov_e(j_stok) = ne
-
                   prov_prov_n(lnode - lnode_block + 1) = jj
-                  prov_prov_e(lnode - lnode_block + 1) = ne
-
-                  !write(6,*) "jj ",jj," ne ",ne
-200               continue
+!                 prov_prov_e(lnode - lnode_block + 1) = ne
                 enddo ! while(jj /= 0)
                 jj = lnode_block_end - lnode_block + 1
                 k = 0
                 do i = 1, jj
-                  if (prov_prov_n(i) /= 0 .or. prov_prov_e(i) /= 0) then
+                  if (prov_prov_n(i) /= 0) then
                     k = k + 1
                     temp_n(k) = prov_prov_n(i)
-                    temp_e(k) = prov_prov_e(i)
                   endif
                 enddo
-
                 ! Update the prov_n and prov_e arrays
                 do i = 1, k
                   j_stok = j_stok + 1
                   prov_n(j_stok) = temp_n(i)
-                  prov_e(j_stok) = temp_e(i)
+                  prov_e(j_stok) = ne
                 enddo
-
-                prov_prov_e(1:jj) = 0
                 prov_prov_n(1:jj) = 0
-
               enddo
 
 
