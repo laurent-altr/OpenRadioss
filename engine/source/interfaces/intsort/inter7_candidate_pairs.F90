@@ -1556,13 +1556,9 @@
                       aaa = marge+curv_max(ne)+max(min(gapmax,max(gapmin,xrem(9,j)+gap_m(ne)))+dgapload,drad)
                     endif
                   endif
-
-                  if(xs<=xmine(lmain)-aaa) cycle
-                  if(xs>=xmaxe(lmain)+aaa) cycle
-                  if(ys<=ymine(lmain)-aaa) cycle
-                  if(ys>=ymaxe(lmain)+aaa) cycle
-                  if(zs<=zmine(lmain)-aaa) cycle
-                  if(zs>=zmaxe(lmain)+aaa) cycle
+                    if (xs <= xmine(lmain) - aaa .or. xs >= xmaxe(lmain) + aaa .or. &
+                        ys <= ymine(lmain) - aaa .or. ys >= ymaxe(lmain) + aaa .or. &
+                        zs <= zmine(lmain) - aaa .or. zs >= zmaxe(lmain) + aaa) cycle
 
                   ! underestimation of the distance**2 to eliminate candidates
 
