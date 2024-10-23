@@ -1346,6 +1346,7 @@
           integer :: lnode_block, lnode_block_end
           integer :: temp_e(GROUP_SIZE), temp_n(GROUP_SIZE)
           integer :: prov_prov_n(GROUP_SIZE), prov_prov_e(GROUP_SIZE)
+          integer :: mnodes(4)
 
 !$OMP BARRIER
           if(nb_voxel_node_on == 0) then
@@ -1444,10 +1445,7 @@
 !               enddo
 !             endif
 
-              m1 = irect(1,ne)
-              m2 = irect(2,ne)
-              m3 = irect(3,ne)
-              m4 = irect(4,ne)
+              mnodes = irect(1:4,ne)
 
               !write(6,*) "cell id ",cellid," nb ",voxel_nodes(cellid)%nb
               aaa = tzinf + curv_max(ne)
@@ -1478,12 +1476,13 @@
                    ! if the last node is local, all the nodes are local
 !$OMP SIMD PRIVATE(jj, nn, xs, ys, zs, d1x, d1y, d1z, d2x, d2y, d2z, dd1, dd2, d2, a2)
                 do lnode = lnode_block, lnode_block_end
+
                   jj = voxel_nodes(cellid)%list(lnode)
                     nn=nsv(jj)
-                    if(nn == m1) cycle
-                    if(nn == m2) cycle
-                    if(nn == m3) cycle
-                    if(nn == m4) cycle
+                    if(ANY(nn == mnodes)) cycle
+!                   if(nn == m2) cycle
+!                   if(nn == m3) cycle
+!                   if(nn == m4) cycle
                     xs = x(1,nn)
                     ys = x(2,nn)
                     zs = x(3,nn)
@@ -1496,6 +1495,7 @@
                   if(ys>=ymaxe(lmain)+aaa) cycle
                   if(zs<=zmine(lmain)-aaa) cycle
                   if(zs>=zmaxe(lmain)+aaa) cycle
+
 
                   ! underestimation of the distance**2 to eliminate candidates
 
@@ -1524,11 +1524,7 @@
                     ! local node
                     nn=nsv(jj)
 
-                    !
-                    if(nn == m1) cycle
-                    if(nn == m2) cycle
-                    if(nn == m3) cycle
-                    if(nn == m4) cycle
+                    if( ANY(nn == mnodes)) cycle
 
 !                   if(flagremnode == 2) then
 !                     if( tagremnode(nsv(jj)) == 1)  cycle
