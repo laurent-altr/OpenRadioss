@@ -1344,6 +1344,8 @@
           integer :: cellid
           integer :: lnode, lmain, ll,llz
           integer :: lnode_block, lnode_block_end
+          integer :: temp_e(GROUP_SIZE), temp_n(GROUP_SIZE)
+          integer :: prov_prov_n(GROUP_SIZE), prov_prov_e(GROUP_SIZE)
 
 !$OMP BARRIER
           if(nb_voxel_node_on == 0) then
@@ -1385,6 +1387,10 @@
               tagremnode(i) = 0
             enddo
           endif
+          temp_e = 0
+          temp_n = 0
+          prov_prov_e = 0
+          prov_prov_n = 0
 !$OMP BARRIER
 !$OMP DO SCHEDULE(DYNAMIC)
           do ll = 1, nb_voxel_node_on
@@ -1448,7 +1454,7 @@
               aaa = tzinf + curv_max(ne)
 
 
-                do lnode_block = 1, voxel_nodes(cellid)%nb, GROUP_SIZE
+              do lnode_block = 1, voxel_nodes(cellid)%nb, GROUP_SIZE
                 if(j_stok + voxel_nodes(cellid)%nb >= GROUP_SIZE) then
                   ! filter prov_n, prov_e and append to cand_n, cand_e
                   if(i_mem == 0) call inter7_filter_cand(&
@@ -1468,89 +1474,113 @@
 
                 lnode_block_end = min(lnode_block + GROUP_SIZE - 1, voxel_nodes(cellid)%nb)
                 do lnode = lnode_block, lnode_block_end
-                jj = voxel_nodes(cellid)%list(lnode)
-                !write(6,*) "jj ",jj," nsn ",nsn
-                if(jj<=nsn)then
-                  ! local node
-                  nn=nsv(jj)
+                  jj = voxel_nodes(cellid)%list(lnode)
+                  !write(6,*) "jj ",jj," nsn ",nsn
+                  if(jj<=nsn)then
+                    ! local node
+                    nn=nsv(jj)
 
-                  !
-                  if(nn == m1)goto 200
-                  if(nn == m2)goto 200
-                  if(nn == m3)goto 200
-                  if(nn == m4)goto 200
-
-
-                  !if(jj == im1)goto 200
-                  !if(jj == im2)goto 200
-                  !if(jj == im3)goto 200
-                  !if(jj == im4)goto 200
+                    !
+                    if(nn == m1)goto 200
+                    if(nn == m2)goto 200
+                    if(nn == m3)goto 200
+                    if(nn == m4)goto 200
 
 
+                    !if(jj == im1)goto 200
+                    !if(jj == im2)goto 200
+                    !if(jj == im3)goto 200
+                    !if(jj == im4)goto 200
 
-                  if(flagremnode == 2) then
-                    if( tagremnode(nsv(jj)) == 1) goto 200
+
+
+                    if(flagremnode == 2) then
+                      if( tagremnode(nsv(jj)) == 1) goto 200
+                    endif
+                    xs = x(1,nn)
+                    ys = x(2,nn)
+                    zs = x(3,nn)
+                    if(igap /= 0)then
+                      aaa = marge+curv_max(ne)+max(min(gapmax,max(gapmin,gap_s(jj)+gap_m(ne)))+dgapload,drad)
+                    endif
+                  else
+                    ! remote (SPMD) node: data are stored in irem/xrem (communicated earlier)
+                    j=jj-nsn
+                    delnod = 0
+                    if(flagremnode == 2) then
+                      k = kremnod(2*(ne-1)+2) + 1
+                      l = kremnod(2*(ne-1)+3)
+                      do m=k,l
+                        if(remnod(m) == -irem(2,j) ) then
+                          delnod = delnod + 1
+                          exit
+                        endif
+                      enddo
+                      if(delnod /= 0)goto 200
+                    endif
+
+                    xs = xrem(1,j)
+                    ys = xrem(2,j)
+                    zs = xrem(3,j)
+                    if(igap /= 0)then
+                      aaa = marge+curv_max(ne)+max(min(gapmax,max(gapmin,xrem(9,j)+gap_m(ne)))+dgapload,drad)
+                    endif
                   endif
-                  xs = x(1,nn)
-                  ys = x(2,nn)
-                  zs = x(3,nn)
-                  if(igap /= 0)then
-                    aaa = marge+curv_max(ne)+max(min(gapmax,max(gapmin,gap_s(jj)+gap_m(ne)))+dgapload,drad)
+
+                  if(xs<=xmine(lmain)-aaa)goto 200
+                  if(xs>=xmaxe(lmain)+aaa)goto 200
+                  if(ys<=ymine(lmain)-aaa)goto 200
+                  if(ys>=ymaxe(lmain)+aaa)goto 200
+                  if(zs<=zmine(lmain)-aaa)goto 200
+                  if(zs>=zmaxe(lmain)+aaa)goto 200
+
+                  ! underestimation of the distance**2 to eliminate candidates
+
+                  d1x = xs - xx1(lmain)
+                  d1y = ys - yy1(lmain)
+                  d1z = zs - zz1(lmain)
+                  d2x = xs - xx2(lmain)
+                  d2y = ys - yy2(lmain)
+                  d2z = zs - zz2(lmain)
+                  dd1 = d1x*sx(lmain)+d1y*sy(lmain)+d1z*sz(lmain)
+                  dd2 = d2x*sx(lmain)+d2y*sy(lmain)+d2z*sz(lmain)
+                  if(dd1*dd2 > zero)then
+                    d2 = min(dd1*dd1,dd2*dd2)
+                    a2 = aaa*aaa*s2(lmain)
+                    if(d2 > a2)goto 200
                   endif
-                else
-                  ! remote (SPMD) node: data are stored in irem/xrem (communicated earlier)
-                  j=jj-nsn
-                  delnod = 0
-                  if(flagremnode == 2) then
-                    k = kremnod(2*(ne-1)+2) + 1
-                    l = kremnod(2*(ne-1)+3)
-                    do m=k,l
-                      if(remnod(m) == -irem(2,j) ) then
-                        delnod = delnod + 1
-                        exit
-                      endif
-                    enddo
-                    if(delnod /= 0)goto 200
+
+!                 j_stok = j_stok + 1
+!                 prov_n(j_stok) = jj
+!                 prov_e(j_stok) = ne
+
+                  prov_prov_n(lnode - lnode_block + 1) = jj
+                  prov_prov_e(lnode - lnode_block + 1) = ne
+
+                  !write(6,*) "jj ",jj," ne ",ne
+200               continue
+                enddo ! while(jj /= 0)
+                jj = lnode_block_end - lnode_block + 1
+                k = 0
+                do i = 1, jj
+                  if (prov_prov_n(i) /= 0 .or. prov_prov_e(i) /= 0) then
+                    k = k + 1
+                    temp_n(k) = prov_prov_n(i)
+                    temp_e(k) = prov_prov_e(i)
                   endif
+                enddo
 
-                  xs = xrem(1,j)
-                  ys = xrem(2,j)
-                  zs = xrem(3,j)
-                  if(igap /= 0)then
-                    aaa = marge+curv_max(ne)+max(min(gapmax,max(gapmin,xrem(9,j)+gap_m(ne)))+dgapload,drad)
-                  endif
-                endif
+                ! Update the prov_n and prov_e arrays
+                do i = 1, k
+                  j_stok = j_stok + 1
+                  prov_n(j_stok) = temp_n(i)
+                  prov_e(j_stok) = temp_e(i)
+                enddo
 
-                if(xs<=xmine(lmain)-aaa)goto 200
-                if(xs>=xmaxe(lmain)+aaa)goto 200
-                if(ys<=ymine(lmain)-aaa)goto 200
-                if(ys>=ymaxe(lmain)+aaa)goto 200
-                if(zs<=zmine(lmain)-aaa)goto 200
-                if(zs>=zmaxe(lmain)+aaa)goto 200
+                prov_prov_e(1:jj) = 0
+                prov_prov_n(1:jj) = 0
 
-                ! underestimation of the distance**2 to eliminate candidates
-
-                d1x = xs - xx1(lmain)
-                d1y = ys - yy1(lmain)
-                d1z = zs - zz1(lmain)
-                d2x = xs - xx2(lmain)
-                d2y = ys - yy2(lmain)
-                d2z = zs - zz2(lmain)
-                dd1 = d1x*sx(lmain)+d1y*sy(lmain)+d1z*sz(lmain)
-                dd2 = d2x*sx(lmain)+d2y*sy(lmain)+d2z*sz(lmain)
-                if(dd1*dd2 > zero)then
-                  d2 = min(dd1*dd1,dd2*dd2)
-                  a2 = aaa*aaa*s2(lmain)
-                  if(d2 > a2)goto 200
-                endif
-
-                j_stok = j_stok + 1
-                prov_n(j_stok) = jj
-                prov_e(j_stok) = ne
-                !write(6,*) "jj ",jj," ne ",ne
-200             continue
-              enddo ! while(jj /= 0)
-            enddo
+              enddo
 
 
               if(flagremnode == 2) then

@@ -255,8 +255,8 @@
           &IRECT   ,X        ,STF      ,XYZM    ,&
           &NSV     ,II_STOK  ,CAND_N   ,ESHIFT   ,CAND_E  ,&
           &NCONTACT,TZINF    ,GAP_S_L  ,GAP_M_L ,&
-          &inter_struct%VOXEL_NODES, inter_struct%voxel_main  ,inter_struct%NBX      ,inter_struct%NBY      ,inter_struct%NBZ      ,&
-          &INACTI  ,IFQ      ,CAND_A,CAND_P   ,IFPEN   ,&
+          &inter_struct%VOXEL_NODES,inter_struct%voxel_main,inter_struct%NBX,inter_struct%NBY,inter_struct%NBZ,&
+          &INACTI,IFQ,CAND_A,CAND_P,IFPEN,&
           &NRTM    ,NSNROLD  ,IGAP     ,GAP      ,GAP_S   ,&
           &GAP_M   ,GAPMIN   ,GAPMAX   ,MARGE    ,CURV_MAX,&
           &ITASK    ,BGAPSMX  ,S_KREMNOD, KREMNOD  ,S_REMNOD, REMNOD  ,&
