@@ -1473,6 +1473,50 @@
                 if(i_mem .ne. 0) cycle
 
                 lnode_block_end = min(lnode_block + GROUP_SIZE - 1, voxel_nodes(cellid)%nb)
+                if(voxel_nodes(cellid)%list(lnode_block_end)  <= nsn) then
+                   ! the local nodes are in the first positions:
+                   ! if the last node is local, all the nodes are local
+!$OMP SIMD PRIVATE(jj, nn, xs, ys, zs, d1x, d1y, d1z, d2x, d2y, d2z, dd1, dd2, d2, a2)
+                do lnode = lnode_block, lnode_block_end
+                  jj = voxel_nodes(cellid)%list(lnode)
+                    nn=nsv(jj)
+                    if(nn == m1) cycle
+                    if(nn == m2) cycle
+                    if(nn == m3) cycle
+                    if(nn == m4) cycle
+                    xs = x(1,nn)
+                    ys = x(2,nn)
+                    zs = x(3,nn)
+                    if(igap /= 0)then
+                      aaa = marge+curv_max(ne)+max(min(gapmax,max(gapmin,gap_s(jj)+gap_m(ne)))+dgapload,drad)
+                    endif
+                  if(xs<=xmine(lmain)-aaa) cycle
+                  if(xs>=xmaxe(lmain)+aaa) cycle
+                  if(ys<=ymine(lmain)-aaa) cycle
+                  if(ys>=ymaxe(lmain)+aaa) cycle
+                  if(zs<=zmine(lmain)-aaa) cycle
+                  if(zs>=zmaxe(lmain)+aaa) cycle
+
+                  ! underestimation of the distance**2 to eliminate candidates
+
+                  d1x = xs - xx1(lmain)
+                  d1y = ys - yy1(lmain)
+                  d1z = zs - zz1(lmain)
+                  d2x = xs - xx2(lmain)
+                  d2y = ys - yy2(lmain)
+                  d2z = zs - zz2(lmain)
+                  dd1 = d1x*sx(lmain)+d1y*sy(lmain)+d1z*sz(lmain)
+                  dd2 = d2x*sx(lmain)+d2y*sy(lmain)+d2z*sz(lmain)
+                  if(dd1*dd2 > zero)then
+                    d2 = min(dd1*dd1,dd2*dd2)
+                    a2 = aaa*aaa*s2(lmain)
+                    if(d2 > a2) cycle
+                  endif
+                  prov_prov_n(lnode - lnode_block + 1) = jj
+                enddo ! current block
+
+                else
+!$OMP SIMD PRIVATE(jj, nn, xs, ys, zs, d1x, d1y, d1z, d2x, d2y, d2z, dd1, dd2, d2, a2)
                 do lnode = lnode_block, lnode_block_end
                   jj = voxel_nodes(cellid)%list(lnode)
                   !write(6,*) "jj ",jj," nsn ",nsn
@@ -1543,7 +1587,9 @@
                   endif
                   prov_prov_n(lnode - lnode_block + 1) = jj
 !                 prov_prov_e(lnode - lnode_block + 1) = ne
-                enddo ! while(jj /= 0)
+                enddo ! current block
+              endif
+
                 jj = lnode_block_end - lnode_block + 1
                 k = 0
                 do i = 1, jj
