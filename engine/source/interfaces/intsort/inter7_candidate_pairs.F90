@@ -1554,10 +1554,10 @@
                 enddo
                 ! Update the prov_n and prov_e arrays
                 do i = 1, k
-                  j_stok = j_stok + 1
-                  prov_n(j_stok) = temp_n(i)
-                  prov_e(j_stok) = ne
+                  prov_n(j_stok+i) = temp_n(i)
+                  prov_e(j_stok+i) = ne
                 enddo
+                j_stok = j_stok + k
                 prov_prov_n(1:jj) = 0
               enddo
 

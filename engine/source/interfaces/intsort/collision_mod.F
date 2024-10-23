@@ -31,5 +31,5 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
       !||    inter7_penetration       ../engine/source/interfaces/intsort/inter7_penetration.F90
       !||====================================================================
       MODULE COLLISION_MOD
-        integer, parameter :: GROUP_SIZE = 64
+        integer, parameter :: GROUP_SIZE = 128
       END MODULE COLLISION_MOD
