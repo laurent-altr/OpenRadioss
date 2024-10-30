@@ -1,70 +1,71 @@
-# Radioss stable Code
 
-This section describes how to access to the stable version of OpenRadioss.
+# Radioss Stable Code
+
+This section describes how to access the stable version of OpenRadioss.
 Review the [How to Contribute](Contributing.md) section to create a clone of OpenRadioss.
 
-## Stable code in OpenRadioss
+## Stable Code in OpenRadioss
 
-* The Stable code in OpenRadioss is set with a **git tag**
-* The Tag is in the main branch of OpenRadioss.
+* The stable code in OpenRadioss is set with a **git tag**.
+* The tag is in the main branch of OpenRadioss.
 * It is named
 
       latest-YYYYMMDD
 
-## To obtain stable version of the code
+## To Obtain Stable Version of the Code
 
-### Download from release area
+### Download from Release Area
 
 Source code can be downloaded from the [Releases area on GitHub](https://github.com/OpenRadioss/OpenRadioss/releases)
 
 ![image](/doc/stable_release.png)
 
-### Obtain the stable release from clone of OpenRadioss repository
+### Obtain the Stable Release from Clone of OpenRadioss Repository
 
-Command line calls permits to gather the tags from OpenRadioss:
+Command line calls permit gathering the tags from OpenRadioss:
 
-#### On linux in the clone
+#### On Linux in the Clone
 
-  To gather all tags from OpenRadioss
-  
+To gather all tags from OpenRadioss:
+
       git fetch --tags origin main
 
-  To work on the latest stable version
+To work on the latest stable version:
 
-      export latest_tag=`git tag --sort=-version:refname  |head -1`
+      export latest_tag=`git tag --sort=-version:refname |head -1`
       git checkout $latest_tag
-      
-#### On Windows in the clone with cmd commands
 
-  To gather all tags from OpenRadioss
+#### On Windows in the Clone with CMD Commands
+
+To gather all tags from OpenRadioss:
 
       git fetch --tags origin main
       git tag --sort=-version:refname > tags.txt
       set /p latest-tag=<tags.txt
       git checkout %latest-tag%
 
-### Obtain the stable release from your fork of OpenRadioss repository
+### Obtain the Stable Release from Your Fork of OpenRadioss Repository
 
-Command line calls permits to gather the tags from OpenRadioss when clone is from a fork:
+Command line calls permit gathering the tags from OpenRadioss when the clone is from a fork:
 
-#### On linux in the fork clone
+#### On Linux in the Fork Clone
 
-  To gather all tags from OpenRadioss:
-  
+To gather all tags from OpenRadioss:
+
       git fetch --tags upstream main
 
-  To work on the latest stable version:
+To work on the latest stable version:
 
-      export latest_tag=`git tag --sort=-version:refname  |head -1`
+      export latest_tag=`git tag --sort=-version:refname |head -1`
       git checkout $latest_tag
-      
-#### On Windows in the fork clone with cmd command
 
-  To gather all tags from OpenRadioss:
+#### On Windows in the Fork Clone with CMD Command
+
+To gather all tags from OpenRadioss:
 
       git fetch --tags upstream main
 
-  To work on the latest stable version:
+To work on the latest stable version:
 
       git tag --sort=-version:refname > tags.txt
       set /p latest-tag=<tags.txt
