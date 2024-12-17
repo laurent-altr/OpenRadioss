@@ -35,24 +35,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
      7   PX2H1,   PX2H2,   PX2H3,   PX2H4,
      8   PX3H1,   PX3H2,   PX3H3,   PX3H4,
      9   PX4H1,   PX4H2,   PX4H3,   PX4H4,
-     A   PX1,     PX2,     PX3,     PX4,
-     B   PX5,     PX6,     PX7,     PX8,
-     C   PY1,     PY2,     PY3,     PY4,
-     D   PY5,     PY6,     PY7,     PY8,
-     E   PZ1,     PZ2,     PZ3,     PZ4,
-     F   PZ5,     PZ6,     PZ7,     PZ8,
-     G   PXY1,    PXY2,    PXY3,    PXY4,
-     H   PXY5,    PXY6,    PXY7,    PXY8,
-     I   PYX1,    PYX2,    PYX3,    PYX4,
-     J   PYX5,    PYX6,    PYX7,    PYX8,
-     K   PXZ1,    PXZ2,    PXZ3,    PXZ4,
-     L   PXZ5,    PXZ6,    PXZ7,    PXZ8,
-     M   PZX1,    PZX2,    PZX3,    PZX4,
-     N   PZX5,    PZX6,    PZX7,    PZX8,
-     O   PYZ1,    PYZ2,    PYZ3,    PYZ4,
-     P   PYZ5,    PYZ6,    PYZ7,    PYZ8,
-     Q   PZY1,    PZY2,    PZY3,    PZY4,
-     R   PZY5,    PZY6,    PZY7,    PZY8,
+     .   PX, PXY, PXZ, PYX, PY, PYZ, PZ, PZX, PZY,
      S   BXY1,    BXY2,    BXY3,    BXY4,
      T   BXY5,    BXY6,    BXY7,    BXY8,
      U   BYX1,    BYX2,    BYX3,    BYX4,
@@ -107,24 +90,9 @@ C     REAL
      .   PX2H1(*), PX2H2(*), PX2H3(*),PX2H4(*),  
      .   PX3H1(*), PX3H2(*), PX3H3(*),PX3H4(*),  
      .   PX4H1(*), PX4H2(*), PX4H3(*),PX4H4(*),  
-     .   PX1(*), PX2(*), PX3(*), PX4(*),
-     .   PX5(*), PX6(*), PX7(*), PX8(*),
-     .   PY1(*), PY2(*), PY3(*), PY4(*),
-     .   PY5(*), PY6(*), PY7(*), PY8(*),
-     .   PZ1(*), PZ2(*), PZ3(*), PZ4(*), 
-     .   PZ5(*), PZ6(*), PZ7(*), PZ8(*),
-     .   PXY1(*),PXY2(*),PXY3(*),PXY4(*),
-     .   PXY5(*),PXY6(*),PXY7(*),PXY8(*),
-     .   PYX1(*),PYX2(*),PYX3(*),PYX4(*),
-     .   PYX5(*),PYX6(*),PYX7(*),PYX8(*),
-     .   PXZ1(*),PXZ2(*),PXZ3(*),PXZ4(*),
-     .   PXZ5(*),PXZ6(*),PXZ7(*),PXZ8(*),
-     .   PZX1(*),PZX2(*),PZX3(*),PZX4(*),
-     .   PZX5(*),PZX6(*),PZX7(*),PZX8(*),
-     .   PYZ1(*),PYZ2(*),PYZ3(*),PYZ4(*),
-     .   PYZ5(*),PYZ6(*),PYZ7(*),PYZ8(*),
-     .   PZY1(*),PZY2(*),PZY3(*),PZY4(*),
-     .   PZY5(*),PZY6(*),PZY7(*),PZY8(*),
+     .   PX(MVSIZ,8), PXY(MVSIZ,8), PXZ(MVSIZ,8),
+     .   PY(MVSIZ,8), PYX(MVSIZ,8), PYZ(MVSIZ,8),
+     .   PZ(MVSIZ,8), PZX(MVSIZ,8), PZY(MVSIZ,8),
      .   BXY1(*),BXY2(*),BXY3(*),BXY4(*),
      .   BXY5(*),BXY6(*),BXY7(*),BXY8(*),
      .   BYX1(*),BYX2(*),BYX3(*),BYX4(*),
@@ -221,41 +189,41 @@ C
       DO I=1,NEL
        XS =D1X(I)+D2X(I)+D3X(I)
        XAS =D4X(I)+XG1(I)+XG2(I)+XG3(I)+XG4(I)-PXC1(I)
-       PX1(I)=XS-XAS
-       PX7(I)=XS+XAS
+       PX(I,1)=XS-XAS
+       PX(I,7)=XS+XAS
        YS =D1Y(I)+D2Y(I)+D3Y(I)
        YAS =D4Y(I)+YG1(I)+YG2(I)+YG3(I)+YG4(I)-PYC1(I)
-       PY1(I)=YS-YAS
-       PY7(I)=YS+YAS
+       PY(I,1)=YS-YAS
+       PY(I,7)=YS+YAS
        ZS =D1Z(I)+D2Z(I)+D3Z(I)
        ZAS =D4Z(I)+ZG1(I)+ZG2(I)+ZG3(I)+ZG4(I)-PZC1(I)
-       PZ1(I)=ZS-ZAS
-       PZ7(I)=ZS+ZAS
+       PZ(I,1)=ZS-ZAS
+       PZ(I,7)=ZS+ZAS
 C
        YS =D1Y(I)+D2Y(I)
        YAS =YG1(I)+YG2(I)-PYC1(I)
-       PXY1(I)=YS-YAS
-       PXY7(I)=YS+YAS
+       PXY(I,1)=YS-YAS
+       PXY(I,7)=YS+YAS
        XS =D1X(I)+D2X(I)
        XAS =XG1(I)+XG2(I)-PXC1(I)
-       PYX1(I)=XS-XAS
-       PYX7(I)=XS+XAS
+       PYX(I,1)=XS-XAS
+       PYX(I,7)=XS+XAS
        ZS =D1Z(I)+D3Z(I)
        ZAS =ZG1(I)+ZG3(I)-PZC1(I)
-       PXZ1(I)=ZS-ZAS
-       PXZ7(I)=ZS+ZAS
+       PXZ(I,1)=ZS-ZAS
+       PXZ(I,7)=ZS+ZAS
        XS =D1X(I)+D3X(I)
        XAS =XG1(I)+XG3(I)-PXC1(I)
-       PZX1(I)=XS-XAS
-       PZX7(I)=XS+XAS
+       PZX(I,1)=XS-XAS
+       PZX(I,7)=XS+XAS
        ZS =D2Z(I)+D3Z(I)
        ZAS =ZG2(I)+ZG3(I)-PZC1(I)
-       PYZ1(I)=ZS-ZAS
-       PYZ7(I)=ZS+ZAS
+       PYZ(I,1)=ZS-ZAS
+       PYZ(I,7)=ZS+ZAS
        YS =D2Y(I)+D3Y(I)
        YAS =YG2(I)+YG3(I)-PYC1(I)
-       PZY1(I)=YS-YAS
-       PZY7(I)=YS+YAS
+       PZY(I,1)=YS-YAS
+       PZY(I,7)=YS+YAS
       ENDDO
 C  
       IF (ICP /= 1 .AND. ICP /= 11) THEN
@@ -302,41 +270,41 @@ C
       DO I=1,NEL
        XS =D1X(I)-D2X(I)-D3X(I)
        XAS =-D4X(I)+XG1(I)+XG2(I)+XG3(I)+XG4(I)-PXC2(I)
-       PX2(I)=XS-XAS
-       PX8(I)=XS+XAS
+       PX(I,2)=XS-XAS
+       PX(I,8)=XS+XAS
        YS =D1Y(I)-D2Y(I)-D3Y(I)
        YAS =-D4Y(I)+YG1(I)+YG2(I)+YG3(I)+YG4(I)-PYC2(I)
-       PY2(I)=YS-YAS
-       PY8(I)=YS+YAS
+       PY(I,2)=YS-YAS
+       PY(I,8)=YS+YAS
        ZS =D1Z(I)-D2Z(I)-D3Z(I)
        ZAS =-D4Z(I)+ZG1(I)+ZG2(I)+ZG3(I)+ZG4(I)-PZC2(I)
-       PZ2(I)=ZS-ZAS
-       PZ8(I)=ZS+ZAS
+       PZ(I,2)=ZS-ZAS
+       PZ(I,8)=ZS+ZAS
 C
        YS =D1Y(I)-D2Y(I)
        YAS =YG1(I)+YG2(I)-PYC2(I)
-       PXY2(I)=YS-YAS
-       PXY8(I)=YS+YAS
+       PXY(I,2)=YS-YAS
+       PXY(I,8)=YS+YAS
        XS =D1X(I)-D2X(I)
        XAS =XG1(I)+XG2(I)-PXC2(I)
-       PYX2(I)=XS-XAS
-       PYX8(I)=XS+XAS
+       PYX(I,2)=XS-XAS
+       PYX(I,8)=XS+XAS
        ZS =D1Z(I)-D3Z(I)
        ZAS =ZG1(I)+ZG3(I)-PZC2(I)
-       PXZ2(I)=ZS-ZAS
-       PXZ8(I)=ZS+ZAS
+       PXZ(I,2)=ZS-ZAS
+       PXZ(I,8)=ZS+ZAS
        XS =D1X(I)-D3X(I)
        XAS =XG1(I)+XG3(I)-PXC2(I)
-       PZX2(I)=XS-XAS
-       PZX8(I)=XS+XAS
+       PZX(I,2)=XS-XAS
+       PZX(I,8)=XS+XAS
        ZS =-D2Z(I)-D3Z(I)
        ZAS =ZG2(I)+ZG3(I)-PZC2(I)
-       PYZ2(I)=ZS-ZAS
-       PYZ8(I)=ZS+ZAS
+       PYZ(I,2)=ZS-ZAS
+       PYZ(I,8)=ZS+ZAS
        YS =-D2Y(I)-D3Y(I)
        YAS =YG2(I)+YG3(I)-PYC2(I)
-       PZY2(I)=YS-YAS
-       PZY8(I)=YS+YAS
+       PZY(I,2)=YS-YAS
+       PZY(I,8)=YS+YAS
       ENDDO
 C
       IF (ICP /= 1 .AND. ICP /= 11) THEN
@@ -384,41 +352,41 @@ C
       DO I=1,NEL
        XS =-D1X(I)-D2X(I)+D3X(I)
        XAS =D4X(I)+XG1(I)+XG2(I)+XG3(I)+XG4(I)-PXC3(I)
-       PX3(I)=XS-XAS
-       PX5(I)=XS+XAS
+       PX(I,3)=XS-XAS
+       PX(I,5)=XS+XAS
        YS =-D1Y(I)-D2Y(I)+D3Y(I)
        YAS =D4Y(I)+YG1(I)+YG2(I)+YG3(I)+YG4(I)-PYC3(I)
-       PY3(I)=YS-YAS
-       PY5(I)=YS+YAS
+       PY(I,3)=YS-YAS
+       PY(I,5)=YS+YAS
        ZS =-D1Z(I)-D2Z(I)+D3Z(I)
        ZAS =D4Z(I)+ZG1(I)+ZG2(I)+ZG3(I)+ZG4(I)-PZC3(I)
-       PZ3(I)=ZS-ZAS
-       PZ5(I)=ZS+ZAS
+       PZ(I,3)=ZS-ZAS
+       PZ(I,5)=ZS+ZAS
 C
        YS =-D1Y(I)-D2Y(I)
        YAS =YG1(I)+YG2(I)-PYC3(I)
-       PXY3(I)=YS-YAS
-       PXY5(I)=YS+YAS
+       PXY(I,3)=YS-YAS
+       PXY(I,5)=YS+YAS
        XS =-D1X(I)-D2X(I)
        XAS =XG1(I)+XG2(I)-PXC3(I)
-       PYX3(I)=XS-XAS
-       PYX5(I)=XS+XAS
+       PYX(I,3)=XS-XAS
+       PYX(I,5)=XS+XAS
        ZS =-D1Z(I)+D3Z(I)
        ZAS =ZG1(I)+ZG3(I)-PZC3(I)
-       PXZ3(I)=ZS-ZAS
-       PXZ5(I)=ZS+ZAS
+       PXZ(I,3)=ZS-ZAS
+       PXZ(I,5)=ZS+ZAS
        XS =-D1X(I)+D3X(I)
        XAS =XG1(I)+XG3(I)-PXC3(I)
-       PZX3(I)=XS-XAS
-       PZX5(I)=XS+XAS
+       PZX(I,3)=XS-XAS
+       PZX(I,5)=XS+XAS
        ZS =-D2Z(I)+D3Z(I)
        ZAS =ZG2(I)+ZG3(I)-PZC3(I)
-       PYZ3(I)=ZS-ZAS
-       PYZ5(I)=ZS+ZAS
+       PYZ(I,3)=ZS-ZAS
+       PYZ(I,5)=ZS+ZAS
        YS =-D2Y(I)+D3Y(I)
        YAS =YG2(I)+YG3(I)-PYC3(I)
-       PZY3(I)=YS-YAS
-       PZY5(I)=YS+YAS
+       PZY(I,3)=YS-YAS
+       PZY(I,5)=YS+YAS
       ENDDO
 C  
       IF (ICP /= 1 .AND. ICP /= 11) THEN
@@ -465,41 +433,41 @@ C
       DO I=1,NEL
        XS =-D1X(I)+D2X(I)-D3X(I)
        XAS =-D4X(I)+XG1(I)+XG2(I)+XG3(I)+XG4(I)-PXC4(I)
-       PX4(I)=XS-XAS
-       PX6(I)=XS+XAS
+       PX(I,4)=XS-XAS
+       PX(I,6)=XS+XAS
        YS =-D1Y(I)+D2Y(I)-D3Y(I)
        YAS =-D4Y(I)+YG1(I)+YG2(I)+YG3(I)+YG4(I)-PYC4(I)
-       PY4(I)=YS-YAS
-       PY6(I)=YS+YAS
+       PY(I,4)=YS-YAS
+       PY(I,6)=YS+YAS
        ZS =-D1Z(I)+D2Z(I)-D3Z(I)
        ZAS =-D4Z(I)+ZG1(I)+ZG2(I)+ZG3(I)+ZG4(I)-PZC4(I)
-       PZ4(I)=ZS-ZAS
-       PZ6(I)=ZS+ZAS
+       PZ(I,4)=ZS-ZAS
+       PZ(I,6)=ZS+ZAS
 C
        YS =-D1Y(I)+D2Y(I)
        YAS =YG1(I)+YG2(I)-PYC4(I)
-       PXY4(I)=YS-YAS
-       PXY6(I)=YS+YAS
+       PXY(I,4)=YS-YAS
+       PXY(I,6)=YS+YAS
        XS =-D1X(I)+D2X(I)
        XAS =XG1(I)+XG2(I)-PXC4(I)
-       PYX4(I)=XS-XAS
-       PYX6(I)=XS+XAS
+       PYX(I,4)=XS-XAS
+       PYX(I,6)=XS+XAS
        ZS =-D1Z(I)-D3Z(I)
        ZAS =ZG1(I)+ZG3(I)-PZC4(I)
-       PXZ4(I)=ZS-ZAS
-       PXZ6(I)=ZS+ZAS
+       PXZ(I,4)=ZS-ZAS
+       PXZ(I,6)=ZS+ZAS
        XS =-D1X(I)-D3X(I)
        XAS =XG1(I)+XG3(I)-PXC4(I)
-       PZX4(I)=XS-XAS
-       PZX6(I)=XS+XAS
+       PZX(I,4)=XS-XAS
+       PZX(I,6)=XS+XAS
        ZS =D2Z(I)-D3Z(I)
        ZAS =ZG2(I)+ZG3(I)-PZC4(I)
-       PYZ4(I)=ZS-ZAS
-       PYZ6(I)=ZS+ZAS
+       PYZ(I,4)=ZS-ZAS
+       PYZ(I,6)=ZS+ZAS
        YS =D2Y(I)-D3Y(I)
        YAS =YG2(I)+YG3(I)-PYC4(I)
-       PZY4(I)=YS-YAS
-       PZY6(I)=YS+YAS
+       PZY(I,4)=YS-YAS
+       PZY(I,6)=YS+YAS
       ENDDO
 C
       IF (ICP /= 1 .AND. ICP /= 11) THEN
@@ -609,61 +577,61 @@ C
      .    ((ISMSTR==10.OR.ISMSTR==12).AND.
      .    (ICP==1.OR.ICP==11.OR.MTN==99.OR.MTN==1).AND.JHBE==14)) THEN
        DO I=1,NEL
-        PXY1(I)=PY1(I)
-        PXY2(I)=PY2(I)
-        PXY3(I)=PY3(I)
-        PXY4(I)=PY4(I)
-        PXY5(I)=PY5(I)
-        PXY6(I)=PY6(I)
-        PXY7(I)=PY7(I)
-        PXY8(I)=PY8(I)
+        PXY(I,1)=PY(I,1)
+        PXY(I,2)=PY(I,2)
+        PXY(I,3)=PY(I,3)
+        PXY(I,4)=PY(I,4)
+        PXY(I,5)=PY(I,5)
+        PXY(I,6)=PY(I,6)
+        PXY(I,7)=PY(I,7)
+        PXY(I,8)=PY(I,8)
 C
-        PYX1(I)=PX1(I)
-        PYX2(I)=PX2(I)
-        PYX3(I)=PX3(I)
-        PYX4(I)=PX4(I)
-        PYX5(I)=PX5(I)
-        PYX6(I)=PX6(I)
-        PYX7(I)=PX7(I)
-        PYX8(I)=PX8(I)
+        PYX(I,1)=PX(I,1)
+        PYX(I,2)=PX(I,2)
+        PYX(I,3)=PX(I,3)
+        PYX(I,4)=PX(I,4)
+        PYX(I,5)=PX(I,5)
+        PYX(I,6)=PX(I,6)
+        PYX(I,7)=PX(I,7)
+        PYX(I,8)=PX(I,8)
        ENDDO
        DO I=1,NEL
-        PYZ1(I)=PZ1(I)
-        PYZ2(I)=PZ2(I)
-        PYZ3(I)=PZ3(I)
-        PYZ4(I)=PZ4(I)
-        PYZ5(I)=PZ5(I)
-        PYZ6(I)=PZ6(I)
-        PYZ7(I)=PZ7(I)
-        PYZ8(I)=PZ8(I)
+        PYZ(I,1)=PZ(I,1)
+        PYZ(I,2)=PZ(I,2)
+        PYZ(I,3)=PZ(I,3)
+        PYZ(I,4)=PZ(I,4)
+        PYZ(I,5)=PZ(I,5)
+        PYZ(I,6)=PZ(I,6)
+        PYZ(I,7)=PZ(I,7)
+        PYZ(I,8)=PZ(I,8)
 C
-        PZY1(I)=PY1(I)
-        PZY2(I)=PY2(I)
-        PZY3(I)=PY3(I)
-        PZY4(I)=PY4(I)
-        PZY5(I)=PY5(I)
-        PZY6(I)=PY6(I)
-        PZY7(I)=PY7(I)
-        PZY8(I)=PY8(I)
+        PZY(I,1)=PY(I,1)
+        PZY(I,2)=PY(I,2)
+        PZY(I,3)=PY(I,3)
+        PZY(I,4)=PY(I,4)
+        PZY(I,5)=PY(I,5)
+        PZY(I,6)=PY(I,6)
+        PZY(I,7)=PY(I,7)
+        PZY(I,8)=PY(I,8)
        ENDDO
        DO I=1,NEL
-        PXZ1(I)=PZ1(I)
-        PXZ2(I)=PZ2(I)
-        PXZ3(I)=PZ3(I)
-        PXZ4(I)=PZ4(I)
-        PXZ5(I)=PZ5(I)
-        PXZ6(I)=PZ6(I)
-        PXZ7(I)=PZ7(I)
-        PXZ8(I)=PZ8(I)
+        PXZ(I,1)=PZ(I,1)
+        PXZ(I,2)=PZ(I,2)
+        PXZ(I,3)=PZ(I,3)
+        PXZ(I,4)=PZ(I,4)
+        PXZ(I,5)=PZ(I,5)
+        PXZ(I,6)=PZ(I,6)
+        PXZ(I,7)=PZ(I,7)
+        PXZ(I,8)=PZ(I,8)
 C
-        PZX1(I)=PX1(I)
-        PZX2(I)=PX2(I)
-        PZX3(I)=PX3(I)
-        PZX4(I)=PX4(I)
-        PZX5(I)=PX5(I)
-        PZX6(I)=PX6(I)
-        PZX7(I)=PX7(I)
-        PZX8(I)=PX8(I)
+        PZX(I,1)=PX(I,1)
+        PZX(I,2)=PX(I,2)
+        PZX(I,3)=PX(I,3)
+        PZX(I,4)=PX(I,4)
+        PZX(I,5)=PX(I,5)
+        PZX(I,6)=PX(I,6)
+        PZX(I,7)=PX(I,7)
+        PZX(I,8)=PX(I,8)
        ENDDO
       ENDIF 
       IF ((ISMSTR==10.OR.ISMSTR==12).AND.MTN==1.AND.JHBE==14.AND.
@@ -725,12 +693,12 @@ C-------|BXY BYY BZY |  same than H8A
 C-------|BXZ BYZ BZZ |
       IF (ICP==11) THEN
        DO I=1,NEL
-        BXHI=THIRD*(PX1(I)-PXC1(I))
-        BYHI=THIRD*(PY1(I)-PYC1(I))
-        BZHI=THIRD*(PZ1(I)-PZC1(I))
-        PX1(I)=PXC1(I)+TWO*BXHI
-        PY1(I)=PYC1(I)+TWO*BYHI
-        PZ1(I)=PZC1(I)+TWO*BZHI
+        BXHI=THIRD*(PX(I,1)-PXC1(I))
+        BYHI=THIRD*(PY(I,1)-PYC1(I))
+        BZHI=THIRD*(PZ(I,1)-PZC1(I))
+        PX(I,1)=PXC1(I)+TWO*BXHI
+        PY(I,1)=PYC1(I)+TWO*BYHI
+        PZ(I,1)=PZC1(I)+TWO*BZHI
         BXY1(I)=-BXHI
         BXZ1(I)=-BXHI
         BYX1(I)=-BYHI
@@ -739,12 +707,12 @@ C-------|BXZ BYZ BZZ |
         BZY1(I)=-BZHI
        ENDDO
        DO I=1,NEL
-        BXHI=THIRD*(PX2(I)-PXC2(I))
-        BYHI=THIRD*(PY2(I)-PYC2(I))
-        BZHI=THIRD*(PZ2(I)-PZC2(I))
-        PX2(I)=PXC2(I)+TWO*BXHI
-        PY2(I)=PYC2(I)+TWO*BYHI
-        PZ2(I)=PZC2(I)+TWO*BZHI
+        BXHI=THIRD*(PX(I,2)-PXC2(I))
+        BYHI=THIRD*(PY(I,2)-PYC2(I))
+        BZHI=THIRD*(PZ(I,2)-PZC2(I))
+        PX(I,2)=PXC2(I)+TWO*BXHI
+        PY(I,2)=PYC2(I)+TWO*BYHI
+        PZ(I,2)=PZC2(I)+TWO*BZHI
         BXY2(I)=-BXHI
         BXZ2(I)=-BXHI
         BYX2(I)=-BYHI
@@ -753,12 +721,12 @@ C-------|BXZ BYZ BZZ |
         BZY2(I)=-BZHI
        ENDDO
        DO I=1,NEL
-        BXHI=THIRD*(PX3(I)-PXC3(I))
-        BYHI=THIRD*(PY3(I)-PYC3(I))
-        BZHI=THIRD*(PZ3(I)-PZC3(I))
-        PX3(I)=PXC3(I)+TWO*BXHI
-        PY3(I)=PYC3(I)+TWO*BYHI
-        PZ3(I)=PZC3(I)+TWO*BZHI
+        BXHI=THIRD*(PX(I,3)-PXC3(I))
+        BYHI=THIRD*(PY(I,3)-PYC3(I))
+        BZHI=THIRD*(PZ(I,3)-PZC3(I))
+        PX(I,3)=PXC3(I)+TWO*BXHI
+        PY(I,3)=PYC3(I)+TWO*BYHI
+        PZ(I,3)=PZC3(I)+TWO*BZHI
         BXY3(I)=-BXHI
         BXZ3(I)=-BXHI
         BYX3(I)=-BYHI
@@ -767,12 +735,12 @@ C-------|BXZ BYZ BZZ |
         BZY3(I)=-BZHI
        ENDDO
        DO I=1,NEL
-        BXHI=THIRD*(PX4(I)-PXC4(I))
-        BYHI=THIRD*(PY4(I)-PYC4(I))
-        BZHI=THIRD*(PZ4(I)-PZC4(I))
-        PX4(I)=PXC4(I)+TWO*BXHI
-        PY4(I)=PYC4(I)+TWO*BYHI
-        PZ4(I)=PZC4(I)+TWO*BZHI
+        BXHI=THIRD*(PX(I,4)-PXC4(I))
+        BYHI=THIRD*(PY(I,4)-PYC4(I))
+        BZHI=THIRD*(PZ(I,4)-PZC4(I))
+        PX(I,4)=PXC4(I)+TWO*BXHI
+        PY(I,4)=PYC4(I)+TWO*BYHI
+        PZ(I,4)=PZC4(I)+TWO*BZHI
         BXY4(I)=-BXHI
         BXZ4(I)=-BXHI
         BYX4(I)=-BYHI
@@ -781,12 +749,12 @@ C-------|BXZ BYZ BZZ |
         BZY4(I)=-BZHI
        ENDDO
        DO I=1,NEL
-        BXHI=THIRD*(PX5(I)+PXC3(I))
-        BYHI=THIRD*(PY5(I)+PYC3(I))
-        BZHI=THIRD*(PZ5(I)+PZC3(I))
-        PX5(I)=-PXC3(I)+TWO*BXHI
-        PY5(I)=-PYC3(I)+TWO*BYHI
-        PZ5(I)=-PZC3(I)+TWO*BZHI
+        BXHI=THIRD*(PX(I,5)+PXC3(I))
+        BYHI=THIRD*(PY(I,5)+PYC3(I))
+        BZHI=THIRD*(PZ(I,5)+PZC3(I))
+        PX(I,5)=-PXC3(I)+TWO*BXHI
+        PY(I,5)=-PYC3(I)+TWO*BYHI
+        PZ(I,5)=-PZC3(I)+TWO*BZHI
         BXY5(I)=-BXHI
         BXZ5(I)=-BXHI
         BYX5(I)=-BYHI
@@ -795,12 +763,12 @@ C-------|BXZ BYZ BZZ |
         BZY5(I)=-BZHI
        ENDDO
        DO I=1,NEL
-        BXHI=THIRD*(PX6(I)+PXC4(I))
-        BYHI=THIRD*(PY6(I)+PYC4(I))
-        BZHI=THIRD*(PZ6(I)+PZC4(I))
-        PX6(I)=-PXC4(I)+TWO*BXHI
-        PY6(I)=-PYC4(I)+TWO*BYHI
-        PZ6(I)=-PZC4(I)+TWO*BZHI
+        BXHI=THIRD*(PX(I,6)+PXC4(I))
+        BYHI=THIRD*(PY(I,6)+PYC4(I))
+        BZHI=THIRD*(PZ(I,6)+PZC4(I))
+        PX(I,6)=-PXC4(I)+TWO*BXHI
+        PY(I,6)=-PYC4(I)+TWO*BYHI
+        PZ(I,6)=-PZC4(I)+TWO*BZHI
         BXY6(I)=-BXHI
         BXZ6(I)=-BXHI
         BYX6(I)=-BYHI
@@ -809,12 +777,12 @@ C-------|BXZ BYZ BZZ |
         BZY6(I)=-BZHI
        ENDDO
        DO I=1,NEL
-        BXHI=THIRD*(PX7(I)+PXC1(I))
-        BYHI=THIRD*(PY7(I)+PYC1(I))
-        BZHI=THIRD*(PZ7(I)+PZC1(I))
-        PX7(I)=-PXC1(I)+TWO*BXHI
-        PY7(I)=-PYC1(I)+TWO*BYHI
-        PZ7(I)=-PZC1(I)+TWO*BZHI
+        BXHI=THIRD*(PX(I,7)+PXC1(I))
+        BYHI=THIRD*(PY(I,7)+PYC1(I))
+        BZHI=THIRD*(PZ(I,7)+PZC1(I))
+        PX(I,7)=-PXC1(I)+TWO*BXHI
+        PY(I,7)=-PYC1(I)+TWO*BYHI
+        PZ(I,7)=-PZC1(I)+TWO*BZHI
         BXY7(I)=-BXHI
         BXZ7(I)=-BXHI
         BYX7(I)=-BYHI
@@ -823,12 +791,12 @@ C-------|BXZ BYZ BZZ |
         BZY7(I)=-BZHI
        ENDDO
        DO I=1,NEL
-        BXHI=THIRD*(PX8(I)+PXC2(I))
-        BYHI=THIRD*(PY8(I)+PYC2(I))
-        BZHI=THIRD*(PZ8(I)+PZC2(I))
-        PX8(I)=-PXC2(I)+TWO*BXHI
-        PY8(I)=-PYC2(I)+TWO*BYHI
-        PZ8(I)=-PZC2(I)+TWO*BZHI
+        BXHI=THIRD*(PX(I,8)+PXC2(I))
+        BYHI=THIRD*(PY(I,8)+PYC2(I))
+        BZHI=THIRD*(PZ(I,8)+PZC2(I))
+        PX(I,8)=-PXC2(I)+TWO*BXHI
+        PY(I,8)=-PYC2(I)+TWO*BYHI
+        PZ(I,8)=-PZC2(I)+TWO*BZHI
         BXY8(I)=-BXHI
         BXZ8(I)=-BXHI
         BYX8(I)=-BYHI
