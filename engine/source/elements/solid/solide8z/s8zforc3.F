@@ -176,7 +176,7 @@ C
      .   PM(NPROPM,*),GEO(NPROPG,*),X(*),A(*),V(*),MS(*),W(*), 
      .   FLUX(6,*),FLU1(*),VEUL(*),FV(*),TF(*),BUFMAT(*),
      .   PARTSAV(*),STIFN(*), FSKY(*),EANI(*),
-     .   FX(8,MVSIZ), FY(8,MVSIZ), FZ(8,MVSIZ),
+     .   FX(8,MVSIZ), FY(8,MVSIZ), FZ(8,MVSIZ)
       my_real
      .    SMR(MVSIZ,729),SMS(MVSIZ,729),SMT(MVSIZ,729),
      .    MFXX(MVSIZ,729),MFXY(MVSIZ,729),MFYX(MVSIZ,729),
