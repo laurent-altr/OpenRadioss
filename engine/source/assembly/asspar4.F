@@ -36,12 +36,12 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
       !||====================================================================
       SUBROUTINE ASSPAR4(
      1  A       ,AR      ,STIFN  ,STIFR  ,MS      ,
-     2  FSKY    ,FSKYV   ,ADDCNE ,INDSKY ,FSKYM   ,
+     2  FSKY    ,FSKYV   ,ADSKY , FSKYM   ,
      3  MSNF    ,ISKY    ,FSKYI  ,VISCN  ,FTHE    ,
      4  FTHESKY ,FTHESKYI,NODFT  ,NODLT  ,ADSKYI  ,
      5  PARTSAV ,PARTFT  ,PARTLT ,ITASK  ,GREFT   ,
      6  GRELT   ,GRESAV  ,AF     ,FFSKY  ,MSF     ,
-     7  ADDCNE_PXFEM ,INOD_PXFEM ,ITAB   ,FSKYD   ,
+     7  ADSKY_PXFEM ,INOD_PXFEM ,ITAB   ,FSKYD   ,
      8  DMSPH   ,CONDN,CONDNSKY,CONDNSKYI,MS_2D,ICNDS10 ,
      A  STIFND  ,FORNEQS ,FORNEQSKY,NFACNIT,NODFT_2,
      B  NODLT_2 ,FSKY_L  ,GLOB_THERM)
@@ -75,10 +75,10 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C----------------------------------------------
-      INTEGER ADDCNE(*),INDSKY(*), ISKY(*),
+      INTEGER ADSKY(*), ISKY(*),
      .        ADSKYI(0:NUMNOD+1),
      .        NODFT, NODLT, ITASK, PARTFT, PARTLT,GREFT,GRELT,
-     .        ADDCNE_PXFEM(*),INOD_PXFEM(*), ITAB(*),ICNDS10(3,*),NODFT_2  ,NODLT_2
+     .        ADSKY_PXFEM(*),INOD_PXFEM(*), ITAB(*),ICNDS10(3,*),NODFT_2  ,NODLT_2
 
 C     REAL
       my_real
@@ -157,8 +157,8 @@ C-----------------------------------------------
         IF(ALE%SUB%IFSUBM==0)THEN
 !$OMP DO SCHEDULE(guided)
           DO N = 1,NUMNOD 
-            NCT = ADDCNE(N)-1
-            NC = ADDCNE(N+1)-ADDCNE(N)
+            NCT = ADSKY(N)-1
+            NC = ADSKY(N+1)-ADSKY(N)
             DO K = NCT+1, NCT+NC
               A(1,N)   = A(1,N)   + FSKY(1,K)
               A(2,N)   = A(2,N)   + FSKY(2,K)
@@ -175,8 +175,8 @@ C-----------------------------------------------
         ELSEIF(N2D/=0)THEN
 !$OMP DO SCHEDULE(guided)
           DO N = 1,NUMNOD
-            NCT = ADDCNE(N)-1
-            NC = ADDCNE(N+1)-ADDCNE(N)
+            NCT = ADSKY(N)-1
+            NC = ADSKY(N+1)-ADSKY(N)
             DO K = NCT+1, NCT+NC
               A(1,N)   = A(1,N)   + FSKY(1,K)
               A(2,N)   = A(2,N)   + FSKY(2,K)
@@ -194,8 +194,8 @@ C-----------------------------------------------
         ELSE
 !$OMP DO SCHEDULE(guided)
           DO N = 1,NUMNOD
-            NCT = ADDCNE(N)-1
-            NC = ADDCNE(N+1)-ADDCNE(N)
+            NCT = ADSKY(N)-1
+            NC = ADSKY(N+1)-ADSKY(N)
             DO K = NCT+1, NCT+NC
               A(1,N)   = A(1,N)   + FSKY(1,K)
               A(2,N)   = A(2,N)   + FSKY(2,K)
@@ -219,8 +219,8 @@ C-----------------------------------------------
           IF(ALE%SUB%IFSUBM==0)THEN
 !$OMP DO SCHEDULE(guided)
             DO N = 1,NUMNOD
-              NCT = ADDCNE(N)-1
-              NC = ADDCNE(N+1)-ADDCNE(N)
+              NCT = ADSKY(N)-1
+              NC = ADSKY(N+1)-ADSKY(N)
               DO K = NCT+1, NCT+NC
                 A(1,N)   = A(1,N)   + FSKY(1,K)
                 A(2,N)   = A(2,N)   + FSKY(2,K)
@@ -239,8 +239,8 @@ C-----------------------------------------------
           ELSEIF(N2D/=0)THEN
 !$OMP DO SCHEDULE(guided)
             DO N = 1,NUMNOD
-              NCT = ADDCNE(N)-1
-              NC = ADDCNE(N+1)-ADDCNE(N)
+              NCT = ADSKY(N)-1
+              NC = ADSKY(N+1)-ADSKY(N)
               DO K = NCT+1, NCT+NC
                 A(1,N)   = A(1,N)   + FSKY(1,K)
                 A(2,N)   = A(2,N)   + FSKY(2,K)
@@ -260,8 +260,8 @@ C-----------------------------------------------
           ELSE
 !$OMP DO SCHEDULE(guided)
             DO N = 1,NUMNOD
-              NCT = ADDCNE(N)-1
-              NC = ADDCNE(N+1)-ADDCNE(N)
+              NCT = ADSKY(N)-1
+              NC = ADSKY(N+1)-ADSKY(N)
               DO K = NCT+1, NCT+NC
                 A(1,N)   = A(1,N)   + FSKY(1,K)
                 A(2,N)   = A(2,N)   + FSKY(2,K)
@@ -285,8 +285,8 @@ C-----------------------------------------------
           IF(ALE%SUB%IFSUBM==0)THEN
 !$OMP DO SCHEDULE(guided)
             DO N = 1,NUMNOD
-              NCT = ADDCNE(N)-1
-              NC = ADDCNE(N+1)-ADDCNE(N)
+              NCT = ADSKY(N)-1
+              NC = ADSKY(N+1)-ADSKY(N)
               DO K = NCT+1, NCT+NC
                 A(1,N)   = A(1,N)   + FSKY(1,K)
                 A(2,N)   = A(2,N)   + FSKY(2,K)
@@ -304,8 +304,8 @@ C-----------------------------------------------
           ELSEIF(N2D/=0)THEN
 !$OMP DO SCHEDULE(guided)
             DO N = 1,NUMNOD
-              NCT = ADDCNE(N)-1
-              NC = ADDCNE(N+1)-ADDCNE(N)
+              NCT = ADSKY(N)-1
+              NC = ADSKY(N+1)-ADSKY(N)
               DO K = NCT+1, NCT+NC
                 A(1,N)   = A(1,N)   + FSKY(1,K)
                 A(2,N)   = A(2,N)   + FSKY(2,K)
@@ -324,8 +324,8 @@ C-----------------------------------------------
           ELSE
 !$OMP DO SCHEDULE(guided)
             DO N = 1,NUMNOD
-              NCT = ADDCNE(N)-1
-              NC = ADDCNE(N+1)-ADDCNE(N)
+              NCT = ADSKY(N)-1
+              NC = ADSKY(N+1)-ADSKY(N)
               DO K = NCT+1, NCT+NC
                 A(1,N)   = A(1,N)   + FSKY(1,K)
                 A(2,N)   = A(2,N)   + FSKY(2,K)
@@ -352,8 +352,8 @@ C-----------------------------------------------
       IF(IALELAG > 0) THEN
 !$OMP DO SCHEDULE(guided)
         DO N = 1,NUMNOD
-          NCT = ADDCNE(N)-1
-          NC = ADDCNE(N+1)-ADDCNE(N)
+          NCT = ADSKY(N)-1
+          NC = ADSKY(N+1)-ADSKY(N)
           DO K = NCT+1, NCT+NC
             AF(1,N)  = AF(1,N)   + FFSKY(1,K)
             AF(2,N)  = AF(2,N)   + FFSKY(2,K)
@@ -371,8 +371,8 @@ C-----------------------------------------------
       IF(SOL2SPH_FLAG/=0)THEN
 !$OMP DO SCHEDULE(guided)
         DO N = 1,NUMNOD
-          NCT = ADDCNE(N)-1
-          NC = ADDCNE(N+1)-ADDCNE(N)
+          NCT = ADSKY(N)-1
+          NC = ADSKY(N+1)-ADSKY(N)
           DO K = NCT+1, NCT+NC
             DMSPH(N) = DMSPH(N) + FSKYD(K)
           ENDDO
@@ -388,8 +388,8 @@ C-----------------------------------------------
         DO N = 1,NUMNOD
           IL = INOD_PXFEM(N)
           IF(IL > 0) THEN
-            NCT = ADDCNE_PXFEM(IL) - 1
-            NC =  ADDCNE_PXFEM(IL+1) - ADDCNE_PXFEM(IL)
+            NCT = ADSKY_PXFEM(IL) - 1
+            NC =  ADSKY_PXFEM(IL+1) - ADSKY_PXFEM(IL)
             DO K = NCT+1, NCT+NC
               DO J=1,NPLYMAX
                 PLY(J)%A(1,IL) = PLY(J)%A(1,IL) + PLYSKY(J)%FSKY(1,K)
@@ -447,8 +447,8 @@ C-----------------------------------------------
       IF(NITSCHE /= 0) THEN
 !$OMP DO SCHEDULE(guided)
         DO N = 1,NUMNOD !NODFT, NODLT
-          NCT = ADDCNE(N)-1
-          NC = ADDCNE(N+1)-ADDCNE(N)
+          NCT = ADSKY(N)-1
+          NC = ADSKY(N+1)-ADSKY(N)
           DO K = NCT+1, NCT+NC
             DO NF=1,NFACNIT
               FORNEQS(1,N) = FORNEQS(1,N) + FORNEQSKY(3*(NF-1)+1,K)

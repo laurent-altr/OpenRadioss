@@ -5214,7 +5214,7 @@ C Assembly Parith/ON spmd+multi-thread
 C------------------------
         CALL ASSPAR4(
      1       NODES%A      ,NODES%AR      ,NODES%STIFN  ,NODES%STIFR       ,NODES%MS    ,
-     2       FSKY   ,FSKY    ,ADSKY  ,ADSKY(IAD1B),FSKYM ,
+     2       FSKY   ,FSKY    ,ADSKY  ,FSKYM ,
      3       MSNF   ,ISKY    ,FSKYI  ,NODES%VISCN       ,FTHE  ,
      4       FTHESKY,FTHESKYI,NODFTSK,NODLTSK     ,ADSKYI,
      5       PARTSAV,PARTFTSK ,PARTLTSK ,ITSK     ,GREFTSK ,
