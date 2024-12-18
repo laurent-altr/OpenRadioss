@@ -356,7 +356,7 @@
             arrays%max_uid = 0
             call reserve_capacity(arrays%loc2glob, numnod)
             do i = 1, numnod
-              max_uid = max(max_uid, arrays%itab(i))
+              arrays%max_uid = max(arrays%max_uid, arrays%itab(i))
               call add_entry_umap(arrays%loc2glob, arrays%itab(i), i)
             end do
 

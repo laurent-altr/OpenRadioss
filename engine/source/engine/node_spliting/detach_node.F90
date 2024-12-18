@@ -63,8 +63,8 @@
             new_local_id = nodes%numnod + 1
             do i = 1, list_size
                 do j = 1,4
-                    if(elements%shells%nodes(j,shell_list(i)) == node_id) then
-                        elements%shells%nodes(j,shell_list(i)) = new_local_id
+                    if(elements%shell%nodes(j,shell_list(i)) == node_id) then
+                        elements%shell%nodes(j,shell_list(i)) = new_local_id
                         elements%shell%ixc(j+1,shell_list(i)) = new_local_id
                     end if
                 enddo
@@ -100,9 +100,8 @@
                 endif
             end do
             nodes%itab(numnod+1) = new_uid
-            nodes%ITABM1(numnod+2:2*(numnod+1)) = nodes%ITABM1(numnod+1:2*numnod)
 
 
         end subroutine detach_node_from_shell 
 
-      end module detach_node 
+      end module detach_node_mod 
