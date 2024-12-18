@@ -797,7 +797,7 @@ C Partie Parith/ON lue en SPM dans tous les cas
 C
 C lecture directe de ADDCNE
         IF(IPARIT==1) THEN
-          CALL READ_I_C(ADSKY,NUMNOD+1)
+          CALL READ_I_C(ELEMENT%PON%ADSKY,NUMNOD+1)
 C lecture directe de PROCNE
           CALL READ_I_C(PROCNE,LCNE0)
 C lecture directe structure interface type2
