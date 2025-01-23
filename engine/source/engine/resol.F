@@ -2067,7 +2067,7 @@ c  Equivalent nodal force
        ! Initialization of INTER_STRUCT structure + allocation
        ALLOCATE( INTER_STRUCT(NINTER) )
        ALLOCATE( SORT_COMM(NINTER) )
-       CALL INTER_STRUCT_INIT(INTER_STRUCT,SORT_COMM)
+       CALL INTER_STRUCT_INIT(INTER_STRUCT,SORT_COMM,INTERFACES%INTBUF_TAB, IPARI,NPARI, ISPMD,NODES%WEIGHT)
 
 
 C========================================================================================
@@ -3111,6 +3111,7 @@ C Implementing a dummy Madymo cycle
       ELSE
         NINTER25E = 0
       ENDIF
+
 
       NFVBAG = 0
       CHECK_NPOLH = .FALSE. 

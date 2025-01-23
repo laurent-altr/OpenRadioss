@@ -208,11 +208,15 @@ C -------------------------------------------------------------
             IF(ITASK==0)THEN
             ! ---------------------------
             ! send/rcv the secondary node data
-                CALL SPMD_CELL_EXCHANGE(TIMERS, NIN,ISENDTO,IRCVFROM,NSN,NSNR,IPARI(21,NIN),
-     1                                   IFQ,INACTI,NSNFIOLD,IPARI(47,NIN),NTY, intbuf_tab%stfns, intbuf_tab%nsv,
-     2                                   NRTM, X,
-     2                                   ITIED,NMN,INTER_STRUCT,SORT_COMM, GOT_PREVIEW)
-C
+c               CALL SPMD_CELL_EXCHANGE(TIMERS, NIN,ISENDTO,IRCVFROM,NSN,NSNR,IPARI(21,NIN),
+c    1                                   IFQ,INACTI,NSNFIOLD,IPARI(47,NIN),NTY, intbuf_tab%stfns, intbuf_tab%nsv,
+c    2                                   NRTM, X,
+c    2                                   ITIED,NMN,INTER_STRUCT,SORT_COMM, GOT_PREVIEW)
+c
+c               CALL SPMD_FILL_XREM(IRCVFROM,ISENDTO,WEIGHT,
+c    .                    IAD_ELEM,X,V,MS,TEMP,KINET,NODNX_SMS,ITAB,INTBUF_TAB,IPARI,NIN,
+c    .                    SORT_COMM,NODNX_SMS_SIZ,TEMP_SIZE)
+
                 IF(INACTI==5.OR.INACTI==6.OR.INACTI==7.OR.
      +               IFQ>0.OR.ITIED/=0)THEN
                     CALL SPMD_RNUMCD(

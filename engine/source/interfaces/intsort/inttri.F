@@ -720,11 +720,11 @@ C Fin Partie non parallele smt
             ENDIF
             ! -----------
             ! prepare the sort 
-            CALL INTER_PREPARE_SORT( ITASK,NB_INTER_SORTED,LIST_INTER_SORTED,ISENDTO,IRECVFROM,
+            CALL INTER_PREPARE_SORT_NEW( ITASK,NB_INTER_SORTED,LIST_INTER_SORTED,ISENDTO,IRECVFROM,
      .                               IPARI,IAD_ELEM,FR_ELEM,X,V,
      .                               MS,TEMP,KINET,NODNX_SMS,ITAB,
      .                               WEIGHT,INTBUF_TAB,INTER_STRUCT,SORT_COMM,NODNX_SMS_SIZ,
-     .                               TEMP_SIZ )
+     .                               TEMP_SIZ, NSNFIOLD)
             ! -----------
             ! sorting computation
             CALL INTER_SORT(TIMERS, ITASK,NB_INTER_SORTED,LIST_INTER_SORTED,RETRI,IPARI,

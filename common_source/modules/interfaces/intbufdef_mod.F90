@@ -1136,9 +1136,12 @@ module intbufdef_mod
       integer :: nrtm_free
 
 ! mpi communicators
+      integer, dimension(:), allocatable :: NSNS, RANKS
+
       integer :: mpi_comm
       integer :: rank
       integer :: nspmd
+      
 !
       integer :: nb_internal_edges        ! number of edges internal to the domain
       integer :: nb_boundary_edges_local  ! boundary edges treated by current domain
@@ -1172,6 +1175,8 @@ module intbufdef_mod
 
        ! Implicit
        my_real, DIMENSION(6) :: BMINMA_IMP
+
+
 !=======================================================================
    end type intbuf_struct_
 !=======================================================================
@@ -1203,3 +1208,5 @@ module intbufdef_mod
 !
 !---------------
 end module intbufdef_mod
+
+

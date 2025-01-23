@@ -214,6 +214,8 @@ set_source_files_properties( ${source_directory}/source/mpi/user_interface/spmd_
 set_source_files_properties( ${source_directory}/source/mpi/implicit/spmd_dsreso.F PROPERTIES COMPILE_FLAGS "${legacy_flags}" )
 set_source_files_properties( ${source_directory}/source/mpi/implicit/imp_spmd.F PROPERTIES COMPILE_FLAGS "${legacy_flags}" )
 set_source_files_properties( ${source_directory}/source/mpi/implicit/imp_fri.F PROPERTIES COMPILE_FLAGS "${legacy_flags}" )
+
+set_source_files_properties( ${source_directory}/source/mpi/interfaces/spmd_fill_xrem.F PROPERTIES COMPILE_FLAGS "${legacy_flags}" )
 set_source_files_properties( ${source_directory}/source/mpi/interfaces/spmd_exchmsr_idel.F PROPERTIES COMPILE_FLAGS "${legacy_flags}" )
 set_source_files_properties( ${source_directory}/source/mpi/interfaces/spmd_i21crit.F PROPERTIES COMPILE_FLAGS "${legacy_flags}" )
 set_source_files_properties( ${source_directory}/source/mpi/interfaces/spmd_exch_i25.F PROPERTIES COMPILE_FLAGS "${legacy_flags}" )
@@ -1278,6 +1280,7 @@ set_source_files_properties( ${source_directory}/source/interfaces/int20/i20cor3
 set_source_files_properties( ${source_directory}/source/interfaces/int20/i20mainf.F PROPERTIES COMPILE_FLAGS "${legacy_flags}" )
 set_source_files_properties( ${source_directory}/source/interfaces/int20/i20curv.F PROPERTIES COMPILE_FLAGS "${legacy_flags}" )
 set_source_files_properties( ${source_directory}/source/interfaces/int07/inter_trc_7.F PROPERTIES COMPILE_FLAGS "${legacy_flags}" )
+set_source_files_properties( ${source_directory}/source/interfaces/int07/inter_sort_07.F PROPERTIES COMPILE_FLAGS "${legacy_flags}" )
 set_source_files_properties( ${source_directory}/source/interfaces/int07/i7therm.F PROPERTIES COMPILE_FLAGS "${legacy_flags}" )
 set_source_files_properties( ${source_directory}/source/interfaces/int07/i7dstk3.F PROPERTIES COMPILE_FLAGS "${legacy_flags}" )
 set_source_files_properties( ${source_directory}/source/interfaces/int07/i7lagm.F PROPERTIES COMPILE_FLAGS "${legacy_flags}" )
@@ -1290,7 +1293,6 @@ set_source_files_properties( ${source_directory}/source/interfaces/int07/frictio
 set_source_files_properties( ${source_directory}/source/interfaces/int07/i7curv.F PROPERTIES COMPILE_FLAGS "${legacy_flags}" )
 set_source_files_properties( ${source_directory}/source/interfaces/int07/i7for3.F PROPERTIES COMPILE_FLAGS "${legacy_flags}" )
 set_source_files_properties( ${source_directory}/source/interfaces/int07/i7cor3t.F PROPERTIES COMPILE_FLAGS "${legacy_flags}" )
-
 set_source_files_properties( ${source_directory}/source/interfaces/int15/i15cmp.F PROPERTIES COMPILE_FLAGS "${legacy_flags}" )
 set_source_files_properties( ${source_directory}/source/interfaces/int15/i15for1.F PROPERTIES COMPILE_FLAGS "${legacy_flags}" )
 set_source_files_properties( ${source_directory}/source/interfaces/int15/i15fort1.F PROPERTIES COMPILE_FLAGS "${legacy_flags}" )
