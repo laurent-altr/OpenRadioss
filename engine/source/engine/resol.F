@@ -1269,6 +1269,7 @@ C-------------------------------------------------------------------------------
       DATA IUN/1/
         INTEGER MAXFUNC
         PARAMETER (MAXFUNC  = 100)
+        LOGICAL :: SHARED_MEMORY_CONTACT_SORTING
 C-----------------------------------------------------------------------------------       
 C Err THK
 C-----------------------------------------------------------------------------------       
@@ -2071,7 +2072,7 @@ c  Equivalent nodal force
        ALLOCATE( INTER_STRUCT(NINTER) )
        ALLOCATE( SORT_COMM(NINTER) )
        CALL INTER_STRUCT_INIT(INTER_STRUCT,SORT_COMM)
-
+       CALL INTER_STRUCT_INIT(INTER_STRUCT,SORT_COMM,INTERFACES%INTBUF_TAB, IPARI,NPARI, ISPMD,NODES%WEIGHT)
 
 C========================================================================================
 
@@ -2222,6 +2223,15 @@ C
      9   ISKWN  ,IFRAME  ,LOADS ,GLOB_THERM,PBLAST,RBE3)
 
 !$OMP END PARALLEL
+      SHARED_MEMORY_CONTACT_SORTING = .TRUE.
+      DO J = 1,NBINTC
+        N = INTLIST(J)
+        if(IPARI(7,N) .NE. 7) SHARED_MEMORY_CONTACT_SORTING = .FALSE.
+        if(IPARI(7,N) == 7 .AND. IPARI(22,N) == 7 ) SHARED_MEMORY_CONTACT_SORTING = .FALSE.
+      ENDDO
+      IF(IMPL_S /= 0) SHARED_MEMORY_CONTACT_SORTING = .FALSE.
+      write(6,*) 'SHARED_MEMORY_CONTACT_SORTING = ',SHARED_MEMORY_CONTACT_SORTING
+
        IF (ALEMUSCL_Param%IALEMUSCL == 0) DEALLOCATE(ADDTMPL)
 C========================================================================================
 C                                  NON PARALLEL SECTION (SMP)
@@ -3705,6 +3715,36 @@ C===============================================================================
         NELTSTT = NELTST
         ITYPTSTT= ITYPTST
         ITSK = OMP_GET_THREAD_NUM()
+        IF(SHARED_MEMORY_CONTACT_SORTING) THEN
+        CALL INTER_SORT_SHM(TIMERS,
+     1     IPARI   ,ptrX     ,W     , INTER_ERRORS,
+     2     NODES%V       ,NODES%MS           ,IAD_ELEM  ,
+     3     FR_ELEM ,      ISENDTO ,IRCVFROM  ,
+     4     NEWFRONT  ,ITSK    ,WA      ,DT2TT     ,
+     5     NODES%ITAB      ,NELTSTT ,ITYPTSTT,NODES%WEIGHT    ,
+     6     INTLIST ,NBINTC  ,KINET   ,  
+     7     ISLEN7  ,IRLEN7  ,ISLEN11 ,IRLEN11   ,
+     8     TEMP    ,IGRBRIC ,IGRSH3N ,EMINX     ,
+     9     IXS     ,IXS(L3) ,IXS(L2) ,ISLEN17   ,
+     A     IRLEN17 ,IRLEN7T ,ISLEN7T ,NUM_IMP1  ,
+     B     IND_IMP ,INTSTAMP,THKNOD  ,IRLEN20   ,
+     C     ISLEN20 ,IRLEN20T,ISLEN20T,IRLEN20E  ,
+     D     ISLEN20E  ,RENUM   ,NSNFIOLD,XSLV      ,
+     E     XMSR      ,VSLV    ,VMSR    ,SIZE_T    ,
+     F     NATIV_SMS ,DXANCG  ,NODES%IKINE   ,DIAG_SMS  ,
+     G     COUNT_REMSLV,COUNT_REMSLVE  ,ALE_CONNECTIVITY,
+     H     IXTG      ,SENSORS,DELTA_PMAX_GAP,INTERFACES%INTBUF_TAB,
+     I     DELTA_PMAX_GAP_NODE,IAD_FRNOR,FR_NOR,
+     J     NB25_CANDT,NB25_IMPCT,NB25_DST1,NB25_DST2,INTLIST25,
+     K     INTERFACES%SPMD_ARRAYS%IAD_FREDG,INTERFACES%SPMD_ARRAYS%FR_EDG,MAIN_PROC,NATIV_SMS,I_OPT_STOK ,
+     L     MULTI_FVM,IPARG  ,ELBUF_TAB, H3D_DATA, T2MAIN_SMS,
+     M     LSKYI_SMS_NEW    ,FORNEQS  ,INT7ITIED,IDEL7NOK_SAV,MAXDGAP,
+     N     T2FAC_SMS,NODES%ICODT,NODES%ISKEW ,FSKYN25  ,ADDCSRECT,PROCNOR,
+     O     INTER_STRUCT,SORT_COMM,RNUM_SIZ,NATIV_SMS_SIZ,TEMP_SIZ,
+     P     INTERFACES,GLOB_THERM)
+
+        ELSE
+
         CALL INTTRI(TIMERS,
      1     IPARI   ,ptrX     ,W     , INTER_ERRORS,
      2     NODES%V       ,NODES%MS      ,NODES%IN      ,IAD_ELEM  ,
@@ -3731,6 +3771,8 @@ C===============================================================================
      N     T2FAC_SMS,NODES%ICODT,NODES%ISKEW ,FSKYN25  ,ADDCSRECT,PROCNOR,
      O     INTER_STRUCT,SORT_COMM,RNUM_SIZ,NATIV_SMS_SIZ,TEMP_SIZ,
      P     INTERFACES,GLOB_THERM)
+
+        ENDIF
 C
 #include "lockon.inc"
         IF(DT2TT<DT2T)THEN

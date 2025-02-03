@@ -47,6 +47,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
       !||    spmd_split_comm_inter          ../engine/source/mpi/interfaces/spmd_split_comm_inter.F
       !||====================================================================
         MODULE INTER_STRUCT_MOD
+          USE inter_shm_mod, only : inter_win_
 #include      "my_real.inc"    
 !$COMMENT
 !       INTER_STRUCT_MOD :
@@ -81,6 +82,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
                 integer, dimension(:), allocatable :: next_nod !< next_node(i) is the next node of node i in the same voxel cell
                 integer, dimension(:), allocatable ::  last_nod
                 integer :: istart !< next available space in next_nod and last_nod
+                type(inter_win_) :: win
             END TYPE inter_struct_type  
         END MODULE INTER_STRUCT_MOD
 

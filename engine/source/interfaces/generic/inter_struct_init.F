@@ -28,7 +28,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
       !||    inter_sorting_mod   ../engine/share/modules/inter_sorting_mod.F
       !||    inter_struct_mod    ../engine/share/modules/inter_struct_mod.F
       !||====================================================================
-        SUBROUTINE INTER_STRUCT_INIT(INTER_STRUCT,SORT_COMM)
+        SUBROUTINE INTER_STRUCT_INIT(INTER_STRUCT,SORT_COMM,INTBUF_TAB, IPARI,NPARI, ISPMD,WEIGHT)
 !$COMMENT
 !       INTER_STRUCT_INIT description
 !       initialization of INTER_STRUCT structure
@@ -41,10 +41,16 @@ C-----------------------------------------------
         USE INTBUFDEF_MOD  
         USE INTER_STRUCT_MOD
         USE INTER_SORTING_MOD
+        USE intbufdef_mod
+        USE INTER_SHM_MOD
+        USE SPMD_MOD
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
 #include      "implicit_f.inc"
+#ifdef MPI
+#include "mpif.h"
+#endif
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
 C-----------------------------------------------
@@ -52,13 +58,22 @@ C-----------------------------------------------
 #include      "com04_c.inc"
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
-C-----------------------------------------------
+C------------------------o-----------------------
+        TYPE(intbuf_struct_), INTENT(inout) :: INTBUF_TAB(NINTER)
         TYPE(inter_struct_type), DIMENSION(NINTER), INTENT(inout) :: INTER_STRUCT   !   structure for interface
         TYPE(sorting_comm_type), DIMENSION(NINTER), INTENT(inout) :: SORT_COMM   ! structure for interface sorting comm
+        INTEGER, INTENT(in) :: NPARI !< number of parameters
+        INTEGER, INTENT(in) :: IPARI(NPARI,NINTER) !< integer parameters
+        INTEGER, INTENT(in) :: ISPMD !< current rank
+        INTEGER, INTENT(in) :: WEIGHT(NUMNOD)
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-        INTEGER :: KK,NIN
+        INTEGER :: KK,NIN,i
+        INTEGER :: NSN,NSN_OWNED,NMN, NRTM
+        INTEGER :: SENDBUF(NSPMD)
+        INTEGER :: KEY,COLOR
+        INTEGER :: IREM_SIZE, XREM_SIZE
 !   ----------------------------------------
         DO KK=1,NINTER
             INTER_STRUCT(KK)%SIZE_CAND_A = 0   
@@ -67,7 +82,37 @@ C-----------------------------------------------
             INTER_STRUCT(KK)%INACTII = 0
             INTER_STRUCT(KK)%CURV_MAX_MAX = ZERO
             INTER_STRUCT(KK)%NMN_G = 0                
+            NSN = IPARI(5,KK)
+C           INTER_STRUCT(KK)%WIN%NSNS(1:NSPMD) = 0
+C           INTER_STRUCT(KK)%WIN%NSNS(ISPMD+1) = NSN_OWNED
         ENDDO
+        DO KK=1,NINTER
+            NSN = IPARI(5,KK)
+            NRTM = IPARI(4,KK)
+            NMN = IPARI(6,KK) 
+            KEY = ISPMD
+            COLOR = 0
+            IF(NSN + NRTM + NMN > 0) COLOR = 1
+            NSN_OWNED = 0 
+            DO i = 1,NSN
+                IF(WEIGHT(intbuf_tab(kk)%NSV(i)) == 1) THEN
+                    NSN_OWNED = NSN_OWNED + 1
+                ENDIF
+            ENDDO
+
+           XREM_SIZE = 1 ! size of XREM + size of IREM 
+           IREM_SIZE = 1
+
+
+#ifdef MPI
+            CALL SPMD_COMM_SPLIT(COLOR,KEY,INTBUF_TAB(KK)%MPI_COMM,
+     .                          INTBUF_TAB(KK)%RANK, INTBUF_TAB(KK)%NSPMD)
+#endif
+            IF(NSN+NRTM+NMN > 0) THEN
+              call inter_window_open(INTER_STRUCT(KK)%WIN, NSN_OWNED, IREM_SIZE, XREM_SIZE, INTBUF_TAB(KK)%MPI_COMM)
+            ENDIF
+
+       ENDDO
         DO KK=1,NB_INTER_7_INACTI
             NIN = LIST_INTER_7_INACTI(KK)
             ALLOCATE( INTER_STRUCT(NIN)%NSNFIOLD(NSPMD) )
