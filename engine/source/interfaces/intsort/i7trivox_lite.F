@@ -34,7 +34,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
       !||    message_mod     ../engine/share/message_module/message_mod.F
       !||    tri7box         ../engine/share/modules/tri7box.F
       !||====================================================================
-      SUBROUTINE I7TRIVOX(
+      SUBROUTINE I7TRIVOX_LITE(WIN,
      1      NSN    ,RENUM       ,NSNR    ,ISZNSNR  ,I_MEM    ,
      2      IRECT  ,X           ,STF     ,STFN     ,XYZM     ,
      3      NSV    ,II_STOK     ,CAND_N  ,ESHIFT   ,CAND_E   ,
@@ -51,6 +51,7 @@ C============================================================================
 C   M o d u l e s
 C-----------------------------------------------
       USE MESSAGE_MOD
+      USE INTER_SHM_MOD
       USE TRI7BOX
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
@@ -109,6 +110,7 @@ C                       noeud au dernier
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
+      TYPE(inter_win_) :: WIN
       INTEGER I_MEM,ESHIFT,NSN,ISZNSNR,NSNROLD,NIN,ITASK,
      .        MULNSN,NOINT,INACTI,IFQ,NSNR,IGAP,NBX,NBY,NBZ,
      .        NSV(*),CAND_N(*),CAND_E(*),CAND_A(*),IFPEN(*),RENUM(*),
@@ -163,6 +165,9 @@ C-----------------------------------------------
           CALL ARRET(2)
         ENDIF
         ALLOCATE(IIX(NSN+NSNR),IIY(NSN+NSNR),IIZ(NSN+NSNR),STAT=IERROR)
+        if(allocated(win%mask)) deallocate(win%mask)
+        allocate(win%mask(NBX+2,NBY+2,NBZ+2))
+        win%mask = 0
         IF(IERROR/=0) THEN
           CALL ANCMSG(MSGID=19,ANMODE=ANINFO,
      .        C1='(/INTER/TYPE7)')
@@ -208,6 +213,80 @@ C-----------------------------------------------
         CALL SPMD_OLDNUMCD(RENUM,OLDNUM,ISZNSNR,NSNROLD,INTHEAT,IDT_THERM,NODADT_THERM)
       END IF
 
+         DO NE=1,NRTM
+           IF(STF(NE) == ZERO)CYCLE ! on ne retient pas les facettes detruites
+           IF(IGAP == 0)THEN
+             AAA = TZINF+CURV_MAX(NE)
+           ELSE
+             AAA = MARGE+CURV_MAX(NE)+MAX(MIN(GAPMAX,MAX(GAPMIN,BGAPSMX+GAP_M(NE)))+DGAPLOAD,DRAD)
+           ENDIF
+           !il est possible d'ameliorer l'algo en decoupant la facette
+           !en 2(4,3,6,9...) si la facette est grande devant AAA et inclinee
+           M1 = IRECT(1,NE)
+           M2 = IRECT(2,NE)
+           M3 = IRECT(3,NE)
+           M4 = IRECT(4,NE)
+           XX1=X(1,M1)
+           XX2=X(1,M2)
+           XX3=X(1,M3)
+           XX4=X(1,M4)
+           XMAXE=MAX(XX1,XX2,XX3,XX4)
+           XMINE=MIN(XX1,XX2,XX3,XX4)
+           YY1=X(2,M1)
+           YY2=X(2,M2)
+           YY3=X(2,M3)
+           YY4=X(2,M4)
+           YMAXE=MAX(YY1,YY2,YY3,YY4)
+           YMINE=MIN(YY1,YY2,YY3,YY4)
+           ZZ1=X(3,M1)
+           ZZ2=X(3,M2)
+           ZZ3=X(3,M3)
+           ZZ4=X(3,M4)
+           ZMAXE=MAX(ZZ1,ZZ2,ZZ3,ZZ4)
+           ZMINE=MIN(ZZ1,ZZ2,ZZ3,ZZ4)
+           !calcul de la surface (pour elimination future de candidats)
+           SX = (YY3-YY1)*(ZZ4-ZZ2) - (ZZ3-ZZ1)*(YY4-YY2)
+           SY = (ZZ3-ZZ1)*(XX4-XX2) - (XX3-XX1)*(ZZ4-ZZ2)
+           SZ = (XX3-XX1)*(YY4-YY2) - (YY3-YY1)*(XX4-XX2)
+           S2 = SX*SX + SY*SY + SZ*SZ
+           !indice des voxels occupes par la facette
+           IF(NBX>1) THEN
+             IX1=INT(NBX*(XMINE-AAA-XMINB)/(XMAXB-XMINB))
+             IX2=INT(NBX*(XMAXE+AAA-XMINB)/(XMAXB-XMINB))
+           ELSE
+             IX1=-2
+             IX2=1
+           ENDIF
+           IF(NBY>1) THEN
+             IY1=INT(NBY*(YMINE-AAA-YMINB)/(YMAXB-YMINB))
+             IY2=INT(NBY*(YMAXE+AAA-YMINB)/(YMAXB-YMINB))
+           ELSE
+             IY1=-2
+             IY2=1
+           ENDIF
+           IF(NBZ>1) THEN
+             IZ1=INT(NBZ*(ZMINE-AAA-ZMINB)/(ZMAXB-ZMINB))
+             IZ2=INT(NBZ*(ZMAXE+AAA-ZMINB)/(ZMAXB-ZMINB))
+           ELSE
+             IZ1=-2
+             IZ2=1
+           ENDIF
+           IX1=MAX(1,2+MIN(NBX,IX1))
+           IY1=MAX(1,2+MIN(NBY,IY1))
+           IZ1=MAX(1,2+MIN(NBZ,IZ1))
+           IX2=MAX(1,2+MIN(NBX,IX2))
+           IY2=MAX(1,2+MIN(NBY,IY2))
+           IZ2=MAX(1,2+MIN(NBZ,IZ2))
+           DO IZ = IZ1,IZ2
+             DO IY = IY1,IY2
+                 win%mask(IX1:IX2,IY,IZ) = 1
+              ENDDO
+           ENDDO
+        ENDDO 
+
+        call my_barrier()
+
+
 C=======================================================================
 C 1   NODE CLUSTERING
 C=======================================================================
@@ -234,6 +313,7 @@ C=======================================================================
           IIX(I)=MAX(1,2+MIN(NBX,IIX(I)))
           IIY(I)=MAX(1,2+MIN(NBY,IIY(I)))
           IIZ(I)=MAX(1,2+MIN(NBZ,IIZ(I)))
+          if(win%mask(IIX(I),IIY(I),IIZ(I)) == 0) cycle
           FIRST = VOXEL(IIX(I),IIY(I),IIZ(I))
           IF(TEST_V0) THEN
 ! count the number of SECONDARY nodes outiside the reduced box
@@ -283,6 +363,7 @@ C=======================================================================
           IIX(NSN+J)=MAX(1,2+MIN(NBX,IIX(NSN+J)))
           IIY(NSN+J)=MAX(1,2+MIN(NBY,IIY(NSN+J)))
           IIZ(NSN+J)=MAX(1,2+MIN(NBZ,IIZ(NSN+J)))
+          if(win%mask(IIX(NSN+J),IIY(NSN+J),IIZ(NSN+J)) == 0) cycle
 
           FIRST = VOXEL(IIX(NSN+J),IIY(NSN+J),IIZ(NSN+J))
           IF(TEST_V0) THEN
@@ -311,6 +392,7 @@ C=======================================================================
             NEXT_NOD(NSN+J)     = 0 ! last one
           ENDIF
         ENDDO
+        deallocate(win%mask)
       END IF !ITASK == 0
 
       CALL MY_BARRIER ! Barrier to wait task0 treatment

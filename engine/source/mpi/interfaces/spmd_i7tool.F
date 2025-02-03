@@ -35,6 +35,8 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
       !||====================================================================
       SUBROUTINE SPMD_OLDNUMCD(RENUM,OLDNUM,NSNR,NSNROLD,
      .           INTHEAT,IDT_THERM,NODADT_THERM) 
+CALL SPMD_OLDNUMCD(RENUM,OLDNUM,ISZNSNR,NSNROLD,INTHEAT,IDT_THERM,NODADT_THERM)
+
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
@@ -187,6 +189,9 @@ C-----------------------------------------------
         RENUM(I) = 0
       END DO
       I_STOK = II_STOK
+
+!     write(6,*) "I_STOK=",I_STOK
+
       IDEB = 0
       JDEB = 0
       DO P = 1, NSPMD
@@ -224,6 +229,82 @@ C
 C
       RETURN
       END
+
+      SUBROUTINE SPMD_RNUMCD_LITE(WIN,
+     1   CAND_N  ,RENUM  ,II_STOK,NIN,NSN,
+     2   NSNFIOLD,NSNROLD)
+C-----------------------------------------------
+C   M o d u l e s
+C-----------------------------------------------
+      use ISO_C_BINDING
+      use umap_mod, only: get_value_umap
+      USE inter_shm_mod 
+      USE TRI7BOX
+C-----------------------------------------------
+C   I m p l i c i t   T y p e s
+C-----------------------------------------------
+#include      "implicit_f.inc"
+C-----------------------------------------------
+C   C o m m o n   B l o c k s
+C-----------------------------------------------
+#include      "com01_c.inc"
+C-----------------------------------------------
+C   D u m m y   A r g u m e n t s
+C-----------------------------------------------
+      type(inter_win_), intent(in) :: WIN
+      INTEGER CAND_N(*), NSNFIOLD(*), RENUM(*),
+     .        NIN, NSN, NSNROLD,II_STOK
+C-----------------------------------------------
+C   L o c a l  V a r i a b l e s
+C-----------------------------------------------
+      INTEGER I, J, P, I_STOK, IDEB, JDEB, NI
+      integer(kind=8), dimension(:,:), pointer :: shared_int
+C-----------------------------------------------
+C   S o u r c e  L i n e s
+C-----------------------------------------------
+      integer :: size_shared_data
+      integer :: i_offset
+      integer key, val
+C-----------------------------------------------
+      size_shared_data = (WIN%RSIZ + WIN%ISIZ)!
+      call c_f_pointer(win%shared_base, shared_int,[ size_shared_data, win%nsn_global ] )
+      i_offset = win%i_offset
+
+      DO I = 1, NSNROLD
+        RENUM(I) = -HUGE(I)
+      END DO
+      I_STOK = II_STOK
+
+C     write(6,*) "I_STOK=",I_STOK
+
+C
+      val = -1
+      DO I = 1, I_STOK
+        NI = CAND_N(I)
+        IF(NI>NSN) THEN
+          NI = NI - NSN
+!         function get_value_umap(umap_ptr, key, default_value) result(val) bind(C, name="cpp_get_value_umap")
+          key = ITAFI(NIN)%P(NI)
+          RENUM(NI) = get_value_umap(WIN%glob2loc,key,val)
+c         IF(RENUM(NI) < 0) THEN
+c            DO j = 1, win%nsn_global
+c               if(ITAFI(NIN)%P(NI) == shared_int(win%itab_offset,j)) then
+c                  write(6,*) "FOUND:",shared_int(win%itab_offset,j),shared_int(win%ispmd_offset,j),j
+c               end if
+c            end do
+c            write(6,*) __FILE__,"RENUM(",NI,")=",RENUM(NI)
+c            call flush(6)
+c            call arret(2)
+c          ENDIF
+          CAND_N(I) = RENUM(NI) + NSN
+        END IF        
+        
+      END DO
+C
+      RETURN
+      END
+
+
 
 C
       !||====================================================================

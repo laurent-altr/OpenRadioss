@@ -688,7 +688,7 @@ C--------------------------------------
 
         CALL WRITE_I_C(IBMPC,SIBMPC)
 
-        CALL WRITE_I_C(KINET,SKINET)
+        CALL WRITE_I_C(NODES%KINET,SKINET)
 
         CALL WRITE_I_C(FASOLFR,SFASOLFR)
 
@@ -1076,7 +1076,7 @@ C--------------------------------------
 C--------------------------------------
 C     ECRITURE DES VARIABLES REELLES
 C--------------------------------------
-      CALL WRITE_DB(TABVREA, LVARREA)
+         CALL WRITE_DB(TABVREA, LVARREA)
 C--------------------------------------
 C     ECRITURE DES REELS
 C--------------------------------------

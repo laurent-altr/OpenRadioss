@@ -39,7 +39,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
       !||    sensor_mod              ../common_source/modules/sensor_mod.F90
       !||    timer_mod               ../engine/source/system/timer_mod.F90
       !||====================================================================
-        SUBROUTINE INTER_SORT( TIMERS,ITASK,NB_INTER_SORTED,LIST_INTER_SORTED,RETRI,IPARI,
+        SUBROUTINE INTER_SORT_LITE( TIMERS,ITASK,NB_INTER_SORTED,LIST_INTER_SORTED,RETRI,IPARI,
      1                         NSENSOR,ISENDTO,IRECVFROM,INTBUF_TAB,X,ITAB,
      2                         RENUM,NSNFIOLD,MULTI_FVM,H3D_DATA,SENSOR_TAB,
      3                         INTER_STRUCT,SORT_COMM,RENUM_SIZ,GLOB_THERM )
@@ -53,6 +53,7 @@ C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
       USE COMMAND_LINE_ARGS_MOD , ONLY : GOT_PREVIEW
+      USE TRI7BOX
       USE MULTI_FVM_MOD
       USE H3D_MOD
       USE METRIC_MOD
@@ -101,8 +102,8 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER :: KK,N,ESHIFT
-      INTEGER :: NTY,INACTI,ISENS
+      INTEGER :: KK,N,ESHIFT,P
+      INTEGER :: NTY,INACTI,ISENS,ITIED,IFQ
       INTEGER :: NRTM_T
       LOGICAL :: TYPE18
       my_real :: TS
@@ -112,6 +113,9 @@ C-----------------------------------------------
             N = LIST_INTER_SORTED(KK)
             NTY = IPARI(7,N)
             INACTI = IPARI(22,N)
+            ITIED = IPARI(85,N)
+            IFQ =IPARI(31,N)
+
             TYPE18=.FALSE.
             IF(NTY==7.AND.INACTI==7)TYPE18=.TRUE.
 
@@ -149,7 +153,21 @@ C-----------------------------------------------
                   IF(ITASK==NTHREAD-1)NRTM_T=IPARI(4,N)-(NTHREAD-1)*NRTM_T
                 ENDIF
 
-                CALL INTER_SORT_07( TIMERS,IPARI,X,N,ITASK,ISENDTO,
+                IF(INACTI==5.OR.INACTI==6.OR.INACTI==7.OR.IFQ>0.OR.ITIED/=0) THEN
+                    IF(.NOT.ALLOCATED(INTER_STRUCT(N)%NSNFIOLD) ) THEN
+                        ALLOCATE(INTER_STRUCT(N)%NSNFIOLD(NSPMD))
+                        INTER_STRUCT(N)%NSNFIOLD(1:NSPMD) = 0
+                    ENDIF
+                    DO P = 1, NSPMD
+                        INTER_STRUCT(N)%NSNFIOLD(P) = NSNFI(N)%P(P)
+                        NSNFIOLD(P) = NSNFI(N)%P(P)
+c                       write(6,*) "NSNFIOLD ",N,P,INTER_STRUCT(N)%NSNFIOLD(P)
+                    END DO
+                END IF
+    
+
+c               write(6,*) "SORTING INTERFACE ",N
+                CALL INTER_SORT_07_LITE( TIMERS,IPARI,X,N,ITASK,ISENDTO,
      1                              IRECVFROM,RETRI,ITAB,NRTM_T,RENUM,RENUM_SIZ,
      2                              NSNFIOLD,ESHIFT,MULTI_FVM,INTBUF_TAB(N),H3D_DATA,
      3                              INTER_STRUCT,SORT_COMM,GLOB_THERM%INTHEAT, GLOB_THERM%IDT_THERM, GLOB_THERM%NODADT_THERM)
@@ -165,4 +183,4 @@ C-----------------------------------------------
         ENDDO
 
         RETURN
-        END SUBROUTINE INTER_SORT
+        END SUBROUTINE INTER_SORT_LITE

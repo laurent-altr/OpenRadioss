@@ -383,9 +383,9 @@ c       ITABM1 = 0
         IF (IERR/=0) GOTO 1000
         IBMPC = 0  
 
-        ALLOCATE (KINET(SKINET),STAT=IERR)
-        IF (IERR/=0) GOTO 1000
-        KINET = 0  
+C       ALLOCATE (KINET(SKINET),STAT=IERR)
+C       IF (IERR/=0) GOTO 1000
+C       KINET = 0  
 
         ALLOCATE (FASOLFR(SFASOLFR),STAT=IERR)
         IF (IERR/=0) GOTO 1000

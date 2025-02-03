@@ -96,6 +96,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
 C-----------------------------------------------
+#include     "task_c.inc"
 #include      "com01_c.inc"
 #include      "com04_c.inc"
 #include      "com06_c.inc"
@@ -4128,6 +4129,17 @@ C
         FY4(I)=FYI(I)*H4(I)
         FZ4(I)=FZI(I)*H4(I)
       ENDDO
+c     IF (NSPMD>1) THEN
+c       DO I = 1,JLT
+c         NN = NSVG(I)
+c         IF(NN<0)THEN
+c           write(700+ISPMD,"(5I10,Z20)") ITAFI(NIN)%P(-NN), ITAB(IX1(I)),ITAB(IX2(I)),ITAB(IX3(I)),ITAB(IX4(I)),PENE(I)
+c         ELSE
+c           write(700+ISPMD,"(5I10,Z20)") -ITAB(NN), ITAB(IX1(I)),ITAB(IX2(I)),ITAB(IX3(I)),ITAB(IX4(I)),PENE(I)
+c         ENDIF
+c       ENDDO
+c     ENDIF
+ 
 C
 C spmd : identification des noeuds interf. utiles a envoyer
       IF (NSPMD>1) THEN
