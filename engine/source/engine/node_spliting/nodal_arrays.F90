@@ -66,6 +66,7 @@
             logical :: used_dr
             integer :: sicodt_fac !< size of ICODT
             integer :: max_uid !< maximum user id
+            logical :: itherm_fe !< true if thermal finite element
 
 
             integer :: numnod
@@ -79,6 +80,7 @@
             integer, dimension(:), allocatable :: ICODR !< NUMNOD * IRODDL
             integer, dimension(:), allocatable :: ISKEW
             integer, dimension(:), allocatable :: ICODE
+            integer, dimension(:), allocatable :: KINET !< 
             my_real, dimension(:,:), allocatable :: A !< accelerations: 3 x numnod (x nthreads if parith/off)
             my_real, dimension(:,:), allocatable :: AR !< accelerations
             my_real, dimension(:,:), allocatable :: V !< velocities
@@ -93,6 +95,8 @@
             my_real, dimension(:), allocatable :: MS0 !< initial mass
             my_real, dimension(:), allocatable :: IN0 !< initial inertia
             my_real, dimension(:), allocatable :: VISCN !< nodal 
+
+
 
             ! 3*NUMNOD if IRESP == 1, else 3
             double precision, dimension(:,:), allocatable :: DDP !< double precision D 
@@ -203,6 +207,7 @@
             call my_alloc(arrays%IN0,numnod*iroddl)
             call my_alloc(arrays%ISKEW,numnod)
             call my_alloc(arrays%ICODE,numnod)
+            call my_alloc(arrays%KINET,numnod)
 #ifdef MYREAL4
             call my_alloc(arrays%DDP,3,numnod)
             call my_alloc(arrays%XDP,3,numnod)
@@ -243,6 +248,7 @@
             arrays%IN0 = 0
             arrays%ISKEW = 0
             arrays%ICODE = 0
+            arrays%KINET = 0
             arrays%DDP = 0
             arrays%XDP = 0
             arrays%WEIGHT = 0
@@ -307,6 +313,9 @@
               arrays%iskew(arrays%numnod + 1:) = 0
               call extend_array(arrays%ICODE, size(arrays%ICODE), arrays%max_numnod)
               arrays%ICODE(arrays%numnod + 1:) = 0
+              call extend_array(arrays%KINET, size(arrays%KINET), arrays%max_numnod)
+              arrays%KINET(arrays%numnod + 1:) = 0
+
               if(arrays%iroddl >0) then
                 call extend_array(arrays%VR,3, size(arrays%VR,2), 3, arrays%max_numnod)
                 call extend_array(arrays%IN, size(arrays%IN), arrays%max_numnod)

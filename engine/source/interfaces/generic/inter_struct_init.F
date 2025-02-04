@@ -92,7 +92,14 @@ C           INTER_STRUCT(KK)%WIN%NSNS(ISPMD+1) = NSN_OWNED
             NMN = IPARI(6,KK) 
             KEY = ISPMD
             COLOR = 0
+            
             IF(NSN + NRTM + NMN > 0) COLOR = 1
+
+#ifdef MPI
+            CALL SPMD_COMM_SPLIT(COLOR,KEY,INTBUF_TAB(KK)%MPI_COMM,
+     .                          INTBUF_TAB(KK)%RANK, INTBUF_TAB(KK)%NSPMD)
+#endif
+            IF(IPARI(7,KK) .NE. 7) CYCLE
             NSN_OWNED = 0 
             DO i = 1,NSN
                 IF(WEIGHT(intbuf_tab(kk)%NSV(i)) == 1) THEN
@@ -100,14 +107,9 @@ C           INTER_STRUCT(KK)%WIN%NSNS(ISPMD+1) = NSN_OWNED
                 ENDIF
             ENDDO
 
-           XREM_SIZE = 1 ! size of XREM + size of IREM 
-           IREM_SIZE = 1
+            XREM_SIZE = 1 ! size of XREM + size of IREM 
+            IREM_SIZE = 1
 
-
-#ifdef MPI
-            CALL SPMD_COMM_SPLIT(COLOR,KEY,INTBUF_TAB(KK)%MPI_COMM,
-     .                          INTBUF_TAB(KK)%RANK, INTBUF_TAB(KK)%NSPMD)
-#endif
             IF(NSN+NRTM+NMN > 0) THEN
               call inter_window_open(INTER_STRUCT(KK)%WIN, NSN_OWNED, IREM_SIZE, XREM_SIZE, INTBUF_TAB(KK)%MPI_COMM)
             ENDIF

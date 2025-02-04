@@ -518,7 +518,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
      3  IFILL  ,MAT_ELEM,
      4  IMS    ,NPC    ,IBCL    ,
      5  IBFV   ,IDUM   ,LAS     ,LACCELM,NNLINK ,LNLINK ,
-     6  IPARG  ,DD_IAD  ,IGRV   ,IEXLNK ,KINET  ,
+     6  IPARG  ,DD_IAD  ,IGRV   ,IEXLNK ,
      7  IPARI  ,        NPRW    ,ICONX  ,NPBY   ,
      8  LPBY   ,LRIVET ,NSTRF   ,LJOINT ,NODPOR ,MONVOL ,IAD_ELEM,
      9  FR_ELEM,MAIN_PROC,ILINK  ,
@@ -769,7 +769,6 @@ C-----------------------------------------------
      .   IPART(*),NOM_OPT(LNOPT1,*),IXS(*),
      .   IXQ(NIXQ,*), IXT(NIXT,*), IXP(NIXP,*),
      .   IXR(NIXR,*),IXTG(NIXTG,*), IXTG1(4,*),
-     .   KINET(*),
      .   IFILL(NUMNOD,*), IMS(*), NPC(*), IBCL(*), IBFV(*),
      .   IDUM(*), LAS(*),IPARG(NPARG,*),IPARI(NPARI,*),
      .   NPRW(*), LPRW(*), ICONX(*), NPBY(NNPBY,*),
@@ -2071,7 +2070,6 @@ c  Equivalent nodal force
        ! Initialization of INTER_STRUCT structure + allocation
        ALLOCATE( INTER_STRUCT(NINTER) )
        ALLOCATE( SORT_COMM(NINTER) )
-       CALL INTER_STRUCT_INIT(INTER_STRUCT,SORT_COMM)
        CALL INTER_STRUCT_INIT(INTER_STRUCT,SORT_COMM,INTERFACES%INTBUF_TAB, IPARI,NPARI, ISPMD,NODES%WEIGHT)
 
 C========================================================================================
@@ -2207,7 +2205,7 @@ C
      s   IADSDP_CRK,IADRCP_CRK ,INT24USE,NDAMA2    ,
      t   IGROUPC  ,IGROUPTG ,IGROUPS   ,IGROUPFLG ,DMINT2  ,IRBKIN_L ,
      u   NRBYKIN_L,KINDRBY  ,ELBUF_TAB ,SENSORS ,DD_R2R_ELEM,
-     v   SDD_R2R_ELEM,KINET, NODES%WEIGHT_MD ,DMSPH   ,IOLDSECT,LBUFSEGLO,
+     v   SDD_R2R_ELEM,NODES%KINET, NODES%WEIGHT_MD ,DMSPH   ,IOLDSECT,LBUFSEGLO,
      w   INTERFACES%INTBUF_TAB  ,NUMSPH_GLO_R2R, FLG_SPHINOUT_R2R,I15K,
      y   CONDN       ,CONDNSKY,KXFENOD2ELC  ,ELCUTC ,NODEDGE,
      z   IAD_EDGE ,CRKNODIAD,FR_EDGE     ,FR_NBEDGE ,NODLEVXF,
@@ -2229,6 +2227,8 @@ C
         if(IPARI(7,N) .NE. 7) SHARED_MEMORY_CONTACT_SORTING = .FALSE.
         if(IPARI(7,N) == 7 .AND. IPARI(22,N) == 7 ) SHARED_MEMORY_CONTACT_SORTING = .FALSE.
       ENDDO
+      IF(GLOB_THERM%ITHERM_FE>0) SHARED_MEMORY_CONTACT_SORTING = .FALSE.
+      IF(IDTMINS == 2 .OR. IDTMINS_INT/=0) SHARED_MEMORY_CONTACT_SORTING = .FALSE. 
       IF(IMPL_S /= 0) SHARED_MEMORY_CONTACT_SORTING = .FALSE.
       write(6,*) 'SHARED_MEMORY_CONTACT_SORTING = ',SHARED_MEMORY_CONTACT_SORTING
 
@@ -2260,7 +2260,7 @@ C===============================================================================
        CALL INT18_ALLOC(NUMBER_INTER18,INTER18_LIST,MULTI_FVM,IPARI,XCELL_REMOTE,NSPMD)
        CALL INT18_LAW151_INIT(MULTI_FVM,IGRBRIC,IPARI    ,IXS,
      1                        IGROUPS  ,IPARG  ,ELBUF_TAB,MULTI_FVM%FORCE_INT    ,
-     2            ptrX     ,     NODES%V       ,          NODES%MS         ,    KINET   ,
+     2            ptrX     ,     NODES%V       ,          NODES%MS         ,    NODES%KINET   ,
      3    MULTI_FVM%X_APPEND,MULTI_FVM%V_APPEND,MULTI_FVM%MASS_APPEND,MULTI_FVM%KINET_APPEND,
      4    MULTI_FVM%FORCE_INT_PON)
 
@@ -2617,7 +2617,7 @@ C----------------------------------------------------------
           IF(IDTMINS_INT /= 0)THEN
 C
 C           /DT/INTER/AMS
-            CALL SMS_INI_ERR(NPRW ,LPRW ,KINET )
+            CALL SMS_INI_ERR(NPRW ,LPRW ,NODES%KINET )
 C
           END IF
 C----------------------------------------------------------
@@ -2633,14 +2633,14 @@ C
 
             IF(IDTMINS_INT==0)
      .      CALL SMS_INI_RBY(
-     1      KINET   ,NPRW     ,LPRW    ,NPBY    , LPBY     ,
+     1      NODES%KINET   ,NPRW     ,LPRW    ,NPBY    , LPBY     ,
      2      TAGMSR_RBY_SMS,TAGSLV_RBY_SMS)
 
             CALL SMS_INI_KAD(
      1      IXS     ,IXQ      ,ELEMENT%SHELL%IXC     ,IXT     ,IXP       ,
      2      IXR     ,IXTG     ,IXTG1   ,IXS(L1) ,IXS(L3)   ,
      3      IXS(L2) ,IPARG    ,NODES%MS      ,NODES%MS0     ,TAGNOD_SMS,
-     4      NODES%ICODT    ,NODES%ICODR   ,KINET   ,INDX1_SMS,
+     4      NODES%ICODT    ,NODES%ICODR   ,NODES%KINET   ,INDX1_SMS,
      5      KAD_SMS ,IPART(I15A),IPART(I15B),
      6     IPART(I15C),IPART(I15D),IPART(I15E),IPART(I15F),IPART(I15G),
      7     IPART(I15H),IPART(I15I),TAGPRT_SMS ,TAGREL_SMS ,NODES%ITAB       ,
@@ -2664,7 +2664,7 @@ C
      6             JADR_SMS,JADTG_SMS,INDX1_SMS,TAGPRT_SMS,IAD_SMS ,
      7       TAGREL_SMS,IPART(I15A),IPART(I15B),IPART(I15C),IPART(I15D),
      8      IPART(I15E),IPART(I15F),IPART(I15G),IPART(I15H),IPART(I15I),
-     9             IAD_ELEM  ,FR_ELEM,NPBY     ,LPBY     ,KINET    ,
+     9             IAD_ELEM  ,FR_ELEM,NPBY     ,LPBY     ,NODES%KINET    ,
      A             TAGSLV_RBY_SMS,IPARI  ,INTERFACES%INTBUF_TAB,IADI2,
      B             LAD_SMS   ,IPART,IGEO     ,NODES%WEIGHT    ,
      C             NATIV_SMS)
@@ -2685,7 +2685,7 @@ C
      6             KAD_SMS,KDI_SMS    ,PK_SMS     ,
      7       TAGREL_SMS,IPART(I15A),IPART(I15B),IPART(I15C),IPART(I15D),
      8      IPART(I15E),IPART(I15F),IPART(I15G),IPART(I15H),IPART(I15I),
-     9             IAD_ELEM  ,FR_ELEM,NPBY     ,LPBY     ,KINET    ,
+     9             IAD_ELEM  ,FR_ELEM,NPBY     ,LPBY     ,NODES%KINET    ,
      A             TAGSLV_RBY_SMS,IPARI  ,INTERFACES%INTBUF_TAB,IADI2,
      B             LAD_SMS   ,IPART      ,IGEO      ,NODES%WEIGHT  ,NATIV_SMS,
      C             IAD_SMS   ,IDI_SMS,JAD_SMS  ,JDI_SMS   ,T2MAIN_SMS)
@@ -2706,7 +2706,7 @@ C
      5             JADTG_SMS,INDX1_SMS,TAGPRT_SMS,KAD_SMS ,KDI_SMS  ,
      6       TAGREL_SMS,IPART(I15A),IPART(I15B),IPART(I15C),IPART(I15D),
      7      IPART(I15E),IPART(I15F),IPART(I15G),IPART(I15H),IPART(I15I),
-     8             IAD_ELEM  ,FR_ELEM,NPBY     ,LPBY     ,KINET    ,
+     8             IAD_ELEM  ,FR_ELEM,NPBY     ,LPBY     ,NODES%KINET    ,
      9             TAGSLV_RBY_SMS,IPARI  ,INTERFACES%INTBUF_TAB,IADI2    ,
      A             LAD_SMS   ,NPRW ,LPRW,TAGMSR_RBY_SMS,
      B         TAGSLV_I21_SMS ,TAGMSR_I21_SMS, JADI21_SMS,INTSTAMP  ,
@@ -2735,7 +2735,7 @@ C
      5             JADTG_SMS,INDX1_SMS,TAGPRT_SMS,KAD_SMS,KDI_SMS  ,
      6       TAGREL_SMS,IPART(I15A),IPART(I15B),IPART(I15C),IPART(I15D),
      7      IPART(I15E),IPART(I15F),IPART(I15G),IPART(I15H),IPART(I15I),
-     8             IAD_ELEM  ,FR_ELEM,NPBY     ,LPBY     ,KINET    ,
+     8             IAD_ELEM  ,FR_ELEM,NPBY     ,LPBY     ,NODES%KINET    ,
      9             TAGSLV_RBY_SMS,IPARI  ,INTERFACES%INTBUF_TAB,IADI2    ,
      A             LAD_SMS ,JSM_SMS ,TAGSLV_I21_SMS,INTSTAMP  ,IPART    ,
      B             IGEO    ,TAGMSR_RBY_SMS,NODES%WEIGHT,NATIV_SMS,
@@ -2772,7 +2772,7 @@ C             Obsolete
             IF(IDTMINS_INT/=0)THEN
 C re-tag rigid bodies (all nodes)
               CALL SMS_INI_RBY(
-     1        KINET   ,NPRW     ,LPRW    ,NPBY    , LPBY     ,
+     1        NODES%KINET   ,NPRW     ,LPRW    ,NPBY    , LPBY     ,
      2        TAGMSR_RBY_SMS,TAGSLV_RBY_SMS)
             END IF
 
@@ -2803,7 +2803,7 @@ C           /DT/INTER/AMS
      4  NRWL_SMS  ,IAD_ELEM ,FR_ELEM   )
 
             CALL SMS_INI_RBY(
-     1      KINET   ,NPRW     ,LPRW    ,NPBY    , LPBY     ,
+     1      NODES%KINET   ,NPRW     ,LPRW    ,NPBY    , LPBY     ,
      2      TAGMSR_RBY_SMS,TAGSLV_RBY_SMS)
 
             CALL SMS_INI_INT(
@@ -3722,7 +3722,7 @@ C===============================================================================
      3     FR_ELEM ,      ISENDTO ,IRCVFROM  ,
      4     NEWFRONT  ,ITSK    ,WA      ,DT2TT     ,
      5     NODES%ITAB      ,NELTSTT ,ITYPTSTT,NODES%WEIGHT    ,
-     6     INTLIST ,NBINTC  ,KINET   ,  
+     6     INTLIST ,NBINTC  ,NODES%KINET   ,  
      7     ISLEN7  ,IRLEN7  ,ISLEN11 ,IRLEN11   ,
      8     TEMP    ,IGRBRIC ,IGRSH3N ,EMINX     ,
      9     IXS     ,IXS(L3) ,IXS(L2) ,ISLEN17   ,
@@ -3751,7 +3751,7 @@ C===============================================================================
      3     FR_ELEM ,NODES%VR      ,ISENDTO ,IRCVFROM  ,
      4     NEWFRONT  ,ITSK    ,WA      ,DT2TT     ,
      5     NODES%ITAB      ,NELTSTT ,ITYPTSTT,NODES%WEIGHT    ,
-     6     INTLIST ,NBINTC  ,KINET   ,DRETRI    ,
+     6     INTLIST ,NBINTC  ,NODES%KINET   ,DRETRI    ,
      7     ISLEN7  ,IRLEN7  ,ISLEN11 ,IRLEN11   ,
      8     TEMP    ,IGRBRIC ,IGRSH3N ,EMINX     ,
      9     IXS     ,IXS(L3) ,IXS(L2) ,ISLEN17   ,
@@ -4330,7 +4330,7 @@ C Init var parallel SMP
      2     NODES%ICODT             ,FSAV           ,NODES%V        ,NODES%MS              ,DT2TT           ,
      3     NELTSTT           ,ITYPTSTT       ,NODES%ITAB     ,NODES%STIFN(NDTSK)    ,TF              ,
      4     FSKYI             ,ISKY           ,NODES%VR       ,FANI            ,SECFCUM         ,
-     5     ITSK+1            ,NISKYFI        ,KINET          ,NEWFRONT        ,NSTRF           ,
+     5     ITSK+1            ,NISKYFI        ,NODES%KINET          ,NEWFRONT        ,NSTRF           ,
      6     ICONTACT          ,NODES%VISCN(NDTSK),XCELL       ,
      8     NUM_IMPL(1,ITSK+1),NS_IMP(IADISK) ,NE_IMP(IADISK) ,IND_IMP(IADISK) ,NT_IMP          ,
      9     FR_I18            ,IGRBRIC        ,EMINX          ,
@@ -5831,7 +5831,7 @@ C        /---------------/
 C        /---------------/
           CALL I18MAIN_KINE_1(IPARI,INTERFACES%INTBUF_TAB,NODES%X       ,NODES%V       ,
      2             NODES%A          ,NODES%ISKEW     ,SKEWS%SKEW     ,NODES%ICODT   ,WA      ,
-     3             NODES%MS         ,NODES%ITAB      ,ITSK+1   ,KINET   ,NODES%STIFN   ,
+     3             NODES%MS         ,NODES%ITAB      ,ITSK+1   ,NODES%KINET   ,NODES%STIFN   ,
      4             MTF        ,CAND_SAV  ,INT18ADD ,IAD_ELEM,FR_ELEM ,
      5             TAGPENE    ,H3D_DATA  ,MULTI_FVM,ALE_CONNECTIVITY%NE_CONNECT,XCELL,XCELL_REMOTE)
 !$OMP END PARALLEL
@@ -6131,7 +6131,7 @@ C
      B             ISKYI_SMS,JADI_SMS,JDII_SMS  ,LTI_SMS    ,NODXI_SMS,
      C             DMELS    ,DMELTR  ,DMELP     ,DMELRT     ,IGEO     ,
      D             FR_SMS   ,FR_RMS  ,ELBUF     ,IPARI      ,INTERFACES%INTBUF_TAB,
-     E             KINET    ,TAGSLV_I21_SMS,JADI21_SMS,INTSTAMP,
+     E             NODES%KINET    ,TAGSLV_I21_SMS,JADI21_SMS,INTSTAMP,
      F             IXS(L1),JADS10_SMS,ILINK     ,LLINK      ,NNLINK   ,
      G             LNLINK   ,TAG_LNK_SMS,LJOINT ,IADCJ      ,FR_CJ    ,
      H             NODES%ITAB  ,NODES%WEIGHT  ,DMINT2    ,ELBUF_TAB,TAGMSR_RBY_SMS,
@@ -6820,7 +6820,7 @@ C===============================================================================
      F        NODES%AR       ,NODES%VR       ,NODES%IN       ,FRL       ,FNL        ,
      G        NPRW     ,LPRW     ,RWBUF    ,RWSAV     ,
      H        FANI(1,1+NFOA+2*(NSECT+NRBODY)),FR_WALL ,NRWL_SMS   ,
-     I        INTSTAMP ,KINET    ,ELEMENT%SHELL%IXC      ,IXTG      ,SH4TREE    ,
+     I        INTSTAMP ,NODES%KINET    ,ELEMENT%SHELL%IXC      ,IXTG      ,SH4TREE    ,
      J        SH3TREE  ,CPTREAC  ,NODREAC  ,FTHREAC   ,
      K        FRWL6    ,3+IRODDL*3,TAGSLV_RBY,DAMPR   , DAMP      ,
      L        IGRNOD   ,NODES%DR       ,RBY      ,TAGMSR_RBY_SMS,
@@ -7487,7 +7487,7 @@ C        /---------------/
 C        /---------------/
           CALL I18MAIN_KINE_2(IPARI,INTERFACES%INTBUF_TAB,NODES%X  ,NODES%V  ,
      2                  NODES%A    ,NODES%ISKEW,SKEWS%SKEW ,NODES%ICODT,WA,
-     3                  NODES%MS   ,NODES%ITAB ,FSAV ,ITSK+1,KINET,
+     3                  NODES%MS   ,NODES%ITAB ,FSAV ,ITSK+1,NODES%KINET,
      4                  NODES%STIFN,MTF  ,CAND_SAV,FANI,INT18ADD,
      5                  IAD_ELEM,FR_ELEM,H3D_DATA )
 !$OMP END PARALLEL
@@ -8334,7 +8334,7 @@ C Init var parallel SMP
      6       IXS(L1)  ,GJBUFI   ,GJBUFR   ,IBMPC    ,RBMPC    ,
      7       NPBYL    ,LPBYL    ,IBFV     ,VEL      ,NPC      ,
      8       TF         ,NEWFRONT ,ICONTACT ,RWBUF    ,LPRW     ,
-     9       NPRW     ,RBYL     ,NODES%D        ,NODES%DR       ,KINET    ,
+     9       NPRW     ,RBYL     ,NODES%D        ,NODES%DR       ,NODES%KINET    ,
      A       NSENSOR  ,SENSORS%SENSOR_TAB,INTERFACES%INTBUF_TAB, H3D_DATA ,IGRBRIC, 
      B       PYTHON)
 
@@ -8365,7 +8365,7 @@ C===============================================================================
      6       IXS(L1)  ,GJBUFI   ,GJBUFR   ,IBMPC    ,RBMPC    ,
      7       NPBYL    ,LPBYL    ,IBFV     ,VEL      ,NPC      ,
      8       TF       ,NEWFRONT ,ICONTACT ,RWBUF    ,LPRW     ,
-     9       NPRW     ,RBYL     ,NODES%D        ,NODES%DR       ,KINET    ,
+     9       NPRW     ,RBYL     ,NODES%D        ,NODES%DR       ,NODES%KINET    ,
      A       NODGLOB  ,NODES%WEIGHT   ,NBNCL    ,NBIKL    ,NBNODL   ,
      B       NBNODLR  ,FR_LAGF  ,LLAGF    ,IAD_ELEM ,FR_ELEM  ,
      C       INTERFACES%INTBUF_TAB ,H3D_DATA, PYTHON)
@@ -8902,7 +8902,7 @@ C----       10,11,12:ELBUF_C,BUFMAT_C,X_C,13,14:DD,DDR,15,16:X_ac,V_zero,23,24:A
      O  MONVOL ,IGRSURF,FR_MV  ,VOLMON ,DIRUL,
      P  NODGLOB,MUMPS_PAR,CDDLP ,ISENDTO,IRCVFROM,NEWFRONT,IMSCH  ,
      Q  I2MSCH ,ISIZXV,ILENXV ,ISLEN7  ,IRLEN7 ,ISLEN11,IRLEN11,ISLEN17,
-     R  IRLEN17,IRLEN7T,ISLEN7T,KINET  ,NUM_IMP1,TEMP  ,DT2PREV,WA     ,
+     R  IRLEN17,IRLEN7T,ISLEN7T,NODES%KINET  ,NUM_IMP1,TEMP  ,DT2PREV,WA     ,
      S  LGRAV  ,SH4TREE,SH3TREE,IRLEN20,ISLEN20,IRLEN20T,ISLEN20T,
      T  IRLEN20E,ISLEN20E,RBE3%IRBE3,RBE3%LRBE3  ,RBE3%FRBE3  ,FR_I2M,IAD_I2M,rbe3%mpi%FR_RBE3,
      U  RBE3%mpi%IAD_RBE3,FRWL6,IRBE2  ,LRBE2,INTBUF_TAB_CP,
@@ -9363,7 +9363,7 @@ C===============================================================================
           ITSK = OMP_GET_THREAD_NUM()
           CALL INT18_LAW151_UPDATE(ITSK   ,MULTI_FVM,IGRBRIC  ,IPARI,IXS,
      1                             IGROUPS,IPARG    ,ELBUF_TAB,MULTI_FVM%FORCE_INT         ,
-     2             NODES%X       ,          NODES%V       ,          NODES%MS         ,          KINET       ,
+     2             NODES%X       ,          NODES%V       ,          NODES%MS         ,          NODES%KINET       ,
      3   MULTI_FVM%X_APPEND,MULTI_FVM%V_APPEND,MULTI_FVM%MASS_APPEND,MULTI_FVM%KINET_APPEND)
 !$OMP   END PARALLEL
 
