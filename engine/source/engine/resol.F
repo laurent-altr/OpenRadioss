@@ -598,7 +598,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
-
+      USE spmd_inter_window_update
       USE CONNECTIVITY_MOD
       USE NODAL_ARRAYS_MOD
       USE detach_node_mod
@@ -2230,6 +2230,8 @@ C
       IF(GLOB_THERM%ITHERM_FE>0) SHARED_MEMORY_CONTACT_SORTING = .FALSE.
       IF(IDTMINS == 2 .OR. IDTMINS_INT/=0) SHARED_MEMORY_CONTACT_SORTING = .FALSE. 
       IF(IMPL_S /= 0) SHARED_MEMORY_CONTACT_SORTING = .FALSE.
+      IF(NSPMD == 1 .OR. IRESP == 1) SHARED_MEMORY_CONTACT_SORTING = .FALSE.
+!     SHARED_MEMORY_CONTACT_SORTING = .FALSE.
       write(6,*) 'SHARED_MEMORY_CONTACT_SORTING = ',SHARED_MEMORY_CONTACT_SORTING
 
        IF (ALEMUSCL_Param%IALEMUSCL == 0) DEALLOCATE(ADDTMPL)
@@ -3709,6 +3711,15 @@ C===============================================================================
           CALL ASSIGN_PTRX(ptrX,NODES%X,NUMNOD)
         ENDIF
         INTER_ERRORS = 0
+
+      IF(SHARED_MEMORY_CONTACT_SORTING) THEN
+      DO J = 1,NBINTC
+        N = INTLIST(J)
+        if(IPARI(7,N) .NE. 7) CYCLE
+        if(IPARI(7,N) == 7 .AND. IPARI(22,N) == 7 ) CYCLE                                       
+        call spmd_inter_window_update_intra(inter_struct(n)%win, nodes, interfaces%intbuf_tab(n), ipari(1:npari,n),npari,ispmd)
+      ENDDO
+      ENDIF
 
 !$OMP PARALLEL PRIVATE(ITSK,DT2TT,NELTSTT,ITYPTSTT)
         DT2TT = DT2T

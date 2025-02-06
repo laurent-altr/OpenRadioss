@@ -61,6 +61,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 C============================================================================
 C   M o d u l e s
 C-----------------------------------------------
+        USE spmd_inter_window_update
         USE TIMER_MOD
         USE TRI7BOX
         USE COMMAND_LINE_ARGS_MOD
@@ -208,14 +209,11 @@ C -------------------------------------------------------------
             IF(ITASK==0)THEN
             ! ---------------------------
             ! send/rcv the secondary node data
-                CALL SPMD_CELL_EXCHANGE(TIMERS, NIN,ISENDTO,IRCVFROM,NSN,NSNR,IPARI(21,NIN),
-     1                                   IFQ,INACTI,NSNFIOLD,IPARI(47,NIN),NTY, intbuf_tab%stfns, intbuf_tab%nsv,
-     2                                   NRTM, X,
-     2                                   ITIED,NMN,INTER_STRUCT,SORT_COMM, GOT_PREVIEW)
-C
+!             call spmd_inter_window_update_intra(inter_struct(nin)%win, nodes, intbuf_tab, ipari,npari,ispmd)
+              call spmd_inter_window_update_inter(inter_struct(nin)%win)
                 IF(INACTI==5.OR.INACTI==6.OR.INACTI==7.OR.
      +               IFQ>0.OR.ITIED/=0)THEN
-                    CALL SPMD_RNUMCD(
+                    CALL SPMD_RNUMCD_LITE(inter_struct(nin)%win,
      1                  INTBUF_TAB%CAND_N,RENUM  ,INTBUF_TAB%I_STOK(1), NIN,NSN,
      2                NSNFIOLD     ,NSNROLD)
                 END IF
@@ -250,32 +248,15 @@ C
 #endif
         IF (IMONM > 0 .AND. ITASK == 0) CALL STARTIME(TIMERS,30)
 C
-        IF(GOT_PREVIEW == 1) THEN
-            CALL INTER7_COLLISION_DETECTION(
-     1      X      ,INTBUF_TAB%IRECTM,INTBUF_TAB%NSV       ,INACTI    ,INTBUF_TAB%CAND_P,
-     2      NRTM           ,NSN                  ,INTBUF_TAB%CAND_E,INTBUF_TAB%CAND_N,
-     3      GAP    ,NOINT            ,INTBUF_TAB%I_STOK(1) ,NCONTACT ,INTER_STRUCT(NIN)%BOX_LIMIT_MAIN,
-     4      TZINF  ,INTER_STRUCT(NIN)%CAND_A  ,INTER_STRUCT(NIN)%CURV_MAX, RENUM_SIZ,
-     6      NB_N_B ,ESHIFT      ,ILD            ,IFQ    ,INTBUF_TAB%IFPEN,
-     8      INTBUF_TAB%STFM,IPARI(21,NIN),INTBUF_TAB%GAP_S,
-     A      NSNR   ,NCONT  ,RENUM  ,NSNROLD  ,INTBUF_TAB%GAP_M,
-     B      GAPMIN ,GAPMAX  ,NUM_IMP   ,INTBUF_TAB%GAP_SL,
-     C      INTBUF_TAB%GAP_ML,ITASK  , INTBUF_TAB%VARIABLES(bgapsmx_index),I_MEM     ,  
-     D      INTBUF_TAB%KREMNODE,INTBUF_TAB%REMNODE,  IPARI(63,NIN),DRAD         ,
-     E      ITIED ,INTBUF_TAB%CAND_F,DGAPLOADP,
-     F      INTER_STRUCT(NIN)%SIZE_CAND_A,
-     .      INTBUF_TAB%S_KREMNODE, INTBUF_TAB%S_REMNODE, NSPMD, NUMNOD, INTER_STRUCT(nin),
-     .      INTHEAT, IDT_THERM, NODADT_THERM)
-
-        ELSE IF(INTBUF_TAB%METRIC%ALGO == ALGO_VOXEL .OR.  INTBUF_TAB%METRIC%ALGO == TRY_ALGO_VOXEL) THEN
+        IF(.TRUE.) THEN
             FIRST = 1 + ITASK*(NRTM/NTHREAD)
             LAST = FIRST + NRTM_T - 1
             IF(ITASK==NTHREAD-1) LAST=NRTM
             CURV_MAX(1:NRTM_T) = INTER_STRUCT(NIN)%CURV_MAX(FIRST:LAST)
 
 
-            CALL I7BUCE_VOX(
-     1      X      ,INTBUF_TAB%IRECTM(1+4*ESHIFT),INTBUF_TAB%NSV  ,INACTI    ,INTBUF_TAB%CAND_P,
+            CALL I7BUCE_VOX_LITE(
+     1      INTER_STRUCT(NIN)%WIN, X    ,INTBUF_TAB%IRECTM(1+4*ESHIFT),INTBUF_TAB%NSV  ,INACTI    ,INTBUF_TAB%CAND_P,
      2      NMN_G  ,NRTM_T                       ,NSN     ,INTBUF_TAB%CAND_E,INTBUF_TAB%CAND_N,
      3      GAP    ,NOINT       ,INTBUF_TAB%I_STOK(1) ,NCONTACT ,INTER_STRUCT(NIN)%BOX_LIMIT_MAIN ,
      4      TZINF  ,MAXBOX      ,MINBOX         ,INTER_STRUCT(NIN)%CAND_A         ,CURV_MAX  ,
@@ -394,7 +375,7 @@ C mono tache
             IF (IMONM > 0) CALL STARTIME(TIMERS,26)
             INTBUF_TAB%VARIABLES(distance_index) = -INTBUF_TAB%VARIABLES(distance_index)
 C
-            CALL SPMD_TRI7GAT(
+            CALL SPMD_TRI7GAT_LITE(INTER_STRUCT(NIN)%WIN,
      1          RESULT       ,NSN     ,INTBUF_TAB%CAND_N,INTBUF_TAB%I_STOK(1),NIN,
      2          IPARI(21,NIN),NSNR    ,MULTIMP        ,NTY         ,IPARI(47,NIN),  
      3          IDUM1        ,NSNFIOLD, IPARI        , H3D_DATA    ,IPARI(72,NIN),

@@ -162,93 +162,93 @@ C-----------------------------------------------
 
         ! -----------------------------
         ! globalization of min/max position 
-        IF(NSPMD>1.AND.NEED_TO_SORT>0)THEN
-            IF(ITASK==0) THEN
-                CALL SPMD_BOX_LIMIT_REDUCTION(NB_INTER_SORTED)
-            ENDIF
-            CALL MY_BARRIER()
-        ENDIF
-        ! -----------------------------
+c       IF(NSPMD>1.AND.NEED_TO_SORT>0)THEN
+c           IF(ITASK==0) THEN
+c               CALL SPMD_BOX_LIMIT_REDUCTION(NB_INTER_SORTED)
+c           ENDIF
+c           CALL MY_BARRIER()
+c       ENDIF
+c       ! -----------------------------
 
         ! -----------------------------
         ! allocation & initialization of coarse_grid
-        IF(ITASK==0) THEN
-            IF(.NOT.ALLOCATED(LOCAL_COARSE_GRID)) THEN
-                ALLOCATE(LOCAL_COARSE_GRID(NB_BOX_COARSE_GRID**3+1))
-            ENDIF            
-            LOCAL_COARSE_GRID(1:NB_BOX_COARSE_GRID**3+1) = 0
-        ENDIF
-        CALL MY_BARRIER()
+c       IF(ITASK==0) THEN
+c           IF(.NOT.ALLOCATED(LOCAL_COARSE_GRID)) THEN
+c               ALLOCATE(LOCAL_COARSE_GRID(NB_BOX_COARSE_GRID**3+1))
+c           ENDIF            
+c           LOCAL_COARSE_GRID(1:NB_BOX_COARSE_GRID**3+1) = 0
+c       ENDIF
+c       CALL MY_BARRIER()
         ! -----------------------------
 
         ! -----------------------------
         ! color the coarse grid
-        IF(NB_INTER_SORTED>0) THEN
-            IF(ITASK==0) CALL INTER_BOX_CREATION( )
-            CALL MY_BARRIER()
-            CALL INTER_COLOR_COARSE_VOXEL(ITASK,NB_INTER_SORTED,LIST_INTER_SORTED,IPARI,INTBUF_TAB,
-     .                                    X,SORT_COMM)
-        ENDIF
+c       IF(NB_INTER_SORTED>0) THEN
+c           IF(ITASK==0) CALL INTER_BOX_CREATION( )
+c           CALL MY_BARRIER()
+c           CALL INTER_COLOR_COARSE_VOXEL(ITASK,NB_INTER_SORTED,LIST_INTER_SORTED,IPARI,INTBUF_TAB,
+c    .                                    X,SORT_COMM)
+c       ENDIF
         ! -----------------------------
 
         ! -----------------------------
         ! exchange of coarse_grid : send/rcv part
-        IF(NSPMD>1.AND.NEED_TO_SORT>0)THEN
-            IF(ITASK==0) THEN
-                CALL SPMD_COARSE_CELL_EXCHANGE(NB_INTER_SORTED,LIST_INTER_SORTED,IRECVFROM,ISENDTO,1,
-     .                       IPARI,SORT_COMM,NB_REQUEST_COARSE_CELL,ARRAY_REQUEST_COARSE_CELL,LIST_INTER_COARSE_CELL)
-            ENDIF
-        ENDIF
+c       IF(NSPMD>1.AND.NEED_TO_SORT>0)THEN
+c           IF(ITASK==0) THEN
+c               CALL SPMD_COARSE_CELL_EXCHANGE(NB_INTER_SORTED,LIST_INTER_SORTED,IRECVFROM,ISENDTO,1,
+c    .                       IPARI,SORT_COMM,NB_REQUEST_COARSE_CELL,ARRAY_REQUEST_COARSE_CELL,LIST_INTER_COARSE_CELL)
+c           ENDIF
+c       ENDIF
         ! -----------------------------
 
         ! -----------------------------
         ! color the voxel (fine grid)
-        IF(NB_INTER_SORTED>0) THEN
-            CALL MY_BARRIER()
-            CALL INTER_COLOR_VOXEL( ITASK,NB_INTER_SORTED,LIST_INTER_SORTED,IPARI,INTBUF_TAB,
-     .                              X,INTER_STRUCT,SORT_COMM )
-        ENDIF
-        ! -----------------------------
+c       IF(NB_INTER_SORTED>0) THEN
+c           CALL MY_BARRIER()
+c           CALL INTER_COLOR_VOXEL( ITASK,NB_INTER_SORTED,LIST_INTER_SORTED,IPARI,INTBUF_TAB,
+c    .                              X,INTER_STRUCT,SORT_COMM )
+c       ENDIF
+c       ! -----------------------------
 
 
-        IF(NEED_TO_SORT>0)THEN
-          IF(NSPMD > 1 .AND. ITASK == 0) THEN
+c       IF(NEED_TO_SORT>0)THEN
+c         IF(NSPMD > 1 .AND. ITASK == 0) THEN
         ! -----------------------------
         ! exchange of coarse_grid : waiting part + check if 2 processors need to communicate
-           CALL SPMD_COARSE_CELL_EXCHANGE(NB_INTER_SORTED,LIST_INTER_SORTED,IRECVFROM,ISENDTO,2,
-     .                       IPARI,SORT_COMM,NB_REQUEST_COARSE_CELL,ARRAY_REQUEST_COARSE_CELL,LIST_INTER_COARSE_CELL)
+c          CALL SPMD_COARSE_CELL_EXCHANGE(NB_INTER_SORTED,LIST_INTER_SORTED,IRECVFROM,ISENDTO,2,
+c    .                       IPARI,SORT_COMM,NB_REQUEST_COARSE_CELL,ARRAY_REQUEST_COARSE_CELL,LIST_INTER_COARSE_CELL)
         !
-          DO KK=1,NB_INTER_SORTED
-            N = LIST_INTER_SORTED(KK)
-            ! -----------------------------
-            ! exchange of number of colored cells (fine grid)
-                    CALL SPMD_CELL_LIST_EXCHANGE(IRECVFROM,ISENDTO,1,WEIGHT,IAD_ELEM,
-     .                 FR_ELEM,X,V,MS,TEMP,
-     .                 KINET,NODNX_SMS,ITAB,INTBUF_TAB,IPARI,
-     .                 N,INTER_STRUCT,SORT_COMM,NODNX_SMS_SIZ,TEMP_SIZ, GOT_PREVIEW)   !   size of cell list
-            ! -----------------------------
-                if(GOT_PREVIEW == 1) THEN
-                nrtm = IPARI(4,N)
-                nsn = IPARI(5,N)
-                nsnr = IPARI(24,N)
-                nmn = IPARI(6,N)
-                call compute_voxel_dimensions(nmn, nrtm, inter_struct(N))
-                endif
+c         DO KK=1,NB_INTER_SORTED
+c           N = LIST_INTER_SORTED(KK)
+c           ! -----------------------------
+c           ! exchange of number of colored cells (fine grid)
+c                   CALL SPMD_CELL_LIST_EXCHANGE(IRECVFROM,ISENDTO,1,WEIGHT,IAD_ELEM,
+c    .                 FR_ELEM,X,V,MS,TEMP,
+c    .                 KINET,NODNX_SMS,ITAB,INTBUF_TAB,IPARI,
+c    .                 N,INTER_STRUCT,SORT_COMM,NODNX_SMS_SIZ,TEMP_SIZ, GOT_PREVIEW)   !   size of cell list
+c           ! -----------------------------
+c               if(GOT_PREVIEW == 1) THEN
+c               nrtm = IPARI(4,N)
+c               nsn = IPARI(5,N)
+c               nsnr = IPARI(24,N)
+c               nmn = IPARI(6,N)
+c               call compute_voxel_dimensions(nmn, nrtm, inter_struct(N))
+c               endif
 
             ! -----------------------------
             ! creation of voxel of secondary nodes 
             ! wait comm R "exchange of number of colored cells" & send/rcv the colored cells
-                    CALL INTER_VOXEL_CREATION(IPARI,INTBUF_TAB,X,N,SORT_COMM)! create the voxel of secondary nodes
-                    CALL SPMD_CELL_LIST_EXCHANGE(IRECVFROM,ISENDTO,2,WEIGHT,IAD_ELEM,
-     .                 FR_ELEM,X,V,MS,TEMP,
-     .                 KINET,NODNX_SMS,ITAB,INTBUF_TAB,IPARI,
-     .                 N,INTER_STRUCT,SORT_COMM,NODNX_SMS_SIZ,TEMP_SIZ, GOT_PREVIEW) !   mpi wait size of cell list
+c                   CALL INTER_VOXEL_CREATION(IPARI,INTBUF_TAB,X,N,SORT_COMM)! create the voxel of secondary nodes
+c                   CALL SPMD_CELL_LIST_EXCHANGE(IRECVFROM,ISENDTO,2,WEIGHT,IAD_ELEM,
+c    .                 FR_ELEM,X,V,MS,TEMP,
+c    .                 KINET,NODNX_SMS,ITAB,INTBUF_TAB,IPARI,
+c    .                 N,INTER_STRUCT,SORT_COMM,NODNX_SMS_SIZ,TEMP_SIZ, GOT_PREVIEW) !   mpi wait size of cell list
 
-            ! -----------------------------
-                if(GOT_PREVIEW == 1) THEN
-                  CALL FILL_VOXEL_LOCAL_PARTIAL(nsn,intbuf_tab(n)%nsv,nsnr,nrtm,numnod,x,intbuf_tab(N)%stfns,INTER_STRUCT(N),
-     .                     sort_comm(n)%request_cell_rcv, sort_comm(n)%NB_REQUEST_CELL_RCV)
-                endif
+c           ! -----------------------------
+c               if(GOT_PREVIEW == 1) THEN
+c                 CALL FILL_VOXEL_LOCAL_PARTIAL(nsn,intbuf_tab(n)%nsv,nsnr,nrtm,numnod,x,intbuf_tab(N)%stfns,INTER_STRUCT(N),
+c    .                     sort_comm(n)%request_cell_rcv, sort_comm(n)%NB_REQUEST_CELL_RCV)
+c               endif
 
             
             ! -----------------------------
@@ -257,24 +257,24 @@ C-----------------------------------------------
             !             + comm of "number of secondary nodes needed by remote proc"
             !             + creation of the secondary node list 
             !             + initialize the S buffer of secondary node data (x & v)
-                    CALL SPMD_CELL_LIST_EXCHANGE(IRECVFROM,ISENDTO,3,WEIGHT,IAD_ELEM,
-     .                 FR_ELEM,X,V,MS,TEMP,
-     .                 KINET,NODNX_SMS,ITAB,INTBUF_TAB,IPARI,
-     .                 N,INTER_STRUCT,SORT_COMM,NODNX_SMS_SIZ,TEMP_SIZ, GOT_PREVIEW)
+c                   CALL SPMD_CELL_LIST_EXCHANGE(IRECVFROM,ISENDTO,3,WEIGHT,IAD_ELEM,
+c    .                 FR_ELEM,X,V,MS,TEMP,
+c    .                 KINET,NODNX_SMS,ITAB,INTBUF_TAB,IPARI,
+c    .                 N,INTER_STRUCT,SORT_COMM,NODNX_SMS_SIZ,TEMP_SIZ, GOT_PREVIEW)
 
-             ENDDO
-             ELSEIF (ITASK == 0) THEN
-               DO KK=1,NB_INTER_SORTED
-                 N = LIST_INTER_SORTED(KK)
-                 if(GOT_PREVIEW == 1) THEN
-                   nrtm = IPARI(4,N) ;   nsn = IPARI(5,N) ; nsnr = IPARI(24,N) ; nmn = IPARI(6,N)
-                   call compute_voxel_dimensions(nmn, nrtm, inter_struct(N))
-                   CALL FILL_VOXEL_LOCAL_PARTIAL(nsn,intbuf_tab(n)%nsv,nsnr,nrtm,numnod,x,
-     .                                           intbuf_tab(N)%stfns,INTER_STRUCT(N),DUMMY,0) 
-                 ENDIF
-              ENDDO
-            ENDIF
-            ENDIF
+c            ENDDO
+c            ELSEIF (ITASK == 0) THEN
+c              DO KK=1,NB_INTER_SORTED
+c                N = LIST_INTER_SORTED(KK)
+c                if(GOT_PREVIEW == 1) THEN
+c                  nrtm = IPARI(4,N) ;   nsn = IPARI(5,N) ; nsnr = IPARI(24,N) ; nmn = IPARI(6,N)
+c                  call compute_voxel_dimensions(nmn, nrtm, inter_struct(N))
+c                  CALL FILL_VOXEL_LOCAL_PARTIAL(nsn,intbuf_tab(n)%nsv,nsnr,nrtm,numnod,x,
+c    .                                           intbuf_tab(N)%stfns,INTER_STRUCT(N),DUMMY,0) 
+c                ENDIF
+c             ENDDO
+c           ENDIF
+c           ENDIF
 
 
             ! -----------------------------
@@ -285,27 +285,27 @@ C-----------------------------------------------
         ! -----------------------------
         ! wait comm S "send/rcv the colored cells"
         ! wait comm S/R "number of secondary nodes needed by remote proc"
-        DO KK=1,NB_INTER_SORTED
-            N = LIST_INTER_SORTED(KK)
-            IF(NSPMD>1.AND.NEED_TO_SORT>0)THEN
-                IF(ITASK==0) THEN
-                    ! wait comm S "send/rcv the colored cells"
-                    CALL SPMD_CELL_LIST_EXCHANGE(IRECVFROM,ISENDTO,4,WEIGHT,IAD_ELEM,
-     .                 FR_ELEM,X,V,MS,TEMP,
-     .                 KINET,NODNX_SMS,ITAB,INTBUF_TAB,IPARI,
-     .                 N,INTER_STRUCT,SORT_COMM,NODNX_SMS_SIZ,TEMP_SIZ, GOT_PREVIEW)
-                    ! wait "number of secondary nodes needed by remote proc"
-                if(GOT_PREVIEW == 1) THEN
-                   nrtm = IPARI(4,N) ;   nsn = IPARI(5,N) ; nsnr = IPARI(24,N) ; nmn = IPARI(6,N)
-                  CALL FILL_VOXEL_LOCAL_PARTIAL(nsn,intbuf_tab(n)%nsv,nsnr,nrtm,numnod,x,intbuf_tab(N)%stfns,INTER_STRUCT(N),
-     .                     SORT_COMM(N)%REQUEST_NB_R, SORT_COMM(N)%NBRECV_NB)
-                endif
+c       DO KK=1,NB_INTER_SORTED
+c           N = LIST_INTER_SORTED(KK)
+c           IF(NSPMD>1.AND.NEED_TO_SORT>0)THEN
+c               IF(ITASK==0) THEN
+c                   ! wait comm S "send/rcv the colored cells"
+c                   CALL SPMD_CELL_LIST_EXCHANGE(IRECVFROM,ISENDTO,4,WEIGHT,IAD_ELEM,
+c    .                 FR_ELEM,X,V,MS,TEMP,
+c    .                 KINET,NODNX_SMS,ITAB,INTBUF_TAB,IPARI,
+c    .                 N,INTER_STRUCT,SORT_COMM,NODNX_SMS_SIZ,TEMP_SIZ, GOT_PREVIEW)
+c                   ! wait "number of secondary nodes needed by remote proc"
+c               if(GOT_PREVIEW == 1) THEN
+c                  nrtm = IPARI(4,N) ;   nsn = IPARI(5,N) ; nsnr = IPARI(24,N) ; nmn = IPARI(6,N)
+c                 CALL FILL_VOXEL_LOCAL_PARTIAL(nsn,intbuf_tab(n)%nsv,nsnr,nrtm,numnod,x,intbuf_tab(N)%stfns,INTER_STRUCT(N),
+c    .                     SORT_COMM(N)%REQUEST_NB_R, SORT_COMM(N)%NBRECV_NB)
+c               endif
 
-                    CALL SPMD_WAIT_NB(IRECVFROM,ISENDTO,N,SORT_COMM)    
-                ENDIF
-                CALL MY_BARRIER()
-            ENDIF
-        ENDDO
+c                   CALL SPMD_WAIT_NB(IRECVFROM,ISENDTO,N,SORT_COMM)    
+c               ENDIF
+c               CALL MY_BARRIER()
+c           ENDIF
+c       ENDDO
 
 
 

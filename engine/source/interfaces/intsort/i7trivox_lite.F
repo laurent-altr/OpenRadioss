@@ -36,7 +36,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
       !||====================================================================
       SUBROUTINE I7TRIVOX_LITE(
      1      NSN    ,RENUM       ,NSNR    ,ISZNSNR  ,I_MEM    ,
-     2      IRECT  ,X           ,STF     ,STFN     ,XYZM     ,
+     2      IRECT  ,WIN ,X        ,STF     ,STFN     ,XYZM     ,
      3      NSV    ,II_STOK     ,CAND_N  ,ESHIFT   ,CAND_E   ,
      4      MULNSN ,NOINT       ,TZINF   ,GAP_S_L  ,GAP_M_L  ,
      5      VOXEL  ,NBX         ,NBY     ,NBZ      ,INTTH    ,
@@ -50,6 +50,8 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 C============================================================================
 C   M o d u l e s
 C-----------------------------------------------
+      USE ISO_C_BINDING
+      USE inter_shm_mod
       USE MESSAGE_MOD
       USE TRI7BOX
 C-----------------------------------------------
@@ -109,6 +111,7 @@ C                       noeud au dernier
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
+      TYPE(inter_win_) :: WIN
       INTEGER I_MEM,ESHIFT,NSN,ISZNSNR,NSNROLD,NIN,ITASK,
      .        MULNSN,NOINT,INACTI,IFQ,NSNR,IGAP,NBX,NBY,NBZ,
      .        NSV(*),CAND_N(*),CAND_E(*),CAND_A(*),IFPEN(*),RENUM(*),
@@ -140,10 +143,10 @@ C-----------------------------------------------
      .   XX1,XX2,XX3,XX4,YY1,YY2,YY3,YY4,ZZ1,ZZ2,ZZ3,ZZ4,
      .   D1X,D1Y,D1Z,D2X,D2Y,D2Z,DD1,DD2,D2,A2,GS
 c provisoire
-      INTEGER  LAST_NOD(NSN+NSNR)
+      INTEGER, dimension(:), allocatable ::  LAST_NOD! (NSN+NSNR)
       INTEGER  IX,IY,IZ,NEXT,M1,M2,M3,M4,
      .         IX1,IY1,IZ1,IX2,IY2,IZ2
-      INTEGER,  DIMENSION(:),ALLOCATABLE :: IIX,IIY,IIZ
+      INTEGER  IIX,IIY,IIZ
       my_real
      .   XMINB,YMINB,ZMINB,XMAXB,YMAXB,ZMAXB,
      .   XMINE,YMINE,ZMINE,XMAXE,YMAXE,ZMAXE,AAA
@@ -151,18 +154,31 @@ c provisoire
       LOGICAL TEST_V0
       INTEGER FIRST,NEW,LAST,IERROR
       LOGICAL DBG_type18_fvm
-      SAVE IIX,IIY,IIZ
+      integer :: CHUNK_SIZE
+      my_real :: X1,X2,X3
+      integer :: proc
+      integer :: ielec_offset, temp_offset, areas_offset, gap_s_offset, gap_sl_offset, ipartfrics_offset
+      integer :: x_offset, v_offset, ms_offset, stfns_offset
+      integer :: ispmd_offset, itab_offset, IKINET_offset, i_offset 
+      double precision,  dimension(:,:), pointer :: shared_real
+      integer(kind=8), dimension(:,:), pointer :: shared_int 
+      integer :: size_shared_data
 C-----------------------------------------------
+      size_shared_data = (WIN%RSIZ + WIN%ISIZ)!
+      call c_f_pointer(win%shared_base, shared_int,[ size_shared_data, win%nsn_global ] )
+      call c_f_pointer(win%shared_base, shared_real,[ size_shared_data, win%nsn_global ] )
+
+
+      allocate(LAST_NOD(win%nsn_global))
       IF(ITASK == 0)THEN
         REMOTE_S_NODE = 0
         CPT_VOX0 = 0
-        ALLOCATE(NEXT_NOD(NSN+NSNR),STAT=IERROR)
+        ALLOCATE(NEXT_NOD(win%nsn_global),STAT=IERROR)
         IF(IERROR/=0) THEN
           CALL ANCMSG(MSGID=19,ANMODE=ANINFO,
      .        C1='(/INTER/TYPE7)')
           CALL ARRET(2)
         ENDIF
-        ALLOCATE(IIX(NSN+NSNR),IIY(NSN+NSNR),IIZ(NSN+NSNR),STAT=IERROR)
         IF(IERROR/=0) THEN
           CALL ANCMSG(MSGID=19,ANMODE=ANINFO,
      .        C1='(/INTER/TYPE7)')
@@ -211,40 +227,63 @@ C-----------------------------------------------
 C=======================================================================
 C 1   NODE CLUSTERING
 C=======================================================================
+      CHUNK_SIZE = WIN%RSIZ + WIN%ISIZ
+      ielec_offset = win%ielec_offset
+      temp_offset = win%temp_offset
+      areas_offset = win%areas_offset
+      gap_s_offset = win%gap_s_offset
+      gap_sl_offset = win%gap_sl_offset
+      ipartfrics_offset = win%ipartfrics_offset
+      ispmd_offset = win%ispmd_offset
+      itab_offset = win%itab_offset
+      IKINET_offset = win%IKINET_offset
+      i_offset = win%i_offset
+      x_offset = win%x_offset
+      v_offset = win%v_offset
+      ms_offset = win%ms_offset
+      stfns_offset = win%stfns_offset 
+C     DO I=1,WIN%NSN_GLOBAL
+C        write(700+ISPMD,*) "X=",shared_real(x_offset,I),shared_real(x_offset+1,I),shared_real(x_offset+2,I)
+C        write(700+ISPMD,*) "X=",shared_int(x_offset,I),shared_int(x_offset+1,I),shared_int(x_offset+2,I)
+C        write(700+ISPMD,*) "ispmd=",shared_int(ispmd_offset,I),shared_real(ispmd_offset,I)
+C        write(700+ISPMD,*) "itab=",shared_int(itab_offset,I),shared_real(itab_offset,I)
+C     ENDDO
+
+
       IF(ITASK==0.AND.TOTAL_NB_NRTM>0)THEN
         !==========LAGRANGIAN and STAGGERED ALE==========!
         TEST_V0 = FIRST_TEST(NIN)
-        DO I=1,NSN
-          IIX(I)=0
-          IIY(I)=0
-          IIZ(I)=0
-          IF(STFN(I) == ZERO)CYCLE
-          J=NSV(I)
+        DO I=1,WIN%NSN_GLOBAL
+          IIX=0
+          IIY=0
+          IIZ=0
+          !IF(STFN(I) == ZERO)CYCLE
+          IF(shared_real(stfns_offset,I) == ZERO)CYCLE
           !C Optimisation // recherche les noeuds compris dans xmin xmax des
           !C elements du processeur
-          IF(X(1,J) < XMIN)  CYCLE
-          IF(X(1,J) > XMAX)  CYCLE
-          IF(X(2,J) < YMIN)  CYCLE
-          IF(X(2,J) > YMAX)  CYCLE
-          IF(X(3,J) < ZMIN)  CYCLE
-          IF(X(3,J) > ZMAX)  CYCLE
-          IIX(I)=INT(NBX*(X(1,J)-XMINB)/(XMAXB-XMINB))
-          IIY(I)=INT(NBY*(X(2,J)-YMINB)/(YMAXB-YMINB))
-          IIZ(I)=INT(NBZ*(X(3,J)-ZMINB)/(ZMAXB-ZMINB))
-          IIX(I)=MAX(1,2+MIN(NBX,IIX(I)))
-          IIY(I)=MAX(1,2+MIN(NBY,IIY(I)))
-          IIZ(I)=MAX(1,2+MIN(NBZ,IIZ(I)))
-          FIRST = VOXEL(IIX(I),IIY(I),IIZ(I))
-          IF(TEST_V0) THEN
-! count the number of SECONDARY nodes outiside the reduced box
-            IF(IIX(I) ==  1    .OR.  IIY(I) ==  1    .OR. IIZ(I) == 1 .AND.
-     .         IIX(I) ==  NBX+2 .OR. IIY(I) == NBY+2 .OR. IIZ(I) == NBZ+2) THEN
-              CPT_VOX0 = CPT_VOX0 +1
-            ENDIF
-          ENDIF
+!         X1 = WIN%SHARED_DATA(CHUNK_SIZE*(I-1)+x_offset)
+!         X2 = WIN%SHARED_DATA(CHUNK_SIZE*(I-1)+x_offset+1)
+!         X3 = WIN%SHARED_DATA(CHUNK_SIZE*(I-1)+x_offset+2)
+          X1 = shared_real(1,I)                          
+          X2 = shared_real(2,I)
+          X3 = shared_real(3,I)
+          IF(X1 < XMIN)  CYCLE
+          IF(X1 > XMAX)  CYCLE
+          IF(X2 < YMIN)  CYCLE
+          IF(X2 > YMAX)  CYCLE
+          IF(X3 < ZMIN)  CYCLE
+          IF(X3 > ZMAX)  CYCLE
+          
+          IIX=INT(NBX*(X1 -XMINB)/(XMAXB-XMINB))
+          IIY=INT(NBY*(X2 -YMINB)/(YMAXB-YMINB))
+          IIZ=INT(NBZ*(X3 -ZMINB)/(ZMAXB-ZMINB))
+          IIX=MAX(1,2+MIN(NBX,IIX))
+          IIY=MAX(1,2+MIN(NBY,IIY))
+          IIZ=MAX(1,2+MIN(NBZ,IIZ))
+          FIRST = VOXEL(IIX,IIY,IIZ)
           IF(FIRST == 0)THEN
             !empty cell
-            VOXEL(IIX(I),IIY(I),IIZ(I)) = I ! first
+            VOXEL(IIX,IIY,IIZ) = I ! first
             NEXT_NOD(I)                 = 0 ! last one
             LAST_NOD(I)                 = 0 ! no last
           ELSEIF(LAST_NOD(FIRST) == 0)THEN
@@ -262,57 +301,10 @@ C=======================================================================
             NEXT_NOD(I)     = 0 ! last one
           ENDIF
         ENDDO
-
+      ENDIF
 C=======================================================================
 C 2   REMOTE NODE CLUSTERING
 C=======================================================================
-        DO J = 1, NSNR
-
-          IF(XREM(1,J) < XMIN)  CYCLE
-          IF(XREM(1,J) > XMAX)  CYCLE
-          IF(XREM(2,J) < YMIN)  CYCLE
-          IF(XREM(2,J) > YMAX)  CYCLE
-          IF(XREM(3,J) < ZMIN)  CYCLE
-          IF(XREM(3,J) > ZMAX)  CYCLE
-
-          REMOTE_S_NODE = REMOTE_S_NODE + 1
-          LIST_REMOTE_S_NODE( REMOTE_S_NODE ) = J
-          IIX(NSN+J)=INT(NBX*(XREM(1,J)-XMINB)/(XMAXB-XMINB))
-          IIY(NSN+J)=INT(NBY*(XREM(2,J)-YMINB)/(YMAXB-YMINB))
-          IIZ(NSN+J)=INT(NBZ*(XREM(3,J)-ZMINB)/(ZMAXB-ZMINB))
-          IIX(NSN+J)=MAX(1,2+MIN(NBX,IIX(NSN+J)))
-          IIY(NSN+J)=MAX(1,2+MIN(NBY,IIY(NSN+J)))
-          IIZ(NSN+J)=MAX(1,2+MIN(NBZ,IIZ(NSN+J)))
-
-          FIRST = VOXEL(IIX(NSN+J),IIY(NSN+J),IIZ(NSN+J))
-          IF(TEST_V0) THEN
-! count the number of SECONDARY nodes outiside the reduced box
-            IF(IIX(J+NSN) ==  1     .OR. IIY(J+NSN) ==  1     .OR. IIZ(J+NSN) == 1 .AND.
-     .         IIX(J+NSN) ==  NBX+2 .OR. IIY(J+NSN) ==  NBY+2 .OR. IIZ(J+NSN) == NBZ+2) THEN
-              CPT_VOX0 = CPT_VOX0 +1
-            ENDIF
-          ENDIF
-
-          IF(FIRST == 0)THEN
-            ! empty cell
-            VOXEL(IIX(NSN+J),IIY(NSN+J),IIZ(NSN+J)) = NSN+J ! first
-            NEXT_NOD(NSN+J)     = 0 ! last one
-            LAST_NOD(NSN+J)     = 0 ! no last
-          ELSEIF(LAST_NOD(FIRST) == 0)THEN
-            ! cell containing one node, add it as next node
-            NEXT_NOD(FIRST) = NSN+J  ! next
-            LAST_NOD(FIRST) = NSN+J  ! last
-            NEXT_NOD(NSN+J)  = 0     ! last one
-          ELSE
-            ! , jump to the last node of the cell
-            LAST = LAST_NOD(FIRST)  ! last node in this voxel
-            NEXT_NOD(LAST)  = NSN+J ! next
-            LAST_NOD(FIRST) = NSN+J ! last
-            NEXT_NOD(NSN+J)     = 0 ! last one
-          ENDIF
-        ENDDO
-      END IF !ITASK == 0
-
       CALL MY_BARRIER ! Barrier to wait task0 treatment
 
       IF(FIRST_TEST(NIN)) THEN
@@ -431,35 +423,35 @@ C=======================================================================
               ! nbpelem = nbpelem + 1
 
               JJ = VOXEL(IX,IY,IZ)
+c             write(6,*) "VOXEL(",IX,",",IY,",",IZ,")=",JJ
               DO WHILE(JJ /= 0)
                 DELNOD = 0
 
                 !nnpelem = nnpelem + 1
-                IF(JJ<=NSN)THEN
-                  NN=NSV(JJ)
-
+!               IF(JJ<=NSN)THEN if local node
+                IF(shared_int(ispmd_offset,JJ) == ispmd)THEN
+                  J = shared_int(i_offset,JJ) 
+                  NN=NSV(J)
                   IF(NN == M1)GOTO 200
                   IF(NN == M2)GOTO 200
                   IF(NN == M3)GOTO 200
                   IF(NN == M4)GOTO 200
 
                   IF(FLAGREMNODE == 2) THEN
-                    IF( TAGREMNODE(NSV(JJ)) == 1)GOTO 200
-                  ENDIF
-                  XS = X(1,NN)
-                  YS = X(2,NN)
-                  ZS = X(3,NN)
-                  IF(IGAP /= 0)THEN
-                    AAA = MARGE+CURV_MAX(NE)+MAX(MIN(GAPMAX,MAX(GAPMIN,GAP_S(JJ)+GAP_M(NE)))+DGAPLOAD,DRAD)
+                    IF( TAGREMNODE(NSV(J)) == 1)GOTO 200
                   ENDIF
                 ELSE
-                  J=JJ-NSN
+                  J = NSN + JJ 
+                  IF(shared_int(itab_offset,JJ) ==itab(M1))GOTO 200
+                  IF(shared_int(itab_offset,JJ) ==itab(M2))GOTO 200
+                  IF(shared_int(itab_offset,JJ) ==itab(M3))GOTO 200
+                  IF(shared_int(itab_offset,JJ) ==itab(M4))GOTO 200
+
                   IF(FLAGREMNODE == 2) THEN
-                    NN = IREM(1,J)
                     K = KREMNOD(2*(NE-1)+2) + 1
                     L = KREMNOD(2*(NE-1)+3)
                     DO M=K,L
-                      IF(REMNOD(M) == -IREM(2,J) ) THEN
+                      IF(REMNOD(M) == -shared_int(itab_offset,JJ) ) THEN
                         DELNOD = DELNOD + 1
                         EXIT
                       ENDIF
@@ -467,13 +459,15 @@ C=======================================================================
                     IF(DELNOD /= 0)GOTO 200
                   ENDIF
 
-                  XS = XREM(1,J)
-                  YS = XREM(2,J)
-                  ZS = XREM(3,J)
-                  IF(IGAP /= 0)THEN
-                    AAA = MARGE+CURV_MAX(NE)+MAX(MIN(GAPMAX,MAX(GAPMIN,XREM(9,J)+GAP_M(NE)))+DGAPLOAD,DRAD)
-                  ENDIF
                 ENDIF
+
+                XS = shared_real(1,JJ)
+                YS = shared_real(2,JJ)
+                ZS = shared_real(3,JJ)
+                IF(IGAP /= 0)THEN
+                  AAA = MARGE+CURV_MAX(NE)+MAX(MIN(GAPMAX,MAX(GAPMIN,shared_real(9,JJ)+GAP_M(NE)))+DGAPLOAD,DRAD)
+                ENDIF
+
 
                 IF(XS<=XMINE-AAA)GOTO 200
                 IF(XS>=XMAXE+AAA)GOTO 200
@@ -502,10 +496,11 @@ C=======================================================================
                 !nnrpelem = nnrpelem + 1
 
                 J_STOK = J_STOK + 1
-                PROV_N(J_STOK) = JJ
+                PROV_N(J_STOK) = J
                 PROV_E(J_STOK) = NE
+                
                 IF(J_STOK == NVSIZ)THEN
-                  CALL I7STO(
+                CALL I7STO_LITE(SHARED_INT, SHARED_REAL, size_shared_data,win%nsn_global,
      1               NVSIZ ,IRECT  ,X     ,NSV   ,II_STOK,
      2               CAND_N,CAND_E ,MULNSN,NOINT ,MARGE  ,
      3               I_MEM ,PROV_N ,PROV_E,ESHIFT,INACTI ,
@@ -534,7 +529,7 @@ C=======================================================================
 C=======================================================================
 C 4   STORAGE
 C=======================================================================
-      IF(J_STOK/=0)CALL I7STO(
+      IF(J_STOK/=0)CALL I7STO_LITE(SHARED_INT, SHARED_REAL, size_shared_data,win%nsn_global,
      1              J_STOK,IRECT  ,X     ,NSV   ,II_STOK,
      2              CAND_N,CAND_E ,MULNSN,NOINT ,MARGE  ,
      3              I_MEM ,PROV_N ,PROV_E,ESHIFT,INACTI ,
@@ -551,64 +546,67 @@ C=======================================================================
       ! Barrier to avoid reinitialization before end of sorting
       CALL MY_BARRIER
       IF(TOTAL_NB_NRTM>0) THEN
-        NSNF = 1 + ITASK*NSN / NTHREAD
-        NSNL = (ITASK+1)*NSN / NTHREAD
-        DO I=NSNF,NSNL
-            IF(IIX(I)/=0)THEN
-              VOXEL(IIX(I),IIY(I),IIZ(I))=0
-            ENDIF
-        ENDDO
-        NSNF = 1 + ITASK*REMOTE_S_NODE / NTHREAD
-        NSNL = (ITASK+1)*REMOTE_S_NODE / NTHREAD
-        IF(ITASK+1==NTHREAD) NSNL=REMOTE_S_NODE
-        DO JJ = NSNF, NSNL
-            J = LIST_REMOTE_S_NODE(JJ)
-            VOXEL(IIX(NSN+J),IIY(NSN+J),IIZ(NSN+J))=0
-        ENDDO
+!$OMP SINGLE
+       VOXEL = 0
+!$OMP END SI NGLE
+C       NSNF = 1 + ITASK*NSN / NTHREAD
+C       NSNL = (ITASK+1)*NSN / NTHREAD
+C       VOXEL = ZERO
+C       DO I=NSNF,NSNL
+C           IF(IIX(I)/=0)THEN
+C             VOXEL(IIX(I),IIY(I),IIZ(I))=0
+C           ENDIF
+C       ENDDO
+C       NSNF = 1 + ITASK*REMOTE_S_NODE / NTHREAD
+C       NSNL = (ITASK+1)*REMOTE_S_NODE / NTHREAD
+C       IF(ITASK+1==NTHREAD) NSNL=REMOTE_S_NODE
+C       DO JJ = NSNF, NSNL
+C           J = LIST_REMOTE_S_NODE(JJ)
+C           VOXEL(IIX(NSN+J),IIY(NSN+J),IIZ(NSN+J))=0
+C       ENDDO
       ENDIF
       CALL MY_BARRIER()
 
+      write(6,*) "ISTOK=",II_STOK
 C=======================================================================
 C 6   DEBUG OUTPUT
 C=======================================================================
 
-      DBG_type18_fvm=.false.
-      if(inacti==7 .AND. DBG_type18_fvm)then
-        write(*,FMT='(A)')"------------------------------------------"
-        write(*,*)"RESULT : Search Algorithm with VOXEL partitioning"
-        write(*,*)"  Number of couples =", II_STOK
-        if(II_STOK>0)then
-          write(*,FMT='(A,(I10))')"  --> SECONDARY Node ids: ", CAND_N(1:II_STOK)
-          write(*,FMT='(A,(I10))')"  --> Local Face ids: ", CAND_E(1:II_STOK)
-        endif
-        write(*,*)" Structure domain :"
-        write(*,FMT='(A,F30.16,A,F30.16)')" Xmin=",XMIN,"  Xmax=",XMAX
-        write(*,FMT='(A,F30.16,A,F30.16)')" Ymin=",YMIN,"  Ymax=",YMAX
-        write(*,FMT='(A,F30.16,A,F30.16)')" Zmin=",ZMIN,"  Zmax=",ZMAX
-        write(*,*)" Partitioning domain :"
-        write(*,*)"   TZINF,AAA=",TZINF,AAA
-        write(*,FMT='(A,F30.16,A,F30.16)')" Xmin=",XMIN-AAA,"  Xmax=",XMAX+AAA
-        write(*,FMT='(A,F30.16,A,F30.16)')" Ymin=",YMIN-AAA,"  Ymax=",YMAX+AAA
-        write(*,FMT='(A,F30.16,A,F30.16)')" Zmin=",ZMIN-AAA,"  Zmax=",ZMAX+AAA
-        write(*,FMT='(A)')"------------------------------------------"
-      endif
+C     DBG_type18_fvm=.false.
+C     if(inacti==7 .AND. DBG_type18_fvm)then
+C       write(*,FMT='(A)')"------------------------------------------"
+C       write(*,*)"RESULT : Search Algorithm with VOXEL partitioning"
+C       write(*,*)"  Number of couples =", II_STOK
+C       if(II_STOK>0)then
+C         write(*,FMT='(A,(I10))')"  --> SECONDARY Node ids: ", CAND_N(1:II_STOK)
+C         write(*,FMT='(A,(I10))')"  --> Local Face ids: ", CAND_E(1:II_STOK)
+C       endif
+C       write(*,*)" Structure domain :"
+C       write(*,FMT='(A,F30.16,A,F30.16)')" Xmin=",XMIN,"  Xmax=",XMAX
+C       write(*,FMT='(A,F30.16,A,F30.16)')" Ymin=",YMIN,"  Ymax=",YMAX
+C       write(*,FMT='(A,F30.16,A,F30.16)')" Zmin=",ZMIN,"  Zmax=",ZMAX
+C       write(*,*)" Partitioning domain :"
+C       write(*,*)"   TZINF,AAA=",TZINF,AAA
+C       write(*,FMT='(A,F30.16,A,F30.16)')" Xmin=",XMIN-AAA,"  Xmax=",XMAX+AAA
+C       write(*,FMT='(A,F30.16,A,F30.16)')" Ymin=",YMIN-AAA,"  Ymax=",YMAX+AAA
+C       write(*,FMT='(A,F30.16,A,F30.16)')" Zmin=",ZMIN-AAA,"  Zmax=",ZMAX+AAA
+C       write(*,FMT='(A)')"------------------------------------------"
+C     endif
 
 C=======================================================================
 C 7   DEALLOCATE
 C=======================================================================
       IF(ITASK == 0)THEN
         DEALLOCATE(NEXT_NOD)
-        DEALLOCATE(IIX)
-        DEALLOCATE(IIY)
-        DEALLOCATE(IIZ)
       ENDIF
+      DEALLOCATE(LAST_NOD)
       IF(FLAGREMNODE == 2) THEN
         IF(ALLOCATED(TAGREMNODE)) DEALLOCATE(TAGREMNODE)
       ENDIF
 
 
       RETURN
-      END
+      END SUBROUTINE
 
 
 

@@ -480,8 +480,7 @@ C N=5  : Restart files not found
 C N=6  : Abort with system Error (return code=3)
 C N=7  : Exiting only - errors before MPP_INIT or after MPI_FINALIZE
 C ----------------------------------------------
-
-
+c        call sleep(3600)
 C ----------------------------------------------
 C TEMPO FILES Clean
 C-----------------------------------------------

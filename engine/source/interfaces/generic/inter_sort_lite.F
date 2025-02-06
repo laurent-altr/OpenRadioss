@@ -148,6 +148,7 @@ C-----------------------------------------------
                   ESHIFT = ITASK*NRTM_T
                   IF(ITASK==NTHREAD-1)NRTM_T=IPARI(4,N)-(NTHREAD-1)*NRTM_T
                 ENDIF
+                write(6,*) "SORTING INTERFACE ",N
                 CALL INTER_SORT_07_LITE( TIMERS,IPARI,X,N,ITASK,ISENDTO,
      1                              IRECVFROM,RETRI,ITAB,NRTM_T,RENUM,RENUM_SIZ,
      2                              NSNFIOLD,ESHIFT,MULTI_FVM,INTBUF_TAB(N),H3D_DATA,

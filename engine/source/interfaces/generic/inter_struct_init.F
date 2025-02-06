@@ -38,10 +38,9 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
-        USE INTBUFDEF_MOD  
         USE INTER_STRUCT_MOD
         USE INTER_SORTING_MOD
-        USE intbufdef_mod
+        USE INTBUFDEF_MOD
         USE INTER_SHM_MOD
         USE SPMD_MOD
 C-----------------------------------------------
@@ -111,7 +110,7 @@ C           INTER_STRUCT(KK)%WIN%NSNS(ISPMD+1) = NSN_OWNED
             IREM_SIZE = 1
 
             IF(NSN+NRTM+NMN > 0) THEN
-              call inter_window_open(INTER_STRUCT(KK)%WIN, NSN_OWNED, IREM_SIZE, XREM_SIZE, INTBUF_TAB(KK)%MPI_COMM)
+              call inter_window_open(INTER_STRUCT(KK)%WIN, NSN_OWNED, INTBUF_TAB(KK), ispmd,nspmd, ipari(:,KK), npari)
             ENDIF
 
        ENDDO

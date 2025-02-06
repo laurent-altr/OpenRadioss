@@ -225,6 +225,88 @@ C
       RETURN
       END
 
+      SUBROUTINE SPMD_RNUMCD_LITE(WIN,
+     1   CAND_N  ,RENUM  ,II_STOK,NIN,NSN,
+     2   NSNFIOLD,NSNROLD)
+C-----------------------------------------------
+C   M o d u l e s
+C-----------------------------------------------
+      use ISO_C_BINDING
+      USE inter_shm_mod 
+      USE TRI7BOX
+C-----------------------------------------------
+C   I m p l i c i t   T y p e s
+C-----------------------------------------------
+#include      "implicit_f.inc"
+C-----------------------------------------------
+C   C o m m o n   B l o c k s
+C-----------------------------------------------
+#include      "com01_c.inc"
+C-----------------------------------------------
+C   D u m m y   A r g u m e n t s
+C-----------------------------------------------
+      type(inter_win_), intent(in) :: WIN
+      INTEGER CAND_N(*), NSNFIOLD(*), RENUM(*),
+     .        NIN, NSN, NSNROLD,II_STOK
+C-----------------------------------------------
+C   L o c a l  V a r i a b l e s
+C-----------------------------------------------
+      INTEGER I, J, P, I_STOK, IDEB, JDEB, NI
+      integer(kind=8), dimension(:,:), pointer :: shared_int
+C-----------------------------------------------
+C   S o u r c e  L i n e s
+C-----------------------------------------------
+      integer :: size_shared_data
+      integer :: i_offset
+C-----------------------------------------------
+      size_shared_data = (WIN%RSIZ + WIN%ISIZ)!
+      call c_f_pointer(win%shared_base, shared_int,[ size_shared_data, win%nsn_global ] )
+      i_offset = win%i_offset
+
+      DO I = 1, NSNROLD
+        RENUM(I) = 0
+      END DO
+      I_STOK = II_STOK
+      IDEB = 0
+      JDEB = 0
+      DO P = 1, NSPMD
+        I = 1
+        J = 1
+        DO WHILE (J<=NSNFI(NIN)%P(P).AND.I<=NSNFIOLD(P))
+          IF(shared_int(i_offset,J+JDEB)==
+     +       NSVFI(NIN)%P(I+IDEB)) THEN
+            RENUM(I+IDEB) = J+JDEB
+            I = I + 1
+            J = J + 1
+          ELSEIF(shared_int(i_offset,J+JDEB)<
+     +           NSVFI(NIN)%P(I+IDEB)) THEN
+            J = J + 1
+          ELSEIF(shared_int(i_offset,J+JDEB)>
+     +           NSVFI(NIN)%P(I+IDEB)) THEN
+Cas candidat non penetre et non retenu
+            I = I + 1
+          END IF
+        END DO
+        JDEB = JDEB + NSNFI(NIN)%P(P)  
+        IDEB = IDEB + NSNFIOLD(P)
+      END DO
+C
+C renumerotation des anciens candidats suivant les nouveaux no
+C
+      DO I = 1, I_STOK
+        NI = CAND_N(I)
+        IF(NI>NSN) THEN
+          NI = NI - NSN
+          CAND_N(I) = RENUM(NI) + NSN
+        END IF        
+        
+      END DO
+C
+      RETURN
+      END
+
+
+
 C
       !||====================================================================
       !||    spmd_rnumcd10   ../engine/source/mpi/interfaces/spmd_i7tool.F

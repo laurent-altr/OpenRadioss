@@ -34,7 +34,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
       !||    tri7box         ../engine/share/modules/tri7box.F
       !||====================================================================
        SUBROUTINE I7BUCE_VOX_LITE(
-     1   X        ,IRECT   ,NSV     ,INACTI   ,CAND_P  ,
+     1   WIN,X ,IRECT   ,NSV     ,INACTI   ,CAND_P  ,
      2   NMN      ,NRTM    ,NSN     ,CAND_E   ,CAND_N  ,
      3   GAP      ,NOINT   ,II_STOK ,NCONTACT ,BMINMA  ,
      4   TZINF    ,MAXBOX  ,MINBOX  ,MWAG     ,CURV_MAX,
@@ -49,6 +49,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 C============================================================================
 C   M o d u l e s
 C-----------------------------------------------
+      USE inter_shm_mod
       USE TRI7BOX
       USE MESSAGE_MOD
 C-----------------------------------------------
@@ -65,6 +66,8 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
+      TYPE(inter_win_), intent(inout) :: WIN
+      my_real :: X(3,*)
       INTEGER NMN,NSN, NOINT,IDT,INACTI,IFQ, NIN, NSNR, NSNROLD
       INTEGER, INTENT(in) :: NRTM !< number of segments per threads
       INTEGER, INTENT(in) :: TOTAL_NB_NRTM !< total number of segments
@@ -83,7 +86,7 @@ C     REAL
      .   GAPMIN, GAPMAX, BMINMA(12),CURV_MAX(NRTM),BGAPSMX
       my_real , INTENT(IN) :: DRAD,DGAPLOAD
       my_real
-     .   X(3,*), CAND_P(*), STFN(*),
+     .   CAND_P(*), STFN(*),
      .   STF(*), GAP_S(*), GAP_M(*), 
      .   GAP_S_L(*), GAP_M_L(*), CAND_F(*)
 C-----------------------------------------------
@@ -222,7 +225,7 @@ C (en // SMP il y a possibilite de redondance de traitement mais no pb)
       INIVOXEL = MAX(INIVOXEL,(NBX+2)*(NBY+2)*(NBZ+2)+1)
        CALL I7TRIVOX_LITE(
      1   NSN     ,RENUM    ,NSNR     ,ISZNSNR  ,I_MEM   ,
-     2   IRECT   ,X        ,STF      ,STFN     ,XYZM    ,
+     2   IRECT   ,WIN  , X      ,STF      ,STFN     ,XYZM    ,
      3   NSV     ,II_STOK  ,CAND_N   ,ESHIFT   ,CAND_E  ,
      4   NCONTACT,NOINT    ,TZINF    ,GAP_S_L  ,GAP_M_L ,
      5   VOXEL1  ,NBX      ,NBY      ,NBZ      ,INTTH   ,
