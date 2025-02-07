@@ -111,8 +111,9 @@ C
               NODFI = 0
               LSKYFI= 0
               ALLOCATE(INDEX(WIN%nsn_global))
+              INDEX = -HUGE(0)
               ALLOCATE(NEEDED_NODE(WIN%nsn_global))
-                NEEDED_NODE = .FALSE.
+              NEEDED_NODE(1:WIN%nsn_global) = .FALSE.
 
               IF(RESULT==0) THEN
 C Reperage des candidats
@@ -121,6 +122,11 @@ C
                 DO I = 1, I_STOK
                   N = CAND_N(I)
                   NN = N-NSN
+c                 if(i == 46 .and. NSN == 139 .AND. NN > 0) THEN
+c                   write(700+ispmd,*) 'N=',N,'NN=',NN,NEEDED_NODE(NN)
+c                   write(700+ispmd,*) "On processor=",SHARED_INT(ispmd_offset,NN),ispmd,SHARED_INT(itab_offset,NN)
+c                 ENDIF
+
                   IF(NN>0)THEN
                     IF(.NOT. NEEDED_NODE(NN)) THEN
                       NODFI = NODFI + 1
@@ -223,24 +229,27 @@ C               ENDIF
 C Compactage des candidats
                 NN2 = 0
                 DO P = 1, NSPMD ! PP = proceesses that owns a part of the interface
+                  write(700+ispmd,*) P,"size",win%nsns_in_world(P),"starting",win%starting_node_of_proc(P)
+                  write(700+ispmd,*) "P == ispmd + 1",P==ispmd+1
                   if(P == ispmd + 1) CYCLE
                   IDEB = win%starting_node_of_proc(P)
-                  if(IDEB > 0)  THEN ! skip rank that is not in the interface
+                  write(700+ispmd,*) "win%starting_node_of_proc(",P,")=",IDEB
+                  if(IDEB >= 0)  THEN ! skip rank that is not in the interface
                     NN = 0
                     nb_remote =  win%nsns_in_world(P) 
+                    write(700+ispmd,*) "win%nsns_in_world(",P,")=",nb_remote
                     IF(nb_remote > 0) THEN
                       ALLOCATE(IAUX(nb_remote))
                       NNP = NN2
                       ! points to the first node of the shared data (2D)
+                      write(700+ispmd,*) P,"remote chunk",1+IDEB, nb_remote+IDEB
                       DO I = 1, nb_remote
-                        if(i + IDEB > win%nsn_global) write(6,*) __LINE__,'ERROR',I+IDEB,win%nsn_global
-                        call flush(6)
                         IF(NEEDED_NODE(I+IDEB)) THEN
                           NN = NN + 1
                           IAUX(NN) = I+IDEB
                         ENDIF
                       ENDDO
-
+        ! CAND_N(46) = 193 > nsn = 139 ; index(193-139) = undefined
                       DO J = 1, NN
                         I = IAUX(J)
                         INDEX(I) = NN2+J
@@ -415,12 +424,15 @@ C
               DO I = 1, I_STOK
                 N = CAND_N(I)
                 NN = N-NSN
-                IF(NN>0)THEN
+                IF(NN>0)THEN      
+c                 IF(INDEX(NN) < 0) write(ispmd+700,*) "wrong index=",i,N,NSN,INDEX(NN)
                   CAND_N(I) = INDEX(NN)+NSN
                 ENDIF
+c               IF(CAND_N(I) < 0) write(ispmd+700,*) __FILE__,__LINE__,"ERROR"
               ENDDO
-              DEALLOCATE(INDEX)
-              DEALLOCATE(NEEDED_NODE)
+c             call flush(ispmd+700)
+              if(allocated(index)) DEALLOCATE(INDEX)
+              if(allocated(needed_node)) DEALLOCATE(NEEDED_NODE)
 C
 #endif
               RETURN

@@ -89,6 +89,7 @@ C-----------------------------------------------
       FIRST = 1 + I_STOK*ITASK / NTHREAD
       LAST = I_STOK*(ITASK+1) / NTHREAD
       JS = FIRST-1
+C     write(700+ispmd,*) 'I7OPTCD: FIRST, LAST, MSEG, JS = ',FIRST, LAST, MSEG, JS
       DO SG = FIRST,LAST,MSEG
        NSEG = MIN(MSEG,LAST-JS)
        NLS=0
@@ -101,6 +102,15 @@ C
          NLS2 = NSEG+1
          DO IS = 1, NSEG
            I=JS+IS
+c         if(I > I_STOK .OR. I < 1) then
+c          write(700+ispmd,*) 'I7OPTCD: IS, I=',IS+JS,I_STOK
+c          call flush(700+ispmd)
+c         endif
+           if(CAND_N(I) < 0) THEN
+             write(700+ispmd,*) __LINE__,'I7OPTCD: CAND_N(I) < 0',CAND_N(I),I
+              call flush(700+ispmd)
+              call arret(2)
+           endif
            IF(CAND_N(I)<=NSN)THEN
              NLS=NLS+1
              LISTI(NLS)=IS
@@ -204,6 +214,15 @@ C   conserver LISTI et LIST pour optimiser le code genere (IA64)
           IS = LISTI(LS)
           I=JS+IS
           L  = CAND_E(I)
+          
+          if(I > I_STOK .OR. I < 1) then
+           write(700+ispmd,*) 'I7OPTCD: IS, I=',IS+JS,I_STOK
+           call flush(700+ispmd)
+          endif
+          if(CAND_N(I) > NSN .OR. CAND_N(I)< 1) then
+           write(700+ispmd,*) 'I7OPTCD: CAND_N(I), NSN=',CAND_N(I),NSN
+           call flush(700+ispmd)
+          endif
           IF(STF(L)/=ZERO.AND.STFN(CAND_N(I))/=ZERO) THEN 
            IG(IS) = NSV(CAND_N(I))
            GAPF = MAX(GAPV(IS)+DGAPLOAD,DRAD) 
