@@ -106,11 +106,11 @@ C           INTER_STRUCT(KK)%WIN%NSNS(ISPMD+1) = NSN_OWNED
                 ENDIF
             ENDDO
 
-            XREM_SIZE = 1 ! size of XREM + size of IREM 
-            IREM_SIZE = 1
-
             IF(NSN+NRTM+NMN > 0) THEN
               call inter_window_open(INTER_STRUCT(KK)%WIN, NSN_OWNED, INTBUF_TAB(KK), ispmd,nspmd, ipari(:,KK), npari)
+            ELSE
+
+              call nullify_inter_win(INTER_STRUCT(KK)%WIN)
             ENDIF
 
        ENDDO

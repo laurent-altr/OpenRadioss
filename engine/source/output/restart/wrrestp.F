@@ -1076,7 +1076,7 @@ C--------------------------------------
 C--------------------------------------
 C     ECRITURE DES VARIABLES REELLES
 C--------------------------------------
-      CALL WRITE_DB(TABVREA, LVARREA)
+         CALL WRITE_DB(TABVREA, LVARREA)
 C--------------------------------------
 C     ECRITURE DES REELS
 C--------------------------------------

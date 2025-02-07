@@ -1322,8 +1322,8 @@ C
       ! ------------------------
       ! explicit part
       IF(IMPL_S/=1)THEN
-        CALL INTER_DEALLOCATE_WAIT( ITASK,NB_INTER_SORTED,LIST_INTER_SORTED,IPARI,
-     1       NSENSOR,IRECVFROM,SENSORS%SENSOR_TAB,INTER_STRUCT,SORT_COMM )
+c       CALL INTER_DEALLOCATE_WAIT( ITASK,NB_INTER_SORTED,LIST_INTER_SORTED,IPARI,
+c    1       NSENSOR,IRECVFROM,SENSORS%SENSOR_TAB,INTER_STRUCT,SORT_COMM )
       ENDIF
       ! end : new sorting algorithm 
       ! ------------------------------
