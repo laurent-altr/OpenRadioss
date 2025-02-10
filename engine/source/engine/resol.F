@@ -1315,10 +1315,6 @@ c
       BOOL_RESTART = .TRUE.
       STATE_H3D = 0 
       STATE_ANIM = 0
-      IF(IPARIT==0.AND.IRESP==1) THEN
-        ALLOCATE( ACC_DP(3,NUMNOD) )
-        ACC_DP(1:3,1:NUMNOD) = 0.d+00
-      ENDIF
       ALLOCATE(INT18ADD(NINTER+1))
       INT18ADD(1) = 1
       INT18ADD(NINTER+1) = 0
@@ -5110,7 +5106,7 @@ C
           IF(IDTMINS /= 0)THEN
 
             CALL SPMD_EXCH_A_AMS_POFF(
-     1       NODES%A       ,NODES%AR     ,NODES%STIFN,NODES%STIFR ,NODES%MS   ,
+     1       NODES%A       ,NODES%AR     ,NODES%STIFN, NODES%STIFR ,NODES%MS   ,
      2       IAD_ELEM,FR_ELEM,MSNF ,ALE%SUB%IFSUBM,LENGTH ,
      3       LENR    ,FTHE , NODES%MCP,FR_LOC,NB_FR   ,
      4       MS_2D ,MCP_OFF,FORNEQS ,NFACNIT    ,
@@ -5118,7 +5114,7 @@ C
      6       FANI(1,NFTCA+1) ,GLOB_THERM)
           ELSE 
             CALL SPMD_EXCH_A(
-     1       NODES%A       ,NODES%AR     ,NODES%STIFN,NODES%STIFR ,NODES%MS   ,
+     1       NODES%A , NODES%ACC_DP      ,NODES%AR     ,NODES%STIFN,NODES%STIFR ,NODES%MS   ,
      2       IAD_ELEM,FR_ELEM,MSNF ,ALE%SUB%IFSUBM,LENGTH ,
      3       LENR    ,FTHE , NODES%MCP, DMSPH,CONDN, 
      4       MS_2D,MCP_OFF,
@@ -9908,10 +9904,6 @@ C
           CALL DEALLOCM_IMP(MUMPS_PAR)
 #endif
         END IF
-        IF(IPARIT==0.AND.IRESP==1) THEN
-        DEALLOCATE( ACC_DP )
-        ENDIF
-
         IF(IMON>0) THEN
           IF(NVOLU > 0)  CALL FVSTATS(MONVOL)
           CALL STOPTIME(TIMERS,TIMER_RESOL)

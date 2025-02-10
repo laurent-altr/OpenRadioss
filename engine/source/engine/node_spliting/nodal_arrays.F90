@@ -100,6 +100,7 @@
             ! 3*NUMNOD if IRESP == 1, else 3
             double precision, dimension(:,:), allocatable :: DDP !< double precision D 
             double precision, dimension(:,:), allocatable :: XDP !< double precision X  
+            double precision, dimension(:,:), allocatable :: ACC_DP !< double precision acceleration
         end type nodal_arrays_
  ! faire la rupture vers checkstfn
 !       type animation_buffers
@@ -218,6 +219,9 @@
 #ifdef MYREAL4
             call my_alloc(arrays%DDP,3,numnod)
             call my_alloc(arrays%XDP,3,numnod)
+            if(iparith==0) then
+              call my_allocate(arrays%ACC_DP,3,numnod) 
+            endif
 #else
             call my_alloc(arrays%DDP,3,1)
             call my_alloc(arrays%XDP,3,1)
@@ -346,6 +350,9 @@
 #ifdef MYREAL4
               call extend_array(arrays%DDP,3, size(arrays%DDP,2), 3,arrays%max_numnod)
               call extend_array(arrays%XDP,3, size(arrays%XDP,2), 3,arrays%max_numnod)
+              if(iparith==0) then
+                call my_allocate(arrays%ACC_DP,3,numnod) 
+              endif
 #endif
               call extend_array(arrays%WEIGHT, size(arrays%WEIGHT), arrays%max_numnod)
               call extend_array(arrays%WEIGHT_MD, size(arrays%WEIGHT_MD), arrays%max_numnod)
