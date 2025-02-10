@@ -219,6 +219,8 @@ C-----------------------------------------------
         ZMAXB = ZMAX
       ENDIF
 
+!     write(6,*) "ISZNSNR=",ISZNSNR
+
       ! En SPMD, pour inacti ou IFQ, retrouve ancienne numerotation des candidats non locaux
       IF(NSPMD>1.AND.(INACTI==5.OR.INACTI==6.OR.INACTI==7.OR.IFQ>0.OR.ITIED/=0)) THEN
         CALL SPMD_OLDNUMCD(RENUM,OLDNUM,ISZNSNR,NSNROLD,INTHEAT,IDT_THERM,NODADT_THERM)

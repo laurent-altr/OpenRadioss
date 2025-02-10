@@ -151,6 +151,7 @@ C
       ELSE
         ISZNSNR = 0
       END IF
+c     write(6,*) __FILE__,"ISZNSNR=",ISZNSNR
 C
 C-----DEBUT DE LA PHASE DE TRI 
 C

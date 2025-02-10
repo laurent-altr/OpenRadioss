@@ -35,6 +35,8 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
       !||====================================================================
       SUBROUTINE SPMD_OLDNUMCD(RENUM,OLDNUM,NSNR,NSNROLD,
      .           INTHEAT,IDT_THERM,NODADT_THERM) 
+CALL SPMD_OLDNUMCD(RENUM,OLDNUM,ISZNSNR,NSNROLD,INTHEAT,IDT_THERM,NODADT_THERM)
+
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
@@ -264,7 +266,7 @@ C-----------------------------------------------
       i_offset = win%i_offset
 
       DO I = 1, NSNROLD
-        RENUM(I) = 0
+        RENUM(I) = -HUGE(I)
       END DO
       I_STOK = II_STOK
       IDEB = 0
@@ -272,12 +274,14 @@ C-----------------------------------------------
       DO P = 1, NSPMD
         I = 1
         J = 1
+!       write(6,* ) P,"NSN NEW / OLD:",NSNFI(NIN)%P(P), NSNFIOLD(P)
         DO WHILE (J<=NSNFI(NIN)%P(P).AND.I<=NSNFIOLD(P))
           IF(shared_int(i_offset,J+JDEB)==
      +       NSVFI(NIN)%P(I+IDEB)) THEN
             RENUM(I+IDEB) = J+JDEB
             I = I + 1
             J = J + 1
+!           write(6,* ) "RNUM(",I+IDEB,")=",J+JDEB,NSNROLD
           ELSEIF(shared_int(i_offset,J+JDEB)<
      +           NSVFI(NIN)%P(I+IDEB)) THEN
             J = J + 1
@@ -287,7 +291,9 @@ Cas candidat non penetre et non retenu
             I = I + 1
           END IF
         END DO
-        JDEB = JDEB + NSNFI(NIN)%P(P)  
+        !JDEB = JDEB + NSNFI(NIN)%P(P)  
+        JDEB = JDEB + win%nsns_in_world(P)
+!       write(6,* ) __FILE__,P,NSNFI(NIN)%P(P),win%nsns_in_world(P)
         IDEB = IDEB + NSNFIOLD(P)
       END DO
 C

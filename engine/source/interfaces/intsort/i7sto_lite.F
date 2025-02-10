@@ -101,13 +101,14 @@ C SUPPRESSION DES ANCIENS CANDIDATS DEJE STOCKES (PENE INITIALE)
 C-----------------------------------------------
        IF(INACTI==5.OR.INACTI==6.OR.INACTI==7.OR.IFQ>0.OR.
      .    ITIED/=0)THEN
-             write(6,*) __FILE__,__LINE__,'I7STO_LITE'
             DO I=1,J_STOK
               IF(PENE(I)/=ZERO)THEN
                 N  = PROV_N(I)
                 NE = PROV_E(I)+ESHIFT
                 IF(N>NSN) THEN
 C numerotation tris precedent pour les noeuds non locaux (SPMD)
+!                 write(6,*) "OLDNUM(",N,NSN,")=",OLDNUM(N-NSN)
+                  call flush(6)
                   N = OLDNUM(N-NSN)+NSN
                   IF(N==NSN) N = NSN+NSNROLD+1
                 END IF

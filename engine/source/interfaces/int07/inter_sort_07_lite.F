@@ -198,7 +198,7 @@ C -------------------------------------------------------------
 
         I_SK_OLD = INTER_STRUCT(NIN)%I_SK_OLD
 !$OMP SINGLE
-        NSNR = 0
+        NSNR = inter_struct(nin)%win%nsn_global
         CURV_MAX_MAX = INTER_STRUCT(NIN)%CURV_MAX_MAX
         RESULT = 0
         NMN_G = INTER_STRUCT(NIN)%NMN_G

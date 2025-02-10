@@ -120,11 +120,11 @@ C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
         LOGICAL :: TYPE18
         INTEGER :: KK,N
-        INTEGER :: INACTI,NTY
+        INTEGER :: INACTI,NTY, ITIED, IFQ
         INTEGER :: NB_REQUEST_COARSE_CELL   ! number of request for coarse cell comm
         INTEGER, DIMENSION(NB_INTER_SORTED) :: ARRAY_REQUEST_COARSE_CELL ! array of request
         INTEGER, DIMENSION(NB_INTER_SORTED) :: LIST_INTER_COARSE_CELL ! list of interface
-        integer :: nsn, nsnr, nrtm, nmn
+        integer :: nsn, nsnr, nrtm, nmn,P
         integer :: DUMMY(1)
 !   ----------------------------------------
         nsn = 0
@@ -211,15 +211,15 @@ c       ENDIF
 c       ! -----------------------------
 
 
-c       IF(NEED_TO_SORT>0)THEN
-c         IF(NSPMD > 1 .AND. ITASK == 0) THEN
+        IF(NEED_TO_SORT>0)THEN
+          IF(NSPMD > 1 .AND. ITASK == 0) THEN
         ! -----------------------------
         ! exchange of coarse_grid : waiting part + check if 2 processors need to communicate
 c          CALL SPMD_COARSE_CELL_EXCHANGE(NB_INTER_SORTED,LIST_INTER_SORTED,IRECVFROM,ISENDTO,2,
 c    .                       IPARI,SORT_COMM,NB_REQUEST_COARSE_CELL,ARRAY_REQUEST_COARSE_CELL,LIST_INTER_COARSE_CELL)
         !
-c         DO KK=1,NB_INTER_SORTED
-c           N = LIST_INTER_SORTED(KK)
+          DO KK=1,NB_INTER_SORTED
+            N = LIST_INTER_SORTED(KK)
 c           ! -----------------------------
 c           ! exchange of number of colored cells (fine grid)
 c                   CALL SPMD_CELL_LIST_EXCHANGE(IRECVFROM,ISENDTO,1,WEIGHT,IAD_ELEM,
@@ -231,7 +231,7 @@ c               if(GOT_PREVIEW == 1) THEN
 c               nrtm = IPARI(4,N)
 c               nsn = IPARI(5,N)
 c               nsnr = IPARI(24,N)
-c               nmn = IPARI(6,N)
+c               nmn = IPARI(6,N
 c               call compute_voxel_dimensions(nmn, nrtm, inter_struct(N))
 c               endif
 
@@ -249,6 +249,9 @@ c               if(GOT_PREVIEW == 1) THEN
 c                 CALL FILL_VOXEL_LOCAL_PARTIAL(nsn,intbuf_tab(n)%nsv,nsnr,nrtm,numnod,x,intbuf_tab(N)%stfns,INTER_STRUCT(N),
 c    .                     sort_comm(n)%request_cell_rcv, sort_comm(n)%NB_REQUEST_CELL_RCV)
 c               endif
+
+    
+
 
             
             ! -----------------------------
@@ -272,9 +275,9 @@ c                  call compute_voxel_dimensions(nmn, nrtm, inter_struct(N))
 c                  CALL FILL_VOXEL_LOCAL_PARTIAL(nsn,intbuf_tab(n)%nsv,nsnr,nrtm,numnod,x,
 c    .                                           intbuf_tab(N)%stfns,INTER_STRUCT(N),DUMMY,0) 
 c                ENDIF
-c             ENDDO
-c           ENDIF
-c           ENDIF
+              ENDDO
+            ENDIF
+            ENDIF
 
 
             ! -----------------------------

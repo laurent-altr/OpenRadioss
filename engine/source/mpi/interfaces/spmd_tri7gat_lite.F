@@ -229,20 +229,20 @@ C               ENDIF
 C Compactage des candidats
                 NN2 = 0
                 DO P = 1, NSPMD ! PP = proceesses that owns a part of the interface
-                  write(700+ispmd,*) P,"size",win%nsns_in_world(P),"starting",win%starting_node_of_proc(P)
-                  write(700+ispmd,*) "P == ispmd + 1",P==ispmd+1
+c                 write(700+ispmd,*) P,"size",win%nsns_in_world(P),"starting",win%starting_node_of_proc(P)
+c                 write(700+ispmd,*) "P == ispmd + 1",P==ispmd+1
                   if(P == ispmd + 1) CYCLE
                   IDEB = win%starting_node_of_proc(P)
-                  write(700+ispmd,*) "win%starting_node_of_proc(",P,")=",IDEB
+c                 write(700+ispmd,*) "win%starting_node_of_proc(",P,")=",IDEB
                   if(IDEB >= 0)  THEN ! skip rank that is not in the interface
                     NN = 0
                     nb_remote =  win%nsns_in_world(P) 
-                    write(700+ispmd,*) "win%nsns_in_world(",P,")=",nb_remote
+                    !write(700+ispmd,*) "win%nsns_in_world(",P,")=",nb_remote
                     IF(nb_remote > 0) THEN
                       ALLOCATE(IAUX(nb_remote))
                       NNP = NN2
                       ! points to the first node of the shared data (2D)
-                      write(700+ispmd,*) P,"remote chunk",1+IDEB, nb_remote+IDEB
+                      !write(700+ispmd,*) P,"remote chunk",1+IDEB, nb_remote+IDEB
                       DO I = 1, nb_remote
                         IF(NEEDED_NODE(I+IDEB)) THEN
                           NN = NN + 1
@@ -253,11 +253,11 @@ C Compactage des candidats
                       DO J = 1, NN
                         I = IAUX(J)
                         INDEX(I) = NN2+J
-                        if(i <= 0) write(6,*) 'ERROR', I
-                        if(I > win%nsn_global) write(6,*) 'ERROR', I, win%nsn_global
-                        call flush(6)
-                        if(NN2+J > NODFI) write(6,*) 'ERROR',J,NN             
-                        call flush(6)
+                       ! if(i <= 0) write(6,*) 'ERROR', I
+                       ! if(I > win%nsn_global) write(6,*) 'ERROR', I, win%nsn_global
+                       ! call flush(6)
+                       ! if(NN2+J > NODFI) write(6,*) 'ERROR',J,NN             
+                       ! call flush(6)
                         XFI(NIN)%P(1,NN2+J) = SHARED_REAL(x_offset,I)
                         XFI(NIN)%P(2,NN2+J) = SHARED_REAL(x_offset+1,I)
                         XFI(NIN)%P(3,NN2+J) = SHARED_REAL(x_offset+2,I)
