@@ -69,7 +69,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
       !||====================================================================
       SUBROUTINE RESOL_HEAD( ELEMENT, NODES,
      .           ITASK       ,AF          ,IAF            ,IDATA      ,RDATA,
-     .           GRAPHE      ,IFLOW       ,RFLOW          ,MCP        ,TEMP            ,
+     .           GRAPHE      ,IFLOW       ,RFLOW          ,
      .           STACK       ,IRUNN_BIS   , TIMERS,
      .           MULTI_FVM   ,H3D_DATA    ,SUBSETS    ,IGRNOD          ,
      .           IGRBRIC     ,IGRQUAD     ,IGRSH4N        ,IGRSH3N    ,IGRTRUSS        ,
@@ -149,7 +149,7 @@ C
       INTEGER ITASK,IAF(*),IDATA(*),IRUNN_BIS
 C     REAL
       my_real
-     .   AF(*),RDATA(*),MCP(NUMNOD),TEMP(NUMNOD) ,
+     .   AF(*),RDATA(*),                          
      .   FORNEQS(*)
       TYPE(PRGRAPH) :: GRAPHE(*)
       TYPE (STACK_PLY) :: STACK
@@ -258,7 +258,7 @@ C
      j  LLAGF           ,LPRW           ,ICONTACT       ,RCONTACT       ,SH4TREE        ,SH3TREE     ,
      k  IPADMESH        ,PADMESH        ,MSC            ,MSTG           ,INC            ,INTG        ,PTG              ,
      l  ISKWP           ,NSKWP          ,ISENSP         ,NSENSP         ,IACCP          ,NACCP       ,IPART_STATE      ,
-     m  ACONTACT        ,PCONTACT       ,FACTIV         ,MCP            ,TEMP,
+     m  ACONTACT        ,PCONTACT       ,FACTIV         ,
      p  SH4TRIM         ,SH3TRIM        ,MSCND          ,INCND          ,
      q  IBFFLUX         ,FBFFLUX        ,RBYM           ,IRBYM          ,LNRBYM         ,ICODRBYM,
      r  IBCV            ,FCONV          ,IBFTEMP        ,FBFTEMP        ,IAD_RBYM       ,FR_RBYM,

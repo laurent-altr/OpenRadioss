@@ -559,7 +559,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
      j  LLAGF   ,LPRW    ,ICONTACT,RCONTACT,SH4TREE ,SH3TREE ,
      k  IPADMESH,PADMESH ,MSC     ,MSTG    ,INC     ,INTG    ,PTG     ,
      l  ISKWP   ,NSKWP   ,ISENSP  ,NSENSP  ,IACCP   ,NACCP,IPART_STATE,
-     m  ACONTACT,PCONTACT,FACTIV  ,MCP     ,TEMP
+     m  ACONTACT,PCONTACT,FACTIV  
      p                   ,SH4TRIM ,SH3TRIM ,MSCND   ,INCND   ,
      q  IBFFLUX ,FBFFLUX ,RBYM    ,IRBYM   ,LNRBYM  ,ICODRBYM,
      r  IBCV    ,FCONV   ,IBFTEMP ,FBFTEMP ,IAD_RBYM,FR_RBYM,
@@ -854,7 +854,7 @@ C-----------------------------------------------
       my_real
      .   RFLOW(*), RCONTACT(*),
      .   PADMESH(*), MSC(*), MSTG(*), INC(*) , INTG(*), PTG(3,*),
-     .   ACONTACT(*), PCONTACT(*), FACTIV(*), TEMP(*), MCP(*),
+     .   ACONTACT(*), PCONTACT(*), FACTIV(*), 
      .   MSCND(*), INCND(*), RBYM(*), FBFFLUX(*),
      .   FCONV(*), FBFTEMP(*), MS_PLY(*), ZI_PLY(*),  ADMSMS(*),
      .   MCPC(*), MCPTG(*), DMELC(*), DMELTG(*), MSSA(*), DMELS(*),
@@ -2193,7 +2193,7 @@ C
      c   LBUFIDEL ,SH4TRIM  ,SH3TRIM  ,MSCND    ,INCND    ,
      d   IRLEN20  ,ISLEN20  ,IRLEN20T ,ISLEN20T ,NBINT20  ,
      e   IRLEN20E ,ISLEN20E ,NISKYFIE ,
-     f   MCP      ,NODES%MS0      ,INOD_PXFEM,IEL_PXFEM,IADC_PXFEM,
+     f   NODES%MCP      ,NODES%MS0      ,INOD_PXFEM,IEL_PXFEM,IADC_PXFEM,
      g   ADSKY_PXFEM,NODES%ICODT  ,NODES%ICODR    ,IBFV     ,ADMSMS    ,
      h   NODREAC  ,IGROUC   ,NGROUC   ,IGROUNC  ,NGROUNC  ,
      i   FR_RBY   ,FR_RBY6  ,NPBY     ,
@@ -2329,7 +2329,7 @@ C     Multidomains + SPH
 
 C     THERMAL EXPANSION and IMPTEMP : Initialisation of nodal temperatures
       IF (GLOB_THERM%NFXTEMP  > 0 .AND. GLOB_THERM%ITHERM_FE > 0.AND.TT==ZERO) THEN
-        CALL FIXTEMP(IBFTEMP  ,FBFTEMP    ,TEMP    ,NPC    ,TF  ,
+        CALL FIXTEMP(IBFTEMP  ,FBFTEMP    ,NODES%TEMP    ,NPC    ,TF  ,
      .       NSENSOR  ,SENSORS%SENSOR_TAB,GLOB_THERM )
       ENDIF
 C ---------------------
@@ -2994,7 +2994,7 @@ C------ one routine for EIG
      G                   NODGLOB     , IAD_ELEM    , FR_ELEM  , FR_SEC    , FR_RBY2 ,
      H                   IAD_RBY2    , FR_WALL     ,  IPARI   ,
      I                   INTERFACES%INTBUF_TAB  , NODES%D           ,PARTSAV   ,
-     J                   FSAV(1,NFNCA+1),FSAV(1,NFTCA+1), TEMP      , THKE    ,
+     J                   FSAV(1,NFNCA+1),FSAV(1,NFTCA+1), NODES%TEMP      , THKE    ,
      K                   ERR_THK_SH4 , ERR_THK_SH3 , IRBE2    , RBE3%IRBE3     ,LRBE2    ,
      L                   RBE3%LRBE3       , RBE3%FRBE3    ,FR_RBE2  , RBE3%mpi%fr_rbe3  , IAD_RBE2,
      M                   NODES%WEIGHT_MD   , CLUSTER     , FCLUSTER , MCLUSTER  , XFEM_TAB,
@@ -3388,7 +3388,7 @@ C-------------------------------------------------------------------
         IF (NACTIV>0) THEN
             IF(GLOB_THERM%ITHERM_FE > 0 .AND. NSPMD > 1 ) THEN
               DO I = 1,NUMNOD
-                MCP(I)   = MCP(I)   * NODES%WEIGHT(I)
+                NODES%MCP(I)   = NODES%MCP(I)   * NODES%WEIGHT(I)
                 NODES%STIFN(I) = NODES%STIFN(I) * NODES%WEIGHT(I)
               ENDDO
             ENDIF
@@ -3396,13 +3396,13 @@ C-------------------------------------------------------------------
      .                   IXR     ,IXTG    ,IPARG   ,IACTIV  ,
      .                   NSENSOR ,SENSORS%SENSOR_TAB,ELEMENT%PON%FSKY    ,NODES%X       ,ELBUF_TAB,
      .                   IBCV    ,FCONV   ,IBCR    ,FRADIA  ,IGROUPS  ,
-     .                   FACTIV  ,TEMP     ,MCP     ,PM      ,MCP_OFF  ,
+     .                   FACTIV  ,NODES%TEMP     ,NODES%MCP     ,PM      ,MCP_OFF  ,
      .                   IGRBRIC ,IGRQUAD  ,IGRSH4N ,IGRSH3N ,IGRTRUSS ,
      .                   IGRBEAM ,IGRSPRING,GLOB_THERM)
         ELSE
             IF(GLOB_THERM%ITHERM_FE > 0 .AND. NSPMD > 1 .AND. IPARIT == 0) THEN
               DO I = 1,NUMNOD
-                MCP(I)   = MCP(I)   * NODES%WEIGHT(I)
+                NODES%MCP(I)   = NODES%MCP(I)   * NODES%WEIGHT(I)
               ENDDO
             ENDIF
         ENDIF
@@ -3527,7 +3527,7 @@ C----------------------------------------------
             IF (IMON>0) CALL STARTIME(TIMERS,TIMER_KIN)
             IF (IMONM > 0) CALL STARTIME(TIMERS,41)
               CALL CONVEC(IBCV  ,FCONV   ,NPC   ,TF   , NODES%X     ,
-     1                  TEMP    ,NSENSOR,SENSORS%SENSOR_TAB,FTHE, ELEMENT%PON%IAD_CONV,
+     1                  NODES%TEMP    ,NSENSOR,SENSORS%SENSOR_TAB,FTHE, ELEMENT%PON%IAD_CONV,
      2                  FTHESKY, PYTHON,GLOB_THERM)
             IF (IMONM > 0) CALL STOPTIME(TIMERS,41)
             IF (IMON>0) CALL STOPTIME(TIMERS,TIMER_KIN)
@@ -3539,7 +3539,7 @@ C-----------------------------------------------------------
             IF (IMON>0) CALL STARTIME(TIMERS,TIMER_KIN)
             IF (IMONM > 0) CALL STARTIME(TIMERS,41)
             CALL RADIATION(IBCR,   FRADIA, NPC,     TF,   NODES%X         ,
-     1                     TEMP,   NSENSOR,SENSORS%SENSOR_TAB, FTHE, ELEMENT%PON%IAD_RADIA,
+     1                     NODES%TEMP,   NSENSOR,SENSORS%SENSOR_TAB, FTHE, ELEMENT%PON%IAD_RADIA,
      2                     FTHESKY, PYTHON,GLOB_THERM)
             IF (IMONM > 0) CALL STOPTIME(TIMERS,41)
             IF (IMON>0) CALL STOPTIME(TIMERS,TIMER_KIN)
@@ -3621,7 +3621,7 @@ C----------------------------------------
      2       IMSCH  ,I2MSCH   ,DT2PREV ,INTLIST ,NBINTC  ,
      3       ISLEN7 ,IRLEN7   ,ISLEN11 ,IRLEN11 ,ISLEN17 ,
      4       IRLEN17 ,IXS     ,IXS(L3) ,NSENSOR ,
-     5       IGRBRIC ,TEMP    ,2       ,IRLEN7T ,ISLEN7T ,
+     5       IGRBRIC ,NODES%TEMP    ,2       ,IRLEN7T ,ISLEN7T ,
      6       IRLEN20 ,ISLEN20 ,IRLEN20T,ISLEN20T,IRLEN20E,
      7       ISLEN20E,NODES%IKINE   ,DIAG_SMS,SENSORS%SENSOR_TAB,INTERFACES%INTBUF_TAB ,INT24E2EUSE,
      8       FORNEQS ,MULTI_FVM,INTERFACES)
@@ -3716,7 +3716,7 @@ C===============================================================================
      5     NODES%ITAB      ,NELTSTT ,ITYPTSTT,NODES%WEIGHT    ,
      6     INTLIST ,NBINTC  ,KINET   ,DRETRI    ,
      7     ISLEN7  ,IRLEN7  ,ISLEN11 ,IRLEN11   ,
-     8     TEMP    ,IGRBRIC ,IGRSH3N ,EMINX     ,
+     8     NODES%TEMP    ,IGRBRIC ,IGRSH3N ,EMINX     ,
      9     IXS     ,IXS(L3) ,IXS(L2) ,ISLEN17   ,
      A     IRLEN17 ,IRLEN7T ,ISLEN7T ,NUM_IMP1  ,
      B     IND_IMP ,INTSTAMP,THKNOD  ,IRLEN20   ,
@@ -3860,7 +3860,7 @@ C===============================================================================
      .               IGEO ,IPM      ,SH4TREE,PADMESH,MSC  ,
      .               INC  ,SH3TREE  ,MSTG   ,INTG   ,PTG  ,
      .            ACONTACT,PCONTACT,ERR_THK_SH4,ERR_THK_SH3,MSCND,
-     .               INCND,PM      ,MCP     ,MCPC   ,MCPTG,
+     .               INCND,PM      ,NODES%MCP     ,MCPC   ,MCPTG,
      .            GLOB_THERM%ITHERM_FE)
         NGDONE = 1 
 C       /---------------/
@@ -3873,7 +3873,7 @@ C       /---------------/
      .                    ELBUF_TAB,NODFTSK  ,NODLTSK,IGEO     ,IPM  ,
      .                    SH4TREE,MSC  ,INC   ,SH3TREE,MSTG    ,
      .                    INTG   ,PTG  ,MSCND ,INCND  ,PM      ,
-     .                    MCP    ,MCPC ,MCPTG ,GLOB_THERM%ITHERM_FE)
+     .                    NODES%MCP    ,MCPC ,MCPTG ,GLOB_THERM%ITHERM_FE)
 C           /---------------/
             CALL MY_BARRIER
 C           /---------------/
@@ -3968,7 +3968,7 @@ C
      6          IPARG                 ,NPC      ,IXS           ,IXQ,   IXTG             ,ELEMENT%PON%IADS,
      7          IFILL                 ,NODPOR   ,NODES%ICODT   ,NODES%ISKEW       ,IMS ,ELEMENT%PON%IADQ     ,
      8          NELTSTT               ,ITYPTSTT ,IPART         ,IPART(K1)         ,IPART(K2)           ,ITSK    ,
-     A          NODFTSK               ,NODLTSK  ,NBRCVOIS      ,TEMP              ,OUTPUT%TH%TH_SURF%CHANNELS,
+     A          NODFTSK               ,NODLTSK  ,NBRCVOIS      ,NODES%TEMP              ,OUTPUT%TH%TH_SURF%CHANNELS,
      B          NBSDVOIS              ,LNRCVOIS ,LNSDVOIS      ,NERCVOIS          ,NESDVOIS           ,LERCVOIS  ,
      C          LESDVOIS              ,ISIZXV   ,IAD_ELEM      ,FR_ELEM           ,ELEMENT%PON%FSKYM              ,MSNF      ,
      D          IPARI                 ,SEGVAR   ,NODES%ITAB    ,ISKWN             ,DIFFUSION          ,IRESP,
@@ -4297,7 +4297,7 @@ C Init var parallel SMP
      9     FR_I18            ,IGRBRIC        ,EMINX          ,
      A     IXS               ,IXS(L3)        ,IXS(L2)        ,FANI(1,NFNCA+1) ,FANI(1,NFTCA+1) ,
      B     IAD_ELEM          ,FR_ELEM        ,RCONTACT       ,ACONTACT        ,PCONTACT        ,
-     C     TEMP              ,FTHE(IDX_FTHE) ,FTHESKYI       ,IPARG           ,NSENSOR         ,  
+     C     NODES%TEMP              ,FTHE(IDX_FTHE) ,FTHESKYI       ,IPARG           ,NSENSOR         ,  
      D     PM                ,INTSTAMP       ,NODES%WEIGHT   ,NISKYFIE        ,IRLEN20         ,
      E     ISLEN20           ,IRLEN20T       ,ISLEN20T       ,IRLEN20E        ,ISLEN20E        , 
      F     MSKYI_SMS         ,ISKYI_SMS      ,NATIV_SMS      ,INT18ADD        ,FCONTG          , 
@@ -4577,8 +4577,8 @@ C Init var parallel SMP
      A   IPART        ,IPART(K3)       ,IPART(K8)       ,SECFCUM        ,                  
      B   FSAVD        ,MAT_ELEM%GROUP_PARAM , 
      E   FZERO        ,IXTG1           ,ELEMENT%PON%IAD_TG6      ,IGEO           ,IPM          ,
-     F   MADFAIL      ,XSEC            ,ITSK            ,MCP          ,
-     G   TEMP         ,FTHE(IDX_FTHE)  ,FTHESKY         ,
+     F   MADFAIL      ,XSEC            ,ITSK            ,NODES%MCP          ,
+     G   NODES%TEMP         ,FTHE(IDX_FTHE)  ,FTHESKY         ,
      H   MS_PLY       ,ZI_PLY          ,INOD_PXFEM      ,XEDGE4N       ,XEDGE3N       ,
      I   IEL_PXFEM    ,IADC_PXFEM      ,IGROUC          ,NGROUC        ,GRESAV(IGMTSK),
      J   GRTH         ,IGRTH(IAD_GREL) ,MSTG            ,DMELTG        ,MSC           ,
@@ -4663,7 +4663,7 @@ C
      G IXS(L1)        ,
      H IXS(L2)        ,ELEMENT%PON%IADS10     ,ELEMENT%PON%IADS20   ,IXS(L3)    ,ELEMENT%PON%IADS16       ,
      I W16(I16TSK)    ,ELEMENT%PON%FSKYM         ,MSNF        ,IGEO       ,IPM             ,
-     J XSEC           ,ITSK          ,TEMP           ,
+     J XSEC           ,ITSK          ,NODES%TEMP           ,
      K FTHE(IDX_FTHE) ,FTHESKY                    ,IGROUNC    ,NGROUNC         ,
      M GRESAV(IGMTSK) ,GRTH          ,IGRTH       ,NODES%XDP        ,MSSA            ,
      N DMELS          ,MSTR          ,DMELTR      ,MSP        ,DMELP           ,
@@ -4769,7 +4769,7 @@ C----------------------------------
      A    VSPHIO        ,SPHVELN        ,ITSK       ,IPM             ,GRESAV(IGMTSK),
      B    GRTH          ,IGRTH(IAD_GREL),TABLE      ,LGAUGE          ,GAUGE         ,
      C    NGROUNC       ,IGROUNC        ,IXS        ,IRST            ,SOL2SPH       ,
-     D    SPH2SOL       ,ELEMENT%PON%FSKY           ,ELEMENT%PON%FSKY       ,IGEO            ,TEMP          ,
+     D    SPH2SOL       ,ELEMENT%PON%FSKY           ,ELEMENT%PON%FSKY       ,IGEO            ,NODES%TEMP          ,
      E    FTHE          ,FTHESKYI       ,SPHG_F6    ,WSMCOMP%BUF     ,SOL2SPH_TYP   ,
      F    MAt_ELEM      ,OUTPUT         ,SPH_IORD1  ,SNPC            ,STF           ,
      G    SBUFMAT       ,NSVOIS         ,IDTMINS    ,IRESP           ,MAXFUNC       ,
@@ -5112,7 +5112,7 @@ C
             CALL SPMD_EXCH_A_AMS_POFF(
      1       NODES%A       ,NODES%AR     ,NODES%STIFN,NODES%STIFR ,NODES%MS   ,
      2       IAD_ELEM,FR_ELEM,MSNF ,ALE%SUB%IFSUBM,LENGTH ,
-     3       LENR    ,FTHE , MCP,FR_LOC,NB_FR   ,
+     3       LENR    ,FTHE , NODES%MCP,FR_LOC,NB_FR   ,
      4       MS_2D ,MCP_OFF,FORNEQS ,NFACNIT    ,
      5       LENC ,FANI ,H3D_DATA,FANI(1,NFNCA+1),
      6       FANI(1,NFTCA+1) ,GLOB_THERM)
@@ -5120,7 +5120,7 @@ C
             CALL SPMD_EXCH_A(
      1       NODES%A       ,NODES%AR     ,NODES%STIFN,NODES%STIFR ,NODES%MS   ,
      2       IAD_ELEM,FR_ELEM,MSNF ,ALE%SUB%IFSUBM,LENGTH ,
-     3       LENR    ,FTHE , MCP, DMSPH,CONDN, 
+     3       LENR    ,FTHE , NODES%MCP, DMSPH,CONDN, 
      4       MS_2D,MCP_OFF,
      5       FORNEQS ,NFACNIT,LENC ,FANI ,H3D_DATA,
      6       FANI(1,NFNCA+1) ,FANI(1,NFTCA+1) ,GLOB_THERM)
@@ -5819,7 +5819,7 @@ C===============================================================================
      5         SKEWS%SKEW   ,I2SIZE ,FR_NBCCI2,ANIN(NDIN+1)   ,IGEO,BUFGEO ,
      6         FSAV   ,NPC    ,TF       ,FANI(1,NFT2+1) ,IAD_ELEM,FR_ELEM,
      7         NATIV_SMS,DMINT2,ANIN(NDAMA2+1),NB_FRI2M ,FR_LOCI2M,
-     8         DT2T  ,NELTST ,ITYPTST   ,INTERFACES%INTBUF_TAB ,TEMP     ,MCP   ,
+     8         DT2T  ,NELTST ,ITYPTST   ,INTERFACES%INTBUF_TAB ,NODES%TEMP     ,NODES%MCP   ,
      9         FTHE  ,CONDN  ,GLOB_THERM,
      A         H3D_DATA,T2FAC_SMS,FANI(1,NFNCA2+1),NPCONT2)
           ENDDO
@@ -6282,7 +6282,7 @@ C     IF(IDTMINS==0.AND.IDTMINS_INT==0)THEN
      3              DMAST,DINERT,ANIN,ANIN(NDMA+1),IMSCH  ,
      4              NODES%WEIGHT,NODES%A    ,NODES%AR    ,IGRNOD    ,glob_therm%nodadt_therm,
      5              ANIN(NDIN+1),RBYM  ,ARBYM ,ARRBYM,NODES%WEIGHT_MD,
-     6              MCP         ,MCP_OFF,CONDN ,ALE_CONNECTIVITY%NALE  ,H3D_DATA  )
+     6              NODES%MCP         ,MCP_OFF,CONDN ,ALE_CONNECTIVITY%NALE  ,H3D_DATA  )
       ELSEIF(IDTMINS/=0)THEN
         CALL DTNODAMS(
      1              NODFTSK,NODLTSK ,NELTSTT,ITYPTSTT   ,NODES%ITAB   ,
@@ -6938,7 +6938,7 @@ c
           ! -------------------------------
           ! pre-computation and mpi communication for type 17 sensor
           IF(SENSORS%COMM_SENS17%BOOL) THEN
-             CALL SENSOR_TEMP0(NSENSOR,SENSORS%SENSOR_TAB,IGRNOD,TEMP,NODES%WEIGHT,SENSORS%COMM_SENS17,
+             CALL SENSOR_TEMP0(NSENSOR,SENSORS%SENSOR_TAB,IGRNOD,NODES%TEMP,NODES%WEIGHT,SENSORS%COMM_SENS17,
      *                         SENSORS%SENSOR_STRUCT)
           ENDIF
           ! -------------------------------
@@ -7152,7 +7152,7 @@ C--- //  ---------------------------------------
 C       TEMPERATURES COMPUTATION 
 C-----------------------------------------------
        IF (GLOB_THERM%ITHERM_FE > 0 )
-     .    CALL TEMPUR(TEMP ,MCP,FTHE,NODFTSK,NODLTSK,NODES%WEIGHT,MCP_OFF,GLOB_THERM%HEAT_STORED)
+     .    CALL TEMPUR(NODES%TEMP ,NODES%MCP,FTHE,NODFTSK,NODLTSK,NODES%WEIGHT,MCP_OFF,GLOB_THERM%HEAT_STORED)
 !$OMP END PARALLEL
 
 
@@ -7192,9 +7192,9 @@ C---------------------------------------------------------------------
              ELSE
                SIZ = 0
              END IF
-             CALL SPMD_COLLECTT(TEMP,NODES%ITAB,NODES%WEIGHT,NODGLOB,SIZ)
+             CALL SPMD_COLLECTT(NODES%TEMP,NODES%ITAB,NODES%WEIGHT,NODGLOB,SIZ)
           ELSE
-             CALL COLLECTT(TEMP,NODES%ITAB,NODES%WEIGHT,NODGLOB)
+             CALL COLLECTT(NODES%TEMP,NODES%ITAB,NODES%WEIGHT,NODGLOB)
           END IF
         END IF
       END IF
@@ -7853,7 +7853,7 @@ C--------------------------
           CALL STARTIME(TIMERS,TIMER_KIN)
           IF(IMONM > 0) CALL STARTIME(TIMERS,44)
         ENDIF
-        CALL FIXTEMP(IBFTEMP  ,FBFTEMP    ,TEMP    ,NPC    ,TF  ,
+        CALL FIXTEMP(IBFTEMP  ,FBFTEMP    ,NODES%TEMP    ,NPC    ,TF  ,
      1               NSENSOR  ,SENSORS%SENSOR_TAB,GLOB_THERM)
         IF (IMON>0) THEN
           IF(IMONM > 0) CALL STOPTIME(TIMERS,44)
@@ -7937,7 +7937,7 @@ C===============================================================================
 
           CALL ADMVIT(ELEMENT%SHELL%IXC, IPART(K3), IXTG, IPART(K8), IPART,
      1                ITSK   ,NODES%A        , NODES%V   , NODES%AR       , NODES%VR   ,
-     2              SH4TREE,SH3TREE ,TEMP ,GLOB_THERM%ITHERM_FE)
+     2              SH4TREE,SH3TREE ,NODES%TEMP ,GLOB_THERM%ITHERM_FE)
 
 !$OMP END PARALLEL
 
@@ -8236,7 +8236,7 @@ c
 
         ! pre-computation and mpi communication for type 17 sensor
         IF (SENSORS%COMM_SENS17%BOOL) THEN
-          CALL SENSOR_TEMP0(NSENSOR,SENSORS%SENSOR_TAB,IGRNOD,TEMP,NODES%WEIGHT,SENSORS%COMM_SENS17,
+          CALL SENSOR_TEMP0(NSENSOR,SENSORS%SENSOR_TAB,IGRNOD,NODES%TEMP,NODES%WEIGHT,SENSORS%COMM_SENS17,
      *                      SENSORS%SENSOR_STRUCT)
         ENDIF
 
@@ -8648,7 +8648,7 @@ C Regular animation
      V   NDIN          ,FXBDEP         ,FXBVIT         ,FXBACC         ,IFLOW         ,
      W   RFLOW         ,IPARTL         ,NPARTL         ,IACCP          ,NACCP         ,
      X   FASOLFR       ,FANI(1,NFNCA+1),FANI(1,NFTCA+1),IPART(I15ATH)  ,
-     Y   FR_MV         ,IPART_STATE    ,SH4TREE        ,SH3TREE,TEMP   ,
+     Y   FR_MV         ,IPART_STATE    ,SH4TREE        ,SH3TREE,NODES%TEMP   ,
      Z   THKE          ,ERR_THK_SH4    ,ERR_THK_SH3,
      a   INOD_PXFEM    ,FTHREAC        ,NODREAC        ,GRESAV,
      b   DIAG_SMS      ,SH4TRIM        ,SH3TRIM        ,FANI(1,1+NFT2) ,XMOM_SMS      ,
@@ -8863,7 +8863,7 @@ C----       10,11,12:ELBUF_C,BUFMAT_C,X_C,13,14:DD,DDR,15,16:X_ac,V_zero,23,24:A
      O  MONVOL ,IGRSURF,FR_MV  ,VOLMON ,DIRUL,
      P  NODGLOB,MUMPS_PAR,CDDLP ,ISENDTO,IRCVFROM,NEWFRONT,IMSCH  ,
      Q  I2MSCH ,ISIZXV,ILENXV ,ISLEN7  ,IRLEN7 ,ISLEN11,IRLEN11,ISLEN17,
-     R  IRLEN17,IRLEN7T,ISLEN7T,KINET  ,NUM_IMP1,TEMP  ,DT2PREV,WA     ,
+     R  IRLEN17,IRLEN7T,ISLEN7T,KINET  ,NUM_IMP1,NODES%TEMP  ,DT2PREV,WA     ,
      S  LGRAV  ,SH4TREE,SH3TREE,IRLEN20,ISLEN20,IRLEN20T,ISLEN20T,
      T  IRLEN20E,ISLEN20E,RBE3%IRBE3,RBE3%LRBE3  ,RBE3%FRBE3  ,FR_I2M,IAD_I2M,rbe3%mpi%FR_RBE3,
      U  RBE3%mpi%IAD_RBE3,FRWL6,IRBE2  ,LRBE2,INTBUF_TAB_CP,
@@ -8908,7 +8908,7 @@ C
      L FR_ELEM,        FR_SEC,          FR_RBY2,   IAD_RBY2,       FR_WALL,
      M NODES%V,              NODES%A,               GRAPHE,    PARTSAV ,       XFRAME  ,
      N DIRUL,           
-     O FSAV(1,NFNCA+1), FSAV(1,NFTCA+1),TEMP      ,SH4TREE,        SH3TREE,
+     O FSAV(1,NFNCA+1), FSAV(1,NFTCA+1),NODES%TEMP      ,SH4TREE,        SH3TREE,
      P ERR_THK_SH4,    ERR_THK_SH3    , IFRAME    ,LPRW      ,     ELBUF_TAB,
      Q FSAV           ,FSAVD          , RWSAV     ,NODES%AR        ,   RBE3%IRBE3   ,
      R RBE3%LRBE3     ,RBE3%FRBE3     , FR_I2M    ,IAD_I2M   ,     RBE3%mpi%FR_RBE3,
@@ -9413,7 +9413,7 @@ C mass & velocity
      2     IMSCH   ,I2MSCH ,DT2PREV ,INTLIST ,NBINTC  ,
      3     ISLEN7  ,IRLEN7 ,ISLEN11 ,IRLEN11 ,ISLEN17 ,
      4     IRLEN17 ,IXS    ,IXS(L3) ,NSENSOR ,
-     5     IGRBRIC ,TEMP   ,1       ,IRLEN7T ,ISLEN7T ,
+     5     IGRBRIC ,NODES%TEMP   ,1       ,IRLEN7T ,ISLEN7T ,
      6     IRLEN20 ,ISLEN20,IRLEN20T,ISLEN20T,IRLEN20E,
      7     ISLEN20E,NODES%IKINE  ,DIAG_SMS,SENSORS%SENSOR_TAB,INTERFACES%INTBUF_TAB ,INT24E2EUSE,
      8     FORNEQS ,MULTI_FVM,INTERFACES)
@@ -9431,7 +9431,7 @@ C mass & velocity
        ENDIF
 
        IF(NINTSTAMP /= 0.AND.FTEMPVAR21==1.AND.NSPMD>1) THEN
-         CALL SPMD_I21TEMPCOM(IPARI,TEMP,INTERFACES%INTBUF_TAB,NSENSOR,SENSORS%SENSOR_TAB) 
+         CALL SPMD_I21TEMPCOM(IPARI,NODES%TEMP,INTERFACES%INTBUF_TAB,NSENSOR,SENSORS%SENSOR_TAB) 
        ENDIF
 
        IF(NUMFRAM/=0.AND.N2D==0)THEN
@@ -9521,7 +9521,7 @@ C--- //0 ----------------
      2             IMSCH   ,I2MSCH ,DT2PREV ,INTLIST ,NBINTC  ,
      3             ISLEN7  ,IRLEN7 ,ISLEN11 ,IRLEN11 ,ISLEN17 ,
      4             IRLEN17 ,IXS    ,IXS(L3) ,NSENSOR ,
-     5             IGRBRIC ,TEMP   ,2       ,IRLEN7T ,ISLEN7T ,
+     5             IGRBRIC ,NODES%TEMP   ,2       ,IRLEN7T ,ISLEN7T ,
      6             IRLEN20 ,ISLEN20,IRLEN20T,ISLEN20T,IRLEN20E,
      7             ISLEN20E,NODES%IKINE  ,DIAG_SMS,SENSORS%SENSOR_TAB,INTERFACES%INTBUF_TAB ,INT24E2EUSE,
      8             FORNEQS ,MULTI_FVM,INTERFACES)
@@ -9545,7 +9545,7 @@ C--- //0 ----------------
 
         ! INTERFACE 21 - Communication of nodal temperature
         IF(NINTSTAMP /= 0.AND.FTEMPVAR21==1.AND.NSPMD>1) THEN
-           CALL SPMD_I21TEMPCOM(IPARI,TEMP,INTERFACES%INTBUF_TAB,NSENSOR,SENSORS%SENSOR_TAB) 
+           CALL SPMD_I21TEMPCOM(IPARI,NODES%TEMP,INTERFACES%INTBUF_TAB,NSENSOR,SENSORS%SENSOR_TAB) 
         ENDIF
         ICH = 0
         ! Engine time for restart
@@ -9559,7 +9559,7 @@ C--- //0 ----------------
      .               OUTPUT     ,INTERFACES      ,LOADS          ,PYTHON          ,NAMES_AND_TITLES ,
      .               EIGIPM     ,EIGIBUF         ,EIGRPM         ,NEIPM           ,LEIBUF           ,
      .               NERPM      ,IFLOW           ,RFLOW          ,LIFLOW          ,LRFLOW           ,
-     .               IMPBUF_TAB ,IMPL_S          ,IMPL_S0        ,MCP             ,TEMP             ,
+     .               IMPBUF_TAB ,IMPL_S          ,IMPL_S0        ,NODES%MCP             ,NODES%TEMP             ,
      .               FORNEQS    ,UNITAB          ,STACK          ,NDRAPE          ,DRAPE_SH3N       ,
      .               DRAPE_SH4N ,DRAPEG          ,RESTSIZE       ,SKEWS           ,GLOB_THERM       ,
      .               PBLAST     ,RBE3)
@@ -9667,7 +9667,7 @@ C--- //0 ----------------
      2          IMSCH   ,I2MSCH  ,DT2PREV ,INTLIST ,NBINTC  ,     
      3          ISLEN7  ,IRLEN7  ,ISLEN11 ,IRLEN11 ,ISLEN17 ,     
      4          IRLEN17 ,IXS     ,IXS(L3) ,NSENSOR ,              
-     5          IGRBRIC ,TEMP    ,2       ,IRLEN7T ,ISLEN7T ,     
+     5          IGRBRIC ,NODES%TEMP    ,2       ,IRLEN7T ,ISLEN7T ,     
      6          IRLEN20 ,ISLEN20 ,IRLEN20T,ISLEN20T,IRLEN20E,     
      7          ISLEN20E,NODES%IKINE   ,DIAG_SMS,SENSORS%SENSOR_TAB,INTERFACES%INTBUF_TAB ,INT24E2EUSE ,
      8          FORNEQS ,MULTI_FVM,INTERFACES) 
@@ -9761,7 +9761,7 @@ C /KILL
      2       IMSCH   ,I2MSCH ,DT2PREV ,INTLIST ,NBINTC  ,
      3       ISLEN7  ,IRLEN7 ,ISLEN11 ,IRLEN11 ,ISLEN17 ,
      4       IRLEN17 ,IXS    ,IXS(L3) ,NSENSOR ,
-     5       IGRBRIC ,TEMP   ,2       ,IRLEN7T ,ISLEN7T ,
+     5       IGRBRIC ,NODES%TEMP   ,2       ,IRLEN7T ,ISLEN7T ,
      6       IRLEN20 ,ISLEN20,IRLEN20T,ISLEN20T,IRLEN20E,
      7       ISLEN20E,NODES%IKINE  ,DIAG_SMS,SENSORS%SENSOR_TAB,INTERFACES%INTBUF_TAB,INT24E2EUSE,
      8       FORNEQS ,MULTI_FVM,INTERFACES)

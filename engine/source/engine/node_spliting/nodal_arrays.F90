@@ -66,6 +66,7 @@
             logical :: used_dr
             integer :: sicodt_fac !< size of ICODT
             integer :: max_uid !< maximum user id
+            integer :: itherm_fe
 
 
             integer :: numnod
@@ -93,6 +94,8 @@
             my_real, dimension(:), allocatable :: MS0 !< initial mass
             my_real, dimension(:), allocatable :: IN0 !< initial inertia
             my_real, dimension(:), allocatable :: VISCN !< nodal 
+            my_real, dimension(:), allocatable :: MCP !< thermal
+            my_real, dimension(:), allocatable :: TEMP !< temperature
 
             ! 3*NUMNOD if IRESP == 1, else 3
             double precision, dimension(:,:), allocatable :: DDP !< double precision D 
@@ -144,8 +147,8 @@
 
 
 !! \brief Allocate nodal arrays                                                              
-  subroutine allocate_nodal_arrays(arrays, numnod, nthreads, iroddl, iparith, &
-           isecut, iisrot, impose_dr, idrot, nrcvvois, sicodt)
+        subroutine allocate_nodal_arrays(arrays, numnod, nthreads, iroddl, iparith, &
+           isecut, iisrot, impose_dr, idrot, nrcvvois, sicodt, itherm_fe)
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Modules
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -172,6 +175,7 @@
             integer, intent(in) :: idrot !< number of discrete rotations
             integer, intent(in) :: nrcvvois !< ALE ghost nodes in SPMD
             integer, intent(in) :: sicodt !< SICODT=NUMNOD+2*NUMNOD*MAX(IALE,IEULER,IALELAG)
+            integer, intent(in) :: itherm_fe !< thermal finite element
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Body
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -180,6 +184,7 @@
             arrays%nthreads = nthreads
             arrays%max_numnod = numnod
             arrays%nrcvvois = nrcvvois
+            arrays%itherm_fe = itherm_fe
             arrays%sicodt_fac = 0
             if(numnod >0 ) arrays%sicodt_fac = sicodt / numnod
             IF(ISECUT > 0 .OR. IISROT > 0 .OR. IMPOSE_DR /= 0 .OR. IDROT > 0) THEN
@@ -203,6 +208,13 @@
             call my_alloc(arrays%IN0,numnod*iroddl)
             call my_alloc(arrays%ISKEW,numnod)
             call my_alloc(arrays%ICODE,numnod)
+            if(itherm_fe > 0) then
+              call my_alloc(arrays%MCP,numnod)
+              call my_alloc(arrays%TEMP,numnod)
+            else 
+              call my_alloc(arrays%MCP,0)
+              call my_alloc(arrays%TEMP,0)
+            endif
 #ifdef MYREAL4
             call my_alloc(arrays%DDP,3,numnod)
             call my_alloc(arrays%XDP,3,numnod)
@@ -254,6 +266,10 @@
             arrays%VISCN = 0
             arrays%ICODT = 0
             arrays%ICODR = 0
+            if(itherm_fe > 0) then
+              arrays%MCP = 0
+              arrays%TEMP = 0
+            endif
 
 
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -312,6 +328,13 @@
                 call extend_array(arrays%IN, size(arrays%IN), arrays%max_numnod)
                 call extend_array(arrays%IN0, size(arrays%IN0), arrays%max_numnod)
                 call extend_array(arrays%ICODR, size(arrays%ICODR), arrays%max_numnod*arrays%iroddl)
+              endif
+              if(arrays%itherm_fe > 0) then
+                call extend_array(arrays%MCP, size(arrays%MCP), arrays%max_numnod)
+                call extend_array(arrays%TEMP, size(arrays%TEMP), arrays%max_numnod)
+              else 
+                call extend_array(arrays%MCP, size(arrays%MCP), 0)
+                call extend_array(arrays%TEMP, size(arrays%TEMP), 0)
               endif
               call extend_array(arrays%ICODT, size(arrays%ICODT), arrays%sicodt_fac * arrays%max_numnod) 
               arrays%ICODT(arrays%sicodt_fac * arrays%numnod + 1:) = 0

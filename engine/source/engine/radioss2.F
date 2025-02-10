@@ -282,7 +282,6 @@ C Madymo Stuff
       INTEGER KMADPRT,KMADSH4,KMADSH3,KMADSOL,KMADNOD,KMADFAIL,K1,K2,K3,K4,K5,K6,K7,K8,K9,K10,K11
       INTEGER BUFTEST(100),NB_MAN,NB_MAN_TOT,TOPINT,FLAG_MAIN,J, ILAW51,ILAW37,ILAW20
 
-      my_real, DIMENSION(:), ALLOCATABLE :: MCP,TEMP
       my_real, DIMENSION(:),ALLOCATABLE :: FORNEQS
       TYPE(PRGRAPH), DIMENSION(:), ALLOCATABLE :: GRAPHE
       INTEGER, DIMENSION(:), ALLOCATABLE :: IFLOW
@@ -987,11 +986,11 @@ C
       ENDIF
 
       ! Heat Transfer
-      IF (GLOB_THERM%ITHERM_FE > 0   ) THEN
-        ALLOCATE(MCP(NUMNOD),TEMP(NUMNOD))
-      ELSE
-         ALLOCATE(MCP(0),TEMP(0))
-      ENDIF
+!     IF (GLOB_THERM%ITHERM_FE > 0   ) THEN
+!       ALLOCATE(NODES%MCP(NUMNOD),NODES%TEMP(NUMNOD))
+!     ELSE
+!        ALLOCATE(NODES%MCP(0),NODES%TEMP(0))
+!     ENDIF
 
       ! Nitsche Method : Equivalent Nodal Force allocation
       IF(NITSCHE > 0   ) THEN
@@ -1031,7 +1030,7 @@ C
      .            SENSORS        ,EBCS_TAB   ,DYNAIN_DATA   ,USER_WINDOWS     ,OUTPUT    ,
      .            INTERFACES     ,LOADS      ,MAT_ELEM      ,PYTHON           ,IFLOW     ,
      .            SKEWS          ,RFLOW      ,LIFLOW        ,LRFLOW           ,IMPL_S0   ,
-     .            MCP            ,TEMP       ,FORNEQS       ,UNITAB,
+     .            FORNEQS       ,UNITAB,
      .            STACK          ,DRAPE_SH4N ,DRAPE_SH3N    ,DRAPEG           ,NDRAPE ,
      .            GLOB_THERM     ,PBLAST     ,ELEMENT       ,NODES            ,RBE3)
       ! Close restart file
@@ -2159,7 +2158,7 @@ C---------------------------------------------------------------------
          IRUNN_BIS = IRUNN
 
          CALL RESOL_HEAD(ELEMENT, NODES, ITASK        ,AF              ,IAF             ,IDATA      ,RDATA,
-     .                   GRAPHE       ,IFLOW           ,RFLOW           ,MCP        ,TEMP      ,
+     .                   GRAPHE       ,IFLOW           ,RFLOW           ,
      .                   STACK        ,IRUNN_BIS       , TIMERS,
      .                   MULTI_FVM    ,H3D_DATA        ,SUBSETS    ,IGRNOD    ,
      .                   IGRBRIC      ,IGRQUAD         ,IGRSH4N         ,IGRSH3N    ,IGRTRUSS  ,

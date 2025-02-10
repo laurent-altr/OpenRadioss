@@ -158,7 +158,7 @@ C             allocations entieres
 C   -----------------------------------------------
 
         CALL ALLOCATE_NODAL_ARRAYS(NODES, NUMNOD, NTHREAD, IRODDL, IPARIT, 
-     .      ISECUT, IISROTS, IMPOSE_DR, IDROT, NRCVVOIS, SICODT)
+     .      ISECUT, IISROTS, IMPOSE_DR, IDROT, NRCVVOIS, SICODT, GLOB_THERM%ITHERM_FE)
 
 C       
 c       ALLOCATE (ICODE(SICODE),STAT=IERR)
