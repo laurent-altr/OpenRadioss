@@ -162,7 +162,6 @@ C-----------------------------------------------
       USE DYNLIB_MOD
       USE MONVOL_STRUCT_MOD
       USE DRAPE_MOD
-      USE RBODY_MOD
       USE SENSOR_MOD
       USE EBCS_MOD
       USE DIFFUSION_MOD
@@ -1458,7 +1457,7 @@ C------------------------------------------------
      C              MONVOL ,VOLMON, IPART_STATE,GEO,TABLE,
      D              IFRAME,XFRAME,MAT_ELEM%ELBUF,IGEO,INTERFACES%INTBUF_TAB,
      E              IPM   ,H3D_DATA, MULTI_FVM,
-     F              IGRPART,TAG_SKINS6,ICFIELD,LCFIELD,TAGSLV_RBY,
+     F              IGRPART,TAG_SKINS6,ICFIELD,LCFIELD,NODES%TAG_S_RBY,
      G              MDS_LABEL,MDS_OUTPUT_TABLE,MDS_NMAT,MAX_DEPVAR,
      H              MDS_NDEPSVAR,STACK,IBCL,ILOADP,LLOADP,SENSORS,
      I              DYNAIN_DATA,DT ,LOADS ,OUTPUT,NAMES_AND_TITLES,

@@ -591,7 +591,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
      J  IGRSPRING,IGRPART,IGRSURF,FORNEQS,
      K  NLOC_DMG ,ISKWP_L,KNOTLOCPC,KNOTLOCEL,PINCH_DATA,TAG_SKINS6, ALE_CONNECTIVITY,
      L  XCELL, XFACE, NE_NERCVOIS, NE_NESDVOIS, NE_LERCVOIS, NE_LESDVOIS,IBCSCYC  ,LBCSCYC,
-     M  T_MONVOL,ID_GLOBAL_VOIS,FACE_VOIS,TAGSLV_RBY,DYNAIN_DATA,FCONT_MAX,EBCS_TAB,DIFFUSION,
+     M  T_MONVOL,ID_GLOBAL_VOIS,FACE_VOIS,DYNAIN_DATA,FCONT_MAX,EBCS_TAB,DIFFUSION,
      N  KLOADPINTER,LOADPINTER,DGAPLOADINT,DRAPEG,USER_WINDOWS,OUTPUT,INTERFACES,
      O  DT        ,LOADS     , PYTHON, DPL0CLD,VEL0CLD,
      P  NDAMP_VREL,ID_DAMP_VREL,FR_DAMP_VREL,NDAMP_VREL_RBYG,NAMES_AND_TITLES,UNITAB,LIFLOW,LRFLOW ,
@@ -815,7 +815,7 @@ C-----------------------------------------------
      .   CRKNODIAD(*), LGAUGE(3,*), IGAUP(*), NGAUP(*),NODLEVXF(*),
      .   NODGLOBXFE(*),ELCUTC(2,*),NODENR(*),KXFENOD2ELC(*),
      .   ENRTAG(NUMNOD,*),KXIG3D(*),IXIG3D(*),
-     .   NATIV0_SMS(*), SEGQUADFR(*), TAGSLV_RBY(*),
+     .   NATIV0_SMS(*), SEGQUADFR(*),
      .   KLOADPINTER(NINTER+1)  ,LOADPINTER(NINTER*NLOADP_HYD) 
       INTEGER IDATA(*), IBFTEMP(*), IBCV(*), IBFFLUX(*), WEIGHT_RM(*),
      .        ICODT_PLY(*), ISKEW_PLY(*),INOD_PXFEM(*),IEL_PXFEM(*),
@@ -2215,7 +2215,7 @@ C
      3   IGRBRIC ,IGRQUAD  ,IGRSH4N  ,IGRSH3N  ,IGRTRUSS   ,
      4   IGRBEAM ,IGRSPRING,IGRPART  ,FORNEQS  ,INT7ITIED,
      5   FXVEL_FGEO,FAILWAVE,NLOC_DMG,PINCH_DATA ,SLLOADP,
-     6   TAGSLV_RBY,NFNCA2  ,NFTCA2  ,NODES%IN0 ,SORT_COMM,STACK,OUTPUT,
+     6   NODES%TAG_S_RBY,NFNCA2  ,NFTCA2  ,NODES%IN0 ,SORT_COMM,STACK,OUTPUT,
      7   THKE   ,SFR_ELEM  ,SH_OFFSET_TAB,
      8   NEED_COMM_INT25_SOLID_EROSION,COMM_INT25_SOLID_EROSION ,
      9   ISKWN  ,IFRAME  ,LOADS ,GLOB_THERM,PBLAST,RBE3)
@@ -5944,7 +5944,7 @@ C===============================================================================
      6     IGRV ,LGRAV,SENSORS%SENSOR_TAB,NODES%A     ,NODES%AR   ,
      7     FSAV  ,NODES%STIFN ,NODES%STIFR,FANI(1,1+NFOA),NODES%WEIGHT,
      8     DMAS  ,DINER ,BUFSF,FR_RBY2,PARTSAV ,
-     9     IPART ,ELBUF_TAB,ICFIELD,LCFIELD,TAGSLV_RBY)
+     9     IPART ,ELBUF_TAB,ICFIELD,LCFIELD,NODES%TAG_S_RBY)
 
 C========================================================================================
 C                                     PARALLEL SECTION (SMP)
@@ -5960,7 +5960,7 @@ C===============================================================================
      6      NRBYKIN_L        ,NATIV_SMS    ,SENSORS%SFSAV   ,SENSORS%FSAV    ,SENSORS%STABSEN,
      7      SENSORS%TABSENSOR,NODREAC      ,FTHREAC         ,CPTREAC         ,DAMPR,
      8      SDAMP            ,DAMP         ,NDAMP_VREL      ,ID_DAMP_VREL    ,IGRNOD         ,
-     9      TAGSLV_RBY       ,IPARIT       ,OUTPUT%WFEXT    ,NDAMP_VREL_RBYG ,SIZE_RBY6_C    ,
+     9      NODES%TAG_S_RBY       ,IPARIT       ,OUTPUT%WFEXT    ,NDAMP_VREL_RBYG ,SIZE_RBY6_C    ,
      A      RBY6_C)
 
 !$OMP END PARALLEL
@@ -6779,7 +6779,7 @@ C===============================================================================
      H        FANI(1,1+NFOA+2*(NSECT+NRBODY)),FR_WALL ,NRWL_SMS   ,
      I        INTSTAMP ,KINET    ,ELEMENT%SHELL%IXC      ,IXTG      ,SH4TREE    ,
      J        SH3TREE  ,CPTREAC  ,NODREAC  ,FTHREAC   ,
-     K        FRWL6    ,3+IRODDL*3,TAGSLV_RBY,DAMPR   , DAMP      ,
+     K        FRWL6    ,3+IRODDL*3,NODES%TAG_S_RBY,DAMPR   , DAMP      ,
      L        IGRNOD   ,NODES%DR       ,RBY      ,TAGMSR_RBY_SMS,
      M        JSM_SMS  ,IRBE2     ,LRBE2   ,IAD_RBE2  ,FR_RBE2M   ,
      N        NMRBE2   ,R2SIZE    ,RBE3%IRBE3    ,RBE3%LRBE3      ,RBE3%FRBE3    ,
@@ -7627,10 +7627,10 @@ C-----------------------------------------------
       IF(IDAMP/=0)THEN
         IF (NS10E>0) THEN
           CALL DAMPING(NODFTSK,NODLTSK,VMD,NODES%VR,NODES%A ,NODES%AR ,DAMP,NODES%MS,NODES%IN,
-     .               IGRNOD,3+IRODDL*3,ITSK,NODES%WEIGHT,TAGSLV_RBY,OUTPUT%WFEXT)
+     .               IGRNOD,3+IRODDL*3,ITSK,NODES%WEIGHT,NODES%TAG_S_RBY,OUTPUT%WFEXT)
         ELSE
          CALL DAMPING(NODFTSK,NODLTSK,NODES%V ,NODES%VR,NODES%A ,NODES%AR ,DAMP,NODES%MS,NODES%IN,
-     .               IGRNOD,3+IRODDL*3,ITSK,NODES%WEIGHT,TAGSLV_RBY,OUTPUT%WFEXT)
+     .               IGRNOD,3+IRODDL*3,ITSK,NODES%WEIGHT,NODES%TAG_S_RBY,OUTPUT%WFEXT)
         END IF !(NS10E>0) THEN
       ELSEIF(NDAMP>0)THEN
         IF(NRDAMP==4)THEN
@@ -7639,7 +7639,7 @@ C-----------------------------------------------
           CALL DAMPING44(
      .                 3+IRODDL*3,NODES%V       ,
      .                 NODES%VR      ,NODES%A       ,NODES%AR      ,NODES%MS        ,NODES%IN      ,
-     .                 DAMPR   ,DAMP    ,IGRNOD  ,NODES%WEIGHT    ,TAGSLV_RBY       ,OUTPUT%WFEXT)
+     .                 DAMPR   ,DAMP    ,IGRNOD  ,NODES%WEIGHT    ,NODES%TAG_S_RBY       ,OUTPUT%WFEXT)
 !$OMP END SINGLE
 
         ELSE
@@ -7649,14 +7649,14 @@ C-----------------------------------------------
            CALL DAMPING51(
      .                 3+IRODDL*3,VMD     ,
      .                 NODES%VR      ,NODES%A       ,NODES%AR      ,NODES%MS        ,NODES%IN      ,
-     .                 DAMPR   ,DAMP    ,IGRNOD  ,NODES%WEIGHT    ,TAGSLV_RBY,
+     .                 DAMPR   ,DAMP    ,IGRNOD  ,NODES%WEIGHT    ,NODES%TAG_S_RBY,
      .                 SKEWS%SKEW    ,ICONTACT,IDAMP_RDOF_TAB     ,NDAMP_VREL,ID_DAMP_VREL,
      .                 FR_DAMP_VREL,IPARIT,ISPMD,OUTPUT%WFEXT)
          ELSE
            CALL DAMPING51(
      .                 3+IRODDL*3,NODES%V       ,
      .                 NODES%VR      ,NODES%A       ,NODES%AR      ,NODES%MS        ,NODES%IN      ,
-     .                 DAMPR   ,DAMP    ,IGRNOD  ,NODES%WEIGHT    ,TAGSLV_RBY,
+     .                 DAMPR   ,DAMP    ,IGRNOD  ,NODES%WEIGHT    ,NODES%TAG_S_RBY,
      .                 SKEWS%SKEW    ,ICONTACT,IDAMP_RDOF_TAB     ,NDAMP_VREL,ID_DAMP_VREL,
      .                 FR_DAMP_VREL,IPARIT,ISPMD,OUTPUT%WFEXT)
          END IF

@@ -2263,10 +2263,6 @@ C-------EIGEN MODES (moved from radioss2.F) -----
         ALLOCATE (EIGIBUF(LEIBUF),STAT=IERR)
         IF (IERR/=0) GOTO 1000
         EIGIBUF = 0
-C-------TAGSLV_RBY -----
-        ALLOCATE (TAGSLV_RBY(NUMNOD),STAT=IERR)
-        IF (IERR/=0) GOTO 1000
-        TAGSLV_RBY = 0
 C-------Seatbelt structures -----
         ALLOCATE (SLIPRING(NSLIPRING),STAT=IERR)
         IF (IERR/=0) GOTO 1000
