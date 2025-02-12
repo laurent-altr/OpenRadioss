@@ -431,7 +431,7 @@ C=======================================================================
               JJ = VOXEL(IX,IY,IZ)
 c             write(6,*) "VOXEL(",IX,",",IY,",",IZ,")=",JJ
               DO WHILE(JJ /= 0)
-                DELNOD = 0
+
                 IF(shared_int(ispmd_offset,JJ) == ispmd)THEN
                   J = shared_int(i_offset,JJ) 
                   NN=NSV(J)
@@ -447,16 +447,18 @@ c             write(6,*) "VOXEL(",IX,",",IY,",",IZ,")=",JJ
                 ELSE
                  J = NSN + JJ
                  M = shared_int(boundary_offset,JJ)
+                 IF(M > 0) M = get_value_umap(win%boundary_to_local, JJ, -1)
+                 IF(M > 0) J = M
                  IF(M > 0) then ! the node is actually a local but with weight = 0
                     IF(shared_int(itab_offset,JJ) ==itab(M1))GOTO 200
                     IF(shared_int(itab_offset,JJ) ==itab(M2))GOTO 200
                     IF(shared_int(itab_offset,JJ) ==itab(M3))GOTO 200
                     IF(shared_int(itab_offset,JJ) ==itab(M4))GOTO 200
-                    J = get_value_umap(win%boundary_to_local, JJ, -1)
                     IF(FLAGREMNODE == 2) THEN
                       IF( TAGREMNODE(NSV(J)) == 1)GOTO 200
                     ENDIF
                  else  IF(FLAGREMNODE == 2) THEN
+                    DELNOD = 0
                     K = KREMNOD(2*(NE-1)+2) + 1
                     L = KREMNOD(2*(NE-1)+3)
                     DO MM=K,L
