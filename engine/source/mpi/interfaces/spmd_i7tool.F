@@ -190,7 +190,7 @@ C-----------------------------------------------
       END DO
       I_STOK = II_STOK
 
-      write(6,*) "I_STOK=",I_STOK
+!     write(6,*) "I_STOK=",I_STOK
 
       IDEB = 0
       JDEB = 0
@@ -286,16 +286,16 @@ C
 !         function get_value_umap(umap_ptr, key, default_value) result(val) bind(C, name="cpp_get_value_umap")
           key = ITAFI(NIN)%P(NI)
           RENUM(NI) = get_value_umap(WIN%glob2loc,key,val)
-          IF(RENUM(NI) < 0) THEN
-             DO j = 1, win%nsn_global
-                if(ITAFI(NIN)%P(NI) == shared_int(win%itab_offset,j)) then
-                   write(6,*) "FOUND:",shared_int(win%itab_offset,j),shared_int(win%ispmd_offset,j),j
-                end if
-             end do
-             write(6,*) __FILE__,"RENUM(",NI,")=",RENUM(NI)
-             call flush(6)
-             call arret(2)
-           ENDIF
+c         IF(RENUM(NI) < 0) THEN
+c            DO j = 1, win%nsn_global
+c               if(ITAFI(NIN)%P(NI) == shared_int(win%itab_offset,j)) then
+c                  write(6,*) "FOUND:",shared_int(win%itab_offset,j),shared_int(win%ispmd_offset,j),j
+c               end if
+c            end do
+c            write(6,*) __FILE__,"RENUM(",NI,")=",RENUM(NI)
+c            call flush(6)
+c            call arret(2)
+c          ENDIF
           CAND_N(I) = RENUM(NI) + NSN
         END IF        
         
