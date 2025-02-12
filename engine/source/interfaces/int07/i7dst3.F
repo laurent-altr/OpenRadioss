@@ -49,6 +49,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
      I                  IELECI ,NSMS   ,CMAJ   ,DRAD2  , INTFRIC,IPARTFRICSI,
      K                  IPARTFRICMI,ITIED  ,JLT_TIED,CAND_F,IORTHFRIC,
      L                  IREP_FRICMI,DIR_FRICMI,DGAPLOAD)
+      USE DEBUG_MOD
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -127,6 +128,9 @@ C--------------------------------------------------------
 C  CAS DES PAQUETS MIXTES
 C--------------------------------------------------------
        DO I=1,JLT
+!      IF(ITAB(NSVG(I))==40142.AND.ITAB(IX1(I))==40016.AND.ITAB(IX2(I))==40017.AND.ITAB(IX3(I))==40080
+c     .   .AND.ITAB(IX4(I))==40079) THEN
+c         write(6,*) NSVG(I), ITAB_DEBUG(IX1(I)), ITAB_DEBUG(IX2(I)), ITAB_DEBUG(IX3(I)), ITAB_DEBUG(IX4(I))
         IF(IX3(I)/=IX4(I))THEN
          X0(I) = FOURTH*(X1(I)+X2(I)+X3(I)+X4(I))
          Y0(I) = FOURTH*(Y1(I)+Y2(I)+Y3(I)+Y4(I))
@@ -409,8 +413,10 @@ C
         NZ4(I) = ZI(I)-(Z0(I) + LB4(I)*Z04(I) + LC4(I)*Z01(I))
         P4(I) = NX4(I)*NX4(I) + NY4(I)*NY4(I) +NZ4(I)*NZ4(I)
         D4 = MAX(ZERO, GAP2 - P4(I))
+
 c      IF(ITAB(NSVG(I))==40142.AND.ITAB(IX1(I))==40016.AND.ITAB(IX2(I))==40017.AND.ITAB(IX3(I))==40080
 c     .   .AND.ITAB(IX4(I))==40079) THEN
+    
 c      write(*,*) ' P1(I)  P2(I)  P3(I)  P4(I)   ',P1(I) , P2(I) , P3(I) , P4(I)
 c      PAUSE
 c      ENDIF

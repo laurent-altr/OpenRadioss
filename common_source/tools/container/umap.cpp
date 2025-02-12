@@ -66,4 +66,11 @@ void cpp_reserve_umap(void* umap_ptr, std::size_t n) noexcept {
     umap->reserve(n);
 }
 
+// Expose a function to check if a pointer is null.
+int cpp_is_null(void* ptr) noexcept {
+    // Returns 1 if ptr is null, 0 otherwise.
+    return (ptr == nullptr) ? 1 : 0;
+}
+
+
 } // extern "C"

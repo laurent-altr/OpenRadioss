@@ -189,6 +189,9 @@ C-----------------------------------------------
         RENUM(I) = 0
       END DO
       I_STOK = II_STOK
+
+      write(6,*) "I_STOK=",I_STOK
+
       IDEB = 0
       JDEB = 0
       DO P = 1, NSPMD
@@ -234,6 +237,7 @@ C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
       use ISO_C_BINDING
+      use umap_mod, only: get_value_umap
       USE inter_shm_mod 
       USE TRI7BOX
 C-----------------------------------------------
@@ -260,6 +264,7 @@ C   S o u r c e  L i n e s
 C-----------------------------------------------
       integer :: size_shared_data
       integer :: i_offset
+      integer key, val
 C-----------------------------------------------
       size_shared_data = (WIN%RSIZ + WIN%ISIZ)!
       call c_f_pointer(win%shared_base, shared_int,[ size_shared_data, win%nsn_global ] )
@@ -269,40 +274,28 @@ C-----------------------------------------------
         RENUM(I) = -HUGE(I)
       END DO
       I_STOK = II_STOK
-      IDEB = 0
-      JDEB = 0
-      DO P = 1, NSPMD
-        I = 1
-        J = 1
-!       write(6,* ) P,"NSN NEW / OLD:",NSNFI(NIN)%P(P), NSNFIOLD(P)
-        DO WHILE (J<=NSNFI(NIN)%P(P).AND.I<=NSNFIOLD(P))
-          IF(shared_int(i_offset,J+JDEB)==
-     +       NSVFI(NIN)%P(I+IDEB)) THEN
-            RENUM(I+IDEB) = J+JDEB
-            I = I + 1
-            J = J + 1
-!           write(6,* ) "RNUM(",I+IDEB,")=",J+JDEB,NSNROLD
-          ELSEIF(shared_int(i_offset,J+JDEB)<
-     +           NSVFI(NIN)%P(I+IDEB)) THEN
-            J = J + 1
-          ELSEIF(shared_int(i_offset,J+JDEB)>
-     +           NSVFI(NIN)%P(I+IDEB)) THEN
-Cas candidat non penetre et non retenu
-            I = I + 1
-          END IF
-        END DO
-        !JDEB = JDEB + NSNFI(NIN)%P(P)  
-        JDEB = JDEB + win%nsns_in_world(P)
-!       write(6,* ) __FILE__,P,NSNFI(NIN)%P(P),win%nsns_in_world(P)
-        IDEB = IDEB + NSNFIOLD(P)
-      END DO
+
+C     write(6,*) "I_STOK=",I_STOK
+
 C
-C renumerotation des anciens candidats suivant les nouveaux no
-C
+      val = -1
       DO I = 1, I_STOK
         NI = CAND_N(I)
         IF(NI>NSN) THEN
           NI = NI - NSN
+!         function get_value_umap(umap_ptr, key, default_value) result(val) bind(C, name="cpp_get_value_umap")
+          key = ITAFI(NIN)%P(NI)
+          RENUM(NI) = get_value_umap(WIN%glob2loc,key,val)
+          IF(RENUM(NI) < 0) THEN
+             DO j = 1, win%nsn_global
+                if(ITAFI(NIN)%P(NI) == shared_int(win%itab_offset,j)) then
+                   write(6,*) "FOUND:",shared_int(win%itab_offset,j),shared_int(win%ispmd_offset,j),j
+                end if
+             end do
+             write(6,*) __FILE__,"RENUM(",NI,")=",RENUM(NI)
+             call flush(6)
+             call arret(2)
+           ENDIF
           CAND_N(I) = RENUM(NI) + NSN
         END IF        
         

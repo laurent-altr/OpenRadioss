@@ -50,9 +50,12 @@
         !\extend the array, copy the values
         interface extend_array
           module procedure extend_array_integer_1d
+          module procedure extend_array_integer_ptr_1d
           module procedure extend_array_integer_2d
           module procedure extend_array_integer_3d
           module procedure extend_array_double_1d
+          module procedure extend_array_double_ptr_1d
+
           module procedure extend_array_double_2d
           module procedure extend_array_double_3d
           module procedure extend_array_real_1d
@@ -172,6 +175,56 @@
             call arret(2)
           end if
         end subroutine check_error_and_write
+!! \brief resize a 1D array of integer, copy the values 
+      !||====================================================================
+      !||    extend_array_integer_1d   ../common_source/tools/memory/extend_array.F90
+      !||--- calls      -----------------------------------------------------
+      !||    check_error_and_write     ../common_source/tools/memory/my_alloc.F90
+      !||====================================================================
+        subroutine extend_array_integer_ptr_1d(a, oldsize, newsize, msg, stat)
+! ----------------------------------------------------------------------------------------------------------------------
+!                                                     Arguments
+! ----------------------------------------------------------------------------------------------------------------------
+          integer, dimension(:), pointer , intent(inout) :: a !< The allocated array
+          integer, intent(in) :: oldsize !< The old size of the array
+          integer, intent(in) :: newsize !< The new size of the array
+          character(len=len_error_message), optional, intent(in) :: msg !< The error message to print if the allocation fails
+          integer, optional, intent(out) :: stat !< The error code returned by the allocation
+! ----------------------------------------------------------------------------------------------------------------------
+!                                                   Local variables
+! ----------------------------------------------------------------------------------------------------------------------
+          integer :: ierr,i
+          integer, pointer :: temp(:)
+          integer :: copy_size
+! ----------------------------------------------------------------------------------------------------------------------
+!                                                      Body
+! ----------------------------------------------------------------------------------------------------------------------
+          if(newsize > oldsize) then  
+            allocate(temp(newsize), stat=ierr)
+            if(.not. present(stat)) then
+              if(present(msg)) then
+                call check_error_and_write(ierr, msg=msg)
+              else
+                call check_error_and_write(ierr)
+              end if
+            endif
+            if(present(stat)) stat = ierr
+            copy_size = oldsize
+            if(copy_size >0) temp(1:copy_size) = a(1:copy_size)
+!           call move_alloc(temp, a)
+            deallocate(a)
+            allocate(a(newsize), stat=ierr)
+            do i = 1, copy_size
+              a(i) = temp(i)
+            end do
+            deallocate(temp)
+
+          else if(newsize == oldsize .and. newsize == 0 .and. .not. associated(a)) then
+            allocate(a(1), stat=ierr)
+            if(present(stat)) stat = ierr
+          endif
+        end subroutine extend_array_integer_ptr_1d
+
 
 
 !! \brief resize a 1D array of integer, copy the values 
@@ -576,6 +629,53 @@
         ! Set the status to success if no errors occurred
         if (present(stat)) stat = 0
       end subroutine extend_array_real_3d
+      !||====================================================================
+      !||    extend_array_double_1d   ../common_source/tools/memory/extend_array.F90
+      !||--- calls      -----------------------------------------------------
+      !||    check_error_and_write    ../common_source/tools/memory/my_alloc.F90
+      !||====================================================================
+        subroutine extend_array_double_ptr_1d(a, oldsize, newsize, msg, stat)
+! ----------------------------------------------------------------------------------------------------------------------
+!                                                     Arguments
+! ----------------------------------------------------------------------------------------------------------------------
+          double precision, dimension(:), pointer, intent(inout) :: a !< The allocated array
+          integer, intent(in) :: oldsize !< The old size of the array
+          integer, intent(in) :: newsize !< The new size of the array
+          character(len=len_error_message), optional, intent(in) :: msg !< The error message to print if the allocation fails
+          integer, optional, intent(out) :: stat !< The error code returned by the allocation
+! ----------------------------------------------------------------------------------------------------------------------
+!                                                   Local variables
+! ----------------------------------------------------------------------------------------------------------------------
+          integer :: ierr,i
+          double precision, allocatable :: temp(:)
+          integer :: copy_size
+! ----------------------------------------------------------------------------------------------------------------------
+!                                                      Body
+! ----------------------------------------------------------------------------------------------------------------------
+          if(newsize > oldsize) then  
+            allocate(temp(newsize), stat=ierr)
+            if(.not. present(stat)) then
+              if(present(msg)) then
+                call check_error_and_write(ierr, msg=msg)
+              else
+                call check_error_and_write(ierr)
+              end if
+            endif
+            if(present(stat)) stat = ierr
+            copy_size = oldsize
+            if(copy_size >0) temp(1:copy_size) = a(1:copy_size)
+            deallocate(a)
+            allocate(a(newsize), stat=ierr)
+            do i = 1, copy_size
+              a(i) = temp(i)
+            end do
+            deallocate(temp)
+          else if(newsize == oldsize .and. newsize == 0 .and. .not. associated(a)) then
+            allocate(a(1), stat=ierr)
+            if(present(stat)) stat = ierr
+          endif
+        end subroutine extend_array_double_ptr_1d
+
 
 
 

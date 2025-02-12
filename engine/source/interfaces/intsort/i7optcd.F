@@ -102,10 +102,10 @@ C
          NLS2 = NSEG+1
          DO IS = 1, NSEG
            I=JS+IS
-c         if(I > I_STOK .OR. I < 1) then
-c          write(700+ispmd,*) 'I7OPTCD: IS, I=',IS+JS,I_STOK
-c          call flush(700+ispmd)
-c         endif
+          if(I > I_STOK .OR. I < 1) then
+           write(700+ispmd,*) 'I7OPTCD: IS, I=',IS+JS,I_STOK
+           call flush(700+ispmd)
+          endif
            if(CAND_N(I) < 0) THEN
              write(700+ispmd,*) __LINE__,'I7OPTCD: CAND_N(I) < 0',CAND_N(I),I
               call flush(700+ispmd)

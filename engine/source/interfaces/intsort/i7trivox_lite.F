@@ -50,6 +50,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 C============================================================================
 C   M o d u l e s
 C-----------------------------------------------
+      USE UMAP_MOD
       USE ISO_C_BINDING
       USE inter_shm_mod
       USE MESSAGE_MOD
@@ -159,10 +160,10 @@ c provisoire
       integer :: proc
       integer :: ielec_offset, temp_offset, areas_offset, gap_s_offset, gap_sl_offset, ipartfrics_offset
       integer :: x_offset, v_offset, ms_offset, stfns_offset
-      integer :: ispmd_offset, itab_offset, IKINET_offset, i_offset 
+      integer :: ispmd_offset, itab_offset, IKINET_offset, i_offset, boundary_offset
       double precision,  dimension(:,:), pointer :: shared_real
       integer(kind=8), dimension(:,:), pointer :: shared_int 
-      integer :: size_shared_data
+      integer :: size_shared_data,MM
 C-----------------------------------------------
       size_shared_data = (WIN%RSIZ + WIN%ISIZ)!
       call c_f_pointer(win%shared_base, shared_int,[ size_shared_data, win%nsn_global ] )
@@ -244,6 +245,7 @@ C=======================================================================
       v_offset = win%v_offset
       ms_offset = win%ms_offset
       stfns_offset = win%stfns_offset 
+      boundary_offset = win%boundary_offset
 C     DO I=1,WIN%NSN_GLOBAL
 C        write(700+ISPMD,*) "X=",shared_real(x_offset,I),shared_real(x_offset+1,I),shared_real(x_offset+2,I)
 C        write(700+ISPMD,*) "X=",shared_int(x_offset,I),shared_int(x_offset+1,I),shared_int(x_offset+2,I)
@@ -251,6 +253,7 @@ C        write(700+ISPMD,*) "ispmd=",shared_int(ispmd_offset,I),shared_real(ispm
 C        write(700+ISPMD,*) "itab=",shared_int(itab_offset,I),shared_real(itab_offset,I)
 C     ENDDO
 
+C      
 
       IF(ITASK==0.AND.TOTAL_NB_NRTM>0)THEN
         !==========LAGRANGIAN and STAGGERED ALE==========!
@@ -260,6 +263,7 @@ C     ENDDO
           IIY=0
           IIZ=0
           !IF(STFN(I) == ZERO)CYCLE
+          ! if(shared_int(weight_offset,i) > 0 .or. shared_int(ispmd_offset,i) == ispmd) then
           IF(shared_real(stfns_offset,I) == ZERO)CYCLE
           !C Optimisation // recherche les noeuds compris dans xmin xmax des
           !C elements du processeur
@@ -428,9 +432,6 @@ C=======================================================================
 c             write(6,*) "VOXEL(",IX,",",IY,",",IZ,")=",JJ
               DO WHILE(JJ /= 0)
                 DELNOD = 0
-
-                !nnpelem = nnpelem + 1
-!               IF(JJ<=NSN)THEN if local node
                 IF(shared_int(ispmd_offset,JJ) == ispmd)THEN
                   J = shared_int(i_offset,JJ) 
                   NN=NSV(J)
@@ -442,18 +443,24 @@ c             write(6,*) "VOXEL(",IX,",",IY,",",IZ,")=",JJ
                   IF(FLAGREMNODE == 2) THEN
                     IF( TAGREMNODE(NSV(J)) == 1)GOTO 200
                   ENDIF
+                 M = 0
                 ELSE
-                  J = NSN + JJ 
-                  IF(shared_int(itab_offset,JJ) ==itab(M1))GOTO 200
-                  IF(shared_int(itab_offset,JJ) ==itab(M2))GOTO 200
-                  IF(shared_int(itab_offset,JJ) ==itab(M3))GOTO 200
-                  IF(shared_int(itab_offset,JJ) ==itab(M4))GOTO 200
-
-                  IF(FLAGREMNODE == 2) THEN
+                 J = NSN + JJ
+                 M = shared_int(boundary_offset,JJ)
+                 IF(M > 0) then ! the node is actually a local but with weight = 0
+                    IF(shared_int(itab_offset,JJ) ==itab(M1))GOTO 200
+                    IF(shared_int(itab_offset,JJ) ==itab(M2))GOTO 200
+                    IF(shared_int(itab_offset,JJ) ==itab(M3))GOTO 200
+                    IF(shared_int(itab_offset,JJ) ==itab(M4))GOTO 200
+                    J = get_value_umap(win%boundary_to_local, JJ, -1)
+                    IF(FLAGREMNODE == 2) THEN
+                      IF( TAGREMNODE(NSV(J)) == 1)GOTO 200
+                    ENDIF
+                 else  IF(FLAGREMNODE == 2) THEN
                     K = KREMNOD(2*(NE-1)+2) + 1
                     L = KREMNOD(2*(NE-1)+3)
-                    DO M=K,L
-                      IF(REMNOD(M) == -shared_int(itab_offset,JJ) ) THEN
+                    DO MM=K,L
+                      IF(REMNOD(MM) == -shared_int(itab_offset,JJ) ) THEN
                         DELNOD = DELNOD + 1
                         EXIT
                       ENDIF
@@ -498,6 +505,16 @@ c             write(6,*) "VOXEL(",IX,",",IY,",",IZ,")=",JJ
                 !nnrpelem = nnrpelem + 1
 
                 J_STOK = J_STOK + 1
+                ! a local node with weight=0 will be found in 
+                ! the shared memory chunk associated to another domain
+                ! we convert it back to local node here
+!               IF(ITAB(M1) == 4443 .AND. ITAB(M2)== 4367 .AND. ITAB(M3) == 4366 .AND. ITAB(M4)==4442) THEN
+!                 IF(J < NSN) then  
+!                     if(itab(nsv(j))== 24653) write(6,*) "LOCAL FOUND",J,itab(nsv(J))
+!                 else
+!                    if(shared_int(itab_offset,JJ)==24653) write(6,*) "BUOND?",JJ,get_value_umap(win%boundary_to_local, JJ, -1)
+!                 endif
+!               ENDIF
                 PROV_N(J_STOK) = J
                 PROV_E(J_STOK) = NE
                 

@@ -2070,7 +2070,7 @@ c  Equivalent nodal force
        ! Initialization of INTER_STRUCT structure + allocation
        ALLOCATE( INTER_STRUCT(NINTER) )
        ALLOCATE( SORT_COMM(NINTER) )
-       CALL INTER_STRUCT_INIT(INTER_STRUCT,SORT_COMM,INTERFACES%INTBUF_TAB, IPARI,NPARI, ISPMD,NODES%WEIGHT)
+       CALL INTER_STRUCT_INIT(INTER_STRUCT,SORT_COMM,INTERFACES%INTBUF_TAB, IPARI,NPARI, ISPMD,NODES)
 
 C========================================================================================
 
@@ -2221,6 +2221,7 @@ C
      9   ISKWN  ,IFRAME  ,LOADS ,GLOB_THERM,PBLAST,RBE3)
 
 !$OMP END PARALLEL
+
       SHARED_MEMORY_CONTACT_SORTING = .TRUE.
       DO J = 1,NBINTC
         N = INTLIST(J)

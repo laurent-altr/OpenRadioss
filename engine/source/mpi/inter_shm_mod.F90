@@ -34,6 +34,8 @@
         public :: inter_window_open
         public :: inter_window_update
         public :: inter_window_close
+        public :: create_glob2loc
+        public :: inter_window_mark_boundary
         public :: nullify_inter_win
 
         type inter_win_
@@ -45,6 +47,8 @@
           integer :: node_id
           integer :: disp_unit !                                           
           integer :: win
+          TYPE(C_PTR) :: glob2loc
+          TYPE(C_PTR) :: boundary_to_local
           TYPE(C_PTR) :: shared_base
           integer, dimension(:,:), allocatable :: ranks_mapping
           integer, dimension(:), allocatable :: ranks_mapping_reverse
@@ -61,7 +65,7 @@
           integer :: rsiz, isiz
           integer :: ielec_offset, temp_offset, areas_offset, gap_s_offset, gap_sl_offset, ipartfrics_offset
           integer :: x_offset, v_offset, ms_offset, stfns_offset
-          integer :: i_offset, ispmd_offset, itab_offset, IKINET_offset
+          integer :: i_offset, ispmd_offset, itab_offset, IKINET_offset,boundary_offset
         end type inter_win_
 
 !       interface
@@ -112,6 +116,7 @@
           inter_win_var%ispmd_offset     = 0
           inter_win_var%itab_offset      = 0
           inter_win_var%IKINET_offset    = 0
+          inter_win_var%boundary_offset = 0
         
           ! -- Set MPI_ADDRESS_KIND fields to 0
           inter_win_var%shared_size      = 0_MPI_ADDRESS_KIND
@@ -155,7 +160,7 @@
           integer :: igap, intth, intfric, ityp, itied, nmn, nsn, inacti, ifq
           integer :: lr, li           
           integer :: ielec_offset, temp_offset, areas_offset, gap_s_offset, gap_sl_offset, ipartfrics_offset
-          integer :: ispmd_offset, itab_offset, IKINET_offset, i_offset 
+          integer :: ispmd_offset, itab_offset, IKINET_offset, i_offset, boundary_offset
           igap = ipari(21)
           intth = ipari(47)
           intfric = ipari(72)
@@ -193,8 +198,9 @@
           itab_offset = lr + 2
           IKINET_offset = lr + 3
           i_offset = lr + 4
+          boundary_offset = lr + 5
           ! =====
-          li = lr +4
+          li = lr +5
           if(intth>0)then
              ielec_offset = li + 1
              li = li + 1
@@ -219,6 +225,7 @@
           inter_win%itab_offset = itab_offset
           inter_win%ikinet_offset = IKINET_offset
           inter_win%i_offset = i_offset
+          inter_win%boundary_offset = boundary_offset
         end subroutine set_win_size 
 
 
@@ -341,6 +348,11 @@
 
           ! Convert base pointer to a usable Fortran pointer
           call c_f_pointer(inter_win%shared_base, inter_win%shared_data, [inter_win%shared_size / disp_unit])
+          if(inter_win%rank_intra_node == 0) then
+            inter_win%shared_data = 0.0d0
+          endif
+
+
 
 
           allocate(inter_win%addresses(inter_win%size_inter,2))
@@ -405,6 +417,8 @@
           write(6,*) "MPI communicators:", inter_comm, inter_win%COMM_INTER_NODE, inter_win%COMM_INTRA_NODE
            call flush(6)
           call MPI_Barrier(inter_comm, mpi_err)
+
+          inter_win%glob2loc = C_NULL_PTR
 #endif
         end subroutine
 
@@ -447,6 +461,36 @@
 #endif
         end subroutine inter_window_update
 
+        subroutine create_glob2loc(inter_win)
+          use umap_mod
+          use iso_c_binding
+          implicit none
+#ifdef MPI
+#include  "mpif.h"
+#else
+#define MPI_ADDRESS_KIND 8
+#endif
+! input arguments
+          type(inter_win_), intent(inout) :: inter_win
+! local variables
+          integer(MPI_ADDRESS_KIND) :: i
+          integer :: size_shared_data
+          integer(kind=8), dimension(:,:), pointer :: shared_int 
+          integer(C_SIZE_T) :: nsn_global
+          integer :: id,j
+          size_shared_data = (inter_win%RSIZ + inter_WIN%ISIZ)!
+          call c_f_pointer(inter_win%shared_base, shared_int,[ size_shared_data, inter_win%nsn_global ] )
+
+          inter_win%glob2loc = create_umap()
+          nsn_global = inter_win%nsn_global
+          call reserve_umap(inter_win%glob2loc, nsn_global)
+          do i = 1, nsn_global
+            id = shared_int(inter_win%itab_offset,i)
+            j = i
+            call add_entry(inter_win%glob2loc, id, j)
+          enddo 
+        end subroutine
+
         subroutine inter_window_close(inter_win)
           use iso_c_binding
           implicit none
@@ -475,4 +519,53 @@
           end if
 #endif
         end subroutine inter_window_close
+
+
+        subroutine inter_window_mark_boundary(inter_win, nodes, nspmd, nsv, nsn, numnod)
+          use iso_c_binding
+          use umap_mod
+          use nodal_arrays_mod
+          implicit none
+#ifdef MPI
+#include  "mpif.h"
+#endif
+! input arguments
+          type(inter_win_), intent(inout) :: inter_win
+          type(nodal_arrays_), intent(in) :: nodes
+          integer, intent(in) :: nspmd
+          integer, intent(in) :: nsn
+          integer, intent(in) :: nsv(nsn)
+          integer, intent(in) :: numnod 
+
+! local variables
+          integer :: size_shared_data
+          integer(kind=8), dimension(:,:), pointer :: shared_int 
+          integer(C_SIZE_T) :: nsn_global
+          integer :: i,id,j,p,n,k,pos
+          integer, dimension(:), allocatable :: inv_nsn
+
+          allocate(inv_nsn(numnod))
+          inv_nsn(1:numnod) = 0
+          do i = 1, nsn
+            inv_nsn(nsv(i)) = i
+          enddo
+          size_shared_data = (inter_win%RSIZ + inter_WIN%ISIZ)!
+          call c_f_pointer(inter_win%shared_base, shared_int,[ size_shared_data, inter_win%nsn_global ] )
+
+          inter_win%boundary_to_local = create_umap()
+          do n = 1, numnod
+              if(nodes%weight(n) == 0) then
+                id = nodes%itab(n)
+                k = get_value_umap(inter_win%glob2loc, id, -1)
+                if(k > 0) then
+                  shared_int(inter_win%boundary_offset,k) = 1 !ibset(shared_int(inter_win%i_boundary,k),pos)
+                  call add_entry(inter_win%boundary_to_local, k, inv_nsn(n))
+                endif
+              endif
+          enddo
+
+          deallocate(inv_nsn)
+
+
+        end subroutine
       end module
