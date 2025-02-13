@@ -304,8 +304,8 @@ C
         OFFSET = 0
         DO P = 1, NSPMD
           IF(P .NE. ISPMD + 1) THEN
-            DO I=1,WIN%nsns_in_world(P)
-              J = I + OFFSET
+            DO J=1,WIN%nsns_in_world(P)
+              I = J + OFFSET
               IIX=0
               IIY=0
               IIZ=0
