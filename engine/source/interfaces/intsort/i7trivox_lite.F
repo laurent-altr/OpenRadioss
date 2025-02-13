@@ -337,6 +337,7 @@ C=======================================================================
           TAGREMNODE(I) = 0
         ENDDO
       ENDIF
+      call startime(timers,45)
       DO NE=1,NRTM
         IF(STF(NE) == ZERO)CYCLE ! on ne retient pas les facettes detruites
         IF(FLAGREMNODE == 2) THEN
@@ -449,9 +450,7 @@ c             write(6,*) "VOXEL(",IX,",",IY,",",IZ,")=",JJ
                  J = NSN + JJ
                  M = shared_int(boundary_offset,JJ)
                  IF(M > 0) THEN
-                    call startime(timers,45)
                     M = get_value_umap(win%boundary_to_local, JJ, -1)
-                    call stoptime(timers,45)
                   ENDIF
                  IF(M > 0) J = M
                  IF(M > 0) then ! the node is actually a local but with weight = 0
@@ -527,6 +526,7 @@ c             write(6,*) "VOXEL(",IX,",",IY,",",IZ,")=",JJ
                 PROV_E(J_STOK) = NE
                 
                 IF(J_STOK == NVSIZ)THEN
+                call startime(timers,44)
                 CALL I7STO_LITE(SHARED_INT, SHARED_REAL, size_shared_data,win%nsn_global,
      1               NVSIZ ,IRECT  ,X     ,NSV   ,II_STOK,
      2               CAND_N,CAND_E ,MULNSN,NOINT ,MARGE  ,
@@ -536,6 +536,7 @@ c             write(6,*) "VOXEL(",IX,",",IY,",",IZ,")=",JJ
      6               GAP_M ,GAPMIN ,GAPMAX,CURV_MAX,NIN  ,
      7               GAP_S_L,GAP_M_L,INTTH,DRAD,ITIED    ,
      8               CAND_F ,DGAPLOAD)
+                  call stoptime(timers,44)
                   IF(I_MEM==2)GOTO 100
                   J_STOK = 0
                 ENDIF
@@ -565,6 +566,8 @@ C=======================================================================
      6              GAP_M ,GAPMIN ,GAPMAX,CURV_MAX,NIN  ,
      7              GAP_S_L,GAP_M_L,INTTH,DRAD  ,ITIED    ,
      8              CAND_F ,DGAPLOAD)
+
+                    call stoptime(timers,45)
 
 C=======================================================================
 C 5   VOXEL CLUSTERING  RESET
