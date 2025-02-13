@@ -310,6 +310,14 @@ C
               IIY=0
               IIZ=0
               IF(shared_real(stfns_offset,I) == ZERO)CYCLE
+              M = shared_int(boundary_offset,I) ! is the node at the boundary of multiple domains?
+              if(m > 0) then
+                 m = get_value_umap(win%boundary_to_local, I, -1) ! local number or -1
+              endif
+              if(m > 0) then 
+                cycle  ! boundary node owned by another domain, but knowned by me 
+              endif 
+
               !C Optimisation // recherche les noeuds compris dans xmin xmax des
               !C elements du processeur
               X1 = shared_real(1,I)                          
@@ -331,20 +339,20 @@ C
               FIRST = VOXEL(IIX,IIY,IIZ)
               IF(FIRST == 0)THEN
                 ! empty cell
-                VOXEL(IIX,IIY,IIZ) = NSN+J ! first
-                NEXT_NOD(NSN+J)     = 0 ! last one
-                LAST_NOD(NSN+J)     = 0 ! no last
+                VOXEL(IIX,IIY,IIZ) = NSN+I ! first
+                NEXT_NOD(NSN+I)     = 0 ! last one
+                LAST_NOD(NSN+I)     = 0 ! no last
               ELSEIF(LAST_NOD(FIRST) == 0)THEN
                 ! cell containing one node, add it as next node
-                NEXT_NOD(FIRST) = NSN+J  ! next
-                LAST_NOD(FIRST) = NSN+J  ! last
-                NEXT_NOD(NSN+J)  = 0     ! last one
+                NEXT_NOD(FIRST) = NSN+I  ! next
+                LAST_NOD(FIRST) = NSN+I  ! last
+                NEXT_NOD(NSN+I)  = 0     ! last one
               ELSE
                 ! , jump to the last node of the cell
                 LAST = LAST_NOD(FIRST)  ! last node in this voxel
-                NEXT_NOD(LAST)  = NSN+J ! next
-                LAST_NOD(FIRST) = NSN+J ! last
-                NEXT_NOD(NSN+J)     = 0 ! last one
+                NEXT_NOD(LAST)  = NSN+I ! next
+                LAST_NOD(FIRST) = NSN+I ! last
+                NEXT_NOD(NSN+I)     = 0 ! last one
               ENDIF
             ENDDO
           ENDIF ! ispmd
@@ -496,13 +504,7 @@ c             write(6,*) "VOXEL(",IX,",",IY,",",IZ,")=",JJ
                   M = 0
                 ELSE
                  J = JJ - NSN
-                 M = shared_int(boundary_offset,J) ! is the node at the boundary of multiple domains?
-                 if(m > 0) then
-                    m = get_value_umap(win%boundary_to_local, j, -1) ! local number or -1
-                 endif
-                 if(m > 0) then 
-                   goto 200  ! boundary node owned by another domain, but knowned by me 
-                 else  IF(FLAGREMNODE == 2) THEN
+                 IF(FLAGREMNODE == 2) THEN
                     call startime(timers,45)
                     DELNOD = 0
                     K = KREMNOD(2*(NE-1)+2) + 1
