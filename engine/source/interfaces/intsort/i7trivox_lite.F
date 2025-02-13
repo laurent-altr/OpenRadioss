@@ -505,7 +505,7 @@ c             write(6,*) "VOXEL(",IX,",",IY,",",IZ,")=",JJ
                 ELSE
                  J = JJ - NSN
                  IF(FLAGREMNODE == 2) THEN
-                    call startime(timers,45)
+c                   call startime(timers,45)
                     DELNOD = 0
                     K = KREMNOD(2*(NE-1)+2) + 1
                     L = KREMNOD(2*(NE-1)+3)
@@ -515,17 +515,17 @@ c             write(6,*) "VOXEL(",IX,",",IY,",",IZ,")=",JJ
                         EXIT
                       ENDIF
                     ENDDO
-                    call stoptime(timers,45)
+c                   call stoptime(timers,45)
                     IF(DELNOD /= 0)GOTO 200
                   ENDIF
-                  call startime(timers,45)
+c                 call startime(timers,45)
                   XS = shared_real(1,J)
                   YS = shared_real(2,J)
                   ZS = shared_real(3,J)
                   IF(IGAP /= 0)THEN
                     AAA = MARGE+CURV_MAX(NE)+MAX(MIN(GAPMAX,MAX(GAPMIN,shared_real(9,J)+GAP_M(NE)))+DGAPLOAD,DRAD)
                   ENDIF
-                  call stoptime(timers,45)
+c                 call stoptime(timers,45)
                 ENDIF
 
 
@@ -571,7 +571,7 @@ c             write(6,*) "VOXEL(",IX,",",IY,",",IZ,")=",JJ
                 PROV_E(J_STOK) = NE
                 
                 IF(J_STOK == NVSIZ)THEN
-                call startime(timers,44)
+c               call startime(timers,44)
                 CALL I7STO_LITE(SHARED_INT, SHARED_REAL, size_shared_data,win%nsn_global,
      1               NVSIZ ,IRECT  ,X     ,NSV   ,II_STOK,
      2               CAND_N,CAND_E ,MULNSN,NOINT ,MARGE  ,
@@ -581,7 +581,7 @@ c             write(6,*) "VOXEL(",IX,",",IY,",",IZ,")=",JJ
      6               GAP_M ,GAPMIN ,GAPMAX,CURV_MAX,NIN  ,
      7               GAP_S_L,GAP_M_L,INTTH,DRAD,ITIED    ,
      8               CAND_F ,DGAPLOAD)
-                  call stoptime(timers,44)
+c                 call stoptime(timers,44)
                   IF(I_MEM==2)GOTO 100
                   J_STOK = 0
                 ENDIF
