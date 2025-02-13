@@ -256,7 +256,6 @@ C        write(700+ISPMD,*) "itab=",shared_int(itab_offset,I),shared_real(itab_o
 C     ENDDO
 
 C      
-      CALL STARTIME(TIMERS, 45)
       IF(ITASK==0.AND.TOTAL_NB_NRTM>0)THEN
         !==========LAGRANGIAN and STAGGERED ALE==========!
         TEST_V0 = FIRST_TEST(NIN)
@@ -310,7 +309,6 @@ C
           ENDIF
         ENDDO
       ENDIF
-      CALL STOPTIME(TIMERS,45)
 C=======================================================================
 C 2   REMOTE NODE CLUSTERING
 C=======================================================================
@@ -450,13 +448,17 @@ c             write(6,*) "VOXEL(",IX,",",IY,",",IZ,")=",JJ
                 ELSE
                  J = NSN + JJ
                  M = shared_int(boundary_offset,JJ)
-                 IF(M > 0) M = get_value_umap(win%boundary_to_local, JJ, -1)
+                 IF(M > 0) THEN
+                    call startime(timers,45)
+                    M = get_value_umap(win%boundary_to_local, JJ, -1)
+                    call stoptime(timers,45)
+                  ENDIF
                  IF(M > 0) J = M
                  IF(M > 0) then ! the node is actually a local but with weight = 0
-                    IF(shared_int(itab_offset,JJ) ==itab(M1))GOTO 200
-                    IF(shared_int(itab_offset,JJ) ==itab(M2))GOTO 200
-                    IF(shared_int(itab_offset,JJ) ==itab(M3))GOTO 200
-                    IF(shared_int(itab_offset,JJ) ==itab(M4))GOTO 200
+                    IF(NN == M1)GOTO 200
+                    IF(NN == M2)GOTO 200
+                    IF(NN == M3)GOTO 200
+                    IF(NN == M4)GOTO 200
                     IF(FLAGREMNODE == 2) THEN
                       IF( TAGREMNODE(NSV(J)) == 1)GOTO 200
                     ENDIF
@@ -567,6 +569,7 @@ C=======================================================================
 C 5   VOXEL CLUSTERING  RESET
 C=======================================================================
   100 CONTINUE
+!     write(6,*) "II_STOK = ",II_STOK
       ! Barrier to avoid reinitialization before end of sorting
       CALL MY_BARRIER
       IF(TOTAL_NB_NRTM>0) THEN
@@ -591,7 +594,7 @@ C       ENDDO
       ENDIF
       CALL MY_BARRIER()
 
-c     write(6,*) "ISTOK=",II_STOK
+      write(6,*) "ISTOK=",II_STOK
 C=======================================================================
 C 6   DEBUG OUTPUT
 C=======================================================================
