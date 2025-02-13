@@ -1263,6 +1263,7 @@ set_source_files_properties( ${source_directory}/source/interfaces/intsort/i25st
 set_source_files_properties( ${source_directory}/source/interfaces/intsort/i24buce_crit.F PROPERTIES COMPILE_FLAGS "${legacy_flags}" )
 set_source_files_properties( ${source_directory}/source/interfaces/intsort/i22main_tri.F PROPERTIES COMPILE_FLAGS "${legacy_flags}" )
 set_source_files_properties( ${source_directory}/source/interfaces/intsort/intcrit.F PROPERTIES COMPILE_FLAGS "${legacy_flags}" )
+set_source_files_properties( ${source_directory}/source/interfaces/intsort/intcrit_lite.F PROPERTIES COMPILE_FLAGS "${legacy_flags}" )
 set_source_files_properties( ${source_directory}/source/interfaces/intsort/i24optcd.F PROPERTIES COMPILE_FLAGS "${legacy_flags}" )
 set_source_files_properties( ${source_directory}/source/interfaces/intsort/i7pen3.F PROPERTIES COMPILE_FLAGS "${legacy_flags}" )
 set_source_files_properties( ${source_directory}/source/interfaces/int24/i24dst3.F PROPERTIES COMPILE_FLAGS "${legacy_flags}" )

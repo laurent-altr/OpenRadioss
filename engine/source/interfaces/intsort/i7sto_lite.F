@@ -107,11 +107,11 @@ C-----------------------------------------------
                 NE = PROV_E(I)+ESHIFT
                 IF(N>NSN) THEN
 C numerotation tris precedent pour les noeuds non locaux (SPMD)
-                  IF(OLDNUM(N-NSN)< 0) THEN
-                  write(6,*) "OLDNUM(",N,NSN,")=",OLDNUM(N-NSN),N,NSN
-                  call flush(6)
-                  call arret(2) 
-                  endif
+c                 IF(OLDNUM(N-NSN)< 0) THEN
+c                 write(6,*) "OLDNUM(",N,NSN,")=",OLDNUM(N-NSN),N,NSN
+c                 call flush(6)
+c                 call arret(2) 
+c                 endif
                   N = OLDNUM(N-NSN)+NSN
                   IF(N==NSN) N = NSN+NSNROLD+1
                 END IF

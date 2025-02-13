@@ -210,7 +210,7 @@ C -------------------------------------------------------------
             ! ---------------------------
             ! send/rcv the secondary node data
 !             call spmd_inter_window_update_intra(inter_struct(nin)%win, nodes, intbuf_tab, ipari,npari,ispmd)
-              call spmd_inter_window_update_inter(inter_struct(nin)%win)
+!             call spmd_inter_window_update_inter(inter_struct(nin)%win)
                 IF(INACTI==5.OR.INACTI==6.OR.INACTI==7.OR.
      +               IFQ>0.OR.ITIED/=0)THEN
                     CALL SPMD_RNUMCD_LITE(inter_struct(nin)%win,
@@ -255,7 +255,7 @@ C
             CURV_MAX(1:NRTM_T) = INTER_STRUCT(NIN)%CURV_MAX(FIRST:LAST)
 
 
-            CALL I7BUCE_VOX_LITE(
+            CALL I7BUCE_VOX_LITE(TIMERS,
      1      INTER_STRUCT(NIN)%WIN, X    ,INTBUF_TAB%IRECTM(1+4*ESHIFT),INTBUF_TAB%NSV  ,INACTI    ,INTBUF_TAB%CAND_P,
      2      NMN_G  ,NRTM_T                       ,NSN     ,INTBUF_TAB%CAND_E,INTBUF_TAB%CAND_N,
      3      GAP    ,NOINT       ,INTBUF_TAB%I_STOK(1) ,NCONTACT ,INTER_STRUCT(NIN)%BOX_LIMIT_MAIN ,

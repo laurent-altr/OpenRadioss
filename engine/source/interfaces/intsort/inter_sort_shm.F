@@ -654,15 +654,14 @@ C
 C Fin Partie non parallele smt
 !$OMP END SINGLE
 
-      IF(IMPL_S/=1)THEN
-
-       IF((NSPMD>1.AND.ITASK==0).AND.(H3D_DATA%N_SCAL_CSE_FRIC > 0.OR.NINEFRIC > 0).AND.TT > ZERO) THEN
-         CALL SPMD_EXCH_SORTING_EFRIC(
-     1        IPARI   ,INTLIST ,NBINTC  ,ISLEN7 ,IRLEN7  ,
-     2        IRLEN7T ,ISLEN7T ,IRLEN20 ,ISLEN20,IRLEN20T,
-     3        ISLEN20T,INTBUF_TAB,H3D_DATA  )
-       ENDIF
-      ENDIF
+!     IF(IMPL_S/=1)THEN
+!      IF((NSPMD>1.AND.ITASK==0).AND.(H3D_DATA%N_SCAL_CSE_FRIC > 0.OR.NINEFRIC > 0).AND.TT > ZERO) THEN
+!        CALL SPMD_EXCH_SORTING_EFRIC(
+!    1        IPARI   ,INTLIST ,NBINTC  ,ISLEN7 ,IRLEN7  ,
+!    2        IRLEN7T ,ISLEN7T ,IRLEN20 ,ISLEN20,IRLEN20T,
+!    3        ISLEN20T,INTBUF_TAB,H3D_DATA  )
+!      ENDIF
+!     ENDIF
 
       IF(ITASK==0)CALL STOPTIME(TIMERS,120) 
 
@@ -778,6 +777,7 @@ c-----------------------------------------------------------------------
             PTR_MS => MS(1:NUMNOD)
             PTR_KINET => KINET(1:NUMNOD)
           ENDIF
+       call arret(2)
        CALL I7MAIN_TRI(TIMERS,
      1 IPARI   ,PTR_X   ,PTR_V   ,
      2 PTR_MS  ,N            ,ITASK        ,WAG     ,WEIGHT  ,
@@ -997,6 +997,7 @@ C
            IF(RETRI21(N)==1) RETRI = 1 
           ENDIF
        ENDDO
+
       ELSE
 C=======================================================================
 C      implicit options-------
@@ -1041,6 +1042,7 @@ C-----------------------------------------------------------------------
             PTR_MS => MS(1:NUMNOD)
             PTR_KINET => KINET(1:NUMNOD)
           ENDIF
+      call arret(2)
       CALL I7MAIN_TRI(TIMERS,
      1 IPARI   ,PTR_X   ,PTR_V   ,
      2 PTR_MS  ,N            ,ITASK        ,WAG     ,WEIGHT  ,

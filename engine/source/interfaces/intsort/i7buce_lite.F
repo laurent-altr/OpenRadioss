@@ -33,7 +33,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
       !||    message_mod     ../engine/share/message_module/message_mod.F
       !||    tri7box         ../engine/share/modules/tri7box.F
       !||====================================================================
-       SUBROUTINE I7BUCE_VOX_LITE(
+       SUBROUTINE I7BUCE_VOX_LITE(TIMERS,
      1   WIN,X ,IRECT   ,NSV     ,INACTI   ,CAND_P  ,
      2   NMN      ,NRTM    ,NSN     ,CAND_E   ,CAND_N  ,
      3   GAP      ,NOINT   ,II_STOK ,NCONTACT ,BMINMA  ,
@@ -49,6 +49,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 C============================================================================
 C   M o d u l e s
 C-----------------------------------------------
+      USE TIMER_MOD
       USE inter_shm_mod
       USE TRI7BOX
       USE MESSAGE_MOD
@@ -66,6 +67,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
+      TYPE(TIMER_), INTENT(inout) :: TIMERS
       TYPE(inter_win_), intent(inout) :: WIN
       my_real :: X(3,*)
       INTEGER NMN,NSN, NOINT,IDT,INACTI,IFQ, NIN, NSNR, NSNROLD
@@ -224,7 +226,7 @@ C (en // SMP il y a possibilite de redondance de traitement mais no pb)
         VOXEL1(I)=0
       ENDDO
       INIVOXEL = MAX(INIVOXEL,(NBX+2)*(NBY+2)*(NBZ+2)+1)
-       CALL I7TRIVOX_LITE(
+       CALL I7TRIVOX_LITE(TIMERS,
      1   NSN     ,RENUM    ,NSNR     ,ISZNSNR  ,I_MEM   ,
      2   IRECT   ,WIN  , X      ,STF      ,STFN     ,XYZM    ,
      3   NSV     ,II_STOK  ,CAND_N   ,ESHIFT   ,CAND_E  ,

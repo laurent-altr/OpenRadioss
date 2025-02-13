@@ -34,7 +34,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
       !||    message_mod     ../engine/share/message_module/message_mod.F
       !||    tri7box         ../engine/share/modules/tri7box.F
       !||====================================================================
-      SUBROUTINE I7TRIVOX_LITE(
+      SUBROUTINE I7TRIVOX_LITE(TIMERS,
      1      NSN    ,RENUM       ,NSNR    ,ISZNSNR  ,I_MEM    ,
      2      IRECT  ,WIN ,X        ,STF     ,STFN     ,XYZM     ,
      3      NSV    ,II_STOK     ,CAND_N  ,ESHIFT   ,CAND_E   ,
@@ -50,6 +50,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 C============================================================================
 C   M o d u l e s
 C-----------------------------------------------
+      USE TIMER_MOD
       USE UMAP_MOD
       USE ISO_C_BINDING
       USE inter_shm_mod
@@ -112,6 +113,7 @@ C                       noeud au dernier
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
+      TYPE(TIMER_) :: TIMERS
       TYPE(inter_win_) :: WIN
       INTEGER I_MEM,ESHIFT,NSN,ISZNSNR,NSNROLD,NIN,ITASK,
      .        MULNSN,NOINT,INACTI,IFQ,NSNR,IGAP,NBX,NBY,NBZ,
@@ -254,7 +256,7 @@ C        write(700+ISPMD,*) "itab=",shared_int(itab_offset,I),shared_real(itab_o
 C     ENDDO
 
 C      
-
+      CALL STARTIME(TIMERS, 45)
       IF(ITASK==0.AND.TOTAL_NB_NRTM>0)THEN
         !==========LAGRANGIAN and STAGGERED ALE==========!
         TEST_V0 = FIRST_TEST(NIN)
@@ -308,6 +310,7 @@ C
           ENDIF
         ENDDO
       ENDIF
+      CALL STOPTIME(TIMERS,45)
 C=======================================================================
 C 2   REMOTE NODE CLUSTERING
 C=======================================================================
