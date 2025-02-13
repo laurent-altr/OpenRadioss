@@ -357,9 +357,10 @@ C
             ENDDO
           ENDIF ! ispmd
           OFFSET = OFFSET + WIN%nsns_in_world(P)
-          IF(win%nsns_in_world(P) =< 0 .or. win%nsns_in_world(P) > NSNGLO) THEN
+          IF(win%nsns_in_world(P) < 0 .or. win%nsns_in_world(P) > NSNGLO) THEN
             WRITE(6,*) 'ERROR: nsns_in_world(P)=',win%nsns_in_world(P)
             CALL ARRET(2)
+          endif
         ENDDO
       ENDIF
 
