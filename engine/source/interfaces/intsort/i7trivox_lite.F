@@ -610,7 +610,7 @@ C=======================================================================
      7              GAP_S_L,GAP_M_L,INTTH,DRAD  ,ITIED    ,
      8              CAND_F ,DGAPLOAD)
 
-                    call stoptime(timers,45)
+!                   call stoptime(timers,45)
 
 C=======================================================================
 C 5   VOXEL CLUSTERING  RESET
