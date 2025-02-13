@@ -165,18 +165,20 @@ c provisoire
       integer :: ispmd_offset, itab_offset, IKINET_offset, i_offset, boundary_offset
       double precision,  dimension(:,:), pointer :: shared_real
       integer(kind=8), dimension(:,:), pointer :: shared_int 
-      integer :: size_shared_data,MM
+      integer :: size_shared_data,MM,P
+      integer :: NSNGLO, OFFSET
 C-----------------------------------------------
       size_shared_data = (WIN%RSIZ + WIN%ISIZ)!
       call c_f_pointer(win%shared_base, shared_int,[ size_shared_data, win%nsn_global ] )
       call c_f_pointer(win%shared_base, shared_real,[ size_shared_data, win%nsn_global ] )
+      NSNGLO = WIN%NSN_GLOBAL
 
 
-      allocate(LAST_NOD(win%nsn_global))
+      allocate(LAST_NOD(win%nsn_global+NSN))
       IF(ITASK == 0)THEN
         REMOTE_S_NODE = 0
         CPT_VOX0 = 0
-        ALLOCATE(NEXT_NOD(win%nsn_global),STAT=IERROR)
+        ALLOCATE(NEXT_NOD(win%nsn_global+NSN),STAT=IERROR)
         IF(IERROR/=0) THEN
           CALL ANCMSG(MSGID=19,ANMODE=ANINFO,
      .        C1='(/INTER/TYPE7)')
@@ -258,32 +260,23 @@ C     ENDDO
 C      
       IF(ITASK==0.AND.TOTAL_NB_NRTM>0)THEN
         !==========LAGRANGIAN and STAGGERED ALE==========!
-        TEST_V0 = FIRST_TEST(NIN)
-        DO I=1,WIN%NSN_GLOBAL
+        DO I=1,NSN
           IIX=0
           IIY=0
           IIZ=0
-          !IF(STFN(I) == ZERO)CYCLE
-          ! if(shared_int(weight_offset,i) > 0 .or. shared_int(ispmd_offset,i) == ispmd) then
-          IF(shared_real(stfns_offset,I) == ZERO)CYCLE
+          IF(STFN(I) == ZERO)CYCLE
+          J=NSV(I)
           !C Optimisation // recherche les noeuds compris dans xmin xmax des
           !C elements du processeur
-!         X1 = WIN%SHARED_DATA(CHUNK_SIZE*(I-1)+x_offset)
-!         X2 = WIN%SHARED_DATA(CHUNK_SIZE*(I-1)+x_offset+1)
-!         X3 = WIN%SHARED_DATA(CHUNK_SIZE*(I-1)+x_offset+2)
-          X1 = shared_real(1,I)                          
-          X2 = shared_real(2,I)
-          X3 = shared_real(3,I)
-          IF(X1 < XMIN)  CYCLE
-          IF(X1 > XMAX)  CYCLE
-          IF(X2 < YMIN)  CYCLE
-          IF(X2 > YMAX)  CYCLE
-          IF(X3 < ZMIN)  CYCLE
-          IF(X3 > ZMAX)  CYCLE
-          
-          IIX=INT(NBX*(X1 -XMINB)/(XMAXB-XMINB))
-          IIY=INT(NBY*(X2 -YMINB)/(YMAXB-YMINB))
-          IIZ=INT(NBZ*(X3 -ZMINB)/(ZMAXB-ZMINB))
+          IF(X(1,J) < XMIN)  CYCLE
+          IF(X(1,J) > XMAX)  CYCLE
+          IF(X(2,J) < YMIN)  CYCLE
+          IF(X(2,J) > YMAX)  CYCLE
+          IF(X(3,J) < ZMIN)  CYCLE
+          IF(X(3,J) > ZMAX)  CYCLE
+          IIX=INT(NBX*(X(1,J)-XMINB)/(XMAXB-XMINB))
+          IIY=INT(NBY*(X(2,J)-YMINB)/(YMAXB-YMINB))
+          IIZ=INT(NBZ*(X(3,J)-ZMINB)/(ZMAXB-ZMINB))
           IIX=MAX(1,2+MIN(NBX,IIX))
           IIY=MAX(1,2+MIN(NBY,IIY))
           IIZ=MAX(1,2+MIN(NBZ,IIZ))
@@ -308,23 +301,73 @@ C
             NEXT_NOD(I)     = 0 ! last one
           ENDIF
         ENDDO
+        OFFSET = 0
+        DO P = 1, NSPMD
+          IF(P .NE. ISPMD + 1) THEN
+            DO I=1,WIN%nsns_in_world(P)
+              J = I + OFFSET
+              IIX=0
+              IIY=0
+              IIZ=0
+              IF(shared_real(stfns_offset,I) == ZERO)CYCLE
+              !C Optimisation // recherche les noeuds compris dans xmin xmax des
+              !C elements du processeur
+              X1 = shared_real(1,I)                          
+              X2 = shared_real(2,I)
+              X3 = shared_real(3,I)
+              IF(X1 < XMIN)  CYCLE
+              IF(X1 > XMAX)  CYCLE
+              IF(X2 < YMIN)  CYCLE
+              IF(X2 > YMAX)  CYCLE
+              IF(X3 < ZMIN)  CYCLE
+              IF(X3 > ZMAX)  CYCLE
+              
+              IIX=INT(NBX*(X1 -XMINB)/(XMAXB-XMINB))
+              IIY=INT(NBY*(X2 -YMINB)/(YMAXB-YMINB))
+              IIZ=INT(NBZ*(X3 -ZMINB)/(ZMAXB-ZMINB))
+              IIX=MAX(1,2+MIN(NBX,IIX))
+              IIY=MAX(1,2+MIN(NBY,IIY))
+              IIZ=MAX(1,2+MIN(NBZ,IIZ))
+              FIRST = VOXEL(IIX,IIY,IIZ)
+              IF(FIRST == 0)THEN
+                ! empty cell
+                VOXEL(IIX,IIY,IIZ) = NSN+J ! first
+                NEXT_NOD(NSN+J)     = 0 ! last one
+                LAST_NOD(NSN+J)     = 0 ! no last
+              ELSEIF(LAST_NOD(FIRST) == 0)THEN
+                ! cell containing one node, add it as next node
+                NEXT_NOD(FIRST) = NSN+J  ! next
+                LAST_NOD(FIRST) = NSN+J  ! last
+                NEXT_NOD(NSN+J)  = 0     ! last one
+              ELSE
+                ! , jump to the last node of the cell
+                LAST = LAST_NOD(FIRST)  ! last node in this voxel
+                NEXT_NOD(LAST)  = NSN+J ! next
+                LAST_NOD(FIRST) = NSN+J ! last
+                NEXT_NOD(NSN+J)     = 0 ! last one
+              ENDIF
+            ENDDO
+          ENDIF ! ispmd
+          OFFSET = OFFSET + WIN%nsns_in_world(P)
+        ENDDO
       ENDIF
+
 C=======================================================================
 C 2   REMOTE NODE CLUSTERING
 C=======================================================================
       CALL MY_BARRIER ! Barrier to wait task0 treatment
 
-      IF(FIRST_TEST(NIN)) THEN
-!During the first sorting, we use the reduced box
-!If too many (>5 %) nodes are outside the reduced box
-!then the box is not reduced anymore
-        CALL MY_BARRIER
-        IF(ITASK == 0) THEN
-          IF(CPT_VOX0 > 5*(REMOTE_S_NODE + NSN)/100) TO_TRIM(NIN) = .FALSE.
-          FIRST_TEST(NIN) = .FALSE.
-        ENDIF
-        CALL MY_BARRIER
-      ENDIF
+C       IF(FIRST_TEST(NIN)) THEN
+C !During the first sorting, we use the reduced box
+C !If too many (>5 %) nodes are outside the reduced box
+C !then the box is not reduced anymore
+C         CALL MY_BARRIER
+C         IF(ITASK == 0) THEN
+C           IF(CPT_VOX0 > 5*(REMOTE_S_NODE + NSN)/100) TO_TRIM(NIN) = .FALSE.
+C           FIRST_TEST(NIN) = .FALSE.
+C         ENDIF
+C         CALL MY_BARRIER
+C       ENDIF
 
 
 C=======================================================================
@@ -434,55 +477,53 @@ C=======================================================================
 c             write(6,*) "VOXEL(",IX,",",IY,",",IZ,")=",JJ
               DO WHILE(JJ /= 0)
 
-                IF(shared_int(ispmd_offset,JJ) == ispmd)THEN
-                  J = shared_int(i_offset,JJ) 
-                  NN=NSV(J)
+                IF(JJ <= NSN)THEN
+                  NN=NSV(JJ)
                   IF(NN == M1)GOTO 200
                   IF(NN == M2)GOTO 200
                   IF(NN == M3)GOTO 200
                   IF(NN == M4)GOTO 200
 
                   IF(FLAGREMNODE == 2) THEN
-                    IF( TAGREMNODE(NSV(J)) == 1)GOTO 200
+                    IF( TAGREMNODE(NN) == 1)GOTO 200
                   ENDIF
-                 M = 0
+                  XS = X(1,NN)
+                  YS = X(2,NN)
+                  ZS = X(3,NN)
+                  IF(IGAP /= 0)THEN
+                    AAA = MARGE+CURV_MAX(NE)+MAX(MIN(GAPMAX,MAX(GAPMIN,GAP_S(JJ)+GAP_M(NE)))+DGAPLOAD,DRAD)
+                  ENDIF
+
+                  M = 0
                 ELSE
-                 J = NSN + JJ
-                 M = shared_int(boundary_offset,JJ)
-                 IF(M > 0) THEN
-                    M = get_value_umap(win%boundary_to_local, JJ, -1)
-                  ENDIF
-                 IF(M > 0) J = M
-                 IF(M > 0) then ! the node is actually a local but with weight = 0
-                    NN = NSV(J)
-                    IF(NN == M1)GOTO 200
-                    IF(NN == M2)GOTO 200
-                    IF(NN == M3)GOTO 200
-                    IF(NN == M4)GOTO 200
-                    IF(FLAGREMNODE == 2) THEN
-                      IF( TAGREMNODE(NSV(J)) == 1)GOTO 200
-                    ENDIF
+                 J = JJ - NSN
+                 M = shared_int(boundary_offset,J) ! is the node at the boundary of multiple domains?
+                 if(m > 0) then
+                    m = get_value_umap(win%boundary_to_local, j, -1) ! local number or -1
+                 endif
+                 if(m > 0) then 
+                   goto 200  ! boundary node owned by another domain, but knowned by me 
                  else  IF(FLAGREMNODE == 2) THEN
                     DELNOD = 0
                     K = KREMNOD(2*(NE-1)+2) + 1
                     L = KREMNOD(2*(NE-1)+3)
                     DO MM=K,L
-                      IF(REMNOD(MM) == -shared_int(itab_offset,JJ) ) THEN
+                      IF(REMNOD(MM) == -shared_int(itab_offset,J) ) THEN
                         DELNOD = DELNOD + 1
                         EXIT
                       ENDIF
                     ENDDO
                     IF(DELNOD /= 0)GOTO 200
                   ENDIF
+                  XS = shared_real(1,J)
+                  YS = shared_real(2,J)
+                  ZS = shared_real(3,J)
+                  IF(IGAP /= 0)THEN
+                    AAA = MARGE+CURV_MAX(NE)+MAX(MIN(GAPMAX,MAX(GAPMIN,shared_real(9,J)+GAP_M(NE)))+DGAPLOAD,DRAD)
+                  ENDIF
 
                 ENDIF
 
-                XS = shared_real(1,JJ)
-                YS = shared_real(2,JJ)
-                ZS = shared_real(3,JJ)
-                IF(IGAP /= 0)THEN
-                  AAA = MARGE+CURV_MAX(NE)+MAX(MIN(GAPMAX,MAX(GAPMIN,shared_real(9,JJ)+GAP_M(NE)))+DGAPLOAD,DRAD)
-                ENDIF
 
 
                 IF(XS<=XMINE-AAA)GOTO 200
@@ -522,11 +563,10 @@ c             write(6,*) "VOXEL(",IX,",",IY,",",IZ,")=",JJ
 !                    if(shared_int(itab_offset,JJ)==24653) write(6,*) "BUOND?",JJ,get_value_umap(win%boundary_to_local, JJ, -1)
 !                 endif
 !               ENDIF
-                PROV_N(J_STOK) = J
+                PROV_N(J_STOK) = JJ
                 PROV_E(J_STOK) = NE
                 
                 IF(J_STOK == NVSIZ)THEN
-                call startime(timers,44)
                 CALL I7STO_LITE(SHARED_INT, SHARED_REAL, size_shared_data,win%nsn_global,
      1               NVSIZ ,IRECT  ,X     ,NSV   ,II_STOK,
      2               CAND_N,CAND_E ,MULNSN,NOINT ,MARGE  ,
@@ -536,7 +576,6 @@ c             write(6,*) "VOXEL(",IX,",",IY,",",IZ,")=",JJ
      6               GAP_M ,GAPMIN ,GAPMAX,CURV_MAX,NIN  ,
      7               GAP_S_L,GAP_M_L,INTTH,DRAD,ITIED    ,
      8               CAND_F ,DGAPLOAD)
-                  call stoptime(timers,44)
                   IF(I_MEM==2)GOTO 100
                   J_STOK = 0
                 ENDIF
@@ -598,7 +637,6 @@ C       ENDDO
       ENDIF
       CALL MY_BARRIER()
 
-      write(6,*) "ISTOK=",II_STOK
 C=======================================================================
 C 6   DEBUG OUTPUT
 C=======================================================================
