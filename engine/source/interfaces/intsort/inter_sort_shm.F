@@ -101,11 +101,11 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
       !||====================================================================
       SUBROUTINE INTER_SORT_SHM(TIMERS,
      1       IPARI    ,X       ,W       , ERRORS, 
-     2       V        ,MS      ,        IAD_ELEM ,
-     3       FR_ELEM  ,         ISENDTO ,IRECVFROM,
+     2       V        ,MS      ,IN      ,IAD_ELEM ,
+     3       FR_ELEM  ,VR      ,ISENDTO ,IRECVFROM,
      4       NEWFRONT ,ITASK   ,WAG     ,DT2T     ,
      5       ITAB     ,NELTST  ,ITYPTST ,WEIGHT   ,
-     6       INTLIST  ,NBINTC  ,KINET             ,
+     6       INTLIST  ,NBINTC  ,KINET   ,DRETRI   ,
      7       ISLEN7   ,IRLEN7  ,ISLEN11 ,IRLEN11  ,
      8       TEMP     ,IGRBRIC ,IGRSH3N ,EMINX    ,
      9       IXS      ,IXS16   ,IXS20   ,ISLEN17  ,
@@ -202,7 +202,7 @@ C-----------------------------------------------
       TYPE(INTSTAMP_DATA) INTSTAMP(*)
       my_real 
      .   WAG(*),
-     .        DT2T,DIST,  TEMP(TEMP_SIZ), EMINX(*),
+     .   VR(3,*),IN(*),DT2T,DIST, DRETRI(*), TEMP(TEMP_SIZ), EMINX(*),
      .        THKNOD(*),DELTA_PMAX_GAP(NINTER),
      .        XSLV(18,NINTER),XMSR(12,NINTER),X21MSR(3,NINTSTAMP),
      .        VSLV(6,NINTER),VMSR(6,NINTER),V21MSR(3,NINTSTAMP),
@@ -366,6 +366,8 @@ C        Look if interface is activated
         IF(NTY == 24.AND.TT>=TS)THEN
          NSNE_MAX = MAX(NSNE_MAX,IPARI(55,N))
 C-- 
+ccc         NFIC = 3   
+ccc         CALL I24XVFIC_UPD(IPARI(1,N),INTBUF_TAB(N),X   ,V ,NFIC  ,ITAB)
         END IF
 
         IF(INTBUF_TAB(N)%S_NIGE/=0) THEN
@@ -477,6 +479,20 @@ C-----------------------------------------------
         ELSEIF(NTY == 24.AND.TT>=TS)THEN
 C-----------------------------------------------
           I7KGLO = 1
+C         IPARI(4,N) = NRTM ; IPARI(5,N)=NSN  
+C-------not necessary but should modify I24BUCE_CRIT
+C         NSNE = IPARI(55,N)
+C        IF (NSNE >0 ) THEN
+C         CALL MY_BARRIER
+C!$OMP SINGLE
+C         XE(NNOD3+1:(NNOD3+NSNE3)) = INTBUF_TAB(N)%XFIC(1:NSNE3)
+C         VE(NNOD3+1:(NNOD3+NSNE3)) = INTBUF_TAB(N)%VFIC(1:NSNE3)
+C!$OMP END SINGLE
+C        CALL I24MAIN_CRIT_TRI(
+C     1      IPARI ,INTBUF_TAB(N),XE           ,N        ,
+C     2      ITASK ,VE           ,XSLV(1,N)    ,XMSR(1,N),VSLV(1,N),
+C     3      VMSR(1,N),DELTA_PMAX_GAP(N),DELTA_PMAX_DGAP(N))
+C        ELSE
         CALL I24MAIN_CRIT_TRI(
      1      IPARI ,INTBUF_TAB(N),X            ,N        ,
      2      ITASK ,V            ,XSLV(1,N)    ,XMSR(1,N),VSLV(1,N),
@@ -654,14 +670,15 @@ C
 C Fin Partie non parallele smt
 !$OMP END SINGLE
 
-!     IF(IMPL_S/=1)THEN
-!      IF((NSPMD>1.AND.ITASK==0).AND.(H3D_DATA%N_SCAL_CSE_FRIC > 0.OR.NINEFRIC > 0).AND.TT > ZERO) THEN
-!        CALL SPMD_EXCH_SORTING_EFRIC(
-!    1        IPARI   ,INTLIST ,NBINTC  ,ISLEN7 ,IRLEN7  ,
-!    2        IRLEN7T ,ISLEN7T ,IRLEN20 ,ISLEN20,IRLEN20T,
-!    3        ISLEN20T,INTBUF_TAB,H3D_DATA  )
-!      ENDIF
-!     ENDIF
+      IF(IMPL_S/=1)THEN
+
+       IF((NSPMD>1.AND.ITASK==0).AND.(H3D_DATA%N_SCAL_CSE_FRIC > 0.OR.NINEFRIC > 0).AND.TT > ZERO) THEN
+         CALL SPMD_EXCH_SORTING_EFRIC(
+     1        IPARI   ,INTLIST ,NBINTC  ,ISLEN7 ,IRLEN7  ,
+     2        IRLEN7T ,ISLEN7T ,IRLEN20 ,ISLEN20,IRLEN20T,
+     3        ISLEN20T,INTBUF_TAB,H3D_DATA  )
+       ENDIF
+      ENDIF
 
       IF(ITASK==0)CALL STOPTIME(TIMERS,120) 
 
@@ -703,14 +720,14 @@ C Fin Partie non parallele smt
             ENDIF
             ! -----------
             ! prepare the sort 
-            CALL INTER_PREPARE_SORT_LITE( ITASK,NB_INTER_SORTED,LIST_INTER_SORTED,ISENDTO,IRECVFROM,
+            CALL INTER_PREPARE_SORT( ITASK,NB_INTER_SORTED,LIST_INTER_SORTED,ISENDTO,IRECVFROM,
      .                               IPARI,IAD_ELEM,FR_ELEM,X,V,
      .                               MS,TEMP,KINET,NODNX_SMS,ITAB,
      .                               WEIGHT,INTBUF_TAB,INTER_STRUCT,SORT_COMM,NODNX_SMS_SIZ,
      .                               TEMP_SIZ )
             ! -----------
             ! sorting computation
-            CALL INTER_SORT_LITE(TIMERS, ITASK,NB_INTER_SORTED,LIST_INTER_SORTED,RETRI,IPARI,
+            CALL INTER_SORT(TIMERS, ITASK,NB_INTER_SORTED,LIST_INTER_SORTED,RETRI,IPARI,
      1                       NSENSOR,ISENDTO,IRECVFROM,INTBUF_TAB,X,ITAB,
      2                       RENUM,NSNFIOLD,MULTI_FVM,H3D_DATA,SENSORS%SENSOR_TAB,
      3                       INTER_STRUCT,SORT_COMM ,RENUM_SIZ,GLOB_THERM)
@@ -777,7 +794,6 @@ c-----------------------------------------------------------------------
             PTR_MS => MS(1:NUMNOD)
             PTR_KINET => KINET(1:NUMNOD)
           ENDIF
-       call arret(2)
        CALL I7MAIN_TRI(TIMERS,
      1 IPARI   ,PTR_X   ,PTR_V   ,
      2 PTR_MS  ,N            ,ITASK        ,WAG     ,WEIGHT  ,
@@ -997,7 +1013,6 @@ C
            IF(RETRI21(N)==1) RETRI = 1 
           ENDIF
        ENDDO
-
       ELSE
 C=======================================================================
 C      implicit options-------
@@ -1042,7 +1057,6 @@ C-----------------------------------------------------------------------
             PTR_MS => MS(1:NUMNOD)
             PTR_KINET => KINET(1:NUMNOD)
           ENDIF
-      call arret(2)
       CALL I7MAIN_TRI(TIMERS,
      1 IPARI   ,PTR_X   ,PTR_V   ,
      2 PTR_MS  ,N            ,ITASK        ,WAG     ,WEIGHT  ,
@@ -1324,8 +1338,8 @@ C
       ! ------------------------
       ! explicit part
       IF(IMPL_S/=1)THEN
-c       CALL INTER_DEALLOCATE_WAIT( ITASK,NB_INTER_SORTED,LIST_INTER_SORTED,IPARI,
-c    1       NSENSOR,IRECVFROM,SENSORS%SENSOR_TAB,INTER_STRUCT,SORT_COMM )
+        CALL INTER_DEALLOCATE_WAIT( ITASK,NB_INTER_SORTED,LIST_INTER_SORTED,IPARI,
+     1       NSENSOR,IRECVFROM,SENSORS%SENSOR_TAB,INTER_STRUCT,SORT_COMM )
       ENDIF
       ! end : new sorting algorithm 
       ! ------------------------------

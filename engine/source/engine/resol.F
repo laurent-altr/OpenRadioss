@@ -3730,13 +3730,13 @@ C===============================================================================
         ITYPTSTT= ITYPTST
         ITSK = OMP_GET_THREAD_NUM()
         IF(SHARED_MEMORY_CONTACT_SORTING) THEN
-        CALL INTER_SORT_SHM(TIMERS,
+        CALL INTER_SORT_SHM(TIMERS, 
      1     IPARI   ,ptrX     ,W     , INTER_ERRORS,
-     2     NODES%V       ,NODES%MS           ,IAD_ELEM  ,
-     3     FR_ELEM ,      ISENDTO ,IRCVFROM  ,
+     2     NODES%V       ,NODES%MS      ,NODES%IN      ,IAD_ELEM  ,
+     3     FR_ELEM ,NODES%VR      ,ISENDTO ,IRCVFROM  ,
      4     NEWFRONT  ,ITSK    ,WA      ,DT2TT     ,
      5     NODES%ITAB      ,NELTSTT ,ITYPTSTT,NODES%WEIGHT    ,
-     6     INTLIST ,NBINTC  ,NODES%KINET   ,  
+     6     INTLIST ,NBINTC  ,NODES%KINET   ,DRETRI    ,
      7     ISLEN7  ,IRLEN7  ,ISLEN11 ,IRLEN11   ,
      8     TEMP    ,IGRBRIC ,IGRSH3N ,EMINX     ,
      9     IXS     ,IXS(L3) ,IXS(L2) ,ISLEN17   ,
@@ -3756,7 +3756,6 @@ C===============================================================================
      N     T2FAC_SMS,NODES%ICODT,NODES%ISKEW ,FSKYN25  ,ADDCSRECT,PROCNOR,
      O     INTER_STRUCT,SORT_COMM,RNUM_SIZ,NATIV_SMS_SIZ,TEMP_SIZ,
      P     INTERFACES,GLOB_THERM)
-
         ELSE
 
         CALL INTTRI(TIMERS,

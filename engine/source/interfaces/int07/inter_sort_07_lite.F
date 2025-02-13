@@ -198,7 +198,7 @@ C -------------------------------------------------------------
 
         I_SK_OLD = INTER_STRUCT(NIN)%I_SK_OLD
 !$OMP SINGLE
-        NSNR = inter_struct(nin)%win%nsn_global
+        NSNR = 0 ! inter_struct(nin)%win%nsn_global
         CURV_MAX_MAX = INTER_STRUCT(NIN)%CURV_MAX_MAX
         RESULT = 0
         NMN_G = INTER_STRUCT(NIN)%NMN_G
@@ -209,11 +209,14 @@ C -------------------------------------------------------------
             IF(ITASK==0)THEN
             ! ---------------------------
             ! send/rcv the secondary node data
-!             call spmd_inter_window_update_intra(inter_struct(nin)%win, nodes, intbuf_tab, ipari,npari,ispmd)
-!             call spmd_inter_window_update_inter(inter_struct(nin)%win)
+                CALL SPMD_CELL_EXCHANGE_LITE(TIMERS, NIN,ISENDTO,IRCVFROM,NSN,NSNR,IPARI(21,NIN),
+     1                                   IFQ,INACTI,NSNFIOLD,IPARI(47,NIN),NTY, intbuf_tab%stfns, intbuf_tab%nsv,
+     2                                   NRTM, X, INTBUF_TAB,IPARI,NPARI,
+     2                                   ITIED,NMN,INTER_STRUCT,SORT_COMM, GOT_PREVIEW)
+C
                 IF(INACTI==5.OR.INACTI==6.OR.INACTI==7.OR.
      +               IFQ>0.OR.ITIED/=0)THEN
-                    CALL SPMD_RNUMCD_LITE(inter_struct(nin)%win,
+                    CALL SPMD_RNUMCD(
      1                  INTBUF_TAB%CAND_N,RENUM  ,INTBUF_TAB%I_STOK(1), NIN,NSN,
      2                NSNFIOLD     ,NSNROLD)
                 END IF
@@ -255,8 +258,8 @@ C
             CURV_MAX(1:NRTM_T) = INTER_STRUCT(NIN)%CURV_MAX(FIRST:LAST)
 
 
-            CALL I7BUCE_VOX_LITE(TIMERS,
-     1      INTER_STRUCT(NIN)%WIN, X    ,INTBUF_TAB%IRECTM(1+4*ESHIFT),INTBUF_TAB%NSV  ,INACTI    ,INTBUF_TAB%CAND_P,
+            CALL I7BUCE_VOX(
+     1      X      ,INTBUF_TAB%IRECTM(1+4*ESHIFT),INTBUF_TAB%NSV  ,INACTI    ,INTBUF_TAB%CAND_P,
      2      NMN_G  ,NRTM_T                       ,NSN     ,INTBUF_TAB%CAND_E,INTBUF_TAB%CAND_N,
      3      GAP    ,NOINT       ,INTBUF_TAB%I_STOK(1) ,NCONTACT ,INTER_STRUCT(NIN)%BOX_LIMIT_MAIN ,
      4      TZINF  ,MAXBOX      ,MINBOX         ,INTER_STRUCT(NIN)%CAND_A         ,CURV_MAX  ,
@@ -375,7 +378,7 @@ C mono tache
             IF (IMONM > 0) CALL STARTIME(TIMERS,26)
             INTBUF_TAB%VARIABLES(distance_index) = -INTBUF_TAB%VARIABLES(distance_index)
 C
-            CALL SPMD_TRI7GAT_LITE(INTER_STRUCT(NIN)%WIN,
+            CALL SPMD_TRI7GAT(
      1          RESULT       ,NSN     ,INTBUF_TAB%CAND_N,INTBUF_TAB%I_STOK(1),NIN,
      2          IPARI(21,NIN),NSNR    ,MULTIMP        ,NTY         ,IPARI(47,NIN),  
      3          IDUM1        ,NSNFIOLD, IPARI        , H3D_DATA    ,IPARI(72,NIN),

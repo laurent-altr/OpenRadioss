@@ -164,6 +164,7 @@ set_source_files_properties( ${source_directory}/source/mpi/output/spmd_sd_acc.F
 set_source_files_properties( ${source_directory}/source/mpi/output/spmd_collectv.F PROPERTIES COMPILE_FLAGS "${legacy_flags}" )
 set_source_files_properties( ${source_directory}/source/mpi/output/spmd_collectm.F PROPERTIES COMPILE_FLAGS "${legacy_flags}" )
 set_source_files_properties( ${source_directory}/source/mpi/output/spmd_sd_gau.F PROPERTIES COMPILE_FLAGS "${legacy_flags}" )
+set_source_files_properties( ${source_directory}/source/mpi/generic/spmd_cell_exchange_lite.F PROPERTIES COMPILE_FLAGS "${legacy_flags}" )
 set_source_files_properties( ${source_directory}/source/mpi/generic/spmd_ialltoall_int.F PROPERTIES COMPILE_FLAGS "${legacy_flags}" )
 set_source_files_properties( ${source_directory}/source/mpi/generic/spmd_ialltoall.F PROPERTIES COMPILE_FLAGS "${legacy_flags}" )
 set_source_files_properties( ${source_directory}/source/mpi/generic/spmd_glob_minv.F PROPERTIES COMPILE_FLAGS "${legacy_flags}" )
