@@ -455,6 +455,7 @@ c             write(6,*) "VOXEL(",IX,",",IY,",",IZ,")=",JJ
                   ENDIF
                  IF(M > 0) J = M
                  IF(M > 0) then ! the node is actually a local but with weight = 0
+                    NN = NSV(J)
                     IF(NN == M1)GOTO 200
                     IF(NN == M2)GOTO 200
                     IF(NN == M3)GOTO 200
