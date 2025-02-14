@@ -179,7 +179,8 @@
           !  inter_win%itab_offset = itab_offset
           !  inter_win%ikinet_offset = IKINET_offset
           !  inter_win%i_offset = i_offset
-
+          call MPI_Win_sync(inter_win%win, mpi_err)
+          call MPI_Barrier(inter_win%COMM_INTRA_NODE, mpi_err)
 #endif
         end subroutine spmd_inter_window_update_intra
 

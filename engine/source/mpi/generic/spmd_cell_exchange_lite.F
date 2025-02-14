@@ -143,7 +143,7 @@ C     et creation des candidats
 C================================================================
       my_real :: xmin, xmax, ymin, ymax, zmin, zmax
       integer :: max_remote
-      integer :: iix, iiy, iiz, m
+      integer :: iix, iiy, iiz, m, k
       integer :: ielec_offset, temp_offset, areas_offset, gap_s_offset, gap_sl_offset, ipartfrics_offset
       integer :: x_offset, v_offset, ms_offset, stfns_offset
       integer :: ispmd_offset, itab_offset, IKINET_offset, i_offset, boundary_offset
@@ -153,6 +153,7 @@ C================================================================
       integer :: NSNGLO, OFFSET,NSNROLD
       integer :: nsn_local
       integer :: count_extend
+      my_real, dimension(:,:), allocatable :: X_PACKED
       my_real :: x1, x2, x3
 C-----------------------------------------------
       size_shared_data = (inter_struct(nin)%WIN%RSIZ + inter_struct(nin)%WIN%ISIZ)!
@@ -272,9 +273,14 @@ c     ALLOCATE(IREM(ISIZ,max_remote),STAT=IERROR)
       IF (IMONM > 0) CALL STARTIME(TIMERS,25)
         count_extend = 0
         OFFSET = 0
+        K = maxval(inter_struct(nin)%WIN%nsns_in_world(1:NSPMD))
+        allocate(X_PACKED(3,k))
         DO P = 1, NSPMD
           nsn_local = 0
           IF(P .NE. ISPMD + 1) THEN
+          K = inter_struct(nin)%WIN%nsns_in_world(P)
+          if(K > 0) X_PACKED(1:3,1:K) = shared_real(1:3,OFFSET+1:OFFSET+K)
+
             DO J=1,inter_struct(nin)%WIN%nsns_in_world(P)
               I = J + OFFSET
               IIX=0
@@ -324,7 +330,7 @@ c     ALLOCATE(IREM(ISIZ,max_remote),STAT=IERROR)
         ENDDO ! P
         inter_struct(nin)%old_rem_size = NSNR
 !       write(6,*) ispmd,"count_extend",count_extend,nsn,nsnr
-        
+        deallocate(X_PACKED) 
           
        ENDIF
 
