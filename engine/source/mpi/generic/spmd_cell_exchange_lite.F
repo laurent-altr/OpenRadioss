@@ -153,6 +153,7 @@ C================================================================
       integer :: NSNGLO, OFFSET,NSNROLD
       integer :: nsn_local
       integer :: count_extend
+      my_real, dimension(:,:), allocatable :: PACKED_X
       my_real :: x1, x2, x3
 C-----------------------------------------------
       size_shared_data = (inter_struct(nin)%WIN%RSIZ + inter_struct(nin)%WIN%ISIZ)!
@@ -271,9 +272,12 @@ c     ALLOCATE(IREM(ISIZ,max_remote),STAT=IERROR)
       IF (IMONM > 0) CALL STARTIME(TIMERS,25)
         count_extend = 0
         OFFSET = 0
+        ALLOCATE(PACKED_X(3,MAXVAL(inter_struct(nin)%WIN%nsns_in_world(1:NSPMD))))
         DO P = 1, NSPMD
           nsn_local = 0
           IF(P .NE. ISPMD + 1) THEN
+            J = inter_struct(nin)%WIN%nsns_in_world(P)
+            PACKED_X(1:3,1:J) =shared_real(1:3,OFFSET+1:OFFSET+J)
             DO J=1,inter_struct(nin)%WIN%nsns_in_world(P)
               I = J + OFFSET
               IIX=0
@@ -281,9 +285,9 @@ c     ALLOCATE(IREM(ISIZ,max_remote),STAT=IERROR)
               IIZ=0
               !C Optimisation // recherche les noeuds compris dans xmin xmax des
               !C elements du processeur
-              X1 = shared_real(1,I)                          
-              X2 = shared_real(2,I)
-              X3 = shared_real(3,I)
+              X1 = packed_x(1,j) ! shared_real(1,I)                          
+              X2 = packed_x(1,j) ! shared_real(2,I)
+              X3 = packed_x(1,j) ! shared_real(3,I)
               IF(X1 < XMIN)  CYCLE
               IF(X1 > XMAX)  CYCLE
               IF(X2 < YMIN)  CYCLE
@@ -321,6 +325,7 @@ c     ALLOCATE(IREM(ISIZ,max_remote),STAT=IERROR)
           OFFSET = OFFSET + inter_struct(nin)%WIN%nsns_in_world(P)
           NSNFI(NIN)%P(P) = nsn_local
         ENDDO ! P
+        deallocate(PACKED_X)
         inter_struct(nin)%old_rem_size = NSNR
 !       write(6,*) ispmd,"count_extend",count_extend,nsn,nsnr
         
