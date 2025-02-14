@@ -150,6 +150,7 @@ C================================================================
       integer(kind=8), dimension(:,:), pointer :: shared_int 
       integer :: size_shared_data,MM
       integer :: NSNGLO, OFFSET,NSNROLD
+      integer :: nsn_local
       my_real :: x1, x2, x3
 C-----------------------------------------------
       size_shared_data = (inter_struct(nin)%WIN%RSIZ + inter_struct(nin)%WIN%ISIZ)!
@@ -256,6 +257,8 @@ C       INTER_STRUCT(NIN)%BOX_LIMIT_MAIN(6) = MIN(INTER_STRUCT(NIN)%BOX_LIMIT_MA
         SORT_COMM(NIN)%RSIZ = RSIZ
         SORT_COMM(NIN)%ISIZ = ISIZ
 
+      IF(allocated(XREM))DEALLOCATE(XREM)
+      IF(allocated(IREM))DEALLOCATE(IREM)
       ALLOCATE(XREM(RSIZ,max_remote),STAT=IERROR)
       ALLOCATE(IREM(ISIZ,max_remote),STAT=IERROR)          
       NSNR = 0
@@ -263,6 +266,7 @@ C       INTER_STRUCT(NIN)%BOX_LIMIT_MAIN(6) = MIN(INTER_STRUCT(NIN)%BOX_LIMIT_MA
       IF (IMONM > 0) CALL STARTIME(TIMERS,25)
         OFFSET = 0
         DO P = 1, NSPMD
+          nsn_local = 0
           IF(P .NE. ISPMD + 1) THEN
             DO J=1,inter_struct(nin)%WIN%nsns_in_world(P)
               I = J + OFFSET
@@ -290,8 +294,9 @@ C       INTER_STRUCT(NIN)%BOX_LIMIT_MAIN(6) = MIN(INTER_STRUCT(NIN)%BOX_LIMIT_MA
               IF(X3 < ZMIN)  CYCLE
               IF(X3 > ZMAX)  CYCLE
 
-              NSNR = NSNR + 1 
-              if(nsnr > max_remote) then
+             NSNR = NSNR + 1 
+             nsn_local = nsn_local + 1
+             if(nsnr == max_remote) then
                  max_remote = max(max_remote + 1000,int(max_remote*1.2))
                 call extend_array(XREM,RSIZ,nsnr,RSIZ,max_remote)
                 call extend_array(IREM,ISIZ,nsnr,ISIZ,max_remote)
@@ -306,6 +311,7 @@ C       INTER_STRUCT(NIN)%BOX_LIMIT_MAIN(6) = MIN(INTER_STRUCT(NIN)%BOX_LIMIT_MA
             ENDDO !j
           ENDIF ! ispmd
           OFFSET = OFFSET + inter_struct(nin)%WIN%nsns_in_world(P)
+          NSNFI(NIN)%P(P) = nsn_local
         ENDDO ! P
 
         

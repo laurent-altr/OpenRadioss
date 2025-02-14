@@ -3715,6 +3715,7 @@ C===============================================================================
         INTER_ERRORS = 0
 
       IF(SHARED_MEMORY_CONTACT_SORTING) THEN
+      call startime(timers, 45)
       DO J = 1,NBINTC
         N = INTLIST(J)
         if(IPARI(7,N) .NE. 7) CYCLE
@@ -3722,6 +3723,7 @@ C===============================================================================
         call spmd_inter_window_update_intra(inter_struct(n)%win, nodes, interfaces%intbuf_tab(n), ipari(1:npari,n),npari,ispmd)
         call spmd_inter_window_update_inter(inter_struct(n)%win)
       ENDDO
+      call stoptime(timers, 45)
       ENDIF
 
 !$OMP PARALLEL PRIVATE(ITSK,DT2TT,NELTSTT,ITYPTSTT)

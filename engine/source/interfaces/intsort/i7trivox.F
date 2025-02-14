@@ -548,7 +548,7 @@ C=======================================================================
 C 5   VOXEL CLUSTERING  RESET
 C=======================================================================
   100 CONTINUE
-       write(6,*) "II_STOK = ", II_STOK
+!      write(6,*) "II_STOK = ", II_STOK
       ! Barrier to avoid reinitialization before end of sorting
       CALL MY_BARRIER
       IF(TOTAL_NB_NRTM>0) THEN

@@ -720,14 +720,14 @@ C Fin Partie non parallele smt
             ENDIF
             ! -----------
             ! prepare the sort 
-            CALL INTER_PREPARE_SORT( ITASK,NB_INTER_SORTED,LIST_INTER_SORTED,ISENDTO,IRECVFROM,
+            CALL INTER_PREPARE_SORT_LITE( ITASK,NB_INTER_SORTED,LIST_INTER_SORTED,ISENDTO,IRECVFROM,
      .                               IPARI,IAD_ELEM,FR_ELEM,X,V,
      .                               MS,TEMP,KINET,NODNX_SMS,ITAB,
      .                               WEIGHT,INTBUF_TAB,INTER_STRUCT,SORT_COMM,NODNX_SMS_SIZ,
      .                               TEMP_SIZ )
             ! -----------
             ! sorting computation
-            CALL INTER_SORT(TIMERS, ITASK,NB_INTER_SORTED,LIST_INTER_SORTED,RETRI,IPARI,
+            CALL INTER_SORT_LITE(TIMERS, ITASK,NB_INTER_SORTED,LIST_INTER_SORTED,RETRI,IPARI,
      1                       NSENSOR,ISENDTO,IRECVFROM,INTBUF_TAB,X,ITAB,
      2                       RENUM,NSNFIOLD,MULTI_FVM,H3D_DATA,SENSORS%SENSOR_TAB,
      3                       INTER_STRUCT,SORT_COMM ,RENUM_SIZ,GLOB_THERM)
@@ -1337,10 +1337,10 @@ C
       CALL MY_BARRIER()
       ! ------------------------
       ! explicit part
-      IF(IMPL_S/=1)THEN
-        CALL INTER_DEALLOCATE_WAIT( ITASK,NB_INTER_SORTED,LIST_INTER_SORTED,IPARI,
-     1       NSENSOR,IRECVFROM,SENSORS%SENSOR_TAB,INTER_STRUCT,SORT_COMM )
-      ENDIF
+!     IF(IMPL_S/=1)THEN
+!       CALL INTER_DEALLOCATE_WAIT( ITASK,NB_INTER_SORTED,LIST_INTER_SORTED,IPARI,
+!    1       NSENSOR,IRECVFROM,SENSORS%SENSOR_TAB,INTER_STRUCT,SORT_COMM )
+!     ENDIF
       ! end : new sorting algorithm 
       ! ------------------------------
 C=======================================================================

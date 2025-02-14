@@ -160,31 +160,6 @@ C-----------------------------------------------
         ENDIF
         ! -----------------------------
 
-        ! -----------------------------
-        ! globalization of min/max position 
-        IF(NSPMD>1.AND.NEED_TO_SORT>0)THEN
-            IF(ITASK==0) THEN
-                CALL SPMD_BOX_LIMIT_REDUCTION(NB_INTER_SORTED)
-            ENDIF
-            CALL MY_BARRIER()
-        ENDIF
-        ! -----------------------------
-
-        ! -----------------------------
-        ! allocation & initialization of coarse_grid
-        IF(ITASK==0) THEN
-            IF(.NOT.ALLOCATED(LOCAL_COARSE_GRID)) THEN
-                ALLOCATE(LOCAL_COARSE_GRID(NB_BOX_COARSE_GRID**3+1))
-            ENDIF            
-            LOCAL_COARSE_GRID(1:NB_BOX_COARSE_GRID**3+1) = 0
-        ENDIF
-        CALL MY_BARRIER()
-        ! -----------------------------
-
-        ! -----------------------------
-        ! color the coarse grid
-
-
         IF(NEED_TO_SORT>0)THEN
           IF(NSPMD > 1 .AND. ITASK == 0) THEN
         ! -----------------------------
