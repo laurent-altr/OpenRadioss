@@ -147,6 +147,7 @@ C-----------------------------------------------
       USE OUTPUTS_MOD
       USE INTERFACES_MOD
       USE GLOB_THERM_MOD
+      USE SPMD_INTER_WINDOW_UPDATE
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -645,6 +646,16 @@ C
      3    XSLV      ,XMSR    ,VSLV    ,VMSR     ,INTLIST   ,
      4    NBINTC    ,SIZE_T  ,SENSORS%SENSOR_TAB,DELTA_PMAX_GAP,
      5    INTBUF_TAB,DELTA_PMAX_GAP_NODE,IDEL7NOK_SAV,MAXDGAP,V)
+
+      call startime(timers, 45)
+      DO J = 1,NBINTC
+        N = INTLIST(J)
+        if(IPARI(7,N) .NE. 7) CYCLE
+        if(IPARI(7,N) == 7 .AND. IPARI(22,N) == 7 ) CYCLE                                       
+!       call spmd_inter_window_update_intra(inter_struct(n)%win, nodes, interfaces%intbuf_tab(n), ipari(1:npari,n),npari,ispmd)
+        call spmd_inter_window_update_inter(inter_struct(n)%win)
+      ENDDO
+      if(IMON > 0) call stoptime(timers, 45)
 
 
 C

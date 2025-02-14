@@ -252,7 +252,7 @@ C
 C       INTER_STRUCT(NIN)%BOX_LIMIT_MAIN(4) = MIN(INTER_STRUCT(NIN)%BOX_LIMIT_MAIN(4),MIN_LIMIT_MAIN(1))
 C       INTER_STRUCT(NIN)%BOX_LIMIT_MAIN(5) = MIN(INTER_STRUCT(NIN)%BOX_LIMIT_MAIN(5),MIN_LIMIT_MAIN(2))
 C       INTER_STRUCT(NIN)%BOX_LIMIT_MAIN(6) = MIN(INTER_STRUCT(NIN)%BOX_LIMIT_MAIN(6),MIN_LIMIT_MAIN(3))
-        max_remote = max(NSN,NSNROLD)
+        max_remote = 2*max(NSN,NSNROLD)
         NSNR = 0
         SORT_COMM(NIN)%RSIZ = RSIZ
         SORT_COMM(NIN)%ISIZ = ISIZ
@@ -297,11 +297,9 @@ C       INTER_STRUCT(NIN)%BOX_LIMIT_MAIN(6) = MIN(INTER_STRUCT(NIN)%BOX_LIMIT_MA
              NSNR = NSNR + 1 
              nsn_local = nsn_local + 1
              if(nsnr == max_remote) then
-                 call startime(TIMERS,44)
                  max_remote = max(max_remote + 1000,int(max_remote*1.2))
                 call extend_array(XREM,RSIZ,nsnr,RSIZ,max_remote)
                 call extend_array(IREM,ISIZ,nsnr,ISIZ,max_remote)
-                call stoptime(TIMERS,44)
               endif
               DO L=1,RSIZ
               XREM(L,NSNR) = shared_real(L,I)
