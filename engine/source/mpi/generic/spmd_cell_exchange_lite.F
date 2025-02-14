@@ -274,6 +274,7 @@ c     ALLOCATE(IREM(ISIZ,max_remote),STAT=IERROR)
         count_extend = 0
         OFFSET = 0
         K = maxval(inter_struct(nin)%WIN%nsns_in_world(1:NSPMD))
+
         allocate(X_PACKED(3,k))
         DO P = 1, NSPMD
           nsn_local = 0
