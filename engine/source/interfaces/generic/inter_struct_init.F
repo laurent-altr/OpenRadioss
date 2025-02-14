@@ -118,12 +118,13 @@ C           INTER_STRUCT(KK)%WIN%NSNS(ISPMD+1) = NSN_OWNED
             ENDDO
 
             IF(NSN+NRTM+NMN > 0) THEN
+              inter_struct(KK)%old_rem_size = size(ITAFI(KK)%P)
               call inter_window_open(INTER_STRUCT(KK)%WIN, NSN_OWNED, INTBUF_TAB(KK), ispmd,nspmd, ipari(:,KK), npari)
               call spmd_inter_window_update_intra(INTER_STRUCT(KK)%WIN, nodes, INTBUF_TAB(KK), IPARI(:,KK), NPARI, ISPMD)
               call spmd_inter_window_update_inter(INTER_STRUCT(KK)%WIN)
               if(NSN>0) call inter_window_mark_boundary(INTER_STRUCT(KK)%WIN, nodes, nspmd, intbuf_tab(KK)%NSV, NSN, numnod)
               call spmd_inter_window_update_inter(INTER_STRUCT(KK)%WIN)
-
+             
 
 !             size_shared_data = (INTER_STRUCT(KK)%WIN%RSIZ + INTER_STRUCT(KK)%WIN%ISIZ)!
 !             call c_f_pointer(INTER_STRUCT(KK)%WIN%shared_base, shared_int,[ size_shared_data, INTER_STRUCT(KK)%WIN%nsn_global ] )
