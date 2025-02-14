@@ -254,7 +254,7 @@ C
 C       INTER_STRUCT(NIN)%BOX_LIMIT_MAIN(4) = MIN(INTER_STRUCT(NIN)%BOX_LIMIT_MAIN(4),MIN_LIMIT_MAIN(1))
 C       INTER_STRUCT(NIN)%BOX_LIMIT_MAIN(5) = MIN(INTER_STRUCT(NIN)%BOX_LIMIT_MAIN(5),MIN_LIMIT_MAIN(2))
 C       INTER_STRUCT(NIN)%BOX_LIMIT_MAIN(6) = MIN(INTER_STRUCT(NIN)%BOX_LIMIT_MAIN(6),MIN_LIMIT_MAIN(3))
-        max_remote = MAX(10*NSN, 1000)
+        max_remote = MAX(INT(1.2D0*inter_struct(nin)%old_rem_size),2*(NMN+NSN))
         NSNR = 0
         SORT_COMM(NIN)%RSIZ = RSIZ
         SORT_COMM(NIN)%ISIZ = ISIZ
@@ -321,6 +321,7 @@ c     ALLOCATE(IREM(ISIZ,max_remote),STAT=IERROR)
           OFFSET = OFFSET + inter_struct(nin)%WIN%nsns_in_world(P)
           NSNFI(NIN)%P(P) = nsn_local
         ENDDO ! P
+        inter_struct(nin)%old_rem_size = NSNR
 !       write(6,*) ispmd,"count_extend",count_extend,nsn,nsnr
         
           

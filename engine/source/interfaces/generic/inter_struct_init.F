@@ -91,6 +91,7 @@ C-----------------------------------------------
             INTER_STRUCT(KK)%INACTII = 0
             INTER_STRUCT(KK)%CURV_MAX_MAX = ZERO
             INTER_STRUCT(KK)%NMN_G = 0                
+            INTER_STRUCT(KK)%old_rem_size = 0
             NSN = IPARI(5,KK)
 C           INTER_STRUCT(KK)%WIN%NSNS(1:NSPMD) = 0
 C           INTER_STRUCT(KK)%WIN%NSNS(ISPMD+1) = NSN_OWNED
