@@ -65,6 +65,7 @@ C-----------------------------------------------
         USE INTBUFDEF_MOD
         USE EXTEND_ARRAY_MOD
         use umap_mod
+        use MY_ALLOC_MOD
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -253,15 +254,18 @@ C
 C       INTER_STRUCT(NIN)%BOX_LIMIT_MAIN(4) = MIN(INTER_STRUCT(NIN)%BOX_LIMIT_MAIN(4),MIN_LIMIT_MAIN(1))
 C       INTER_STRUCT(NIN)%BOX_LIMIT_MAIN(5) = MIN(INTER_STRUCT(NIN)%BOX_LIMIT_MAIN(5),MIN_LIMIT_MAIN(2))
 C       INTER_STRUCT(NIN)%BOX_LIMIT_MAIN(6) = MIN(INTER_STRUCT(NIN)%BOX_LIMIT_MAIN(6),MIN_LIMIT_MAIN(3))
-        max_remote = MAX(2*NSN, 1000)
+        max_remote = MAX(5*NSN, 1000)
         NSNR = 0
         SORT_COMM(NIN)%RSIZ = RSIZ
         SORT_COMM(NIN)%ISIZ = ISIZ
 
       IF(allocated(XREM))DEALLOCATE(XREM)
       IF(allocated(IREM))DEALLOCATE(IREM)
-      ALLOCATE(XREM(RSIZ,max_remote),STAT=IERROR)
-      ALLOCATE(IREM(ISIZ,max_remote),STAT=IERROR)          
+c     ALLOCATE(XREM(RSIZ,max_remote),STAT=IERROR)
+c     ALLOCATE(IREM(ISIZ,max_remote),STAT=IERROR)          
+      CALL MY_ALLOC(XREM,RSIZ,max_remote)
+      CALL MY_ALLOC(IREM,ISIZ,max_remote)
+      
       NSNR = 0
 
       IF (IMONM > 0) CALL STARTIME(TIMERS,25)
@@ -300,8 +304,8 @@ C       INTER_STRUCT(NIN)%BOX_LIMIT_MAIN(6) = MIN(INTER_STRUCT(NIN)%BOX_LIMIT_MA
              NSNR = NSNR + 1 
              nsn_local = nsn_local + 1
              if(nsnr == max_remote) then
-!               max_remote = max(max_remote + 1000,int(max_remote*1.2))
-                count_extend = count_extend + 1
+                max_remote = max(max_remote + 1000,int(max_remote*1.2))
+!               count_extend = count_extend + 1
                 call extend_array(XREM,RSIZ,nsnr,RSIZ,max_remote)
                 call extend_array(IREM,ISIZ,nsnr,ISIZ,max_remote)
               endif
