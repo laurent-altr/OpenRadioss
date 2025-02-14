@@ -151,6 +151,7 @@ C================================================================
       integer :: size_shared_data,MM
       integer :: NSNGLO, OFFSET,NSNROLD
       integer :: nsn_local
+      integer :: count_extend
       my_real :: x1, x2, x3
 C-----------------------------------------------
       size_shared_data = (inter_struct(nin)%WIN%RSIZ + inter_struct(nin)%WIN%ISIZ)!
@@ -264,6 +265,7 @@ C       INTER_STRUCT(NIN)%BOX_LIMIT_MAIN(6) = MIN(INTER_STRUCT(NIN)%BOX_LIMIT_MA
       NSNR = 0
 
       IF (IMONM > 0) CALL STARTIME(TIMERS,25)
+        count_extend = 0
         OFFSET = 0
         DO P = 1, NSPMD
           nsn_local = 0
@@ -273,15 +275,6 @@ C       INTER_STRUCT(NIN)%BOX_LIMIT_MAIN(6) = MIN(INTER_STRUCT(NIN)%BOX_LIMIT_MA
               IIX=0
               IIY=0
               IIZ=0
-              IF(shared_real(stfns_offset,I) == ZERO)CYCLE
-              M = shared_int(boundary_offset,I) ! is the node at the boundary of multiple domains?
-              if(m > 0) then
-                 m = get_value_umap(inter_struct(nin)%win%boundary_to_local, I, -1) ! local number or -1
-              endif
-              if(m > 0) then 
-                cycle  ! boundary node owned by another domain, but knowned by me 
-              endif 
-
               !C Optimisation // recherche les noeuds compris dans xmin xmax des
               !C elements du processeur
               X1 = shared_real(1,I)                          
@@ -293,11 +286,22 @@ C       INTER_STRUCT(NIN)%BOX_LIMIT_MAIN(6) = MIN(INTER_STRUCT(NIN)%BOX_LIMIT_MA
               IF(X2 > YMAX)  CYCLE
               IF(X3 < ZMIN)  CYCLE
               IF(X3 > ZMAX)  CYCLE
+              IF(shared_real(stfns_offset,I) == ZERO)CYCLE
+
+              M = shared_int(boundary_offset,I) ! is the node at the boundary of multiple domains?
+              if(m > 0) then
+                 m = get_value_umap(inter_struct(nin)%win%boundary_to_local, I, -1) ! local number or -1
+              endif
+              if(m > 0) then 
+                cycle  ! boundary node owned by another domain, but knowned by me 
+              endif 
+
 
              NSNR = NSNR + 1 
              nsn_local = nsn_local + 1
              if(nsnr == max_remote) then
                  max_remote = max(max_remote + 1000,int(max_remote*1.2))
+                count_extend = count_extend + 1
                 call extend_array(XREM,RSIZ,nsnr,RSIZ,max_remote)
                 call extend_array(IREM,ISIZ,nsnr,ISIZ,max_remote)
               endif
@@ -313,6 +317,7 @@ C       INTER_STRUCT(NIN)%BOX_LIMIT_MAIN(6) = MIN(INTER_STRUCT(NIN)%BOX_LIMIT_MA
           OFFSET = OFFSET + inter_struct(nin)%WIN%nsns_in_world(P)
           NSNFI(NIN)%P(P) = nsn_local
         ENDDO ! P
+        write(6,*) ispmd,"count_extend",count_extend,nsn,nsnr
         
           
        ENDIF
