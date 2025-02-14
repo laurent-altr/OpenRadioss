@@ -297,9 +297,11 @@ C       INTER_STRUCT(NIN)%BOX_LIMIT_MAIN(6) = MIN(INTER_STRUCT(NIN)%BOX_LIMIT_MA
              NSNR = NSNR + 1 
              nsn_local = nsn_local + 1
              if(nsnr == max_remote) then
+                 call startime(TIMERS,44)
                  max_remote = max(max_remote + 1000,int(max_remote*1.2))
                 call extend_array(XREM,RSIZ,nsnr,RSIZ,max_remote)
                 call extend_array(IREM,ISIZ,nsnr,ISIZ,max_remote)
+                call stoptime(TIMERS,44)
               endif
               DO L=1,RSIZ
               XREM(L,NSNR) = shared_real(L,I)
@@ -313,7 +315,6 @@ C       INTER_STRUCT(NIN)%BOX_LIMIT_MAIN(6) = MIN(INTER_STRUCT(NIN)%BOX_LIMIT_MA
           OFFSET = OFFSET + inter_struct(nin)%WIN%nsns_in_world(P)
           NSNFI(NIN)%P(P) = nsn_local
         ENDDO ! P
-
         
           
        ENDIF

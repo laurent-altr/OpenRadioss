@@ -3688,6 +3688,19 @@ C----------------------------------------
 C      COLLISION DETECTION FOR INTERFACES 7 (CALL BARRIER DANS I7BUCE_CRIT)
 C----------------------------------------
       IF(NINTER/=0) THEN
+      IF(SHARED_MEMORY_CONTACT_SORTING) THEN
+      if(IMON > 0 ) call startime(timers, 45)
+      DO J = 1,NBINTC
+        N = INTLIST(J)
+        if(IPARI(7,N) .NE. 7) CYCLE
+        if(IPARI(7,N) == 7 .AND. IPARI(22,N) == 7 ) CYCLE                                       
+        call spmd_inter_window_update_intra(inter_struct(n)%win, nodes, interfaces%intbuf_tab(n), ipari(1:npari,n),npari,ispmd)
+        call spmd_inter_window_update_inter(inter_struct(n)%win)
+      ENDDO
+      if(IMON > 0) call stoptime(timers, 45)
+      ENDIF
+
+
         CALL TRACE_IN(8,2,ZERO)
         IF (IMON > 0) CALL STARTIME(TIMERS,TIMER_CONTSORT)
         L1 = 1+NIXS*NUMELS + NSVOIS*NIXS
@@ -3713,18 +3726,6 @@ C===============================================================================
           CALL ASSIGN_PTRX(ptrX,NODES%X,NUMNOD)
         ENDIF
         INTER_ERRORS = 0
-
-      IF(SHARED_MEMORY_CONTACT_SORTING) THEN
-      call startime(timers, 45)
-      DO J = 1,NBINTC
-        N = INTLIST(J)
-        if(IPARI(7,N) .NE. 7) CYCLE
-        if(IPARI(7,N) == 7 .AND. IPARI(22,N) == 7 ) CYCLE                                       
-        call spmd_inter_window_update_intra(inter_struct(n)%win, nodes, interfaces%intbuf_tab(n), ipari(1:npari,n),npari,ispmd)
-        call spmd_inter_window_update_inter(inter_struct(n)%win)
-      ENDDO
-      call stoptime(timers, 45)
-      ENDIF
 
 !$OMP PARALLEL PRIVATE(ITSK,DT2TT,NELTSTT,ITYPTSTT)
         DT2TT = DT2T
