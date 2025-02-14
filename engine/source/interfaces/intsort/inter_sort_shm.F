@@ -704,9 +704,7 @@ C Fin Partie non parallele smt
         call startime(timers, 44)
         call spmd_inter_window_update_intra(inter_struct(n)%win, nodes, interfaces%intbuf_tab(n), ipari(1:npari,n),npari,ispmd)
         call stoptime(timers, 44)
-        call startime(timers, 45)
         call spmd_inter_window_update_inter(inter_struct(n)%win)
-        call stoptime(timers, 45)
       ENDDO
       ENDIF
 
@@ -724,6 +722,7 @@ C Fin Partie non parallele smt
             ! -----------
             ! inacti exchange for all interfaces
             IF(NEED_TO_SORT>0.AND.NEED_COMM_INACTI.AND.NB_INTER_7_INACTI>0) THEN
+               call startime(timers, 45)
                 IF(ITASK==0) THEN
                     IF(NSPMD>1) THEN
                         CALL SPMD_GET_INACTI_GLOBAL(IPARI,NB_INTER_SORTED,LIST_INTER_SORTED,INTER_STRUCT)
@@ -735,6 +734,7 @@ C Fin Partie non parallele smt
                     ENDIF   
                 ENDIF
                 CALL MY_BARRIER()
+                call stoptime(timers, 45)
             ENDIF
             ! -----------
             ! prepare the sort 
