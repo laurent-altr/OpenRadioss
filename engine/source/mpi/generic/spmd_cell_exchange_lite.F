@@ -275,7 +275,8 @@ c     ALLOCATE(IREM(ISIZ,max_remote),STAT=IERROR)
         OFFSET = 0
         K = maxval(inter_struct(nin)%WIN%nsns_in_world(1:NSPMD))
 
-        allocate(X_PACKED(3,k))
+        allocate(X_PACKED(3,K))
+
         DO P = 1, NSPMD
           nsn_local = 0
           IF(P .NE. ISPMD + 1) THEN
@@ -289,9 +290,12 @@ c     ALLOCATE(IREM(ISIZ,max_remote),STAT=IERROR)
               IIZ=0
               !C Optimisation // recherche les noeuds compris dans xmin xmax des
               !C elements du processeur
-              X1 = shared_real(1,I)                          
-              X2 = shared_real(2,I)
-              X3 = shared_real(3,I)
+c             X1 = shared_real(1,I)                          
+c             X2 = shared_real(2,I)
+c             X3 = shared_real(3,I)
+              X1 = X_PACKED(1,J)
+              X2 = X_PACKED(2,J)
+              X3 = X_PACKED(3,J)
               IF(X1 < XMIN)  CYCLE
               IF(X1 > XMAX)  CYCLE
               IF(X2 < YMIN)  CYCLE
