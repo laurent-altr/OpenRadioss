@@ -20,21 +20,8 @@ Copyright>
 Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
-      !||====================================================================
-      !||    i7buce_vox      ../engine/source/interfaces/intsort/i7buce.F
-      !||--- called by ------------------------------------------------------
-      !||    i7main_tri      ../engine/source/interfaces/intsort/i7main_tri.F
-      !||    inter_sort_07   ../engine/source/interfaces/int07/inter_sort_07.F
-      !||--- calls      -----------------------------------------------------
-      !||    ancmsg          ../engine/source/output/message/message.F
-      !||    arret           ../engine/source/system/arret.F
-      !||    i7trivox        ../engine/source/interfaces/intsort/i7trivox.F
-      !||--- uses       -----------------------------------------------------
-      !||    message_mod     ../engine/share/message_module/message_mod.F
-      !||    tri7box         ../engine/share/modules/tri7box.F
-      !||====================================================================
-       SUBROUTINE I7BUCE_VOX_LITE(TIMERS,
-     1   WIN,X ,IRECT   ,NSV     ,INACTI   ,CAND_P  ,
+       SUBROUTINE I7BUCE_VOX_LITE(WIN,
+     1   X        ,IRECT   ,NSV     ,INACTI   ,CAND_P  ,
      2   NMN      ,NRTM    ,NSN     ,CAND_E   ,CAND_N  ,
      3   GAP      ,NOINT   ,II_STOK ,NCONTACT ,BMINMA  ,
      4   TZINF    ,MAXBOX  ,MINBOX  ,MWAG     ,CURV_MAX,
@@ -49,8 +36,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 C============================================================================
 C   M o d u l e s
 C-----------------------------------------------
-      USE TIMER_MOD
-      USE inter_shm_mod
+      USE INTER_SHM_MOD
       USE TRI7BOX
       USE MESSAGE_MOD
 C-----------------------------------------------
@@ -67,9 +53,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
-      TYPE(TIMER_), INTENT(inout) :: TIMERS
-      TYPE(inter_win_), intent(inout) :: WIN
-      my_real :: X(3,*)
+      TYPE(inter_win_) :: WIN
       INTEGER NMN,NSN, NOINT,IDT,INACTI,IFQ, NIN, NSNR, NSNROLD
       INTEGER, INTENT(in) :: NRTM !< number of segments per threads
       INTEGER, INTENT(in) :: TOTAL_NB_NRTM !< total number of segments
@@ -88,7 +72,7 @@ C     REAL
      .   GAPMIN, GAPMAX, BMINMA(12),CURV_MAX(NRTM),BGAPSMX
       my_real , INTENT(IN) :: DRAD,DGAPLOAD
       my_real
-     .   CAND_P(*), STFN(*),
+     .   X(3,*), CAND_P(*), STFN(*),
      .   STF(*), GAP_S(*), GAP_M(*), 
      .   GAP_S_L(*), GAP_M_L(*), CAND_F(*)
 C-----------------------------------------------
@@ -153,7 +137,6 @@ C
       ELSE
         ISZNSNR = 0
       END IF
-c     write(6,*) __FILE__,"ISZNSNR=",ISZNSNR
 C
 C-----DEBUT DE LA PHASE DE TRI 
 C
@@ -226,9 +209,9 @@ C (en // SMP il y a possibilite de redondance de traitement mais no pb)
         VOXEL1(I)=0
       ENDDO
       INIVOXEL = MAX(INIVOXEL,(NBX+2)*(NBY+2)*(NBZ+2)+1)
-       CALL I7TRIVOX_LITE(TIMERS,
+       CALL I7TRIVOX_LITE(WIN,
      1   NSN     ,RENUM    ,NSNR     ,ISZNSNR  ,I_MEM   ,
-     2   IRECT   ,WIN  , X      ,STF      ,STFN     ,XYZM    ,
+     2   IRECT   ,X        ,STF      ,STFN     ,XYZM    ,
      3   NSV     ,II_STOK  ,CAND_N   ,ESHIFT   ,CAND_E  ,
      4   NCONTACT,NOINT    ,TZINF    ,GAP_S_L  ,GAP_M_L ,
      5   VOXEL1  ,NBX      ,NBY      ,NBZ      ,INTTH   ,
