@@ -99,7 +99,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
       !||    timer_mod                 ../engine/source/system/timer_mod.F90
       !||    tri7box                   ../engine/share/modules/tri7box.F
       !||====================================================================
-      SUBROUTINE INTER_SORT_SHM(TIMERS,
+      SUBROUTINE INTER_SORT_SHM(TIMERS, NODES,
      1       IPARI    ,X       ,W       , ERRORS, 
      2       V        ,MS      ,IN      ,IAD_ELEM ,
      3       FR_ELEM  ,VR      ,ISENDTO ,IRECVFROM,
@@ -129,6 +129,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
+      USE NODAL_ARRAYS_MOD
       USE TIMER_MOD
       USE ELBUFDEF_MOD  
       USE INTSTAMP_MOD
@@ -171,6 +172,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
+      type(NODAL_ARRAYS_) , INTENT(INOUT) :: NODES
       TYPE(TIMER_), INTENT(inout) :: TIMERS
       INTEGER, INTENT(INOUT) :: ERRORS !< number of interfaces that could not be sorted
       INTEGER, INTENT(in) :: NODNX_SMS_SIZ
@@ -647,15 +649,6 @@ C
      4    NBINTC    ,SIZE_T  ,SENSORS%SENSOR_TAB,DELTA_PMAX_GAP,
      5    INTBUF_TAB,DELTA_PMAX_GAP_NODE,IDEL7NOK_SAV,MAXDGAP,V)
 
-      call startime(timers, 45)
-      DO J = 1,NBINTC
-        N = INTLIST(J)
-        if(IPARI(7,N) .NE. 7) CYCLE
-        if(IPARI(7,N) == 7 .AND. IPARI(22,N) == 7 ) CYCLE                                       
-!       call spmd_inter_window_update_intra(inter_struct(n)%win, nodes, interfaces%intbuf_tab(n), ipari(1:npari,n),npari,ispmd)
-        call spmd_inter_window_update_inter(inter_struct(n)%win)
-      ENDDO
-      if(IMON > 0) call stoptime(timers, 45)
 
 
 C
@@ -703,6 +696,20 @@ C Fin Partie non parallele smt
      .     INTBUF_TAB,SENSORS%SENSOR_TAB,NB_INTER_SORTED,LIST_INTER_SORTED,INTER_STRUCT)
       ! globalize NEED_TO_SORT : 1= one or several interface(s) must be sorted 
       IF(NSPMD>1.AND.ITASK==0) CALL SPMD_ALLGLOB_ISUM9(NEED_TO_SORT,1)
+      IF(NEED_TO_SORT > 0) THEN
+      DO J = 1,NBINTC
+        N = INTLIST(J)
+        if(IPARI(7,N) .NE. 7) CYCLE
+        if(IPARI(7,N) == 7 .AND. IPARI(22,N) == 7 ) CYCLE                                       
+        call startime(timers, 44)
+        call spmd_inter_window_update_intra(inter_struct(n)%win, nodes, interfaces%intbuf_tab(n), ipari(1:npari,n),npari,ispmd)
+        call stoptime(timers, 44)
+        call startime(timers, 45)
+        call spmd_inter_window_update_inter(inter_struct(n)%win)
+        call stoptime(timers, 45)
+      ENDDO
+      ENDIF
+
       CALL MY_BARRIER()
       ! ------------------------
 

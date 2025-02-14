@@ -3694,8 +3694,8 @@ C----------------------------------------
         N = INTLIST(J)
         if(IPARI(7,N) .NE. 7) CYCLE
         if(IPARI(7,N) == 7 .AND. IPARI(22,N) == 7 ) CYCLE                                       
-        call spmd_inter_window_update_intra(inter_struct(n)%win, nodes, interfaces%intbuf_tab(n), ipari(1:npari,n),npari,ispmd)
-        call spmd_inter_window_update_inter(inter_struct(n)%win)
+!       call spmd_inter_window_update_intra(inter_struct(n)%win, nodes, interfaces%intbuf_tab(n), ipari(1:npari,n),npari,ispmd)
+!       call spmd_inter_window_update_inter(inter_struct(n)%win)
       ENDDO
       if(IMON > 0) call stoptime(timers, 45)
       ENDIF
@@ -3733,7 +3733,7 @@ C===============================================================================
         ITYPTSTT= ITYPTST
         ITSK = OMP_GET_THREAD_NUM()
         IF(SHARED_MEMORY_CONTACT_SORTING) THEN
-        CALL INTER_SORT_SHM(TIMERS, 
+        CALL INTER_SORT_SHM(TIMERS,NODES, 
      1     IPARI   ,ptrX     ,W     , INTER_ERRORS,
      2     NODES%V       ,NODES%MS      ,NODES%IN      ,IAD_ELEM  ,
      3     FR_ELEM ,NODES%VR      ,ISENDTO ,IRCVFROM  ,
