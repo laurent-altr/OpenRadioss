@@ -253,7 +253,7 @@ C
 C       INTER_STRUCT(NIN)%BOX_LIMIT_MAIN(4) = MIN(INTER_STRUCT(NIN)%BOX_LIMIT_MAIN(4),MIN_LIMIT_MAIN(1))
 C       INTER_STRUCT(NIN)%BOX_LIMIT_MAIN(5) = MIN(INTER_STRUCT(NIN)%BOX_LIMIT_MAIN(5),MIN_LIMIT_MAIN(2))
 C       INTER_STRUCT(NIN)%BOX_LIMIT_MAIN(6) = MIN(INTER_STRUCT(NIN)%BOX_LIMIT_MAIN(6),MIN_LIMIT_MAIN(3))
-        max_remote = 2*max(NSN,NSNROLD)
+        max_remote = 10*max(NSN,NSNROLD)
         NSNR = 0
         SORT_COMM(NIN)%RSIZ = RSIZ
         SORT_COMM(NIN)%ISIZ = ISIZ
@@ -300,7 +300,7 @@ C       INTER_STRUCT(NIN)%BOX_LIMIT_MAIN(6) = MIN(INTER_STRUCT(NIN)%BOX_LIMIT_MA
              NSNR = NSNR + 1 
              nsn_local = nsn_local + 1
              if(nsnr == max_remote) then
-                 max_remote = max(max_remote + 1000,int(max_remote*1.2))
+!               max_remote = max(max_remote + 1000,int(max_remote*1.2))
                 count_extend = count_extend + 1
                 call extend_array(XREM,RSIZ,nsnr,RSIZ,max_remote)
                 call extend_array(IREM,ISIZ,nsnr,ISIZ,max_remote)
@@ -317,7 +317,7 @@ C       INTER_STRUCT(NIN)%BOX_LIMIT_MAIN(6) = MIN(INTER_STRUCT(NIN)%BOX_LIMIT_MA
           OFFSET = OFFSET + inter_struct(nin)%WIN%nsns_in_world(P)
           NSNFI(NIN)%P(P) = nsn_local
         ENDDO ! P
-        write(6,*) ispmd,"count_extend",count_extend,nsn,nsnr
+!       write(6,*) ispmd,"count_extend",count_extend,nsn,nsnr
         
           
        ENDIF
