@@ -61,6 +61,7 @@
           integer sendcount
           integer, dimension(:), allocatable :: recvcounts
           integer, dimension(:), allocatable :: displs
+          integer, dimension(:,:,:), allocatable :: mask 
           integer :: nsn_global
           integer :: rsiz, isiz
           integer :: ielec_offset, temp_offset, areas_offset, gap_s_offset, gap_sl_offset, ipartfrics_offset
