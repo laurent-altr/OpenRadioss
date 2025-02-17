@@ -143,7 +143,7 @@ C     et creation des candidats
 C================================================================
       my_real :: xmin, xmax, ymin, ymax, zmin, zmax
       integer :: max_remote
-      integer :: iix, iiy, iiz, m, k
+      integer :: iix, iiy, iiz,k
       integer :: ielec_offset, temp_offset, areas_offset, gap_s_offset, gap_sl_offset, ipartfrics_offset
       integer :: x_offset, v_offset, ms_offset, stfns_offset
       integer :: ispmd_offset, itab_offset, IKINET_offset, i_offset, boundary_offset
@@ -155,6 +155,7 @@ C================================================================
       integer :: count_extend
       my_real, dimension(:,:), allocatable :: R_PACKED
       integer(kind=8), dimension(:,:), allocatable :: I_PACKED
+      integer(kind=8) :: M
       my_real :: x1, x2, x3
 C-----------------------------------------------
       size_shared_data = (inter_struct(nin)%WIN%RSIZ + inter_struct(nin)%WIN%ISIZ)!
@@ -277,14 +278,14 @@ c     ALLOCATE(IREM(ISIZ,max_remote),STAT=IERROR)
         K = maxval(inter_struct(nin)%WIN%nsns_in_world(1:NSPMD))
 
         allocate(R_PACKED(size_shared_data,K))
-        allocate(I_PACKED(size_shared_data,K))
+        !allocate(I_PACKED(size_shared_data,K))
 
         DO P = 1, NSPMD
           nsn_local = 0
           IF(P .NE. ISPMD + 1) THEN
           K = inter_struct(nin)%WIN%nsns_in_world(P)
           if(K > 0) R_PACKED(1:size_shared_data,1:K) = shared_real(1:size_shared_data,OFFSET+1:OFFSET+K)
-          if(K > 0) I_PACKED(1:size_shared_data,1:K) = shared_int(1:size_shared_data,OFFSET+1:OFFSET+K)
+          !if(K > 0) I_PACKED(1:size_shared_data,1:K) = shared_int(1:size_shared_data,OFFSET+1:OFFSET+K)
 
             DO J=1,inter_struct(nin)%WIN%nsns_in_world(P)
               I = J + OFFSET
@@ -309,7 +310,7 @@ c             X3 = shared_real(3,I)
               IF(R_PACKED(stfns_offset,J) == ZERO)CYCLE
 
 !             M = shared_int(boundary_offset,I) ! is the node at the boundary of multiple domains?
-              M = I_PACKED(boundary_offset,J) ! is the node at the boundary of multiple domains?
+              M = transfer(R_PACKED(boundary_offset,J),M) ! is the node at the boundary of multiple domains?
               if(m > 0) then
                  m = get_value_umap(inter_struct(nin)%win%boundary_to_local, I, -1) ! local number or -1
               endif
@@ -329,9 +330,9 @@ c             X3 = shared_real(3,I)
               DO L=1,RSIZ
               XREM(L,NSNR) = R_PACKED(L,j)
               ENDDO
-              IREM(1,NSNR) = I_PACKED(i_offset,J)!shared_int(i_offset,I)
-              IREM(2,NSNR) = I_PACKED(itab_offset,J) ! shared_int(itab_offset,I)
-              IREM(3,NSNR) = I_PACKED(IKINET_offset,J)!  shared_int(IKINET_offset,I)
+              IREM(1,NSNR) = transfer(R_PACKED(i_offset,J),M) !shared_int(i_offset,I)
+              IREM(2,NSNR) = transfer(R_PACKED(itab_offset,J),M) ! shared_int(itab_offset,I)
+              IREM(3,NSNR) = transfer(R_PACKED(IKINET_offset,J),M)!  shared_int(IKINET_offset,I)
               IREM(4:ISIZ,NSNR) = 0 
             ENDDO !j
           ENDIF ! ispmd
@@ -341,7 +342,7 @@ c             X3 = shared_real(3,I)
         inter_struct(nin)%old_rem_size = NSNR
 !       write(6,*) ispmd,"count_extend",count_extend,nsn,nsnr
         deallocate(R_PACKED) 
-        deallocate(I_PACKED)
+!       deallocate(I_PACKED)
           
        ENDIF
 
