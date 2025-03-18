@@ -2606,6 +2606,14 @@ C-----------------------------------------------
         CALL SYSTEM_CLOCK(COUNT=CLOCK1, COUNT_RATE=CLOCKRATE,
      +                  COUNT_MAX=NBMAX                   )
       ENDIF
+
+      IF(CLOCK1 < 0 ) THEN 
+        CALL SYSTEM_CLOCK(COUNT=CLOCK1, COUNT_RATE=CLOCKRATE,
+     +                  COUNT_MAX=NBMAX                   )
+      ENDIF
+
+
+
 #ifdef _OPENMP
       OMP_ENDING_TIME = OMP_GET_WTIME( )
       CLOCK0 = CLOCK1
@@ -2613,10 +2621,10 @@ C-----------------------------------------------
       ETIME = ELAPSED
 #else
       IF(CLOCK1 > 0 ) THEN
-        SECS = CLOCK1-CLOCK0         ! diff temps courant - temps initial (qui peut ne pas etre 0 !)
+        SECS = CLOCK1-T%CLOCK0         ! diff temps courant - temps initial (qui peut ne pas etre 0 !)
         IF(SECS<ZERO) SECS = SECS + NBMAX   ! cas depassement nb de periode maximum
         SECS = SECS/CLOCKRATE
-        CLOCK0 = CLOCK1              ! recuperation du temps courant dans clock0
+        T%CLOCK0 = CLOCK1              ! recuperation du temps courant dans clock0
         ELAPSED = ELAPSED + SECS
         ETIME = ELAPSED
       ENDIF
