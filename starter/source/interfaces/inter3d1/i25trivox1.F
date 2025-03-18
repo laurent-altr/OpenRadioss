@@ -146,7 +146,10 @@ C
       INTEGER FIRST,LAST
       INTEGER, DIMENSION(:), ALLOCATABLE :: TAGNOD
 
+#ifdef _OPENMP
       integer , external :: omp_get_thread_num,omp_get_num_threads
+ERROR ERROR ERROR
+#endif
       integer :: itask,nthreads
       integer :: my_old_size,my_address
       integer :: local_i_stok,multimp
@@ -158,8 +161,13 @@ C
       type(array_type_int_1d) :: local_cand_e
 C-----------------------------------------------
       ! allocation of local arrays 
+#ifdef _OPENMP
       itask = omp_get_thread_num()
       nthreads = omp_get_num_threads()
+#else
+      itask = 0
+      nthreads = 1
+#endif
       local_cand_n_size = size(intbuf_tab%cand_n) / nthreads + 1
       local_cand_e_size = size(intbuf_tab%cand_e) / nthreads + 1
       local_i_stok = 0

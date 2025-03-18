@@ -29,6 +29,8 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
       !||====================================================================
       SUBROUTINE INI_MSG( )
       USE MESSAGE_MOD
+      USE NAMES_AND_TITLES_MOD , ONLY : NCHARLINE
+
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -41,6 +43,8 @@ C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
 #include "starter_message_description.inc"
+
+
       IMSG=0
       IWARN=0
       IERR=0
