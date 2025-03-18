@@ -1,8 +1,9 @@
 import sys
 import os
+import math
 
 # Constants
-MESSAGES_PER_FILE = 500 # Split messages every 5000 entries (adjustable)
+NUM_PARTS = 20  # Fixed number of output files
 DEFAULT_INPUT_FILE = "infile.txt"
 DEFAULT_OUTFILE = "outfile.inc"
 
@@ -28,46 +29,30 @@ os.makedirs(output_dir, exist_ok=True)
 with open(input_file, "r", encoding="utf-8") as f:
     lines = [line.strip() for line in f.readlines() if line.strip() and not line.startswith("#")]
 
-# Determine number of parts
-num_parts = (len(lines) + MESSAGES_PER_FILE - 1) // MESSAGES_PER_FILE
+total_messages = len(lines)
+
+# Compute how many messages per file (distributed evenly)
+base_count = total_messages // NUM_PARTS  # Minimum messages per file
+extra = total_messages % NUM_PARTS  # Remaining messages to distribute
 
 # Generate the .inc file (Main include)
 with open(output_file, "w", encoding="utf-8") as f_inc:
-    print(f"Generating {output_file} with {num_parts} message parts...")
+    print(f"Generating {output_file} with {NUM_PARTS} message parts...")
     f_inc.write("      CHARACTER(LEN=ncharline),DIMENSION(:),ALLOCATABLE :: MESSAGESDATA\n")
-    f_inc.write(f"      ALLOCATE(MESSAGESDATA({len(lines)}))\n\n")
-    f_inc.write(f"      SMESSAGESFILE = {len(lines)}\n")
-    f_inc.write("      write(6,*) 'Number of messages in the file: ', SMESSAGESFILE\n\n")
-    f_inc.write("      write(6,*) LOC(MESSAGESDATA) \n\n")
+    f_inc.write(f"      ALLOCATE(MESSAGESDATA({total_messages}))\n\n")
+    f_inc.write(f"      SMESSAGESFILE = {total_messages}\n")
 
-
-    for i in range(num_parts):
+    for i in range(NUM_PARTS):
         f_inc.write(f"      CALL message_part{i+1}(MESSAGESDATA,SMESSAGESFILE)\n")
 
-#check for open failure
-
-
-#check if output_file exists
-#if it exists, print its content
-    if os.path.exists(output_file):
-        with open(output_file, "r", encoding="utf-8") as f:
-            print(f.read())
-    else:
-        print("\n \n FILE DOES NOT EXIST")
-
-
-
-print(f"Generated {output_file} with {num_parts} message parts.")
-#prints the content of output_file
-try:
-    with open(output_file, "r", encoding="utf-8") as f:
-        print(f.read())
-except:
-    print("File does not exist")
-
 # Generate Fortran subroutine files in the same directory as the .inc file
-for i in range(num_parts):
-    part_lines = lines[i * MESSAGES_PER_FILE: (i + 1) * MESSAGES_PER_FILE]
+start_idx = 0
+for i in range(NUM_PARTS):
+    # Determine number of messages for this file
+    count = base_count + (1 if i < extra else 0)
+    part_lines = lines[start_idx: start_idx + count]
+    start_idx += count  # Update starting index for next file
+
     part_filename = os.path.join(output_dir, f"message_part{i+1}.txt")
 
     with open(part_filename, "w", encoding="utf-8") as f_part:
@@ -77,12 +62,12 @@ for i in range(num_parts):
         f_part.write("  INTEGER, INTENT(IN) :: S\n")
         f_part.write("  CHARACTER(LEN=ncharline),INTENT(INOUT) :: MESSAGESDATA(S)\n\n")
 
-        for j, message in enumerate(part_lines, start=1 + i * MESSAGES_PER_FILE):
+        for j, message in enumerate(part_lines, start=start_idx - count + 1):
             safe_message = message.replace("'", "''")  # Escape single quotes for Fortran
             f_part.write(f"  MESSAGESDATA({j}) = '{safe_message}'\n")
 
         f_part.write("\nEND SUBROUTINE\n")
 
-    print(f"Generated {part_filename} with {len(part_lines)} messages.")
+    print(f"Generated {part_filename} with {count} messages.")
 
-print(f"\nAll {num_parts} message part files have been created in '{output_dir}'!")
+print(f"\nAll {NUM_PARTS} message part files have been created in '{output_dir}'!")

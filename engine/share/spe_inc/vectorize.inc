@@ -32,6 +32,10 @@
 
 !$OMP SIMD
 
+#elif defined(COMP_LLVM)
+
+!$OMP SIMD
+
 #elif defined(COMP_AOCC)
 
 !$OMP SIMD
