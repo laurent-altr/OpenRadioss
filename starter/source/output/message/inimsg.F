@@ -43,8 +43,6 @@ C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
 #include "starter_message_description.inc"
-
-
       IMSG=0
       IWARN=0
       IERR=0

@@ -148,7 +148,6 @@ C
 
 #ifdef _OPENMP
       integer , external :: omp_get_thread_num,omp_get_num_threads
-ERROR ERROR ERROR
 #endif
       integer :: itask,nthreads
       integer :: my_old_size,my_address
