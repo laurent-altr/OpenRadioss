@@ -1,16 +1,35 @@
 import re
 import os
-from collections import defaultdict
 import logging
 from pathlib import Path
+from collections import defaultdict
+
+# List of function names to ignore
+IGNORE_LIST = [
+    "FortranAAssign", "FortranAMaxlocDim", "free",
+    "FortranAAllocatableSetBounds", "FortranACopyOutAssign",
+    "FortranADestroy", "FortranAAbort",
+    "FortranAAllocatableInitDerivedForAllocate",
+    "FortranACopyInAssign",
+    "FortranAPointerSetBounds",
+    "FortranAStopStatement"
+]
+
+
+TARGET_METADATA_TYPES = {
+    "DIBasicType", "DICommonBlock", "DICompositeType", "DIDerivedType",
+    "DIFile", "DIGlobalVariableExpression", "DIImportedEntity",
+    "DILocalVariable", "DILocation", "DIModule", "DIStringType",
+    "DISubprogram", "DISubrange", "DISubroutineType"
+}
 
 class CustomFormatter(logging.Formatter):
     """Custom formatter to add emojis based on log levels."""
-    
+
     EMOJIS = {
         logging.INFO: "✅",     # Info messages
         logging.WARNING: "⚠️",  # Warnings
-        logging.ERROR: "❌",     # Errors
+        logging.ERROR: "⛔",     # Errors
         logging.DEBUG: "🔍"      # Debug messages (optional)
     }
 
@@ -19,397 +38,331 @@ class CustomFormatter(logging.Formatter):
         record.msg = f"{emoji} {record.msg}"
         return super().format(record)
 
-
 def normalize_name(name):
     """Normalize function names by stripping Fortran module mangling and trailing underscores."""
-    # Remove module mangling pattern: _QM<module>P<procedure>
     match = re.match(r'_QM\w+P(\w+)', name)
     if match:
         return match.group(1)  # Extract only the procedure name
-
-    return name.rstrip("_")  # Also remove trailing underscores
-
-def extract_function_scopes(lines):
-    """Extracts function definitions (subroutines) from DISubprogram."""
-    scope_map = {}  # Map of scope ID → function name
-    logging.info("Extracting function scopes from DISubprogram...")
-    for line in lines:
-        match = re.match(r'!(\d+) = distinct !DISubprogram\(name: "(\w+)", .* scope: !(\d+),', line)
-        if match:
-            scope_id, func_name, parent_scope = match.groups()
-            scope_map[f"!{scope_id}"] = func_name
-            logging.info(f"Found function: {func_name} (Scope ID: !{scope_id})")
-
-    return scope_map
-
-def extract_type_definitions(lines):
-    """Extracts type definitions from DIBasicType and DIDerivedType."""
-    type_definitions = {}
-
-    logging.info("Extracting type definitions...")
-
-    for line in lines:
-        line = line.strip()
-        # Match basic types (DIBasicType)
-#       match_basic = re.match(r'!(\d+) = !DIBasicType\(name: "([^"]+)",', line)
-#        match_basic = re.match(r'!(\d+) = !DIBasicType\(name: "([^"]+)",.*\)', line.strip())
-        match_basic = re.match(r'!(\d+) = !DIBasicType\(name: "([^"]+)", size: (\d+), encoding: (\w+)\)', line.strip())
-        
-        if match_basic:
-            type_id, type_name, size, encoding = match_basic.groups()  # Capture all four values
-            type_definitions[f"!{type_id}"] = {"name": type_name, "size": size, "encoding": encoding}  # Store all values
-            logging.info(f"Found basic type: !{type_id} → {type_name} (Size: {size}, Encoding: {encoding})")
-
-    for line in lines:
-        line = line.strip()
-        # Match derived types (DIDerivedType, e.g., typedefs)
-        match_derived = re.match(r'!(\d+) = !DIDerivedType\(.* name: "([^"]+)", baseType: !(\d+)', line)
-        if match_derived:
-            type_id, derived_name, base_id = match_derived.groups()
-            base_type = type_definitions.get(f"!{base_id}", f"!{base_id}")  # Resolve base type if known
-            type_definitions[f"!{type_id}"] = derived_name if derived_name else base_type
-            logging.info(f"Found derived type: !{type_id} → {derived_name} (base: {base_type})")
-
-    for line in lines:
-        line = line.strip()
-        match_array = re.match(r'!(\d+) = !DICompositeType\(tag: DW_TAG_array_type, baseType: !(\d+),.*\)', line.strip())
-        if match_array:
-            type_id, base_type_id = match_array.groups()
-            # Resolve base type if it's already parsed
-            if f"!{base_type_id}" in type_definitions:
-                resolved_base = type_definitions[f"!{base_type_id}"]
-            else:
-                resolved_base = f"!{base_type_id}"  # Keep unresolved reference if not found yet
-        
-            type_definitions[f"!{type_id}"] = f"Array of {resolved_base}"  # Store resolved type
-            logging.info(f"Found array type: !{type_id} → Array of {resolved_base}")
-
-    for line in lines:
-        line = line.strip()
-        match_array = re.match(r'!(\d+) = !DICompositeType\(tag: DW_TAG_array_type, baseType: !(\d+),', line)
-        if match_array:
-            type_id, base_id = match_array.groups()
-            base_type = type_definitions.get(f"!{base_id}", f"!{base_id}")  # Resolve base type if known
-            type_definitions[f"!{type_id}"] = f"Array of {base_type}"
-            logging.info(f"Found array type: !{type_id} → Array of {base_type}")
-
-
-    return type_definitions
-
-
-def extract_variable_mappings(lines, scope_map, type_definitions):
-    """Extracts variable names and types from DILocalVariable and groups them by subroutine scope."""
-    subroutine_data = defaultdict(lambda: {"register_map": {}, "type_info": {}, "calls": []})
-
-    logging.info("Extracting variable mappings from DILocalVariable...")
-
-    # Regex for function arguments (those containing 'arg:')
-    arg_pattern = re.compile(r'!(\d+) = !DILocalVariable\(name: "([^"]+)", arg: \d+, scope: !(\d+), file: !\d+, line: \d+, type: !(\d+)\)')
-    
-    # Regex for local variables (without 'arg:')
-    local_var_pattern = re.compile(r'!(\d+) = !DILocalVariable\(name: "([^"]+)", scope: !(\d+), file: !\d+, line: \d+, type: !(\d+)\)')
-
-    for line in lines:
-        line = line.strip()
-        
-        # First, check if it matches an argument
-        match = arg_pattern.match(line)
-        if not match:
-            # If not, check if it's a local variable
-            match = local_var_pattern.match(line)
-
-        if match:
-            metadata_id, var_name, scope_id, type_id = match.groups()
-            scope_key = f"!{scope_id}"
-
-            if scope_key in scope_map:
-                subroutine = scope_map[scope_key]
-                subroutine_data[subroutine]["register_map"][f"!{metadata_id}"] = var_name
-
-#               subroutine_data[subroutine]["type_info"][var_name] = type_definitions.get(f"!{type_id}", f"!{type_id}")
-                type_found = type_definitions.get(f"!{type_id}", f"!{type_id}")
-                if type_found:
-                    subroutine_data[subroutine]["type_info"][var_name] = type_found
-                else:
-                    logging.warning(f"Type ID {type_id} not found for variable {var_name} in subroutine {subroutine}")
-                    subroutine_data[subroutine]["type_info"][var_name] = f"!{type_id}"
-                logging.info(f"{subroutine}: Stored Variable {var_name} (Type: !{type_id})")
-            else:
-                logging.warning(f"Scope {scope_id} not found in scope_map for line: {line}")
-
-    return subroutine_data
-
-
-def extract_dbg_declare_mappings(lines, subroutine_data):
-    """Extracts dbg_declare mappings for ptr %X → variable name and associates them with subroutines."""
-    logging.info("Extracting dbg_declare mappings (ptr %X → variable name)...")
-    
-    for line in lines:
-        if "dbg_declare" in line:
-            match = re.match(r'#dbg_declare\(ptr (%\d+), !(\d+),', line.strip())
-            if match:
-                register, metadata_id = match.groups()
-                meta_key = f"!{metadata_id}"
-
-                for subroutine, data in subroutine_data.items():
-                    if meta_key in data["register_map"]:
-                        data["register_map"][f"ptr {register}"] = data["register_map"][meta_key]
-                        logging.info(f"{subroutine}: Mapped ptr %{register} → {data['register_map'][meta_key]}")
-                        break
-                else:
-                    logging.warning(f"Metadata ID {meta_key} not found in any subroutine for line: {line.strip()}")
-
-def extract_function_calls(lines, subroutine_data, dbg_map):
-    """Extracts function calls and resolves register arguments using debug locations and store instructions."""
-    logging.info("🔍 Extracting function calls...")
-
-    unresolved_ptrs = {}  # Stores unresolved ptr %X and their associated call site (by Fortran line)
-    store_mappings = {}  # Maps ptr %X → (type, value) from store instructions
-
-    # **PASS 1**: Extract function calls, keeping unresolved ptr %X
-    for line_num, line in enumerate(lines, start=1):
-        line = line.strip()
-        
-        # Match function calls
-        match = re.match(r'call void @(\w+)\((.*)\), !dbg !(\d+)', line)
-        if match:
-            callee, args, dbg_id = match.groups()
-            callee = normalize_name(callee)
-            dbg_key = f"!{dbg_id}"
-            
-            if dbg_key in dbg_map:
-                # Find which subroutine this call belongs to
-                subroutine, fortran_line = dbg_map[dbg_key]  # Unpack the tuple
-                subroutine = normalize_name(subroutine)
-                call_info = {
-                    "caller": subroutine,
-                    "callee": callee,
-                    "args": [arg.strip() for arg in args.split(',') if arg.strip()],
-                    "original_code_line": fortran_line
-                }
-                
-                resolved_args = []
-                for arg in call_info["args"]:
-                    if arg.startswith("ptr %"):  # Unresolved argument
-                        unresolved_ptrs[arg] = fortran_line  # Store for later resolution
-                        resolved_args.append(arg)  # Keep unresolved for now
-                    else:
-                        resolved_args.append(arg)  # Constants or known variables
-
-                call_info["args"] = resolved_args
-                subroutine_data[subroutine]["calls"].append(call_info)
-
-                logging.info(f"{subroutine}: Call to {callee} at line {call_info['original_code_line']}")
-            else:
-                logging.warning(f"No scope found for function call: {line}")
-
-    # **PASS 2**: Extract `store` instructions mapping ptr %X → value/type
-    logging.info("Resolving stored values for unresolved pointers...")
-    for line in lines:
-        line = line.strip()
-        
-        # Match store instructions like:
-        # store i32 1, ptr %55, align 4, !dbg !2210
-        store_match = re.match(r'store (\w+\d+) (\S+), ptr (%\d+), .* !dbg !(\d+)', line)
-        if store_match:
-            var_type, value, ptr, dbg_id = store_match.groups()
-            dbg_key = f"!{dbg_id}"
-            
-            if dbg_key in dbg_map:
-                fortran_line = dbg_map[dbg_key][1]  # Extract Fortran line number
-
-                if f"ptr {ptr}" in unresolved_ptrs and unresolved_ptrs[f"ptr {ptr}"] == fortran_line:
-                    # Store type and value resolution
-#                    store_mappings[f"ptr {ptr}"] = f"{var_type} {value}"
-                    store_mappings[f"ptr {ptr}"] = value  # Store only the actual constant
-
-                    logging.info(f"Resolved {ptr}: Type {var_type}, Value {value} (Fortran line {fortran_line})")
-
-    # **PASS 3**: Apply the resolutions to function call arguments
-    logging.info("Applying resolved values to function call arguments...")
-    for subroutine, data in subroutine_data.items():
-        for call in data["calls"]:
-            resolved_args = []
-            resolved_types = []  # Track types
-    
-            for arg in call["args"]:
-                # **Case 1: Variables (resolve from register_map and type_info)**
-                if arg in subroutine_data[subroutine]["register_map"]:
-                    var_name = subroutine_data[subroutine]["register_map"][arg]
-                    resolved_args.append(var_name)
-                    resolved_types.append(subroutine_data[subroutine]["type_info"].get(var_name, "unknown"))
-    
-                # **Case 2: Constants (resolve from store_mappings)**
-                elif arg in store_mappings:
-                    resolved_args.append(store_mappings[arg])
-                    resolved_types.append("integer" if store_mappings[arg].isdigit() else "unknown")
-    
-                # **Case 3: Keep unresolved**
-                else:
-                    resolved_args.append(arg)
-                    resolved_types.append("unknown")
-    
-            # Update call arguments and add types
-            call["args"] = resolved_args
-            call["argsType"] = resolved_types
-    
-    logging.info("Function call argument resolution complete.")
-
-
-
-def extract_dbg_locations(lines, scope_map):
-    """Extracts DILocation (debug info) to map function calls to their subroutine and Fortran line number."""
-    dbg_map = {}  # Map of !dbg ID → {subroutine, line}
-    
-    logging.info("Extracting debug locations (DILocation)...")
-    for line in lines:
-        line = line.strip()
-        match = re.match(r'!(\d+) = !DILocation\(line: (\d+), column: \d+, scope: !(\d+)', line)
-        if match:
-            dbg_id, fortran_line, scope_id = match.groups()
-            scope_key = f"!{scope_id}"
-            if scope_key in scope_map:
-                subroutine = scope_map[scope_key]
-                dbg_map[f"!{dbg_id}"] = (subroutine, fortran_line)  # Store as a tuple
-                logging.info(f"Mapped !dbg {dbg_id} to subroutine {subroutine}, Fortran line {fortran_line}")
-            else:
-                logging.warning(f"Warning: Scope {scope_id} not found for debug location: {line.strip()}")
-        else:
-            match = re.match(r'!(\d+) = !DILocation\(line: (\d+), scope: !(\d+)', line) 
-            if match:
-                dbg_id, fortran_line, scope_id = match.groups()
-                scope_key = f"!{scope_id}"
-                if scope_key in scope_map:
-                    subroutine = scope_map[scope_key]
-                    dbg_map[f"!{dbg_id}"] = (subroutine, fortran_line)  # Store as a tuple
-                    logging.info(f"Mapped !dbg {dbg_id} to subroutine {subroutine}, Fortran line {fortran_line}")
-                else:
-                    logging.warning(f"Scope {scope_id} not found for debug location: {line.strip()}")
-    
-    return dbg_map
-
-def parse_llvm_ir(file_path):
-    """Coordinates the parsing of an LLVM IR file."""
-    logging.info(f"Parsing {file_path}...")
-
-    with open(file_path, "r") as f:
-        lines = f.readlines()
-
-    # Step 1: Extract function scopes (DISubprogram)
-    scope_map = extract_function_scopes(lines)
-
-
-    # Step 2: Extract debug location mappings (!dbg → subroutine and Fortran line)
-    dbg_map = extract_dbg_locations(lines, scope_map)
-    type_definitions = extract_type_definitions(lines)
-    # Step 3: Extract variable mappings (DILocalVariable)
-    subroutine_data = extract_variable_mappings(lines, scope_map,type_definitions)
-
-    # Step 4: Extract ptr %X to variable name mappings from dbg_declare
-    extract_dbg_declare_mappings(lines, subroutine_data)
-
-    # Step 5: Extract function calls and resolve arguments
-    extract_function_calls(lines, subroutine_data, dbg_map)
-
-    return subroutine_data
-
+    return name.strip("_").rstrip("_")  # Ensure we don't accidentally remove the wrong characters
 
 def find_object_files(directory):
     """Recursively find all .o files in the given directory."""
-    return list(Path(directory).rglob("*.F.o"))+list(Path(directory).rglob("*.F90.o"))
+    return list(Path(directory).rglob("*.F.o")) + list(Path(directory).rglob("*.F90.o"))
 
-def build_call_tree(subroutine_data):
-    """Builds a call tree mapping each function to the functions it calls."""
-    call_tree = defaultdict(set)  # Dictionary of sets: {caller → {callee1, callee2, ...}}
+def load_llvm_ir_files(file_list):
+    """Loads LLVM IR files into memory and returns a dictionary."""
+    llvm_ir_store = {}  # Dictionary to store all files
+    for file_path in file_list:
+        try:
+            with open(file_path, "r", encoding="utf-8") as f:
+                llvm_ir_store[file_path] = f.readlines()  # Store file as a list of lines
+        except UnicodeDecodeError:
+            logging.error(f"Could not read file {file_path} due to encoding issues.")
+    return llvm_ir_store  # Return the loaded data
 
-    # Step 1: Reconstruct "caller" information from call records
-    for caller, data in subroutine_data.items():
-        for call in data["calls"]:
-            callee = call["callee"]
-            if caller != callee:
-                call_tree[caller.rstrip("_")].add(callee.rstrip("_"))  # Add caller → callee relationship
+def process_file(filename, llvm_ir_store, current_max_x):
+    """Processes an LLVM IR file, updating metadata IDs in a single pass."""
+    new_max_x = current_max_x  # Keep track of max metadata ID
+    updated_lines = []
+
+    # Precompile regex to match `!X` and `!dbg !X`
+    metadata_pattern = re.compile(r'(!dbg )?!\d+')
+
+    logging.info(f"Processing {filename}..., offset: {current_max_x}")
+
+    for line in llvm_ir_store[filename]:
+        stripped_line = line.lstrip()  # Remove only leading spaces (not trailing)
+        
+        # Skip empty lines & lines where first non-space char is '%'
+        if not stripped_line or stripped_line.startswith("%"):
+            continue  
+
+        # **Replace !X → !Y where Y = X + current_max_x**
+        def replace_metadata(match):
+            token = match.group(0)  # Get full match (!dbg !X or !X)
+            prefix = ""
+
+            if token.startswith("!dbg "):
+                prefix = "!dbg "
+                token = token[len(prefix):]  # Remove "!dbg " prefix
+
+            old_id = int(token[1:])  # Extract numeric part from `!X`
+            new_id = old_id + current_max_x  # Apply offset
+            nonlocal new_max_x
+            new_max_x = max(new_max_x, new_id)
+
+            return f"{prefix}!{new_id}"  # Preserve "!dbg " prefix
+
+        updated_line = metadata_pattern.sub(replace_metadata, stripped_line)
+
+        # Store the updated line
+        updated_lines.append(updated_line)
+
+    # Batch update `llvm_ir_store`
+    llvm_ir_store[filename] = updated_lines
+
+    return new_max_x  # Return updated max metadata ID for next file
+
+
+def resolve_type(type_id, metadata_store):
+    """
+    Resolves the type name for a given metadata ID (!X) by checking DIBasicType, DIDerivedType, or DICompositeType.
+    """
+    if type_id not in metadata_store:
+        logging.error(f"Type ID {type_id} not found in metadata_store.")
+        return "unknown"
+
+    type_metadata = metadata_store[type_id]
+
+    # Check if it's a basic type
+    if "DIBasicType" in type_metadata:
+        return type_metadata["DIBasicType"].get("name", "unknown")
+
+    # Check if it's a derived type
+    if "DIDerivedType" in type_metadata:
+        base_type = type_metadata["DIDerivedType"].get("baseType")
+        return resolve_type(base_type, metadata_store) if base_type else "unknown"
+
+    # Check if it's a composite type (array, struct, etc.)
+    if "DICompositeType" in type_metadata:
+        base_type = type_metadata["DICompositeType"].get("baseType")
+        return f"Array of {resolve_type(base_type, metadata_store)}" if base_type else "unknown"
+
+    logging.error(f"Could not resolve type for {type_id}, metadata: {type_metadata}")
+    return "unknown"
+
+def extract_function_signatures(metadata_store):
+    """
+    Extracts subroutine argument names and types from DISubprogram and DISubroutineType.
+
+    Populates subroutines["name"]["argList"] and subroutines["name"]["argType"].
+    """
+    subroutines = defaultdict(lambda: {"argList": [], "argType": [], "calls": defaultdict(lambda: {"name": None, "argList": [], "argTypes": []})})
+
+    logging.info("🔍 Extracting function signatures from DISubprogram entries...")
+
+    for meta_id, metadata in metadata_store.items():
+        if "DISubprogram" in metadata:
+            subroutine_name = metadata["DISubprogram"].get("linkageName", metadata["DISubprogram"].get("name"))
+            type_ref = metadata["DISubprogram"].get("type")
+
+            if type_ref and type_ref in metadata_store:
+                function_type = metadata_store[type_ref]
+                if "DISubroutineType" in function_type:
+                    type_list = function_type["DISubroutineType"].get("types", [])
+
+                    arg_types = []
+                    for type_id in type_list[1:]:  # Exclude return type
+                        resolved_type = resolve_type(type_id, metadata_store)
+                        arg_types.append(resolved_type)
+
+                    subroutines[subroutine_name]["argType"] = arg_types
+
+            logging.info(f"Found subroutine: {subroutine_name}, Arguments: {subroutines[subroutine_name]['argType']}")
+
+    return subroutines
+
+
+def extract_call_sites(llvm_ir_store, metadata_store, subroutines, scope_map):
+    """
+    Extracts call statements from LLVM IR and matches them to caller subroutines.
+    Populates subroutines["caller"]["calls"][line] with callee, arguments, and argument types.
+    """
+    logging.info("🔍 Extracting function call sites...")
+
+    call_pattern = re.compile(r'call .*? @(\w+)\((.*?)\), !dbg !(\d+)')
+
+    for filename, lines in llvm_ir_store.items():
+        for line in lines:
+            match = call_pattern.search(line)
+            if match:
+                callee, raw_args, dbg_id = match.groups()
+                #delete all "!" from dbg_id
+                dbg_id = dbg_id.replace("!", "")
+                dbg_key = int(dbg_id)
+
+                # Resolve caller subroutine from scope map
+                if dbg_key in metadata_store and "DILocation" in metadata_store[dbg_key]:
+                    scope_ref_str = metadata_store[dbg_key]["DILocation"].get("scope")
+                    scope_ref = int(scope_ref_str.replace("!", "")) if scope_ref_str else None
+                    if scope_ref in scope_map:
+                        caller = scope_map[scope_ref]
+                    else:
+                        logging.error(f"Could not resolve caller for !dbg {dbg_id}")
+                        logging.error(f"line: {line}")
+                        logging.error(f"metadata: {metadata_store[dbg_key]}")
+
+                        continue
+                else:
+                    logging.error(f"Debug location not found for !dbg {dbg_id}")
+                    continue
+
+                # Extract arguments
+                arg_list = [arg.strip() for arg in raw_args.split(",") if arg.strip()]
+                arg_types = []
+
+                for arg in arg_list:
+                    if arg.startswith("ptr %"):  # Variable reference
+                        var_ref = arg.replace("ptr ", "")
+                        if var_ref in metadata_store:
+                            var_metadata = metadata_store[var_ref]
+                            if "DILocalVariable" in var_metadata:
+                                var_type_id = var_metadata["DILocalVariable"].get("type")
+                                if var_type_id in metadata_store:
+                                    var_type = metadata_store[var_type_id].get("DIBasicType", {}).get("name", "unknown")
+                                    arg_types.append(var_type)
+                                else:
+                                    arg_types.append("unknown")
+                        else:
+                            arg_types.append("unknown")
+                    elif arg.isdigit():  # Constant integer
+                        arg_types.append("integer")
+                    else:
+                        arg_types.append("unknown")
+
+                # Store call information
+                fortran_line = metadata_store[dbg_key]["DILocation"].get("line", "unknown")
+                subroutines[caller]["calls"][fortran_line] = {
+                    "name": callee,
+                    "argList": arg_list,
+                    "argTypes": arg_types
+                }
+
+                logging.info(f"📞in {caller} at line {fortran_line}: {callee}({arg_types})")
 
 
 
-    return call_tree
+def build_scope_map(metadata_store):
+    """
+    Creates a mapping from scope ID to subroutine name by parsing DISubprogram entries.
+    Returns a dictionary { scope_id -> subroutine_name }.
+    """
+    scope_map = {}
+    for meta_id, metadata in metadata_store.items():
+        if "DISubprogram" in metadata:
+            subroutine_name = metadata["DISubprogram"].get("linkageName", metadata["DISubprogram"].get("name"))
+            scope_id = meta_id
+            scope_map[scope_id] = subroutine_name
+            logging.info(f"Found subroutine: {subroutine_name} with scope {scope_id}")
+
+    return scope_map
 
 
-def find_reachable_functions(call_tree, start_function):
-    """Finds all functions reachable from a given starting function."""
-    reachable = set()
-    stack = [start_function]
+def extract_metadata_entries(llvm_ir_store):
+    """
+    Extracts metadata entries dynamically and stores them indexed by metadata ID.
 
-    while stack:
-        func = stack.pop()
-        if func not in reachable:
-            reachable.add(func)
-            if func in call_tree:
-                stack.extend(call_tree[func])  # Add callees to explore next
+    Returns:
+        dict: {metadata_id: {metadata_type: {key: value, ...}}}
+    """
+    metadata_store = {}
 
-    return reachable
+    logging.info("Extracting all metadata entries dynamically...")
+
+    for filename, lines in llvm_ir_store.items():
+        for line in lines:
+            match = re.match(r'!(\d+)\s+=\s+(distinct\s+)?!(\w+)\((.*)', line)
+            if not match:
+                continue  # Skip lines that don't define metadata
+
+#           metadata_id, metadata_type, rest_of_line = match.groups()
+            id, distinct_kw, metadata_type, rest_of_line = match.groups()
+
+            metadata_id = int(id.replace("!", ""))
+#           metadata_id = f"!{metadata_id}"
+#           if metadata_id =="!0": zero seems to be a valid ID
+#               logging.error(f"Found metadata ID 0 in line: {line}")
+
+            # Skip if the metadata type is not in our list
+            if metadata_type not in TARGET_METADATA_TYPES:
+                #search if each TARGET_METADATA_TYPES are in the line
+                for target_metadata_type in TARGET_METADATA_TYPES:
+                    if target_metadata_type in line:
+                        logging.error(f"Found {target_metadata_type} in line: {line}, but not in metadata_store: {metadata_store}")
+                continue
+
+            # Extract fields dynamically
+            fields = {}
+
+            # Special handling for `name` and `linkageName` (appear first)
+            name_match = re.match(r'name:\s*"([^"]+)",\s*linkageName:\s*"([^"]+)",', rest_of_line)
+            if name_match:
+                fields["name"], fields["linkageName"] = name_match.groups()
+                rest_of_line = rest_of_line[name_match.end():]  # Remove processed part
+
+            elif 'name:' in rest_of_line:
+                # If only `name` is available without `linkageName`
+                name_match = re.match(r'name:\s*"([^"]+)"', rest_of_line)
+                if name_match:
+                    fields["name"] = name_match.group(1)
+                    rest_of_line = rest_of_line[name_match.end():]
+
+            # Extract key-value pairs dynamically
+            key_value_matches = re.findall(r'(\w+):\s*(!?\w+)', rest_of_line)
+
+            for key, value in key_value_matches:
+                fields[key] = value  # Store field in dictionary
+
+            # Store metadata indexed by metadata_id first, then metadata_type
+            if metadata_id not in metadata_store:
+                metadata_store[metadata_id] = {}
+
+            # how to get the type of metadata_id. It needs to be an integer, not a string
 
 
-def print_call_tree(call_tree, start_function, reachable, indent=""):
-    """Recursively prints the call tree from a specific function, avoiding dead branches."""
-    if start_function not in reachable:
-        return  # Skip functions that are not reachable
 
-    #if too deep, skip
-    if len(indent) > 20:
-        logging.warning(f"recursion too deep, skipping {start_function}") 
-        return
-    print(indent + f"📌 {start_function}")
-    if start_function in call_tree:
-        for callee in sorted(call_tree[start_function]):  # Sort for consistent output
-            print_call_tree(call_tree, callee, reachable, indent + "  ")
+
+            metadata_store[metadata_id][metadata_type] = fields
+
+#           if "4747836" in line:
+#               logging.info(f"ID FOUND {metadata_type}: {metadata_id} with fields {fields}")
+
+            if metadata_type == "DISubprogram":
+                logging.info(f"Subroutine: {metadata_id} with fields {fields}")
+
+
+       #     logging.info(f"Found {metadata_type}: {metadata_id} with fields {fields}")
+
+    return metadata_store
+
+
 
 if __name__ == "__main__":
 
     formatter = CustomFormatter("%(levelname)s: %(message)s")
     handler = logging.StreamHandler()
     handler.setFormatter(formatter)
-    logging.basicConfig(level=logging.WARNING, handlers=[handler])
-   #logging.basicConfig(level=logging.WARNING, format="%(levelname)s: %(message)s")
+    logging.basicConfig(level=logging.INFO, handlers=[handler])
 
     # Set the root directory where .o files are stored
     root_dir = "../engine/cbuild_engine_linux64_flang_db/"
+    # root_dir = "./"
 
-    logging.info(f"🔍 Searching for .o files in {root_dir}...")
+    logging.info(f"Searching for .o files in {root_dir}...")
     object_files = find_object_files(root_dir)
 
     if not object_files:
         logging.error("No .o files found.")
         exit(1)
 
-    all_subroutines = {}
-
     logging.info(f"📂 Found {len(object_files)} .o files. Parsing them now...")
+
+    llvm_ir_store = load_llvm_ir_files(object_files)  # Load all files into memory
+    current_max_x = 0  # Track max !X value globally
+    all_metadata = {}
 
     for obj_file in object_files:
         try:
             logging.info(f"📜 Parsing {obj_file} ...")
-            subroutine_data = parse_llvm_ir(str(obj_file))  # Ensure it's a string path
-            all_subroutines.update(subroutine_data)  # Merge subroutine data across files
+            new_max_x = process_file(obj_file, llvm_ir_store, current_max_x)
+            current_max_x = new_max_x  # Update max value
         except UnicodeDecodeError as e:
             logging.error(f"UnicodeDecodeError in file: {obj_file} → {e}")
 
+    metadata_store = extract_metadata_entries(llvm_ir_store)
+    scope_map = build_scope_map(metadata_store)
+    subroutines = extract_function_signatures(metadata_store)
+    extract_call_sites(llvm_ir_store, metadata_store, subroutines, scope_map)
 
-#   for obj_file in object_files:
-#       logging.info(f"📜 Parsing {obj_file} ...")
-#       subroutine_data = parse_llvm_ir(str(obj_file))  # Ensure it's a string path
-#       all_subroutines.update(subroutine_data)  # Merge subroutine data across files
 
-    logging.info(f"Parsing complete. Collected {len(all_subroutines)} subroutines.")
-
-    # Debug output (optional)
-    for subroutine, data in all_subroutines.items():
-        logging.info(f"Subroutine: {subroutine}")
-        logging.info(f"    📌 Calls: {[call['callee'] for call in data['calls']]}")
-
-    # Build the call tree
-    call_tree = build_call_tree(all_subroutines)
-    # Print the call tree
-    start_function = "radioss"
-    reachable_functions = find_reachable_functions(call_tree, start_function)
-    print_call_tree(call_tree, start_function, reachable_functions)
-
+    logging.info("Parsing complete.")
