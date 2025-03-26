@@ -719,6 +719,7 @@ C-----------------------------------------------
         INTEGER, DIMENSION(:), POINTER :: P
       END TYPE INTERMASURFEP
 
+      integer (kind=8) :: P
       INTEGER II,I,J,KK,N, NPTS, NMNT, NRTMT_25,MLW,
      .   NUMEL, IFIP, IS_EULER,NB_EULER_GROUPS,
      .   NAIRWA,NTHWA, LWASPIO, LEN_G,LEN_M,LEN,
@@ -727,7 +728,7 @@ C-----------------------------------------------
      .   NPT,NS_I11,
      .   SVOLMON0,FLAG_GOTO,
      .   INNOD,INSEG,NSIGI, NSIGS, NSIGSH, NSIGSPH,
-     .   LB_MAX, P, NG,
+     .   LB_MAX, NG,
      .   IINU ,NEL3D,NEL2D,NEL1D,IMAX,JMAX,
      .   OFF, NELEM, IDDLEVEL, NELEMINT,
      .   IFIXIN,IFIEND,ICO,
@@ -1101,7 +1102,7 @@ C
 !       -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-**-*-*-*-*-*-*-*-*-*-*-*-*
       INTEGER, DIMENSION(:), ALLOCATABLE :: TAG_SKN
       TYPE(SKEW_) :: SKEWS
-      TYPE (SENSOR_STR_) ,DIMENSION(:) ,ALLOCATABLE :: SENSOR_TMP
+      TYPE (SENSOR_) ,DIMENSION(:) ,ALLOCATABLE :: SENSOR_TMP
 !       -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-**-*-*-*-*-*-*-*-*-*-*-*-*
 !       TAG_SKN : integer ; dimension=NUMSKW+1
 !                 tag array --> tag the i SKEW if a SPRING uses it
@@ -11469,3 +11470,10 @@ C-----------------------------------------------
 
       RETURN
       END
+
+      subroutine do_not_work()
+            implicit none
+            integer :: myint
+            myint = 1
+            call print_double(myint)
+      end subroutine
