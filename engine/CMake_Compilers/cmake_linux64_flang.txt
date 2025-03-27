@@ -182,6 +182,18 @@ set_source_files_properties(${c_source_files} PROPERTIES COMPILE_FLAGS "${FSANIT
 # CXX source files
 set_source_files_properties(${cpp_source_files} PROPERTIES COMPILE_FLAGS "${FSANITIZE} ${h3d_inc} ${zlib_inc} ${precision_flag} ${cppmach} ${cpprel}  -O0 -g ${OPENMP} -std=c++11  " )
 
+elseif( debug STREQUAL "analysis" )
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+
+set_source_files_properties(${source_files}  PROPERTIES COMPILE_FLAGS "${FSANITIZE}  -O0 -g  ${opt_flag} ${precision_flag} ${cppmach} ${cpprel} -DCPP_comp=f90  -ffixed-line-length=132 ${mpi_flag} ${ADF}  " )
+
+# C source files
+set_source_files_properties(${c_source_files} PROPERTIES COMPILE_FLAGS "${FSANITIZE} ${h3d_inc} ${zlib_inc} ${precision_flag}  ${cppmach} ${cpprel} -O0 -g  ${OPENMP} " )
+
+# CXX source files
+set_source_files_properties(${cpp_source_files} PROPERTIES COMPILE_FLAGS "${FSANITIZE} ${h3d_inc} ${zlib_inc} ${precision_flag} ${cppmach} ${cpprel}  -O0 -g ${OPENMP} -std=c++11  " )
+
 
 else ()
 

@@ -112,10 +112,31 @@ def fortranize_type(type_str):
     new_type = new_type.replace("_QF", "")
     new_type = new_type.replace("T", "%")
 
+    #count the number of "?x" in the type
+    count = new_type.count("?x")
+    
+    #replace "!fir.array<" by "array
+    #dimname = 1D,2D,3D depending on the number of "?x"
+    array_name = f"array({count}D)"
+    new_type = new_type.replace("!fir.array",array_name)
+    #remove all the "?x" from the type
+    new_type = new_type.replace("?x", "")
 
-
-
+    #replace i32 by integer(4)
+    new_type = new_type.replace("i32", " integer(4)")
+    new_type = new_type.replace("i64", " integer(8)")
+    new_type = new_type.replace("f32", " real(4)")
+    new_type = new_type.replace("f64", " real(8)")
+    #
     return new_type
+def fortranize_name(name):
+    """Convert a name to Fortran style."""
+    new_name = name.replace("_QM", "")
+    new_name = new_name.replace("_QF", "")
+    new_name = new_name.replace("_Q", "")
+    new_name = new_name.replace("P", ".")
+    new_name = new_name.replace("T", "%")
+    return new_name
 
 
 # === Type Simplifier ===
@@ -325,7 +346,9 @@ if __name__ == "__main__":
     trailing_re = re.compile(r'>>')
     for fname, info in call_data.items():
         # remove leading "_QP" from the function name
-        normalized_fname = normalized_fname_re.sub("", fname)
+        #normalized_fname = normalized_fname_re.sub("", fname)
+        normalized_fname = fortranize_name(fname)
+
         logging.info(f"\nFunction: {normalized_fname}")
         for i, (t, n) in enumerate(zip(info["ArgTypes"], info["ArgNames"])):
             logging.info(f"    arg[{i}]: {t}  name: {n}")
@@ -333,7 +356,8 @@ if __name__ == "__main__":
         if info["Callees"]:
             logging.info("  Calls:")
             for callee, instances in info["Callees"].items():
-                normalized_callee = normalized_fname_re.sub("", callee)
+                #normalized_callee = normalized_fname_re.sub("", callee)
+                normalized_callee = fortranize_name(callee)
                 for callnum, callinfo in instances.items():
                     logging.info(f"    -> {normalized_callee} (call #{callnum}):")
                     for i, t in enumerate(callinfo["ArgTypes"]):
@@ -353,14 +377,16 @@ if __name__ == "__main__":
                             #logging.warning(f"Call {normalized_callee} from {normalized_fname} : Possible Mismatch")
                             #loop over the arguments and check if the argument types are the same
                             for i, (arg1, arg2) in enumerate(zip(callinfo["ArgTypes"], call_data[callee_name]["ArgTypes"])):
-                                arg1s = arg1 
-                                arg2s = arg2
                                 arg1 = dimension2_re.sub('?x', arg1)
                                 arg2 = dimension2_re.sub('?x', arg2)
+                                arg1s = arg1 
+                                arg2s = arg2
                                 arg1 = dimension_re.sub("?x", arg1)
                                 arg2 = dimension_re.sub("?x", arg2)
                                 if arg1 == arg2 and arg1s != arg2s:
-                                    logging.error(f"LENGTH MISMATCH {normalized_fname}->{callnum}:{normalized_callee}({call_data[callee_name]['ArgNames'][i]}) {arg2} != {arg1}")
+                                    fortran_arg1 = fortranize_type(arg1s)
+                                    fortran_arg2 = fortranize_type(arg2s)
+                                    logging.warning(f"DIMENSION MISMATCH {normalized_fname}->{callnum}:{normalized_callee}({call_data[callee_name]['ArgNames'][i]}) {fortran_arg2} != {fortran_arg1}")
                                 if arg1 != arg2:
                                     arg2 = fir_array_re.sub("", arg2)
                                     arg2 = trailing_re.sub(">", arg2)
@@ -369,11 +395,12 @@ if __name__ == "__main__":
                                     if arg1 != arg2:
                                         fortran_arg1 = fortranize_type(arg1)
                                         fortran_arg2 = fortranize_type(arg2)
-                                        logging.error(f"TYPE MISMATCH {normalized_fname}->{callnum}:{normalized_callee}({call_data[callee_name]['ArgNames'][i]}) {fortran_arg2} != {fortran_arg1}")
-#                                   else:
-#                                       logging.warning(f"  Type mismatch calling {normalized_callee} from {normalized_fname}")
-#                                       logging.warning(f"  Argument name: {call_data[callee_name]['ArgNames'][i]}")
-#                                       logging.warning(f"  expecting an array, recieved a scalar")
+                                        logging.critical(f"TYPE MISMATCH {normalized_fname}->{callnum}:{normalized_callee}({call_data[callee_name]['ArgNames'][i]}) {fortran_arg2} != {fortran_arg1}")
+                                    else:
+                                        if "array" in arg1 and not "array" in arg2:
+                                            logging.error(f"SCALAR VS ARRAY {normalized_fname}->{callnum}:{normalized_callee}({call_data[callee_name]['ArgNames'][i]}) {arg2} != {arg1}")
+                                        elif "array" in arg2 and not "array" in arg1:
+                                            logging.error(f"ARRAY VS SCALAR {normalized_fname}->{callnum}:{normalized_callee}({call_data[callee_name]['ArgNames'][i]}) {arg1} != {arg2}")
 
                     else:
                         logging.warning(f"callee {callee_name} not found in the call_data")

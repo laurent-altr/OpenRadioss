@@ -87,12 +87,20 @@ if ( debug STREQUAL "1" )
   set(c_flags       "${precision_flag} ${Tet_mesher_inc} ${cppmach} ${cpprel} ${zlib_inc} -O0 -g  ")
   set(cpp_flags     "${precision_flag} ${Tet_mesher_inc} ${cppmach} ${cpprel} ${zlib_inc} -O0 -g  -std=c++11")
 
+elseif( debug STREQUAL "analysis" )
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(fortran_flags " ${precision_flag} ${Tet_mesher_inc} ${cppmach} ${cpprel} -DCPP_comp=f90  -DCOMP_LLVM -fno-fast-math -ffixed-line-length-132 -fno-implicit-none ${ADF}")
+set(c_flags       "${precision_flag} ${Tet_mesher_inc} ${cppmach} ${cpprel} ${zlib_inc} " )
+set(cpp_flags     "${precision_flag} ${Tet_mesher_inc} ${cppmach} ${cpprel} ${zlib_inc}   -Wno-deprecated -fpermissive -std=c++11")
+
+
 else()
 
 # Optimized compilation
 set(fortran_flags "${precision_flag} ${Tet_mesher_inc} ${cppmach} ${cpprel} -DCPP_comp=f90  -DCOMP_LLVM -O2 -fno-fast-math -ffixed-line-length-132  -fno-implicit-none ${ADF}")
 set(c_flags       "${precision_flag} ${Tet_mesher_inc} ${cppmach} ${cpprel} ${zlib_inc} " )
-set(cpp_flags     "${precision_flag} ${Tet_mesher_inc} ${cppmach} ${cpprel} ${zlib_inc}  -O2  -Wno-deprecated -fpermissive -std=c++11 -fPIC")
+set(cpp_flags     "${precision_flag} ${Tet_mesher_inc} ${cppmach} ${cpprel} ${zlib_inc} -Wno-deprecated -fpermissive -std=c++11 -fPIC")
+
 
 endif()
 

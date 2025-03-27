@@ -36,6 +36,11 @@
 
 !$OMP SIMD
 
+#elif defined(COMP_LLVM)
+
+!$OMP SIMD
+
+
 #elif defined (COMP_ARMFLANG)
 
 !$OMP SIMD
