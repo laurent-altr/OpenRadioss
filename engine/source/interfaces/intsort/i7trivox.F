@@ -52,6 +52,7 @@ C   M o d u l e s
 C-----------------------------------------------
       USE MESSAGE_MOD
       USE TRI7BOX
+      USE iso_c_binding
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -133,7 +134,7 @@ C-----------------------------------------------
      .        N1,N2,N3,N4,NN,NE,K,L,NCAND_PROV,J_STOK,II,JJ,
      .        PROV_N(MVSIZ),PROV_E(MVSIZ),
      .        OLDNUM(ISZNSNR), NSNF, NSNL,DELNOD,M
-      INTEGER, DIMENSION(:), ALLOCATABLE :: TAGREMNODE
+      LOGICAL(C_BOOL), DIMENSION(:), ALLOCATABLE :: TAGREMNODE
       my_real
      .   DX,DY,DZ,XS,YS,ZS,XX,SX,SY,SZ,S2,
      .   XMIN, XMAX,YMIN, YMAX,ZMIN, ZMAX, TZ, GAPSMX, GAPL,
@@ -335,7 +336,7 @@ C=======================================================================
       IF(FLAGREMNODE == 2) THEN
         ALLOCATE(TAGREMNODE(NUMNOD+NUMFAKENODIGEO))
         DO I=1,NUMNOD+NUMFAKENODIGEO
-          TAGREMNODE(I) = 0
+          TAGREMNODE(I) = .FALSE.
         ENDDO
       ENDIF
       DO NE=1,NRTM
@@ -344,7 +345,7 @@ C=======================================================================
           K = KREMNOD(2*(NE-1)+1)+1
           L = KREMNOD(2*(NE-1)+2)
           DO I=K,L
-            TAGREMNODE(REMNOD(I)) = 1
+            TAGREMNODE(REMNOD(I)) = .FALSE.
           ENDDO
         ENDIF
         IF(IGAP == 0)THEN
@@ -444,7 +445,7 @@ C=======================================================================
                   IF(NN == M4)GOTO 200
 
                   IF(FLAGREMNODE == 2) THEN
-                    IF( TAGREMNODE(NSV(JJ)) == 1)GOTO 200
+                    IF( TAGREMNODE(NSV(JJ)))GOTO 200
                   ENDIF
                   XS = X(1,NN)
                   YS = X(2,NN)
@@ -527,7 +528,7 @@ C=======================================================================
           K = KREMNOD(2*(NE-1)+1)+1
           L = KREMNOD(2*(NE-1)+2)
           DO I=K,L
-            TAGREMNODE(REMNOD(I)) = 0
+            TAGREMNODE(REMNOD(I)) = .FALSE.
           ENDDO
         ENDIF
       ENDDO

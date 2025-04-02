@@ -46,6 +46,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 C============================================================================
 C   M o d u l e s
 C-----------------------------------------------
+      USE iso_c_binding
       USE TRI7BOX
       use my_alloc_mod
 C-----------------------------------------------
@@ -137,9 +138,9 @@ c
      .   XMINE,YMINE,ZMINE,XMAXE,YMAXE,ZMAXE,AAA
       INTEGER FIRST,NEW,LAST
       SAVE IIX,IIY,IIZ
-      INTEGER, DIMENSION(:),ALLOCATABLE :: TAG
+      LOGICAL(c_bool), DIMENSION(:),ALLOCATABLE :: TAG
 C-----------------------------------------------
-      CALL MY_ALLOC(TAG,NUMNOD)
+      ALLOCATE(TAG(NUMNOD))
       CALL MY_ALLOC(LAST_NOD,NSN+NSNR)
       IF(ITASK == 0)THEN
         ALLOCATE(NEXT_NOD(NSN+NSNR))
@@ -258,7 +259,7 @@ C=======================================================================
 C
       IF(FLAGREMNODE == 2)THEN
         DO I=1,NUMNOD
-          TAG(I) = 0
+          TAG(I) = .FALSE.
         ENDDO
 
         DO NE=1,NRTM
@@ -267,7 +268,7 @@ C don't keep deleted segments
           K = KREMNOD(2*(NE-1)+1)+1
           L = KREMNOD(2*(NE-1)+2)
           DO I=K,L
-            TAG(REMNOD(I)) = 1
+            TAG(REMNOD(I)) = .TRUE.
           ENDDO
 c
           AAA = MARGE+CURV_MAX(NE)+MAX(MAX(BGAPSMX+GAP_M(NE),PMAX_GAP)+DGAPLOAD,DRAD)+VMAXDT
@@ -352,7 +353,7 @@ cc             nnpelem = nnpelem + 1
                     IF(NN == M2)GOTO 200
                     IF(NN == M3)GOTO 200
                     IF(NN == M4)GOTO 200
-                    IF(TAG(NN) == 1)GOTO 200
+                    IF(TAG(NN))GOTO 200
                     XS = X(1,NN)
                     YS = X(2,NN)
                     ZS = X(3,NN)
@@ -446,7 +447,7 @@ cc             nnrpelem = nnrpelem + 1
           K = KREMNOD(2*(NE-1)+1)+1
           L = KREMNOD(2*(NE-1)+2)
           DO I=K,L
-            TAG(REMNOD(I)) = 0
+            TAG(REMNOD(I)) = .FALSE.
           ENDDO
 
 cc             nbpelg = nbpelg + nbpelem
