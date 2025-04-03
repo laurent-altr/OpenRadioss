@@ -456,6 +456,10 @@ C
       IF (IMONM > 0 .AND. ITASK == 0) CALL STARTIME(TIMERS,30)
 C
       IF(INTBUF_TAB%METRIC%ALGO == ALGO_VOXEL .OR.  INTBUF_TAB%METRIC%ALGO == TRY_ALGO_VOXEL) THEN
+            if(itask == 0) then
+                allocate(intbuf_tab%glob2s(numnod))
+            end if
+
         CALL I7BUCE_VOX(
      1 X      ,INTBUF_TAB%IRECTM(1+4*ESHIFT),INTBUF_TAB%NSV  ,INACTI    ,INTBUF_TAB%CAND_P,
      2 NMN_G  ,NRTM_T                       ,NSN     ,INTBUF_TAB%CAND_E,INTBUF_TAB%CAND_N,
@@ -469,6 +473,13 @@ C
      D INTBUF_TAB%KREMNODE(1+2*ESHIFT),INTBUF_TAB%REMNODE,ITAB , IPARI(63,NIN),DRAD         ,
      E ITIED ,INTBUF_TAB%CAND_F,DGAPLOADP,REMOTE_S_NODE,LIST_REMOTE_S_NODE,
      F NRTM  ,GLOB_THERM%INTHEAT,GLOB_THERM%IDT_THERM,GLOB_THERM%NODADT_THERM)
+            if(itask == 0) then
+                if(allocated(intbuf_tab%glob2s)) then
+                    deallocate(intbuf_tab%glob2s)
+                end if
+            end if
+
+
       ELSE
         CALL I7BUCE(
      1 X      ,INTBUF_TAB%IRECTM(1+4*ESHIFT),INTBUF_TAB%NSV  ,INACTI    ,INTBUF_TAB%CAND_P,

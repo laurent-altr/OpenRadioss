@@ -203,7 +203,7 @@ C
      C   GAP_M_L  ,INTTH   ,ITASK   ,BGAPSMX  ,I_MEM   ,  
      D   KREMNOD  ,REMNOD  ,ITAB    ,FLAGREMNODE, DRAD ,
      E   ITIED    ,CAND_F  ,DGAPLOAD,REMOTE_S_NODE,LIST_REMOTE_S_NODE,
-     F   TOTAL_NB_NRTM,INTHEAT,IDT_THERM,NODADT_THERM)
+     F   TOTAL_NB_NRTM,INTHEAT,IDT_THERM,NODADT_THERM,glob2s)
 C============================================================================
 C   M o d u l e s
 C-----------------------------------------------
@@ -235,6 +235,7 @@ C-----------------------------------------------
       INTEGER, INTENT(in) :: IDT_THERM
       INTEGER, INTENT(in) :: NODADT_THERM
       INTEGER, DIMENSION(NSNR), INTENT(inout) :: LIST_REMOTE_S_NODE
+      integer  :: glob2s(*)
 C     REAL
       my_real
      .   GAP,TZINF,MAXBOX,MINBOX,CURV_MAX_MAX,
@@ -390,7 +391,7 @@ C (en // SMP il y a possibilite de redondance de traitement mais no pb)
      9   NIN     ,ITASK    ,BGAPSMX  ,KREMNOD  ,REMNOD  ,
      A   ITAB    ,FLAGREMNODE,DRAD   ,ITIED    ,CAND_F  ,
      B   DGAPLOAD,REMOTE_S_NODE,LIST_REMOTE_S_NODE,
-     C   TOTAL_NB_NRTM,INTHEAT,IDT_THERM,NODADT_THERM)
+     C   TOTAL_NB_NRTM,INTHEAT,IDT_THERM,NODADT_THERM,glob2s)
  
  234  CONTINUE
 

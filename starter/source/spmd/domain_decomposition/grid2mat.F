@@ -212,6 +212,7 @@ C metis5 null pointers
       INTEGER :: CEP_MIN
       INTEGER :: C1,C2
       INTEGER :: OFFSET
+      double precision, dimension(:,:), allocatable :: elt_coord
 
 
 C ---- statistics for edges added for contact interface
@@ -229,6 +230,7 @@ C ---- statistics for edges added for contact interface
         INTEGER :: NUMBER_OF_ELEMENT_RBODY,NUMEL
         INTEGER, DIMENSION(:), ALLOCATABLE :: LIST_ELEMENT_RBODY
         LOGICAL :: BOOL_RBODY
+        integer, dimension(:), allocatable :: TMP
 C-----------------------------------------------
 C   E x t e r n a l   F u n c t i o n s
 C-----------------------------------------------
@@ -1740,6 +1742,8 @@ C           according to the distance
         !NUMG1 id of the root element of the larest connected part
         ALLOCATE(MIN_DIST(NCONNX))
         ALLOCATE(COORDS(3,NCONNX))
+
+
         DO I = 1,NCONNX
 
           CALL FIND_NODES(ROOTS(I)   ,ELEMNODES,TAGELEM,IXS,IXS10,
@@ -1803,7 +1807,6 @@ C
         NEDGES_8 = NEDGES_8 / 2
       ENDIF
 
-      IF(ALLOCATED(TAGELEM)) DEALLOCATE(TAGELEM)
 
 
 !   ----------------------------------------------------------------
@@ -2012,7 +2015,7 @@ C 2) recompute connexity to verify it is ok now
         WRITE(IOUT,FMT=FMW_A_I)'  EDGES FOUND    = ',NEDGES
         WRITE(IOUT,*)' '
 
-        IWFLG=2
+       IWFLG=2
         NFLAG=1
 C old metis option kept for compatibility
         OPTIONS(1)=0
@@ -2126,7 +2129,6 @@ C
             GO TO 1024
           END IF
         END DO
-
 C
         UBVEC(1:15) = 0
         UBVEC(ICELEM) = 1.02
@@ -2144,6 +2146,38 @@ C
 c        i=0
 c        call METIS_EstimateMemory(NELEM,XADJ,ADJNCY,0,2,I)
 c        print *,'estimate memory=',i,nelem,XADJ(NELEM+1)
+
+        ALLOCATE(elt_coord(3,NELEM))
+        if(iddlevel==1) then
+        DO I = 1,NELEM
+
+          CALL FIND_NODES(I   ,ELEMNODES,TAGELEM,IXS,IXS10,
+     1                    IXQ   ,IXC      ,IXT    ,IXP,IXR,
+     2                    IXTG  ,KXX    ,IXX,KXIG3D,
+     3                    IXIG3D,GEO      ,OFFELEM,NELMIN)
+
+          IF(ELEMNODES(1) /= 0) THEN
+            elt_COORD(1:3,I) = X(1:3,ELEMNODES(1))
+          ELSE
+            elt_COORD(1:3,I) = ZERO
+          ENDIF
+        ENDDO
+        write(6,*) "WRITE FILE"
+        allocate(TMP(NCOND))
+        do i = 1, NELEM
+            do j = 1, 4
+                TMP(j) = IWD(NCOND*(i-1)+j)
+            enddo
+            write(799, '(3F12.6, 5(I8))') elt_coord(1:3,i), TMP(1:4)
+        enddo
+        deallocate(TMP)
+        write(6,*) "END WRITE FILE"
+        end if
+
+      IF(ALLOCATED(TAGELEM)) DEALLOCATE(TAGELEM)
+
+
+ 
  1999    CONTINUE
          IF(DECTYP==3.OR.DECTYP==5)THEN
 C KWAY METIS

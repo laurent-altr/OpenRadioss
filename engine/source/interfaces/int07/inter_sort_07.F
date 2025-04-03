@@ -269,7 +269,11 @@ C
             FIRST = 1 + ITASK*(NRTM/NTHREAD)
             LAST = FIRST + NRTM_T - 1
             IF(ITASK==NTHREAD-1) LAST=NRTM
+
             CURV_MAX(1:NRTM_T) = INTER_STRUCT(NIN)%CURV_MAX(FIRST:LAST)
+            if(itask == 0) then
+                allocate(intbuf_tab%glob2s(numnod))
+            end if
 
 
             CALL I7BUCE_VOX(
@@ -284,7 +288,13 @@ C
      C      INTBUF_TAB%GAP_ML(1+ESHIFT),INTTH ,ITASK  , INTBUF_TAB%VARIABLES(bgapsmx_index),I_MEM     ,  
      D      INTBUF_TAB%KREMNODE(1+2*ESHIFT),INTBUF_TAB%REMNODE,ITAB , IPARI(63,NIN),DRAD         ,
      E      ITIED ,INTBUF_TAB%CAND_F,DGAPLOADP,REMOTE_S_NODE,LIST_REMOTE_S_NODE,
-     F      NRTM,INTHEAT,IDT_THERM,NODADT_THERM)
+     F      NRTM,INTHEAT,IDT_THERM,NODADT_THERM, INTBUF_TAB%glob2s)
+
+            if(itask == 0) then
+                if(allocated(intbuf_tab%glob2s)) then
+                    deallocate(intbuf_tab%glob2s)
+                end if
+            end if
 
         ELSE
             FIRST = 1 + ITASK*(NRTM/NTHREAD)

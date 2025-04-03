@@ -1135,6 +1135,8 @@ module intbufdef_mod
       my_real, dimension(:) , allocatable ::   stifmsdt_edg
       integer :: nrtm_free
 
+      integer, dimension(:), allocatable ::  glob2s
+
 ! mpi communicators
       integer :: mpi_comm
       integer :: rank

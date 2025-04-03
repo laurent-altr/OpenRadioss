@@ -46,7 +46,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
      9      NIN    ,ITASK       ,BGAPSMX ,KREMNOD  ,REMNOD   ,
      A      ITAB   ,FLAGREMNODE ,DRAD    ,ITIED    ,CAND_F   ,
      B      DGAPLOAD,REMOTE_S_NODE,LIST_REMOTE_S_NODE,
-     C      TOTAL_NB_NRTM,INTHEAT,IDT_THERM,NODADT_THERM)
+     C      TOTAL_NB_NRTM,INTHEAT,IDT_THERM,NODADT_THERM, glob2s)
 C============================================================================
 C   M o d u l e s
 C-----------------------------------------------
@@ -120,6 +120,7 @@ C-----------------------------------------------
       INTEGER, INTENT(IN) :: INTHEAT
       INTEGER, INTENT(IN) :: IDT_THERM
       INTEGER, INTENT(IN) :: NODADT_THERM
+      INTEGER, INTENT(inOUT) :: glob2s(numnod)
       my_real
      .   X(3,*),XYZM(12),CAND_P(*),STF(*),STFN(*),GAP_S(*),GAP_M(*),
      .   TZINF,MARGE,GAP,GAPMIN,GAPMAX,BGAPSMX,
@@ -153,6 +154,7 @@ c provisoire
       INTEGER FIRST,NEW,LAST,IERROR
       LOGICAL DBG_type18_fvm
       SAVE IIX,IIY,IIZ
+      INTEGER :: MM1,MM2,MM3,MM4
 C-----------------------------------------------
       IF(ITASK == 0)THEN
         REMOTE_S_NODE = 0
@@ -170,6 +172,31 @@ C-----------------------------------------------
           CALL ARRET(2)
         ENDIF
       END IF
+
+!$OMP SINGLE      
+      glob2s(1:numnod) = 0
+!$OMP END SINGLE
+
+      DO NE=1,NRTM
+        IF(STF(NE) == ZERO)CYCLE ! on ne retient pas les facettes detruites
+        M1 = IRECT(1,NE)
+        M2 = IRECT(2,NE)
+        M3 = IRECT(3,NE)
+        M4 = IRECT(4,NE)
+        glob2s(M1) =-NE
+        glob2s(M2) =-NE
+        glob2s(M3) =-NE
+        glob2s(M4) =-NE
+      ENDDO
+      CALL MY_BARRIER
+!$OMP DO SCHEDULE(GUIDED)
+      DO I = 1, NSN
+        J =NSV(I)
+        IF(glob2s(J) < 0) THEN
+          glob2s(J) = I
+        ENDIF
+      ENDDO
+!$OMP END DO
 
       CALL MY_BARRIER !Barrier to wait init voxel and allocation NEX_NOD
 
@@ -359,6 +386,10 @@ C=======================================================================
         M2 = IRECT(2,NE)
         M3 = IRECT(3,NE)
         M4 = IRECT(4,NE)
+        MM1 = glob2s(M1)
+        MM2 = glob2s(M2)
+        MM3 = glob2s(M3)
+        MM4 = glob2s(M4)
 
         XX1=X(1,M1)
         XX2=X(1,M2)
@@ -437,15 +468,15 @@ C=======================================================================
 
                 !nnpelem = nnpelem + 1
                 IF(JJ<=NSN)THEN
+
+                  IF(JJ == MM1)GOTO 200
+                  IF(JJ == MM2)GOTO 200
+                  IF(JJ == MM3)GOTO 200
+                  IF(JJ == MM4)GOTO 200
+
                   NN=NSV(JJ)
-
-                  IF(NN == M1)GOTO 200
-                  IF(NN == M2)GOTO 200
-                  IF(NN == M3)GOTO 200
-                  IF(NN == M4)GOTO 200
-
                   IF(FLAGREMNODE == 2) THEN
-                    IF( TAGREMNODE(NSV(JJ)))GOTO 200
+                    IF( TAGREMNODE(NN))GOTO 200
                   ENDIF
                   XS = X(1,NN)
                   YS = X(2,NN)
@@ -520,6 +551,10 @@ C=======================================================================
                 ENDIF
   200           CONTINUE
                 JJ = NEXT_NOD(JJ)
+                DO WHILE( JJ .NE. 0 .AND. JJ <= NSN .AND. ( JJ == MM1 .OR. JJ == MM2 .OR. JJ == MM3 .OR. JJ == MM4))
+                  ! not remote but belong to the semgent
+                  JJ = NEXT_NOD(JJ)
+                ENDDO
               ENDDO ! WHILE(JJ /= 0)
             ENDDO ! X
           ENDDO  ! Y
