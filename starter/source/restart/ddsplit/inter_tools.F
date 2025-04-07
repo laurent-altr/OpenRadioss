@@ -1417,7 +1417,7 @@ C=======================================================================
       !||    front_mod          ../starter/share/modules1/front_mod.F
       !||    i7i10splitmod      ../starter/share/modules1/i710split_mod.F
       !||====================================================================
-      SUBROUTINE PREPARE_SPLIT_I7(PROC     ,   INTBUF_TAB  , IPARI       ,
+      SUBROUTINE PREPARE_SPLIT_I7(PROC     ,   INTBUF_TAB  , IPARI       ,X,
      .                            INTERCEP ,   TAG_NODE_2RY, TAG_SEGM    ,
      .                            TAG_SEGM2,   TAG_NM      , TAG_NODE_MSR,
      .                            TAG_SCRATCH, NI, CEP, MULTI_FVM,I710XSAV,
@@ -1426,6 +1426,7 @@ C=======================================================================
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
+      USE CLUSTER_NODE_MOD
       USE INTBUFDEF_MOD 
       USE FRONT_MOD
       USE I7I10SPLITMOD
@@ -1448,6 +1449,7 @@ C-----------------------------------------------
       INTEGER, DIMENSION(*), INTENT(INOUT) :: INDX_NM,INDX_SCRT
       INTEGER, DIMENSION(*), INTENT(IN) :: NODLOCAL
       INTEGER, INTENT(IN) :: NUMNOD_L
+      my_real, intent(in) :: X(3,*)
       INTEGER I710XSAV(*)
 !       -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
 !       INDX_XXX : size = NUMNOD
@@ -1480,6 +1482,11 @@ C-----------------------------------------------
      .        I,J,K,N,N1,N2,N3,N4,E,
      .        CNSN_L,CNRTM_L,CNMN_L,NSN0,
      .        NSN_FE, NSN_IGE
+      INTEGER :: ncolor
+      INTEGER, DIMENSION(:), ALLOCATABLE :: color                                          
+      double precision, dimension(:,:), allocatable :: coords
+      integer, dimension(:), allocatable :: color_count
+      double precision :: dist
 C ----------------------------------------
       IF(IPARI(7) == 7) THEN
         NRTM = IPARI(4)
@@ -1520,6 +1527,31 @@ C     Interface type 18 law 151
                INDX_SCRT(NINDX_SCRT) = N
             ENDIF
          ENDDO
+        if(CNSN_L > 150) then 
+        allocate(coords(3,CNSN_L))
+        allocate(color(CNSN_L))
+        DO K = 1, CNSN_L
+          N = TAG_NODE_2RY(K)
+          coords(1,K) = X(1,N)
+          coords(2,K) = X(2,N)
+          coords(3,K) = X(3,N)
+        ENDDO
+        dist = max(INTBUF_TAB%VARIABLES(2)*100.0D0,1.0D0)
+        ncolor = cluster_nodes(coords, CNSN_L, color, dist, 100)
+!         ction  cluster_nodes(coords, numnod, color, eps, minPts) bind(C, name="cluster_nodes")
+
+!       write(6,*) 'Number of colors = ', ncolor+1,CNSN_L,NSN0
+!       allocate(color_count(ncolor+1))
+!       color_count = 0
+!       DO K = 1, CNSN_L
+!         color_count(color(K)+1) = color_count(color(K)+1) + 1
+!       ENDDO 
+!       write(6,*) 'Number of nodes in each color = ', color_count
+!       ! reorder TAG_NODE_2RY in order to have the same color together
+!       deallocate(coords)
+!       deallocate(color_count)
+        endif
+    
          DO K=NSN0+1, NSN0 + NSN_IGE ! Specifique surface IGEO
             N=INTBUF_TAB%NSV(K)
             IF(TAG_SCRATCH(N)==0) THEN

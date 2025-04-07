@@ -250,7 +250,6 @@ C
       ymin = inter_struct(nin)%box_limit_main(5)
       zmin = inter_struct(nin)%box_limit_main(6)
 
-
 C       INTER_STRUCT(NIN)%BOX_LIMIT_MAIN(1) = MAX(INTER_STRUCT(NIN)%BOX_LIMIT_MAIN(1),MAX_LIMIT_MAIN(1))
 C       INTER_STRUCT(NIN)%BOX_LIMIT_MAIN(2) = MAX(INTER_STRUCT(NIN)%BOX_LIMIT_MAIN(2),MAX_LIMIT_MAIN(2))
 C       INTER_STRUCT(NIN)%BOX_LIMIT_MAIN(3) = MAX(INTER_STRUCT(NIN)%BOX_LIMIT_MAIN(3),MAX_LIMIT_MAIN(3))
@@ -286,8 +285,8 @@ c     ALLOCATE(IREM(ISIZ,max_remote),STAT=IERROR)
           K = inter_struct(nin)%WIN%nsns_in_world(P)
           if(K > 0) R_PACKED(1:size_shared_data,1:K) = shared_real(1:size_shared_data,OFFSET+1:OFFSET+K)
           !if(K > 0) I_PACKED(1:size_shared_data,1:K) = shared_int(1:size_shared_data,OFFSET+1:OFFSET+K)
-
-            DO J=1,inter_struct(nin)%WIN%nsns_in_world(P)
+            !DO icluster = 1, inter_struct(nin)%win%n_cluster(P)
+            DO J=1,inter_struct(nin)%WIN%nsns_in_world(P) ! this might be the issue
               I = J + OFFSET
               IIX=0
               IIY=0
