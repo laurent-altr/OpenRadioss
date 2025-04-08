@@ -22,6 +22,7 @@
 !Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
       module inter_shm_mod
         use iso_c_binding
+        use cluster_node_mod, only: cluster_mapping_
 #ifdef MPI
 #include  "mpif.h"
 #else
@@ -67,6 +68,8 @@
           integer :: ielec_offset, temp_offset, areas_offset, gap_s_offset, gap_sl_offset, ipartfrics_offset
           integer :: x_offset, v_offset, ms_offset, stfns_offset
           integer :: i_offset, ispmd_offset, itab_offset, IKINET_offset,boundary_offset
+          type(cluster_mapping_), dimension(:), allocatable :: patchs !< patches per spmd process
+ 
         end type inter_win_
 
 !       interface
@@ -230,12 +233,16 @@
         end subroutine set_win_size 
 
 
-        subroutine inter_window_open(inter_win, n_local, intbuf_tab, rank_world, nspmd, ipari, npari)
+        subroutine inter_window_open(inter_win, n_local, intbuf_tab, rank_world, nspmd, ipari, npari, eps, nodes)
           use iso_c_binding
+          use nodal_arrays_mod
           use intbufdef_mod
+          use cluster_node_mod, only : cluster_mapping_
+          use init_patch_mod, only: init_patch
+          use spmd_mod
           implicit none
 #ifdef MPI
-#include  "mpif.h"
+#include "spmd.inc"
 #endif
 ! input arguments
           integer :: nspmd ! number of spmd processes
@@ -245,6 +252,8 @@
           integer, intent(in) :: rank_world
           integer, intent(in) :: n_local
           type(intbuf_struct_), intent(in) :: intbuf_tab
+          double precision, intent(in) :: eps !< minimum length of a cluster
+          type(nodal_arrays_), intent(in) :: nodes !< nodal arrays
 ! local variables
           integer :: mpi_err
           integer :: rank, rankmin
@@ -255,15 +264,24 @@
           integer :: n_global
           integer :: integer_count, real_count
           integer :: inter_comm
+          integer :: ncolors
+          integer, dimension(:), allocatable :: counter, counter_loc, counter_glob
+          integer :: ncolors_global
+          integer :: displs(nspmd+1)
+          integer :: P
+          integer :: numnod_global, numnod_local
+          integer :: nsn 
 
 !         integer :: cpu_id
 #ifdef MPI
+          nsn = ipari(5)
           inter_comm = intbuf_tab%MPI_COMM
           call set_win_size(inter_win, intbuf_tab, ipari,npari)
           integer_count = inter_win%isiz
           real_count =inter_win%rsiz
 
           call mpi_comm_rank(inter_comm, inter_win%rank_inter, mpi_err)
+          
           call mpi_comm_size(inter_comm, inter_win%size_inter, mpi_err)
 
 !         cpu_id = numa_node_of_cpu(sched_getcpu())
@@ -418,6 +436,102 @@
           write(6,*) "MPI communicators:", inter_comm, inter_win%COMM_INTER_NODE, inter_win%COMM_INTRA_NODE
            call flush(6)
           call MPI_Barrier(inter_comm, mpi_err)
+          ! ============================================================
+          ! PATCHWORK
+          !=============================================================
+!         double precision, dimension(3,n_local), intent(in) :: coords !< coordinates of the nodes
+
+
+          allocate(inter_win%patchs(inter_win%size_inter))
+          write(6,*) "init patchs"
+          call init_patch(inter_win%patchs, eps, nodes, inter_win%size_inter, inter_win%rank_inter, intbuf_tab, nsn)
+          write(6,*) "init patchs done"
+
+          ncolors = inter_win%patchs(inter_win%rank_inter+1)%nb_clusters
+          allocate(counter(inter_win%size_inter))
+          counter = 0
+          counter(inter_win%rank_inter+1) = ncolors
+          ! mpi exchange of ncolors, allreduce
+          call MPI_allgather(ncolors, 1, MPI_INTEGER, counter, 1, MPI_INTEGER, inter_comm, mpi_err)
+          write(6,*) "Allgather ncolors done"
+          ! copy counter to nb_clusters 
+          ncolors_global = 0
+          displs = 0
+          do i = 1, inter_win%size_inter
+            inter_win%patchs(i)%nb_clusters= counter(i)
+            ncolors_global = ncolors_global + counter(i)
+            displs(i+1) = ncolors_global
+          end do
+
+          allocate(counter_glob(ncolors_global)) 
+          counter_glob = 0
+          allocate(counter_loc(ncolors))
+          counter_loc = 0
+          ! for each cluster, we need to know the number of nodes in the cluster 
+          do j = 1, ncolors                               
+            counter_loc(j) = inter_win%patchs(inter_win%rank_inter+1)%clusters(j)%numnod
+          end do
+
+          ! allgatherv counter_loc to counter
+          call MPI_Allgatherv(counter_loc, ncolors, MPI_INTEGER, counter_glob, counter, displs, MPI_INTEGER, inter_comm, mpi_err)
+
+          !copy counter_glob to each numnod
+          do i = 1, inter_win%size_inter
+            if(i == inter_win%rank_inter + 1) cycle
+            allocate(inter_win%patchs(i)%clusters(inter_win%patchs(i)%nb_clusters))
+            do k = 1,inter_win%patchs(i)%nb_clusters
+              inter_win%patchs(i)%clusters(k)%numnod = counter_glob(displs(i)+k)
+            enddo
+          end do
+
+          displs = 0
+          numnod_global= 0
+          counter = 0
+          do i = 1, inter_win%size_inter
+            do j = 1, inter_win%patchs(i)%nb_clusters
+              numnod_global= numnod_global + inter_win%patchs(i)%clusters(j)%numnod
+              counter(i) = counter(i) + inter_win%patchs(i)%clusters(j)%numnod
+            end do
+            displs(i+1) = numnod_global 
+          end do
+          numnod_local = displs(inter_win%rank_inter+2) - displs(inter_win%rank_inter+1)
+          write(6,*) "numnod_local",numnod_local,counter(inter_win%rank_inter+1)
+
+
+          deallocate(counter_loc)
+          deallocate(counter_glob)
+
+          allocate(counter_loc(numnod_local))
+          allocate(counter_glob(numnod_global))
+          ! gather all local index_to_win into counter_loc
+          k = 0
+          do i = 1, ncolors
+            do j = 1, inter_win%patchs(inter_win%rank_inter+1)%clusters(i)%numnod
+              k = k + 1
+              counter_loc(k) = inter_win%patchs(inter_win%rank_inter+1)%clusters(i)%index_to_win(j)
+            end do
+          end do
+          write(6,*) "numnod_global",numnod_global
+          write(6,*) "displs=",displs
+          write(6,*) "counter_loc",counter_loc
+          ! allgatherv counter_loc to counter_glob
+          call MPI_Allgatherv(counter_loc, numnod_local, MPI_INTEGER, counter_glob, counter, displs, MPI_INTEGER, inter_comm, mpi_err)
+
+          ! upack counter_glob into index_to_win
+          k = 0
+          do p = 1, inter_win%size_inter
+            if(p == inter_win%rank_inter + 1) cycle
+            do i = 1, inter_win%patchs(p)%nb_clusters
+              numnod_local = inter_win%patchs(p)%clusters(i)%numnod
+              allocate(inter_win%patchs(p)%clusters(i)%index_to_win(numnod_local))
+              do j = 1, numnod_local
+                k = k + 1
+                inter_win%patchs(p)%clusters(i)%index_to_win(j) = counter_glob(displs(p)+j)
+              end do
+            end do
+          end do
+
+
 
           inter_win%glob2loc = C_NULL_PTR
 #endif

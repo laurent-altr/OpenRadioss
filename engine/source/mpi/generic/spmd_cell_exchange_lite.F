@@ -285,7 +285,6 @@ c     ALLOCATE(IREM(ISIZ,max_remote),STAT=IERROR)
           K = inter_struct(nin)%WIN%nsns_in_world(P)
           if(K > 0) R_PACKED(1:size_shared_data,1:K) = shared_real(1:size_shared_data,OFFSET+1:OFFSET+K)
           !if(K > 0) I_PACKED(1:size_shared_data,1:K) = shared_int(1:size_shared_data,OFFSET+1:OFFSET+K)
-            !DO icluster = 1, inter_struct(nin)%win%n_cluster(P)
             DO J=1,inter_struct(nin)%WIN%nsns_in_world(P) ! this might be the issue
               I = J + OFFSET
               IIX=0

@@ -64,22 +64,24 @@ extern "C" int cluster_nodes(const double *coords, int numnod, int *color, doubl
     std::fill(color, color + numnod, UNCLASSIFIED);
 
     int clusterID = 0;
+    const double h = std::min(1e-2, eps);
 
     // create a bounding box for the clould of points
     std::array<double, 3> min_coords = {coords[0], coords[1], coords[2]};
     std::array<double, 3> max_coords = {coords[0], coords[1], coords[2]};
     for (size_t i = 0; i < numnod; i++)
     {
-        min_coords[0] = std::min(min_coords[0], coords[3 * i]);
-        min_coords[1] = std::min(min_coords[1], coords[3 * i + 1]);
-        min_coords[2] = std::min(min_coords[2], coords[3 * i + 2]);
+        min_coords[0] = std::min(min_coords[0], coords[3 * i]    - h);
+        min_coords[1] = std::min(min_coords[1], coords[3 * i + 1] -h );
+        min_coords[2] = std::min(min_coords[2], coords[3 * i + 2] -h );
 
-        max_coords[0] = std::max(max_coords[0], coords[3 * i]);
-        max_coords[1] = std::max(max_coords[1], coords[3 * i + 1]);
-        max_coords[2] = std::max(max_coords[2], coords[3 * i + 2]);
+        max_coords[0] = std::max(max_coords[0], coords[3 * i]    + h); 
+        max_coords[1] = std::max(max_coords[1], coords[3 * i + 1]+ h);
+        max_coords[2] = std::max(max_coords[2], coords[3 * i + 2]+ h);
     }
     // Calculate the size of the bounding box
     std::array<double, 3> sizes = {max_coords[0] - min_coords[0], max_coords[1] - min_coords[1], max_coords[2] - min_coords[2]};
+    // case of degenerated boxes, set the size to 1
     std::array<size_t, 3> num_cells = {static_cast<size_t>(std::ceil(sizes[0] / eps)), static_cast<size_t>(std::ceil(sizes[1] / eps)), static_cast<size_t>(std::ceil(sizes[2] / eps))};
 
     // cap the number of cells between 1 and 128 in each dimension
@@ -302,14 +304,16 @@ extern "C" int cluster_nodes(const double *coords, int numnod, int *color, doubl
 
     double global_volume = (global_max_coords[0] - global_min_coords[0]) * (global_max_coords[1] - global_min_coords[1]) * (global_max_coords[2] - global_min_coords[2]);
     double sum_volume = 0.0;
-    for (size_t i = 0; i < clusterID; ++i)
+    if(global_volume > 0.0)
     {
-        double cluster_volume = (cluster_max_coords[i][0] - cluster_min_coords[i][0]) * (cluster_max_coords[i][1] - cluster_min_coords[i][1]) * (cluster_max_coords[i][2] - cluster_min_coords[i][2]);
-        double cluster_ratio = cluster_volume / global_volume;
-        sum_volume += cluster_volume;
-        std::cout << "Color " << i << ": " << color_count[i] << " nodes" << " volume ratio: " << cluster_ratio*100.0<<"%"<< std::endl;
-    }
-    std::cout << "sum / global " << sum_volume / global_volume *100.0 << "%" << std::endl;
+      for (size_t i = 0; i < clusterID; ++i)
+      {
+          double cluster_volume = (cluster_max_coords[i][0] - cluster_min_coords[i][0]) * (cluster_max_coords[i][1] - cluster_min_coords[i][1]) * (cluster_max_coords[i][2] - cluster_min_coords[i][2]);
+          double cluster_ratio = cluster_volume / global_volume;
+          sum_volume += cluster_volume;
+          std::cout << "Color " << i << ": " << color_count[i] << " nodes" << " volume ratio: " << cluster_ratio*100.0<<"%"<< std::endl;
+      }
+    } 
  
     return clusterID;
 }

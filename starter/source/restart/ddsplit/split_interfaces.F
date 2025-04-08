@@ -91,7 +91,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
       !||    front_mod                     ../starter/share/modules1/front_mod.F
       !||    message_mod                   ../starter/share/message_module/message_mod.F
       !||====================================================================
-      SUBROUTINE SPLIT_INTERFACES(INTBUF_TAB, X, IPARI   , PROC    , INTBUF_TAB_L,
+      SUBROUTINE SPLIT_INTERFACES(INTBUF_TAB, IPARI   , PROC    , INTBUF_TAB_L,
      .                            IPARI_L   , INTERCEP, NODLOCAL,
      .                            ITAB      , ITABI2M , NBDDI2M , NUMNOD_L    ,
      .                            LEN_CEP,CEP       , CEL     , IGRBRIC , T8, MULTI_FVM,
@@ -143,7 +143,6 @@ C-----------------------------------------------
       INTEGER, INTENT(INOUT) :: NINDX_NM,NINDX_SCRT
       INTEGER, DIMENSION(*), INTENT(INOUT) :: INDX_NM,INDX_SCRT
       INTEGER, DIMENSION(*) :: TAG_NM,TAG_SCRATCH
-      my_real, DIMENSION(3,NUMNOD), INTENT(in) :: X
 c      my_real
 
       TYPE(INTBUF_STRUCT_) INTBUF_TAB(*),INTBUF_TAB_L(*)
@@ -769,7 +768,7 @@ C=======================================================================
             TYPE18_LAW151 = .TRUE.
 C     Interface type 18 for law151
 !prepare addition arrays used for split
-              CALL PREPARE_SPLIT_I7(PROC          ,INTBUF_TAB(NI),IPARI(1,NI) ,X,
+              CALL PREPARE_SPLIT_I7(PROC          ,INTBUF_TAB(NI),IPARI(1,NI) ,
      .             INTERCEP(1,NI),TAG_NODE_2RY,TAG_SEGM      ,
      .             TAG_SEGM2     ,TAG_NM        ,TAG_NODE_MSR,
      .             TAG_SCRATCH   ,NI, CEP, MULTI_FVM,I710XSAV,
@@ -896,7 +895,7 @@ c
               CALL COPY_RVAL(INTBUF_TAB(NI)%CAND_F,SIZ,1)
            ELSE 
 !prepare addition arrays used for split
-              CALL PREPARE_SPLIT_I7(PROC          ,INTBUF_TAB(NI),IPARI(1,NI) ,X,
+              CALL PREPARE_SPLIT_I7(PROC          ,INTBUF_TAB(NI),IPARI(1,NI) ,
      .             INTERCEP(1,NI),TAG_NODE_2RY,TAG_SEGM      ,
      .             TAG_SEGM2     ,TAG_NM        ,TAG_NODE_MSR,
      .             TAG_SCRATCH   ,NI, CEP, MULTI_FVM,I710XSAV,
@@ -1228,7 +1227,7 @@ C=======================================================================
           TAG_II(1:II_STOK) = 0
 
           !prepare addition arrays used for split
-          CALL PREPARE_SPLIT_I7(PROC          ,INTBUF_TAB(NI),IPARI(1,NI) ,X,
+          CALL PREPARE_SPLIT_I7(PROC          ,INTBUF_TAB(NI),IPARI(1,NI) ,
      .                          INTERCEP(1,NI),TAG_NODE_2RY,TAG_SEGM      ,
      .                          TAG_SEGM2     ,TAG_NM        ,TAG_NODE_MSR,
      .                          TAG_SCRATCH   ,NI, CEP, MULTI_FVM,I710XSAV,
@@ -1970,7 +1969,7 @@ C=======================================================================
           TAG_II(1:II_STOK)     = 0
 
           !prepare addition arrays used for split
-          CALL PREPARE_SPLIT_I7(PROC          ,INTBUF_TAB(NI),IPARI(1,NI) ,X,
+          CALL PREPARE_SPLIT_I7(PROC          ,INTBUF_TAB(NI),IPARI(1,NI) ,
      .                          INTERCEP(1,NI),TAG_NODE_2RY,TAG_SEGM      ,
      .                          TAG_SEGM2     ,TAG_NM        ,TAG_NODE_MSR,
      .                          TAG_SCRATCH   ,NI, CEP, MULTI_FVM,I710XSAV,
@@ -2092,7 +2091,7 @@ C=======================================================================
           TAG_II(1:II_STOK) = 0
 
           !prepare addition arrays used for split
-          CALL PREPARE_SPLIT_I7(PROC          ,INTBUF_TAB(NI),IPARI(1,NI) ,X,
+          CALL PREPARE_SPLIT_I7(PROC          ,INTBUF_TAB(NI),IPARI(1,NI) ,
      .                          INTERCEP(1,NI),TAG_NODE_2RY,TAG_SEGM      ,
      .                          TAG_SEGM2     ,TAG_NM        ,TAG_NODE_MSR,
      .                          TAG_SCRATCH   ,NI, CEP, MULTI_FVM,I710XSAV,

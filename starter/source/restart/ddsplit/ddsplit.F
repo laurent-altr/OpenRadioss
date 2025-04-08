@@ -2374,7 +2374,7 @@ c       stop CPU timer for INTBUF_INI
 
 c       start CPU timer for SPLIT_INTERFACES
         CALL STARTIME(7,1)
-        CALL SPLIT_INTERFACES(INTBUF_TAB, X, IPARI   , P-1     , INTBUF_TAB_L,
+        CALL SPLIT_INTERFACES(INTBUF_TAB, IPARI   , P-1     , INTBUF_TAB_L,
      .                        IPARI_L   , INTERCEP, NODLOCAL,
      .                        ITAB      , ITABI2M , NBDDI2M , NUMNOD_L    ,
      .                        LEN_CEP,CEP       , CEL     , IGRBRIC , T8, MULTI_FVM,

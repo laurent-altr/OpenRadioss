@@ -83,6 +83,8 @@ C-----------------------------------------------
         my_real, dimension(:), allocatable :: temp_stif
         integer, dimension(:), allocatable :: temp_itab
         integer, dimension(:), allocatable :: temp_ispmd
+        double precision, dimension(:,:), allocatable :: coords
+        double precision :: eps 
 !   ----------------------------------------
         DO KK=1,NINTER
             INTER_STRUCT(KK)%SIZE_CAND_A = 0   
@@ -111,19 +113,27 @@ C           INTER_STRUCT(KK)%WIN%NSNS(ISPMD+1) = NSN_OWNED
 #endif
             IF(IPARI(7,KK) .NE. 7) CYCLE
             NSN_OWNED = 0 
-            DO i = 1,NSN
-                IF(NODES%WEIGHT(intbuf_tab(kk)%NSV(i)) == 1) THEN
-                    NSN_OWNED = NSN_OWNED + 1
-                ENDIF
-            ENDDO
+!           IF(ALLOCATED(COORDS)) DEALLOCATE(COORDS)
+!           ALLOCATE(coords(3,NSN))
+!           DO i = 1,NSN
+!               IF(NODES%WEIGHT(intbuf_tab(kk)%NSV(i)) == 1) THEN
+!                   NSN_OWNED = NSN_OWNED + 1
+!                   coords(1:3,NSN_OWNED) = NODES%X(1:3,intbuf_tab(kk)%NSV(i))
+!               ENDIF
+!           ENDDO
 
             IF(NSN+NRTM+NMN > 0) THEN
+
+              eps = 100.0d0 * INTBUF_TAB(KK)%VARIABLES(2)
+
               inter_struct(KK)%old_rem_size = size(ITAFI(KK)%P)
-              call inter_window_open(INTER_STRUCT(KK)%WIN, NSN_OWNED, INTBUF_TAB(KK), ispmd,nspmd, ipari(:,KK), npari)
+              call inter_window_open(INTER_STRUCT(KK)%WIN, NSN_OWNED, INTBUF_TAB(KK), ispmd,nspmd, ipari(:,KK), npari,eps,nodes)
               call spmd_inter_window_update_intra(INTER_STRUCT(KK)%WIN, nodes, INTBUF_TAB(KK), IPARI(:,KK), NPARI, ISPMD)
               call spmd_inter_window_update_inter(INTER_STRUCT(KK)%WIN)
               if(NSN>0) call inter_window_mark_boundary(INTER_STRUCT(KK)%WIN, nodes, nspmd, intbuf_tab(KK)%NSV, NSN, numnod)
               call spmd_inter_window_update_inter(INTER_STRUCT(KK)%WIN)
+
+              
              
 
 !             size_shared_data = (INTER_STRUCT(KK)%WIN%RSIZ + INTER_STRUCT(KK)%WIN%ISIZ)!
