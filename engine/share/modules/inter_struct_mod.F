@@ -85,10 +85,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
                 integer :: istart !< next available space in next_nod and last_nod
                 integer :: old_rem_size
                 type(inter_win_) :: win
-                type(cluster_node_), dimension(:), allocatable :: clusters
-                integer :: nb_clusters
-                type(cluster_mapping_):: cluster_mapping
-            END TYPE inter_struct_type  
+           END TYPE inter_struct_type  
         END MODULE INTER_STRUCT_MOD
 
 

@@ -115,18 +115,19 @@ C           INTER_STRUCT(KK)%WIN%NSNS(ISPMD+1) = NSN_OWNED
             NSN_OWNED = 0 
 !           IF(ALLOCATED(COORDS)) DEALLOCATE(COORDS)
 !           ALLOCATE(coords(3,NSN))
-!           DO i = 1,NSN
-!               IF(NODES%WEIGHT(intbuf_tab(kk)%NSV(i)) == 1) THEN
-!                   NSN_OWNED = NSN_OWNED + 1
+            DO i = 1,NSN
+                IF(NODES%WEIGHT(intbuf_tab(kk)%NSV(i)) == 1) THEN
+                    NSN_OWNED = NSN_OWNED + 1
 !                   coords(1:3,NSN_OWNED) = NODES%X(1:3,intbuf_tab(kk)%NSV(i))
-!               ENDIF
-!           ENDDO
+                ENDIF
+            ENDDO
 
             IF(NSN+NRTM+NMN > 0) THEN
 
               eps = 100.0d0 * INTBUF_TAB(KK)%VARIABLES(2)
 
               inter_struct(KK)%old_rem_size = size(ITAFI(KK)%P)
+        !         inter_window_open(inter_win           , n_local, intbuf_tab, rank_world, nspmd, ipari, npari, eps, nodes)
               call inter_window_open(INTER_STRUCT(KK)%WIN, NSN_OWNED, INTBUF_TAB(KK), ispmd,nspmd, ipari(:,KK), npari,eps,nodes)
               call spmd_inter_window_update_intra(INTER_STRUCT(KK)%WIN, nodes, INTBUF_TAB(KK), IPARI(:,KK), NPARI, ISPMD)
               call spmd_inter_window_update_inter(INTER_STRUCT(KK)%WIN)

@@ -692,6 +692,7 @@ C Fin Partie non parallele smt
      .     INTBUF_TAB,SENSORS%SENSOR_TAB,NB_INTER_SORTED,LIST_INTER_SORTED,INTER_STRUCT)
       ! globalize NEED_TO_SORT : 1= one or several interface(s) must be sorted 
       IF(NSPMD>1.AND.ITASK==0) CALL SPMD_ALLGLOB_ISUM9(NEED_TO_SORT,1)
+      ! check with Romain, why this is needed, because it should already done in syncmmxg
       CALL MY_BARRIER()
       ! ------------------------
 

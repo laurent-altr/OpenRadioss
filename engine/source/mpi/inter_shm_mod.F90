@@ -69,6 +69,8 @@
           integer :: x_offset, v_offset, ms_offset, stfns_offset
           integer :: i_offset, ispmd_offset, itab_offset, IKINET_offset,boundary_offset
           type(cluster_mapping_), dimension(:), allocatable :: patchs !< patches per spmd process
+          type(cluster_mapping_) :: main_patchs !< patches per spmd process
+
  
         end type inter_win_
 
@@ -238,7 +240,7 @@
           use nodal_arrays_mod
           use intbufdef_mod
           use cluster_node_mod, only : cluster_mapping_
-          use init_patch_mod, only: init_patch
+          use init_patch_mod, only: init_patch, init_patch_m
           use spmd_mod
           implicit none
 #ifdef MPI
@@ -270,11 +272,12 @@
           integer :: displs(nspmd+1)
           integer :: P
           integer :: numnod_global, numnod_local
-          integer :: nsn 
+          integer :: nsn,nmn 
 
 !         integer :: cpu_id
 #ifdef MPI
           nsn = ipari(5)
+          nmn = ipari(6)
           inter_comm = intbuf_tab%MPI_COMM
           call set_win_size(inter_win, intbuf_tab, ipari,npari)
           integer_count = inter_win%isiz
@@ -445,6 +448,7 @@
           allocate(inter_win%patchs(inter_win%size_inter))
           write(6,*) "init patchs"
           call init_patch(inter_win%patchs, eps, nodes, inter_win%size_inter, inter_win%rank_inter, intbuf_tab, nsn)
+          call init_patch_m(inter_win%main_patchs, eps, nodes, intbuf_tab, nmn)
           write(6,*) "init patchs done"
 
           ncolors = inter_win%patchs(inter_win%rank_inter+1)%nb_clusters
@@ -511,9 +515,10 @@
               counter_loc(k) = inter_win%patchs(inter_win%rank_inter+1)%clusters(i)%index_to_win(j)
             end do
           end do
+          write(6,*) "ncolors",ncolors
           write(6,*) "numnod_global",numnod_global
-          write(6,*) "displs=",displs
-          write(6,*) "counter_loc",counter_loc
+          !write(6,*) "displs=",displs
+          !write(6,*) "counter_loc",counter_loc
           ! allgatherv counter_loc to counter_glob
           call MPI_Allgatherv(counter_loc, numnod_local, MPI_INTEGER, counter_glob, counter, displs, MPI_INTEGER, inter_comm, mpi_err)
 

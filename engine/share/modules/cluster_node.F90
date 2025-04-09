@@ -24,6 +24,7 @@
 ! ----------------------------------------------------------------------------
     module cluster_node_mod
     integer, parameter :: UNCLASSIFIED = -1
+    integer, parameter :: MIN_PATCH_SIZE = 10
     interface
         function cluster_nodes(coords, numnod, color, eps, minPts) bind(C, name="cluster_nodes")
             use, intrinsic :: iso_c_binding
@@ -43,6 +44,7 @@
         double precision, dimension(3,2) :: bounding_box !< bounding box of the cluster 
         integer, dimension(:), allocatable :: index_to_win !< mapping from the node number to the window number
         integer, dimension(:), allocatable :: index_in_x !< mapping from the node number to the nsv number
+        integer, dimension(:), allocatable :: index_in_nsv !< mapping from the node number to the nsv number
         integer :: numnod !< number of nodes in the cluster
         double precision :: volume 
     end type cluster_node_
@@ -80,74 +82,6 @@
         enddo
 
     end subroutine compute_cluster_volume
-!    subroutine update_bounding_box(nodes,intbuf_tab,inter_struct)
-!        use intbufdef_mod
-!        use nodal_arrays_mod
-!        use inter_struct_mod
-!        implicit none
-!
-!! dummy arguments
-!        type(inter_struct_) :: inter_struct
-!        type(nodal_arrays_), intent(in) :: nodes
-!        type(intbuf_struct_):: intbuf_tab
-!! local variables    
-!
-!        integer :: i, j, k
-!        integer :: numnod
-!        double precision :: dx, dy, dz
-!        double precision :: x_min, y_min, z_min
-!        double precision :: x_max, y_max, z_max
-!        double precision :: xx,yy,zz
-!        integer :: color
-!        integer :: rank 
-!
-!        rank = inter_struct%win%rank_inter + 1
-!        numnod = nodes%numnod
-!        x_min = HUGE(1.0d0)
-!        y_min = HUGE(1.0d0)
-!        z_min = HUGE(1.0d0)
-!        x_max = -HUGE(1.0d0)
-!        y_max = -HUGE(1.0d0)
-!        z_max = -HUGE(1.0d0)
-!
-!        ! initialize the bounding box
-!        do i = 1, inter_struct%win%partches(rank)%nb_clusters                           
-!           inter_struct%win%partches(rank)%cluster(i)%bounding_box(1,1) = x_min
-!           inter_struct%win%partches(rank)%cluster(i)%bounding_box(2,1) = y_min
-!           inter_struct%win%partches(rank)%cluster(i)%bounding_box(3,1) = z_min
-!           inter_struct%win%partches(rank)%cluster(i)%bounding_box(1,2) = x_max
-!           inter_struct%win%partches(rank)%cluster(i)%bounding_box(2,2) = y_max
-!           inter_struct%win%partches(rank)%cluster(i)%bounding_box(3,2) = z_max
-!        enddo
-!        do i = 1,inter_struct%win%partches(rank)%nb_clusters
-!            do j = 1, inter_struct%win%partches(rank)%cluster(i)%numnod
-!                k = inter_struct%win%partches(rank)%cluster(i)%index_in_x(j)
-!                color = inter_struct%win%partches(rank)%cluster(i)%color(j)
-!                xx = nodes%X(1,k)
-!                yy = nodes%X(2,k)
-!                zz = nodes%X(3,k)
-!                if (xx < inter_struct%win%partches(rank)%cluster(i)%bounding_box(1,1)) then
-!                    inter_struct%win%partches(rank)%cluster(i)%bounding_box(1,1) = xx
-!                endif
-!                if (xx > inter_struct%win%partches(rank)%cluster(i)%bounding_box(1,2)) then
-!                    inter_struct%win%partches(rank)%cluster(i)%bounding_box(1,2) = xx
-!                endif
-!                if (yy < inter_struct%win%partches(rank)%cluster(i)%bounding_box(2,1)) then
-!                    inter_struct%win%partches(rank)%cluster(i)%bounding_box(2,1) = yy
-!                endif
-!                if (yy > inter_struct%win%partches(rank)%cluster(i)%bounding_box(2,2)) then
-!                    inter_struct%win%partches(rank)%cluster(i)%bounding_box(2,2) = yy
-!                endif
-!                if (zz < inter_struct%win%partches(rank)%cluster(i)%bounding_box(3,1)) then
-!                    inter_struct%win%partches(rank)%cluster(i)%bounding_box(3,1) = zz
-!                endif
-!                if (zz > inter_struct%win%partches(rank)%cluster(i)%bounding_box(3,2)) then
-!                    inter_struct%win%partches(rank)%cluster(i)%bounding_box(3,2) = zz
-!                endif
-!            enddo
-!        enddo
-!
-!    end subroutine update_bounding_box
 
 
     end module cluster_node_mod

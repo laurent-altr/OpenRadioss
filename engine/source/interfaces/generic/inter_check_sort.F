@@ -106,7 +106,7 @@ C-----------------------------------------------
                 ! check if the interface must be sorted (dist + t_start + t_stop)
                 DIST = INTBUF_TAB(N)%VARIABLES(distance_index)
 
-                IF(NODES%X(1,1) .NE. nodes%X(1,1)) write(6,*) 'NODES%X(1,1) = ',NODES%X(1,1)
+                IF(NODES%numnod .NE. nodes%numnod) write(6,*) 'NODES%X(1,1) = ',NODES%X(1,1)
 !               CALL UPDATE_BOUNDING_BOX(NODES,INTBUF_TAB(N),INTER_STRUCT(N))
 
                 IF (DIST<=ZERO) IS_SORTING_NEEDED = .TRUE.

@@ -74,6 +74,23 @@ extern "C" {
     {
             std::sort(array,array+ *len);
     }
+    void stlsort_int(int *len, int* array) {
+
+	    std::sort(array, array + *len);
+    }
+    void stlsort_float(int *len, float* array) {
+
+	    std::sort(array, array + *len);
+    }
+    void stlsort_double(int *len, float* array) {
+
+	    std::sort(array, array + *len);
+    }
+
+
+
+
+
 // sort array with int and key
     void stlsort_int_int(int *len, int* keys,  int *values) {
          stlsort_generic_generic<int,int>(len, keys, values); 
@@ -90,5 +107,6 @@ extern "C" {
     void STLSORT_INT_INT_(int *len, int* keys,  int *values) {
          stlsort_generic_generic<int,int>(len, keys, values); 
     }
+
 }
 

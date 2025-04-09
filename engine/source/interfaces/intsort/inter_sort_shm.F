@@ -149,6 +149,7 @@ C-----------------------------------------------
       USE INTERFACES_MOD
       USE GLOB_THERM_MOD
       USE SPMD_INTER_WINDOW_UPDATE
+      USE UPDATE_PATCH_MOD
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -172,7 +173,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
-      type(NODAL_ARRAYS_) , INTENT(INOUT) :: NODES
+      type(NODAL_ARRAYS_), INTENT(INOUT) :: NODES
       TYPE(TIMER_), INTENT(inout) :: TIMERS
       INTEGER, INTENT(INOUT) :: ERRORS !< number of interfaces that could not be sorted
       INTEGER, INTENT(in) :: NODNX_SMS_SIZ
@@ -694,6 +695,14 @@ C Fin Partie non parallele smt
       ! find the list of interface (for the moment : type7) that needs to be sorted
       CALL INTER_CHECK_SORT_LITE( ITASK,NEED_TO_SORT,NBINTC,INTLIST,IPARI,NSENSOR,
      .     INTBUF_TAB,SENSORS%SENSOR_TAB,NB_INTER_SORTED,LIST_INTER_SORTED,INTER_STRUCT,NODES)
+      DO J = 1,NBINTC
+        N = INTLIST(J)
+        if(IPARI(7,N) .NE. 7) CYCLE
+        if(IPARI(7,N) == 7 .AND. IPARI(22,N) == 7 ) CYCLE                                       
+        IF(inter_struct(n)%win%rank_inter >= 0) then
+          CALL UPDATE_PATCH(NODES,INTER_STRUCT(N), INTBUF_TAB(N)%MPI_COMM,intbuf_tab(n)%stfns,ipari(5,n))
+        endif
+      ENDDO
       ! globalize NEED_TO_SORT : 1= one or several interface(s) must be sorted 
       IF(NSPMD>1.AND.ITASK==0) CALL SPMD_ALLGLOB_ISUM9(NEED_TO_SORT,1)
       IF(NEED_TO_SORT > 0) THEN
@@ -702,7 +711,8 @@ C Fin Partie non parallele smt
         if(IPARI(7,N) .NE. 7) CYCLE
         if(IPARI(7,N) == 7 .AND. IPARI(22,N) == 7 ) CYCLE                                       
         call startime(timers, 44)
-        call spmd_inter_window_update_intra(inter_struct(n)%win, nodes, interfaces%intbuf_tab(n), ipari(1:npari,n),npari,ispmd)
+        call spmd_inter_window_update_intra(inter_struct(n)%win, nodes, intbuf_tab(n), ipari(1:npari,n),npari,ispmd)
+
         call stoptime(timers, 44)
         call spmd_inter_window_update_inter(inter_struct(n)%win)
       ENDDO

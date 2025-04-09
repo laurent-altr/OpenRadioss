@@ -66,6 +66,8 @@ C-----------------------------------------------
         USE EXTEND_ARRAY_MOD
         use umap_mod
         use MY_ALLOC_MOD
+        use cppsort_mod
+        use update_patch_mod, only : intersects
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -143,7 +145,7 @@ C     et creation des candidats
 C================================================================
       my_real :: xmin, xmax, ymin, ymax, zmin, zmax
       integer :: max_remote
-      integer :: iix, iiy, iiz,k
+      integer :: iix, iiy, iiz,k,color
       integer :: ielec_offset, temp_offset, areas_offset, gap_s_offset, gap_sl_offset, ipartfrics_offset
       integer :: x_offset, v_offset, ms_offset, stfns_offset
       integer :: ispmd_offset, itab_offset, IKINET_offset, i_offset, boundary_offset
@@ -157,6 +159,9 @@ C================================================================
       integer(kind=8), dimension(:,:), allocatable :: I_PACKED
       integer(kind=8) :: M
       my_real :: x1, x2, x3
+      integer :: pp
+      double precision, dimension(3,2) :: main_box
+      integer, dimension(:), allocatable :: indexes, rank_in_inter
 C-----------------------------------------------
       size_shared_data = (inter_struct(nin)%WIN%RSIZ + inter_struct(nin)%WIN%ISIZ)!
       NSNGLO = inter_struct(nin)%WIN%NSN_GLOBAL
@@ -249,6 +254,8 @@ C
       xmin = inter_struct(nin)%box_limit_main(4)  
       ymin = inter_struct(nin)%box_limit_main(5)
       zmin = inter_struct(nin)%box_limit_main(6)
+      main_box(1:3,1) = (/xmin,ymin,zmin/)
+      main_box(1:3,2) = (/xmax,ymax,zmax/)
 
 C       INTER_STRUCT(NIN)%BOX_LIMIT_MAIN(1) = MAX(INTER_STRUCT(NIN)%BOX_LIMIT_MAIN(1),MAX_LIMIT_MAIN(1))
 C       INTER_STRUCT(NIN)%BOX_LIMIT_MAIN(2) = MAX(INTER_STRUCT(NIN)%BOX_LIMIT_MAIN(2),MAX_LIMIT_MAIN(2))
@@ -270,69 +277,97 @@ c     ALLOCATE(IREM(ISIZ,max_remote),STAT=IERROR)
       CALL MY_ALLOC(IREM,ISIZ,max_remote)
       
       NSNR = 0
-
+      allocate(rank_in_inter(NSPMD))
+      rank_in_inter = -1
+      DO P = 1, inter_struct(nin)%win%size_inter
+        rank_in_inter(inter_struct(nin)%win%ranks_mapping(4,P)+1) = P
+       enddo
       IF (IMONM > 0) CALL STARTIME(TIMERS,25)
         count_extend = 0
         OFFSET = 0
         K = maxval(inter_struct(nin)%WIN%nsns_in_world(1:NSPMD))
 
         allocate(R_PACKED(size_shared_data,K))
+        allocate(indexes(k))
         !allocate(I_PACKED(size_shared_data,K))
 
+        PP = 0
         DO P = 1, NSPMD
           nsn_local = 0
           IF(P .NE. ISPMD + 1) THEN
-          K = inter_struct(nin)%WIN%nsns_in_world(P)
-          if(K > 0) R_PACKED(1:size_shared_data,1:K) = shared_real(1:size_shared_data,OFFSET+1:OFFSET+K)
-          !if(K > 0) I_PACKED(1:size_shared_data,1:K) = shared_int(1:size_shared_data,OFFSET+1:OFFSET+K)
+            K = inter_struct(nin)%WIN%nsns_in_world(P)
+            if(k > 0 ) then 
+            PP = rank_in_inter(P) 
+            if(PP < 0) write(6,*) "ERROR: rank_in_inter(P) < 0 ",P,PP
+            R_PACKED(1:size_shared_data,1:K) = shared_real(1:size_shared_data,OFFSET+1:OFFSET+K)
             DO J=1,inter_struct(nin)%WIN%nsns_in_world(P) ! this might be the issue
-              I = J + OFFSET
-              IIX=0
-              IIY=0
-              IIZ=0
-              !C Optimisation // recherche les noeuds compris dans xmin xmax des
-              !C elements du processeur
-c             X1 = shared_real(1,I)                          
-c             X2 = shared_real(2,I)
-c             X3 = shared_real(3,I)
-              X1 = R_PACKED(1,J)
-              X2 = R_PACKED(2,J)
-              X3 = R_PACKED(3,J)
-              IF(X1 < XMIN)  CYCLE
-              IF(X1 > XMAX)  CYCLE
-              IF(X2 < YMIN)  CYCLE
-              IF(X2 > YMAX)  CYCLE
-              IF(X3 < ZMIN)  CYCLE
-              IF(X3 > ZMAX)  CYCLE
-!             IF(shared_real(stfns_offset,I) == ZERO)CYCLE
-              IF(R_PACKED(stfns_offset,J) == ZERO)CYCLE
+            I = J + OFFSET
 
-!             M = shared_int(boundary_offset,I) ! is the node at the boundary of multiple domains?
-              M = transfer(R_PACKED(boundary_offset,J),M) ! is the node at the boundary of multiple domains?
-              if(m > 0) then
-                 m = get_value_umap(inter_struct(nin)%win%boundary_to_local, I, -1) ! local number or -1
-              endif
-              if(m > 0) then 
-                cycle  ! boundary node owned by another domain, but knowned by me 
-              endif 
+!           l = 0
+!           Do color = 1, inter_struct(nin)%win%patchs(pp)%nb_clusters
+!            !   if(intersects(main_box,inter_struct(nin)%win%patchs(pp)%clusters(color)%bounding_box)) then
+!               if(.true.) then
+!               DO j = 1,inter_struct(nin)%win%patchs(pp)%clusters(color)%numnod
+!                  I = inter_struct(nin)%win%patchs(pp)%clusters(color)%index_to_win(j) 
+!                  l = l + 1
+!                  indexes(l) = I
+!               ENDDO
+!               endif
+!           enddo 
+!           !if(l > 0) write(6,*) 'PROCESS ',ISPMD+1,' COLLIDES WITH',P,L
+!           !if( l .ne. k) write(6,*) "ERROR: ",l,k," : ",P           
+!           ! the sorting is necessary, XREM should be sorted according to the remote NSV
+!           call cppsort(l,indexes)
+!             DO j = 1,l
+!               I = indexes(j) + OFFSET                                                                        
+                IIX=0
+                IIY=0
+                IIZ=0
+                !C Optimisation // recherche les noeuds compris dans xmin xmax des
+                !C elements du processeur
+c               X1 = shared_real(1,I)                          
+c               X2 = shared_real(2,I)
+c               X3 = shared_real(3,I)
+                X1 = R_PACKED(1,J)
+                X2 = R_PACKED(2,J)
+                X3 = R_PACKED(3,J)
+                IF(X1 < XMIN)  CYCLE
+                IF(X1 > XMAX)  CYCLE
+                IF(X2 < YMIN)  CYCLE
+                IF(X2 > YMAX)  CYCLE
+                IF(X3 < ZMIN)  CYCLE
+                IF(X3 > ZMAX)  CYCLE
+!               IF(shared_real(stfns_offset,I) == ZERO)CYCLE
+                IF(R_PACKED(stfns_offset,J) == ZERO)CYCLE
+
+!               M = shared_int(boundary_offset,I) ! is the node at the boundary of multiple domains?
+                M = transfer(R_PACKED(boundary_offset,J),M) ! is the node at the boundary of multiple domains?
+                if(m > 0) then
+                   m = get_value_umap(inter_struct(nin)%win%boundary_to_local, I, -1) ! local number or -1
+                endif
+                if(m > 0) then 
+                  cycle  ! boundary node owned by another domain, but knowned by me 
+                endif 
 
 
-             NSNR = NSNR + 1 
-             nsn_local = nsn_local + 1
-             if(nsnr == max_remote) then
-                max_remote = max(max_remote + 1000,int(max_remote*1.2))
-!               count_extend = count_extend + 1
-                call extend_array(XREM,RSIZ,nsnr,RSIZ,max_remote)
-                call extend_array(IREM,ISIZ,nsnr,ISIZ,max_remote)
-              endif
-              DO L=1,RSIZ
-              XREM(L,NSNR) = R_PACKED(L,j)
-              ENDDO
-              IREM(1,NSNR) = transfer(R_PACKED(i_offset,J),M) !shared_int(i_offset,I)
-              IREM(2,NSNR) = transfer(R_PACKED(itab_offset,J),M) ! shared_int(itab_offset,I)
-              IREM(3,NSNR) = transfer(R_PACKED(IKINET_offset,J),M)!  shared_int(IKINET_offset,I)
-              IREM(4:ISIZ,NSNR) = 0 
-            ENDDO !j
+                NSNR = NSNR + 1 
+                nsn_local = nsn_local + 1
+                if(nsnr == max_remote) then
+                  max_remote = max(max_remote + 1000,int(max_remote*1.2))
+!                 count_extend = count_extend + 1
+                  call extend_array(XREM,RSIZ,nsnr,RSIZ,max_remote)
+                  call extend_array(IREM,ISIZ,nsnr,ISIZ,max_remote)
+                endif
+                DO L=1,RSIZ
+                  XREM(L,NSNR) = R_PACKED(L,j)
+                ENDDO
+                IREM(1,NSNR) = transfer(R_PACKED(i_offset,J),M) !shared_int(i_offset,I)
+                IREM(2,NSNR) = transfer(R_PACKED(itab_offset,J),M) ! shared_int(itab_offset,I)
+                IREM(3,NSNR) = transfer(R_PACKED(IKINET_offset,J),M)!  shared_int(IKINET_offset,I)
+                IREM(4:ISIZ,NSNR) = 0 
+              ENDDO !j 
+            ENDIF
+           !ENDDO !color
           ENDIF ! ispmd
           OFFSET = OFFSET + inter_struct(nin)%WIN%nsns_in_world(P)
           NSNFI(NIN)%P(P) = nsn_local
