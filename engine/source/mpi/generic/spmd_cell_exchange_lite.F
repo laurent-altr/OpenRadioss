@@ -162,6 +162,7 @@ C================================================================
       integer :: pp
       double precision, dimension(3,2) :: main_box
       integer, dimension(:), allocatable :: indexes, rank_in_inter
+      integer :: intersects_counter
 C-----------------------------------------------
       size_shared_data = (inter_struct(nin)%WIN%RSIZ + inter_struct(nin)%WIN%ISIZ)!
       NSNGLO = inter_struct(nin)%WIN%NSN_GLOBAL
@@ -291,6 +292,7 @@ c     ALLOCATE(IREM(ISIZ,max_remote),STAT=IERROR)
         allocate(indexes(k))
         !allocate(I_PACKED(size_shared_data,K))
 
+        intersects_counter = 0
         PP = 0
         DO P = 1, NSPMD
           nsn_local = 0
@@ -306,8 +308,8 @@ c     ALLOCATE(IREM(ISIZ,max_remote),STAT=IERROR)
 
             l = 0
             Do color = 1, inter_struct(nin)%win%patchs(pp)%nb_clusters
-             !   if(intersects(main_box,inter_struct(nin)%win%patchs(pp)%clusters(color)%bounding_box)) then
-                if(.true.) then
+                 if(intersects(main_box,inter_struct(nin)%win%patchs(pp)%clusters(color)%bounding_box)) then
+             !  if(.true.) then
                 DO j = 1,inter_struct(nin)%win%patchs(pp)%clusters(color)%numnod
                    I = inter_struct(nin)%win%patchs(pp)%clusters(color)%index_to_win(j) 
                    l = l + 1

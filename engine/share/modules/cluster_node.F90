@@ -24,7 +24,7 @@
 ! ----------------------------------------------------------------------------
     module cluster_node_mod
     integer, parameter :: UNCLASSIFIED = -1
-    integer, parameter :: MIN_PATCH_SIZE = 10
+    integer, parameter :: MIN_PATCH_SIZE = 100
     interface
         function cluster_nodes(coords, numnod, color, eps, minPts) bind(C, name="cluster_nodes")
             use, intrinsic :: iso_c_binding
