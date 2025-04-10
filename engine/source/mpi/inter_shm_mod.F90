@@ -707,6 +707,7 @@
           call c_f_pointer(inter_win%shared_base, shared_int,[ size_shared_data, inter_win%nsn_global ] )
 
           inter_win%boundary_to_local = create_umap()
+          write(6,*) "inter_win%boundary_to_local created"
           do n = 1, numnod
               if(nodes%weight(n) == 0) then
                 id = nodes%itab(n)

@@ -24,6 +24,7 @@
 #include <unordered_map>
 #include <cstdint>
 #include <stdexcept>
+#include <iostream>
 
 //       Using C++14, we have no std::shared_mutex, so no internal locking is shown here.
 //       The container should be fully populated before concurrent reads to ensure safety.
@@ -53,8 +54,13 @@ void cpp_add_entry_umap(void* umap_ptr, int key, int value) noexcept {
 int cpp_get_value_umap(void* umap_ptr, int key, int default_value) noexcept {
     // Retrieve a value from the map. If the key is not found, return default_value.
     // Safe for concurrent calls *only if* no other thread modifies the map.
+    if(!umap_ptr) {
+        // If umap_ptr is null, return default_value.
+        std::cout<<"cpp_get_value_umap: umap_ptr is null"<<std::endl;
+        return default_value;
+    }
     auto umap = static_cast<std::unordered_map<int,int>*>(umap_ptr);
-    auto it = umap->find(key);
+    auto it = umap->find(key); // sefault here
     return (it != umap->end()) ? it->second : default_value;
 }
 
