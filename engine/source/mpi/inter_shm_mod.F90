@@ -45,6 +45,7 @@
           integer :: rank_inter_node, number_of_nodes
           integer :: COMM_INTER_NODE
           integer :: COMM_INTRA_NODE
+          integer :: COMM
           integer :: node_id
           integer :: disp_unit !                                           
           integer :: win
@@ -273,6 +274,8 @@
           integer :: P
           integer :: numnod_global, numnod_local
           integer :: nsn,nmn 
+          integer :: offset
+          integer :: key
 
 !         integer :: cpu_id
 #ifdef MPI
@@ -331,6 +334,14 @@
           call MPI_Bcast(inter_win%node_id, 1, MPI_INTEGER, 0, inter_win%COMM_INTRA_NODE, mpi_err)
 
           allocate(inter_win%ranks_mapping(4, inter_win%size_inter))
+
+          color = 1
+          key = inter_win%node_id * 10000 + inter_win%rank_intra_node 
+          call MPI_Comm_split(intbuf_tab%MPI_COMM, color, key, inter_win%COMM, mpi_err)
+          call MPI_Comm_rank(inter_win%COMM, inter_win%rank_inter, mpi_err)
+          inter_comm = inter_win%COMM
+
+
           
           inter_win%ranks_mapping(1:4,:) = 0
           inter_win%ranks_mapping(1, inter_win%rank_inter+1) = inter_win%rank_intra_node
@@ -500,6 +511,7 @@
           end do
           numnod_local = displs(inter_win%rank_inter+2) - displs(inter_win%rank_inter+1)
           write(6,*) "numnod_local",numnod_local,counter(inter_win%rank_inter+1)
+          write(6,*) "displs=",displs
 
 
           deallocate(counter_loc)
@@ -513,8 +525,21 @@
             do j = 1, inter_win%patchs(inter_win%rank_inter+1)%clusters(i)%numnod
               k = k + 1
               counter_loc(k) = inter_win%patchs(inter_win%rank_inter+1)%clusters(i)%index_to_win(j)
+              !counter_loc(k) = counter_loc(k) + inter_win%starting_node_of_proc(rank_world+1) 
+              ! reassign inter_win
+              !inter_win%patchs(inter_win%rank_inter+1)%clusters(i)%index_to_win(j) = counter_loc(k)
             end do
           end do
+
+          do i =1, k
+            do j = 1,k
+              if(j.NE.i .and. counter_loc(j) == counter_loc(i)) then
+                write(6,*) "ERROR: index_to_win not unique",i,j,counter_loc(i),counter_loc(j)
+              end if
+            enddo
+          enddo
+
+
           write(6,*) "ncolors",ncolors
           write(6,*) "numnod_global",numnod_global
           !write(6,*) "displs=",displs
@@ -523,17 +548,26 @@
           call MPI_Allgatherv(counter_loc, numnod_local, MPI_INTEGER, counter_glob, counter, displs, MPI_INTEGER, inter_comm, mpi_err)
 
           ! upack counter_glob into index_to_win
-          k = 0
           do p = 1, inter_win%size_inter
-            if(p == inter_win%rank_inter + 1) cycle
-            do i = 1, inter_win%patchs(p)%nb_clusters
-              numnod_local = inter_win%patchs(p)%clusters(i)%numnod
-              allocate(inter_win%patchs(p)%clusters(i)%index_to_win(numnod_local))
-              do j = 1, numnod_local
-                k = k + 1
-                inter_win%patchs(p)%clusters(i)%index_to_win(j) = counter_glob(displs(p)+j)
+!           if(p .NE. inter_win%rank_inter + 1) then
+              k = 0
+              do i = 1, inter_win%patchs(p)%nb_clusters
+                numnod_local = inter_win%patchs(p)%clusters(i)%numnod
+                if(p .ne. inter_win%rank_inter+1 )allocate(inter_win%patchs(p)%clusters(i)%index_to_win(numnod_local))
+                do j = 1, numnod_local
+                  k = k + 1
+                  if(p == inter_win%rank_inter + 1) then
+                    ! check if recieved buffer = local buffer
+                    if(inter_win%patchs(p)%clusters(i)%index_to_win(j) /=  counter_glob(displs(p)+k)) then
+                      write(6,*) "ERROR: index_to_win not equal",displs(p)+k,inter_win%patchs(p)%clusters(i)%index_to_win(j),counter_glob(displs(p)+k)
+                    end if
+                  end if
+                  offset = inter_win%starting_node_of_proc(inter_win%ranks_mapping(4,p)+1)
+                  inter_win%patchs(p)%clusters(i)%index_to_win(j) = counter_glob(displs(p)+k) + offset 
+!                  write(800+rank_world,*) p,"def:",i,j,inter_win%patchs(p)%clusters(i)%index_to_win(j) 
+                end do
               end do
-            end do
+!           endif
           end do
 
 

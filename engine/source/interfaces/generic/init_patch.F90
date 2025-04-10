@@ -105,6 +105,7 @@
             write(6,*) 'cluster', k, 'numnod', patchs(rank+1)%clusters(k)%numnod
             !write(6,*) 'cluster', k, 'index_to_win', patchs(rank+1)%clusters(k)%index_to_win(1:patchs(rank+1)%clusters(k)%numnod)
           end do
+!     
 
 
           deallocate(counter)

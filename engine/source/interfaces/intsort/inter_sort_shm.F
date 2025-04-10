@@ -700,7 +700,7 @@ C Fin Partie non parallele smt
         if(IPARI(7,N) .NE. 7) CYCLE
         if(IPARI(7,N) == 7 .AND. IPARI(22,N) == 7 ) CYCLE                                       
         IF(inter_struct(n)%win%rank_inter >= 0) then
-          CALL UPDATE_PATCH(NODES,INTER_STRUCT(N), INTBUF_TAB(N)%MPI_COMM,intbuf_tab(n)%stfns,ipari(5,n))
+          CALL UPDATE_PATCH(NODES,INTER_STRUCT(N), INTER_STRUCT(N)%WIN%COMM,intbuf_tab(n)%stfns,ipari(5,n))
         endif
       ENDDO
       ! globalize NEED_TO_SORT : 1= one or several interface(s) must be sorted 

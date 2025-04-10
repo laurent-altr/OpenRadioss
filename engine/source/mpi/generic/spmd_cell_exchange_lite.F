@@ -299,55 +299,73 @@ c     ALLOCATE(IREM(ISIZ,max_remote),STAT=IERROR)
             if(k > 0 ) then 
             PP = rank_in_inter(P) 
             if(PP < 0) write(6,*) "ERROR: rank_in_inter(P) < 0 ",P,PP
-            R_PACKED(1:size_shared_data,1:K) = shared_real(1:size_shared_data,OFFSET+1:OFFSET+K)
-            DO J=1,inter_struct(nin)%WIN%nsns_in_world(P) ! this might be the issue
-            I = J + OFFSET
+!           R_PACKED(1:size_shared_data,1:K) = shared_real(1:size_shared_data,OFFSET+1:OFFSET+K)
+!           write(800+ispmd,*) NIN,P,"NSN:",inter_struct(nin)%win%nsns_in_world(P)
+!           DO J=1,inter_struct(nin)%WIN%nsns_in_world(P) ! this might be the issue
+!           I = J +  inter_struct(nin)%win%starting_node_of_proc(P) 
 
-!           l = 0
-!           Do color = 1, inter_struct(nin)%win%patchs(pp)%nb_clusters
-!            !   if(intersects(main_box,inter_struct(nin)%win%patchs(pp)%clusters(color)%bounding_box)) then
-!               if(.true.) then
-!               DO j = 1,inter_struct(nin)%win%patchs(pp)%clusters(color)%numnod
-!                  I = inter_struct(nin)%win%patchs(pp)%clusters(color)%index_to_win(j) 
-!                  l = l + 1
-!                  indexes(l) = I
-!               ENDDO
-!               endif
-!           enddo 
-!           !if(l > 0) write(6,*) 'PROCESS ',ISPMD+1,' COLLIDES WITH',P,L
-!           !if( l .ne. k) write(6,*) "ERROR: ",l,k," : ",P           
-!           ! the sorting is necessary, XREM should be sorted according to the remote NSV
-!           call cppsort(l,indexes)
-!             DO j = 1,l
-!               I = indexes(j) + OFFSET                                                                        
+            l = 0
+            Do color = 1, inter_struct(nin)%win%patchs(pp)%nb_clusters
+             !   if(intersects(main_box,inter_struct(nin)%win%patchs(pp)%clusters(color)%bounding_box)) then
+                if(.true.) then
+                DO j = 1,inter_struct(nin)%win%patchs(pp)%clusters(color)%numnod
+                   I = inter_struct(nin)%win%patchs(pp)%clusters(color)%index_to_win(j) 
+                   l = l + 1
+                   indexes(l) = I
+                  ! write(800+ispmd,*) "use:",PP,color,j,I
+
+                ENDDO
+                endif
+            enddo 
+            !if(l > 0) write(6,*) 'PROCESS ',ISPMD+1,' COLLIDES WITH',P,L
+       
+           ! if( l .ne. k) write(6,*) "ERROR: ",l,k," : ",P           
+            ! the sorting is necessary, XREM should be sorted according to the remote NSV
+            !write(800+ispmd,*) P,"INDX",INDEXES(1:l)
+
+            call cppsort(l,indexes)
+            
+              DO j = 1,l
+                I = indexes(j)                                                          
+           !    write(800+ispmd,*) "1M=",I,shared_int(itab_offset,I)
+
+
                 IIX=0
                 IIY=0
                 IIZ=0
                 !C Optimisation // recherche les noeuds compris dans xmin xmax des
                 !C elements du processeur
-c               X1 = shared_real(1,I)                          
-c               X2 = shared_real(2,I)
-c               X3 = shared_real(3,I)
-                X1 = R_PACKED(1,J)
-                X2 = R_PACKED(2,J)
-                X3 = R_PACKED(3,J)
+                X1 = shared_real(1,I)                          
+                X2 = shared_real(2,I)
+                X3 = shared_real(3,I)
+!               X1 = R_PACKED(1,J)
+!               X2 = R_PACKED(2,J)
+!               X3 = R_PACKED(3,J)
+!               write(800+ispmd,*) "1X=",X1, X2, X3
+
                 IF(X1 < XMIN)  CYCLE
                 IF(X1 > XMAX)  CYCLE
                 IF(X2 < YMIN)  CYCLE
                 IF(X2 > YMAX)  CYCLE
                 IF(X3 < ZMIN)  CYCLE
                 IF(X3 > ZMAX)  CYCLE
-!               IF(shared_real(stfns_offset,I) == ZERO)CYCLE
-                IF(R_PACKED(stfns_offset,J) == ZERO)CYCLE
+!               write(800+ispmd,*) "2X=",X1, X2, X3
 
-!               M = shared_int(boundary_offset,I) ! is the node at the boundary of multiple domains?
-                M = transfer(R_PACKED(boundary_offset,J),M) ! is the node at the boundary of multiple domains?
+                IF(shared_real(stfns_offset,I) == ZERO)CYCLE
+!               IF(R_PACKED(stfns_offset,J) == ZERO)CYCLE
+!               write(800+ispmd,*) "3X=",X1, X2, X3
+
+
+                M = shared_int(boundary_offset,I) ! is the node at the boundary of multiple domains?
+!               M = transfer(R_PACKED(boundary_offset,J),M) ! is the node at the boundary of multiple domains?
                 if(m > 0) then
                    m = get_value_umap(inter_struct(nin)%win%boundary_to_local, I, -1) ! local number or -1
+                   !write(800+ispmd,*) "2M=",m
                 endif
                 if(m > 0) then 
                   cycle  ! boundary node owned by another domain, but knowned by me 
                 endif 
+!               write(800+ispmd,*) "4X=",X1, X2, X3
 
 
                 NSNR = NSNR + 1 
@@ -359,12 +377,18 @@ c               X3 = shared_real(3,I)
                   call extend_array(IREM,ISIZ,nsnr,ISIZ,max_remote)
                 endif
                 DO L=1,RSIZ
-                  XREM(L,NSNR) = R_PACKED(L,j)
+!                 XREM(L,NSNR) = R_PACKED(L,j)
+                  XREM(L,NSNR) = shared_real(L,I)
                 ENDDO
-                IREM(1,NSNR) = transfer(R_PACKED(i_offset,J),M) !shared_int(i_offset,I)
-                IREM(2,NSNR) = transfer(R_PACKED(itab_offset,J),M) ! shared_int(itab_offset,I)
-                IREM(3,NSNR) = transfer(R_PACKED(IKINET_offset,J),M)!  shared_int(IKINET_offset,I)
+!               IREM(1,NSNR) = transfer(R_PACKED(i_offset,J),M) !shared_int(i_offset,I)
+!               IREM(2,NSNR) = transfer(R_PACKED(itab_offset,J),M) ! shared_int(itab_offset,I)
+!               IREM(3,NSNR) = transfer(R_PACKED(IKINET_offset,J),M)!  shared_int(IKINET_offset,I)
+                IREM(1,NSNR) = shared_int(i_offset,I)
+                IREM(2,NSNR) = shared_int(itab_offset,I)
+                IREM(3,NSNR) = shared_int(IKINET_offset,I)
+
                 IREM(4:ISIZ,NSNR) = 0 
+                !write(800+ispmd,"(4I10)") P,NSNR, IREM(2,NSNR)
               ENDDO !j 
             ENDIF
            !ENDDO !color
@@ -376,7 +400,7 @@ c               X3 = shared_real(3,I)
 !       write(6,*) ispmd,"count_extend",count_extend,nsn,nsnr
         deallocate(R_PACKED) 
 !       deallocate(I_PACKED)
-          
+
        ENDIF
 
       IF (IMONM > 0) CALL STOPTIME(TIMERS,25)
