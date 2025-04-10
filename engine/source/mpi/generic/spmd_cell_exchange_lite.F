@@ -360,7 +360,7 @@ c     ALLOCATE(IREM(ISIZ,max_remote),STAT=IERROR)
 
                 M = shared_int(boundary_offset,I) ! is the node at the boundary of multiple domains?
 !               M = transfer(R_PACKED(boundary_offset,J),M) ! is the node at the boundary of multiple domains?
-                if(m > 0) then
+                if(m > 0 .and. nsn > 0) then
                    m = get_value_umap(inter_struct(nin)%win%boundary_to_local, I, -1) ! local number or -1
                    !write(800+ispmd,*) "2M=",m
                 endif

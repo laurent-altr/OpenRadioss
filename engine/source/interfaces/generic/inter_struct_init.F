@@ -131,6 +131,7 @@ C           INTER_STRUCT(KK)%WIN%NSNS(ISPMD+1) = NSN_OWNED
               call inter_window_open(INTER_STRUCT(KK)%WIN, NSN_OWNED, INTBUF_TAB(KK), ispmd,nspmd, ipari(:,KK), npari,eps,nodes)
               call spmd_inter_window_update_intra(INTER_STRUCT(KK)%WIN, nodes, INTBUF_TAB(KK), IPARI(:,KK), NPARI, ISPMD)
               call spmd_inter_window_update_inter(INTER_STRUCT(KK)%WIN)
+              write(6,*) "mark boundary interface", KK 
               if(NSN>0) call inter_window_mark_boundary(INTER_STRUCT(KK)%WIN, nodes, nspmd, intbuf_tab(KK)%NSV, NSN, numnod)
               call spmd_inter_window_update_inter(INTER_STRUCT(KK)%WIN)
 
