@@ -1153,6 +1153,7 @@ module intbufdef_mod
       type(int8_struct_)             ::   t8
       type(metric_struct_)           ::   metric
 
+
       ! nodnorm
       INTEGER, DIMENSION(:,:), ALLOCATABLE :: SOLIDN_NORMAL
        my_real, DIMENSION(:,:), ALLOCATABLE :: NODNORM_NORMAL
