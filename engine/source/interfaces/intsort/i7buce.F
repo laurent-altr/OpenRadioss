@@ -641,11 +641,14 @@ C
           DIST(ne) = MARGE+CURV_MAX(NE)+MAX(MIN(GAPMAX,MAX(GAPMIN,BGAPSMX+GAP_M(NE)))+DGAPLOAD,DRAD)
         ENDIF
       enddo
-      write(6,*) "VOXEL INITIALIZATION",NRTM
+!     write(6,*) "VOXEL INITIALIZATION",NRTM
       call c_voxel_initialize(VOX,IRECT,nrtm,DIST,nsv,nsn,X,numnod)
       deallocate(DIST)
       else
-      write(6,*) "VOXEL ALREADY INITIALIZED"
+!     write(6,*) "VOXEL ALREADY INITIALIZED"
+      nbx = 1
+      nby = 1
+      nbz = 1
 
       ENDIF
 

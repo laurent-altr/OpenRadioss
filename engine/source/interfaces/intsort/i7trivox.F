@@ -504,7 +504,7 @@ C=======================================================================
                 J_STOK = J_STOK + 1
                 PROV_N(J_STOK) = JJ
                 PROV_E(J_STOK) = NE
-                !write(6,*) "J_STOK = ", J_STOK, "JJ = ", JJ, "NE = ", NE
+                write(6,*) "J_STOK = ", J_STOK, "JJ = ", JJ, "NE = ", NE
 
                 IF(J_STOK == NVSIZ)THEN
                   CALL I7STO(
@@ -896,10 +896,9 @@ C=======================================================================
 
       CALL MY_BARRIER ! Barrier to wait task0 treatment
       J_STOK = voxel_get_max_candidates(vox)
-      ALLOCATE(super_cand(J_STOK))
-      write(6,*) "Maximum number of candidates = ", J_STOK
 
 
+      allocate(super_cand(j_stok))
 C=======================================================================
 C 3   FACE RECOVERY AND ENUMERATION OF CANDIDATE COUPLES
 C=======================================================================
@@ -1039,7 +1038,7 @@ c             DO WHILE(JJ /= 0)
                 J_STOK = J_STOK + 1
                 PROV_N(J_STOK) = JJ
                 PROV_E(J_STOK) = NE
-                !write(6,*) "J_STOK = ", J_STOK, "JJ = ", JJ, "NE = ", NE
+                write(6,*) "J_STOK = ", J_STOK, "JJ = ", JJ, "NE = ", NE
                 IF(J_STOK == NVSIZ)THEN
                   CALL I7STO(
      1               NVSIZ ,IRECT  ,X     ,NSV   ,II_STOK,
