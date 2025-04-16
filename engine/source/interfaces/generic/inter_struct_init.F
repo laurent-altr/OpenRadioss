@@ -38,6 +38,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
+        USE iso_c_binding, only : C_NULL_PTR
         USE INTBUFDEF_MOD  
         USE INTER_STRUCT_MOD
         USE INTER_SORTING_MOD
@@ -67,6 +68,7 @@ C-----------------------------------------------
             INTER_STRUCT(KK)%INACTII = 0
             INTER_STRUCT(KK)%CURV_MAX_MAX = ZERO
             INTER_STRUCT(KK)%NMN_G = 0                
+            INTER_STRUCT(KK)%VOX = C_NULL_PTR
         ENDDO
         DO KK=1,NB_INTER_7_INACTI
             NIN = LIST_INTER_7_INACTI(KK)
