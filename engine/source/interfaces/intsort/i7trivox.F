@@ -504,7 +504,7 @@ C=======================================================================
                 J_STOK = J_STOK + 1
                 PROV_N(J_STOK) = JJ
                 PROV_E(J_STOK) = NE
-                write(6,*) "J_STOK = ", J_STOK, "JJ = ", JJ, "NE = ", NE
+                !write(6,*) "J_STOK = ", J_STOK, "JJ = ", JJ, "NE = ", NE
 
                 IF(J_STOK == NVSIZ)THEN
                   CALL I7STO(
@@ -1038,7 +1038,7 @@ c             DO WHILE(JJ /= 0)
                 J_STOK = J_STOK + 1
                 PROV_N(J_STOK) = JJ
                 PROV_E(J_STOK) = NE
-                write(6,*) "J_STOK = ", J_STOK, "JJ = ", JJ, "NE = ", NE
+                !write(6,*) "J_STOK = ", J_STOK, "JJ = ", JJ, "NE = ", NE
                 IF(J_STOK == NVSIZ)THEN
                   CALL I7STO(
      1               NVSIZ ,IRECT  ,X     ,NSV   ,II_STOK,
