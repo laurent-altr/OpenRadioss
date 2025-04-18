@@ -211,6 +211,7 @@ extern "C"
         // nsv(i) = global id of the node i
         // gap(1:nrtm) = gap of the surface, i.e. the distance beyond the surface to be considered
         Voxel *voxel = static_cast<Voxel *>(v);
+        GridMapper mapper (voxel->bounds, voxel->nbx, voxel->nby, voxel->nbz);
 
         // Create a map to convert global ids of irect, into nsv ids, if they exist
         std::unordered_map<int, int> glob2nsv;
@@ -268,8 +269,33 @@ extern "C"
             const double xmax = std::max(std::max(x1, x2), std::max(x3, x4)) + gapValue;
             const double ymax = std::max(std::max(y1, y2), std::max(y3, y4)) + gapValue;
             const double zmax = std::max(std::max(z1, z2), std::max(z3, z4)) + gapValue;
-            const Node minCoords = coord_to_grid(xmin, ymin, zmin, voxel->bounds, voxel->nbx, voxel->nby, voxel->nbz, false);
-            const Node maxCoords = coord_to_grid(xmax, ymax, zmax, voxel->bounds, voxel->nbx, voxel->nby, voxel->nbz, true);
+            const Node refMin = coord_to_grid(xmin, ymin, zmin, voxel->bounds, voxel->nbx, voxel->nby, voxel->nbz, false);
+            const Node refMax = coord_to_grid(xmax, ymax, zmax, voxel->bounds, voxel->nbx, voxel->nby, voxel->nbz, true);
+            const Node minCoords = mapper.mapMin(xmin, ymin, zmin);
+            const Node maxCoords = mapper.mapMax(xmax, ymax, zmax);
+            if(refMin != minCoords)
+            {
+                std::cerr << "ref: " << refMin[0] << " " << refMin[1] << " " << refMin[2] << std::endl;
+                std::cerr <<"MinCoords: " << minCoords[0] << " " << minCoords[1] << " " << minCoords[2] << std::endl;
+                std::cerr << "bounds: " << voxel->bounds[XMIN] << " " << voxel->bounds[YMIN] << " " << voxel->bounds[ZMIN] << std::endl;
+                std::cerr << "bounds: " << voxel->bounds[XMAX] << " " << voxel->bounds[YMAX] << " " << voxel->bounds[ZMAX] << std::endl;
+                std::cerr << "nbx: " << voxel->nbx << " nby: " << voxel->nby << " nbz: " << voxel->nbz << std::endl;
+                exit(1);
+            }
+            if(refMax != maxCoords)
+            {
+                std::cerr << "ref: " << refMax[0] << " " << refMax[1] << " " << refMax[2] << std::endl;
+                std::cerr <<"maxCoords: " << maxCoords[0] << " " << maxCoords[1] << " " << maxCoords[2] << std::endl;
+                std::cerr << "bounds: " << voxel->bounds[XMIN] << " " << voxel->bounds[YMIN] << " " << voxel->bounds[ZMIN] << std::endl;
+                std::cerr << "bounds: " << voxel->bounds[XMAX] << " " << voxel->bounds[YMAX] << " " << voxel->bounds[ZMAX] << std::endl;
+                std::cerr << "nbx: " << voxel->nbx << " nby: " << voxel->nby << " nbz: " << voxel->nbz << std::endl;
+                exit(1);
+            }
+
+
+
+
+
             std::vector<Node> cells = getCellsInWrappedRange(minCoords[0], maxCoords[0], minCoords[1], maxCoords[1], minCoords[2], maxCoords[2], voxel->nbx, voxel->nby, voxel->nbz);
             // add the surface to the cells it crosses
             for (auto cell : cells)
@@ -317,7 +343,21 @@ extern "C"
             voxel->cells[index].nodes.push_back(i);
 
             // add the node to the nodes vector
-            voxel->nodes[i] = coord_to_grid(x, y, z, voxel->bounds, voxel->nbx, voxel->nby, voxel->nbz);
+            //voxel->nodes[i] = coord_to_grid(x, y, z, voxel->bounds, voxel->nbx, voxel->nby, voxel->nbz);
+            Node ref = coord_to_grid(x, y, z, voxel->bounds, voxel->nbx, voxel->nby, voxel->nbz);
+            voxel->nodes[i] = mapper.mapMin(x, y, z);
+            if(ref != voxel->nodes[i])
+            {
+                std::cerr << "Error: node " << i << " is not in the right cell" << std::endl;
+                std::cerr << "ref: " << ref[0] << " " << ref[1] << " " << ref[2] << std::endl;
+                std::cerr << "voxel->nodes[i]: " << voxel->nodes[i][0] << " " << voxel->nodes[i][1] << " " << voxel->nodes[i][2] << std::endl;
+                std::cerr << "x: " << x << " " << y << " " << z << std::endl;
+                std::cerr << "bounds: " << voxel->bounds[XMIN] << " " << voxel->bounds[YMIN] << " " << voxel->bounds[ZMIN] << std::endl;
+                std::cerr << "bounds: " << voxel->bounds[XMAX] << " " << voxel->bounds[YMAX] << " " << voxel->bounds[ZMAX] << std::endl;
+                std::cerr << "nbx: " << voxel->nbx << " nby: " << voxel->nby << " nbz: " << voxel->nbz << std::endl;
+                exit(1);
+            }
+
             // loop over the surfaces crossing the cell
             for (auto surfId : voxel->cells[index].surfaces)
             {

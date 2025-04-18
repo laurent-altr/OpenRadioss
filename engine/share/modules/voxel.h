@@ -38,46 +38,50 @@ void swap_and_pop(std::vector<T>& vec, T value) {
 //}
 
 
-
 class GridMapper {
 private:
     // Grid dimensions
     const size_t nbx, nby, nbz;
     
-    // Precomputed values for coordinate conversion
+    // Boundary values
     const double x_min, y_min, z_min;
-    const double x_factor, y_factor, z_factor;
+    const double x_max, y_max, z_max;
     const bool x_valid, y_valid, z_valid;
     
 public:
+    // Define same constants as in original function for clarity
+    enum { XMIN = 0, YMIN = 1, ZMIN = 2, XMAX = 3, YMAX = 4, ZMAX = 5 };
+    
     GridMapper(const std::array<double, 6>& bounds, size_t nbx_, size_t nby_, size_t nbz_)
         : nbx(nbx_), nby(nby_), nbz(nbz_),
-          x_min(bounds[0]), y_min(bounds[1]), z_min(bounds[2]),
-          x_valid(bounds[3] > bounds[0]),
-          y_valid(bounds[4] > bounds[1]),
-          z_valid(bounds[5] > bounds[2]),
-          // Precompute conversion factors (handles division once)
-          x_factor(x_valid ? nbx / (bounds[3] - bounds[0]) : 0.0),
-          y_factor(y_valid ? nby / (bounds[4] - bounds[1]) : 0.0),
-          z_factor(z_valid ? nbz / (bounds[5] - bounds[2]) : 0.0)
+          x_min(bounds[XMIN]), y_min(bounds[YMIN]), z_min(bounds[ZMIN]),
+          x_max(bounds[XMAX]), y_max(bounds[YMAX]), z_max(bounds[ZMAX]),
+          x_valid(x_max > x_min),
+          y_valid(y_max > y_min),
+          z_valid(z_max > z_min)
     {}
     
-    // For minimum coordinates (round down on boundaries)
+    // For minimum coordinates
     Node inline mapMin(double x, double y, double z) const {
-        // Direct conversion to indices using precomputed factors
-        double dx = x_valid ? (x - x_min) * x_factor : 0.5 * nbx;
-        double dy = y_valid ? (y - y_min) * y_factor : 0.5 * nby;
-        double dz = z_valid ? (z - z_min) * z_factor : 0.5 * nbz;
+        // Calculate relative position in each dimension (0.0 to 1.0)
+        double rx = x_valid ? (x - x_min) / (x_max - x_min) : 0.5;
+        double ry = y_valid ? (y - y_min) / (y_max - y_min) : 0.5;
+        double rz = z_valid ? (z - z_min) / (z_max - z_min) : 0.5;
         
-        // Truncate to integer indices
-        size_t ix = static_cast<size_t>(dx);
-        size_t iy = static_cast<size_t>(dy);
-        size_t iz = static_cast<size_t>(dz);
+        // Handle wrapping for values outside the bounds
+        rx = rx - floor(rx);
+        ry = ry - floor(ry);
+        rz = rz - floor(rz);
         
-        // Bounds checking (use branch prediction-friendly style)
-        ix = ix < nbx ? ix : nbx - 1;
-        iy = iy < nby ? iy : nby - 1;
-        iz = iz < nbz ? iz : nbz - 1;
+        // Convert to grid indices
+        size_t ix = static_cast<size_t>(rx * nbx);
+        size_t iy = static_cast<size_t>(ry * nby);
+        size_t iz = static_cast<size_t>(rz * nbz);
+        
+        // Ensure indices are within bounds
+        ix = (ix >= nbx) ? nbx - 1 : ix;
+        iy = (iy >= nby) ? nby - 1 : iy;
+        iz = (iz >= nbz) ? nbz - 1 : iz;
         
         return {
             static_cast<short int>(ix),
@@ -86,31 +90,32 @@ public:
         };
     }
     
-    // For maximum coordinates (round up on boundaries)
+    // For maximum coordinates
     Node inline mapMax(double x, double y, double z) const {
-        // Direct conversion to indices using precomputed factors
-        double dx = x_valid ? (x - x_min) * x_factor : 0.5 * nbx;
-        double dy = y_valid ? (y - y_min) * y_factor : 0.5 * nby;
-        double dz = z_valid ? (z - z_min) * z_factor : 0.5 * nbz;
+        // Calculate relative position in each dimension (0.0 to 1.0)
+        double rx = x_valid ? (x - x_min) / (x_max - x_min) : 0.5;
+        double ry = y_valid ? (y - y_min) / (y_max - y_min) : 0.5;
+        double rz = z_valid ? (z - z_min) / (z_max - z_min) : 0.5;
         
-        // Check if exactly on boundary (using integer equality)
-        size_t ix_floor = static_cast<size_t>(dx);
-        size_t iy_floor = static_cast<size_t>(dy);
-        size_t iz_floor = static_cast<size_t>(dz);
+        // Check for coordinates exactly at the max boundary
+        bool xAtMax = (std::abs(rx - 1.0) < 1e-10);
+        bool yAtMax = (std::abs(ry - 1.0) < 1e-10);
+        bool zAtMax = (std::abs(rz - 1.0) < 1e-10);
         
-        bool exact_x = dx == static_cast<double>(ix_floor);
-        bool exact_y = dy == static_cast<double>(iy_floor);
-        bool exact_z = dz == static_cast<double>(iz_floor);
+        // Handle wrapping for values outside the bounds
+        rx = rx - floor(rx);
+        ry = ry - floor(ry);
+        rz = rz - floor(rz);
         
-        // If exactly on boundary and not at max, increment
-        size_t ix = exact_x && ix_floor < nbx - 1 ? ix_floor + 1 : ix_floor;
-        size_t iy = exact_y && iy_floor < nby - 1 ? iy_floor + 1 : iy_floor;
-        size_t iz = exact_z && iz_floor < nbz - 1 ? iz_floor + 1 : iz_floor;
+        // Convert to grid indices with special handling for max boundary
+        size_t ix = xAtMax ? (nbx - 1) : static_cast<size_t>(rx * nbx);
+        size_t iy = yAtMax ? (nby - 1) : static_cast<size_t>(ry * nby);
+        size_t iz = zAtMax ? (nbz - 1) : static_cast<size_t>(rz * nbz);
         
-        // Bounds checking
-        ix = ix < nbx ? ix : nbx - 1;
-        iy = iy < nby ? iy : nby - 1;
-        iz = iz < nbz ? iz : nbz - 1;
+        // Ensure indices are within bounds
+        ix = (ix >= nbx) ? nbx - 1 : ix;
+        iy = (iy >= nby) ? nby - 1 : iy;
+        iz = (iz >= nbz) ? nbz - 1 : iz;
         
         return {
             static_cast<short int>(ix),
