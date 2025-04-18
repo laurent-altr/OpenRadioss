@@ -227,20 +227,18 @@ extern "C"
             {
                 // get the global id of the node
                 int globId = irect[j + 4 * i] - 1; // Fortran to C++ index conversion
+                voxel->surfaceNodes[i][j] = -1; // initialize the surfaceNodes
                 // check if the node exists in nsv
                 if (glob2nsv.find(globId) != glob2nsv.end())
                 {
                     // get the local id of the node
                     int localId = glob2nsv[globId];
                     // add the node to the surfaceNodes
-                    voxel->surfaceNodes[i].insert(localId);
+                    voxel->surfaceNodes[i][j]=localId;
                 }
             }
         }
         // print nbx nby, nbz
-#ifdef DEBUG_PRINT
-        std::cout << "Voxel size: " << voxel->nbx << " " << voxel->nby << " " << voxel->nbz << std::endl;
-#endif
         // Loop over the surfaces, add the surfaces to the cells it crosses
         for (int i = 0; i < nrtm; i++)
         {
@@ -270,14 +268,6 @@ extern "C"
             const double xmax = std::max(std::max(x1, x2), std::max(x3, x4)) + gapValue;
             const double ymax = std::max(std::max(y1, y2), std::max(y3, y4)) + gapValue;
             const double zmax = std::max(std::max(z1, z2), std::max(z3, z4)) + gapValue;
-#ifdef DEBUG_PRINT
-            if (i == 396)
-            {
-                std::cout << "Surf min: " << i << " XMIN: " << xmin << " YMIN: " << ymin << " ZMIN: " << zmin << std::endl;
-                std::cout << "Surf max: " << i << " XMAX: " << xmax << " YMAX: " << ymax << " ZMAX: " << zmax << std::endl;
-
-            }
-#endif
             const Node minCoords = coord_to_grid(xmin, ymin, zmin, voxel->bounds, voxel->nbx, voxel->nby, voxel->nbz, false);
             const Node maxCoords = coord_to_grid(xmax, ymax, zmax, voxel->bounds, voxel->nbx, voxel->nby, voxel->nbz, true);
             std::vector<Node> cells = getCellsInWrappedRange(minCoords[0], maxCoords[0], minCoords[1], maxCoords[1], minCoords[2], maxCoords[2], voxel->nbx, voxel->nby, voxel->nbz);
@@ -285,12 +275,6 @@ extern "C"
             for (auto cell : cells)
             {
                 size_t index = coord_to_index(cell, voxel->bounds, voxel->nbx, voxel->nby, voxel->nbz);
-#ifdef DEBUG_PRINT
-                if (i == 396)
-                {
-                    std::cout << "Surf x Cell: " << cell[0] << " " << cell[1] << " " << cell[2] << " " << index << std::endl;
-                }
-#endif
                 // check if the cell exists
                 if (voxel->cells.find(index) == voxel->cells.end())
                 {
@@ -334,27 +318,16 @@ extern "C"
 
             // add the node to the nodes vector
             voxel->nodes[i] = coord_to_grid(x, y, z, voxel->bounds, voxel->nbx, voxel->nby, voxel->nbz);
-#ifdef DEBUG_PRINT
-            if (i == 597)
-            {
-                std::cout << "INIT Node 597: " << x << " " << y << " " << z << std::endl;
-                std::cout << "INIT Index: " << index << std::endl;
-            }
-#endif
             // loop over the surfaces crossing the cell
             for (auto surfId : voxel->cells[index].surfaces)
             {
-                // check if the node is in the surfaceNodes, because nodes that defines the surface cannot be a candidate for collision
-                if (voxel->surfaceNodes[surfId].find(i) == voxel->surfaceNodes[surfId].end())
+                // check the 4 nodes                                                                                                                      
+                //if (voxel->surfaceNodes[surfId].find(i) == voxel->surfaceNodes[surfId].end())
+                if(voxel->surfaceNodes[surfId][0] != i && voxel->surfaceNodes[surfId][1] != i &&
+                   voxel->surfaceNodes[surfId][2] != i && voxel->surfaceNodes[surfId][3] != i)
                 {
                     // add the node to the surfaceCandiates
                     voxel->surfaceCandidates[surfId].insert(i);
-#ifdef DEBUG_PRINT
-                    if (i == 597)
-                    {
-                        std::cout << "INIT Adding node 597 to surface: " << surfId << std::endl;
-                    }
-#endif
                 }
             }
         }
@@ -371,14 +344,6 @@ extern "C"
         --nodeId; // Fortran to C++ index conversion
         size_t newIndex = coord_to_index(x, y, z, voxel->bounds, voxel->nbx, voxel->nby, voxel->nbz);
         size_t oldIndex = coord_to_index(voxel->nodes[nodeId], voxel->bounds, voxel->nbx, voxel->nby, voxel->nbz);
-#ifdef DEBUG_PRINT
-        if (nodeId == 597)
-        {
-            std::cout << "Node 597: " << x << " " << y << " " << z << std::endl;
-            std::cout << "New index: " << newIndex << std::endl;
-            std::cout << "Old index: " << oldIndex << std::endl;
-        }
-#endif
         if (newIndex != oldIndex)
         {
             // remove the node from the old cell
@@ -388,16 +353,12 @@ extern "C"
             for (auto surfId : voxel->cells[oldIndex].surfaces)
             {
                 // check if the node is in the surfaceNodes, because nodes that defines the surface cannot be a candidate for collision
-                if (voxel->surfaceNodes[surfId].find(nodeId) == voxel->surfaceNodes[surfId].end())
+                //if (voxel->surfaceNodes[surfId].find(nodeId) == voxel->surfaceNodes[surfId].end())
+                if(voxel->surfaceNodes[surfId][0] != nodeId && voxel->surfaceNodes[surfId][1] != nodeId &&
+                   voxel->surfaceNodes[surfId][2] != nodeId && voxel->surfaceNodes[surfId][3] != nodeId)
                 {
                     // remove the node from the surfaceCandiates
                     voxel->surfaceCandidates[surfId].erase(nodeId);
-#ifdef DEBUG_PRINT
-                    if (nodeId == 597)
-                    {
-                        std::cout << "Removing node from surface candidates: " << surfId << std::endl;
-                    }
-#endif
                 }
             }
 
@@ -416,16 +377,13 @@ extern "C"
             for (auto surfId : voxel->cells[newIndex].surfaces)
             {
                 // check if the node is in the surfaceNodes, because nodes that defines the surface cannot be a candidate for collision
-                if (voxel->surfaceNodes[surfId].find(nodeId) == voxel->surfaceNodes[surfId].end())
+                //if (voxel->surfaceNodes[surfId].find(nodeId) == voxel->surfaceNodes[surfId].end())
+                // check the 4 nodes 
+                if(voxel->surfaceNodes[surfId][0] != nodeId && voxel->surfaceNodes[surfId][1] != nodeId &&
+                   voxel->surfaceNodes[surfId][2] != nodeId && voxel->surfaceNodes[surfId][3] != nodeId)
                 {
                     // add the node to the surfaceCandiates of all surfaces crossing the new cell
                     voxel->surfaceCandidates[surfId].insert(nodeId);
-#ifdef DEBUG_PRINT
-                    if (nodeId == 597)
-                    {
-                        std::cout << "Adding node from surface candidates: " << surfId << std::endl;
-                    }
-#endif
                 }
             }
         }
@@ -470,7 +428,10 @@ extern "C"
                     swap_and_pop(voxel->cells[index].surfaces, surfId);
                     for (auto nodeId : voxel->cells[index].nodes)
                     {
-                        if (voxel->surfaceNodes[surfId].find(nodeId) == voxel->surfaceNodes[surfId].end())
+                       // if (voxel->surfaceNodes[surfId].find(nodeId) == voxel->surfaceNodes[surfId].end())
+                        // check the 4 nodes
+                        if(voxel->surfaceNodes[surfId][0] != nodeId && voxel->surfaceNodes[surfId][1] != nodeId &&
+                           voxel->surfaceNodes[surfId][2] != nodeId && voxel->surfaceNodes[surfId][3] != nodeId)
                         {
                             voxel->surfaceCandidates[surfId].erase(nodeId);
                         }
@@ -497,35 +458,15 @@ extern "C"
                 // update surfaceCandidates
                 for (auto nodeId : voxel->cells[index].nodes)
                 {
-                    if (voxel->surfaceNodes[surfId].find(nodeId) == voxel->surfaceNodes[surfId].end())
+                    //if (voxel->surfaceNodes[surfId].find(nodeId) == voxel->surfaceNodes[surfId].end())
+                    // check the 4 nodes
+                    if(voxel->surfaceNodes[surfId][0] != nodeId && voxel->surfaceNodes[surfId][1] != nodeId &&
+                       voxel->surfaceNodes[surfId][2] != nodeId && voxel->surfaceNodes[surfId][3] != nodeId)
                     {
                         voxel->surfaceCandidates[surfId].insert(nodeId);
                     }
                 }
             }
-            // for (short int i = newCoords[XMIN]; i <= newCoords[XMAX]; i++)
-            // {
-            //     for (short int j = newCoords[YMIN]; j <= newCoords[YMAX]; j++)
-            //     {
-            //         for (short int k = newCoords[ZMIN]; k <= newCoords[ZMAX]; k++)
-            //         {
-            //             size_t index = coord_to_index(i, j, k, voxel->bounds, voxel->nbx, voxel->nby, voxel->nbz);
-            //             if (voxel->cells.find(index) == voxel->cells.end())
-            //             {
-            //                 // create the new cell
-            //                 voxel->cells[index] = Cell();
-            //             }
-            //             voxel->cells[index].surfaces.insert(surfId);
-            //             for (auto nodeId : voxel->cells[index].nodes)
-            //             {
-            //                 if (voxel->surfaceNodes[surfId].find(nodeId) == voxel->surfaceNodes[surfId].end())
-            //                 {
-            //                     voxel->surfaceCandidates[surfId].insert(nodeId);
-            //                 }
-            //             }
-            //         }
-            //     }
-            // }
             // update the surface
             voxel->surfaceBounds[surfId] = newCoords;
         }
@@ -555,68 +496,17 @@ extern "C"
         {
             // C to Fortran index conversion
             int index = static_cast<int>(*it) + 1;
-#ifdef DEBUG_PRINT
-            if( id == 396)
-            {
-                ++counter;  
-                std::cout <<counter<< "Candidate: " << index -1 << std::endl;
-            }
-#endif
             *cands = index;
             cands++;
         }
         // set the number of candidates
         *nb = static_cast<int>(voxel->surfaceCandidates[id].size());
         // debug print
-#ifdef DEBUG_PRINT
-        if (id == 396)
-        {
-            std::cout<<"Number of candidates: " << *nb << std::endl;
-
-            // write bounds to std
-            // print all the cells of the node ne = 1, id = 0
-            std::vector<Node> cells = getCellsInWrappedRange(voxel->surfaceBounds[id][XMIN], voxel->surfaceBounds[id][XMAX],
-                                                             voxel->surfaceBounds[id][YMIN], voxel->surfaceBounds[id][YMAX],
-                                                             voxel->surfaceBounds[id][ZMIN], voxel->surfaceBounds[id][ZMAX],
-                                                             voxel->nbx, voxel->nby, voxel->nbz);
-            std::cout << ne - 1 << " Cells of surface: " << id << std::endl;
-            for (auto cell : cells)
-            {
-                std::cout << "Cell: " << cell[0] << " " << cell[1] << " " << cell[2] << std::endl;
-            }
-            // check coordinates of node 33 (32 in C++)
-
-            size_t ii = 597;
-            std::cout << ii << " coordinates: " << voxel->nodes[ii][0] << " " << voxel->nodes[ii][1] << " " << voxel->nodes[ii][2] << std::endl;
-            // node ii should be in the candidates list of surface ne=65
-            bool isInList = false;
-            for (auto it = voxel->surfaceCandidates[id].begin(); it != voxel->surfaceCandidates[id].end(); ++it)
-            {
-                if (*it == ii)
-                {
-                    std::cout << ii << " is in the candidates list of surface"<<ne-1<< std::endl;
-                    isInList = true;
-                    break;
-                }
-            }
-            if (!isInList)
-            {
-                std::cout << ii << " is NOT in the candidates list of surface " << ne - 1 << std::endl;
-            }
-            // check the content of the cell 1,3,1
-//            Node correct;
-//            correct[0] = 1;
-//            correct[1] = 3;
-//            correct[2] = 1;
-//
-//            size_t index = coord_to_index(correct, voxel->bounds, voxel->nbx, voxel->nby, voxel->nbz);
-//            //  std::cout << "Cell 1,3,1: " << index << std::endl;
-//            // loop over the nodes of the cell
-//            for (auto it = voxel->cells[index].nodes.begin(); it != voxel->cells[index].nodes.end(); ++it)
-//            {
-//                std::cout << "Node: " << *it << " in cell " << index << ":" << correct[0] << " " << correct[1] << " " << correct[2] << std::endl;
-//            }
-        }
-#endif
     }
+ //   void Voxel_get_candidates_data(void *v, int ne, int *cands, int *nb)
+ //   {
+ //     Voxel *voxel = static_cast<Voxel *>(v);
+ //     *nb= static_cast<int>(voxel->surfaceCandidates[ne-1].size());
+ //     *data_ptr = voxel->surfaceCandidates[ne-1].data();
+ //   }
 }
