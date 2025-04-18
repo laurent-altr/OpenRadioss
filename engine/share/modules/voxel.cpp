@@ -397,9 +397,11 @@ extern "C"
         Voxel *voxel = static_cast<Voxel *>(v);
         --surfId; // Fortran to C++ index conversion
         Surf newCoords;
-
-        Node minCoords = coord_to_grid(xmin, ymin, zmin, voxel->bounds, voxel->nbx, voxel->nby, voxel->nbz, false);
-        Node maxCoords = coord_to_grid(xmax, ymax, zmax, voxel->bounds, voxel->nbx, voxel->nby, voxel->nbz, true);
+        GridMapper mapper(voxel->bounds, voxel->nbx, voxel->nby, voxel->nbz);
+        //Node minCoords = coord_to_grid(xmin, ymin, zmin, voxel->bounds, voxel->nbx, voxel->nby, voxel->nbz, false);
+        //Node maxCoords = coord_to_grid(xmax, ymax, zmax, voxel->bounds, voxel->nbx, voxel->nby, voxel->nbz, true);
+        Node minCoords = mapper.mapMin(xmin, ymin, zmin);
+        Node maxCoords = mapper.mapMax(xmax, ymax, zmax);
         newCoords[XMIN] = minCoords[0];
         newCoords[YMIN] = minCoords[1];
         newCoords[ZMIN] = minCoords[2];
@@ -430,7 +432,6 @@ extern "C"
                     swap_and_pop(voxel->cells[index].surfaces, surfId);
                     for (auto nodeId : voxel->cells[index].nodes)
                     {
-                        // if (voxel->surfaceNodes[surfId].find(nodeId) == voxel->surfaceNodes[surfId].end())
                         // check the 4 nodes
                         if (voxel->surfaceNodes[surfId][0] != nodeId && voxel->surfaceNodes[surfId][1] != nodeId &&
                             voxel->surfaceNodes[surfId][2] != nodeId && voxel->surfaceNodes[surfId][3] != nodeId)

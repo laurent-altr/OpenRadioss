@@ -21,7 +21,7 @@ using Surf = std::array<short int, 6>; // a surface can cross multiple cells
 //swap_and_pop :
 
 template <typename T>
-void swap_and_pop(std::vector<T>& vec, T value) {
+inline void swap_and_pop(std::vector<T>& vec, const T& value) {
     // finds the value, swaps it with the last element, and pops the last element 
     auto it = std::find(vec.begin(), vec.end(), value);
     if (it != vec.end()) {
@@ -29,13 +29,6 @@ void swap_and_pop(std::vector<T>& vec, T value) {
         vec.pop_back();
     }
 }
-
-//void swap_and_pop(std::vector<Node>& vec, size_t index) {
-//    if (index < vec.size()) {
-//        std::swap(vec[index], vec.back());
-//        vec.pop_back();
-//    }
-//}
 
 
 class GridMapper {
@@ -245,7 +238,7 @@ Node coord_to_grid(double x, double y, double z, const std::array<double, 6> &bo
 
 
 
-size_t coord_to_index(Node coord, const std::array<double, 6> &bounds,
+size_t inline coord_to_index(Node coord, const std::array<double, 6> &bounds,
                       size_t nbx, size_t nby, size_t nbz)
 {
     // cast to size_t
@@ -255,7 +248,7 @@ size_t coord_to_index(Node coord, const std::array<double, 6> &bounds,
     return COORD_TO_INDEX(x, y, z, nbx, nby);
 }
 
-size_t coord_to_index(short int x, short int y, short int z, const std::array<double, 6> &bounds,
+size_t inline coord_to_index(short int x, short int y, short int z, const std::array<double, 6> &bounds,
                       size_t nbx, size_t nby, size_t nbz)
 {
     return COORD_TO_INDEX(static_cast<size_t>(x), static_cast<size_t>(y), static_cast<size_t>(z), nbx, nby);
