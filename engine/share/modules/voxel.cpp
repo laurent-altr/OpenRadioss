@@ -508,10 +508,10 @@ extern "C"
         *nb = static_cast<int>(voxel->surfaceCandidates[id].size());
         // debug print
     }
- //   void Voxel_get_candidates_data(void *v, int ne, int *cands, int *nb)
- //   {
- //     Voxel *voxel = static_cast<Voxel *>(v);
- //     *nb= static_cast<int>(voxel->surfaceCandidates[ne-1].size());
- //     *data_ptr = voxel->surfaceCandidates[ne-1].data();
- //   }
+ void Voxel_get_candidates_data(void *v, int ne, int **cands, int *nb)
+ {
+   Voxel *voxel = static_cast<Voxel *>(v);
+   *nb= static_cast<int>(voxel->surfaceCandidates[ne-1].size());
+   *cands= voxel->surfaceCandidates[ne-1].data();
+ }
 }

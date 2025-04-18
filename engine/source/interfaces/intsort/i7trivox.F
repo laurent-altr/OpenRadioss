@@ -666,6 +666,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 C============================================================================
 C   M o d u l e s
 C-----------------------------------------------
+      USE iso_c_binding
       USE MESSAGE_MOD
       USE TRI7BOX
       USE VOXEL_MOD
@@ -770,7 +771,8 @@ c provisoire
       INTEGER FIRST,NEW,LAST,IERROR
       LOGICAL DBG_type18_fvm
       SAVE IIX,IIY,IIZ
-      integer, dimension(:), allocatable :: super_cand
+      integer(c_int), pointer :: super_cand(:)
+      type(c_ptr) :: super_cand_ptr
       integer :: nb
 C-----------------------------------------------
       IF(ITASK == 0)THEN
@@ -895,10 +897,6 @@ C=======================================================================
       END IF !ITASK == 0
 
       CALL MY_BARRIER ! Barrier to wait task0 treatment
-      J_STOK = voxel_get_max_candidates(vox)
-
-
-      allocate(super_cand(j_stok))
 C=======================================================================
 C 3   FACE RECOVERY AND ENUMERATION OF CANDIDATE COUPLES
 C=======================================================================
@@ -957,7 +955,8 @@ C=======================================================================
         SZ = (XX3-XX1)*(YY4-YY2) - (YY3-YY1)*(XX4-XX2)
         S2 = SX*SX + SY*SY + SZ*SZ
 
-        call c_voxel_get_candidates(vox,ne,super_cand,nb)
+        call c_voxel_get_candidates(vox,ne,super_cand_ptr,nb)
+        call c_f_pointer(super_cand_ptr,super_cand,[nb])
 !       if(ne == 1) write(6,*) ne,"Number of candidates = ", nb
 
 
@@ -968,7 +967,7 @@ c             JJ = VOXEL(IX,IY,IZ)
 c             DO WHILE(JJ /= 0)
               DO I=1,nb
                 DELNOD = 0
-                JJ = super_cand(I)
+                JJ = super_cand(I) + 1
 
                 !nnpelem = nnpelem + 1
                 IF(STFN(JJ) == ZERO)CYCLE

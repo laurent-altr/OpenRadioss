@@ -105,12 +105,12 @@ module voxel_mod
     end function c_voxel_get_max_candidates
 
     ! Voxel_get_candidates
-    subroutine c_voxel_get_candidates(v, ne, cands, nb) bind(C, name="Voxel_get_candidates")
+    subroutine c_voxel_get_candidates(v, ne, cands, nb) bind(C, name="Voxel_get_candidates_data")
       import :: c_ptr, c_int
       implicit none
       type(c_ptr), value :: v
       integer(c_int), value :: ne
-      integer(c_int), intent(out) :: cands(*)
+      type(c_ptr), intent(out) :: cands
       integer(c_int) :: nb
     end subroutine c_voxel_get_candidates
 
@@ -201,15 +201,5 @@ contains
     
     max_candidates = c_voxel_get_max_candidates(voxel)
   end function voxel_get_max_candidates
-
-  ! Get the candidates for a surface in a Voxel
-  subroutine voxel_get_candidates(voxel, ne, cands, nb)
-    type(c_ptr), intent(inout) :: voxel
-    integer, intent(in) :: ne
-    integer, intent(inout) :: cands(*)
-    integer, intent(out) :: nb
-    
-    call c_voxel_get_candidates(voxel, ne, cands, nb)
-  end subroutine voxel_get_candidates
 
 end module voxel_mod
