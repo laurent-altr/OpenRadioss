@@ -120,21 +120,7 @@ module voxel_mod
       type(c_ptr), value :: v
       real(c_double), intent(out) :: xmin, ymin, zmin, xmax, ymax, zmax
     end subroutine c_voxel_get_bounds
-!    void Voxel_restart(void *v, int nbx, int nby, int nbz, int nbsurfaces, int nbnodes)
-!    {
-!        Voxel *voxel = static_cast<Voxel *>(v);
-!        voxel->nbx = nbx;
-!        voxel->nby = nby;
-!        voxel->nbz = nbz;
-!        voxel->cells.clear();
-!        voxel->surfaceBounds.clear();
-!        voxel->surfaceNodes.clear();
-!        voxel->surfaceCandidates.clear();
-!        voxel->nodes.resize(nbnodes);
-!        voxel->surfaceBounds.resize(nbsurfaces);
-!        voxel->surfaceNodes.resize(nbsurfaces);
-!        voxel->surfaceCandidates.resize(nbsurfaces);
-!    }
+
     subroutine c_voxel_restart(v, nbx, nby, nbz, nbsurfaces, nbnodes) bind(C, name="Voxel_restart")
       import :: c_ptr, c_int
       implicit none

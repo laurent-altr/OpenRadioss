@@ -133,7 +133,7 @@ public:
     std::unordered_map<size_t, Cell> cells;          // map of nodes to their index in the vector
     std::vector<Node> nodes;                         // vector of secondary nodes
     std::vector<Surf> surfaceBounds;                 // vector of main surfaceBounds
-    std::vector<std::set<int>> surfaceNodes;      // vector of secondary surfaceBounds
+    std::vector<std::array<int,4>> surfaceNodes;      // vector of secondary surfaceBounds
     std::vector<std::set<int>> surfaceCandidates; // vector of secondary node candidates for broad phase collision with the surface
 };
 
