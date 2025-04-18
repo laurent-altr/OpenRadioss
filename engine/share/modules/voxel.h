@@ -20,12 +20,22 @@ using Surf = std::array<short int, 6>; // a surface can cross multiple cells
 
 //swap_and_pop :
 
-void swap_and_pop(std::vector<Node>& vec, size_t index) {
+template <typename T>
+void swap_and_pop(std::vector<T>& vec, size_t index) {
     if (index < vec.size()) {
         std::swap(vec[index], vec.back());
         vec.pop_back();
     }
 }
+
+//void swap_and_pop(std::vector<Node>& vec, size_t index) {
+//    if (index < vec.size()) {
+//        std::swap(vec[index], vec.back());
+//        vec.pop_back();
+//    }
+//}
+
+
 
 class GridMapper {
 private:
@@ -110,8 +120,8 @@ public:
 
 struct Cell
 {
-    std::set<size_t> nodes;    // list of nodes in the cell
-    std::set<size_t> surfaces; // list of surfaces in the cell
+    std::vector<int> nodes;    // list of nodes in the cell
+    std::vector<int> surfaces; // list of surfaces in the cell
 };
 
 // a voxel is a 3D grid of cells. Each cell contains the list of the nodes it contains, and the list of the surfaces it crosses
@@ -123,8 +133,8 @@ public:
     std::unordered_map<size_t, Cell> cells;          // map of nodes to their index in the vector
     std::vector<Node> nodes;                         // vector of secondary nodes
     std::vector<Surf> surfaceBounds;                 // vector of main surfaceBounds
-    std::vector<std::set<size_t>> surfaceNodes;      // vector of secondary surfaceBounds
-    std::vector<std::set<size_t>> surfaceCandidates; // vector of secondary node candidates for broad phase collision with the surface
+    std::vector<std::set<int>> surfaceNodes;      // vector of secondary surfaceBounds
+    std::vector<std::set<int>> surfaceCandidates; // vector of secondary node candidates for broad phase collision with the surface
 };
 
 #define COORD_TO_INDEX(x, y, z, nbx, nby) ((x) + (y) * (nbx) + (z) * (nbx) * (nby))
