@@ -131,7 +131,8 @@ class Voxel
 public:
     size_t nbx, nby, nbz;                            // dimension of the grid
     std::array<double, 6> bounds;                    // bounds of the grid
-    std::unordered_map<size_t, Cell> cells;          // map of nodes to their index in the vector
+    //std::unordered_map<size_t, Cell> cells;          // map of nodes to their index in the vector
+    std::vector<Cell> cells;                            // vector of cells
     std::vector<Node> nodes;                         // vector of secondary nodes
     std::vector<Surf> surfaceBounds;                 // vector of main surfaceBounds
     std::vector<std::array<int,4>> surfaceNodes;      // vector of secondary surfaceBounds

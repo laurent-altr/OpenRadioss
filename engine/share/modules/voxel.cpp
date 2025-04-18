@@ -17,7 +17,8 @@ extern "C"
         // allocate the vector of nodes
         v->nodes.resize(nbnodes);
         // fill with
-
+        // there are nbx*nby*nbz cells
+        v->cells.resize(nbx * nby * nbz);
         // allocate the vector of surfaces
         v->surfaceBounds.resize(nbsurfaces);
         v->surfaceNodes.resize(nbsurfaces);
@@ -32,6 +33,7 @@ extern "C"
         voxel->nby = nby;
         voxel->nbz = nbz;
         voxel->cells.clear();
+        voxel->cells.resize(nbx * nby * nbz);
         voxel->surfaceBounds.clear();
         voxel->surfaceNodes.clear();
         voxel->surfaceCandidates.clear();
@@ -275,11 +277,11 @@ extern "C"
             {
                 size_t index = coord_to_index(cell, voxel->bounds, voxel->nbx, voxel->nby, voxel->nbz);
                 // check if the cell exists
-                if (voxel->cells.find(index) == voxel->cells.end())
-                {
-                    // create the new cell
-                    voxel->cells[index] = Cell();
-                }
+//                if (voxel->cells.find(index) == voxel->cells.end())
+//                {
+//                    // create the new cell
+//                    voxel->cells[index] = Cell();
+//                }
                 // add the surface to the cell
                 // voxel->cells[index].surfaces.insert(i);
                 voxel->cells[index].surfaces.push_back(i);
@@ -305,11 +307,11 @@ extern "C"
             // get the index of the cell
             size_t index = coord_to_index(x, y, z, voxel->bounds, voxel->nbx, voxel->nby, voxel->nbz);
             // check if the cell exists
-            if (voxel->cells.find(index) == voxel->cells.end())
-            {
-                // create the new cell
-                voxel->cells[index] = Cell();
-            }
+//            if (voxel->cells.find(index) == voxel->cells.end())
+//            {
+//                // create the new cell
+//                voxel->cells[index] = Cell();
+//            }
             // add the node to the cell
             // voxel->cells[index].nodes.insert(i);
             voxel->cells[index].nodes.push_back(i);
@@ -365,11 +367,11 @@ extern "C"
 
             // add the node to the new cell
             // check if the new cell exists
-            if (voxel->cells.find(newIndex) == voxel->cells.end())
-            {
-                // create the new cell
-                voxel->cells[newIndex] = Cell();
-            }
+         //   if (voxel->cells.find(newIndex) == voxel->cells.end())
+         //   {
+         //       // create the new cell
+         //       voxel->cells[newIndex] = Cell();
+         //   }
             // voxel->cells[newIndex].nodes.insert(nodeId);
             voxel->cells[newIndex].nodes.push_back(nodeId);
 
@@ -426,7 +428,9 @@ extern "C"
             for (const auto &cell : oldCells)
             {
                 size_t index = coord_to_index(cell, voxel->bounds, voxel->nbx, voxel->nby, voxel->nbz);
-                if (voxel->cells.find(index) != voxel->cells.end())
+                //if (voxel->cells.find(index) != voxel->cells.end())
+                //if the cell is not empty
+                if(voxel->cells[index].surfaces.size() > 0)
                 {
                     // voxel->cells[index].surfaces.erase(surfId);
                     swap_and_pop(voxel->cells[index].surfaces, surfId);
@@ -451,12 +455,12 @@ extern "C"
             {
                 size_t index = coord_to_index(cell, voxel->bounds, voxel->nbx, voxel->nby, voxel->nbz);
                 // check if the cell exists
-                if (voxel->cells.find(index) == voxel->cells.end())
-                {
-                    // create the new cell
-                    voxel->cells[index] = Cell();
-                }
-                // add the surface to the cell
+            //    if (voxel->cells.find(index) == voxel->cells.end())
+            //    {
+            //        // create the new cell
+            //        voxel->cells[index] = Cell();
+            //    }
+            //    // add the surface to the cell
                 // voxel->cells[index].surfaces.insert(surfId);
                 voxel->cells[index].surfaces.push_back(surfId);
                 // update surfaceCandidates
