@@ -327,7 +327,7 @@ extern "C"
                    voxel->surfaceNodes[surfId][2] != i && voxel->surfaceNodes[surfId][3] != i)
                 {
                     // add the node to the surfaceCandiates
-                    voxel->surfaceCandidates[surfId].insert(i);
+                    voxel->surfaceCandidates[surfId].push_back(i);
                 }
             }
         }
@@ -358,7 +358,8 @@ extern "C"
                    voxel->surfaceNodes[surfId][2] != nodeId && voxel->surfaceNodes[surfId][3] != nodeId)
                 {
                     // remove the node from the surfaceCandiates
-                    voxel->surfaceCandidates[surfId].erase(nodeId);
+            //        voxel->surfaceCandidates[surfId].erase(nodeId);
+                      swap_and_pop(voxel->surfaceCandidates[surfId], nodeId);
                 }
             }
 
@@ -383,7 +384,8 @@ extern "C"
                    voxel->surfaceNodes[surfId][2] != nodeId && voxel->surfaceNodes[surfId][3] != nodeId)
                 {
                     // add the node to the surfaceCandiates of all surfaces crossing the new cell
-                    voxel->surfaceCandidates[surfId].insert(nodeId);
+                    //voxel->surfaceCandidates[surfId].insert(nodeId);
+                    voxel->surfaceCandidates[surfId].push_back(nodeId);
                 }
             }
         }
@@ -433,7 +435,9 @@ extern "C"
                         if(voxel->surfaceNodes[surfId][0] != nodeId && voxel->surfaceNodes[surfId][1] != nodeId &&
                            voxel->surfaceNodes[surfId][2] != nodeId && voxel->surfaceNodes[surfId][3] != nodeId)
                         {
-                            voxel->surfaceCandidates[surfId].erase(nodeId);
+                            //voxel->surfaceCandidates[surfId].erase(nodeId);
+                            swap_and_pop(voxel->surfaceCandidates[surfId], nodeId);
+                            
                         }
                     }
                 }
@@ -463,7 +467,8 @@ extern "C"
                     if(voxel->surfaceNodes[surfId][0] != nodeId && voxel->surfaceNodes[surfId][1] != nodeId &&
                        voxel->surfaceNodes[surfId][2] != nodeId && voxel->surfaceNodes[surfId][3] != nodeId)
                     {
-                        voxel->surfaceCandidates[surfId].insert(nodeId);
+                        //voxel->surfaceCandidates[surfId].insert(nodeId);
+                        voxel->surfaceCandidates[surfId].push_back(nodeId);
                     }
                 }
             }

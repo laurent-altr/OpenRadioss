@@ -21,9 +21,11 @@ using Surf = std::array<short int, 6>; // a surface can cross multiple cells
 //swap_and_pop :
 
 template <typename T>
-void swap_and_pop(std::vector<T>& vec, size_t index) {
-    if (index < vec.size()) {
-        std::swap(vec[index], vec.back());
+void swap_and_pop(std::vector<T>& vec, T value) {
+    // finds the value, swaps it with the last element, and pops the last element 
+    auto it = std::find(vec.begin(), vec.end(), value);
+    if (it != vec.end()) {
+        std::swap(*it, vec.back());
         vec.pop_back();
     }
 }
@@ -134,7 +136,7 @@ public:
     std::vector<Node> nodes;                         // vector of secondary nodes
     std::vector<Surf> surfaceBounds;                 // vector of main surfaceBounds
     std::vector<std::array<int,4>> surfaceNodes;      // vector of secondary surfaceBounds
-    std::vector<std::set<int>> surfaceCandidates; // vector of secondary node candidates for broad phase collision with the surface
+    std::vector<std::vector<int>> surfaceCandidates; // vector of secondary node candidates for broad phase collision with the surface
 };
 
 #define COORD_TO_INDEX(x, y, z, nbx, nby) ((x) + (y) * (nbx) + (z) * (nbx) * (nby))
