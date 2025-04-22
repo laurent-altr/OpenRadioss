@@ -79,6 +79,9 @@ extern "C"
         if (xmin > xmax || ymin > ymax || zmin > zmax)
         {
             std::cerr << "Error: Invalid range for cell coordinates." << std::endl;
+            std::cerr << "xmin: " << xmin << ", xmax: " << xmax << std::endl;
+            std::cerr << "ymin: " << ymin << ", ymax: " << ymax << std::endl;
+            std::cerr << "zmin: " << zmin << ", zmax: " << zmax << std::endl;
             exit(1);
         }
         // Handle cases where the range is larger than the grid
@@ -270,6 +273,18 @@ extern "C"
             const double zmax = std::max(std::max(z1, z2), std::max(z3, z4)) + gapValue;
             const Node minCoords = mapper.mapMin(xmin, ymin, zmin);
             const Node maxCoords = mapper.mapMax(xmax, ymax, zmax);
+            if(maxCoords[0] < minCoords[0] || maxCoords[1] < minCoords[1] || maxCoords[2] < minCoords[2])
+            {
+                std::cerr << "Error: Invalid range for surface coordinates" << std::endl;
+                std::cerr << "xmin: " << xmin << ", xmax: " << xmax << std::endl;
+                std::cerr << "ymin: " << ymin << ", ymax: " << ymax << std::endl;
+                std::cerr << "zmin: " << zmin << ", zmax: " << zmax << std::endl;
+                std::cerr << "minCoords: " << minCoords[0] << " " << minCoords[1] << " " << minCoords[2] << std::endl;
+                std::cerr << "maxCoords: " << maxCoords[0] << " " << maxCoords[1] << " " << maxCoords[2] << std::endl;
+                std::cerr << "nbx: " << voxel->nbx << " nby: " << voxel->nby << " nbz: " << voxel->nbz << std::endl;
+                std::cerr<< "bounds: " << voxel->bounds[XMIN] << " " << voxel->bounds[YMIN] << " " << voxel->bounds[ZMIN] << std::endl;
+                exit(1);
+            }
 
             std::vector<Node> cells = getCellsInWrappedRange(minCoords[0], maxCoords[0], minCoords[1], maxCoords[1], minCoords[2], maxCoords[2], voxel->nbx, voxel->nby, voxel->nbz);
             // add the surface to the cells it crosses
@@ -404,6 +419,28 @@ extern "C"
         //Node maxCoords = coord_to_grid(xmax, ymax, zmax, voxel->bounds, voxel->nbx, voxel->nby, voxel->nbz, true);
         Node minCoords = mapper.mapMin(xmin, ymin, zmin);
         Node maxCoords = mapper.mapMax(xmax, ymax, zmax);
+        if(maxCoords[0] < minCoords[0] || maxCoords[1] < minCoords[1] || maxCoords[2] < minCoords[2])
+        {
+            std::cerr << "Error: Invalid range for surface coordinates" << std::endl;
+            std::cerr << "xmin: " << xmin << ", xmax: " << xmax << std::endl;
+            std::cerr << "ymin: " << ymin << ", ymax: " << ymax << std::endl;
+            std::cerr << "zmin: " << zmin << ", zmax: " << zmax << std::endl;
+            std::cerr << "minCoords: " << minCoords[0] << " " << minCoords[1] << " " << minCoords[2] << std::endl;
+            std::cerr << "maxCoords: " << maxCoords[0] << " " << maxCoords[1] << " " << maxCoords[2] << std::endl;
+            std::cerr << "nbx: " << voxel->nbx << " nby: " << voxel->nby << " nbz: " << voxel->nbz << std::endl;
+            std::cerr<< "bounds: " << voxel->bounds[XMIN] << " " << voxel->bounds[YMIN] << " " << voxel->bounds[ZMIN] << std::endl;
+            exit(1);
+        }
+
+ 
+//        if(xmin > xmax || ymin > ymax || zmin > zmax)
+//        {
+//            std::cerr << "Error: Invalid range for surface coordinates." << std::endl;
+//            std::cerr << "xmin: " << xmin << ", xmax: " << xmax << std::endl;
+//            std::cerr << "ymin: " << ymin << ", ymax: " << ymax << std::endl;
+//            std::cerr << "zmin: " << zmin << ", zmax: " << zmax << std::endl;
+//            exit(1);
+//        }
         newCoords[XMIN] = minCoords[0];
         newCoords[YMIN] = minCoords[1];
         newCoords[ZMIN] = minCoords[2];
