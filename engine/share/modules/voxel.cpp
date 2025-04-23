@@ -205,7 +205,7 @@ extern "C"
         return cells;
     }
 
-    void Voxel_initialize(void *v, int *irect, int nrtm, my_real *gap, int *nsv, int nsn, my_real *X, int numnod)
+    void Voxel_initialize(void *v, int *irect, int nrtm, my_real *gap, int *nsv, int nsn, my_real *X, int numnod, my_real * stf)
     {
         // X = coordinates of the nodes, size 3*numnod
         // nrtm = number of surfaces
@@ -245,6 +245,10 @@ extern "C"
         // Loop over the surfaces, add the surfaces to the cells it crosses
         for (int i = 0; i < nrtm; i++)
         {
+            if(stf[i] <= static_cast<my_real>(0)) 
+            {
+                continue;
+            }
             // get the gap of the surface
             double gapValue = static_cast<double>(gap[i]);
             // get the coordinates of the surface
@@ -265,14 +269,14 @@ extern "C"
             const double x4 = static_cast<double>(X[3 * i4]);
             const double y4 = static_cast<double>(X[3 * i4 + 1]);
             const double z4 = static_cast<double>(X[3 * i4 + 2]);
-            const double xmin = std::min(std::min(x1, x2), std::min(x3, x4)) - gapValue;
-            const double ymin = std::min(std::min(y1, y2), std::min(y3, y4)) - gapValue;
-            const double zmin = std::min(std::min(z1, z2), std::min(z3, z4)) - gapValue;
-            const double xmax = std::max(std::max(x1, x2), std::max(x3, x4)) + gapValue;
-            const double ymax = std::max(std::max(y1, y2), std::max(y3, y4)) + gapValue;
-            const double zmax = std::max(std::max(z1, z2), std::max(z3, z4)) + gapValue;
-            const Node minCoords = mapper.mapMin(xmin, ymin, zmin);
-            const Node maxCoords = mapper.mapMax(xmax, ymax, zmax);
+            double xmin = std::min(std::min(x1, x2), std::min(x3, x4)) - gapValue;
+            double ymin = std::min(std::min(y1, y2), std::min(y3, y4)) - gapValue;
+            double zmin = std::min(std::min(z1, z2), std::min(z3, z4)) - gapValue;
+            double xmax = std::max(std::max(x1, x2), std::max(x3, x4)) + gapValue;
+            double ymax = std::max(std::max(y1, y2), std::max(y3, y4)) + gapValue;
+            double zmax = std::max(std::max(z1, z2), std::max(z3, z4)) + gapValue;
+            Node minCoords = mapper.mapMin(xmin, ymin, zmin);
+            Node maxCoords = mapper.mapMax(xmax, ymax, zmax);
             if(maxCoords[0] < minCoords[0] || maxCoords[1] < minCoords[1] || maxCoords[2] < minCoords[2])
             {
                 std::cerr << "Error: Invalid range for surface coordinates" << std::endl;
@@ -282,8 +286,23 @@ extern "C"
                 std::cerr << "minCoords: " << minCoords[0] << " " << minCoords[1] << " " << minCoords[2] << std::endl;
                 std::cerr << "maxCoords: " << maxCoords[0] << " " << maxCoords[1] << " " << maxCoords[2] << std::endl;
                 std::cerr << "nbx: " << voxel->nbx << " nby: " << voxel->nby << " nbz: " << voxel->nbz << std::endl;
-                std::cerr<< "bounds: " << voxel->bounds[XMIN] << " " << voxel->bounds[YMIN] << " " << voxel->bounds[ZMIN] << std::endl;
-                exit(1);
+                std::cerr << " bounds: " << voxel->bounds[XMIN] << " " << voxel->bounds[YMIN] << " " << voxel->bounds[ZMIN] << std::endl;
+                std::cerr << " bounds: " << voxel->bounds[XMAX] << " " << voxel->bounds[YMAX] << " " << voxel->bounds[ZMAX] << std::endl;
+                xmin = std::max(xmin, voxel->bounds[XMIN]);
+                xmax = std::min(xmax, voxel->bounds[XMAX]);
+                ymin = std::max(ymin, voxel->bounds[YMIN]);
+                ymax = std::min(ymax, voxel->bounds[YMAX]);
+                zmin = std::max(zmin, voxel->bounds[ZMIN]);
+                zmax = std::min(zmax, voxel->bounds[ZMAX]);
+               
+                xmin = std::min(xmin, voxel->bounds[XMAX]);
+                xmax = std::max(xmax, voxel->bounds[XMIN]);
+                ymin = std::min(ymin, voxel->bounds[YMAX]);
+                ymax = std::max(ymax, voxel->bounds[YMIN]);
+                zmin = std::min(zmin, voxel->bounds[ZMAX]);
+                zmax = std::max(zmax, voxel->bounds[ZMIN]);
+                minCoords = mapper.mapMin(xmin, ymin, zmin);
+                maxCoords = mapper.mapMax(xmax, ymax, zmax);
             }
 
             std::vector<Node> cells = getCellsInWrappedRange(minCoords[0], maxCoords[0], minCoords[1], maxCoords[1], minCoords[2], maxCoords[2], voxel->nbx, voxel->nby, voxel->nbz);
@@ -421,7 +440,7 @@ extern "C"
         Node maxCoords = mapper.mapMax(xmax, ymax, zmax);
         if(maxCoords[0] < minCoords[0] || maxCoords[1] < minCoords[1] || maxCoords[2] < minCoords[2])
         {
-            std::cerr << "Error: Invalid range for surface coordinates" << std::endl;
+            std::cerr << "Update Surf Error: Invalid range for surface coordinates" << std::endl;
             std::cerr << "xmin: " << xmin << ", xmax: " << xmax << std::endl;
             std::cerr << "ymin: " << ymin << ", ymax: " << ymax << std::endl;
             std::cerr << "zmin: " << zmin << ", zmax: " << zmax << std::endl;
@@ -429,7 +448,25 @@ extern "C"
             std::cerr << "maxCoords: " << maxCoords[0] << " " << maxCoords[1] << " " << maxCoords[2] << std::endl;
             std::cerr << "nbx: " << voxel->nbx << " nby: " << voxel->nby << " nbz: " << voxel->nbz << std::endl;
             std::cerr<< "bounds: " << voxel->bounds[XMIN] << " " << voxel->bounds[YMIN] << " " << voxel->bounds[ZMIN] << std::endl;
-            exit(1);
+            std::cerr<< "bounds: " << voxel->bounds[XMAX] << " " << voxel->bounds[YMAX] << " " << voxel->bounds[ZMAX] << std::endl;
+
+            // bound x y and z to the grid
+            xmin = std::max(xmin, voxel->bounds[XMIN]);
+            xmax = std::min(xmax, voxel->bounds[XMAX]);
+            ymin = std::max(ymin, voxel->bounds[YMIN]);
+            ymax = std::min(ymax, voxel->bounds[YMAX]);
+            zmin = std::max(zmin, voxel->bounds[ZMIN]);
+            zmax = std::min(zmax, voxel->bounds[ZMAX]);
+
+            xmin = std::min(xmin, voxel->bounds[XMAX]);
+            xmax = std::max(xmax, voxel->bounds[XMIN]);
+            ymin = std::min(ymin, voxel->bounds[YMAX]);
+            ymax = std::max(ymax, voxel->bounds[YMIN]);
+            zmin = std::min(zmin, voxel->bounds[ZMAX]);
+            zmax = std::max(zmax, voxel->bounds[ZMIN]);
+            minCoords = mapper.mapMin(xmin, ymin, zmin);
+            maxCoords = mapper.mapMax(xmax, ymax, zmax);
+ 
         }
 
  

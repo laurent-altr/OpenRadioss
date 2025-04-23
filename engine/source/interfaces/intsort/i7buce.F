@@ -659,7 +659,7 @@ C
                   IF(.NOT. C_ASSOCIATED(VOX)) THEN
                     VOX = c_voxel_new(nbx, nby, nbz,nrtm,nsn)
                   ENDIF
-                  delta = 10.0D0*MAXVAL(DIST)
+                  delta = 100.0D0*MAXVAL(DIST)
                   aabb(1) = bminma(1) + delta
                   aabb(2) = bminma(2) + delta
                   aabb(3) = bminma(3) + delta
@@ -669,7 +669,7 @@ C
 
                   call c_voxel_set_bounds(VOX, aabb(4), aabb(5), aabb(6), aabb(1), aabb(2), aabb(3))
 !     write(6,*) "VOXEL INITIALIZATION",NRTM
-                  call c_voxel_initialize(VOX,IRECT,nrtm,DIST,nsv,nsn,X,numnod)
+                  call c_voxel_initialize(VOX,IRECT,nrtm,DIST,nsv,nsn,X,numnod,stf)
                   deallocate(DIST)
                 else
 !     write(6,*) "VOXEL ALREADY INITIALIZED"

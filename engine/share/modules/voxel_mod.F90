@@ -58,7 +58,7 @@ module voxel_mod
     end subroutine c_voxel_set_bounds
 
     ! Voxel_initialize
-    subroutine c_voxel_initialize(v, irect, nrtm, gap, nsv, nsn, X, numnod) bind(C, name="Voxel_initialize")
+    subroutine c_voxel_initialize(v, irect, nrtm, gap, nsv, nsn, X, numnod, stf) bind(C, name="Voxel_initialize")
       import :: c_ptr, c_int, c_double, c_float
       implicit none
       type(c_ptr), value :: v
@@ -68,6 +68,7 @@ module voxel_mod
       integer(c_int), intent(in) :: nsv(*)
       integer(c_int), value :: nsn
       real(my_real_kind), intent(in) :: X(*)
+      real(my_real_kind), intent(in):: stf(*)
       integer(c_int), value :: numnod
     end subroutine c_voxel_initialize
 
@@ -153,20 +154,6 @@ contains
     
     call c_voxel_set_bounds(voxel, xmin, ymin, zmin, xmax, ymax, zmax)
   end subroutine voxel_set_bounds
-
-  ! Initialize a Voxel
-  subroutine voxel_initialize(voxel, irect, nrtm, gap, nsv, nsn, X, numnod)
-    type(c_ptr), intent(inout) :: voxel
-    integer, intent(in) :: nrtm
-    integer, intent(in) :: irect(4,nrtm)  ! Assuming it's dimensioned as (4,nrtm)
-    real(my_real_kind), intent(in) :: gap(nrtm)
-    integer, intent(in) :: nsn
-    integer, intent(in) :: nsv(nsn)
-    integer, intent(in) :: numnod
-    real(my_real_kind), intent(in) :: X(3,numnod)  ! Assuming it's dimensioned as (3*numnod)
-    
-    call c_voxel_initialize(voxel, irect, nrtm, gap, nsv, nsn, X, numnod)
-  end subroutine voxel_initialize
 
   ! Delete a Voxel object
   subroutine voxel_delete(voxel)
