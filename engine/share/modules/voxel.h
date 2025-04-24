@@ -254,7 +254,7 @@ size_t inline coord_to_index(short int x, short int y, short int z, const std::a
     return COORD_TO_INDEX(static_cast<size_t>(x), static_cast<size_t>(y), static_cast<size_t>(z), nbx, nby);
 }
 
-Node index_to_coord(size_t index, size_t nbx, size_t nby, size_t nbz)
+Node inline index_to_coord(size_t index, size_t nbx, size_t nby, size_t nbz)
 {
     // Calculate maximum valid index
     size_t max_index = nbx * nby * nbz - 1;

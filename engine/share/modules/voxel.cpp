@@ -310,14 +310,6 @@ extern "C"
             for (auto cell : cells)
             {
                 size_t index = coord_to_index(cell, voxel->bounds, voxel->nbx, voxel->nby, voxel->nbz);
-                // check if the cell exists
-                //                if (voxel->cells.find(index) == voxel->cells.end())
-                //                {
-                //                    // create the new cell
-                //                    voxel->cells[index] = Cell();
-                //                }
-                // add the surface to the cell
-                // voxel->cells[index].surfaces.insert(i);
                 voxel->cells[index].surfaces.push_back(i);
             }
             Surf newCoords;
@@ -340,25 +332,14 @@ extern "C"
             const double z = static_cast<double>(X[3 * i1 + 2]);
             // get the index of the cell
             size_t index = coord_to_index(x, y, z, voxel->bounds, voxel->nbx, voxel->nby, voxel->nbz);
-            // check if the cell exists
-            //            if (voxel->cells.find(index) == voxel->cells.end())
-            //            {
-            //                // create the new cell
-            //                voxel->cells[index] = Cell();
-            //            }
-            // add the node to the cell
-            // voxel->cells[index].nodes.insert(i);
             voxel->cells[index].nodes.push_back(i);
-
             // add the node to the nodes vector
-            // voxel->nodes[i] = coord_to_grid(x, y, z, voxel->bounds, voxel->nbx, voxel->nby, voxel->nbz);
             voxel->nodes[i] = mapper.mapMin(x, y, z);
 
             // loop over the surfaces crossing the cell
             for (auto surfId : voxel->cells[index].surfaces)
             {
                 // check the 4 nodes
-                // if (voxel->surfaceNodes[surfId].find(i) == voxel->surfaceNodes[surfId].end())
                 if (voxel->surfaceNodes[surfId][0] != i && voxel->surfaceNodes[surfId][1] != i &&
                     voxel->surfaceNodes[surfId][2] != i && voxel->surfaceNodes[surfId][3] != i)
                 {
@@ -383,30 +364,18 @@ extern "C"
         if (newIndex != oldIndex)
         {
             // remove the node from the old cell
-            // voxel->cells[oldIndex].nodes.erase(nodeId);
             swap_and_pop(voxel->cells[oldIndex].nodes, nodeId);
             // remove the node from candidates list of all surfaces crossing the old cell
             for (auto surfId : voxel->cells[oldIndex].surfaces)
             {
                 // check if the node is in the surfaceNodes, because nodes that defines the surface cannot be a candidate for collision
-                // if (voxel->surfaceNodes[surfId].find(nodeId) == voxel->surfaceNodes[surfId].end())
                 if (voxel->surfaceNodes[surfId][0] != nodeId && voxel->surfaceNodes[surfId][1] != nodeId &&
                     voxel->surfaceNodes[surfId][2] != nodeId && voxel->surfaceNodes[surfId][3] != nodeId)
                 {
-                    // remove the node from the surfaceCandiates
-                    //        voxel->surfaceCandidates[surfId].erase(nodeId);
                     swap_and_pop(voxel->surfaceCandidates[surfId], nodeId);
                 }
             }
 
-            // add the node to the new cell
-            // check if the new cell exists
-            //   if (voxel->cells.find(newIndex) == voxel->cells.end())
-            //   {
-            //       // create the new cell
-            //       voxel->cells[newIndex] = Cell();
-            //   }
-            // voxel->cells[newIndex].nodes.insert(nodeId);
             voxel->cells[newIndex].nodes.push_back(nodeId);
 
             voxel->nodes[nodeId] = index_to_coord(newIndex, voxel->nbx, voxel->nby, voxel->nbz);
@@ -414,13 +383,11 @@ extern "C"
             for (auto surfId : voxel->cells[newIndex].surfaces)
             {
                 // check if the node is in the surfaceNodes, because nodes that defines the surface cannot be a candidate for collision
-                // if (voxel->surfaceNodes[surfId].find(nodeId) == voxel->surfaceNodes[surfId].end())
                 // check the 4 nodes
                 if (voxel->surfaceNodes[surfId][0] != nodeId && voxel->surfaceNodes[surfId][1] != nodeId &&
                     voxel->surfaceNodes[surfId][2] != nodeId && voxel->surfaceNodes[surfId][3] != nodeId)
                 {
                     // add the node to the surfaceCandiates of all surfaces crossing the new cell
-                    // voxel->surfaceCandidates[surfId].insert(nodeId);
                     voxel->surfaceCandidates[surfId].push_back(nodeId);
                 }
             }
