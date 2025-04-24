@@ -669,13 +669,14 @@ C
 
                   call c_voxel_set_bounds(VOX, aabb(4), aabb(5), aabb(6), aabb(1), aabb(2), aabb(3))
 !     write(6,*) "VOXEL INITIALIZATION",NRTM
-                  call c_voxel_initialize(VOX,IRECT,nrtm,DIST,nsv,nsn,X,numnod,stf)
+                  call c_voxel_initialize(VOX,IRECT,nrtm,DIST,nsv,nsn,X,numnod,stf, stfn)
                   deallocate(DIST)
                 else
 !     write(6,*) "VOXEL ALREADY INITIALIZED"
-                  nbx = 1
-                  nby = 1
-                  nbz = 1
+                 call c_voxel_update(VOX,IRECT,nrtm,DIST,nsv,nsn,X,numnod,stf, stfn)
+                 nbx = 1
+                 nby = 1
+                 nbz = 1
                 ENDIF
 
 

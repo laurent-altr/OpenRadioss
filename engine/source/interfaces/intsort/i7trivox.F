@@ -829,44 +829,6 @@ C-----------------------------------------------
       IF(NSPMD>1.AND.(INACTI==5.OR.INACTI==6.OR.INACTI==7.OR.IFQ>0.OR.ITIED/=0)) THEN
         CALL SPMD_OLDNUMCD(RENUM,OLDNUM,ISZNSNR,NSNROLD,INTHEAT,IDT_THERM,NODADT_THERM)
       END IF
-      DO NE=1,NRTM
-        IF(STF(NE) == ZERO)CYCLE ! on ne retient pas les facettes detruites
-        IF(IGAP == 0)THEN
-          AAA = TZINF+CURV_MAX(NE)
-        ELSE
-          AAA = MARGE+CURV_MAX(NE)+MAX(MIN(GAPMAX,MAX(GAPMIN,BGAPSMX+GAP_M(NE)))+DGAPLOAD,DRAD)
-        ENDIF
-        !il est possible d'ameliorer l'algo en decoupant la facette
-        !en 2(4,3,6,9...) si la facette est grande devant AAA et inclinee
-        M1 = IRECT(1,NE)
-        M2 = IRECT(2,NE)
-        M3 = IRECT(3,NE)
-        M4 = IRECT(4,NE)
-
-        XX1=X(1,M1)
-        XX2=X(1,M2)
-        XX3=X(1,M3)
-        XX4=X(1,M4)
-        XMAXE=MAX(XX1,XX2,XX3,XX4) +AAA
-        XMINE=MIN(XX1,XX2,XX3,XX4) -AAA
-
-        YY1=X(2,M1)
-        YY2=X(2,M2)
-        YY3=X(2,M3)
-        YY4=X(2,M4)
-        YMAXE=MAX(YY1,YY2,YY3,YY4) + AAA
-        YMINE=MIN(YY1,YY2,YY3,YY4) -AAA
-
-        ZZ1=X(3,M1)
-        ZZ2=X(3,M2)
-        ZZ3=X(3,M3)
-        ZZ4=X(3,M4)
-        ZMAXE=MAX(ZZ1,ZZ2,ZZ3,ZZ4) + AAA
-        ZMINE=MIN(ZZ1,ZZ2,ZZ3,ZZ4) - AAA
-
-        call c_voxel_update_surf(VOX,XMINE,YMINE,ZMINE,XMAXE,YMAXE,ZMAXE,ne)
-
-      ENDDO
  
 
 C=======================================================================
@@ -874,26 +836,26 @@ C 1   NODE CLUSTERING
 C=======================================================================
       IF(ITASK==0.AND.TOTAL_NB_NRTM>0)THEN
         !==========LAGRANGIAN and STAGGERED ALE==========!
-        DO I=1,NSN
-          IIX(I)=0
-          IIY(I)=0
-          IIZ(I)=0
-          IF(STFN(I) == ZERO)CYCLE
-          J=NSV(I)
-          !C Optimisation // recherche les noeuds compris dans xmin xmax des
-          !C elements du processeur
-          XMINE = X(1,J)
-          YMINE = X(2,J)
-          ZMINE = X(3,J)
-          call c_voxel_update_node(VOX,XMINE,YMINE,ZMINE,I)
-        ENDDO
+!       DO I=1,NSN
+!         IF(STFN(I) == ZERO) then
+!           call c_voxel_delete_node(VOX,I)
+!         ELSE
+!           J=NSV(I)
+!           !C Optimisation // recherche les noeuds compris dans xmin xmax des
+!           !C elements du processeur
+!           XMINE = X(1,J)
+!           YMINE = X(2,J)
+!           ZMINE = X(3,J)
+!           call c_voxel_update_node(VOX,XMINE,YMINE,ZMINE,I)
+!         endif
+!       ENDDO
 
 C=======================================================================
 C 2   REMOTE NODE CLUSTERING
 C=======================================================================
-        DO J = 1, NSNR
+!       DO J = 1, NSNR
 
-        ENDDO
+!       ENDDO
       END IF !ITASK == 0
 
       CALL MY_BARRIER ! Barrier to wait task0 treatment
@@ -1080,23 +1042,23 @@ C 5   VOXEL CLUSTERING  RESET
 C=======================================================================
   100 CONTINUE
       ! Barrier to avoid reinitialization before end of sorting
-      CALL MY_BARRIER
-      IF(TOTAL_NB_NRTM>0) THEN
-        NSNF = 1 + ITASK*NSN / NTHREAD
-        NSNL = (ITASK+1)*NSN / NTHREAD
-        DO I=NSNF,NSNL
-            IF(IIX(I)/=0)THEN
-              VOXEL(IIX(I),IIY(I),IIZ(I))=0
-            ENDIF
-        ENDDO
-        NSNF = 1 + ITASK*REMOTE_S_NODE / NTHREAD
-        NSNL = (ITASK+1)*REMOTE_S_NODE / NTHREAD
-        IF(ITASK+1==NTHREAD) NSNL=REMOTE_S_NODE
-        DO JJ = NSNF, NSNL
-            J = LIST_REMOTE_S_NODE(JJ)
-            VOXEL(IIX(NSN+J),IIY(NSN+J),IIZ(NSN+J))=0
-        ENDDO
-      ENDIF
+C     CALL MY_BARRIER
+C     IF(TOTAL_NB_NRTM>0) THEN
+C        NSNF = 1 + ITASK*NSN / NTHREAD
+C        NSNL = (ITASK+1)*NSN / NTHREAD
+C        DO I=NSNF,NSNL
+C            IF(IIX(I)/=0)THEN
+C              VOXEL(IIX(I),IIY(I),IIZ(I))=0
+C            ENDIF
+C        ENDDO
+C        NSNF = 1 + ITASK*REMOTE_S_NODE / NTHREAD
+C        NSNL = (ITASK+1)*REMOTE_S_NODE / NTHREAD
+C        IF(ITASK+1==NTHREAD) NSNL=REMOTE_S_NODE
+C        DO JJ = NSNF, NSNL
+C            J = LIST_REMOTE_S_NODE(JJ)
+C            VOXEL(IIX(NSN+J),IIY(NSN+J),IIZ(NSN+J))=0
+C        ENDDO
+C      ENDIF
       CALL MY_BARRIER()
 
 C=======================================================================

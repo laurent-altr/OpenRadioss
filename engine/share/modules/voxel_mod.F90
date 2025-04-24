@@ -58,7 +58,7 @@ module voxel_mod
     end subroutine c_voxel_set_bounds
 
     ! Voxel_initialize
-    subroutine c_voxel_initialize(v, irect, nrtm, gap, nsv, nsn, X, numnod, stf) bind(C, name="Voxel_initialize")
+    subroutine c_voxel_initialize(v, irect, nrtm, gap, nsv, nsn, X, numnod, stf, stfn) bind(C, name="Voxel_initialize")
       import :: c_ptr, c_int, c_double, c_float
       implicit none
       type(c_ptr), value :: v
@@ -68,9 +68,23 @@ module voxel_mod
       integer(c_int), intent(in) :: nsv(*)
       integer(c_int), value :: nsn
       real(my_real_kind), intent(in) :: X(*)
-      real(my_real_kind), intent(in):: stf(*)
+      real(my_real_kind), intent(in):: stf(*), stfn(*)
       integer(c_int), value :: numnod
     end subroutine c_voxel_initialize
+    subroutine c_voxel_update(v, irect, nrtm, gap, nsv, nsn, X, numnod, stf, stfn) bind(C, name="Voxel_update")
+      import :: c_ptr, c_int, c_double, c_float
+      implicit none
+      type(c_ptr), value :: v
+      integer(c_int), intent(in) :: irect(*)
+      integer(c_int), value :: nrtm
+      real(my_real_kind), intent(in) :: gap(*)
+      integer(c_int), intent(in) :: nsv(*)
+      integer(c_int), value :: nsn
+      real(my_real_kind), intent(in) :: X(*)
+      real(my_real_kind), intent(in):: stf(*), stfn(*)
+      integer(c_int), value :: numnod
+    end subroutine c_voxel_update
+
 
     ! Voxel_delete
     subroutine c_voxel_delete(v) bind(C, name="Voxel_delete")
@@ -79,23 +93,7 @@ module voxel_mod
       type(c_ptr), value :: v
     end subroutine c_voxel_delete
 
-    ! Voxel_update_node
-    subroutine c_voxel_update_node(v, x, y, z, nodeId) bind(C, name="Voxel_update_node")
-      import :: c_ptr, c_double, c_int
-      implicit none
-      type(c_ptr), value :: v
-      real(c_double), value :: x, y, z
-      integer(c_int), value :: nodeId
-    end subroutine c_voxel_update_node
 
-    ! Voxel_update_surf
-    subroutine c_voxel_update_surf(v, xmin, ymin, zmin, xmax, ymax, zmax, surfId) bind(C, name="Voxel_update_surf")
-      import :: c_ptr, c_double, c_int
-      implicit none
-      type(c_ptr), value :: v
-      real(c_double), value :: xmin, ymin, zmin, xmax, ymax, zmax
-      integer(c_int), value :: surfId
-    end subroutine c_voxel_update_surf
 
     ! Voxel_get_max_candidates
     function c_voxel_get_max_candidates(v) bind(C, name="Voxel_get_max_candidates")
@@ -163,23 +161,6 @@ contains
     voxel = c_null_ptr
   end subroutine voxel_delete
 
-  ! Update a node in a Voxel
-  subroutine voxel_update_node(voxel, x, y, z, nodeId)
-    type(c_ptr), intent(inout) :: voxel
-    real(c_double), intent(in) :: x, y, z
-    integer, intent(in) :: nodeId
-    
-    call c_voxel_update_node(voxel, x, y, z, nodeId)
-  end subroutine voxel_update_node
-
-  ! Update a surface in a Voxel
-  subroutine voxel_update_surf(voxel, xmin, ymin, zmin, xmax, ymax, zmax, surfId)
-    type(c_ptr), intent(inout) :: voxel
-    real(c_double), intent(in) :: xmin, ymin, zmin, xmax, ymax, zmax
-    integer, intent(in) :: surfId
-    
-    call c_voxel_update_surf(voxel, xmin, ymin, zmin, xmax, ymax, zmax, surfId)
-  end subroutine voxel_update_surf
 
   ! Get the maximum number of candidates for a Voxel
   function voxel_get_max_candidates(voxel) result(max_candidates)
