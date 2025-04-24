@@ -42,8 +42,6 @@ private:
     const bool x_valid, y_valid, z_valid;
     
 public:
-    // Define same constants as in original function for clarity
-    enum { XMIN = 0, YMIN = 1, ZMIN = 2, XMAX = 3, YMAX = 4, ZMAX = 5 };
     
     GridMapper(const std::array<double, 6>& bounds, size_t nbx_, size_t nby_, size_t nbz_)
         : nbx(nbx_), nby(nby_), nbz(nbz_),
