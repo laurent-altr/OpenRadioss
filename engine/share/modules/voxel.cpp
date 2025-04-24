@@ -205,7 +205,7 @@ extern "C"
         return cells;
     }
 
-    void Voxel_initialize(void *v, int *irect, int nrtm, my_real *gap, int *nsv, int nsn, my_real *X, int numnod, my_real * stf)
+    void Voxel_initialize(void *v, int *irect, int nrtm, my_real *gap, int *nsv, int nsn, my_real *X, int numnod, my_real *stf)
     {
         // X = coordinates of the nodes, size 3*numnod
         // nrtm = number of surfaces
@@ -245,7 +245,7 @@ extern "C"
         // Loop over the surfaces, add the surfaces to the cells it crosses
         for (int i = 0; i < nrtm; i++)
         {
-            if(stf[i] <= static_cast<my_real>(0)) 
+            if (stf[i] <= static_cast<my_real>(0))
             {
                 continue;
             }
@@ -277,7 +277,7 @@ extern "C"
             double zmax = std::max(std::max(z1, z2), std::max(z3, z4)) + gapValue;
             Node minCoords = mapper.mapMin(xmin, ymin, zmin);
             Node maxCoords = mapper.mapMax(xmax, ymax, zmax);
-            if(maxCoords[0] < minCoords[0] || maxCoords[1] < minCoords[1] || maxCoords[2] < minCoords[2])
+            if (maxCoords[0] < minCoords[0] || maxCoords[1] < minCoords[1] || maxCoords[2] < minCoords[2])
             {
                 std::cerr << "Error: Invalid range for surface coordinates" << std::endl;
                 std::cerr << "xmin: " << xmin << ", xmax: " << xmax << std::endl;
@@ -294,7 +294,7 @@ extern "C"
                 ymax = std::min(ymax, voxel->bounds[YMAX]);
                 zmin = std::max(zmin, voxel->bounds[ZMIN]);
                 zmax = std::min(zmax, voxel->bounds[ZMAX]);
-               
+
                 xmin = std::min(xmin, voxel->bounds[XMAX]);
                 xmax = std::max(xmax, voxel->bounds[XMIN]);
                 ymin = std::min(ymin, voxel->bounds[YMAX]);
@@ -311,11 +311,11 @@ extern "C"
             {
                 size_t index = coord_to_index(cell, voxel->bounds, voxel->nbx, voxel->nby, voxel->nbz);
                 // check if the cell exists
-//                if (voxel->cells.find(index) == voxel->cells.end())
-//                {
-//                    // create the new cell
-//                    voxel->cells[index] = Cell();
-//                }
+                //                if (voxel->cells.find(index) == voxel->cells.end())
+                //                {
+                //                    // create the new cell
+                //                    voxel->cells[index] = Cell();
+                //                }
                 // add the surface to the cell
                 // voxel->cells[index].surfaces.insert(i);
                 voxel->cells[index].surfaces.push_back(i);
@@ -341,11 +341,11 @@ extern "C"
             // get the index of the cell
             size_t index = coord_to_index(x, y, z, voxel->bounds, voxel->nbx, voxel->nby, voxel->nbz);
             // check if the cell exists
-//            if (voxel->cells.find(index) == voxel->cells.end())
-//            {
-//                // create the new cell
-//                voxel->cells[index] = Cell();
-//            }
+            //            if (voxel->cells.find(index) == voxel->cells.end())
+            //            {
+            //                // create the new cell
+            //                voxel->cells[index] = Cell();
+            //            }
             // add the node to the cell
             // voxel->cells[index].nodes.insert(i);
             voxel->cells[index].nodes.push_back(i);
@@ -401,11 +401,11 @@ extern "C"
 
             // add the node to the new cell
             // check if the new cell exists
-         //   if (voxel->cells.find(newIndex) == voxel->cells.end())
-         //   {
-         //       // create the new cell
-         //       voxel->cells[newIndex] = Cell();
-         //   }
+            //   if (voxel->cells.find(newIndex) == voxel->cells.end())
+            //   {
+            //       // create the new cell
+            //       voxel->cells[newIndex] = Cell();
+            //   }
             // voxel->cells[newIndex].nodes.insert(nodeId);
             voxel->cells[newIndex].nodes.push_back(nodeId);
 
@@ -427,30 +427,96 @@ extern "C"
         }
     }
 
+    // Helper function to process a range of cells for surface addition or removal
+    void processCellRange(Voxel *voxel, int surfId,
+                          short int xStart, short int xEnd,
+                          short int yStart, short int yEnd,
+                          short int zStart, short int zEnd,
+                          bool isAddOperation)
+    {
+        for (short int x = xStart; x <= xEnd; x++)
+        {
+            for (short int y = yStart; y <= yEnd; y++)
+            {
+                for (short int z = zStart; z <= zEnd; z++)
+                {
+                    size_t index = coord_to_index(x, y, z, voxel->bounds, voxel->nbx, voxel->nby, voxel->nbz);
+
+                    if (isAddOperation)
+                    {
+                        // Add surface to cell
+                        voxel->cells[index].surfaces.push_back(surfId);
+
+                        // Update surfaceCandidates for new cells
+                        for (auto nodeId : voxel->cells[index].nodes)
+                        {
+                            // Check if the node is not one of the four nodes defining the surface
+                            if (voxel->surfaceNodes[surfId][0] != nodeId &&
+                                voxel->surfaceNodes[surfId][1] != nodeId &&
+                                voxel->surfaceNodes[surfId][2] != nodeId &&
+                                voxel->surfaceNodes[surfId][3] != nodeId)
+                            {
+                                // Since we're adding to differential regions, the node shouldn't be in candidates yet
+                                voxel->surfaceCandidates[surfId].push_back(nodeId);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        // Remove surface from cell
+                        if (voxel->cells[index].surfaces.size() > 0)
+                        {
+                            swap_and_pop(voxel->cells[index].surfaces, surfId);
+
+                            // Remove nodes from candidates list
+                            for (auto nodeId : voxel->cells[index].nodes)
+                            {
+                                // Check if the node is not one of the four nodes defining the surface
+                                if (voxel->surfaceNodes[surfId][0] != nodeId &&
+                                    voxel->surfaceNodes[surfId][1] != nodeId &&
+                                    voxel->surfaceNodes[surfId][2] != nodeId &&
+                                    voxel->surfaceNodes[surfId][3] != nodeId)
+                                {
+                                    swap_and_pop(voxel->surfaceCandidates[surfId], nodeId);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     void Voxel_update_surf(void *v, double xmin, double ymin, double zmin,
                            double xmax, double ymax, double zmax, int surfId)
     {
         Voxel *voxel = static_cast<Voxel *>(v);
         --surfId; // Fortran to C++ index conversion
-        Surf newCoords;
+
+        // Early validation of surfId
+        if (voxel->surfaceBounds.size() <= static_cast<size_t>(surfId))
+        {
+            std::cerr << "Error: surface id " << surfId << " does not exist" << std::endl;
+            return;
+        }
+
+        // Calculate grid coordinates using mapping function
         GridMapper mapper(voxel->bounds, voxel->nbx, voxel->nby, voxel->nbz);
-        //Node minCoords = coord_to_grid(xmin, ymin, zmin, voxel->bounds, voxel->nbx, voxel->nby, voxel->nbz, false);
-        //Node maxCoords = coord_to_grid(xmax, ymax, zmax, voxel->bounds, voxel->nbx, voxel->nby, voxel->nbz, true);
         Node minCoords = mapper.mapMin(xmin, ymin, zmin);
         Node maxCoords = mapper.mapMax(xmax, ymax, zmax);
-        if(maxCoords[0] < minCoords[0] || maxCoords[1] < minCoords[1] || maxCoords[2] < minCoords[2])
+
+        // Handle invalid coordinate cases (where max < min)
+        if (maxCoords[0] < minCoords[0] || maxCoords[1] < minCoords[1] || maxCoords[2] < minCoords[2])
         {
+            // Log error
             std::cerr << "Update Surf Error: Invalid range for surface coordinates" << std::endl;
             std::cerr << "xmin: " << xmin << ", xmax: " << xmax << std::endl;
             std::cerr << "ymin: " << ymin << ", ymax: " << ymax << std::endl;
             std::cerr << "zmin: " << zmin << ", zmax: " << zmax << std::endl;
             std::cerr << "minCoords: " << minCoords[0] << " " << minCoords[1] << " " << minCoords[2] << std::endl;
             std::cerr << "maxCoords: " << maxCoords[0] << " " << maxCoords[1] << " " << maxCoords[2] << std::endl;
-            std::cerr << "nbx: " << voxel->nbx << " nby: " << voxel->nby << " nbz: " << voxel->nbz << std::endl;
-            std::cerr<< "bounds: " << voxel->bounds[XMIN] << " " << voxel->bounds[YMIN] << " " << voxel->bounds[ZMIN] << std::endl;
-            std::cerr<< "bounds: " << voxel->bounds[XMAX] << " " << voxel->bounds[YMAX] << " " << voxel->bounds[ZMAX] << std::endl;
 
-            // bound x y and z to the grid
+            // Adjust coordinates to valid range
             xmin = std::max(xmin, voxel->bounds[XMIN]);
             xmax = std::min(xmax, voxel->bounds[XMAX]);
             ymin = std::max(ymin, voxel->bounds[YMIN]);
@@ -458,26 +524,30 @@ extern "C"
             zmin = std::max(zmin, voxel->bounds[ZMIN]);
             zmax = std::min(zmax, voxel->bounds[ZMAX]);
 
-            xmin = std::min(xmin, voxel->bounds[XMAX]);
-            xmax = std::max(xmax, voxel->bounds[XMIN]);
-            ymin = std::min(ymin, voxel->bounds[YMAX]);
-            ymax = std::max(ymax, voxel->bounds[YMIN]);
-            zmin = std::min(zmin, voxel->bounds[ZMAX]);
-            zmax = std::max(zmax, voxel->bounds[ZMIN]);
+            // Further ensure min <= max
+            if (xmin > xmax)
+                std::swap(xmin, xmax);
+            if (ymin > ymax)
+                std::swap(ymin, ymax);
+            if (zmin > zmax)
+                std::swap(zmin, zmax);
+
+            // Recalculate grid coordinates after adjustment
             minCoords = mapper.mapMin(xmin, ymin, zmin);
             maxCoords = mapper.mapMax(xmax, ymax, zmax);
- 
         }
 
- 
-//        if(xmin > xmax || ymin > ymax || zmin > zmax)
-//        {
-//            std::cerr << "Error: Invalid range for surface coordinates." << std::endl;
-//            std::cerr << "xmin: " << xmin << ", xmax: " << xmax << std::endl;
-//            std::cerr << "ymin: " << ymin << ", ymax: " << ymax << std::endl;
-//            std::cerr << "zmin: " << zmin << ", zmax: " << zmax << std::endl;
-//            exit(1);
-//        }
+        // Ensure coordinates are within valid grid range
+        minCoords[0] = std::max(minCoords[0], static_cast<short int>(0));
+        minCoords[1] = std::max(minCoords[1], static_cast<short int>(0));
+        minCoords[2] = std::max(minCoords[2], static_cast<short int>(0));
+
+        maxCoords[0] = std::min(maxCoords[0], static_cast<short int>(voxel->nbx - 1));
+        maxCoords[1] = std::min(maxCoords[1], static_cast<short int>(voxel->nby - 1));
+        maxCoords[2] = std::min(maxCoords[2], static_cast<short int>(voxel->nbz - 1));
+
+        // Create the new surface bounds
+        Surf newCoords;
         newCoords[XMIN] = minCoords[0];
         newCoords[YMIN] = minCoords[1];
         newCoords[ZMIN] = minCoords[2];
@@ -485,74 +555,165 @@ extern "C"
         newCoords[YMAX] = maxCoords[1];
         newCoords[ZMAX] = maxCoords[2];
 
-        // check if  voxel->surfaceBounds[surfId] exists
-        if (voxel->surfaceBounds.size() <= static_cast<size_t>(surfId))
+        // If no change in surface bounds, return early
+        if (newCoords == voxel->surfaceBounds[surfId])
         {
-            std::cerr << "Error: surface id " << surfId << " does not exist" << std::endl;
-            return;
+            return; // No change, no need to update
         }
 
-        if (newCoords != voxel->surfaceBounds[surfId])
+        // Get references to old bounds for cleaner code
+        const Surf &oldCoords = voxel->surfaceBounds[surfId];
+
+        // Calculate overlapping region
+        const short int overlapXmin = std::max(minCoords[0], oldCoords[XMIN]);
+        const short int overlapYmin = std::max(minCoords[1], oldCoords[YMIN]);
+        const short int overlapZmin = std::max(minCoords[2], oldCoords[ZMIN]);
+        const short int overlapXmax = std::min(maxCoords[0], oldCoords[XMAX]);
+        const short int overlapYmax = std::min(maxCoords[1], oldCoords[YMAX]);
+        const short int overlapZmax = std::min(maxCoords[2], oldCoords[ZMAX]);
+
+        // Check if there's a valid overlap
+        const bool hasOverlap = (overlapXmin <= overlapXmax) &&
+                                (overlapYmin <= overlapYmax) &&
+                                (overlapZmin <= overlapZmax);
+
+        // Process regions - using a general assumption that there usually IS overlap
+        if (!hasOverlap)
         {
-            std::vector<Node> oldCells = getCellsInWrappedRange(voxel->surfaceBounds[surfId][XMIN], voxel->surfaceBounds[surfId][XMAX],
-                                                                voxel->surfaceBounds[surfId][YMIN], voxel->surfaceBounds[surfId][YMAX],
-                                                                voxel->surfaceBounds[surfId][ZMIN], voxel->surfaceBounds[surfId][ZMAX],
-                                                                voxel->nbx, voxel->nby, voxel->nbz);
-            // remove the surface from the old cells
-            for (const auto &cell : oldCells)
-            {
-                size_t index = coord_to_index(cell, voxel->bounds, voxel->nbx, voxel->nby, voxel->nbz);
-                //if (voxel->cells.find(index) != voxel->cells.end())
-                //if the cell is not empty
-                if(voxel->cells[index].surfaces.size() > 0)
-                {
-                    // voxel->cells[index].surfaces.erase(surfId);
-                    swap_and_pop(voxel->cells[index].surfaces, surfId);
-                    for (auto nodeId : voxel->cells[index].nodes)
-                    {
-                        // check the 4 nodes
-                        if (voxel->surfaceNodes[surfId][0] != nodeId && voxel->surfaceNodes[surfId][1] != nodeId &&
-                            voxel->surfaceNodes[surfId][2] != nodeId && voxel->surfaceNodes[surfId][3] != nodeId)
-                        {
-                            // voxel->surfaceCandidates[surfId].erase(nodeId);
-                            swap_and_pop(voxel->surfaceCandidates[surfId], nodeId);
-                        }
-                    }
-                }
-            }
-            // add the surface to the new cells
-            std::vector<Node> newCells = getCellsInWrappedRange(newCoords[XMIN], newCoords[XMAX],
-                                                                newCoords[YMIN], newCoords[YMAX],
-                                                                newCoords[ZMIN], newCoords[ZMAX],
-                                                                voxel->nbx, voxel->nby, voxel->nbz);
-            for (const auto &cell : newCells)
-            {
-                size_t index = coord_to_index(cell, voxel->bounds, voxel->nbx, voxel->nby, voxel->nbz);
-                // check if the cell exists
-            //    if (voxel->cells.find(index) == voxel->cells.end())
-            //    {
-            //        // create the new cell
-            //        voxel->cells[index] = Cell();
-            //    }
-            //    // add the surface to the cell
-                // voxel->cells[index].surfaces.insert(surfId);
-                voxel->cells[index].surfaces.push_back(surfId);
-                // update surfaceCandidates
-                for (auto nodeId : voxel->cells[index].nodes)
-                {
-                    // if (voxel->surfaceNodes[surfId].find(nodeId) == voxel->surfaceNodes[surfId].end())
-                    //  check the 4 nodes
-                    if (voxel->surfaceNodes[surfId][0] != nodeId && voxel->surfaceNodes[surfId][1] != nodeId &&
-                        voxel->surfaceNodes[surfId][2] != nodeId && voxel->surfaceNodes[surfId][3] != nodeId)
-                    {
-                        // voxel->surfaceCandidates[surfId].insert(nodeId);
-                        voxel->surfaceCandidates[surfId].push_back(nodeId);
-                    }
-                }
-            }
-            // update the surface
-            voxel->surfaceBounds[surfId] = newCoords;
+            // No overlap - simpler case: remove all old cells, add all new cells
+            processCellRange(voxel, surfId,
+                             oldCoords[XMIN], oldCoords[XMAX],
+                             oldCoords[YMIN], oldCoords[YMAX],
+                             oldCoords[ZMIN], oldCoords[ZMAX], false);
+
+            processCellRange(voxel, surfId,
+                             minCoords[0], maxCoords[0],
+                             minCoords[1], maxCoords[1],
+                             minCoords[2], maxCoords[2], true);
         }
+        else
+        {
+            // There is overlap - process the differential regions
+
+            // Process regions to remove (old cells not in new bounds)
+
+            // Left region of old bounds
+            if (oldCoords[XMIN] < overlapXmin)
+            {
+                processCellRange(voxel, surfId,
+                                 oldCoords[XMIN], overlapXmin - 1,
+                                 oldCoords[YMIN], oldCoords[YMAX],
+                                 oldCoords[ZMIN], oldCoords[ZMAX], false);
+            }
+
+            // Right region of old bounds
+            if (oldCoords[XMAX] > overlapXmax)
+            {
+                processCellRange(voxel, surfId,
+                                 overlapXmax + 1, oldCoords[XMAX],
+                                 oldCoords[YMIN], oldCoords[YMAX],
+                                 oldCoords[ZMIN], oldCoords[ZMAX], false);
+            }
+
+            // Process middle X slice, but non-overlapping Y slices
+            // Bottom region
+            if (oldCoords[YMIN] < overlapYmin)
+            {
+                processCellRange(voxel, surfId,
+                                 overlapXmin, overlapXmax,
+                                 oldCoords[YMIN], overlapYmin - 1,
+                                 oldCoords[ZMIN], oldCoords[ZMAX], false);
+            }
+
+            // Top region
+            if (oldCoords[YMAX] > overlapYmax)
+            {
+                processCellRange(voxel, surfId,
+                                 overlapXmin, overlapXmax,
+                                 overlapYmax + 1, oldCoords[YMAX],
+                                 oldCoords[ZMIN], oldCoords[ZMAX], false);
+            }
+
+            // Process middle X and Y slices, but non-overlapping Z slices
+            // Front region
+            if (oldCoords[ZMIN] < overlapZmin)
+            {
+                processCellRange(voxel, surfId,
+                                 overlapXmin, overlapXmax,
+                                 overlapYmin, overlapYmax,
+                                 oldCoords[ZMIN], overlapZmin - 1, false);
+            }
+
+            // Back region
+            if (oldCoords[ZMAX] > overlapZmax)
+            {
+                processCellRange(voxel, surfId,
+                                 overlapXmin, overlapXmax,
+                                 overlapYmin, overlapYmax,
+                                 overlapZmax + 1, oldCoords[ZMAX], false);
+            }
+
+            // Process regions to add (new cells not in old bounds)
+
+            // Left region of new bounds
+            if (minCoords[0] < overlapXmin)
+            {
+                processCellRange(voxel, surfId,
+                                 minCoords[0], overlapXmin - 1,
+                                 minCoords[1], maxCoords[1],
+                                 minCoords[2], maxCoords[2], true);
+            }
+
+            // Right region of new bounds
+            if (maxCoords[0] > overlapXmax)
+            {
+                processCellRange(voxel, surfId,
+                                 overlapXmax + 1, maxCoords[0],
+                                 minCoords[1], maxCoords[1],
+                                 minCoords[2], maxCoords[2], true);
+            }
+
+            // Process middle X slice, but non-overlapping Y slices
+            // Bottom region
+            if (minCoords[1] < overlapYmin)
+            {
+                processCellRange(voxel, surfId,
+                                 overlapXmin, overlapXmax,
+                                 minCoords[1], overlapYmin - 1,
+                                 minCoords[2], maxCoords[2], true);
+            }
+
+            // Top region
+            if (maxCoords[1] > overlapYmax)
+            {
+                processCellRange(voxel, surfId,
+                                 overlapXmin, overlapXmax,
+                                 overlapYmax + 1, maxCoords[1],
+                                 minCoords[2], maxCoords[2], true);
+            }
+
+            // Process middle X and Y slices, but non-overlapping Z slices
+            // Front region
+            if (minCoords[2] < overlapZmin)
+            {
+                processCellRange(voxel, surfId,
+                                 overlapXmin, overlapXmax,
+                                 overlapYmin, overlapYmax,
+                                 minCoords[2], overlapZmin - 1, true);
+            }
+
+            // Back region
+            if (maxCoords[2] > overlapZmax)
+            {
+                processCellRange(voxel, surfId,
+                                 overlapXmin, overlapXmax,
+                                 overlapYmin, overlapYmax,
+                                 overlapZmax + 1, maxCoords[2], true);
+            }
+        }
+
+        // Update the surface bounds
+        voxel->surfaceBounds[surfId] = newCoords;
     }
 
     int Voxel_get_max_candidates(void *v)
@@ -586,7 +747,7 @@ extern "C"
         *nb = static_cast<int>(voxel->surfaceCandidates[id].size());
         // debug print
     }
-    //Copyless version
+    // Copyless version
     void Voxel_get_candidates_data(void *v, int ne, int **cands, int *nb)
     {
         Voxel *voxel = static_cast<Voxel *>(v);
