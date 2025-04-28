@@ -527,38 +527,6 @@ extern "C"
         Node minCoords = mapper.mapMin(xmin, ymin, zmin);
         Node maxCoords = mapper.mapMax(xmax, ymax, zmax);
 
-        // Handle invalid coordinate cases (where max < min)
- //       if (maxCoords[0] < minCoords[0] || maxCoords[1] < minCoords[1] || maxCoords[2] < minCoords[2])
- //       {
- //           // Log error
- //           std::cerr << "Update Surf Error: Invalid range for surface coordinates" << std::endl;
- //           std::cerr << "xmin: " << xmin << ", xmax: " << xmax << std::endl;
- //           std::cerr << "ymin: " << ymin << ", ymax: " << ymax << std::endl;
- //           std::cerr << "zmin: " << zmin << ", zmax: " << zmax << std::endl;
- //           std::cerr << "minCoords: " << minCoords[0] << " " << minCoords[1] << " " << minCoords[2] << std::endl;
- //           std::cerr << "maxCoords: " << maxCoords[0] << " " << maxCoords[1] << " " << maxCoords[2] << std::endl;
-
- //           // Adjust coordinates to valid range
- //           xmin = std::max(xmin, voxel->bounds[XMIN]);
- //           xmax = std::min(xmax, voxel->bounds[XMAX]);
- //           ymin = std::max(ymin, voxel->bounds[YMIN]);
- //           ymax = std::min(ymax, voxel->bounds[YMAX]);
- //           zmin = std::max(zmin, voxel->bounds[ZMIN]);
- //           zmax = std::min(zmax, voxel->bounds[ZMAX]);
-
- //           // Further ensure min <= max
- //           if (xmin > xmax)
- //               std::swap(xmin, xmax);
- //           if (ymin > ymax)
- //               std::swap(ymin, ymax);
- //           if (zmin > zmax)
- //               std::swap(zmin, zmax);
-
- //           // Recalculate grid coordinates after adjustment
- //           minCoords = mapper.mapMin(xmin, ymin, zmin);
- //           maxCoords = mapper.mapMax(xmax, ymax, zmax);
- //       }
-
         // Ensure coordinates are within valid grid range
         minCoords[0] = std::max(minCoords[0], static_cast<short int>(0));
         minCoords[1] = std::max(minCoords[1], static_cast<short int>(0));

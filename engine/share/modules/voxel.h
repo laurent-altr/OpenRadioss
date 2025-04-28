@@ -148,7 +148,7 @@ size_t safe_coord_to_index(size_t x, size_t y, size_t z, size_t nbx, size_t nby,
     return COORD_TO_INDEX(x, y, z, nbx, nby);
 }
 
-size_t coord_to_index(double x, double y, double z, const std::array<double, 6> &bounds,
+size_t inline coord_to_index(double x, double y, double z, const std::array<double, 6> &bounds,
                       size_t nbx, size_t nby, size_t nbz)
 {
     // Calculate relative position in each dimension (0.0 to 1.0)
@@ -175,9 +175,9 @@ size_t coord_to_index(double x, double y, double z, const std::array<double, 6> 
     size_t iz = static_cast<size_t>(rz * nbz);
 
     // Ensure indices are within bounds (this is technically redundant with the wrapping above)
-    ix = ix % nbx;
-    iy = iy % nby;
-    iz = iz % nbz;
+//    ix = ix % nbx;
+//    iy = iy % nby;
+//    iz = iz % nbz;
 
     // Convert to linear index
     size_t index = COORD_TO_INDEX(ix, iy, iz, nbx, nby);
