@@ -122,6 +122,9 @@ extern "C"
         Voxel *voxel = static_cast<Voxel *>(v);
         GridMapper mapper(voxel->bounds, voxel->nbx, voxel->nby, voxel->nbz);
 
+        // create a vecor of size nbx*nby*nbz
+        std::vector<int> count_surf_per_cell(voxel->nbx * voxel->nby * voxel->nbz, 0);
+
         // Create a map to convert global ids of irect, into nsv ids, if they exist
         std::unordered_map<int, int> glob2nsv;
         for (int i = 0; i < nsn; i++)
@@ -184,62 +187,60 @@ extern "C"
             double zmax = std::max(std::max(z1, z2), std::max(z3, z4)) + gapValue;
             Node minCoords = mapper.mapMin(xmin, ymin, zmin);
             Node maxCoords = mapper.mapMax(xmax, ymax, zmax);
-//            if (maxCoords[0] < minCoords[0] || maxCoords[1] < minCoords[1] || maxCoords[2] < minCoords[2])
-//            {
-//                std::cerr << "Error: Invalid range for surface coordinates" << std::endl;
-//                std::cerr << "xmin: " << xmin << ", xmax: " << xmax << std::endl;
-//                std::cerr << "ymin: " << ymin << ", ymax: " << ymax << std::endl;
-//                std::cerr << "zmin: " << zmin << ", zmax: " << zmax << std::endl;
-//                std::cerr << "minCoords: " << minCoords[0] << " " << minCoords[1] << " " << minCoords[2] << std::endl;
-//                std::cerr << "maxCoords: " << maxCoords[0] << " " << maxCoords[1] << " " << maxCoords[2] << std::endl;
-//                std::cerr << "nbx: " << voxel->nbx << " nby: " << voxel->nby << " nbz: " << voxel->nbz << std::endl;
-//                std::cerr << " bounds: " << voxel->bounds[XMIN] << " " << voxel->bounds[YMIN] << " " << voxel->bounds[ZMIN] << std::endl;
-//                std::cerr << " bounds: " << voxel->bounds[XMAX] << " " << voxel->bounds[YMAX] << " " << voxel->bounds[ZMAX] << std::endl;
-//                xmin = std::max(xmin, voxel->bounds[XMIN]);
-//                xmax = std::min(xmax, voxel->bounds[XMAX]);
-//                ymin = std::max(ymin, voxel->bounds[YMIN]);
-//                ymax = std::min(ymax, voxel->bounds[YMAX]);
-//                zmin = std::max(zmin, voxel->bounds[ZMIN]);
-//                zmax = std::min(zmax, voxel->bounds[ZMAX]);
-//
-//                xmin = std::min(xmin, voxel->bounds[XMAX]);
-//                xmax = std::max(xmax, voxel->bounds[XMIN]);
-//                ymin = std::min(ymin, voxel->bounds[YMAX]);
-//                ymax = std::max(ymax, voxel->bounds[YMIN]);
-//                zmin = std::min(zmin, voxel->bounds[ZMAX]);
-//                zmax = std::max(zmax, voxel->bounds[ZMIN]);
-//                minCoords = mapper.mapMin(xmin, ymin, zmin);
-//                maxCoords = mapper.mapMax(xmax, ymax, zmax);
-//            }
-//
+
             for (short int ii = minCoords[0]; ii <= maxCoords[0]; ++ii)
             {
                 for (short int jj = minCoords[1]; jj <= maxCoords[1]; ++jj)
                 {
-                    for (short int kk = minCoords[2]; kk <=  maxCoords[2]; ++kk)
+                    for (short int kk = minCoords[2]; kk <= maxCoords[2]; ++kk)
+                    {
+                        size_t index = COORD_TO_INDEX(ii, jj, kk, voxel->nbx, voxel->nby);
+                        // voxel->cells[index].surfaces.push_back(i);
+                        count_surf_per_cell[index]++;
+                    }
+                }
+            }
+
+            voxel->surfaceBounds[i] = {
+                minCoords[0], // XMIN
+                minCoords[1], // YMIN
+                minCoords[2], // ZMIN
+                maxCoords[0], // XMAX
+                maxCoords[1], // YMAX
+                maxCoords[2]  // ZMAX
+            };
+        }
+
+        // Loop over the cells, reserve space for the surfaces
+        for (size_t i = 0; i < voxel->cells.size(); ++i)
+        {
+            // reserve space for the surfaces
+            if(count_surf_per_cell[i] > 0)
+            {
+                voxel->cells[i].surfaces.reserve(count_surf_per_cell[i]);
+                voxel->cells[i].nodes.reserve(4);
+            }
+        }
+
+        // now fill the cells
+        for (int i = 0; i < nrtm; ++i)
+        {
+            if (stf[i] <= static_cast<my_real>(0))
+            {
+                continue;
+            }
+            const Surf &bounds = voxel->surfaceBounds[i];
+            for (short int ii = bounds[XMIN]; ii <= bounds[XMAX]; ++ii)
+            {
+                for (short int jj = bounds[YMIN]; jj <= bounds[YMAX]; ++jj)
+                {
+                    for (short int kk = bounds[ZMIN]; kk <= bounds[ZMAX]; ++kk)
                     {
                         size_t index = COORD_TO_INDEX(ii, jj, kk, voxel->nbx, voxel->nby);
                         voxel->cells[index].surfaces.push_back(i);
                     }
                 }
             }
-
-//            Surf newCoords;
-//            newCoords[XMIN] = minCoords[0];
-//            newCoords[YMIN] = minCoords[1];
-//            newCoords[ZMIN] = minCoords[2];
-//            newCoords[XMAX] = maxCoords[0];
-//            newCoords[YMAX] = maxCoords[1];
-//            newCoords[ZMAX] = maxCoords[2];
-//            voxel->surfaceBounds[i] = newCoords;
-              voxel->surfaceBounds[i] = {
-                  minCoords[0],  // XMIN
-                  minCoords[1],  // YMIN
-                  minCoords[2],  // ZMIN
-                  maxCoords[0],  // XMAX
-                  maxCoords[1],  // YMAX
-                  maxCoords[2]   // ZMAX
-              };
         }
 
         // Loop over the nodes, add the nodes to the cells they belong to
@@ -256,7 +257,7 @@ extern "C"
             const double y = static_cast<double>(X[3 * i1 + 1]);
             const double z = static_cast<double>(X[3 * i1 + 2]);
             // get the index of the cell
-            //size_t index = coord_to_index(x, y, z, voxel->bounds, voxel->nbx, voxel->nby, voxel->nbz);
+            // size_t index = coord_to_index(x, y, z, voxel->bounds, voxel->nbx, voxel->nby, voxel->nbz);
             const size_t index = mapper.toIndex(x, y, z);
             voxel->cells[index].nodes.push_back(i);
             // add the node to the nodes vector
@@ -305,7 +306,7 @@ extern "C"
         voxel->nodes[nodeId] = {-1, -1, -1}; // set the node to -1
     }
 
-    void inline Voxel_update_node(void *v, double x, double y, double z, int nodeId, const GridMapper & mapper)
+    void inline Voxel_update_node(void *v, double x, double y, double z, int nodeId, const GridMapper &mapper)
     {
         Voxel *voxel = static_cast<Voxel *>(v);
         const size_t oldIndex = coord_to_index(voxel->nodes[nodeId], voxel->bounds, voxel->nbx, voxel->nby, voxel->nbz);
@@ -432,7 +433,7 @@ extern "C"
     }
 
     void inline Voxel_update_surf(void *v, double xmin, double ymin, double zmin,
-                                  double xmax, double ymax, double zmax, int surfId, const GridMapper & mapper)
+                                  double xmax, double ymax, double zmax, int surfId, const GridMapper &mapper)
     {
         Voxel *voxel = static_cast<Voxel *>(v);
 
