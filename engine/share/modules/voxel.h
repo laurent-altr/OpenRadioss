@@ -174,11 +174,6 @@ size_t inline coord_to_index(double x, double y, double z, const std::array<doub
     size_t iy = static_cast<size_t>(ry * nby);
     size_t iz = static_cast<size_t>(rz * nbz);
 
-    // Ensure indices are within bounds (this is technically redundant with the wrapping above)
-//    ix = ix % nbx;
-//    iy = iy % nby;
-//    iz = iz % nbz;
-
     // Convert to linear index
     size_t index = COORD_TO_INDEX(ix, iy, iz, nbx, nby);
     return index;

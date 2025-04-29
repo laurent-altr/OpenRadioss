@@ -71,133 +71,40 @@ extern "C"
         *zmax = voxel->bounds[ZMAX];
     }
 
-    std::vector<Node> getCellsInWrappedRange(short int xmin, short int xmax, short int ymin, short int ymax,
-                                             short int zmin, short int zmax, size_t nbx, size_t nby, size_t nbz)
+    using Node = std::array<short int, 3>;
+
+    std::vector<Node> inline getCellsInRange(short int xmin, short int xmax,
+                                             short int ymin, short int ymax,
+                                             short int zmin, short int zmax,
+                                             size_t nbx, size_t nby, size_t nbz)
     {
         std::vector<Node> cells;
 
-        if (xmin > xmax || ymin > ymax || zmin > zmax)
-        {
-            std::cerr << "Error: Invalid range for cell coordinates." << std::endl;
-            std::cerr << "xmin: " << xmin << ", xmax: " << xmax << std::endl;
-            std::cerr << "ymin: " << ymin << ", ymax: " << ymax << std::endl;
-            std::cerr << "zmin: " << zmin << ", zmax: " << zmax << std::endl;
-            exit(1);
-        }
-        // Handle cases where the range is larger than the grid
-        // If max-min+1 >= grid size, include all grid cells in that dimension
-        bool includeAllX = (xmax >= xmin && xmax - xmin + 1 >= nbx) || (xmin > xmax && nbx - xmin + xmax + 1 >= nbx);
-        bool includeAllY = (ymax >= ymin && ymax - ymin + 1 >= nby) || (ymin > ymax && nby - ymin + ymax + 1 >= nby);
-        bool includeAllZ = (zmax >= zmin && zmax - zmin + 1 >= nbz) || (zmin > zmax && nbz - zmin + zmax + 1 >= nbz);
+        //       // Clamp input to grid boundaries (optional depending on your use case)
+        xmin = std::max<short int>(0, std::min(xmin, static_cast<short int>(nbx - 1)));
+        xmax = std::max<short int>(0, std::min(xmax, static_cast<short int>(nbx - 1)));
+        ymin = std::max<short int>(0, std::min(ymin, static_cast<short int>(nby - 1)));
+        ymax = std::max<short int>(0, std::min(ymax, static_cast<short int>(nby - 1)));
+        zmin = std::max<short int>(0, std::min(zmin, static_cast<short int>(nbz - 1)));
+        zmax = std::max<short int>(0, std::min(zmax, static_cast<short int>(nbz - 1)));
 
-        // Handle X dimension
-        std::vector<short int> xIndices;
-        if (includeAllX)
-        {
-            for (short int i = 0; i < nbx; i++)
-            {
-                xIndices.push_back(i);
-            }
-        }
-        else if (xmin <= xmax)
-        {
-            // No wrapping in X
-            for (short int i = xmin; i <= xmax; i++)
-            {
-                xIndices.push_back(i);
-            }
-        }
-        else
-        {
-            // Wrapping in X
-            for (short int i = xmin; i < nbx; i++)
-            {
-                xIndices.push_back(i);
-            }
-            for (short int i = 0; i <= xmax; i++)
-            {
-                xIndices.push_back(i);
-            }
-        }
+        //       // Early exit if range is invalid
+        //       if (xmin > xmax || ymin > ymax || zmin > zmax)
+        //           return cells;
 
-        // Handle Y dimension
-        std::vector<short int> yIndices;
-        if (includeAllY)
-        {
-            for (short int j = 0; j < nby; j++)
-            {
-                yIndices.push_back(j);
-            }
-        }
-        else if (ymin <= ymax)
-        {
-            // No wrapping in Y
-            for (short int j = ymin; j <= ymax; j++)
-            {
-                yIndices.push_back(j);
-            }
-        }
-        else
-        {
-            // Wrapping in Y
-            for (short int j = ymin; j < nby; j++)
-            {
-                yIndices.push_back(j);
-            }
-            for (short int j = 0; j <= ymax; j++)
-            {
-                yIndices.push_back(j);
-            }
-        }
+        size_t xcount = xmax - xmin + 1;
+        size_t ycount = ymax - ymin + 1;
+        size_t zcount = zmax - zmin + 1;
 
-        // Handle Z dimension
-        std::vector<short int> zIndices;
-        if (includeAllZ)
-        {
-            for (short int k = 0; k < nbz; k++)
-            {
-                zIndices.push_back(k);
-            }
-        }
-        else if (zmin <= zmax)
-        {
-            // No wrapping in Z
-            for (short int k = zmin; k <= zmax; k++)
-            {
-                zIndices.push_back(k);
-            }
-        }
-        else
-        {
-            // Wrapping in Z
-            for (short int k = zmin; k < nbz; k++)
-            {
-                zIndices.push_back(k);
-            }
-            for (short int k = 0; k <= zmax; k++)
-            {
-                zIndices.push_back(k);
-            }
-        }
+        cells.reserve(xcount * ycount * zcount);
 
-        // Special case for edge boundaries
-        // If max exactly equals the grid size, we need to include cell 0 as well
-        if (xmax == nbx - 1 && xmin > 0)
-            xIndices.push_back(0);
-        if (ymax == nby - 1 && ymin > 0)
-            yIndices.push_back(0);
-        if (zmax == nbz - 1 && zmin > 0)
-            zIndices.push_back(0);
-
-        // Build the Cartesian product of the three index arrays
-        for (short int i : xIndices)
+        for (short int i = xmin; i <= xmax; ++i)
         {
-            for (short int j : yIndices)
+            for (short int j = ymin; j <= ymax; ++j)
             {
-                for (short int k : zIndices)
+                for (short int k = zmin; k <= zmax; ++k)
                 {
-                    Node cell = {i, j, k};
-                    cells.push_back(cell);
+                    cells.push_back({i, j, k});
                 }
             }
         }
@@ -219,7 +126,7 @@ extern "C"
         std::unordered_map<int, int> glob2nsv;
         for (int i = 0; i < nsn; i++)
         {
-           glob2nsv[nsv[i] - 1] = i; // Fortran to C++ index conversion
+            glob2nsv[nsv[i] - 1] = i; // Fortran to C++ index conversion
         }
 
         // Loop over the surfaces
@@ -277,59 +184,72 @@ extern "C"
             double zmax = std::max(std::max(z1, z2), std::max(z3, z4)) + gapValue;
             Node minCoords = mapper.mapMin(xmin, ymin, zmin);
             Node maxCoords = mapper.mapMax(xmax, ymax, zmax);
-            if (maxCoords[0] < minCoords[0] || maxCoords[1] < minCoords[1] || maxCoords[2] < minCoords[2])
+//            if (maxCoords[0] < minCoords[0] || maxCoords[1] < minCoords[1] || maxCoords[2] < minCoords[2])
+//            {
+//                std::cerr << "Error: Invalid range for surface coordinates" << std::endl;
+//                std::cerr << "xmin: " << xmin << ", xmax: " << xmax << std::endl;
+//                std::cerr << "ymin: " << ymin << ", ymax: " << ymax << std::endl;
+//                std::cerr << "zmin: " << zmin << ", zmax: " << zmax << std::endl;
+//                std::cerr << "minCoords: " << minCoords[0] << " " << minCoords[1] << " " << minCoords[2] << std::endl;
+//                std::cerr << "maxCoords: " << maxCoords[0] << " " << maxCoords[1] << " " << maxCoords[2] << std::endl;
+//                std::cerr << "nbx: " << voxel->nbx << " nby: " << voxel->nby << " nbz: " << voxel->nbz << std::endl;
+//                std::cerr << " bounds: " << voxel->bounds[XMIN] << " " << voxel->bounds[YMIN] << " " << voxel->bounds[ZMIN] << std::endl;
+//                std::cerr << " bounds: " << voxel->bounds[XMAX] << " " << voxel->bounds[YMAX] << " " << voxel->bounds[ZMAX] << std::endl;
+//                xmin = std::max(xmin, voxel->bounds[XMIN]);
+//                xmax = std::min(xmax, voxel->bounds[XMAX]);
+//                ymin = std::max(ymin, voxel->bounds[YMIN]);
+//                ymax = std::min(ymax, voxel->bounds[YMAX]);
+//                zmin = std::max(zmin, voxel->bounds[ZMIN]);
+//                zmax = std::min(zmax, voxel->bounds[ZMAX]);
+//
+//                xmin = std::min(xmin, voxel->bounds[XMAX]);
+//                xmax = std::max(xmax, voxel->bounds[XMIN]);
+//                ymin = std::min(ymin, voxel->bounds[YMAX]);
+//                ymax = std::max(ymax, voxel->bounds[YMIN]);
+//                zmin = std::min(zmin, voxel->bounds[ZMAX]);
+//                zmax = std::max(zmax, voxel->bounds[ZMIN]);
+//                minCoords = mapper.mapMin(xmin, ymin, zmin);
+//                maxCoords = mapper.mapMax(xmax, ymax, zmax);
+//            }
+//
+            for (short int ii = minCoords[0]; ii <= maxCoords[0]; ++ii)
             {
-                std::cerr << "Error: Invalid range for surface coordinates" << std::endl;
-                std::cerr << "xmin: " << xmin << ", xmax: " << xmax << std::endl;
-                std::cerr << "ymin: " << ymin << ", ymax: " << ymax << std::endl;
-                std::cerr << "zmin: " << zmin << ", zmax: " << zmax << std::endl;
-                std::cerr << "minCoords: " << minCoords[0] << " " << minCoords[1] << " " << minCoords[2] << std::endl;
-                std::cerr << "maxCoords: " << maxCoords[0] << " " << maxCoords[1] << " " << maxCoords[2] << std::endl;
-                std::cerr << "nbx: " << voxel->nbx << " nby: " << voxel->nby << " nbz: " << voxel->nbz << std::endl;
-                std::cerr << " bounds: " << voxel->bounds[XMIN] << " " << voxel->bounds[YMIN] << " " << voxel->bounds[ZMIN] << std::endl;
-                std::cerr << " bounds: " << voxel->bounds[XMAX] << " " << voxel->bounds[YMAX] << " " << voxel->bounds[ZMAX] << std::endl;
-                xmin = std::max(xmin, voxel->bounds[XMIN]);
-                xmax = std::min(xmax, voxel->bounds[XMAX]);
-                ymin = std::max(ymin, voxel->bounds[YMIN]);
-                ymax = std::min(ymax, voxel->bounds[YMAX]);
-                zmin = std::max(zmin, voxel->bounds[ZMIN]);
-                zmax = std::min(zmax, voxel->bounds[ZMAX]);
-
-                xmin = std::min(xmin, voxel->bounds[XMAX]);
-                xmax = std::max(xmax, voxel->bounds[XMIN]);
-                ymin = std::min(ymin, voxel->bounds[YMAX]);
-                ymax = std::max(ymax, voxel->bounds[YMIN]);
-                zmin = std::min(zmin, voxel->bounds[ZMAX]);
-                zmax = std::max(zmax, voxel->bounds[ZMIN]);
-                minCoords = mapper.mapMin(xmin, ymin, zmin);
-                maxCoords = mapper.mapMax(xmax, ymax, zmax);
+                for (short int jj = minCoords[1]; jj <= maxCoords[1]; ++jj)
+                {
+                    for (short int kk = minCoords[2]; kk <=  maxCoords[2]; ++kk)
+                    {
+                        size_t index = COORD_TO_INDEX(ii, jj, kk, voxel->nbx, voxel->nby);
+                        voxel->cells[index].surfaces.push_back(i);
+                    }
+                }
             }
 
-            std::vector<Node> cells = getCellsInWrappedRange(minCoords[0], maxCoords[0], minCoords[1], maxCoords[1], minCoords[2], maxCoords[2], voxel->nbx, voxel->nby, voxel->nbz);
-            // add the surface to the cells it crosses
-            for (auto cell : cells)
-            {
-                size_t index = coord_to_index(cell, voxel->bounds, voxel->nbx, voxel->nby, voxel->nbz);
-                voxel->cells[index].surfaces.push_back(i);
-            }
-            Surf newCoords;
-            newCoords[XMIN] = minCoords[0];
-            newCoords[YMIN] = minCoords[1];
-            newCoords[ZMIN] = minCoords[2];
-            newCoords[XMAX] = maxCoords[0];
-            newCoords[YMAX] = maxCoords[1];
-            newCoords[ZMAX] = maxCoords[2];
-            voxel->surfaceBounds[i] = newCoords;
+//            Surf newCoords;
+//            newCoords[XMIN] = minCoords[0];
+//            newCoords[YMIN] = minCoords[1];
+//            newCoords[ZMIN] = minCoords[2];
+//            newCoords[XMAX] = maxCoords[0];
+//            newCoords[YMAX] = maxCoords[1];
+//            newCoords[ZMAX] = maxCoords[2];
+//            voxel->surfaceBounds[i] = newCoords;
+              voxel->surfaceBounds[i] = {
+                  minCoords[0],  // XMIN
+                  minCoords[1],  // YMIN
+                  minCoords[2],  // ZMIN
+                  maxCoords[0],  // XMAX
+                  maxCoords[1],  // YMAX
+                  maxCoords[2]   // ZMAX
+              };
         }
 
         // Loop over the nodes, add the nodes to the cells they belong to
         for (int i = 0; i < nsn; ++i)
         {
-           if(stfn[i] <= static_cast<my_real>(0))
+            if (stfn[i] <= static_cast<my_real>(0))
             {
                 continue;
             }
-  
+
             // get the coordinates of the node
             const size_t i1 = nsv[i] - 1; // Fortran to C++ index conversion
             const double x = static_cast<double>(X[3 * i1]);
@@ -364,7 +284,7 @@ extern "C"
     void inline Voxel_delete_node(void *v, int nodeId)
     {
         Voxel *voxel = static_cast<Voxel *>(v);
-        if(voxel->nodes[nodeId][0] < 0)
+        if (voxel->nodes[nodeId][0] < 0)
         {
             return;
         }
@@ -384,7 +304,7 @@ extern "C"
         voxel->nodes[nodeId] = {-1, -1, -1}; // set the node to -1
     }
 
-    void inline Voxel_update_node(void *v, double x, double y, double z, int nodeId )
+    void inline Voxel_update_node(void *v, double x, double y, double z, int nodeId)
     {
         Voxel *voxel = static_cast<Voxel *>(v);
         size_t newIndex = coord_to_index(x, y, z, voxel->bounds, voxel->nbx, voxel->nby, voxel->nbz);
@@ -511,16 +431,16 @@ extern "C"
     }
 
     void inline Voxel_update_surf(void *v, double xmin, double ymin, double zmin,
-                           double xmax, double ymax, double zmax, int surfId)
+                                  double xmax, double ymax, double zmax, int surfId)
     {
         Voxel *voxel = static_cast<Voxel *>(v);
 
         // Early validation of surfId
-//        if (voxel->surfaceBounds.size() <= static_cast<size_t>(surfId))
-//        {
-//            std::cerr << "Error: surface id " << surfId << " does not exist" << std::endl;
-//            return;
-//        }
+        //        if (voxel->surfaceBounds.size() <= static_cast<size_t>(surfId))
+        //        {
+        //            std::cerr << "Error: surface id " << surfId << " does not exist" << std::endl;
+        //            return;
+        //        }
 
         // Calculate grid coordinates using mapping function
         GridMapper mapper(voxel->bounds, voxel->nbx, voxel->nby, voxel->nbz);
@@ -707,8 +627,8 @@ extern "C"
     }
 
     // update the surfaces, then the nodes
-   void Voxel_update(void *v, int *irect, int nrtm, my_real *gap, int *nsv, int nsn, my_real *X, int numnod, my_real *stf, my_real *stfn)
-   {
+    void Voxel_update(void *v, int *irect, int nrtm, my_real *gap, int *nsv, int nsn, my_real *X, int numnod, my_real *stf, my_real *stfn)
+    {
         Voxel *voxel = static_cast<Voxel *>(v);
         GridMapper mapper(voxel->bounds, voxel->nbx, voxel->nby, voxel->nbz);
         // Loop over the surfaces, add the surfaces to the cells it crosses
@@ -748,11 +668,11 @@ extern "C"
             Voxel_update_surf(v, xmin, ymin, zmin, xmax, ymax, zmax, i);
         }
 
-        for(int i = 0; i < nsn; ++i)
+        for (int i = 0; i < nsn; ++i)
         {
-            if(stfn[i] <= static_cast<my_real>(0))
+            if (stfn[i] <= static_cast<my_real>(0))
             {
-                Voxel_delete_node(v, i );
+                Voxel_delete_node(v, i);
                 continue;
             }
             // get the coordinates of the node
@@ -762,9 +682,7 @@ extern "C"
             const double z = static_cast<double>(X[3 * i1 + 2]);
             Voxel_update_node(v, x, y, z, i);
         }
-   }
-
-
+    }
 
     int Voxel_get_max_candidates(void *v)
     {
