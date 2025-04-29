@@ -35,7 +35,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
       !||    state_mod        ../common_source/modules/state_mod.F
       !||====================================================================
       SUBROUTINE LECINP(IRUN,IRFL,IRFE,H3D_DATA,FLAG_CST_AMS,DYNAIN_DATA,
-     .                  SENSORS ,DT, OUTPUT ,GLOB_THERM)
+     .                  SENSORS ,DT, OUTPUT ,GLOB_THERM,CWIPI)
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
@@ -44,7 +44,8 @@ C-----------------------------------------------
       USE SENSOR_MOD
       USE DT_MOD
       USE OUTPUT_MOD
-      use glob_therm_mod
+      USE GLOB_THERM_MOD
+      USE radioss_cwipi_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -59,6 +60,7 @@ C-----------------------------------------------
       TYPE (DT_), INTENT(INOUT) :: DT
       TYPE(OUTPUT_), INTENT(INOUT) :: OUTPUT !< output structure
       type (glob_therm_) ,intent(inout)   :: glob_therm
+      TYPE(CWIPI_), INTENT(INOUT) :: CWIPI
 
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
@@ -88,7 +90,7 @@ C
 C
       IFREEF=1
       CALL FREFORM(IRUN,IRFL,IRFE,H3D_DATA,FLAG_CST_AMS,DYNAIN_DATA,
-     .             SENSORS,DT,OUTPUT,GLOB_THERM)
+     .             SENSORS,DT,OUTPUT,GLOB_THERM,CWIPI)
 C
       REWIND IIN
 C

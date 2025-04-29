@@ -84,7 +84,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
       !||    th_mod                   ../engine/share/modules/th_mod.F
       !||====================================================================
       SUBROUTINE FREFORM(IRUNN,IRFL,IRFE,H3D_DATA,FLAG_CST_AMS,DYNAIN_DATA,
-     .                   SENSORS,DT,OUTPUT,GLOB_THERM)
+     .                   SENSORS,DT,OUTPUT,GLOB_THERM,CWIPI)
 C-----------------------------------------------
 C   D e s c r i p t i o n
 C-----------------------------------------------
@@ -107,6 +107,7 @@ C-----------------------------------------------
       USE OUTPUT_MOD
       USE NAMES_AND_TITLES_MOD, ONLY: NCHARLINE100,NCHARKEY
       use glob_therm_mod
+      USE radioss_cwipi_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -121,6 +122,7 @@ C-----------------------------------------------
       TYPE (DT_), INTENT(INOUT) :: DT
       TYPE(OUTPUT_), INTENT(INOUT) :: OUTPUT !< output structure
       type (glob_therm_) ,intent(inout)   :: glob_therm
+      type(CWIPI_), INTENT(INOUT) :: CWIPI
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
 C-----------------------------------------------
@@ -163,7 +165,7 @@ C-----------------------------------------------
       INTEGER IKAD(0:NKEY+1),
      .   KDTIX, KIMPL, KFLSEC, KFUNC, KKEREL, KDYREL, KRUN, KTITLE,
      .   KDT, KTFILE, KPRINT, KRFILE, KVERS, KALE, KDEL,
-     .   KVEL, KBCS, KBCSR, KDEBUG,KOUTP,KALESUB,KPROC,
+     .   KVEL, KBCS, KBCSR, KDEBUG,KOUTP,KALESUB,KPROC,KCWIPI,
      .   KNOISE,KDELIN,KPARIT,KINIV,KRBODY,KANIM,KINTER,
      .   KUPWM, KMON,KDT1,KINCMP,KTH, KSTOP, KKILL,
      .   KMADYM,KSPMD,KRAD2R,KDAMP,N_DAMP, KATFIL,KBTFIL,KCTFIL,KDTFIL,
@@ -214,7 +216,7 @@ C-----------------------------------------------
      .     'RFILE'   ,'VERS '   ,''        ,''        ,'ALE  '   ,
      .     'DEL  '   ,'VEL  '   ,'BCS  '   ,'BCSR '   ,'INTER'   ,
      .     'DTIX '   ,'IMPL '   ,'FUNCT'   ,'FLSEC'   ,'DYREL'   ,
-     .     'KEREL'   ,'RBODY'   ,'ANIM'    ,''        ,'DEBUG'   ,
+     .     'KEREL'   ,'RBODY'   ,'ANIM'    ,'CWIPI'   ,'DEBUG'   ,
      .     'OUTP '   ,''        ,'ALESU'   ,'PROC'    ,''        ,
      .     '@TFIL'   ,'DELIN'   ,''        ,'PARIT'   ,'INIV '   ,
      .     'UPWM '   ,'MON'     ,''        ,'DT1'     ,'INCMP'   ,
@@ -234,7 +236,7 @@ C-----------------------------------------------
      .     KRFILE/6/  ,KVERS/7/     ,                           KALE/10/   ,
      .     KDEL/11/   ,KVEL/12/     ,KBCS/13/     ,KBCSR/14/   ,KINTER/15/ ,
      .     KDTIX/16/  ,KIMPL/17/    ,KFUNC/18/    ,KFLSEC/19/  ,KDYREL/20/ ,
-     .     KKEREL/21/ ,KRBODY/22/   ,KANIM/23/                 ,KDEBUG/25/ ,
+     .     KKEREL/21/ ,KRBODY/22/   ,KANIM/23/    ,KCWIPI/24/  ,KDEBUG/25/ ,
      .     KOUTP/26/  ,              KALESUB/28/  ,KPROC/29/   ,
      .     KNOISE/31/ ,KDELIN/32/   ,              KPARIT/34/  ,KINIV/35/  ,
      .     KUPWM/36/  ,KMON/37/     ,              KDT1/39/    ,KINCMP/40/ ,
@@ -328,6 +330,10 @@ C---------------------------------------------------
 C     ENUMERATION OF CARDS BY OPTION
 C---------------------------------------------------
    10 READ(ISTDI,'(A)',END=20) KEYA(1:NCHARLINE100)
+        if(KEYA(1:6) == '/CWIPI') then
+          call parse_cwipi_string(KEYA, cwipi) 
+        end if
+
         WRITE(IUSC_TMP,'(A)') KEYA(1:NCHARLINE100)
         IF(KEYA(1:4)=='/END')GOTO 20
         NCT=NCT+1
@@ -337,6 +343,8 @@ C---------------------------------------------------
         IF(KEYA(1:1)=='/') CALL REDKEY0(KEY0,NKEY,KEYA,IKEY,NSLASH)
         IF(IKEY==0)     GOTO 10
         IKAD(IKEY)=IKAD(IKEY)+1
+
+
         IF(KEYA(1:4)=='/BCS' .AND. KEYA(1:5)/='/BCSR') THEN
           I=2
           J1 = J1 +1
@@ -2477,7 +2485,6 @@ C-----------------------
 C     /OUTP (OUTPUT FILES)
 C-----------------------
       CALL FREOUTP(IKAD(0),KEY0,KOUTP,SENSORS)
-      
 C-----------------------
 C     /DEBUG
 C-----------------------

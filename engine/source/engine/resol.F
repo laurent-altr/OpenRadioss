@@ -517,7 +517,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
             SUBROUTINE RESOL(TIMERS, ELEMENT, NODES, AF,IAF,
      1        ISKWN   ,NETH   ,IPART  ,NOM_OPT,KXX    ,IXX    ,
      2        IXTG   ,IXS     ,IXQ    ,IXT    ,IXP    ,IXR    ,
-     3        IFILL  ,MAT_ELEM,
+     3        IFILL  ,MAT_ELEM, CWIPI,
      4        IMS    ,NPC    ,IBCL    ,
      5        IBFV   ,IDUM   ,LAS     ,LACCELM,NNLINK ,LNLINK ,
      6        IPARG  ,DD_IAD  ,IGRV   ,IEXLNK ,KINET  ,
@@ -600,6 +600,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
+              USE radioss_cwipi_mod
               USE CONNECTIVITY_MOD
               USE NODAL_ARRAYS_MOD
               USE detach_node_mod
@@ -867,6 +868,7 @@ C-----------------------------------------------
      .           GAUGE(LLGAUGE,*),WAGAP(2,*),RTHBUF(*),FORNEQS(3,*),
      .           DPL0CLD(*),VEL0CLD(*)
               my_real , INTENT(IN) :: DGAPLOADINT(NINTER*NLOADP_HYD)
+              TYPE(cwipi_) :: CWIPI
               TYPE(timer_) :: TIMERS
               TYPE(connectivity_), INTENT(INOUT) :: ELEMENT
               TYPE(NODAL_ARRAYS_), INTENT(INOUT) :: NODES
@@ -2215,6 +2217,7 @@ C
      9         ISKWN  ,IFRAME  ,LOADS ,GLOB_THERM,PBLAST,RBE3)
 
 !$OMP END PARALLEL
+              CALL cwipi_init(cwipi, IGRSURF, nsurf,nodes)
               IF (ALEMUSCL_Param%IALEMUSCL == 0) DEALLOCATE(ADDTMPL)
 C========================================================================================
 C                                  NON PARALLEL SECTION (SMP)
