@@ -432,7 +432,7 @@ extern "C"
     }
 
     void inline Voxel_update_surf(void *v, double xmin, double ymin, double zmin,
-                                  double xmax, double ymax, double zmax, int surfId)
+                                  double xmax, double ymax, double zmax, int surfId, const GridMapper & mapper)
     {
         Voxel *voxel = static_cast<Voxel *>(v);
 
@@ -444,7 +444,6 @@ extern "C"
         //        }
 
         // Calculate grid coordinates using mapping function
-        GridMapper mapper(voxel->bounds, voxel->nbx, voxel->nby, voxel->nbz);
         Node minCoords = mapper.mapMin(xmin, ymin, zmin);
         Node maxCoords = mapper.mapMax(xmax, ymax, zmax);
 
@@ -666,7 +665,7 @@ extern "C"
             double xmax = std::max(std::max(x1, x2), std::max(x3, x4)) + gapValue;
             double ymax = std::max(std::max(y1, y2), std::max(y3, y4)) + gapValue;
             double zmax = std::max(std::max(z1, z2), std::max(z3, z4)) + gapValue;
-            Voxel_update_surf(v, xmin, ymin, zmin, xmax, ymax, zmax, i);
+            Voxel_update_surf(v, xmin, ymin, zmin, xmax, ymax, zmax, i, mapper);
         }
 
         for (int i = 0; i < nsn; ++i)
