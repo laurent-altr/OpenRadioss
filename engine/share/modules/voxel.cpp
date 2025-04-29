@@ -256,7 +256,8 @@ extern "C"
             const double y = static_cast<double>(X[3 * i1 + 1]);
             const double z = static_cast<double>(X[3 * i1 + 2]);
             // get the index of the cell
-            size_t index = coord_to_index(x, y, z, voxel->bounds, voxel->nbx, voxel->nby, voxel->nbz);
+            //size_t index = coord_to_index(x, y, z, voxel->bounds, voxel->nbx, voxel->nby, voxel->nbz);
+            const size_t index = mapper.toIndex(x, y, z);
             voxel->cells[index].nodes.push_back(i);
             // add the node to the nodes vector
             voxel->nodes[i] = mapper.mapMin(x, y, z);
@@ -304,11 +305,11 @@ extern "C"
         voxel->nodes[nodeId] = {-1, -1, -1}; // set the node to -1
     }
 
-    void inline Voxel_update_node(void *v, double x, double y, double z, int nodeId)
+    void inline Voxel_update_node(void *v, double x, double y, double z, int nodeId, const GridMapper & mapper)
     {
         Voxel *voxel = static_cast<Voxel *>(v);
-        size_t newIndex = coord_to_index(x, y, z, voxel->bounds, voxel->nbx, voxel->nby, voxel->nbz);
-        size_t oldIndex = coord_to_index(voxel->nodes[nodeId], voxel->bounds, voxel->nbx, voxel->nby, voxel->nbz);
+        const size_t oldIndex = coord_to_index(voxel->nodes[nodeId], voxel->bounds, voxel->nbx, voxel->nby, voxel->nbz);
+        const size_t newIndex = mapper.toIndex(x, y, z);
         if (newIndex != oldIndex)
         {
             // remove the node from the old cell
@@ -680,7 +681,7 @@ extern "C"
             const double x = static_cast<double>(X[3 * i1]);
             const double y = static_cast<double>(X[3 * i1 + 1]);
             const double z = static_cast<double>(X[3 * i1 + 2]);
-            Voxel_update_node(v, x, y, z, i);
+            Voxel_update_node(v, x, y, z, i, mapper);
         }
     }
 

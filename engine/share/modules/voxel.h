@@ -30,7 +30,6 @@ inline void swap_and_pop(std::vector<T>& vec, const T& value) {
     }
 }
 
-
 class GridMapper {
 private:
     // Grid dimensions
@@ -39,7 +38,9 @@ private:
     // Boundary values
     const double x_min, y_min, z_min;
     const double x_max, y_max, z_max;
-    const bool x_valid, y_valid, z_valid;
+    
+    // Precomputed scaling factors for faster index calculation
+    const double x_scale, y_scale, z_scale;
     
 public:
     
@@ -47,17 +48,18 @@ public:
         : nbx(nbx_), nby(nby_), nbz(nbz_),
           x_min(bounds[XMIN]), y_min(bounds[YMIN]), z_min(bounds[ZMIN]),
           x_max(bounds[XMAX]), y_max(bounds[YMAX]), z_max(bounds[ZMAX]),
-          x_valid(x_max > x_min),
-          y_valid(y_max > y_min),
-          z_valid(z_max > z_min)
+          // Precompute scaling factors in the constructor, no validity check needed
+          x_scale(nbx / (x_max - x_min)),
+          y_scale(nby / (y_max - y_min)),
+          z_scale(nbz / (z_max - z_min))
     {}
     
     // For minimum coordinates
     Node inline mapMin(double x, double y, double z) const {
         // Calculate relative position in each dimension (0.0 to 1.0)
-        double rx = x_valid ? (x - x_min) / (x_max - x_min) : 0.5;
-        double ry = y_valid ? (y - y_min) / (y_max - y_min) : 0.5;
-        double rz = z_valid ? (z - z_min) / (z_max - z_min) : 0.5;
+        double rx = (x - x_min) / (x_max - x_min);
+        double ry = (y - y_min) / (y_max - y_min);
+        double rz = (z - z_min) / (z_max - z_min);
         
         // Handle wrapping for values outside the bounds
         rx = rx - floor(rx);
@@ -84,9 +86,9 @@ public:
     // For maximum coordinates
     Node inline mapMax(double x, double y, double z) const {
         // Calculate relative position in each dimension (0.0 to 1.0)
-        double rx = x_valid ? (x - x_min) / (x_max - x_min) : 0.5;
-        double ry = y_valid ? (y - y_min) / (y_max - y_min) : 0.5;
-        double rz = z_valid ? (z - z_min) / (z_max - z_min) : 0.5;
+        double rx = (x - x_min) / (x_max - x_min);
+        double ry = (y - y_min) / (y_max - y_min);
+        double rz = (z - z_min) / (z_max - z_min);
         
         // Check for coordinates exactly at the max boundary
         bool xAtMax = (std::abs(rx - 1.0) < 1e-10);
@@ -113,6 +115,33 @@ public:
             static_cast<short int>(iy),
             static_cast<short int>(iz)
         };
+    }
+    
+    // Optimized function to convert coordinates directly to linear index
+    // For use when coordinates are guaranteed to be within the domain
+    size_t inline toIndex(double x, double y, double z) const {
+        // Calculate grid indices directly using precomputed scaling factors
+        size_t ix = static_cast<size_t>((x - x_min) * x_scale);
+        size_t iy = static_cast<size_t>((y - y_min) * y_scale);
+        size_t iz = static_cast<size_t>((z - z_min) * z_scale);
+        
+        // Ensure indices are within bounds (for safety against floating-point precision issues)
+        ix = (ix >= nbx) ? nbx - 1 : ix;
+        iy = (iy >= nby) ? nby - 1 : iy;
+        iz = (iz >= nbz) ? nbz - 1 : iz;
+        
+        // Convert to linear index
+        return ix + iy * nbx + iz * nbx * nby;
+    }
+    
+    // Faster version without bounds checking - use only when you're absolutely sure
+    // the coordinates are within domain and precision issues won't cause problems
+    size_t inline toIndexUnsafe(double x, double y, double z) const {
+        size_t ix = static_cast<size_t>((x - x_min) * x_scale);
+        size_t iy = static_cast<size_t>((y - y_min) * y_scale);
+        size_t iz = static_cast<size_t>((z - z_min) * z_scale);
+        
+        return ix + iy * nbx + iz * nbx * nby;
     }
 };
 
