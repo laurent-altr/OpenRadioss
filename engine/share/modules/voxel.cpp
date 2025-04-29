@@ -242,6 +242,15 @@ extern "C"
                 }
             }
         }
+        // reserve 4 candidate per surface
+        for(int i = 0; i < nrtm; ++i)
+        {
+            if (stf[i] <= static_cast<my_real>(0))
+            {
+                continue;
+            }
+            voxel->surfaceCandidates[i].reserve(4);
+        }
 
         // Loop over the nodes, add the nodes to the cells they belong to
         for (int i = 0; i < nsn; ++i)
@@ -345,11 +354,11 @@ extern "C"
     }
 
     // Helper function to process a range of cells for surface addition or removal
-    void processCellRange(Voxel *voxel, int surfId,
-                          short int xStart, short int xEnd,
-                          short int yStart, short int yEnd,
-                          short int zStart, short int zEnd,
-                          bool isAddOperation)
+    void inline processCellRange(Voxel *voxel, int surfId,
+                          const short int & xStart, const short int & xEnd,
+                          const short int & yStart, const short int & yEnd,
+                          const short int & zStart, const short int & zEnd,
+                          const bool & isAddOperation)
     {
         for (short int x = xStart; x <= xEnd; x++)
         {
