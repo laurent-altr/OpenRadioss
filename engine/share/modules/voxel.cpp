@@ -71,46 +71,7 @@ extern "C"
         *zmax = voxel->bounds[ZMAX];
     }
 
-    using Node = std::array<short int, 3>;
 
-    std::vector<Node> inline getCellsInRange(short int xmin, short int xmax,
-                                             short int ymin, short int ymax,
-                                             short int zmin, short int zmax,
-                                             size_t nbx, size_t nby, size_t nbz)
-    {
-        std::vector<Node> cells;
-
-        //       // Clamp input to grid boundaries (optional depending on your use case)
-        xmin = std::max<short int>(0, std::min(xmin, static_cast<short int>(nbx - 1)));
-        xmax = std::max<short int>(0, std::min(xmax, static_cast<short int>(nbx - 1)));
-        ymin = std::max<short int>(0, std::min(ymin, static_cast<short int>(nby - 1)));
-        ymax = std::max<short int>(0, std::min(ymax, static_cast<short int>(nby - 1)));
-        zmin = std::max<short int>(0, std::min(zmin, static_cast<short int>(nbz - 1)));
-        zmax = std::max<short int>(0, std::min(zmax, static_cast<short int>(nbz - 1)));
-
-        //       // Early exit if range is invalid
-        //       if (xmin > xmax || ymin > ymax || zmin > zmax)
-        //           return cells;
-
-        size_t xcount = xmax - xmin + 1;
-        size_t ycount = ymax - ymin + 1;
-        size_t zcount = zmax - zmin + 1;
-
-        cells.reserve(xcount * ycount * zcount);
-
-        for (short int i = xmin; i <= xmax; ++i)
-        {
-            for (short int j = ymin; j <= ymax; ++j)
-            {
-                for (short int k = zmin; k <= zmax; ++k)
-                {
-                    cells.push_back({i, j, k});
-                }
-            }
-        }
-
-        return cells;
-    }
 
     void Voxel_initialize(void *v, int *irect, int nrtm, my_real *gap, int *nsv, int nsn, my_real *X, int numnod, my_real *stf, my_real *stfn)
     {
@@ -270,7 +231,7 @@ extern "C"
             const size_t index = mapper.toIndex(x, y, z);
             voxel->cells[index].nodes.push_back(i);
             // add the node to the nodes vector
-            voxel->nodes[i] = mapper.mapMin(x, y, z);
+            voxel->nodes[i] = mapper.mapToIndex(x, y, z);
 
             // loop over the surfaces crossing the cell
             for (auto surfId : voxel->cells[index].surfaces)
@@ -295,11 +256,11 @@ extern "C"
     void inline Voxel_delete_node(void *v, int nodeId)
     {
         Voxel *voxel = static_cast<Voxel *>(v);
-        if (voxel->nodes[nodeId][0] < 0)
+        if (voxel->nodes[nodeId] == DEAD)
         {
             return;
         }
-        size_t index = coord_to_index(voxel->nodes[nodeId], voxel->bounds, voxel->nbx, voxel->nby, voxel->nbz);
+        size_t index = voxel->nodes[nodeId];                                                     
         // remove the node from the cell
         swap_and_pop(voxel->cells[index].nodes, nodeId);
         // remove the node from candidates list of all surfaces crossing the cell
@@ -312,13 +273,13 @@ extern "C"
                 swap_and_pop(voxel->surfaceCandidates[surfId], nodeId);
             }
         }
-        voxel->nodes[nodeId] = {-1, -1, -1}; // set the node to -1
+        voxel->nodes[nodeId] = DEAD; 
     }
 
     void inline Voxel_update_node(void *v, double x, double y, double z, int nodeId, const GridMapper &mapper)
     {
         Voxel *voxel = static_cast<Voxel *>(v);
-        const size_t oldIndex = coord_to_index(voxel->nodes[nodeId], voxel->bounds, voxel->nbx, voxel->nby, voxel->nbz);
+        const size_t oldIndex = voxel->nodes[nodeId];
         const size_t newIndex = mapper.toIndex(x, y, z);
         if (newIndex != oldIndex)
         {
@@ -337,7 +298,7 @@ extern "C"
 
             voxel->cells[newIndex].nodes.push_back(nodeId);
 
-            voxel->nodes[nodeId] = index_to_coord(newIndex, voxel->nbx, voxel->nby, voxel->nbz);
+            voxel->nodes[nodeId] = newIndex;                                      
             // loop over voxel->cells[newIndex].surfaces
             for (auto surfId : voxel->cells[newIndex].surfaces)
             {

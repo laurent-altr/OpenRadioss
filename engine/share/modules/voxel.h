@@ -6,6 +6,8 @@
 #include <cmath>
 #include <chrono>
 #include <algorithm>
+#include <limits>
+
 
 constexpr size_t XMIN = 0;
 constexpr size_t YMIN = 1;
@@ -13,12 +15,13 @@ constexpr size_t ZMIN = 2;
 constexpr size_t XMAX = 3;
 constexpr size_t YMAX = 4;
 constexpr size_t ZMAX = 5;
+constexpr size_t DEAD = std::numeric_limits<size_t>::max();
 
 using Node = std::array<short int, 3>; // coordinate id of the cell containing that node
 using Surf = std::array<short int, 6>; // a surface can cross multiple cells
 
-
 //swap_and_pop :
+
 
 template <typename T>
 inline void swap_and_pop(std::vector<T>& vec, const T& value) {
@@ -81,6 +84,31 @@ public:
             static_cast<short int>(iy),
             static_cast<short int>(iz)
         };
+    }
+
+
+    size_t inline mapToIndex(double x, double y, double z) const {
+        // Calculate relative position in each dimension (0.0 to 1.0)
+        double rx = (x - x_min) / (x_max - x_min);
+        double ry = (y - y_min) / (y_max - y_min);
+        double rz = (z - z_min) / (z_max - z_min);
+        
+        // Handle wrapping for values outside the bounds
+        rx = rx - floor(rx);
+        ry = ry - floor(ry);
+        rz = rz - floor(rz);
+        
+        // Convert to grid indices
+        size_t ix = static_cast<size_t>(rx * nbx);
+        size_t iy = static_cast<size_t>(ry * nby);
+        size_t iz = static_cast<size_t>(rz * nbz);
+        
+        // Ensure indices are within bounds
+        ix = (ix >= nbx) ? nbx - 1 : ix;
+        iy = (iy >= nby) ? nby - 1 : iy;
+        iz = (iz >= nbz) ? nbz - 1 : iz;
+        
+        return ix + iy * nbx + iz * nbx * nby;
     }
     
     // For maximum coordinates
@@ -160,7 +188,7 @@ public:
     std::array<double, 6> bounds;                    // bounds of the grid
     //std::unordered_map<size_t, Cell> cells;          // map of nodes to their index in the vector
     std::vector<Cell> cells;                            // vector of cells
-    std::vector<Node> nodes;                         // vector of secondary nodes
+    std::vector<size_t> nodes;                         // vector of secondary nodes
     std::vector<Surf> surfaceBounds;                 // vector of main surfaceBounds
     std::vector<std::array<int,4>> surfaceNodes;      // vector of secondary surfaceBounds
     std::vector<std::vector<int>> surfaceCandidates; // vector of secondary node candidates for broad phase collision with the surface
