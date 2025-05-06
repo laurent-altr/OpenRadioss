@@ -1,5 +1,7 @@
 #include "voxel.h"
 
+#define DEBUG_VOXEL 1
+
 #ifdef MYREAL8
 #define my_real double
 #else
@@ -1305,50 +1307,52 @@ extern "C"
 
 
         // Debug: loop over all nodes, to check if they are in the candidates, using is_in_bounds
-//        size_t candidate_counter = 0;
-//        for(size_t it = 0 ; it < voxel->nodes.size();++it)                                                               
-//        {
-//            size_t index = voxel->nodes[it];
-//            Node coord = index_to_coord(index, voxel->nbx, voxel->nby, voxel->nbz);
-//            if(is_in_bounds(coord, voxel->surfaceBounds[ne - 1]))
-//            {
-//                // check if the node belongs to the surface
-//                size_t globId = nsv[it]; // Fortran to C++ index conversion
-//                bool belongs_to_surf = (globId == irect[0 + 4 * (ne - 1)] ) || (globId == irect[1 + 4 * (ne - 1)] ) || (globId == irect[2 + 4 * (ne - 1)] ) || (globId == irect[3 + 4 * (ne - 1)] ); 
-//
-//
-//                //find in surfaceCandidates
-//                auto it2 = std::find(voxel->surfaceCandidates[ne - 1].begin(), voxel->surfaceCandidates[ne - 1].end(), it);
-//                if(it2 == voxel->surfaceCandidates[ne - 1].end() && !belongs_to_surf)
-//                {
-//                    std::cout<< "position voxel->nodes "<<it<<std::endl;
-//                    std::cout << "Error: MISSING CANDIDATE " << it << " is in the surface bounds, but not in the candidates for surface " << ne-1 << std::endl;
-//                    std::cout << "coordinate of the node: " << coord[0] << " " << coord[1] << " " << coord[2] << std::endl;
-//                    std::cout << "min Coordinate of the surface: " << voxel->surfaceBounds[ne - 1][XMIN] << " " << voxel->surfaceBounds[ne - 1][YMIN] << " " << voxel->surfaceBounds[ne - 1][ZMIN] << std::endl;
-//                    std::cout << "max Coordinate of the surface: " << voxel->surfaceBounds[ne - 1][XMAX] << " " << voxel->surfaceBounds[ne - 1][YMAX] << " " << voxel->surfaceBounds[ne - 1][ZMAX] << std::endl;
-//
-//                    std::cout <<" Surface Nodes: "<<irect[0 + 4 * (ne - 1)] << " " << irect[1 + 4 * (ne - 1)] << " " << irect[2 + 4 * (ne - 1)] << " " << irect[3 + 4 * (ne - 1)] << std::endl;
-//                    std::cout << "Global node id: " << globId << std::endl;
-//                    std::abort();
-//                }
-//                if(!belongs_to_surf) candidate_counter++;
-//
-//            }
-//        }
-//       
-        // check if candidate_counter == *nb
-//        if(candidate_counter != *nb)
-//        {
-//            std::cout << "Error: candidate_counter != *nb" << std::endl;
-//            std::cout << "candidate_counter: " << candidate_counter << std::endl;
-//            std::cout << "*nb: " << *nb << std::endl;
-//            // print all cands filled so far
-//            for(int j = 0; j < *nb; j++)
-//            {
-//                std::cout<<"cand["<<j<<"]="<<(*cands)[j]<<std::endl;
-//            }
-//            std::abort();
-//        }
+#ifdef DEBUG_VOXEL
+        size_t candidate_counter = 0;
+        for(size_t it = 0 ; it < voxel->nodes.size();++it)                                                               
+        {
+            size_t index = voxel->nodes[it];
+            Node coord = index_to_coord(index, voxel->nbx, voxel->nby, voxel->nbz);
+            if(is_in_bounds(coord, voxel->surfaceBounds[ne - 1]))
+            {
+                // check if the node belongs to the surface
+                size_t globId = nsv[it]; // Fortran to C++ index conversion
+                bool belongs_to_surf = (globId == irect[0 + 4 * (ne - 1)] ) || (globId == irect[1 + 4 * (ne - 1)] ) || (globId == irect[2 + 4 * (ne - 1)] ) || (globId == irect[3 + 4 * (ne - 1)] ); 
+
+
+                //find in surfaceCandidates
+                auto it2 = std::find(voxel->surfaceCandidates[ne - 1].begin(), voxel->surfaceCandidates[ne - 1].end(), it);
+                if(it2 == voxel->surfaceCandidates[ne - 1].end() && !belongs_to_surf)
+                {
+                    std::cout<< "position voxel->nodes "<<it<<std::endl;
+                    std::cout << "Error: MISSING CANDIDATE " << it << " is in the surface bounds, but not in the candidates for surface " << ne-1 << std::endl;
+                    std::cout << "coordinate of the node: " << coord[0] << " " << coord[1] << " " << coord[2] << std::endl;
+                    std::cout << "min Coordinate of the surface: " << voxel->surfaceBounds[ne - 1][XMIN] << " " << voxel->surfaceBounds[ne - 1][YMIN] << " " << voxel->surfaceBounds[ne - 1][ZMIN] << std::endl;
+                    std::cout << "max Coordinate of the surface: " << voxel->surfaceBounds[ne - 1][XMAX] << " " << voxel->surfaceBounds[ne - 1][YMAX] << " " << voxel->surfaceBounds[ne - 1][ZMAX] << std::endl;
+
+                    std::cout <<" Surface Nodes: "<<irect[0 + 4 * (ne - 1)] << " " << irect[1 + 4 * (ne - 1)] << " " << irect[2 + 4 * (ne - 1)] << " " << irect[3 + 4 * (ne - 1)] << std::endl;
+                    std::cout << "Global node id: " << globId << std::endl;
+                    std::abort();
+                }
+                if(!belongs_to_surf) candidate_counter++;
+
+            }
+        }
+       
+      // check if candidate_counter == *nb
+        if(candidate_counter != *nb)
+        {
+            std::cout << "Error: candidate_counter != *nb" << std::endl;
+            std::cout << "candidate_counter: " << candidate_counter << std::endl;
+            std::cout << "*nb: " << *nb << std::endl;
+            // print all cands filled so far
+            for(int j = 0; j < *nb; j++)
+            {
+                std::cout<<"cand["<<j<<"]="<<(*cands)[j]<<std::endl;
+            }
+            std::abort();
+        }
+#endif
 
     }
 
@@ -1371,89 +1375,93 @@ extern "C"
                 continue; // skip dead nodes
             }
             counter++;
-//            if(counter > voxel->nsnr)
-//            {
-//                std::cout << "Error: too many candidates for surface " << ne << std::endl;
-//                std::cout << "Max candidates: " << voxel->nsnr << std::endl;
-//                std::cout << "Current candidates: " << counter << std::endl;
-//                // print all cands filled so far
-//                for(int j = 0; j < voxel->nsnr; j++)
-//                {
-//                    std::cout<<"cand["<<j<<"]="<<cands[j]<<std::endl;
-//                }
-//                std::cout<<"FAILING to insert candidate "<<locId+1<<std::endl;
-//                // abort
-//                std::abort();
-//            }
+#ifdef DEBUG_VOXEL
+            if(counter > voxel->nsnr)
+            {
+                std::cout << "Error: too many candidates for surface " << ne << std::endl;
+                std::cout << "Max candidates: " << voxel->nsnr << std::endl;
+                std::cout << "Current candidates: " << counter << std::endl;
+                // print all cands filled so far/too
+                for(int j = 0; j < voxel->nsnr; j++)
+                {
+                    std::cout<<"cand["<<j<<"]="<<cands[j]<<std::endl;
+                }
+                std::cout<<"FAILING to insert candidate "<<locId+1<<std::endl;
+                // abort
+                std::abort();
+            }
+#endif
             cands[counter - 1] = static_cast<int>(locId); // C to Fortran index conversion
         }
 
 
+#ifdef DEBUG_VOXEL
         // debug check; all values in cands should be unique
-//        std::set<int> uniqueCandidates(cands, cands + counter);
-//        if (uniqueCandidates.size() != counter)
-//        {
-//            std::cout << "Error: duplicate candidates for surface " << ne << std::endl;
-//            std::cout << "Number of candidates: " << counter << std::endl;
-//            // print all cands filled so far
-//            for(int j = 0; j < counter; j++)
-//            {
-//                std::cout<<"cand["<<j<<"]="<<cands[j]<<std::endl;
-//            }
-//            // abort
-//            std::abort();
-//        }
-//
-        // Check all nodes in IREM/XREM to see if they are in the box of the surface. If they are, they should be in the candidates
+       std::set<int> uniqueCandidates(cands, cands + counter);
+       if (uniqueCandidates.size() != counter)
+       {
+           std::cout << "Error: duplicate candidates for surface " << ne << std::endl;
+           std::cout << "Number of candidates: " << counter << std::endl;
+           // print all cands filled so far
+           for(int j = 0; j < counter; j++)
+           {
+               std::cout<<"cand["<<j<<"]="<<cands[j]<<std::endl;
+           }
+           // abort
+           std::abort();
+       }
 
- //       GridMapper mapper = GridMapper(voxel->bounds, voxel->nbx, voxel->nby, voxel->nbz);
- //       for(size_t i = 0; i < voxel->nsnr; ++i)
- //       {
- //           // get the global id of the node
- //           int globId = IREM[i * ISIZ + 3] - 1; // Fortran to C++ index conversion
- //           // get the local id of the node
- //           //int locId = IREM[i * ISIZ + 0] - 1; // Fortran to C++ index conversion
- //           // get the coordinates of the node
- //           double x = static_cast<double>(XREM[i * RSIZ + 0]);
- //           double y = static_cast<double>(XREM[i * RSIZ + 1]);
- //           double z = static_cast<double>(XREM[i * RSIZ + 2]);
+     // Check all nodes in IREM/XREM to see if they are in the box of the surface. If they are, they should be in the candidates
 
- //           int locId = voxel->globalToIREM[globId]; 
- //           if(locId != DEAD)
- //           {
- //               //Error if locId is not i 
- //               if(locId != i)
- //               {
- //                   std::cout << "Error: locId is not i" << std::endl;
- //                   std::cout << "locId: " << locId << std::endl;
- //                   std::cout << "i: " << i << std::endl;
- //                   std::abort();
- //               }
- //           }
+       GridMapper mapper = GridMapper(voxel->bounds, voxel->nbx, voxel->nby, voxel->nbz);
+       for(size_t i = 0; i < voxel->nsnr; ++i)
+       {
+           // get the global id of the node
+           int globId = IREM[i * ISIZ + 3] - 1; // Fortran to C++ index conversion
+           // get the local id of the node
+           //int locId = IREM[i * ISIZ + 0] - 1; // Fortran to C++ index conversion
+           // get the coordinates of the node
+           double x = static_cast<double>(XREM[i * RSIZ + 0]);
+           double y = static_cast<double>(XREM[i * RSIZ + 1]);
+           double z = static_cast<double>(XREM[i * RSIZ + 2]);
 
- //           size_t index = mapper.mapToIndex(x, y, z);
- //           Node newCoords = index_to_coord(index, voxel->nbx, voxel->nby, voxel->nbz);
- //           Surf bounds = voxel->surfaceBounds[ne - 1];
- //           if(is_in_bounds(newCoords, bounds))
- //           {
- //               // cands is storing the list of candidate numbered from 0 to nsnr-1 here
- //               auto it = std::find(cands, cands + counter, locId);
- //               if(it == cands + counter)
- //               {
- //                   std::cout << "Error: node " << globId << " id in xrem " << locId << " is not in the candidates for surface " << ne-1 << std::endl;
- //                   std::cout<< "Nodes coordinate: " << newCoords[0] << " " << newCoords[1] << " " << newCoords[2] << std::endl;
- //                   std::cout << "min Coordinate of the surface: " << voxel->surfaceBounds[ne - 1][XMIN] << " " << voxel->surfaceBounds[ne - 1][YMIN] << " " << voxel->surfaceBounds[ne - 1][ZMIN] << std::endl;
- //                   std::cout << "max Coordinate of the surface: " << voxel->surfaceBounds[ne - 1][XMAX] << " " << voxel->surfaceBounds[ne - 1][YMAX] << " " << voxel->surfaceBounds[ne - 1][ZMAX] << std::endl;
- //                   std::cout << "Number of candidates: " << counter << std::endl;
- //                   // print all cands filled so far
- //                   for(int j = 0; j < counter; j++)
- //                   {
- //                       std::cout<<"cand["<<j<<"]="<<cands[j]<<std::endl;
- //                   }
- //                   std::abort();
- //               }
- //           }
- //       }
+           int locId = voxel->globalToIREM[globId]; 
+           if(locId != DEAD)
+           {
+               //Error if locId is not i 
+               if(locId != i)
+               {
+                   std::cout << "Error: locId is not i" << std::endl;
+                   std::cout << "locId: " << locId << std::endl;
+                   std::cout << "i: " << i << std::endl;
+                   std::abort();
+               }
+           }
+
+           size_t index = mapper.mapToIndex(x, y, z);
+           Node newCoords = index_to_coord(index, voxel->nbx, voxel->nby, voxel->nbz);
+           Surf bounds = voxel->surfaceBounds[ne - 1];
+           if(is_in_bounds(newCoords, bounds))
+           {
+               // cands is storing the list of candidate numbered from 0 to nsnr-1 here
+               auto it = std::find(cands, cands + counter, locId);
+               if(it == cands + counter)
+               {
+                   std::cout << "Error: node " << globId << " id in xrem " << locId << " is not in the candidates for surface " << ne-1 << std::endl;
+                   std::cout<< "Nodes coordinate: " << newCoords[0] << " " << newCoords[1] << " " << newCoords[2] << std::endl;
+                   std::cout << "min Coordinate of the surface: " << voxel->surfaceBounds[ne - 1][XMIN] << " " << voxel->surfaceBounds[ne - 1][YMIN] << " " << voxel->surfaceBounds[ne - 1][ZMIN] << std::endl;
+                   std::cout << "max Coordinate of the surface: " << voxel->surfaceBounds[ne - 1][XMAX] << " " << voxel->surfaceBounds[ne - 1][YMAX] << " " << voxel->surfaceBounds[ne - 1][ZMAX] << std::endl;
+                   std::cout << "Number of candidates: " << counter << std::endl;
+                   // print all cands filled so far
+                   for(int j = 0; j < counter; j++)
+                   {
+                       std::cout<<"cand["<<j<<"]="<<cands[j]<<std::endl;
+                   }
+                   std::abort();
+               }
+           }
+       }
+#endif
 
         // set the number of candidates
         *nb = counter; 
