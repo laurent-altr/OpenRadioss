@@ -1,5 +1,8 @@
 #include "voxel.h"
 
+//measure time with chrono
+#include <chrono>
+
 // #define DEBUG_VOXEL 1
 // #define DEBUG_SURF 103
 ////#define DEBUG_NODE 9705
@@ -1251,6 +1254,9 @@ extern "C"
         voxel->surfaceBoundsOld = voxel->surfaceBounds;
 
         size_t nb_surf_updated = 0;
+
+        // start measuring time here with chrono
+        auto start = std::chrono::high_resolution_clock::now();
         for (int i = 0; i < nrtm; i++)
         {
             if (stf[i] <= static_cast<my_real>(0))
@@ -1309,7 +1315,12 @@ extern "C"
                 nb_surf_updated++;
             }
         }
-        std::cout << "Number of surfaces updated: " << nb_surf_updated <<" /" << nrtm << std::endl;           
+        auto stop = std::chrono::high_resolution_clock::now();
+        std::cout << "Number of surfaces updated: " << nb_surf_updated <<" /" << nrtm ;
+        std::cout <<" nbx,nby,nbz="<<voxel->nbx<<" "<<voxel->nby<<" "<<voxel->nbz;
+        // write duration in ms
+        std::chrono::duration<double, std::milli> duration = stop - start;
+        std::cout << "Time: " << duration.count() << " ms" << std::endl;   
         // update local nodes
         for (int i = 0; i < nsn; ++i)
         {
