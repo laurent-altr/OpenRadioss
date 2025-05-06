@@ -522,6 +522,7 @@ cc      SAVE INIVOXEL, VOXEL
 cc      DATA INIVOXEL /1/
               INTEGER NBX,NBY,NBZ
               INTEGER (KIND=8) :: NBX8,NBY8,NBZ8,RES8,LVOXEL8
+              double precision :: oldVoulume, newVoulume
 
 C-----------------------------------------------
 C   S o u r c e  L i n e s
@@ -652,6 +653,7 @@ C
      .                 aabb(1) < bminma(1) .OR. aabb(2) < bminma(2) .OR. aabb(3) < bminma(3)) then
                     restart_from_scratch = .TRUE.
                     call c_voxel_restart(vox,nbx, nby, nbz,nrtm,nsn,nsnglob)
+                    write(6,*) "VOXEL RESTARTED"
                   endif
                 endif
 
@@ -674,8 +676,21 @@ C
 
                   deallocate(DIST)
                 else
-!     write(6,*) "VOXEL ALREADY INITIALIZED"
-                 call c_voxel_update(VOX,IRECT,nrtm,DIST,nsv,nsn,X,numnod,stf, stfn,IREM,XREM,XREM_SIZE,IREM_SIZE,NSNR)
+                !! check if the  bounding box  has the same sizes
+                  oldVoulume = (aabb(1)-aabb(4))*(aabb(2)-aabb(5))*(aabb(3)-aabb(6))
+                  delta = 100.0D0*MAXVAL(DIST)
+                  aabb(1) = bminma(1) + delta
+                  aabb(2) = bminma(2) + delta
+                  aabb(3) = bminma(3) + delta
+                  aabb(4) = bminma(4) - delta
+                  aabb(5) = bminma(5) - delta
+                  aabb(6) = bminma(6) - delta
+                  newVoulume = (aabb(1)-aabb(4))*(aabb(2)-aabb(5))*(aabb(3)-aabb(6))
+                   if(ABS(newVoulume-oldVoulume)/oldVoulume < 0.001D0) then
+                     call c_voxel_set_bounds(VOX, aabb(4), aabb(5), aabb(6), aabb(1), aabb(2), aabb(3))
+                      write(6,*) "VOXEL BOUNDING BOX TRANSLATED"
+                    endif
+                   call c_voxel_update(VOX,IRECT,nrtm,DIST,nsv,nsn,X,numnod,stf, stfn,IREM,XREM,XREM_SIZE,IREM_SIZE,NSNR)
 
                  nbx = 1
                  nby = 1

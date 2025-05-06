@@ -1,9 +1,9 @@
 #include "voxel.h"
 
-//#define DEBUG_VOXEL 1
-//#define DEBUG_SURF 103
+ #define DEBUG_VOXEL 1
+// #define DEBUG_SURF 103
 ////#define DEBUG_NODE 9705
-//#define DEBUG_SURF_REMOTE 103
+// #define DEBUG_SURF_REMOTE 103
 
 #ifdef MYREAL8
 #define my_real double
@@ -84,9 +84,10 @@ extern "C"
         voxel->bounds[YMAX] = ymax;
         voxel->bounds[ZMAX] = zmax;
         // #ifdef DEBUG_PRINT
+#ifdef DEBUG_VOXEL
         std::cout << "Voxel bounds min: " << xmin << " " << ymin << " " << zmin << std::endl;
         std::cout << "Voxel bounds max: " << xmax << " " << ymax << " " << zmax << std::endl;
-        // #endif
+#endif
     }
 
     void Voxel_get_bounds(void *v, double *xmin, double *ymin, double *zmin,
@@ -496,7 +497,7 @@ extern "C"
                     }
                 }
             }
-            if(newIndex == DEAD)
+            if (newIndex == DEAD)
             {
                 return;
             }
@@ -525,28 +526,34 @@ extern "C"
                     // add the node to the surfaceCandiates of all surfaces crossing the new cell
                     if (!is_in_bounds(oldCoord, voxel->surfaceBoundsOld[surfId]) && is_in_bounds(newCoord, voxel->surfaceBounds[surfId]))
                     { // if the node moved into the new surface bounds, then add it to the candidates list
-                        // find nodeId in the list, print an error if is already found
-                        //                        auto it = std::find(voxel->surfaceCandidates[surfId].begin(), voxel->surfaceCandidates[surfId].end(), nodeId);
-                        //                        if (it != voxel->surfaceCandidates[surfId].end())
-                        //                        {
-                        //                            std::cout <<pos<<" Error: Node " << nodeId << " already in surface candidates list for surface " << surfId << std::endl;
-                        //                            // old node coordinate
-                        //                            std::cout << "Old Node: " << oldCoord[0] << " " << oldCoord[1] << " " << oldCoord[2] << "cell idex " << oldIndex << std::endl;
-                        //                            // new node coordinate
-                        //                            std::cout << "New Node: " << newCoord[0] << " " << newCoord[1] << " " << newCoord[2] << "cell idex " << newIndex << std::endl;
-                        //                            // display old bounds of surface, and new bounds of surface
-                        //                            const Surf &boundsOld = voxel->surfaceBoundsOld[surfId];
-                        //                            const Surf &boundsNew = voxel->surfaceBounds[surfId];
-                        //                            std::cout << "Old Bounds: " << boundsOld[XMIN] << " " << boundsOld[YMIN] << " " << boundsOld[ZMIN] << " "
-                        //                                      << boundsOld[XMAX] << " " << boundsOld[YMAX] << " " << boundsOld[ZMAX] << std::endl;
-                        //                            std::cout << "New Bounds: " << boundsNew[XMIN] << " " << boundsNew[YMIN] << " " << boundsNew[ZMIN] << " "
-                        //                                        << boundsNew[XMAX] << " " << boundsNew[YMAX] << " " << boundsNew[ZMAX] << std::endl;
-                        //                            std::abort();
-                        //                        }
-                        //                    if(surfId == 869 && nodeId == 483)
-                        //                    {
-                        //                        std::cout<<pos<<" NODE UPDATE push back "<<nodeId<<" to surface "<<surfId<<" in cell "<<newIndex<<std::endl;
-                        //                    }
+                      // find nodeId in the list, print an error if is already found
+#ifdef DEBUG_VOXEL
+                        auto it = std::find(voxel->surfaceCandidates[surfId].begin(), voxel->surfaceCandidates[surfId].end(), nodeId);
+                        if (it != voxel->surfaceCandidates[surfId].end())
+                        {
+                            std::cout << pos << " Error: Node " << nodeId << " already in surface candidates list for surface " << surfId << std::endl;
+                            // old node coordinate
+                            std::cout << "Old Node: " << oldCoord[0] << " " << oldCoord[1] << " " << oldCoord[2] << "cell idex " << oldIndex << std::endl;
+                            // new node coordinate
+                            std::cout << "New Node: " << newCoord[0] << " " << newCoord[1] << " " << newCoord[2] << "cell idex " << newIndex << std::endl;
+                            // display old bounds of surface, and new bounds of surface
+                            const Surf &boundsOld = voxel->surfaceBoundsOld[surfId];
+                            const Surf &boundsNew = voxel->surfaceBounds[surfId];
+                            std::cout << "Old Bounds: " << boundsOld[XMIN] << " " << boundsOld[YMIN] << " " << boundsOld[ZMIN] << " "
+                                      << boundsOld[XMAX] << " " << boundsOld[YMAX] << " " << boundsOld[ZMAX] << std::endl;
+                            std::cout << "New Bounds: " << boundsNew[XMIN] << " " << boundsNew[YMIN] << " " << boundsNew[ZMIN] << " "
+                                      << boundsNew[XMAX] << " " << boundsNew[YMAX] << " " << boundsNew[ZMAX] << std::endl;
+                            std::abort();
+                        }
+#endif
+#ifdef DEBUG_SURF
+#ifdef DEBUG_NODE
+                        if (surfId == DEBUG_SURF && nodeId == DEBUG_NODE)
+                        {
+                            std::cout << pos << " NODE UPDATE push back " << nodeId << " to surface " << surfId << " in cell " << newIndex << std::endl;
+                        }
+#endif
+#endif
                         voxel->surfaceCandidates[surfId].push_back(nodeId);
                     }
                 }
@@ -570,15 +577,15 @@ extern "C"
         }
 
 #ifdef DEBUG_NODE_REMOTE
-                if(nodeId == DEBUG_NODE_REMOTE)
-                {
-                    std::cout<<"NODE UPDATE remote old index "<<oldIndex<<" new index "<<newIndex<<std::endl;
-                    std::cout<<"old coords "<<x<<" "<<y<<" "<<z<<std::endl;
-                    auto Node = index_to_coord(voxel->nodesRemote[nodeId], voxel->nbx, voxel->nby, voxel->nbz);
-                    std::cout<<"NODE "<<nodeId<<" cell coord "<<Node[0]<<" "<<Node[1]<<" "<<Node[2]<<std::endl;
-                    std::cout<<"NODE "<<nodeId<<" cell index "<< COORD_TO_INDEX(Node[0], Node[1], Node[2], voxel->nbx, voxel->nby)<<std::endl;
-                }
-        
+        if (nodeId == DEBUG_NODE_REMOTE)
+        {
+            std::cout << "NODE UPDATE remote old index " << oldIndex << " new index " << newIndex << std::endl;
+            std::cout << "old coords " << x << " " << y << " " << z << std::endl;
+            auto Node = index_to_coord(voxel->nodesRemote[nodeId], voxel->nbx, voxel->nby, voxel->nbz);
+            std::cout << "NODE " << nodeId << " cell coord " << Node[0] << " " << Node[1] << " " << Node[2] << std::endl;
+            std::cout << "NODE " << nodeId << " cell index " << COORD_TO_INDEX(Node[0], Node[1], Node[2], voxel->nbx, voxel->nby) << std::endl;
+        }
+
 #endif
         if (newIndex != oldIndex)
         {
@@ -590,10 +597,10 @@ extern "C"
                 for (auto surfId : voxel->cells[oldIndex].surfaces)
                 {
 #ifdef DEBUG_SURF
-                                        if(surfId == DEBUG_SURF)
-                                        {
-                                            std::cout<<"NODE UPDATE remote swap and pop "<<nodeId<<" to surface "<<surfId<<" in cell "<<oldIndex<<std::endl;
-                                        }
+                    if (surfId == DEBUG_SURF)
+                    {
+                        std::cout << "NODE UPDATE remote swap and pop " << nodeId << " to surface " << surfId << " in cell " << oldIndex << std::endl;
+                    }
 #endif
                     swap_and_pop(voxel->surfaceCandidatesRemote[surfId], nodeId);
                 }
@@ -601,9 +608,9 @@ extern "C"
 
             voxel->nodesRemote[nodeId] = newIndex;
 #ifdef DEBUG_NODE_REMOTE
-            if(nodeId == DEBUG_NODE_REMOTE)
+            if (nodeId == DEBUG_NODE_REMOTE)
             {
-                std::cout<<"NODE UPDATE "<<nodeId<<"  newIndex = "<<newIndex<<std::endl;
+                std::cout << "NODE UPDATE " << nodeId << "  newIndex = " << newIndex << std::endl;
             }
 #endif
             if (newIndex != DEAD)
@@ -613,20 +620,20 @@ extern "C"
                 {
                     voxel->nodesRemote[nodeId] = newIndex;
 #ifdef DEBUG_NODE_REMOTE
-                                        if(nodeId == DEBUG_NODE_REMOTE)
-                                        {
-                                            std::cout<<__LINE__<<" NODE "<<nodeId<<" cell index "<<newIndex<<std::endl;
-                                            std::cout<<__LINE__<<" NODE "<<nodeId<<" cell coord "<<x<<" "<<y<<" "<<z<<std::endl;
-                                            std::cout<<__LINE__<<" NODE "<<nodeId<<" cell index "<< COORD_TO_INDEX(x, y, z, voxel->nbx, voxel->nby)<<std::endl;
-                                        }
+                    if (nodeId == DEBUG_NODE_REMOTE)
+                    {
+                        std::cout << __LINE__ << " NODE " << nodeId << " cell index " << newIndex << std::endl;
+                        std::cout << __LINE__ << " NODE " << nodeId << " cell coord " << x << " " << y << " " << z << std::endl;
+                        std::cout << __LINE__ << " NODE " << nodeId << " cell index " << COORD_TO_INDEX(x, y, z, voxel->nbx, voxel->nby) << std::endl;
+                    }
 #endif
                 }
                 else
                 {
 #ifdef DEBUG_NODE_REMOTE
-                    if(nodeId == DEBUG_NODE_REMOTE)
+                    if (nodeId == DEBUG_NODE_REMOTE)
                     {
-                        std::cout<<"REMOTE NODE IN EMPTY CELL "<<nodeId<<"  newIndex = "<<voxel->nodesRemote[nodeId]<<std::endl;
+                        std::cout << "REMOTE NODE IN EMPTY CELL " << nodeId << "  newIndex = " << voxel->nodesRemote[nodeId] << std::endl;
                     }
 #endif
                 }
@@ -642,10 +649,10 @@ extern "C"
                     // check if the node is in the surfaceNodes, because nodes that defines the surface cannot be a candidate for collision
                     // check the 4 nodes
                     // add the node to the surfaceCandiates of all surfaces crossing the new cell
-#ifdef DEBUG_NODE_REMOTE    
-                    if(nodeId == DEBUG_NODE_REMOTE)
+#ifdef DEBUG_NODE_REMOTE
+                    if (nodeId == DEBUG_NODE_REMOTE)
                     {
-                       std::cout<<" add node "<<nodeId<<" to surface "<<surfId<<" in cell "<<newIndex<<std::endl;
+                        std::cout << " add node " << nodeId << " to surface " << surfId << " in cell " << newIndex << std::endl;
                     }
 #endif
 
@@ -678,9 +685,9 @@ extern "C"
         }
 
 #ifdef DEBUG_NODE_REMOTE
-        if(nodeId == 170)
+        if (nodeId == 170)
         {
-            std::cout<<__LINE__<< "NODE END UPDATE remote "<<nodeId<<"  newIndex="<<voxel->nodesRemote[nodeId]<<std::endl;
+            std::cout << __LINE__ << "NODE END UPDATE remote " << nodeId << "  newIndex=" << voxel->nodesRemote[nodeId] << std::endl;
         }
 #endif
         return newIndex != DEAD; // node is in the domain
@@ -704,13 +711,14 @@ extern "C"
                     if (isAddOperation)
                     {
                         // Add surface to cell
-                        //                            auto it = std::find(voxel->cells[index].surfaces.begin(), voxel->cells[index].surfaces.end(), surfId);
-                        //                            if(it != voxel->cells[index].surfaces.end())
-                        //                            {
-                        //                                std::cout<<"SURF ADD Error: surface "<<surfId<<" already in cell "<<index<<std::endl;
-                        //                                std::abort();
-                        //                            }
-                        //
+#ifdef DEBUG_VOXEL
+                        auto it = std::find(voxel->cells[index].surfaces.begin(), voxel->cells[index].surfaces.end(), surfId);
+                        if(it != voxel->cells[index].surfaces.end())
+                        {
+                            std::cout<<"SURF ADD Error: surface "<<surfId<<" already in cell "<<index<<std::endl;
+                            std::abort();
+                        }
+#endif
 
                         voxel->cells[index].surfaces.push_back(surfId);
                         // Update surfaceCandidates for new cells
@@ -730,21 +738,25 @@ extern "C"
                                 if (!is_in_bounds(nodeCoordOld, voxel->surfaceBoundsOld[surfId]) && oldIndex == newIndex)
                                 {
                                     // find nodeId in the list, print an error if is already found
-                                    //                                   auto it = std::find(voxel->surfaceCandidates[surfId].begin(), voxel->surfaceCandidates[surfId].end(), nodeId);
-                                    //                                   if (it != voxel->surfaceCandidates[surfId].end())
-                                    //                                   {
-                                    //                                       std::cout << "Error: Node " << nodeId << " already in surface candidates list for surface " << surfId << std::endl;
-                                    //                                       std::cout<<"oldIndex "<<voxel->nodesOld[nodeId]<<" newIndex "<<voxel->nodes[nodeId]<<std::endl;
-                                    //                                       // stop the program
-                                    //                                       std::abort();
-
-                                    //                                   }
-
-                                    //                    if(surfId == 869 && nodeId == 483)
-                                    //                    {
-                                    //                        std::cout<<"SURF UPDATE push back "<<nodeId<<" to surface "<<surfId<<" in cell "<<index<<std::endl;
-                                    //                        std::cout<<" coordinates "<<x<<" "<<y<<" "<<z<<std::endl;
-                                    //                    }
+#ifdef DEBUG_VOXEL
+                                    auto it = std::find(voxel->surfaceCandidates[surfId].begin(), voxel->surfaceCandidates[surfId].end(), nodeId);
+                                    if (it != voxel->surfaceCandidates[surfId].end())
+                                    {
+                                        std::cout << "Error: Node " << nodeId << " already in surface candidates list for surface " << surfId << std::endl;
+                                        std::cout<<"oldIndex "<<voxel->nodesOld[nodeId]<<" newIndex "<<voxel->nodes[nodeId]<<std::endl;
+                                        // stop the program
+                                        std::abort();
+                                    }
+#endif
+#ifdef DEBUG_SURF
+#ifdef DEBUG_NODE
+                                    if(surfId == DEBUG_SURF && nodeId == DEBUG_NODE)
+                                    {
+                                        std::cout<<"SURF UPDATE push back "<<nodeId<<" to surface "<<surfId<<" in cell "<<index<<std::endl;
+                                        std::cout<<" coordinates "<<x<<" "<<y<<" "<<z<<std::endl;
+                                    }
+#endif
+#endif
                                     //
                                     voxel->surfaceCandidates[surfId].push_back(nodeId);
                                 }
@@ -757,19 +769,20 @@ extern "C"
                             const size_t oldIndex = voxel->nodesRemoteOld[nodeId];
                             const size_t newIndex = voxel->nodesRemote[nodeId];
                             // if oldIndex == DEAD , oldCoord = -1 -1 -1
-                            //const Node nodeCoordOld = index_to_coord(oldIndex, voxel->nbx, voxel->nby, voxel->nbz);
+                            // const Node nodeCoordOld = index_to_coord(oldIndex, voxel->nbx, voxel->nby, voxel->nbz);
                             //                            if(!is_in_bounds(nodeCoordOld, voxel->surfaceBoundsOld[surfId]) && oldIndex == newIndex)
                             {
+#ifdef DEBUG_VOXEL
                                 // find nodeId in the list, print an error if is already found
-                                //                                auto it = std::find(voxel->surfaceCandidatesRemote[surfId].begin(), voxel->surfaceCandidatesRemote[surfId].end(), nodeId);
-                                //                                if(it != voxel->surfaceCandidatesRemote[surfId].end())
-                                //                                {
-                                //                                    std::cout << "Process NodeRemote " << nodeId << " already in surface candidates list for surface " << surfId << std::endl;
-                                //                                    std::cout<<"oldIndex "<<voxel->nodesRemoteOld[nodeId]<<" newIndex "<<voxel->nodesRemote[nodeId]<<std::endl;
-                                //                                    // stop the program
-                                //                                    std::abort();
-                                //
-                                //                                }
+                                auto it = std::find(voxel->surfaceCandidatesRemote[surfId].begin(), voxel->surfaceCandidatesRemote[surfId].end(), nodeId);
+                                if(it != voxel->surfaceCandidatesRemote[surfId].end())
+                                {
+                                 std::cout << "Process NodeRemote " << nodeId << " already in surface candidates list for surface " << surfId << std::endl;
+                                 std::cout<<"oldIndex "<<voxel->nodesRemoteOld[nodeId]<<" newIndex "<<voxel->nodesRemote[nodeId]<<std::endl;
+                                 // stop the program
+                                 std::abort();
+                                }
+#endif 
                                 voxel->surfaceCandidatesRemote[surfId].push_back(nodeId);
                             }
                         }
@@ -813,9 +826,9 @@ extern "C"
                                 { // Remove if the node was in the old surface bounds, but not in the new surface bounds
 
 #ifdef DEBUG_SURF
-                                    if(surfId == DEBUG_SURF)
+                                    if (surfId == DEBUG_SURF)
                                     {
-                                        std::cout<<"PROCESS SURF DELETE remove node "<<nodeId<<" from surface "<<surfId<<" in cell "<<index<<std::endl;
+                                        std::cout << "PROCESS SURF DELETE remove node " << nodeId << " from surface " << surfId << " in cell " << index << std::endl;
                                     }
 #endif
                                     swap_and_pop(voxel->surfaceCandidatesRemote[surfId], nodeId);
