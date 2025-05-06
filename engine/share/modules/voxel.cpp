@@ -869,7 +869,7 @@ extern "C"
         voxel->surfaceBounds[surfId] = {-1, -1, -1, -1, -1, -1}; // Reset bounds to zero
     }
 
-    void inline Voxel_update_surf(void *v, int surfId, const GridMapper &mapper)
+    bool inline Voxel_update_surf(void *v, int surfId, const GridMapper &mapper)
     {
         Voxel *voxel = static_cast<Voxel *>(v);
         const Surf &newCoords = voxel->surfaceBounds[surfId];
@@ -878,7 +878,7 @@ extern "C"
         // If no change in surface bounds, return early
         if (voxel->surfaceBoundsOld[surfId] == voxel->surfaceBounds[surfId])
         {
-            return; // No change, no need to update
+            return false; // No change, no need to update
         }
 
         // Get references to old bounds for cleaner code
@@ -1133,6 +1133,7 @@ extern "C"
         }
 
         // voxel->surfaceBounds[surfId] = newCoords;
+        return true; // Indicate that the surface was updated
     }
     void Voxel_update_remote_coords(void *v, int *IREM, my_real *XREM, int RSIZ, int ISIZ, int NSNR)
     {
@@ -1221,6 +1222,7 @@ extern "C"
 
         voxel->nodesOld = voxel->nodes;
 
+
         for (int i = 0; i < nsn; ++i)
         {
             if (stfn[i] <= static_cast<my_real>(0))
@@ -1248,6 +1250,7 @@ extern "C"
         // Loop over the surfaces, add the surfaces to the cells it crosses
         voxel->surfaceBoundsOld = voxel->surfaceBounds;
 
+        size_t nb_surf_updated = 0;
         for (int i = 0; i < nrtm; i++)
         {
             if (stf[i] <= static_cast<my_real>(0))
@@ -1300,8 +1303,13 @@ extern "C"
             voxel->surfaceBounds[i][YMAX] = maxCoords[1];
             voxel->surfaceBounds[i][ZMAX] = maxCoords[2];
 
-            Voxel_update_surf(v, i, mapper);
+            bool updated = Voxel_update_surf(v, i, mapper);
+            if(updated)
+            {
+                nb_surf_updated++;
+            }
         }
+        std::cout << "Number of surfaces updated: " << nb_surf_updated <<" /" << nrtm << std::endl;           
         // update local nodes
         for (int i = 0; i < nsn; ++i)
         {
