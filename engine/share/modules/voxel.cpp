@@ -1,6 +1,8 @@
 #include "voxel.h"
 
 #define DEBUG_VOXEL 1
+#define DEBUG_SURF 0
+#define DEBUG_NODE 9705
 
 #ifdef MYREAL8
 #define my_real double
@@ -258,32 +260,38 @@ extern "C"
             // add the node to the nodes vector
             voxel->nodes[i] = mapper.mapToIndex(x, y, z);
 
-//              if(i == 337)
-//              {
-//                  std::cout<<"NODE "<<i<<" cell index "<<index<<std::endl;
-//                  std::cout<< "NODE "<<i<<" toIndex "<<mapper.toIndex(x, y, z)<<std::endl;                                       
-//                  auto Node = index_to_coord(voxel->nodes[i], voxel->nbx, voxel->nby, voxel->nbz);
-//                  std::cout<<"NODE "<<i<<" cell coord "<<Node[0]<<" "<<Node[1]<<" "<<Node[2]<<std::endl;
-//                  std::cout<<"NODE "<<i<<" cell index "<< COORD_TO_INDEX(Node[0], Node[1], Node[2], voxel->nbx, voxel->nby)<<std::endl;
-//                  std::cout<<"Global id "<<nsv[i]<<" local id "<<i<<std::endl;
-//              }
+#ifdef DEBUG_NODE
+              if(i == DEBUG_NODE)
+              {
+                  std::cout<<"NODE "<<i<<" cell index "<<index<<std::endl;
+                  std::cout<< "NODE "<<i<<" toIndex "<<mapper.toIndex(x, y, z)<<std::endl;                                       
+                  auto Node = index_to_coord(voxel->nodes[i], voxel->nbx, voxel->nby, voxel->nbz);
+                  std::cout<<"NODE "<<i<<" cell coord "<<Node[0]<<" "<<Node[1]<<" "<<Node[2]<<std::endl;
+                  std::cout<<"NODE "<<i<<" cell index "<< COORD_TO_INDEX(Node[0], Node[1], Node[2], voxel->nbx, voxel->nby)<<std::endl;
+                  std::cout<<"Global id "<<nsv[i]<<" local id "<<i<<std::endl;
+              }
+#endif
 
             // loop over the surfaces crossing the cell
             for (auto surfId : voxel->cells[index].surfaces)
             {
                 // check the 4 nodes
-//                if( i == 337)
-//                {
-//                    std::cout<<"NODE "<<i<<" in surface "<<surfId<<std::endl;
-//                }
+#ifdef DEBUG_NODE
+                if( i == DEBUG_NODE)
+                {
+                    std::cout<<"NODE "<<i<<" in surface "<<surfId<<std::endl;
+                }
+#endif
                 if (voxel->surfaceNodes[surfId][0] != i && voxel->surfaceNodes[surfId][1] != i &&
                     voxel->surfaceNodes[surfId][2] != i && voxel->surfaceNodes[surfId][3] != i)
                 {
-//                    if( i == 337)
-//                    {
-//                        std::cout<<"Add node "<<i<<" to surface "<<surfId<<" candidates"<<std::endl;                                                         
-//                    }
-//                    // add the node to the surfaceCandiates
+#ifdef DEBUG_NODE
+                    if( i == DEBUG_NODE)
+                    {
+                        std::cout<<"Add node "<<i<<" to surface "<<surfId<<" candidates"<<std::endl;                                                         
+                    }
+#endif
+                    // add the node to the surfaceCandiates
                     voxel->surfaceCandidates[surfId].push_back(i);
                 }
             }
@@ -317,26 +325,30 @@ extern "C"
                 for(auto surfId : voxel->cells[index].surfaces)
                 {
                     //write an error message if globId is already in the surfaceCandidates
-//                    auto it = std::find(voxel->surfaceCandidatesRemote[surfId].begin(), voxel->surfaceCandidatesRemote[surfId].end(), globId);
-//                    if(it != voxel->surfaceCandidatesRemote[surfId].end())
-//                    {
-//                        std::cout<<"Error: Initialize NodeRemote "<<globId<<" already in surface candidates list for surface "<<surfId<<std::endl;
-//                        std::cout<<"x= "<<x<<" y=" <<y<<" z= "<<z<<std::endl;
-//                        std::cout<<"Node coordinates "<<x<<" "<<y<<" "<<z<<std::endl;
-//                        std::cout<<"Cell index "<<index<<std::endl;
-//                        std::cout<<"Surface bounds "<<voxel->surfaceBounds[surfId][XMIN]<<" "<<voxel->surfaceBounds[surfId][YMIN]<<" "<<voxel->surfaceBounds[surfId][ZMIN]<<" "
-//                                 <<voxel->surfaceBounds[surfId][XMAX]<<" "<<voxel->surfaceBounds[surfId][YMAX]<<" "<<voxel->surfaceBounds[surfId][ZMAX]<<std::endl;
-//                        std::abort();
-//                    }
+#ifdef DEBUG_VOXEL
+                      auto it = std::find(voxel->surfaceCandidatesRemote[surfId].begin(), voxel->surfaceCandidatesRemote[surfId].end(), globId);
+                      if(it != voxel->surfaceCandidatesRemote[surfId].end())
+                      {
+                          std::cout<<"Error: Initialize NodeRemote "<<globId<<" already in surface candidates list for surface "<<surfId<<std::endl;
+                          std::cout<<"x= "<<x<<" y=" <<y<<" z= "<<z<<std::endl;
+                          std::cout<<"Node coordinates "<<x<<" "<<y<<" "<<z<<std::endl;
+                          std::cout<<"Cell index "<<index<<std::endl;
+                          std::cout<<"Surface bounds "<<voxel->surfaceBounds[surfId][XMIN]<<" "<<voxel->surfaceBounds[surfId][YMIN]<<" "<<voxel->surfaceBounds[surfId][ZMIN]<<" "
+                                   <<voxel->surfaceBounds[surfId][XMAX]<<" "<<voxel->surfaceBounds[surfId][YMAX]<<" "<<voxel->surfaceBounds[surfId][ZMAX]<<std::endl;
+                          std::abort();
+                      }
+#endif
 
                     // add the node to the surfaceCandiates
                     //std::cout<<"Add remote node "<<globId<<" to surface "<<surfId<<" candidates"<<std::endl;
                     voxel->surfaceCandidatesRemote[surfId].push_back(globId);
-//                    if(surfId == 0)
-//                    {
-//                        std::cout<<"Add remote node "<<globId<<" to surface "<<surfId<<" candidates"<<std::endl;
-//                        std::cout<<"Local id "<<locId<<std::endl;
-//                    }
+#ifdef DEBUG_SURF_REMOTE
+                      if(surfId == DEBUG_SURF)
+                      {
+                          std::cout<<"Add remote node "<<globId<<" to surface "<<surfId<<" candidates"<<std::endl;
+                          std::cout<<"Local id "<<locId<<std::endl;
+                      }
+#endif
                 }
             }
             else
@@ -1324,8 +1336,8 @@ extern "C"
                 auto it2 = std::find(voxel->surfaceCandidates[ne - 1].begin(), voxel->surfaceCandidates[ne - 1].end(), it);
                 if(it2 == voxel->surfaceCandidates[ne - 1].end() && !belongs_to_surf)
                 {
-                    std::cout<< "position voxel->nodes "<<it<<std::endl;
-                    std::cout << "Error: MISSING CANDIDATE " << it << " is in the surface bounds, but not in the candidates for surface " << ne-1 << std::endl;
+                    std::cout << "position voxel->nodes "<<it<<std::endl;
+                    std::cout << "Error: MISSING LOCAL CANDIDATE " << it << " is in the surface bounds, but not in the candidates for surface " << ne-1 << std::endl;
                     std::cout << "coordinate of the node: " << coord[0] << " " << coord[1] << " " << coord[2] << std::endl;
                     std::cout << "min Coordinate of the surface: " << voxel->surfaceBounds[ne - 1][XMIN] << " " << voxel->surfaceBounds[ne - 1][YMIN] << " " << voxel->surfaceBounds[ne - 1][ZMIN] << std::endl;
                     std::cout << "max Coordinate of the surface: " << voxel->surfaceBounds[ne - 1][XMAX] << " " << voxel->surfaceBounds[ne - 1][YMAX] << " " << voxel->surfaceBounds[ne - 1][ZMAX] << std::endl;
