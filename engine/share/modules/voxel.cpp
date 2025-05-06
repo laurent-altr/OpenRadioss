@@ -274,7 +274,14 @@ extern "C"
               {
                   std::cout<<"mapper.toIndex(x, y, z) "<<mapper.toIndex(x, y, z)<<std::endl;
                   std::cout<<"mapToIndex(x, y, z) "<<mapper.mapToIndex(x, y, z)<<std::endl;
+                  // print the coordinates of the node
+                    std::cout<<"NODE "<<i<<" coord "<<x<<" "<<y<<" "<<z<<std::endl;
 
+                  // convert back index to Node
+                   Node c1 = index_to_coord(mapper.toIndex(x,y,z), voxel->nbx, voxel->nby, voxel->nbz);
+                   Node c2 = index_to_coord(mapper.mapToIndex(x,y,z), voxel->nbx, voxel->nby, voxel->nbz);
+                    std::cout<<"NODE toIndex "<<i<<" coord "<<c1[0]<<" "<<c1[1]<<" "<<c1[2]<<std::endl;
+                    std::cout<<"NODE mapToIndex"<<i<<" coord "<<c2[0]<<" "<<c2[1]<<" "<<c2[2]<<std::endl;
                   std::cout<<"NODE "<<i<<" cell index "<<index<<std::endl;
                   std::cout<< "NODE "<<i<<" toIndex "<<mapper.toIndex(x, y, z)<<std::endl;                                       
                   auto Node = index_to_coord(voxel->nodes[i], voxel->nbx, voxel->nby, voxel->nbz);
