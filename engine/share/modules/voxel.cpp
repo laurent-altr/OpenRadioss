@@ -529,10 +529,10 @@ extern "C"
                 // remove the node from candidates list of all surfaces crossing the old cell
                 for (auto surfId : voxel->cells[oldIndex].surfaces)
                 {
-                    if(surfId == 0)
-                    {
-                        std::cout<<"NODE UPDATE remote swap and pop "<<nodeId<<" to surface "<<surfId<<" in cell "<<oldIndex<<std::endl;
-                    }
+//                    if(surfId == 0)
+//                    {
+//                        std::cout<<"NODE UPDATE remote swap and pop "<<nodeId<<" to surface "<<surfId<<" in cell "<<oldIndex<<std::endl;
+//                    }
                     swap_and_pop(voxel->surfaceCandidatesRemote[surfId], nodeId);
                 }
             }
@@ -742,11 +742,11 @@ extern "C"
  //                               if(is_in_bounds(nodeCoordOld, voxel->surfaceBoundsOld[surfId]) && !is_in_bounds(nodeCoordNew, voxel->surfaceBounds[surfId]))
                                 {  // Remove if the node was in the old surface bounds, but not in the new surface bounds 
 
-                                    if(surfId == 0)
-                                    {
-                                        std::cout<<"PROCESS SURF DELETE remove node "<<nodeId<<" from surface "<<surfId<<" in cell "<<index<<std::endl;
-                                    }
-                                    swap_and_pop(voxel->surfaceCandidatesRemote[surfId], nodeId);
+//                                    if(surfId == 0)
+//                                    {
+//                                        std::cout<<"PROCESS SURF DELETE remove node "<<nodeId<<" from surface "<<surfId<<" in cell "<<index<<std::endl;
+//                                    }
+//                                    swap_and_pop(voxel->surfaceCandidatesRemote[surfId], nodeId);
                                 }
                             }
                         }
