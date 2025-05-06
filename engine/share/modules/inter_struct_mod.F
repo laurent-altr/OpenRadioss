@@ -63,6 +63,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !                BOX_LIMIT_MAIN : float array ; min&max position of main nodes
 !$ENDCOMMENT
             TYPE inter_struct_type
+                integer :: nsnglob
                 INTEGER :: NMN_G     
                 INTEGER :: I_SK_OLD    
                 INTEGER :: INACTI,INACTII

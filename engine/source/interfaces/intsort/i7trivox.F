@@ -770,27 +770,13 @@ c provisoire
       LOGICAL TEST_V0
       INTEGER FIRST,NEW,LAST,IERROR
       LOGICAL DBG_type18_fvm
-      SAVE IIX,IIY,IIZ
       integer(c_int), pointer :: super_cand(:)
       type(c_ptr) :: super_cand_ptr
       integer :: nb
 C-----------------------------------------------
-      IF(ITASK == 0)THEN
-        REMOTE_S_NODE = 0
-        CPT_VOX0 = 0
-        ALLOCATE(NEXT_NOD(NSN+NSNR),STAT=IERROR)
-        IF(IERROR/=0) THEN
-          CALL ANCMSG(MSGID=19,ANMODE=ANINFO,
-     .        C1='(/INTER/TYPE7)')
-          CALL ARRET(2)
-        ENDIF
-        ALLOCATE(IIX(NSN+NSNR),IIY(NSN+NSNR),IIZ(NSN+NSNR),STAT=IERROR)
-        IF(IERROR/=0) THEN
-          CALL ANCMSG(MSGID=19,ANMODE=ANINFO,
-     .        C1='(/INTER/TYPE7)')
-          CALL ARRET(2)
-        ENDIF
-      END IF
+       ALLOCATE(IIX(NSNR))
+      IIX(:) = 0
+!     write(6,*) "ALLOCATED TO IIX",NSNR
 
       CALL MY_BARRIER !Barrier to wait init voxel and allocation NEX_NOD
 
@@ -863,6 +849,7 @@ C=======================================================================
 C 3   FACE RECOVERY AND ENUMERATION OF CANDIDATE COUPLES
 C=======================================================================
       J_STOK = 0
+
       IF(FLAGREMNODE == 2) THEN
         ALLOCATE(TAGREMNODE(NUMNOD+NUMFAKENODIGEO))
         DO I=1,NUMNOD+NUMFAKENODIGEO
@@ -917,105 +904,148 @@ C=======================================================================
         SZ = (XX3-XX1)*(YY4-YY2) - (YY3-YY1)*(XX4-XX2)
         S2 = SX*SX + SY*SY + SZ*SZ
 
-        call c_voxel_get_candidates(vox,ne,super_cand_ptr,nb)
+        call c_voxel_get_candidates(vox,ne,super_cand_ptr,nb,irect,nsv)
         call c_f_pointer(super_cand_ptr,super_cand,[nb])
-!       if(ne == 1) write(6,*) ne,"Number of candidates = ", nb
+        DO I=1,nb
+          DELNOD = 0
+          JJ = super_cand(I) + 1
+          !nnpelem = nnpelem + 1
+          IF(STFN(JJ) == ZERO)CYCLE
+          IF(JJ<=NSN)THEN
+            NN=NSV(JJ)
+            IF(FLAGREMNODE == 2) THEN
+              IF( TAGREMNODE(NSV(JJ)) == 1)GOTO 200
+            ENDIF
+            XS = X(1,NN)
+            YS = X(2,NN)
+            ZS = X(3,NN)
+            IF(IGAP /= 0)THEN
+              AAA = MARGE+CURV_MAX(NE)+MAX(MIN(GAPMAX,MAX(GAPMIN,GAP_S(JJ)+GAP_M(NE)))+DGAPLOAD,DRAD)
+            ENDIF
+          ELSE
+          ENDIF
+
+          IF(XS<=XMINE-AAA)GOTO 200
+          IF(XS>=XMAXE+AAA)GOTO 200
+          IF(YS<=YMINE-AAA)GOTO 200
+          IF(YS>=YMAXE+AAA)GOTO 200
+          IF(ZS<=ZMINE-AAA)GOTO 200
+          IF(ZS>=ZMAXE+AAA)GOTO 200
+
+          !sousestimation de la distance**2 pour elimination de candidats
+          !nnr0pelem = nnr0pelem + 1
+
+          D1X = XS - XX1
+          D1Y = YS - YY1
+          D1Z = ZS - ZZ1
+          D2X = XS - XX2
+          D2Y = YS - YY2
+          D2Z = ZS - ZZ2
+          DD1 = D1X*SX+D1Y*SY+D1Z*SZ
+          DD2 = D2X*SX+D2Y*SY+D2Z*SZ
+          IF(DD1*DD2 > ZERO)THEN
+            D2 = MIN(DD1*DD1,DD2*DD2)
+            A2 = AAA*AAA*S2
+            IF(D2 > A2)GOTO 200
+          ENDIF
+          J_STOK = J_STOK + 1
+          PROV_N(J_STOK) = JJ
+          PROV_E(J_STOK) = NE
+          IF(J_STOK == NVSIZ)THEN
+            CALL I7STO(
+     1         NVSIZ ,IRECT  ,X     ,NSV   ,II_STOK,
+     2         CAND_N,CAND_E ,MULNSN,NOINT ,MARGE  ,
+     3         I_MEM ,PROV_N ,PROV_E,ESHIFT,INACTI ,
+     4         IFQ   ,CAND_A ,CAND_P,IFPEN ,NSN    ,
+     5         OLDNUM,NSNROLD,IGAP  ,GAP   ,GAP_S  ,
+     6         GAP_M ,GAPMIN ,GAPMAX,CURV_MAX,NIN  ,
+     7         GAP_S_L,GAP_M_L,INTTH,DRAD,ITIED    ,
+     8         CAND_F ,DGAPLOAD)
+            IF(I_MEM==2)GOTO 100
+            J_STOK = 0
+          ENDIF
+  200     CONTINUE
+        ENDDO ! WHILE(JJ /= 0)
+
+!        call c_voxel_get_candidates_remote(vox,ne,IIX,nb)
+!        if(nb > nsnr) then
+!          write(6,*) "ERROR: too many candidates in remote node",nb,nsnr
+!          call arret(2)
+!        endif
+!        DO I=1,nb
+!          DELNOD = 0
+!          JJ = IIX(I) + NSN
+!          !nnpelem = nnpelem + 1
+!          IF(JJ<=NSN)THEN
+!          ELSE
+!            J=JJ-NSN
+!            IF(FLAGREMNODE == 2) THEN
+!              NN = IREM(1,J)
+!              K = KREMNOD(2*(NE-1)+2) + 1
+!              L = KREMNOD(2*(NE-1)+3)
+!              DO M=K,L
+!                IF(REMNOD(M) == -IREM(2,J) ) THEN
+!                  DELNOD = DELNOD + 1
+!                  EXIT
+!                ENDIF
+!              ENDDO
+!              IF(DELNOD /= 0)GOTO 300
+!            ENDIF
+!            XS = XREM(1,J)
+!            YS = XREM(2,J)
+!            ZS = XREM(3,J)
+!            IF(IGAP /= 0)THEN
+!              AAA = MARGE+CURV_MAX(NE)+MAX(MIN(GAPMAX,MAX(GAPMIN,XREM(9,J)+GAP_M(NE)))+DGAPLOAD,DRAD)
+!            ENDIF
+!          ENDIF
+!
+!          IF(XS<=XMINE-AAA)GOTO 300
+!          IF(XS>=XMAXE+AAA)GOTO 300
+!          IF(YS<=YMINE-AAA)GOTO 300
+!          IF(YS>=YMAXE+AAA)GOTO 300
+!          IF(ZS<=ZMINE-AAA)GOTO 300
+!          IF(ZS>=ZMAXE+AAA)GOTO 300
+!
+!          !sousestimation de la distance**2 pour elimination de candidats
+!          !nnr0pelem = nnr0pelem + 1
+!
+!          D1X = XS - XX1
+!          D1Y = YS - YY1
+!          D1Z = ZS - ZZ1
+!          D2X = XS - XX2
+!          D2Y = YS - YY2
+!          D2Z = ZS - ZZ2
+!          DD1 = D1X*SX+D1Y*SY+D1Z*SZ
+!          DD2 = D2X*SX+D2Y*SY+D2Z*SZ
+!          IF(DD1*DD2 > ZERO)THEN
+!            D2 = MIN(DD1*DD1,DD2*DD2)
+!            A2 = AAA*AAA*S2
+!            IF(D2 > A2)GOTO 300
+!          ENDIF
+!          J_STOK = J_STOK + 1
+!          PROV_N(J_STOK) = JJ
+!          PROV_E(J_STOK) = NE
+!          IF(J_STOK == NVSIZ)THEN
+!            CALL I7STO(
+!     1         NVSIZ ,IRECT  ,X     ,NSV   ,II_STOK,
+!     2         CAND_N,CAND_E ,MULNSN,NOINT ,MARGE  ,
+!     3         I_MEM ,PROV_N ,PROV_E,ESHIFT,INACTI ,
+!     4         IFQ   ,CAND_A ,CAND_P,IFPEN ,NSN    ,
+!     5         OLDNUM,NSNROLD,IGAP  ,GAP   ,GAP_S  ,
+!     6         GAP_M ,GAPMIN ,GAPMAX,CURV_MAX,NIN  ,
+!     7         GAP_S_L,GAP_M_L,INTTH,DRAD,ITIED    ,
+!     8         CAND_F ,DGAPLOAD)
+!            IF(I_MEM==2)GOTO 100
+!            J_STOK = 0
+!          ENDIF
+!  300     CONTINUE
+!        ENDDO ! WHILE(JJ /= 0)
 
 
 
-              ! nbpelem = nbpelem + 1
-
-c             JJ = VOXEL(IX,IY,IZ)
-c             DO WHILE(JJ /= 0)
-              DO I=1,nb
-                DELNOD = 0
-                JJ = super_cand(I) + 1
-
-                !nnpelem = nnpelem + 1
-                IF(STFN(JJ) == ZERO)CYCLE
-
-                IF(JJ<=NSN)THEN
-                  NN=NSV(JJ)
 
 
-                  IF(FLAGREMNODE == 2) THEN
-                    IF( TAGREMNODE(NSV(JJ)) == 1)GOTO 200
-                  ENDIF
-                  XS = X(1,NN)
-                  YS = X(2,NN)
-                  ZS = X(3,NN)
-                  IF(IGAP /= 0)THEN
-                    AAA = MARGE+CURV_MAX(NE)+MAX(MIN(GAPMAX,MAX(GAPMIN,GAP_S(JJ)+GAP_M(NE)))+DGAPLOAD,DRAD)
-                  ENDIF
-                ELSE
-                  J=JJ-NSN
-                  IF(FLAGREMNODE == 2) THEN
-                    NN = IREM(1,J)
-                    K = KREMNOD(2*(NE-1)+2) + 1
-                    L = KREMNOD(2*(NE-1)+3)
-                    DO M=K,L
-                      IF(REMNOD(M) == -IREM(2,J) ) THEN
-                        DELNOD = DELNOD + 1
-                        EXIT
-                      ENDIF
-                    ENDDO
-                    IF(DELNOD /= 0)GOTO 200
-                  ENDIF
 
-                  XS = XREM(1,J)
-                  YS = XREM(2,J)
-                  ZS = XREM(3,J)
-                  IF(IGAP /= 0)THEN
-                    AAA = MARGE+CURV_MAX(NE)+MAX(MIN(GAPMAX,MAX(GAPMIN,XREM(9,J)+GAP_M(NE)))+DGAPLOAD,DRAD)
-                  ENDIF
-                ENDIF
-
-                IF(XS<=XMINE-AAA)GOTO 200
-                IF(XS>=XMAXE+AAA)GOTO 200
-                IF(YS<=YMINE-AAA)GOTO 200
-                IF(YS>=YMAXE+AAA)GOTO 200
-                IF(ZS<=ZMINE-AAA)GOTO 200
-                IF(ZS>=ZMAXE+AAA)GOTO 200
-
-                !sousestimation de la distance**2 pour elimination de candidats
-                !nnr0pelem = nnr0pelem + 1
-
-                D1X = XS - XX1
-                D1Y = YS - YY1
-                D1Z = ZS - ZZ1
-                D2X = XS - XX2
-                D2Y = YS - YY2
-                D2Z = ZS - ZZ2
-                DD1 = D1X*SX+D1Y*SY+D1Z*SZ
-                DD2 = D2X*SX+D2Y*SY+D2Z*SZ
-                IF(DD1*DD2 > ZERO)THEN
-                  D2 = MIN(DD1*DD1,DD2*DD2)
-                  A2 = AAA*AAA*S2
-                  IF(D2 > A2)GOTO 200
-                ENDIF
-
-                !nnrpelem = nnrpelem + 1
-
-                J_STOK = J_STOK + 1
-                PROV_N(J_STOK) = JJ
-                PROV_E(J_STOK) = NE
-                !write(6,*) "J_STOK = ", J_STOK, "JJ = ", JJ, "NE = ", NE
-                IF(J_STOK == NVSIZ)THEN
-                  CALL I7STO(
-     1               NVSIZ ,IRECT  ,X     ,NSV   ,II_STOK,
-     2               CAND_N,CAND_E ,MULNSN,NOINT ,MARGE  ,
-     3               I_MEM ,PROV_N ,PROV_E,ESHIFT,INACTI ,
-     4               IFQ   ,CAND_A ,CAND_P,IFPEN ,NSN    ,
-     5               OLDNUM,NSNROLD,IGAP  ,GAP   ,GAP_S  ,
-     6               GAP_M ,GAPMIN ,GAPMAX,CURV_MAX,NIN  ,
-     7               GAP_S_L,GAP_M_L,INTTH,DRAD,ITIED    ,
-     8               CAND_F ,DGAPLOAD)
-                  IF(I_MEM==2)GOTO 100
-                  J_STOK = 0
-                ENDIF
-  200           CONTINUE
-                JJ = NEXT_NOD(JJ)
-              ENDDO ! WHILE(JJ /= 0)
         IF(FLAGREMNODE == 2) THEN
           K = KREMNOD(2*(NE-1)+1)+1
           L = KREMNOD(2*(NE-1)+2)
@@ -1090,10 +1120,10 @@ C=======================================================================
 C 7   DEALLOCATE
 C=======================================================================
       IF(ITASK == 0)THEN
-        DEALLOCATE(NEXT_NOD)
-        DEALLOCATE(IIX)
-        DEALLOCATE(IIY)
-        DEALLOCATE(IIZ)
+       IF(ALLOCATED(NEXT_NOD)) DEALLOCATE(NEXT_NOD)
+        IF(ALLOCATED(IIX)) DEALLOCATE(IIX)
+        IF(ALLOCATED(IIY)) DEALLOCATE(IIY)
+        IF(ALLOCATED(IIZ)) DEALLOCATE(IIZ)
       ENDIF
       IF(FLAGREMNODE == 2) THEN
         IF(ALLOCATED(TAGREMNODE)) DEALLOCATE(TAGREMNODE)

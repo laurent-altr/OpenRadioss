@@ -336,6 +336,8 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 #include "my_real.inc"
       my_real, DIMENSION(:,:), ALLOCATABLE :: XREM
       INTEGER, DIMENSION(:,:), ALLOCATABLE :: IREM
+      INTEGER :: XREM_SIZE
+      INTEGER :: IREM_SIZE
 C tableau temporaire boite secnd remote pour interface type 7, 10, 11 ou 20
 C declare DOUBLE PRECISION pour tranfert entier
 C XREM(1) : X(1)

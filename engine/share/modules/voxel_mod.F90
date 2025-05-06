@@ -42,10 +42,10 @@ module voxel_mod
   interface
 
     ! Voxel_new
-    function c_voxel_new(nbx, nby, nbz, nbsurfaces, nbnodes) bind(C, name="Voxel_new")
+    function c_voxel_new(nbx, nby, nbz, nbsurfaces, nbnodes,nbnodesGlob) bind(C, name="Voxel_new")
       import :: c_ptr, c_int
       implicit none
-      integer(c_int), value :: nbx, nby, nbz, nbsurfaces, nbnodes
+      integer(c_int), value :: nbx, nby, nbz, nbsurfaces, nbnodes, nbnodesGlob
       type(c_ptr) :: c_voxel_new
     end function c_voxel_new
 
@@ -58,7 +58,7 @@ module voxel_mod
     end subroutine c_voxel_set_bounds
 
     ! Voxel_initialize
-    subroutine c_voxel_initialize(v, irect, nrtm, gap, nsv, nsn, X, numnod, stf, stfn) bind(C, name="Voxel_initialize")
+    subroutine c_voxel_initialize(v, irect, nrtm, gap, nsv, nsn, X, numnod, stf, stfn, irem, xrem, rsiz, isiz, nsnr) bind(C, name="Voxel_initialize")
       import :: c_ptr, c_int, c_double, c_float
       implicit none
       type(c_ptr), value :: v
@@ -70,8 +70,14 @@ module voxel_mod
       real(my_real_kind), intent(in) :: X(*)
       real(my_real_kind), intent(in):: stf(*), stfn(*)
       integer(c_int), value :: numnod
+      integer(c_int), intent(in) :: irem(*)
+      real(my_real_kind), intent(in) :: xrem(*)
+      integer(c_int), value :: rsiz
+      integer(c_int), value :: isiz
+      integer(c_int), value :: nsnr
+
     end subroutine c_voxel_initialize
-    subroutine c_voxel_update(v, irect, nrtm, gap, nsv, nsn, X, numnod, stf, stfn) bind(C, name="Voxel_update")
+    subroutine c_voxel_update(v, irect, nrtm, gap, nsv, nsn, X, numnod, stf, stfn, irem, xrem, rsiz, isiz, nsnr) bind(C, name="Voxel_update")
       import :: c_ptr, c_int, c_double, c_float
       implicit none
       type(c_ptr), value :: v
@@ -83,6 +89,11 @@ module voxel_mod
       real(my_real_kind), intent(in) :: X(*)
       real(my_real_kind), intent(in):: stf(*), stfn(*)
       integer(c_int), value :: numnod
+      integer(c_int), intent(in) :: irem(*)
+      real(my_real_kind), intent(in) :: xrem(*)
+      integer(c_int), value :: rsiz
+      integer(c_int), value :: isiz
+      integer(c_int), value :: nsnr
     end subroutine c_voxel_update
 
 
@@ -104,13 +115,15 @@ module voxel_mod
     end function c_voxel_get_max_candidates
 
     ! Voxel_get_candidates
-    subroutine c_voxel_get_candidates(v, ne, cands, nb) bind(C, name="Voxel_get_candidates_data")
+    subroutine c_voxel_get_candidates(v, ne, cands, nb,irect,nsv) bind(C, name="Voxel_get_candidates_data")
       import :: c_ptr, c_int
       implicit none
       type(c_ptr), value :: v
       integer(c_int), value :: ne
       type(c_ptr), intent(out) :: cands
       integer(c_int) :: nb
+      integer(c_int), intent(in) :: irect(*)
+      integer(c_int), intent(in) :: nsv(*)
     end subroutine c_voxel_get_candidates
 
     subroutine c_voxel_get_bounds(v, xmin, ymin, zmin, xmax, ymax, zmax) bind(C, name="Voxel_get_bounds")
@@ -120,54 +133,35 @@ module voxel_mod
       real(c_double), intent(out) :: xmin, ymin, zmin, xmax, ymax, zmax
     end subroutine c_voxel_get_bounds
 
-    subroutine c_voxel_restart(v, nbx, nby, nbz, nbsurfaces, nbnodes) bind(C, name="Voxel_restart")
+    subroutine c_voxel_restart(v, nbx, nby, nbz, nbsurfaces, nbnodes, nbnodesGlob) bind(C, name="Voxel_restart")
       import :: c_ptr, c_int
       implicit none
       type(c_ptr), value :: v
-      integer(c_int), value :: nbx, nby, nbz, nbsurfaces, nbnodes
+      integer(c_int), value :: nbx, nby, nbz, nbsurfaces, nbnodes, nbnodesGlob
     end subroutine c_voxel_restart
 
+    subroutine c_voxel_get_candidates_remote(v, ne, cands, nb) bind(C, name="Voxel_get_candidates_remote")
+      import :: c_ptr, c_int
+      implicit none
+      type(c_ptr), value :: v
+      integer(c_int), value :: ne
+      integer(c_int), intent(inout) :: cands(*)
+      integer(c_int) :: nb
+    end subroutine c_voxel_get_candidates_remote
 
-
+    subroutine c_voxel_update_remote(v, irem, xrem, rsiz, isiz, nsnr) bind(C, name="Voxel_update_remote")
+      use iso_c_binding
+      implicit none
+      type(c_ptr), value :: v
+      integer(c_int), intent(in) :: irem(*)
+      real(my_real_kind), intent(in) :: xrem(*)
+      integer(c_int), value :: rsiz
+      integer(c_int), value :: isiz
+      integer(c_int), value :: nsnr
+    end subroutine c_voxel_update_remote
+ 
 
 
   end interface
-
-contains
-
-  ! Fortran wrapper functions (with more Fortran-friendly interfaces)
-
-  ! Create a new Voxel object
-  function voxel_new(nbx, nby, nbz, nbsurfaces, nbnodes) result(voxel)
-    integer, intent(inout) :: nbx, nby, nbz, nbsurfaces, nbnodes
-    type(c_ptr) :: voxel
-    
-    voxel = c_voxel_new(nbx, nby, nbz, nbsurfaces, nbnodes)
-  end function voxel_new
-
-  ! Set the bounds of a Voxel
-  subroutine voxel_set_bounds(voxel, xmin, ymin, zmin, xmax, ymax, zmax)
-    type(c_ptr), intent(inout) :: voxel
-    real(c_double), intent(in) :: xmin, ymin, zmin, xmax, ymax, zmax
-    
-    call c_voxel_set_bounds(voxel, xmin, ymin, zmin, xmax, ymax, zmax)
-  end subroutine voxel_set_bounds
-
-  ! Delete a Voxel object
-  subroutine voxel_delete(voxel)
-    type(c_ptr), intent(inout) :: voxel
-    
-    call c_voxel_delete(voxel)
-    voxel = c_null_ptr
-  end subroutine voxel_delete
-
-
-  ! Get the maximum number of candidates for a Voxel
-  function voxel_get_max_candidates(voxel) result(max_candidates)
-    type(c_ptr), intent(inout) :: voxel
-    integer :: max_candidates
-    
-    max_candidates = c_voxel_get_max_candidates(voxel)
-  end function voxel_get_max_candidates
 
 end module voxel_mod

@@ -156,6 +156,8 @@ C================================================================
 
         RSIZ = SORT_COMM(NIN)%RSIZ
         ISIZ = SORT_COMM(NIN)%ISIZ  
+        XREM_SIZE = RSIZ
+        IREM_SIZE = ISIZ
 
        IF(NSNR>0) THEN   !   nsn remote > 0 --> only on proc with nmn>0
         

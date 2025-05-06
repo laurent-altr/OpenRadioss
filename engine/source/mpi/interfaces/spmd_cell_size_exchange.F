@@ -311,9 +311,7 @@ C-----------------------------------------------
                         SORT_COMM(NIN)%DATA_PROC(P)%IBUF(L2+2) = ITAB(NOD)        
                         SORT_COMM(NIN)%DATA_PROC(P)%IBUF(L2+3) = KINET(NOD)
 !     save specifics IREM and XREM indexes for INT24 sorting
-                        SORT_COMM(NIN)%DATA_PROC(P)%IBUF(L2+4) = 0 !IGAPXREMP
-                        SORT_COMM(NIN)%DATA_PROC(P)%IBUF(L2+5) = 0 !I24XREMP        
-                        SORT_COMM(NIN)%DATA_PROC(P)%IBUF(L2+6) = 0 !I24IREMP
+                        SORT_COMM(NIN)%DATA_PROC(P)%IBUF(L2+4) = I + SORT_COMM(NIN)%OFFSET(ISPMD+1) !I + OFFSET
                         L = L + RSIZ
                         L2 = L2 + ISIZ
                     END DO
@@ -408,9 +406,9 @@ C -- IDTMINS_INT /= 0
                         I = INDEX(J)
                         NOD = INTBUF_TAB(NIN)%NSV(I)
                         !save specifics IREM and XREM indexes for INT24 sorting
-                        SORT_COMM(NIN)%DATA_PROC(P)%IBUF(L2+4) = IGAPXREMP
-                        SORT_COMM(NIN)%DATA_PROC(P)%IBUF(L2+5) = I24XREMP
-                        SORT_COMM(NIN)%DATA_PROC(P)%IBUF(L2+6) = I24IREMP
+                   !    SORT_COMM(NIN)%DATA_PROC(P)%IBUF(L2+4) = IGAPXREMP
+                   !    SORT_COMM(NIN)%DATA_PROC(P)%IBUF(L2+5) = I24XREMP
+                   !    SORT_COMM(NIN)%DATA_PROC(P)%IBUF(L2+6) = I24IREMP
                         L2 = L2 + ISIZ
                     END DO  
                 ENDIF   !   if nb/=0

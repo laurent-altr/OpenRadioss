@@ -2063,7 +2063,7 @@ c  Equivalent nodal force
               ! Initialization of INTER_STRUCT structure + allocation
               ALLOCATE( INTER_STRUCT(NINTER) )
               ALLOCATE( SORT_COMM(NINTER) )
-              CALL INTER_STRUCT_INIT(INTER_STRUCT,SORT_COMM)
+              CALL INTER_STRUCT_INIT(INTER_STRUCT,SORT_COMM,IPARI,NPARI,ISPMD)
 
 
 C========================================================================================

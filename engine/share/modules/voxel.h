@@ -177,6 +177,7 @@ public:
 struct Cell
 {
     std::vector<int> nodes;    // list of nodes in the cell
+    std::vector<int> nodesRemote; // list of remote nodes in the cell
     std::vector<int> surfaces; // list of surfaces in the cell
 };
 
@@ -184,14 +185,33 @@ struct Cell
 class Voxel
 {
 public:
+    size_t nsnGlob;
+    size_t nsnr;
     size_t nbx, nby, nbz;                            // dimension of the grid
     std::array<double, 6> bounds;                    // bounds of the grid
     //std::unordered_map<size_t, Cell> cells;          // map of nodes to their index in the vector
     std::vector<Cell> cells;                            // vector of cells
-    std::vector<size_t> nodes;                         // vector of secondary nodes
+    std::vector<size_t> nodes;                         // vector of secondary nodes cell index
+    std::vector<size_t> nodesOld;                      // vector of old nodes cell index
     std::vector<Surf> surfaceBounds;                 // vector of main surfaceBounds
+    std::vector<Surf> surfaceBoundsOld;             // vector of old surfaceBounds
     std::vector<std::array<int,4>> surfaceNodes;      // vector of secondary surfaceBounds
     std::vector<std::vector<int>> surfaceCandidates; // vector of secondary node candidates for broad phase collision with the surface
+
+    // in SPMD, some nodes are not in the domain of the current process: they are called remote nodes
+    std::vector<size_t> nodesRemote;                  // list of remote nodes in the cell
+    std::vector<size_t> nodesRemoteOld;               // list of remote nodes in the cell
+    std::vector<std::vector<int>> surfaceCandidatesRemote; // vector of remote node candidates for broad phase collision with the surface
+    // not all remote nodes are exchanged, we need a mapping from the global node id, to the id in the MPI buffer called IREM
+    std::vector<size_t> globalToLocalRemote; // vector of remote nodes mapping
+
+    // defines a function to tell if a coordinates is in the domain of the current process
+    bool isInDomain(double x, double y, double z) const
+    {
+        return (x >= bounds[XMIN] && x <= bounds[XMAX] &&
+                y >= bounds[YMIN] && y <= bounds[YMAX] &&
+                z >= bounds[ZMIN] && z <= bounds[ZMAX]);
+    }
 };
 
 #define COORD_TO_INDEX(x, y, z, nbx, nby) ((x) + (y) * (nbx) + (z) * (nbx) * (nby))
@@ -321,5 +341,12 @@ Node inline index_to_coord(size_t index, size_t nbx, size_t nby, size_t nbz)
     index /= nby;
     coord[2] = static_cast<short int>(index % nbz);
     return coord;
+}
+
+bool inline is_in_bounds(Node coord, const Surf &bounds)
+{
+    return (coord[0] >= bounds[XMIN] && coord[0] <= bounds[XMAX] &&
+            coord[1] >= bounds[YMIN] && coord[1] <= bounds[YMAX] &&
+            coord[2] >= bounds[ZMIN] && coord[2] <= bounds[ZMAX]);
 }
 

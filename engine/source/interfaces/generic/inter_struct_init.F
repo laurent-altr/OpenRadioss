@@ -28,7 +28,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
       !||    inter_sorting_mod   ../engine/share/modules/inter_sorting_mod.F
       !||    inter_struct_mod    ../engine/share/modules/inter_struct_mod.F
       !||====================================================================
-        SUBROUTINE INTER_STRUCT_INIT(INTER_STRUCT,SORT_COMM)
+        SUBROUTINE INTER_STRUCT_INIT(INTER_STRUCT,SORT_COMM,IPARI,NPARI,ISPMD)
 !$COMMENT
 !       INTER_STRUCT_INIT description
 !       initialization of INTER_STRUCT structure
@@ -42,6 +42,7 @@ C-----------------------------------------------
         USE INTBUFDEF_MOD  
         USE INTER_STRUCT_MOD
         USE INTER_SORTING_MOD
+        USE SPMD_MOD
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -56,10 +57,16 @@ C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
         TYPE(inter_struct_type), DIMENSION(NINTER), INTENT(inout) :: INTER_STRUCT   !   structure for interface
         TYPE(sorting_comm_type), DIMENSION(NINTER), INTENT(inout) :: SORT_COMM   ! structure for interface sorting comm
+        integer, intent(in) :: NPARI,ISPMD
+        integer, intent(in) :: IPARI(NPARI,NINTER)
+
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
         INTEGER :: KK,NIN
+        INTEGER :: NSN
+        integer :: buffer(NSPMD)
+        integer :: i
 !   ----------------------------------------
         DO KK=1,NINTER
             INTER_STRUCT(KK)%SIZE_CAND_A = 0   
@@ -78,6 +85,20 @@ C-----------------------------------------------
         DO KK=1,NINTER
             SORT_COMM(KK)%PROC_NUMBER = 0
             SORT_COMM(KK)%SIZE_GLOBAL_COARSE_CELL = 0
+            ALLOCATE(SORT_COMM(KK)%OFFSET(NSPMD))
+            SORT_COMM(KK)%OFFSET(1:NSPMD) = 0
+            buffer(1:NSPMD) = 0
+            SORT_COMM(KK)%OFFSET(ispmd+1) = IPARI(5,KK)
+!       subroutine spmd_allreduce_ints(sendbuf, recvbuf, buf_count, operation, comm)
+            call spmd_allreduce(SORT_COMM(KK)%OFFSET(1:NSPMD), buffer, NSPMD, SPMD_SUM)
+
+            inter_struct(kk)%nsnglob = SUM(buffer(1:NSPMD))
+            ! OFFSET TO 0
+            SORT_COMM(KK)%OFFSET(1:NSPMD) = 0
+            do i = 2, NSPMD
+                SORT_COMM(KK)%OFFSET(i) = SORT_COMM(KK)%OFFSET(i-1) + buffer(i-1)
+            enddo
+
             ALLOCATE( SORT_COMM(KK)%DATA_PROC(NSPMD) )
             ALLOCATE( SORT_COMM(KK)%REQ_SD2(NSPMD) )
             ALLOCATE( SORT_COMM(KK)%REQ_SD3(NSPMD) )

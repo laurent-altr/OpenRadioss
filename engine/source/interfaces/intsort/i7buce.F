@@ -442,7 +442,7 @@ C
               RETURN
             END
 
-            SUBROUTINE I7BUCE_VOX_NEW(VOX,numnod,
+            SUBROUTINE I7BUCE_VOX_NEW(VOX,numnod,nsnglob,
      1        X        ,IRECT   ,NSV     ,INACTI   ,CAND_P  ,
      2        NMN      ,NRTM    ,NSN     ,CAND_E   ,CAND_N  ,
      3        GAP      ,NOINT   ,II_STOK ,NCONTACT ,BMINMA  ,
@@ -477,6 +477,7 @@ C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
               TYPE(C_PTR) :: VOX
+              integer, intent(in) :: nsnglob
               INTEGER NMN,NSN, NOINT,IDT,INACTI,IFQ, NIN, NSNR, NSNROLD
               INTEGER, INTENT(in) :: NRTM !< number of segments per threads
               INTEGER, INTENT(in) :: TOTAL_NB_NRTM !< total number of segments
@@ -650,14 +651,14 @@ C
                   if(aabb(4) > bminma(4) .OR. aabb(5) > bminma(5) .OR. aabb(6) > bminma(6) .OR.
      .                 aabb(1) < bminma(1) .OR. aabb(2) < bminma(2) .OR. aabb(3) < bminma(3)) then
                     restart_from_scratch = .TRUE.
-                    call c_voxel_restart(vox,nbx, nby, nbz,nrtm,nsn)
+                    call c_voxel_restart(vox,nbx, nby, nbz,nrtm,nsn,nsnglob)
                   endif
                 endif
 
 
                 if(restart_from_scratch) then
                   IF(.NOT. C_ASSOCIATED(VOX)) THEN
-                    VOX = c_voxel_new(nbx, nby, nbz,nrtm,nsn)
+                    VOX = c_voxel_new(nbx, nby, nbz,nrtm,nsn,nsnglob)
                   ENDIF
                   delta = 100.0D0*MAXVAL(DIST)
                   aabb(1) = bminma(1) + delta
@@ -669,16 +670,20 @@ C
 
                   call c_voxel_set_bounds(VOX, aabb(4), aabb(5), aabb(6), aabb(1), aabb(2), aabb(3))
 !     write(6,*) "VOXEL INITIALIZATION",NRTM
-                  call c_voxel_initialize(VOX,IRECT,nrtm,DIST,nsv,nsn,X,numnod,stf, stfn)
+                  call c_voxel_initialize(VOX,IRECT,nrtm,DIST,nsv,nsn,X,numnod,stf, stfn,IREM,XREM,XREM_SIZE,IREM_SIZE,NSNR)
+
                   deallocate(DIST)
                 else
 !     write(6,*) "VOXEL ALREADY INITIALIZED"
-                 call c_voxel_update(VOX,IRECT,nrtm,DIST,nsv,nsn,X,numnod,stf, stfn)
+                 call c_voxel_update(VOX,IRECT,nrtm,DIST,nsv,nsn,X,numnod,stf, stfn,IREM,XREM,XREM_SIZE,IREM_SIZE,NSNR)
+
                  nbx = 1
                  nby = 1
                  nbz = 1
                 ENDIF
-
+          
+c              write(6,*) "CALL I7TRIVOX_NEW"
+c              call flush(6)
 
                 CALL I7TRIVOX_NEW(VOX,
      1            NSN     ,RENUM    ,NSNR     ,ISZNSNR  ,I_MEM   ,

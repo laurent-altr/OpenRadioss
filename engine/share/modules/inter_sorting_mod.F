@@ -88,6 +88,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
             !   ---------------------
             TYPE sorting_comm_type
                 INTEGER :: COMM              ! sub communicator for communication 
+                integer, dimension(:), allocatable :: OFFSET
                 !   -----------------------------
                 !   COARSE CELL data
                 INTEGER :: PROC_NUMBER              ! number of processor for the interface NIN
