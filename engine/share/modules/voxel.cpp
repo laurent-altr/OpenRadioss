@@ -1256,7 +1256,7 @@ extern "C"
         size_t nb_surf_updated = 0;
 
         // start measuring time here with chrono
-        auto start = std::chrono::high_resolution_clock::now();
+//        auto start = std::chrono::high_resolution_clock::now();
         for (int i = 0; i < nrtm; i++)
         {
             if (stf[i] <= static_cast<my_real>(0))
@@ -1310,17 +1310,17 @@ extern "C"
             voxel->surfaceBounds[i][ZMAX] = maxCoords[2];
 
             bool updated = Voxel_update_surf(v, i, mapper);
-            if(updated)
-            {
-                nb_surf_updated++;
-            }
+ //           if(updated)
+ //           {
+ //               nb_surf_updated++;
+ //           }
         }
-        auto stop = std::chrono::high_resolution_clock::now();
-        std::cout << "Number of surfaces updated: " << nb_surf_updated <<" /" << nrtm ;
-        std::cout <<" nbx,nby,nbz="<<voxel->nbx<<" "<<voxel->nby<<" "<<voxel->nbz;
-        // write duration in ms
-        std::chrono::duration<double, std::milli> duration = stop - start;
-        std::cout << "Time: " << duration.count() << " ms" << std::endl;   
+//        auto stop = std::chrono::high_resolution_clock::now();
+//        std::cout << "Number of surfaces updated: " << nb_surf_updated <<" /" << nrtm ;
+//        std::cout <<" nbx,nby,nbz="<<voxel->nbx<<" "<<voxel->nby<<" "<<voxel->nbz;
+//        // write duration in ms
+//        std::chrono::duration<double, std::milli> duration = stop - start;
+//        std::cout << "Time: " << duration.count() << " ms" << std::endl;   
         // update local nodes
         for (int i = 0; i < nsn; ++i)
         {
