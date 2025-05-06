@@ -688,7 +688,7 @@ C
                   newVoulume = (aabb(1)-aabb(4))*(aabb(2)-aabb(5))*(aabb(3)-aabb(6))
                    if(ABS(newVoulume-oldVoulume)/oldVoulume < 0.001D0) then
                      call c_voxel_set_bounds(VOX, aabb(4), aabb(5), aabb(6), aabb(1), aabb(2), aabb(3))
-                      write(6,*) "VOXEL BOUNDING BOX TRANSLATED"
+!                     write(6,*) "VOXEL BOUNDING BOX TRANSLATED"
                     endif
                    call c_voxel_update(VOX,IRECT,nrtm,DIST,nsv,nsn,X,numnod,stf, stfn,IREM,XREM,XREM_SIZE,IREM_SIZE,NSNR)
 
