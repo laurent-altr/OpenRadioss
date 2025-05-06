@@ -698,6 +698,11 @@ C
                      ! just update the bounds
                     write(6,*) "VOXEL TRANSLATED"
                    call c_voxel_set_bounds(VOX, aabb(4), aabb(5), aabb(6), aabb(1), aabb(2), aabb(3))
+                  else
+                    ! print the new and old bounding box sizes
+                     write(6,*) "VOXEL X=",aabb(1)-aabb(4),aabb_old(1)-aabb_old(4)                                             
+                     write(6,*) "VOXEL Y=",aabb(2)-aabb(5),aabb_old(2)-aabb_old(5)
+                     write(6,*) "VOXEL Z=",aabb(3)-aabb(6),aabb_old(3)-aabb_old(6)
                   endif
                  call c_voxel_update(VOX,IRECT,nrtm,DIST,nsv,nsn,X,numnod,stf, stfn,IREM,XREM,XREM_SIZE,IREM_SIZE,NSNR)
                  nbx = 1
