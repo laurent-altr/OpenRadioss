@@ -967,79 +967,79 @@ C=======================================================================
   200     CONTINUE
         ENDDO ! WHILE(JJ /= 0)
 
-!        call c_voxel_get_candidates_remote(vox,ne,IIX,nb)
-!        if(nb > nsnr) then
-!          write(6,*) "ERROR: too many candidates in remote node",nb,nsnr
-!          call arret(2)
-!        endif
-!        DO I=1,nb
-!          DELNOD = 0
-!          JJ = IIX(I) + NSN
-!          !nnpelem = nnpelem + 1
-!          IF(JJ<=NSN)THEN
-!          ELSE
-!            J=JJ-NSN
-!            IF(FLAGREMNODE == 2) THEN
-!              NN = IREM(1,J)
-!              K = KREMNOD(2*(NE-1)+2) + 1
-!              L = KREMNOD(2*(NE-1)+3)
-!              DO M=K,L
-!                IF(REMNOD(M) == -IREM(2,J) ) THEN
-!                  DELNOD = DELNOD + 1
-!                  EXIT
-!                ENDIF
-!              ENDDO
-!              IF(DELNOD /= 0)GOTO 300
-!            ENDIF
-!            XS = XREM(1,J)
-!            YS = XREM(2,J)
-!            ZS = XREM(3,J)
-!            IF(IGAP /= 0)THEN
-!              AAA = MARGE+CURV_MAX(NE)+MAX(MIN(GAPMAX,MAX(GAPMIN,XREM(9,J)+GAP_M(NE)))+DGAPLOAD,DRAD)
-!            ENDIF
-!          ENDIF
-!
-!          IF(XS<=XMINE-AAA)GOTO 300
-!          IF(XS>=XMAXE+AAA)GOTO 300
-!          IF(YS<=YMINE-AAA)GOTO 300
-!          IF(YS>=YMAXE+AAA)GOTO 300
-!          IF(ZS<=ZMINE-AAA)GOTO 300
-!          IF(ZS>=ZMAXE+AAA)GOTO 300
-!
-!          !sousestimation de la distance**2 pour elimination de candidats
-!          !nnr0pelem = nnr0pelem + 1
-!
-!          D1X = XS - XX1
-!          D1Y = YS - YY1
-!          D1Z = ZS - ZZ1
-!          D2X = XS - XX2
-!          D2Y = YS - YY2
-!          D2Z = ZS - ZZ2
-!          DD1 = D1X*SX+D1Y*SY+D1Z*SZ
-!          DD2 = D2X*SX+D2Y*SY+D2Z*SZ
-!          IF(DD1*DD2 > ZERO)THEN
-!            D2 = MIN(DD1*DD1,DD2*DD2)
-!            A2 = AAA*AAA*S2
-!            IF(D2 > A2)GOTO 300
-!          ENDIF
-!          J_STOK = J_STOK + 1
-!          PROV_N(J_STOK) = JJ
-!          PROV_E(J_STOK) = NE
-!          IF(J_STOK == NVSIZ)THEN
-!            CALL I7STO(
-!     1         NVSIZ ,IRECT  ,X     ,NSV   ,II_STOK,
-!     2         CAND_N,CAND_E ,MULNSN,NOINT ,MARGE  ,
-!     3         I_MEM ,PROV_N ,PROV_E,ESHIFT,INACTI ,
-!     4         IFQ   ,CAND_A ,CAND_P,IFPEN ,NSN    ,
-!     5         OLDNUM,NSNROLD,IGAP  ,GAP   ,GAP_S  ,
-!     6         GAP_M ,GAPMIN ,GAPMAX,CURV_MAX,NIN  ,
-!     7         GAP_S_L,GAP_M_L,INTTH,DRAD,ITIED    ,
-!     8         CAND_F ,DGAPLOAD)
-!            IF(I_MEM==2)GOTO 100
-!            J_STOK = 0
-!          ENDIF
-!  300     CONTINUE
-!        ENDDO ! WHILE(JJ /= 0)
+        call c_voxel_get_candidates_remote(vox,ne,IIX,nb,irem,xrem,xrem_size,irem_size,nsnr)
+        if(nb > nsnr) then
+          write(6,*) "ERROR: too many candidates in remote node",nb,nsnr
+          call arret(2)
+        endif
+        DO I=1,nb
+          DELNOD = 0
+          JJ = IIX(I) + NSN + 1
+          !nnpelem = nnpelem + 1
+          IF(JJ<=NSN)THEN
+          ELSE
+            J=JJ-NSN
+            IF(FLAGREMNODE == 2) THEN
+              NN = IREM(1,J)
+              K = KREMNOD(2*(NE-1)+2) + 1
+              L = KREMNOD(2*(NE-1)+3)
+              DO M=K,L
+                IF(REMNOD(M) == -IREM(2,J) ) THEN
+                  DELNOD = DELNOD + 1
+                  EXIT
+                ENDIF
+              ENDDO
+              IF(DELNOD /= 0)GOTO 300
+            ENDIF
+            XS = XREM(1,J)
+            YS = XREM(2,J)
+            ZS = XREM(3,J)
+            IF(IGAP /= 0)THEN
+              AAA = MARGE+CURV_MAX(NE)+MAX(MIN(GAPMAX,MAX(GAPMIN,XREM(9,J)+GAP_M(NE)))+DGAPLOAD,DRAD)
+            ENDIF
+          ENDIF
+
+          IF(XS<=XMINE-AAA)GOTO 300
+          IF(XS>=XMAXE+AAA)GOTO 300
+          IF(YS<=YMINE-AAA)GOTO 300
+          IF(YS>=YMAXE+AAA)GOTO 300
+          IF(ZS<=ZMINE-AAA)GOTO 300
+          IF(ZS>=ZMAXE+AAA)GOTO 300
+
+          !sousestimation de la distance**2 pour elimination de candidats
+          !nnr0pelem = nnr0pelem + 1
+
+          D1X = XS - XX1
+          D1Y = YS - YY1
+          D1Z = ZS - ZZ1
+          D2X = XS - XX2
+          D2Y = YS - YY2
+          D2Z = ZS - ZZ2
+          DD1 = D1X*SX+D1Y*SY+D1Z*SZ
+          DD2 = D2X*SX+D2Y*SY+D2Z*SZ
+          IF(DD1*DD2 > ZERO)THEN
+            D2 = MIN(DD1*DD1,DD2*DD2)
+            A2 = AAA*AAA*S2
+            IF(D2 > A2)GOTO 300
+          ENDIF
+          J_STOK = J_STOK + 1
+          PROV_N(J_STOK) = JJ
+          PROV_E(J_STOK) = NE
+          IF(J_STOK == NVSIZ)THEN
+            CALL I7STO(
+     1         NVSIZ ,IRECT  ,X     ,NSV   ,II_STOK,
+     2         CAND_N,CAND_E ,MULNSN,NOINT ,MARGE  ,
+     3         I_MEM ,PROV_N ,PROV_E,ESHIFT,INACTI ,
+     4         IFQ   ,CAND_A ,CAND_P,IFPEN ,NSN    ,
+     5         OLDNUM,NSNROLD,IGAP  ,GAP   ,GAP_S  ,
+     6         GAP_M ,GAPMIN ,GAPMAX,CURV_MAX,NIN  ,
+     7         GAP_S_L,GAP_M_L,INTTH,DRAD,ITIED    ,
+     8         CAND_F ,DGAPLOAD)
+            IF(I_MEM==2)GOTO 100
+            J_STOK = 0
+          ENDIF
+  300     CONTINUE
+        ENDDO ! WHILE(JJ /= 0)
 
 
 

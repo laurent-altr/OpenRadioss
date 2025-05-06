@@ -140,13 +140,19 @@ module voxel_mod
       integer(c_int), value :: nbx, nby, nbz, nbsurfaces, nbnodes, nbnodesGlob
     end subroutine c_voxel_restart
 
-    subroutine c_voxel_get_candidates_remote(v, ne, cands, nb) bind(C, name="Voxel_get_candidates_remote")
-      import :: c_ptr, c_int
+    subroutine c_voxel_get_candidates_remote(v, ne, cands, nb, irem,xrem,rsiz,isiz,nsnr) bind(C, name="Voxel_get_candidates_remote")
+      use iso_c_binding
       implicit none
       type(c_ptr), value :: v
       integer(c_int), value :: ne
       integer(c_int), intent(inout) :: cands(*)
       integer(c_int) :: nb
+      integer(c_int), intent(in) :: irem(*)
+      real(my_real_kind), intent(in) :: xrem(*)
+      integer(c_int), value :: rsiz
+      integer(c_int), value :: isiz
+      integer(c_int), value :: nsnr
+
     end subroutine c_voxel_get_candidates_remote
 
     subroutine c_voxel_update_remote(v, irem, xrem, rsiz, isiz, nsnr) bind(C, name="Voxel_update_remote")
