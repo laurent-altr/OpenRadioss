@@ -600,7 +600,7 @@ C Work on the reduce box
                   AAA = 0
                 ENDIF
 
-                AAA = (real(NMN) / (lx*ly+ly*lz+lz*lx))**(1.0D0/3.0D0)
+                AAA = (real(NMN) / (lx*ly*lz))**(1.0D0/3.0D0)
 
 
                 nbx = NINT(AAA*(BMINMA(1)-BMINMA(4)))
