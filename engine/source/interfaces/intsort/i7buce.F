@@ -513,6 +513,7 @@ C     REAL
               integer :: ne
               double precision :: aabb(6),delta
               double precision :: aabb_old(6)
+              double precision :: lx,ly,lz
               logical restart_from_scratch
 C-----------------------------------------------
 C     PROV
@@ -592,19 +593,26 @@ C Work on the reduce box
      .                     ((BMINMA(7)-BMINMA(10))*(BMINMA(8)-BMINMA(11))
      .                     +(BMINMA(8)-BMINMA(11))*(BMINMA(9)-BMINMA(12))
      .                     +(BMINMA(9)-BMINMA(12))*(BMINMA(7)-BMINMA(10))))
+                lx = BMINMA(1)-BMINMA(4)
+                ly = BMINMA(2)-BMINMA(5)
+                lz = BMINMA(3)-BMINMA(6)
                 ELSE
                   AAA = 0
                 ENDIF
 
-                AAA = 0.75*AAA
+                AAA = (real(NMN) / (lx*ly+ly*lz+lz*lx))**(1.0D0/3.0D0)
 
-                NBX = NINT(AAA*(BMINMA(7)-BMINMA(10)))
-                NBY = NINT(AAA*(BMINMA(8)-BMINMA(11)))
-                NBZ = NINT(AAA*(BMINMA(9)-BMINMA(12)))
+
+                nbx = NINT(AAA*(BMINMA(1)-BMINMA(4)))
+                nby = NINT(AAA*(BMINMA(2)-BMINMA(5)))
+                nbz = NINT(AAA*(BMINMA(3)-BMINMA(6)))
 C
                 NBX = MAX(NBX,1)
                 NBY = MAX(NBY,1)
                 NBZ = MAX(NBZ,1)
+                NBX = MIN(NBX,3000)
+                NBY = MIN(NBY,3000)
+                NBZ = MIN(NBZ,3000)
 
                 NBX8=NBX
                 NBY8=NBY
