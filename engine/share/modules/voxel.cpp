@@ -268,9 +268,13 @@ extern "C"
             // add the node to the nodes vector
             voxel->nodes[i] = mapper.mapToIndex(x, y, z);
 
+
 #ifdef DEBUG_NODE
               if(i == DEBUG_NODE)
               {
+                  std::cout<<"mapper.toIndex(x, y, z) "<<mapper.toIndex(x, y, z)<<std::endl;
+                  std::cout<<"mapToIndex(x, y, z) "<<mapper.mapToIndex(x, y, z)<<std::endl;
+
                   std::cout<<"NODE "<<i<<" cell index "<<index<<std::endl;
                   std::cout<< "NODE "<<i<<" toIndex "<<mapper.toIndex(x, y, z)<<std::endl;                                       
                   auto Node = index_to_coord(voxel->nodes[i], voxel->nbx, voxel->nby, voxel->nbz);
@@ -278,6 +282,9 @@ extern "C"
                   std::cout<<"NODE "<<i<<" cell index "<< COORD_TO_INDEX(Node[0], Node[1], Node[2], voxel->nbx, voxel->nby)<<std::endl;
                   std::cout<<"Global id "<<nsv[i]<<" local id "<<i<<std::endl;
                   std::cout<<"Number of surf in that cell "<<voxel->cells[index].surfaces.size()<<std::endl;
+                  //print bounds of the domain
+                    std::cout<<"bounds "<<voxel->bounds[XMIN]<<" "<<voxel->bounds[YMIN]<<" "<<voxel->bounds[ZMIN]<<" "
+                             <<voxel->bounds[XMAX]<<" "<<voxel->bounds[YMAX]<<" "<<voxel->bounds[ZMAX]<<std::endl;
               }
 #endif
 
