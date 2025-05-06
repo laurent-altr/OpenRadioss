@@ -661,7 +661,7 @@ C
                   aabb(5) = bminma(5) - delta
                   aabb(6) = bminma(6) - delta
                   newVoulume = (aabb(1)-aabb(4))*(aabb(2)-aabb(5))*(aabb(3)-aabb(6))
-                   if(ABS(newVoulume-oldVoulume)/oldVoulume < 0.01D0) then
+                   if(ABS(newVoulume-oldVoulume)/oldVoulume < 0.1D0) then
                      call c_voxel_set_bounds(VOX, aabb(4), aabb(5), aabb(6), aabb(1), aabb(2), aabb(3))
                       write(6,*) "VOXEL BOUNDING BOX TRANSLATED"
                   else
