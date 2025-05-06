@@ -225,6 +225,14 @@ extern "C"
                     for (short int kk = bounds[ZMIN]; kk <= bounds[ZMAX]; ++kk)
                     {
                         size_t index = COORD_TO_INDEX(ii, jj, kk, voxel->nbx, voxel->nby);
+#ifdef DEBUG_SURF
+                        if(i == DEBUG_SURF)
+                        {
+                            std::cout<<"Add surface "<<i<<" to cell "<<index<<std::endl;
+                            std::cout<<"Cell coord "<<ii<<" "<<jj<<" "<<kk<<std::endl;
+                            std::cout<<"Cell index "<<index<<std::endl;
+                        }
+#endif
                         voxel->cells[index].surfaces.push_back(i);
                     }
                 }
@@ -269,6 +277,7 @@ extern "C"
                   std::cout<<"NODE "<<i<<" cell coord "<<Node[0]<<" "<<Node[1]<<" "<<Node[2]<<std::endl;
                   std::cout<<"NODE "<<i<<" cell index "<< COORD_TO_INDEX(Node[0], Node[1], Node[2], voxel->nbx, voxel->nby)<<std::endl;
                   std::cout<<"Global id "<<nsv[i]<<" local id "<<i<<std::endl;
+                  std::cout<<"Number of surf in that cell "<<voxel->cells[index].surfaces.size()<<std::endl;
               }
 #endif
 
@@ -602,21 +611,23 @@ extern "C"
                     
 //                    if(!is_in_bounds(oldCoord, voxel->surfaceBoundsOld[surfId]) && is_in_bounds(newCoord, voxel->surfaceBounds[surfId]))
                     {
+#ifdef DEBUG_VOXEL
                         // print an error message if nodeId is already in the surfaceCandidates
-//                        auto it = std::find(voxel->surfaceCandidatesRemote[surfId].begin(), voxel->surfaceCandidatesRemote[surfId].end(), nodeId);
-//                        if (it != voxel->surfaceCandidatesRemote[surfId].end())
-//                        {
-//                            std::cout <<"Error: update NodeRemote " << nodeId << " already in surface candidates list for surface " << surfId << std::endl;
-//                            std::cout<<"Node coordinates "<<x<<" "<<y<<" "<<z<<std::endl;
-//                            std::cout<<"oldCoord "<<oldCoord[0]<<" "<<oldCoord[1]<<" "<<oldCoord[2]<<" oldIndex "<<oldIndex<<std::endl;
-//                            std::cout<<"newCoord "<<newCoord[0]<<" "<<newCoord[1]<<" "<<newCoord[2]<<" newIndex "<<newIndex<<std::endl;
-//                            std::cout<<"Cell index "<<newIndex<<std::endl;
-//                            std::cout<<"voxel->nodesRemote["<<nodeId<<"] "<<voxel->nodesRemote[nodeId]<<std::endl;
-//                            std::cout<<"voxel->nodesRemoteOld["<<nodeId<<"] "<<voxel->nodesRemoteOld[nodeId]<<std::endl;
-//                            std::cout<<"Surface bounds "<<voxel->surfaceBounds[surfId][XMIN]<<" "<<voxel->surfaceBounds[surfId][YMIN]<<" "<<voxel->surfaceBounds[surfId][ZMIN]<<" "
-//                                     <<voxel->surfaceBounds[surfId][XMAX]<<" "<<voxel->surfaceBounds[surfId][YMAX]<<" "<<voxel->surfaceBounds[surfId][ZMAX]<<std::endl;
-//                            std::abort();
-//                        }
+                          auto it = std::find(voxel->surfaceCandidatesRemote[surfId].begin(), voxel->surfaceCandidatesRemote[surfId].end(), nodeId);
+                          if (it != voxel->surfaceCandidatesRemote[surfId].end())
+                          {
+                              std::cout <<"Error: update NodeRemote " << nodeId << " already in surface candidates list for surface " << surfId << std::endl;
+                              std::cout<<"Node coordinates "<<x<<" "<<y<<" "<<z<<std::endl;
+                              std::cout<<"oldCoord "<<oldCoord[0]<<" "<<oldCoord[1]<<" "<<oldCoord[2]<<" oldIndex "<<oldIndex<<std::endl;
+                              std::cout<<"newCoord "<<newCoord[0]<<" "<<newCoord[1]<<" "<<newCoord[2]<<" newIndex "<<newIndex<<std::endl;
+                              std::cout<<"Cell index "<<newIndex<<std::endl;
+                              std::cout<<"voxel->nodesRemote["<<nodeId<<"] "<<voxel->nodesRemote[nodeId]<<std::endl;
+                              std::cout<<"voxel->nodesRemoteOld["<<nodeId<<"] "<<voxel->nodesRemoteOld[nodeId]<<std::endl;
+                              std::cout<<"Surface bounds "<<voxel->surfaceBounds[surfId][XMIN]<<" "<<voxel->surfaceBounds[surfId][YMIN]<<" "<<voxel->surfaceBounds[surfId][ZMIN]<<" "
+                                       <<voxel->surfaceBounds[surfId][XMAX]<<" "<<voxel->surfaceBounds[surfId][YMAX]<<" "<<voxel->surfaceBounds[surfId][ZMAX]<<std::endl;
+                              std::abort();
+                          }
+#endif
                         voxel->surfaceCandidatesRemote[surfId].push_back(nodeId);
                    }
                 }
