@@ -15,7 +15,8 @@ constexpr size_t ZMIN = 2;
 constexpr size_t XMAX = 3;
 constexpr size_t YMAX = 4;
 constexpr size_t ZMAX = 5;
-constexpr size_t DEAD = std::numeric_limits<size_t>::max();
+constexpr size_t DEAD = std::numeric_limits<int>::max();
+constexpr int DEAD_NODE = std::numeric_limits<int>::max(); 
 
 using Node = std::array<short int, 3>; // coordinate id of the cell containing that node
 using Surf = std::array<short int, 6>; // a surface can cross multiple cells
@@ -331,6 +332,10 @@ Node inline index_to_coord(size_t index, size_t nbx, size_t nby, size_t nbz)
     // Calculate maximum valid index
     size_t max_index = nbx * nby * nbz - 1;
 
+    if(index == DEAD)
+    {
+        return {-1, -1, -1}; // Return invalid coordinates
+    }
     // Clamp index to valid range
     index = (index > max_index) ? max_index : index;
 
