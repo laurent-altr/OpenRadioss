@@ -691,18 +691,18 @@ C
                   newlen = max(newlen, (aabb(2) - aabb(5)))
                   newlen = max(newlen, (aabb(3) - aabb(6)))
                    ! if translation: each length did not change
-                   if( abs(abs(aabb(1)-aabb(4)) - abs(aabb_old(1)-aabb_old(4))) < 1.0D0-3 *newLen .AND.
-     .                 abs(abs(aabb(2)-aabb(5)) - abs(aabb_old(2)-aabb_old(5))) < 1.0D0-3 *newLen .AND.  
-     .                 abs(abs(aabb(3)-aabb(6)) - abs(aabb_old(3)-aabb_old(6))) < 1.0D0-3 *newLen  ) then
+                   if( abs(abs(aabb(1)-aabb(4)) - abs(aabb_old(1)-aabb_old(4))) < 1.D-3 *newLen .AND.
+     .                 abs(abs(aabb(2)-aabb(5)) - abs(aabb_old(2)-aabb_old(5))) < 1.D-3 *newLen .AND.  
+     .                 abs(abs(aabb(3)-aabb(6)) - abs(aabb_old(3)-aabb_old(6))) < 1.D-3 *newLen  ) then
                      ! no need to reinitialize the voxel
                      ! just update the bounds
                     write(6,*) "VOXEL TRANSLATED"
                    call c_voxel_set_bounds(VOX, aabb(4), aabb(5), aabb(6), aabb(1), aabb(2), aabb(3))
                   else
                     ! print the new and old bounding box sizes
-                     write(6,*) "VOXEL X=",aabb(1)-aabb(4),aabb_old(1)-aabb_old(4)                                             
-                     write(6,*) "VOXEL Y=",aabb(2)-aabb(5),aabb_old(2)-aabb_old(5)
-                     write(6,*) "VOXEL Z=",aabb(3)-aabb(6),aabb_old(3)-aabb_old(6)
+                     write(6,*) "VOXEL DX=",aabb(1)-aabb(4)-(aabb_old(1)-aabb_old(4)) 
+                     write(6,*) "VOXEL DY=",aabb(2)-aabb(5)-(aabb_old(2)-aabb_old(5)) 
+                     write(6,*) "VOXEL DZ=",aabb(3)-aabb(6)-(aabb_old(3)-aabb_old(6))
                   endif
                  call c_voxel_update(VOX,IRECT,nrtm,DIST,nsv,nsn,X,numnod,stf, stfn,IREM,XREM,XREM_SIZE,IREM_SIZE,NSNR)
                  nbx = 1
