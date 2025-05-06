@@ -654,7 +654,13 @@ C
      .                 aabb(1) < bminma(1) .OR. aabb(2) < bminma(2) .OR. aabb(3) < bminma(3)) then
                     restart_from_scratch = .TRUE.
                     call c_voxel_restart(vox,nbx, nby, nbz,nrtm,nsn,nsnglob)
-                    write(6,*) "VOXEL RESTARTED"
+                    write(6,*) "VOXEL RESTARTED",100.0D0*MAXVAL(DIST)
+                    write(6,*) "VOXEL DXMAX=",aabb(1), bminma(1)
+                    write(6,*) "VOXEL DYMAX=",aabb(2), bminma(2)
+                    write(6,*) "VOXEL DZMAX=",aabb(3), bminma(3)
+                    write(6,*) "VOXEL DXMIN=",aabb(4), bminma(4)
+                    write(6,*) "VOXEL DYMIN=",aabb(5), bminma(5)
+                    write(6,*) "VOXEL DZMIN=",aabb(6), bminma(6)
                   endif
                 endif
 
@@ -700,9 +706,9 @@ C
                    call c_voxel_set_bounds(VOX, aabb(4), aabb(5), aabb(6), aabb(1), aabb(2), aabb(3))
                   else
                     ! print the new and old bounding box sizes
-                     write(6,*) "VOXEL DX=",aabb(1)-aabb(4)-(aabb_old(1)-aabb_old(4)) 
-                     write(6,*) "VOXEL DY=",aabb(2)-aabb(5)-(aabb_old(2)-aabb_old(5)) 
-                     write(6,*) "VOXEL DZ=",aabb(3)-aabb(6)-(aabb_old(3)-aabb_old(6))
+                     write(6,*) "VOXEL DX=",aabb(1)-aabb(4)-(aabb_old(1)-aabb_old(4)),1.D-3*newLen 
+                     write(6,*) "VOXEL DY=",aabb(2)-aabb(5)-(aabb_old(2)-aabb_old(5)),1.D-3*newLen 
+                     write(6,*) "VOXEL DZ=",aabb(3)-aabb(6)-(aabb_old(3)-aabb_old(6)),1.D-3*newLen 
                   endif
                  call c_voxel_update(VOX,IRECT,nrtm,DIST,nsv,nsn,X,numnod,stf, stfn,IREM,XREM,XREM_SIZE,IREM_SIZE,NSNR)
                  nbx = 1
