@@ -696,7 +696,7 @@ C
      .                 abs(abs(aabb(3)-aabb(6)) - abs(aabb_old(3)-aabb_old(6))) < 1.D-3 *newLen  ) then
                      ! no need to reinitialize the voxel
                      ! just update the bounds
-                    write(6,*) "VOXEL TRANSLATED"
+!                   write(6,*) "VOXEL TRANSLATED"
                    call c_voxel_set_bounds(VOX, aabb(4), aabb(5), aabb(6), aabb(1), aabb(2), aabb(3))
                   else
                     ! print the new and old bounding box sizes
