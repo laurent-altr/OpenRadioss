@@ -71,19 +71,23 @@ public:
         rz = rz - floor(rz);
         
         // Convert to grid indices
-        size_t ix = static_cast<size_t>(rx * nbx);
-        size_t iy = static_cast<size_t>(ry * nby);
-        size_t iz = static_cast<size_t>(rz * nbz);
+        short int ix = static_cast<short int>(rx * nbx);
+        short int iy = static_cast<short int>(ry * nby);
+        short int iz = static_cast<short int>(rz * nbz);
         
         // Ensure indices are within bounds
         ix = (ix >= nbx) ? nbx - 1 : ix;
         iy = (iy >= nby) ? nby - 1 : iy;
         iz = (iz >= nbz) ? nbz - 1 : iz;
+
+        ix = (ix < 0) ? 0 : ix;
+        iy = (iy < 0) ? 0 : iy;
+        iz = (iz < 0) ? 0 : iz;
         
         return {
-            static_cast<short int>(ix),
-            static_cast<short int>(iy),
-            static_cast<short int>(iz)
+            ix,
+            iy,
+            iz
         };
     }
 
@@ -130,19 +134,24 @@ public:
         rz = rz - floor(rz);
         
         // Convert to grid indices with special handling for max boundary
-        size_t ix = xAtMax ? (nbx - 1) : static_cast<size_t>(rx * nbx);
-        size_t iy = yAtMax ? (nby - 1) : static_cast<size_t>(ry * nby);
-        size_t iz = zAtMax ? (nbz - 1) : static_cast<size_t>(rz * nbz);
+        short int ix = xAtMax ? (nbx - 1) : static_cast<short int>(rx * nbx);
+        short int iy = yAtMax ? (nby - 1) : static_cast<short int>(ry * nby);
+        short int iz = zAtMax ? (nbz - 1) : static_cast<short int>(rz * nbz);
         
         // Ensure indices are within bounds
         ix = (ix >= nbx) ? nbx - 1 : ix;
         iy = (iy >= nby) ? nby - 1 : iy;
         iz = (iz >= nbz) ? nbz - 1 : iz;
+
+        ix = (ix < 0) ? 0 : ix;
+        iy = (iy < 0) ? 0 : iy;
+        iz = (iz < 0) ? 0 : iz;
+        
         
         return {
-            static_cast<short int>(ix),
-            static_cast<short int>(iy),
-            static_cast<short int>(iz)
+            ix,
+            iy,
+            iz
         };
     }
     

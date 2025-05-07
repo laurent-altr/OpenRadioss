@@ -599,8 +599,8 @@ C Work on the reduce box
                 ELSE
                   AAA = 0
                 ENDIF
-
-                AAA = (real(NMN) / (lx*ly*lz))**(1.0D0/3.0D0)
+                AAA = 0.75*AAA
+                !AAA = (real(NMN) / (lx*ly*lz))**(1.0D0/3.0D0)
 
 
                 nbx = NINT(AAA*(BMINMA(1)-BMINMA(4)))
@@ -662,15 +662,15 @@ C
      .                 aabb(1) < bminma(1) .OR. aabb(2) < bminma(2) .OR. aabb(3) < bminma(3)) then
                     restart_from_scratch = .TRUE.
                     call c_voxel_restart(vox,nbx, nby, nbz,nrtm,nsn,nsnglob)
-                    if(NRTM > 0 ) then
-                    write(6,*) "VOXEL RESTARTED",100.0D0*MAXVAL(DIST)
-                    write(6,*) "VOXEL DXMAX=",aabb(1), bminma(1)
-                    write(6,*) "VOXEL DYMAX=",aabb(2), bminma(2)
-                    write(6,*) "VOXEL DZMAX=",aabb(3), bminma(3)
-                    write(6,*) "VOXEL DXMIN=",aabb(4), bminma(4)
-                    write(6,*) "VOXEL DYMIN=",aabb(5), bminma(5)
-                    write(6,*) "VOXEL DZMIN=",aabb(6), bminma(6)
-                    endif
+c                   if(NRTM > 0 ) then
+c                   write(6,*) "VOXEL RESTARTED",100.0D0*MAXVAL(DIST)
+c                   write(6,*) "VOXEL DXMAX=",aabb(1), bminma(1)
+c                   write(6,*) "VOXEL DYMAX=",aabb(2), bminma(2)
+c                   write(6,*) "VOXEL DZMAX=",aabb(3), bminma(3)
+c                   write(6,*) "VOXEL DXMIN=",aabb(4), bminma(4)
+c                   write(6,*) "VOXEL DYMIN=",aabb(5), bminma(5)
+c                   write(6,*) "VOXEL DZMIN=",aabb(6), bminma(6)
+c                   endif
                   endif
                 endif
 
@@ -694,29 +694,29 @@ C
                   deallocate(DIST)
                 else
                 !! check if the  bounding box  has the same sizes
-                  oldVoulume = (aabb(1)-aabb(4))*(aabb(2)-aabb(5))*(aabb(3)-aabb(6))
-                  aabb_old(1:6) = aabb(1:6)
-                  delta = 100.0D0*MAXVAL(DIST)
-                  aabb(1) = bminma(1) + delta
-                  aabb(2) = bminma(2) + delta
-                  aabb(3) = bminma(3) + delta
-                  aabb(4) = bminma(4) - delta
-                  aabb(5) = bminma(5) - delta
-                  aabb(6) = bminma(6) - delta
-                  newlen = (aabb(1) - aabb(4))
-                  newlen = max(newlen, (aabb(2) - aabb(5)))
-                  newlen = max(newlen, (aabb(3) - aabb(6)))
-                   ! if translation: each length did not change
-                   if( abs(abs(aabb(1)-aabb(4)) - abs(aabb_old(1)-aabb_old(4))) < 1.D-4 *newLen .AND.
-     .                 abs(abs(aabb(2)-aabb(5)) - abs(aabb_old(2)-aabb_old(5))) < 1.D-4 *newLen .AND.  
-     .                 abs(abs(aabb(3)-aabb(6)) - abs(aabb_old(3)-aabb_old(6))) < 1.D-4 *newLen  ) then
-                     ! no need to reinitialize the voxel
-                     ! just update the bounds
-!                   write(6,*) "VOXEL TRANSLATED"
-                   call c_voxel_set_bounds(VOX, aabb(4), aabb(5), aabb(6), aabb(1), aabb(2), aabb(3))
-                  else if(nrtm > 0 ) then
-                    ! print the new and old bounding box sizes
-                  endif
+c                 oldVoulume = (aabb(1)-aabb(4))*(aabb(2)-aabb(5))*(aabb(3)-aabb(6))
+c                 aabb_old(1:6) = aabb(1:6)
+c                 delta = 100.0D0*MAXVAL(DIST)
+c                 aabb(1) = bminma(1) + delta
+c                 aabb(2) = bminma(2) + delta
+c                 aabb(3) = bminma(3) + delta
+c                 aabb(4) = bminma(4) - delta
+c                 aabb(5) = bminma(5) - delta
+c                 aabb(6) = bminma(6) - delta
+c                 newlen = (aabb(1) - aabb(4))
+c                 newlen = max(newlen, (aabb(2) - aabb(5)))
+c                 newlen = max(newlen, (aabb(3) - aabb(6)))
+c                  ! if translation: each length did not change
+c                  if( abs(abs(aabb(1)-aabb(4)) - abs(aabb_old(1)-aabb_old(4))) < 1.D-4 *newLen .AND.
+c    .                 abs(abs(aabb(2)-aabb(5)) - abs(aabb_old(2)-aabb_old(5))) < 1.D-4 *newLen .AND.  
+c    .                 abs(abs(aabb(3)-aabb(6)) - abs(aabb_old(3)-aabb_old(6))) < 1.D-4 *newLen  ) then
+c                    ! no need to reinitialize the voxel
+c                    ! just update the bounds
+c                   write(6,*) "VOXEL TRANSLATED"
+c                  call c_voxel_set_bounds(VOX, aabb(4), aabb(5), aabb(6), aabb(1), aabb(2), aabb(3))
+c                 else if(nrtm > 0 ) then
+c                   ! print the new and old bounding box sizes
+c                 endif
                  call c_voxel_update(VOX,IRECT,nrtm,DIST,nsv,nsn,X,numnod,stf, stfn,IREM,XREM,XREM_SIZE,IREM_SIZE,NSNR)
                  nbx = 1
                  nby = 1

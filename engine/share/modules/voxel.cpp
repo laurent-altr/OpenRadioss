@@ -1256,7 +1256,7 @@ extern "C"
         size_t nb_surf_updated = 0;
 
         // start measuring time here with chrono
-//        auto start = std::chrono::high_resolution_clock::now();
+        auto start = std::chrono::high_resolution_clock::now();
         for (int i = 0; i < nrtm; i++)
         {
             if (stf[i] <= static_cast<my_real>(0))
@@ -1293,15 +1293,6 @@ extern "C"
             Node minCoords = mapper.mapMin(xmin, ymin, zmin);
             Node maxCoords = mapper.mapMax(xmax, ymax, zmax);
 
-            // Ensure coordinates are within valid grid range
-            minCoords[0] = std::max(minCoords[0], static_cast<short int>(0));
-            minCoords[1] = std::max(minCoords[1], static_cast<short int>(0));
-            minCoords[2] = std::max(minCoords[2], static_cast<short int>(0));
-
-            maxCoords[0] = std::min(maxCoords[0], static_cast<short int>(voxel->nbx - 1));
-            maxCoords[1] = std::min(maxCoords[1], static_cast<short int>(voxel->nby - 1));
-            maxCoords[2] = std::min(maxCoords[2], static_cast<short int>(voxel->nbz - 1));
-
             voxel->surfaceBounds[i][XMIN] = minCoords[0];
             voxel->surfaceBounds[i][YMIN] = minCoords[1];
             voxel->surfaceBounds[i][ZMIN] = minCoords[2];
@@ -1315,13 +1306,15 @@ extern "C"
  //               nb_surf_updated++;
  //           }
         }
-//        auto stop = std::chrono::high_resolution_clock::now();
 //        std::cout << "Number of surfaces updated: " << nb_surf_updated <<" /" << nrtm ;
 //        std::cout <<" nbx,nby,nbz="<<voxel->nbx<<" "<<voxel->nby<<" "<<voxel->nbz;
 //        // write duration in ms
-//        std::chrono::duration<double, std::milli> duration = stop - start;
-//        std::cout << "Time: " << duration.count() << " ms" << std::endl;   
+          auto stop = std::chrono::high_resolution_clock::now();
+          std::chrono::duration<double, std::milli> duration = stop - start;
+          std::cout << "Update surf time: " << duration.count() << " ms" << std::endl;   
         // update local nodes
+
+        start = std::chrono::high_resolution_clock::now();
         for (int i = 0; i < nsn; ++i)
         {
             if (stfn[i] <= static_cast<my_real>(0))
@@ -1336,6 +1329,9 @@ extern "C"
             const double z = static_cast<double>(X[3 * i1 + 2]);
             Voxel_update_node(v, i, mapper);
         }
+        stop = std::chrono::high_resolution_clock::now();
+        duration = stop - start;
+        std::cout << "Update node time: " << duration.count() << " ms" << std::endl;
         // update remote nodes
         //         if(voxel->nodesRemote.size() > 170)
         //        {
@@ -1343,7 +1339,11 @@ extern "C"
         //        std::cout<<"END-1 Node remote old of 170 "<<voxel->nodesRemoteOld[170]<<std::endl;
         //        }
 
+        start = std::chrono::high_resolution_clock::now();
         Voxel_update_remote(v, IREM, XREM, RSIZ, ISIZ, NSNR);
+        stop = std::chrono::high_resolution_clock::now();
+        duration = stop - start;
+        std::cout << "Update remote time: " << duration.count() << " ms" << std::endl;
         //        if(voxel->nodesRemote.size() > 170)
         //       {
         //       std::cout<<"END Node remote new of 170 "<<voxel->nodesRemote[170]<<std::endl;
