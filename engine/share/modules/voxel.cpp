@@ -1548,16 +1548,12 @@ extern "C"
             const size_t index = voxel->surfaceCandidatesRemote[id][i];
             // convert the global id from 1 to nsnGlob, into a local id in the MPI buffer IREM
             const int locId = voxel->globalToIREM[index];
-
+#ifdef DEBUG_VOXEL
             if (locId == DEAD)
             {
-#ifdef DEBUG_VOXEL
                 std::cout << "ERROR: candidate " << index <<" for surf "<<ne-1<< " is DEAD" << std::endl;
                 std::abort();
-#endif
-                continue; // skip dead nodes
             }
-#ifdef DEBUG_VOXEL
             if (i > voxel->nsnr)
             {
                 std::cout << "Error: too many candidates for surface " << ne << std::endl;
