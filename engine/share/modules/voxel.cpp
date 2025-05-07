@@ -1645,7 +1645,7 @@ extern "C"
 #endif
 
         // set the number of candidates
-        *nb = counter;
+        *nb = static_cast<int>(voxel->surfaceCandidatesRemote[id].size());
         toc(FunctionId::GET_CAND_REMOTE);
     }
 }
