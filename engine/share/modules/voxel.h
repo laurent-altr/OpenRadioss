@@ -10,6 +10,7 @@
 #include <limits>
 #include <chrono>
 #include <mutex>
+#include <iomanip>
 
 constexpr size_t XMIN = 0;
 constexpr size_t YMIN = 1;
@@ -491,8 +492,8 @@ public:
                 auto functionId = static_cast<FunctionId>(i);
                 auto seconds = std::chrono::duration_cast<std::chrono::duration<double>>(totalTime).count();
 
-                std::cout << getFunctionName(functionId) << ": Total " << seconds << " s, Calls " << count << ", Avg " << (seconds / count) << " s/call" << std::endl;
-            }
+                std::cout << std::left << std::setw(25) << getFunctionName(functionId) << ": Total " << seconds << " s, Calls " << count << std::endl;
+            } 
         }
     }
     // Reset all timings
