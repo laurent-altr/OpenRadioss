@@ -1,8 +1,5 @@
 #include "voxel.h"
 
-//measure time with chrono
-#include <chrono>
-
 //#define DEBUG_VOXEL 1
 //#define DEBUG_SURF 181
 ////#define DEBUG_NODE 9705
@@ -49,6 +46,8 @@ extern "C"
 
     void Voxel_restart(void *v, int nbx, int nby, int nbz, int nbsurfaces, int nbnodes, int nbGlobalNodes)
     {
+        // print the timers
+        Timer::printResults();
         Voxel *voxel = static_cast<Voxel *>(v);
         voxel->nbx = nbx;
         voxel->nby = nby;
@@ -122,13 +121,16 @@ extern "C"
         std::vector<int> count_surf_per_cell(voxel->nbx * voxel->nby * voxel->nbz, 0);
 
         // Create a map to convert global ids of irect, into nsv ids, if they exist
+        tic(FunctionId::INITIALIZE_NODE);
         std::unordered_map<int, int> glob2nsv;
         for (int i = 0; i < nsn; i++)
         {
             glob2nsv[nsv[i] - 1] = i; // Fortran to C++ index conversion
         }
+        toc(FunctionId::INITIALIZE_NODE);
 
         // Loop over the surfaces
+        tic(FunctionId::INITIALIZE_SURF);
         for (int i = 0; i < nrtm; i++)
         {
             // Loop over the 4 nodes of the surface
@@ -255,7 +257,10 @@ extern "C"
             }
             voxel->surfaceCandidates[i].reserve(4);
         }
+        toc(FunctionId::INITIALIZE_SURF);
 
+
+        tic(FunctionId::INITIALIZE_NODE);
         // Loop over the local nodes, add the nodes to the cells they belong to
         for (int i = 0; i < nsn; ++i)
         {
@@ -338,6 +343,9 @@ extern "C"
                 }
             }
         }
+        toc(FunctionId::INITIALIZE_NODE);
+
+        tic(FunctionId::INITIALIZE_REMOTE_NODE);
         // remote nodes
         constexpr size_t idGlob = 3; // position in IREM of the global id in 1:nsnGlob
         constexpr size_t idLoc = 0;  // position in IREM of the id internal to the remote process
@@ -407,6 +415,7 @@ extern "C"
                 voxel->globalToIREM[globId] = DEAD; // map the global id to the local id
             }
         }
+        toc(FunctionId::INITIALIZE_REMOTE_NODE);
     }
 
     void Voxel_delete(void *v)
@@ -1292,7 +1301,7 @@ extern "C"
         size_t nb_surf_updated = 0;
 
         // start measuring time here with chrono
-        auto start = std::chrono::high_resolution_clock::now();
+        tic(FunctionId::UPDATE_SURF);
         for (int i = 0; i < nrtm; i++)
         {
             if (stf[i] <= static_cast<my_real>(0))
@@ -1342,15 +1351,13 @@ extern "C"
  //               nb_surf_updated++;
  //           }
         }
+        toc(FunctionId::UPDATE_SURF);
 //        std::cout << "Number of surfaces updated: " << nb_surf_updated <<" /" << nrtm ;
 //        std::cout <<" nbx,nby,nbz="<<voxel->nbx<<" "<<voxel->nby<<" "<<voxel->nbz;
 //        // write duration in ms
-          auto stop = std::chrono::high_resolution_clock::now();
-          std::chrono::duration<double, std::milli> duration = stop - start;
-          std::cout << "Update surf time: " << duration.count() << " ms" << std::endl;   
         // update local nodes
 
-        start = std::chrono::high_resolution_clock::now();
+        tic(FunctionId::UPDATE_NODE);
         for (int i = 0; i < nsn; ++i)
         {
             if (stfn[i] <= static_cast<my_real>(0))
@@ -1365,9 +1372,7 @@ extern "C"
             const double z = static_cast<double>(X[3 * i1 + 2]);
             Voxel_update_node(v, i, mapper);
         }
-        stop = std::chrono::high_resolution_clock::now();
-        duration = stop - start;
-        std::cout << "Update node time: " << duration.count() << " ms" << std::endl;
+        toc(FunctionId::UPDATE_NODE);
         // update remote nodes
         //         if(voxel->nodesRemote.size() > 170)
         //        {
@@ -1375,16 +1380,16 @@ extern "C"
         //        std::cout<<"END-1 Node remote old of 170 "<<voxel->nodesRemoteOld[170]<<std::endl;
         //        }
 
-        start = std::chrono::high_resolution_clock::now();
+        tic(FunctionId::UPDATE_NODE_REMOTE);
         Voxel_update_remote(v, IREM, XREM, RSIZ, ISIZ, NSNR);
-        stop = std::chrono::high_resolution_clock::now();
-        duration = stop - start;
-        std::cout << "Update remote time: " << duration.count() << " ms" << std::endl;
+        toc(FunctionId::UPDATE_NODE_REMOTE);
         //        if(voxel->nodesRemote.size() > 170)
         //       {
         //       std::cout<<"END Node remote new of 170 "<<voxel->nodesRemote[170]<<std::endl;
         //       std::cout<<"END Node remote old of 170 "<<voxel->nodesRemoteOld[170]<<std::endl;
         //       }
+        Timer::printResults();
+
     }
 
     int Voxel_get_max_candidates(void *v)
@@ -1484,6 +1489,7 @@ extern "C"
 
         size_t counter = 0;
         counter = 0;
+        tic(FunctionId::GET_CAND_REMOTE);
         for (auto it = voxel->surfaceCandidatesRemote[id].begin(); it != voxel->surfaceCandidatesRemote[id].end(); ++it)
         {
             // C to Fortran index conversion
@@ -1585,5 +1591,6 @@ extern "C"
 
         // set the number of candidates
         *nb = counter;
+        toc(FunctionId::GET_CAND_REMOTE);
     }
 }

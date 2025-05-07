@@ -7,6 +7,8 @@
 #include <chrono>
 #include <algorithm>
 #include <limits>
+#include <chrono>
+#include <mutex>
 
 
 constexpr size_t XMIN = 0;
@@ -365,3 +367,131 @@ bool inline is_in_bounds(Node coord, const Surf &bounds)
             coord[2] >= bounds[ZMIN] && coord[2] <= bounds[ZMAX]);
 }
 
+
+
+// singleton class to measure time
+enum class FunctionId {
+    UPDATE_SURF,
+    UPDATE_NODE,
+    UPDATE_NODE_REMOTE,
+    INITIALIZE_NODE,
+    INITIALIZE_REMOTE_NODE,
+    INITIALIZE_SURF,
+    GET_CAND_REMOTE,
+    // Add more functions as needed
+    
+    COUNT // Must be the last element (used for array sizing)
+};
+
+
+// Non-constexpr version that should work with any compiler
+const char* getFunctionName(FunctionId id) {
+    switch (id) {
+        case FunctionId::UPDATE_SURF: return "Update surfaces";
+        case FunctionId::UPDATE_NODE: return "Update nodes";
+        case FunctionId::UPDATE_NODE_REMOTE: return "Update remote nodes";
+        case FunctionId::INITIALIZE_NODE: return "Initialize nodes";
+        case FunctionId::INITIALIZE_REMOTE_NODE: return "Initialize remote nodes";
+        case FunctionId::INITIALIZE_SURF: return "Initialize surfaces";
+        case FunctionId::GET_CAND_REMOTE: return "Get candidates remote";
+        default: return "Unknown";
+    }
+}
+
+class Timer {
+private:
+    // Singleton instance
+    static Timer& getInstance() {
+        static Timer instance;
+        return instance;
+    }
+    
+    // Arrays for storing timing data (indexed by enum)
+    using TimePoint = std::chrono::time_point<std::chrono::high_resolution_clock>;
+    using Duration = std::chrono::nanoseconds;
+    
+    std::array<TimePoint, static_cast<size_t>(FunctionId::COUNT)> startTimes;
+    std::array<Duration, static_cast<size_t>(FunctionId::COUNT)> accumulatedTimes;
+    std::array<size_t, static_cast<size_t>(FunctionId::COUNT)> callCounts;
+    
+    // Mutex for thread safety
+    std::mutex mtx;
+    
+    // Constructor initializes the arrays
+    Timer() {
+        for (auto& time : accumulatedTimes) {
+            time = Duration::zero();
+        }
+        
+        for (auto& count : callCounts) {
+            count = 0;
+        }
+    }
+    
+public:
+    // Start timing for a function
+    static void tic(FunctionId functionId) {
+        auto idx = static_cast<size_t>(functionId);
+        if (idx >= static_cast<size_t>(FunctionId::COUNT)) return;
+        
+        auto& timer = getInstance();
+        std::lock_guard<std::mutex> lock(timer.mtx);
+        
+        timer.startTimes[idx] = std::chrono::high_resolution_clock::now();
+    }
+    
+    // Stop timing and accumulate result
+    static void toc(FunctionId functionId) {
+        auto idx = static_cast<size_t>(functionId);
+        if (idx >= static_cast<size_t>(FunctionId::COUNT)) return;
+        
+        auto& timer = getInstance();
+        std::lock_guard<std::mutex> lock(timer.mtx);
+        
+        auto now = std::chrono::high_resolution_clock::now();
+        timer.accumulatedTimes[idx] += now - timer.startTimes[idx];
+        timer.callCounts[idx]++;
+    }
+    
+    // Print results for all timed functions
+    static void printResults() {
+        auto& timer = getInstance();
+        std::lock_guard<std::mutex> lock(timer.mtx);
+        
+        std::cout << "===== TIMING RESULTS =====" << std::endl;
+        for (size_t i = 0; i < static_cast<size_t>(FunctionId::COUNT); ++i) {
+            auto totalTime = timer.accumulatedTimes[i];
+            auto count = timer.callCounts[i];
+            
+            if (count > 0) {
+                auto functionId = static_cast<FunctionId>(i);
+                auto microseconds = std::chrono::duration_cast<std::chrono::microseconds>(totalTime).count();
+                
+                std::cout << getFunctionName(functionId) << ": Total " << microseconds << " μs, Calls " << count << ", Avg " << (microseconds / count) << " μs/call" << std::endl;
+            }
+        }
+    }
+    
+    // Reset all timings
+    static void reset() {
+        auto& timer = getInstance();
+        std::lock_guard<std::mutex> lock(timer.mtx);
+        
+        for (auto& time : timer.accumulatedTimes) {
+            time = Duration::zero();
+        }
+        
+        for (auto& count : timer.callCounts) {
+            count = 0;
+        }
+    }
+};
+
+// Convenience functions
+inline void tic(FunctionId functionId) {
+    Timer::tic(functionId);
+}
+
+inline void toc(FunctionId functionId) {
+    Timer::toc(functionId);
+}
