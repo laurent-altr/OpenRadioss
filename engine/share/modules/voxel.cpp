@@ -1,6 +1,6 @@
 #include "voxel.h"
 
-//#define DEBUG_VOXEL 1
+#define DEBUG_VOXEL 1
 //#define DEBUG_SURF 0
 ////#define DEBUG_NODE 9705
 //#define DEBUG_NODE_REMOTE 302
@@ -1534,6 +1534,87 @@ extern "C"
         }
 #endif
     }
+
+    int Voxel_get_candidates_remote_per_cell(void *v, int cell_id, int* ne, int *ns, int *sne, int*sns)
+    { // start with 0 as cell ID, and return the next non empty cell id, or -1 if no more cells
+        // Remote candidates can not belong to the local surfaces. Then we do not need to save a set of candidates per surface
+        // because each surface of that cell will have the same remote candidates
+        Voxel *voxel = static_cast<Voxel *>(v);
+        size_t  id = static_cast<size_t>(cell_id); // index of the surface, C to Fortran conversion
+        Timer::tic(FunctionId::GET_CAND_REMOTE);
+        size_t newId = id;
+        if(newId >= voxel->cells.size())
+        {
+            // no more cells
+            *sne = 0;
+            *sns = 0;
+            Timer::toc(FunctionId::GET_CAND_REMOTE);
+            return -1;
+        }
+
+
+        //Finds the cell with cellId >= id such that the cell is not empty
+        for(size_t i = id; i < voxel->cells.size(); ++i)
+        {
+            // a cell is empty if it has no surf OR no remote nodes
+            newId = i;
+            if(voxel->cells[i].surfaces.size() > 0 && voxel->cells[i].nodesRemote.size() > 0)
+            {
+                break;
+            }
+        }
+
+        // if no more cells, return -1
+        id = newId;
+#ifdef DEBUG_VOXEL
+        if(id >= voxel->cells.size())
+        {
+            std::cout<<"Error: cell id "<<id<<" is out of bounds: "<<voxel->cells.size()<<std::endl;
+            std::abort();
+        }
+#endif
+        const size_t nSurf = voxel->cells[id].surfaces.size();
+        const size_t nRemote = voxel->cells[id].nodesRemote.size();
+
+
+        if(nSurf == 0 || nRemote == 0)
+        {
+            // sns = 0 , sne = 0
+            *sne = 0;
+            *sns = 0;
+            Timer::toc(FunctionId::GET_CAND_REMOTE);
+            return -1;
+        }
+
+
+        // get the number of Surface in the cell
+        // fill ne[i] with the surface ids in Fortran format        
+        for (size_t i = 0; i < nSurf; ++i)
+        {
+            ne[i] = static_cast<int>(voxel->cells[id].surfaces[i]) + 1; // C to Fortran conversion
+        }
+        // get the number of remote candidates in the cell
+        // fill ns[i] with the remote node ids in Fortran format
+        for (size_t i = 0; i < nRemote; ++i)
+        {
+            const auto & remoteid = voxel->cells[id].nodesRemote[i];
+            //converte remote id into local id in IREM
+            const int locId = voxel->globalToIREM[remoteid]+1;
+            ns[i] = locId; // C to Fortran conversion
+        }
+        // sne is the size of ne
+        *sne = static_cast<int>(nSurf);
+        // sns is the size of ns
+        *sns = static_cast<int>(nRemote);
+        
+        Timer::toc(FunctionId::GET_CAND_REMOTE);
+
+
+        return static_cast<int>(newId+1); // return the new cell id
+
+    }
+
+
 
     void Voxel_get_candidates_remote(void *v, int ne, int *cands, int *nb, int *IREM, my_real *XREM, int RSIZ, int ISIZ, int nsnr)
     {

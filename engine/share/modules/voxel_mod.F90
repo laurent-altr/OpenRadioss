@@ -165,6 +165,25 @@ module voxel_mod
       integer(c_int), value :: isiz
       integer(c_int), value :: nsnr
     end subroutine c_voxel_update_remote
+!/int Voxel_get_candidates_remote_per_cell(void *v, int cell_id, int* ne, int *ns, int *nb, int *IREM, my_real *XREM, int RSIZ, int ISIZ, int nsnr)
+
+    function c_voxel_get_cell_remote(v, cell_id, ne, ns, sne,sns) result(ret_val) bind(C, name="Voxel_get_candidates_remote_per_cell")
+      use iso_c_binding
+      implicit none
+      type(c_ptr), value :: v
+      integer(c_int), value :: cell_id
+      integer(c_int), intent(inout) :: ne(*)
+      integer(c_int), intent(inout) :: ns(*)
+!     integer(c_int), intent(in) :: irem(*)
+!     real(my_real_kind), intent(in) :: xrem(*)
+!     integer(c_int), value :: rsiz
+!     integer(c_int), value :: isiz
+!     integer(c_int), value :: nsnr
+      integer(c_int), intent(inout) :: sne ! number of surfaces in the cell
+      integer(c_int), intent(inout) :: sns ! number of nodes in the cell
+      integer(c_int) :: ret_val ! next cell id
+    end function c_voxel_get_cell_remote 
+
  
 
 
