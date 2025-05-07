@@ -2,6 +2,7 @@
 #include <vector>
 #include <array>
 #include <unordered_map>
+#include <unordered_set>
 #include <set>
 #include <cmath>
 #include <chrono>
@@ -215,8 +216,9 @@ public:
     std::vector<size_t> nodesRemoteOld;               // list of remote nodes in the cell
     std::vector<std::vector<int>> surfaceCandidatesRemote; // vector of remote node candidates for broad phase collision with the surface
     // not all remote nodes are exchanged, we need a mapping from the global node id, to the id in the MPI buffer called IREM
-    std::vector<size_t> globalToIREM; // vector of remote nodes mapping
+    std::vector<int> globalToIREM; // vector of remote nodes mapping
     std::vector<size_t> iremToGlobal; // vector of remote nodes mapping
+    std::vector<size_t> iremToGlobalOld; // vector of remote nodes mapping
 
     // defines a function to tell if a coordinates is in the domain of the current process
     bool isInDomain(double x, double y, double z) const
@@ -494,4 +496,43 @@ inline void tic(FunctionId functionId) {
 
 inline void toc(FunctionId functionId) {
     Timer::toc(functionId);
+}
+
+
+
+template <typename T>
+std::vector<T> inline vector_difference(const std::vector<T>& A, const std::vector<T>& B ) {
+    // Create copies to work with
+    std::vector<T> sortedA(A);
+    std::vector<T> sortedB(B);
+    
+    // Sort both vectors
+    std::sort(sortedA.begin(), sortedA.end());
+    std::sort(sortedB.begin(), sortedB.end());
+    
+    // Starting from the end, find the last element before largestValue
+    auto lastBeforeLargestA = sortedA.end();
+    auto lastBeforeLargestB = sortedB.end();
+    
+    // Work backwards until finding a value that isn't largestValue
+    while (lastBeforeLargestA != sortedA.begin() && *(lastBeforeLargestA - 1) == DEAD_NODE ) {
+        --lastBeforeLargestA;
+    }
+    
+    while (lastBeforeLargestB != sortedB.begin() && *(lastBeforeLargestB - 1) == DEAD_NODE ) {
+        --lastBeforeLargestB;
+    }
+    
+    // Prepare result vector
+    std::vector<T> result;
+    result.reserve(sortedA.size());
+    
+    // Apply set_difference only up to the largest value (excluding it)
+    std::set_difference(
+        sortedA.begin(), lastBeforeLargestA,
+        sortedB.begin(), lastBeforeLargestB,
+        std::back_inserter(result)
+    );
+    
+    return result;
 }

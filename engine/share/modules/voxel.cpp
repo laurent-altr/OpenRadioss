@@ -1,9 +1,9 @@
 #include "voxel.h"
 
 //#define DEBUG_VOXEL 1
-//#define DEBUG_SURF 181
+//#define DEBUG_SURF 0
 ////#define DEBUG_NODE 9705
-//#define DEBUG_NODE_REMOTE 273
+//#define DEBUG_NODE_REMOTE 302
 
 #ifdef MYREAL8
 #define my_real double
@@ -353,6 +353,7 @@ extern "C"
         constexpr size_t idY = 1;    // position in XREM of the y coordinate
         constexpr size_t idZ = 2;    // position in XREM of the z coordinate
         voxel->nsnr = NSNR;
+        voxel->iremToGlobal.resize(NSNR);
         for (int i = 0; i < NSNR; ++i)
         {
             // get the global id of the node
@@ -367,6 +368,7 @@ extern "C"
             if (isAlive)
             {
                 voxel->globalToIREM[globId] = i; // map the global id to the local id
+                voxel->iremToGlobal[i] = globId; // map the local id to the global id
                 // std::cout<<"REMOTE NODE "<<i<<" global id "<<globId<<std::endl;
                 voxel->nodesRemote[globId] = mapper.mapToIndex(x, y, z); // map the global id to the local id
                 const size_t index = mapper.toIndex(x, y, z);            // get the index of the cell
@@ -411,8 +413,13 @@ extern "C"
                 //                    std::cout<<"x= "<<x<<" y=" <<y<<" z= "<<z<<std::endl;
                 //                    std::cout<<"Node coordinates "<<x<<" "<<y<<" "<<z<<std::endl;
                 //                }
+#ifdef DEBUG_NODE_REMOTE
+                std::cout << "REMOTE NODE IS DEAD: " << globId << std::endl;
+
+#endif
                 voxel->nodesRemote[globId] = DEAD;
                 voxel->globalToIREM[globId] = DEAD; // map the global id to the local id
+                voxel->iremToGlobal[i] = DEAD;       // map the local id to the global id
             }
         }
         toc(FunctionId::INITIALIZE_REMOTE_NODE);
@@ -469,6 +476,9 @@ extern "C"
             swap_and_pop(voxel->surfaceCandidatesRemote[surfId], nodeId);
         }
         voxel->nodesRemote[nodeId] = DEAD;
+#ifdef DEBUG_NODE_REMOTE
+        std::cout << "DELETE REMOTE NODE: " << nodeId << std::endl;
+#endif
     }
 
     void inline Voxel_update_node(void *v, int nodeId, const GridMapper &mapper)
@@ -1204,6 +1214,10 @@ extern "C"
             }
             else
             {
+#ifdef DEBUG_NODE_REMOTE
+                std::cout << "REMOTE NODE  " << globId << "Is DEAD (empty cell)  " << std::endl;
+
+#endif
                 voxel->nodesRemote[globId] = DEAD;
             }
         }
@@ -1240,6 +1254,8 @@ extern "C"
             }
         }
 
+        std::swap(voxel->iremToGlobal,voxel->iremToGlobalOld);
+
         voxel->iremToGlobal.resize(NSNR);
         voxel->iremToGlobal.assign(NSNR, DEAD);
  
@@ -1256,10 +1272,48 @@ extern "C"
             bool isAlive = Voxel_update_node_remote(v, x, y, z, globId, mapper);
             if (isAlive)
             {
+#ifdef DEBUG_NODE_REMOTE
+                if(globId == DEBUG_NODE_REMOTE)
+                {
+                    std::cout << "REMOTE NODE  " << globId << " Is alive  " << std::endl;
+                }
+#endif
                 voxel->globalToIREM[globId] = i; // map the global id to the local id
                 voxel->iremToGlobal[i] = globId; // map the local id to the global id
             } 
         }
+
+#ifdef DEBUG_NODE_REMOTE
+        std::cout<<"globalToIrem["<<DEBUG_NODE_REMOTE<<"] "<<voxel->globalToIREM[DEBUG_NODE_REMOTE]<<std::endl;
+        // loop over iremGlobal to find DEBUG_NODE_REMOTE
+        for(int i = 0; i < voxel->iremToGlobal.size(); ++i)
+        {
+            if(voxel->iremToGlobal[i] == DEBUG_NODE_REMOTE)
+            {
+                std::cout<<"IREM["<<i<<"] "<<voxel->iremToGlobal[i]<<std::endl;
+            }
+        }
+        // loop over iremToGlobalOld to find DEBUG_NODE_REMOTE 
+        for(int i = 0; i < voxel->iremToGlobalOld.size(); ++i)
+        {
+            if(voxel->iremToGlobalOld[i] == DEBUG_NODE_REMOTE)
+            {
+                std::cout<<"IREMOLD["<<i<<"] "<<voxel->iremToGlobalOld[i]<<std::endl;
+            }
+        }
+#endif
+        // remote nodes that was used in the previous step, but that are not remote anymore
+        auto diff = vector_difference(voxel->iremToGlobalOld, voxel->iremToGlobal);
+        for(auto id : diff)
+        {
+                //delete the node
+#ifdef DEBUG_NODE_REMOTE
+                std::cout<<"Delete remote node "<<id<<" that is no longer found in IREM"<<std::endl;
+#endif
+                Voxel_delete_node_remote(v, id);
+                voxel->globalToIREM[id] = DEAD;
+        }
+
     }
     // update the surfaces, then the nodes
     void Voxel_update(void *v, int *irect, int nrtm, my_real *gap, int *nsv, int nsn, my_real *X, int numnod, my_real *stf, my_real *stfn, int *IREM, my_real *XREM, int RSIZ, int ISIZ, int NSNR)
@@ -1486,27 +1540,28 @@ extern "C"
         size_t id = static_cast<size_t>(ne - 1); // index of the surface, C to Fortran conversion
         Voxel *voxel = static_cast<Voxel *>(v);
 
-        size_t counter = 0;
-        counter = 0;
         tic(FunctionId::GET_CAND_REMOTE);
-        for (auto it = voxel->surfaceCandidatesRemote[id].begin(); it != voxel->surfaceCandidatesRemote[id].end(); ++it)
+//        for (auto it = voxel->surfaceCandidatesRemote[id].begin(); it != voxel->surfaceCandidatesRemote[id].end(); ++it)
+        for(size_t i = 0; i < voxel->surfaceCandidatesRemote[id].size(); ++i)
         {
             // C to Fortran index conversion
-            int index = static_cast<int>(*it);
+            const size_t index = voxel->surfaceCandidatesRemote[id][i];
             // convert the global id from 1 to nsnGlob, into a local id in the MPI buffer IREM
-            size_t locId = voxel->globalToIREM[index];
+            const int locId = voxel->globalToIREM[index];
 
             if (locId == DEAD)
             {
+#ifdef DEBUG_VOXEL
+                std::cout << "ERROR: candidate " << index <<" for surf "<<ne-1<< " is DEAD" << std::endl;
+                std::abort();
+#endif
                 continue; // skip dead nodes
             }
-            counter++;
 #ifdef DEBUG_VOXEL
-            if (counter > voxel->nsnr)
+            if (i > voxel->nsnr)
             {
                 std::cout << "Error: too many candidates for surface " << ne << std::endl;
                 std::cout << "Max candidates: " << voxel->nsnr << std::endl;
-                std::cout << "Current candidates: " << counter << std::endl;
                 // print all cands filled so far/too
                 for (int j = 0; j < voxel->nsnr; j++)
                 {
@@ -1517,10 +1572,11 @@ extern "C"
                 std::abort();
             }
 #endif
-            cands[counter - 1] = static_cast<int>(locId); // C to Fortran index conversion
+            cands[i] = locId; // C to Fortran index conversion
         }
 
 #ifdef DEBUG_VOXEL
+        size_t counter = voxel->surfaceCandidatesRemote[id].size();
         // debug check; all values in cands should be unique
         std::set<int> uniqueCandidates(cands, cands + counter);
         if (uniqueCandidates.size() != counter)
