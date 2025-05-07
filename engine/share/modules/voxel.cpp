@@ -1388,7 +1388,6 @@ extern "C"
         //       std::cout<<"END Node remote new of 170 "<<voxel->nodesRemote[170]<<std::endl;
         //       std::cout<<"END Node remote old of 170 "<<voxel->nodesRemoteOld[170]<<std::endl;
         //       }
-        Timer::printResults();
 
     }
 
