@@ -214,6 +214,7 @@ public:
     std::vector<std::vector<int>> surfaceCandidatesRemote; // vector of remote node candidates for broad phase collision with the surface
     // not all remote nodes are exchanged, we need a mapping from the global node id, to the id in the MPI buffer called IREM
     std::vector<size_t> globalToIREM; // vector of remote nodes mapping
+    std::vector<size_t> iremToGlobal; // vector of remote nodes mapping
 
     // defines a function to tell if a coordinates is in the domain of the current process
     bool isInDomain(double x, double y, double z) const

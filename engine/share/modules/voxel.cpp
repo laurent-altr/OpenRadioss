@@ -35,6 +35,8 @@ extern "C"
         v->nodesRemote.resize(nbGlobalNodes);
         v->surfaceCandidatesRemote.resize(nbsurfaces);
         v->globalToIREM.resize(nbGlobalNodes);
+        v->iremToGlobal.clear();
+
         for (int i = 0; i < nbGlobalNodes; ++i)
         {
             v->nodesRemote[i] = DEAD;
@@ -66,6 +68,7 @@ extern "C"
         voxel->nodesRemote.resize(nbGlobalNodes);
         voxel->globalToIREM.clear();
         voxel->globalToIREM.resize(nbGlobalNodes);
+        voxel->iremToGlobal.clear();
         // fill with remote nodes with DEAD
         for (int i = 0; i < nbGlobalNodes; ++i)
         {
@@ -1210,11 +1213,25 @@ extern "C"
         voxel->nsnr = NSNR;
         // set globalToIREM to DEAD
         // std::cout<<"GlobalToLocalRemote size "<<voxel->globalToIREM.size()<<std::endl;
-        for (int i = 0; i < voxel->globalToIREM.size(); ++i)
+        
+        if(voxel->iremToGlobal.size() == 0)
         {
-            voxel->globalToIREM[i] = DEAD;
+            //fill globalToIREM with DEAD
+            std::fill(voxel->globalToIREM.begin(), voxel->globalToIREM.end(), DEAD);
+        }
+        for (int i = 0; i < voxel->iremToGlobal.size(); ++i)
+        {
+            // flush only the nodes that were touched
+            const size_t id = voxel->iremToGlobal[i];
+            if(id != DEAD)
+            {
+                voxel->globalToIREM[id] = DEAD;
+            }
         }
 
+        voxel->iremToGlobal.resize(NSNR);
+        voxel->iremToGlobal.assign(NSNR, DEAD);
+ 
         for (int i = 0; i < NSNR; ++i)
         {
             // get the global id of the node
@@ -1229,7 +1246,8 @@ extern "C"
             if (isAlive)
             {
                 voxel->globalToIREM[globId] = i; // map the global id to the local id
-            }
+                voxel->iremToGlobal[i] = globId; // map the local id to the global id
+            } 
         }
     }
     // update the surfaces, then the nodes
