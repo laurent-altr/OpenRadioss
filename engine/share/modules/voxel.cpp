@@ -4,9 +4,9 @@
 #include <chrono>
 
 //#define DEBUG_VOXEL 1
-//#define DEBUG_SURF 21
-//#define DEBUG_NODE 9705
-//#define DEBUG_SURF_REMOTE 419
+//#define DEBUG_SURF 181
+////#define DEBUG_NODE 9705
+//#define DEBUG_NODE_REMOTE 273
 
 #ifdef MYREAL8
 #define my_real double
@@ -575,7 +575,9 @@ extern "C"
         if (voxel->isInDomain(x, y, z))
         {
             newIndex = mapper.toIndex(x, y, z);
+            // check there is at least one surface in the cell
             newCoord = index_to_coord(newIndex, voxel->nbx, voxel->nby, voxel->nbz);
+
         }
         else
         {
@@ -587,10 +589,8 @@ extern "C"
         if (nodeId == DEBUG_NODE_REMOTE)
         {
             std::cout << "NODE UPDATE remote old index " << oldIndex << " new index " << newIndex << std::endl;
-            std::cout << "old coords " << x << " " << y << " " << z << std::endl;
-            auto Node = index_to_coord(voxel->nodesRemote[nodeId], voxel->nbx, voxel->nby, voxel->nbz);
+            auto Node = newCoord;
             std::cout << "NODE " << nodeId << " cell coord " << Node[0] << " " << Node[1] << " " << Node[2] << std::endl;
-            std::cout << "NODE " << nodeId << " cell index " << COORD_TO_INDEX(Node[0], Node[1], Node[2], voxel->nbx, voxel->nby) << std::endl;
         }
 #endif
         if (newIndex != oldIndex)
@@ -641,6 +641,8 @@ extern "C"
                 }
                 else
                 {
+                    newIndex = DEAD;
+                    voxel->nodesRemote[nodeId] = DEAD;
 #ifdef DEBUG_NODE_REMOTE
                     if (nodeId == DEBUG_NODE_REMOTE)
                     {
@@ -705,9 +707,9 @@ extern "C"
         }
 
 #ifdef DEBUG_NODE_REMOTE
-        if (nodeId == 170)
+        if (nodeId == DEBUG_NODE_REMOTE)
         {
-            std::cout << __LINE__ << "NODE END UPDATE remote " << nodeId << "  newIndex=" << voxel->nodesRemote[nodeId] << std::endl;
+            std::cout << __LINE__ << " NODE END UPDATE remote " << nodeId << "  newIndex=" << voxel->nodesRemote[nodeId] << std::endl;
         }
 #endif
         return newIndex != DEAD; // node is in the domain
