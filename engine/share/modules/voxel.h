@@ -11,6 +11,7 @@
 #include <chrono>
 #include <mutex>
 #include <iomanip>
+#include <set>
 
 constexpr size_t XMIN = 0;
 constexpr size_t YMIN = 1;
@@ -221,6 +222,9 @@ public:
     std::vector<int> globalToIREM;       // vector of remote nodes mapping
     std::vector<size_t> iremToGlobal;    // vector of remote nodes mapping
     std::vector<size_t> iremToGlobalOld; // vector of remote nodes mapping
+    std::set<size_t> nonEmptyCells;      // set of non empty cells
+    std::set<size_t>::iterator iter; // iterator of the set of non empty cells
+
 
     // defines a function to tell if a coordinates is in the domain of the current process
     bool isInDomain(double x, double y, double z) const
@@ -382,6 +386,7 @@ enum class FunctionId
     INITIALIZE_REMOTE_NODE,
     INITIALIZE_SURF,
     GET_CAND_REMOTE,
+    GET_CAND_LOCAL,
     // Add more functions as needed
 
     COUNT // Must be the last element (used for array sizing)
@@ -406,6 +411,8 @@ const char *getFunctionName(FunctionId id)
         return "Initialize surfaces";
     case FunctionId::GET_CAND_REMOTE:
         return "Get candidates remote";
+    case FunctionId::GET_CAND_LOCAL:
+        return "Get candidates local";
     default:
         return "Unknown";
     }

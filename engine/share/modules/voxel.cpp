@@ -33,6 +33,7 @@ extern "C"
         v->surfaceCandidatesRemote.resize(nbsurfaces);
         v->globalToIREM.resize(nbGlobalNodes);
         v->iremToGlobal.clear();
+        v->iter = v->nonEmptyCells.begin();
 
         for (int i = 0; i < nbGlobalNodes; ++i)
         {
@@ -68,6 +69,8 @@ extern "C"
         voxel->globalToIREM.clear();
         voxel->globalToIREM.resize(nbGlobalNodes);
         voxel->iremToGlobal.clear();
+        voxel->nonEmptyCells.clear();
+        voxel->iter = voxel->nonEmptyCells.begin();
         // fill with remote nodes with DEAD
         for (int i = 0; i < nbGlobalNodes; ++i)
         {
@@ -115,6 +118,7 @@ extern "C"
         // nsv(i) = global id of the node i
         // gap(1:nrtm) = gap of the surface, i.e. the distance beyond the surface to be considered
         Voxel *voxel = static_cast<Voxel *>(v);
+        
         GridMapper mapper(voxel->bounds, voxel->nbx, voxel->nby, voxel->nbz);
 
         // create a vecor of size nbx*nby*nbz
@@ -373,6 +377,10 @@ extern "C"
                 voxel->nodesRemote[globId] = mapper.mapToIndex(x, y, z); // map the global id to the local id
                 const size_t index = mapper.toIndex(x, y, z);            // get the index of the cell
                 voxel->cells[index].nodesRemote.push_back(globId);       // add the remote node to the cell
+                if(voxel->cells[index].surfaces.size() > 0)
+                {
+                    voxel->nonEmptyCells.insert(index); // add the cell to the set of non empty cells
+                }
 
 //                for (auto surfId : voxel->cells[index].surfaces)
 //                {
@@ -464,6 +472,10 @@ extern "C"
         size_t index = voxel->nodesRemote[nodeId];
         // remove the node from the cell
         swap_and_pop(voxel->cells[index].nodesRemote, nodeId);
+        if(voxel->cells[index].nodesRemote.size() == 0)
+        {
+            voxel->nonEmptyCells.erase(index);
+        }
         // remove the node from candidates list of all surfaces crossing the cell
 //        for (auto surfId : voxel->cells[index].surfaces)
 //        {
@@ -612,6 +624,10 @@ extern "C"
             {
                 // remove the node from the old cell
                 swap_and_pop(voxel->cells[oldIndex].nodesRemote, nodeId);
+                if(voxel->cells[oldIndex].nodesRemote.size() == 0)
+                {
+                    voxel->nonEmptyCells.erase(oldIndex); // remove the cell from the set of non empty cells
+                }
                 // remove the node from candidates list of all surfaces crossing the old cell
 //                for (auto surfId : voxel->cells[oldIndex].surfaces)
 //                {
@@ -669,6 +685,10 @@ extern "C"
             {
                 // add the node to the cell, only if it contains at least one surface
                 voxel->cells[newIndex].nodesRemote.push_back(nodeId);
+                if(voxel->cells[newIndex].nodesRemote.size() == 1)
+                {
+                    voxel->nonEmptyCells.insert(newIndex); // add the cell to the set of non empty cells
+                }
                 // loop over voxel->cells[newIndex].surfaces
 //                for (auto surfId : voxel->cells[newIndex].surfaces)
 //                {
@@ -1205,6 +1225,7 @@ extern "C"
             if (isAlive)
             {
                 voxel->nodesRemote[globId] = mapper.mapToIndex(x, y, z); // map the global id to the local id
+                
             }
             else
             {
@@ -1436,7 +1457,7 @@ extern "C"
         //       std::cout<<"END Node remote new of 170 "<<voxel->nodesRemote[170]<<std::endl;
         //       std::cout<<"END Node remote old of 170 "<<voxel->nodesRemoteOld[170]<<std::endl;
         //       }
-
+        voxel->iter = voxel->nonEmptyCells.begin();
     }
 
     int Voxel_get_max_candidates(void *v)
@@ -1473,9 +1494,11 @@ extern "C"
     // Copyless version
     void Voxel_get_candidates_data(void *v, int ne, int **cands, int *nb, int *irect, int *nsv)
     {
+        Timer::tic(FunctionId::GET_CAND_LOCAL);
         Voxel *voxel = static_cast<Voxel *>(v);
         *nb = static_cast<int>(voxel->surfaceCandidates[ne - 1].size());
         *cands = voxel->surfaceCandidates[ne - 1].data();
+        Timer::toc(FunctionId::GET_CAND_LOCAL);
 
         // Debug: loop over all nodes, to check if they are in the candidates, using is_in_bounds
 #ifdef DEBUG_VOXEL
@@ -1533,11 +1556,12 @@ extern "C"
     { // start with 0 as cell ID, and return the next non empty cell id, or -1 if no more cells
         // Remote candidates can not belong to the local surfaces. Then we do not need to save a set of candidates per surface
         // because each surface of that cell will have the same remote candidates
-        Voxel *voxel = static_cast<Voxel *>(v);
-        size_t  id = static_cast<size_t>(cell_id); // index of the surface, C to Fortran conversion
         Timer::tic(FunctionId::GET_CAND_REMOTE);
-        size_t newId = id;
-        if(newId >= voxel->cells.size())
+        Voxel *voxel = static_cast<Voxel *>(v);
+        if(cell_id == 0) {
+            voxel->iter = voxel->nonEmptyCells.begin();
+        }
+        if(voxel->iter == voxel->nonEmptyCells.end())
         {
             // no more cells
             *sne = 0;
@@ -1546,16 +1570,19 @@ extern "C"
             return -1;
         }
 
+        size_t id = *(voxel->iter); // index of the surface, C to Fortran conversion
+        size_t newId = id;
 
-        //Finds the cell with cellId >= id such that the cell is not empty
-        for(size_t i = id; i < voxel->cells.size(); ++i)
+
+        //using std:advance to move the iterator until a non empty cell is found
+        while (voxel->iter != voxel->nonEmptyCells.end())
         {
-            // a cell is empty if it has no surf OR no remote nodes
-            newId = i;
-            if(voxel->cells[i].surfaces.size() > 0 && voxel->cells[i].nodesRemote.size() > 0)
+            newId = *voxel->iter;
+            if (voxel->cells[newId].surfaces.size() > 0 && voxel->cells[newId].nodesRemote.size() > 0)
             {
-                break;
+            break;
             }
+            std::advance(voxel->iter, 1);
         }
 
         // if no more cells, return -1
@@ -1577,6 +1604,11 @@ extern "C"
             *sne = 0;
             *sns = 0;
             Timer::toc(FunctionId::GET_CAND_REMOTE);
+            if(voxel->iter != voxel->nonEmptyCells.end())
+            {
+                std::advance(voxel->iter, 1);
+                return 1;
+            }
             return -1;
         }
 
@@ -1601,9 +1633,11 @@ extern "C"
         // sns is the size of ns
         *sns = static_cast<int>(nRemote);
         
+        if(voxel->iter != voxel->nonEmptyCells.end())
+        {
+            std::advance(voxel->iter, 1);
+        }
         Timer::toc(FunctionId::GET_CAND_REMOTE);
-
-
         return static_cast<int>(newId+1); // return the new cell id
 
     }
