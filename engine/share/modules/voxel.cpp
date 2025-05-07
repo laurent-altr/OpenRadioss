@@ -3,7 +3,7 @@
 //measure time with chrono
 #include <chrono>
 
-#define DEBUG_VOXEL 1
+//#define DEBUG_VOXEL 1
 //#define DEBUG_SURF 21
 //#define DEBUG_NODE 9705
 //#define DEBUG_SURF_REMOTE 419
