@@ -1,6 +1,6 @@
 #include "voxel.h"
 
-#define DEBUG_VOXEL 1
+//#define DEBUG_VOXEL 1
 //#define DEBUG_SURF 0
 ////#define DEBUG_NODE 9705
 //#define DEBUG_NODE_REMOTE 302
