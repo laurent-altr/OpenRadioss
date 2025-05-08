@@ -32,6 +32,9 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
       !||--- uses       -----------------------------------------------------
       !||====================================================================
       SUBROUTINE INIPAR(ITID,ICAS,NNODES,INPUT,GOT_INPUT,NBTASK)
+#ifdef CWIPI
+      USE CWIPI
+#endif  
 C-----------------------------------------------------------------
 #include      "implicit_f.inc"
 #include      "comlock.inc"
@@ -86,6 +89,12 @@ C
      *                            COLOUR, VALID, IERROR)
         CALL MPI_COMM_SPLIT(MPI_COMM_WORLD,COLOUR,KEY,
      *                      SPMD_COMM_WORLD,IERROR)
+
+#ifdef CWIPI 
+      call cwipi_init_f(MPI_COMM_WORLD,"RADIOSS",SPMD_WORLD_COMM)
+      call cwipi_set_output_listing_f(6)
+      call cwipi_dump_appli_properties_f()
+#endif
 
         CALL MPI_COMM_SIZE(SPMD_COMM_WORLD, NNODES, IERROR)
         CALL MPI_COMM_RANK(SPMD_COMM_WORLD, MYRANK, IERROR)

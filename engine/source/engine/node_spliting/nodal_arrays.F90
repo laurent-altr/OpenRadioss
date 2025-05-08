@@ -112,6 +112,7 @@
             my_real, dimension(:), allocatable :: VISCN !< nodal 
             my_real, dimension(:), allocatable :: MCP !< thermal
             my_real, dimension(:), allocatable :: TEMP !< temperature
+            my_real, dimension(:,:), allocatable :: F
           
             ! 3*NUMNOD if IRESP == 1, else 3
             double precision, dimension(:,:), allocatable :: DDP !< double precision D 
@@ -315,6 +316,11 @@
             arrays%parent_node(i) = i
             enddo
             arrays%nchilds = 0
+#ifdef CWIPI
+            !arrays%F is needed
+            call my_alloc(arrays%F,3,numnod)
+            arrays%F = 0
+#endif
 
 
 ! ----------------------------------------------------------------------------------------------------------------------
