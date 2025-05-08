@@ -20,20 +20,20 @@
 !Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 !Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 !Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
-      module radioss_cwipi_mod
+      module radioss_coupling_mod
         implicit none
-        integer, parameter :: CWIPI_SEND = 1
-        integer, parameter :: CWIPI_RECV = 2
-        integer, parameter :: CWIPI_COORDINATE = 1
-        integer, parameter :: CWIPI_VELOCITY = 2
-        integer, parameter :: CWIPI_ACCELERATION = 3
-        integer, parameter :: CWIPI_FORCE = 4
-        integer, parameter :: CWIPI_PRESSURE = 5
+        integer, parameter :: COUPLING_SEND = 1
+        integer, parameter :: COUPLING_RECV = 2
+        integer, parameter :: COUPLING_COORDINATE = 1
+        integer, parameter :: COUPLING_VELOCITY = 2
+        integer, parameter :: COUPLING_ACCELERATION = 3
+        integer, parameter :: COUPLING_FORCE = 4
+        integer, parameter :: COUPLING_PRESSURE = 5
         integer, parameter :: NOTHING = 0
 
-        !/CWIPI/SurfID/in/type
+        !/coupling/SurfID/in/type
 
-        type cwipi_field_
+        type coupling_field_
           integer :: surface_id
           integer :: quantity ! 1: position, 2: velocity, 3: acceleration, 4: force
           integer :: n_faces
@@ -42,13 +42,13 @@
           integer, dimension(:), allocatable :: connec
           integer, dimension(:), allocatable :: node_id
           double precision, dimension(:), allocatable :: buffer
-        end type cwipi_field_
+        end type coupling_field_
 
-        type cwipi_
+        type coupling_
           integer :: i_part
-          type(cwipi_field_) :: send
-          type(cwipi_field_) :: recv
-        end type cwipi_
+          type(coupling_field_) :: send
+          type(coupling_field_) :: recv
+        end type coupling_
 
 
       contains
@@ -93,13 +93,13 @@ end function make_unique
 
 
 
-        subroutine parse_cwipi_string(input_string, cwipi)
+        subroutine parse_coupling_string(input_string, coupling)
           implicit none
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                     Arguments
 ! ----------------------------------------------------------------------------------------------------------------------
           character(len=*), intent(in) :: input_string
-          type(cwipi_), intent(inout) :: cwipi
+          type(coupling_), intent(inout) :: coupling
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Local variables
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -111,30 +111,32 @@ end function make_unique
 !                                                      Body
 ! ----------------------------------------------------------------------------------------------------------------------
 
+          coupling%recv%quantity = NOTHING
+          coupling%send%quantity = NOTHING
 
-          write(6,*) 'parse_cwipi_string: input_string:', input_string
+          write(6,*) 'parse_coupling_string: input_string:', input_string
 
           ! Check prefix
           if (len(input_string) < 7) then
-            write(6,*) 'parse_cwipi_string: input_string too short'
+            write(6,*) 'parse_coupling_string: input_string too short'
             return
           end if
-          if (input_string(1:7) /= '/CWIPI/') then
-            write(6,*) 'parse_cwipi_string: input_string does not start with /CWIPI/'
+          if (input_string(1:7) /= '/coupling/') then
+            write(6,*) 'parse_coupling_string: input_string does not start with /coupling/'
             return
           end if
 
           ! Find slash positions
-          first_slash = 7  ! After "/CWIPI/"
+          first_slash = 7  ! After "/coupling/"
           second_slash = index(input_string(first_slash+1:), '/') + first_slash
           if (second_slash <= first_slash) then
-            write(6,*) 'parse_cwipi_string: second slash not found'
+            write(6,*) 'parse_coupling_string: second slash not found'
             return
           end if
 
           third_slash = index(input_string(second_slash+1:), '/') + second_slash
           if (third_slash <= second_slash) then
-            write(6,*) 'parse_cwipi_string: third slash not found'
+            write(6,*) 'parse_coupling_string: third slash not found'
             return
           end if
 
@@ -146,7 +148,7 @@ end function make_unique
           ! Parse surfId
           read(surf_id_str, *, iostat=read_status) surf_id
           if (read_status /= 0) then
-            write(6,*) 'parse_cwipi_string: invalid surf_id:', surf_id_str
+            write(6,*) 'parse_coupling_string: invalid surf_id:', surf_id_str
             return
           end if
 
@@ -154,34 +156,34 @@ end function make_unique
           ! Convert quantity string to constant
           select case (trim(quant_str))
            case ('COORDINATE')
-            quantity = CWIPI_COORDINATE
+            quantity = coupling_COORDINATE
            case ('VELOCITY')
-            quantity = CWIPI_VELOCITY
+            quantity = coupling_VELOCITY
            case ('ACCELERATION')
-            quantity = CWIPI_ACCELERATION
+            quantity = coupling_ACCELERATION
            case ('FORCE')
-            quantity = CWIPI_FORCE
+            quantity = coupling_FORCE
            case ('PRESSURE')
-            quantity = CWIPI_PRESSURE
+            quantity = coupling_PRESSURE
            case default
             quantity = NOTHING  ! Set default quantity to NOTHING
-            write(6,*) 'parse_cwipi_string: invalid quantity:', quant_str
+            write(6,*) 'parse_coupling_string: invalid quantity:', quant_str
           end select
 
           ! Convert direction string to constant
           select case (trim(dir_str))
            case ('IN')
-            cwipi%recv%surface_id = surf_id
-            cwipi%recv%quantity = quantity
+            coupling%recv%surface_id = surf_id
+            coupling%recv%quantity = quantity
            case ('OUT')
-            cwipi%send%surface_id = surf_id
-            cwipi%send%quantity = quantity
+            coupling%send%surface_id = surf_id
+            coupling%send%quantity = quantity
            case default
-            direction = NOTHING  ! Set default direction to NOTHING
+            write(6,*) 'parse_coupling_string: invalid direction:', dir_str 
           end select
-        end subroutine parse_cwipi_string
+        end subroutine parse_coupling_string
 
-        subroutine cwipi_init_field(field, surf,  nodes)
+        subroutine coupling_init_field(field, surf,  nodes)
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                     Module
 !----------------------------------------------------------------------------------------------------------------------
@@ -191,7 +193,7 @@ end function make_unique
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                     Arguments
 ! ----------------------------------------------------------------------------------------------------------------------
-          type(cwipi_field_), intent(inout) :: field !< CWIPI field structure
+          type(coupling_field_), intent(inout) :: field !< coupling field structure
           type(surf_), intent(in) :: surf !< Array of surfaces
           type(nodal_arrays_), intent(in) :: nodes !< Nodal arrays
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -262,13 +264,13 @@ end function make_unique
           allocate(field%buffer(3*next_node)) 
           field%numnod = counter
 
-        end subroutine cwipi_init_field
+        end subroutine coupling_init_field
 
-        subroutine cwipi_init(cwipi, surf, nsurf, nodes)
+        subroutine coupling_init(coupling, surf, nsurf, nodes)
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                     Module
 ! ----------------------------------------------------------------------------------------------------------------------
-#ifdef CWIPI
+#ifdef WITH_CWIPI
           use cwipi
 #endif
           use GROUPDEF_MOD, only: surf_
@@ -279,7 +281,7 @@ end function make_unique
 !                                                     Arguments
 ! ----------------------------------------------------------------------------------------------------------------------
           integer, intent(in) :: nsurf !< Number of surfaces
-          type(cwipi_), intent(inout) :: cwipi !< CWIPI structure
+          type(coupling_), intent(inout) :: coupling !< coupling structure
           type(surf_), intent(in) :: surf(nsurf) !< Array of surfaces
           type(nodal_arrays_), intent(in) :: nodes !< Nodal arrays
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -293,31 +295,31 @@ end function make_unique
 !                                                      Body
 ! ----------------------------------------------------------------------------------------------------------------------
           do i = 1,nsurf
-            if(cwipi%send%surface_id == surf(i)%id) then
-              cwipi%send%n_faces = surf(i)%NSEG
-              cwipi%send%surface_id= i 
-              call cwipi_init_field(cwipi%send, surf(i), nodes)
-              write(6,*) 'cwipi_init: send surface_id:', cwipi%send%surface_id,"nodes=",cwipi%send%numnod
+            if(coupling%send%surface_id == surf(i)%id) then
+              coupling%send%n_faces = surf(i)%NSEG
+              coupling%send%surface_id= i 
+              call coupling_init_field(coupling%send, surf(i), nodes)
+              write(6,*) 'coupling_init: send surface_id:', coupling%send%surface_id,"nodes=",coupling%send%numnod
             end if
-            if(cwipi%recv%surface_id == surf(i)%id) then
-              cwipi%recv%n_faces = surf(i)%NSEG
-              cwipi%recv%surface_id = i
-              call cwipi_init_field(cwipi%recv, surf(i) , nodes)
-              write(6,*) 'cwipi_init: recv surface_id:', cwipi%recv%surface_id,"nodes=",cwipi%recv%numnod
+            if(coupling%recv%surface_id == surf(i)%id) then
+              coupling%recv%n_faces = surf(i)%NSEG
+              coupling%recv%surface_id = i
+              call coupling_init_field(coupling%recv, surf(i) , nodes)
+              write(6,*) 'coupling_init: recv surface_id:', coupling%recv%surface_id,"nodes=",coupling%recv%numnod
             end if
           enddo
 
-          allocate(coords(3*cwipi%send%numnod))
+          allocate(coords(3*coupling%send%numnod))
 
-          do i = 1, cwipi%send%numnod
-            coords(3*i-2) = nodes%X(1,cwipi%send%node_id(i))
-            coords(3*i-1) = nodes%X(2,cwipi%send%node_id(i))
-            coords(3*i)   = nodes%X(3,cwipi%send%node_id(i))
+          do i = 1, coupling%send%numnod
+            coords(3*i-2) = nodes%X(1,coupling%send%node_id(i))
+            coords(3*i-1) = nodes%X(2,coupling%send%node_id(i))
+            coords(3*i)   = nodes%X(3,coupling%send%node_id(i))
           enddo
 
 
-#ifdef CWIPI
-! CWIPI INITIALIZAITON 
+#ifdef WITH_CWIPI
+! coupling INITIALIZAITON 
       call cwipi_create_coupling_f("r2r", &
       cwipi_cpl_parallel_with_part,&
       "aspi_reel_solver", &
@@ -330,23 +332,23 @@ end function make_unique
       "text")
 
       call cwipi_define_mesh_f("r2r", &
-      cwipi%send%numnod, &
-      cwipi%send%n_faces, &
+      coupling%send%numnod, &
+      coupling%send%n_faces, &
       coords, &
-      cwipi%send%connectIndex, &
-      cwipi%send%connec)
+      coupling%send%connectIndex, &
+      coupling%send%connec)
 
       call cwipi_dump_appli_properties_f()
       call cwipi_locate("r2r")
 #endif 
 
         deallocate(coords)
-        end subroutine cwipi_init
+        end subroutine coupling_init
 
 
-        subroutine cwipi_out(cwipi,  nodes, t)
+        subroutine coupling_out(coupling,  nodes, t)
 
-#ifdef CWIPI
+#ifdef WITH_CWIPI
           use cwipi
 #endif
           use nodal_arrays_mod
@@ -354,7 +356,7 @@ end function make_unique
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                     Arguments
 ! ----------------------------------------------------------------------------------------------------------------------
-          type(cwipi_), intent(inout) :: cwipi !< CWIPI structure
+          type(coupling_), intent(inout) :: coupling !< coupling structure
           type(nodal_arrays_), intent(in) :: nodes !< Nodal arrays
           double precision, intent(in) :: t !< Time
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -370,37 +372,38 @@ end function make_unique
 !                                                      Body
 ! ----------------------------------------------------------------------------------------------------------------------
           time = t
+          if(coupling%send%quantity == NOTHING) return
           ! Send the data to the other side
-          if(.not.allocated(cwipi%send%buffer)) then
-            allocate(cwipi%send%buffer(3*cwipi%send%numnod))
+          if(.not.allocated(coupling%send%buffer)) then
+            allocate(coupling%send%buffer(3*coupling%send%numnod))
           end if
 
-          do i = 1, cwipi%send%numnod
-            if(cwipi%send%quantity == CWIPI_COORDINATE) then
-              cwipi%send%buffer(3*i-2) = nodes%X(1,cwipi%send%node_id(i)) 
-              cwipi%send%buffer(3*i-1) = nodes%X(2,cwipi%send%node_id(i)) 
-              cwipi%send%buffer(3*i)   = nodes%X(3,cwipi%send%node_id(i)) 
+          do i = 1, coupling%send%numnod
+            if(coupling%send%quantity == coupling_COORDINATE) then
+              coupling%send%buffer(3*i-2) = nodes%X(1,coupling%send%node_id(i)) 
+              coupling%send%buffer(3*i-1) = nodes%X(2,coupling%send%node_id(i)) 
+              coupling%send%buffer(3*i)   = nodes%X(3,coupling%send%node_id(i)) 
               fieldName = "COORDINATE"
-            else if(cwipi%send%quantity == CWIPI_VELOCITY) then
-              cwipi%send%buffer(3*i-2) = nodes%V(1,cwipi%send%node_id(i))
-              cwipi%send%buffer(3*i-1) = nodes%V(2,cwipi%send%node_id(i))
-              cwipi%send%buffer(3*i)   = nodes%V(3,cwipi%send%node_id(i))
+            else if(coupling%send%quantity == coupling_VELOCITY) then
+              coupling%send%buffer(3*i-2) = nodes%V(1,coupling%send%node_id(i))
+              coupling%send%buffer(3*i-1) = nodes%V(2,coupling%send%node_id(i))
+              coupling%send%buffer(3*i)   = nodes%V(3,coupling%send%node_id(i))
               fieldName = "VELOCITY"
-            else if(cwipi%send%quantity == CWIPI_ACCELERATION) then
-              cwipi%send%buffer(3*i-2) = nodes%a(1,cwipi%send%node_id(i))
-              cwipi%send%buffer(3*i-1) = nodes%a(2,cwipi%send%node_id(i))
-              cwipi%send%buffer(3*i)   = nodes%a(3,cwipi%send%node_id(i))
+            else if(coupling%send%quantity == coupling_ACCELERATION) then
+              coupling%send%buffer(3*i-2) = nodes%a(1,coupling%send%node_id(i))
+              coupling%send%buffer(3*i-1) = nodes%a(2,coupling%send%node_id(i))
+              coupling%send%buffer(3*i)   = nodes%a(3,coupling%send%node_id(i))
               fieldName = "ACCELERATION"
-            else if(cwipi%send%quantity == CWIPI_FORCE) then
-              cwipi%send%buffer(3*i-2) = nodes%F(1,cwipi%send%node_id(i))
-              cwipi%send%buffer(3*i-1) = nodes%F(2,cwipi%send%node_id(i))
-              cwipi%send%buffer(3*i)   = nodes%F(3,cwipi%send%node_id(i))
+            else if(coupling%send%quantity == coupling_FORCE) then
+              coupling%send%buffer(3*i-2) = nodes%F(1,coupling%send%node_id(i))
+              coupling%send%buffer(3*i-1) = nodes%F(2,coupling%send%node_id(i))
+              coupling%send%buffer(3*i)   = nodes%F(3,coupling%send%node_id(i))
               fieldName = "FORCE"
             endif
           end do
 
 
-#ifdef CWIPI
+#ifdef WITH_CWIPI
           call cwipi_update_location_f("r2r")
           call cwipi_locate_f("r2r")
           call cwipi_issend_f("y2y2", &
@@ -410,16 +413,16 @@ end function make_unique
                             1, &
                             time, &
                             fieldName, &
-                            cwipi%send%buffer, &
+                            coupling%send%buffer, &
                             rq)
             call cwipi_wait_issend_f("y2y2",rq)
 #endif
   
-        end subroutine cwipi_out
+        end subroutine coupling_out
 
 
-        subroutine cwipi_in(cwipi, nodes, t)
-#ifdef CWIPI
+        subroutine coupling_in(coupling, nodes, t)
+#ifdef WITH_CWIPI
           use cwipi
 #endif
           use nodal_arrays_mod
@@ -427,7 +430,7 @@ end function make_unique
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                     Arguments
 ! ----------------------------------------------------------------------------------------------------------------------
-          type(cwipi_), intent(inout) :: cwipi !< CWIPI structure
+          type(coupling_), intent(inout) :: coupling !< coupling structure
           type(nodal_arrays_), intent(inout) :: nodes !< Nodal arrays
           double precision :: t !< Time
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -443,82 +446,84 @@ end function make_unique
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                      Body     
 ! ----------------------------------------------------------------------------------------------------------------------
-          if(.not.allocated(cwipi%recv%buffer)) then
-            allocate(cwipi%recv%buffer(3*cwipi%recv%numnod))
+
+          if(coupling%recv%quantity == NOTHING) return
+          if(.not.allocated(coupling%recv%buffer)) then
+            allocate(coupling%recv%buffer(3*coupling%recv%numnod))
           end if
           time = t
 
-          if(cwipi%recv%quantity == CWIPI_COORDINATE) then
+          if(coupling%recv%quantity == coupling_COORDINATE) then
             fieldName = "COORDINATE"
-          else if(cwipi%recv%quantity == CWIPI_VELOCITY) then
+          else if(coupling%recv%quantity == coupling_VELOCITY) then
             fieldName = "VELOCITY"
-          else if(cwipi%recv%quantity == CWIPI_ACCELERATION) then
+          else if(coupling%recv%quantity == coupling_ACCELERATION) then
             fieldName = "ACCELERATION"
-          else if(cwipi%recv%quantity == CWIPI_FORCE) then
+          else if(coupling%recv%quantity == coupling_FORCE) then
             fieldName = "FORCE"
           endif
 
           ! Receive the data from the other side
-#ifdef CWIPI
+#ifdef WITH_CWIPI
           CALL cwipi_receive_f('r2r', &
                       'exchange', &
                       3, &
                       1, &
                       time, &
-                      recievingField, &
-                      cwipi%recv%buffer, &
+                      fieldName, &
+                      coupling%recv%buffer, &
                       nNotLocatedPoints, &
                       status)
 #endif
-          do i = 1, cwipi%recv%numnod
-            if(cwipi%recv%quantity == CWIPI_COORDINATE) then
-              nodes%X(1,cwipi%recv%node_id(i)) = cwipi%recv%buffer(3*i-2)
-              nodes%X(2,cwipi%recv%node_id(i)) = cwipi%recv%buffer(3*i-1)
-              nodes%X(3,cwipi%recv%node_id(i)) = cwipi%recv%buffer(3*i)
-            else if(cwipi%recv%quantity == CWIPI_VELOCITY) then
-              nodes%V(1,cwipi%recv%node_id(i)) = cwipi%recv%buffer(3*i-2)
-              nodes%V(2,cwipi%recv%node_id(i)) = cwipi%recv%buffer(3*i-1)
-              nodes%V(3,cwipi%recv%node_id(i)) = cwipi%recv%buffer(3*i)
-            else if(cwipi%recv%quantity == CWIPI_ACCELERATION) then
-              nodes%A(1,cwipi%recv%node_id(i)) = cwipi%recv%buffer(3*i-2)
-              nodes%A(2,cwipi%recv%node_id(i)) = cwipi%recv%buffer(3*i-1)
-              nodes%A(3,cwipi%recv%node_id(i)) = cwipi%recv%buffer(3*i)
-            else if(cwipi%recv%quantity == CWIPI_FORCE) then
-              nodes%F(1,cwipi%recv%node_id(i)) = cwipi%recv%buffer(3*i-2)
-              nodes%F(2,cwipi%recv%node_id(i)) = cwipi%recv%buffer(3*i-1)
-              nodes%F(3,cwipi%recv%node_id(i)) = cwipi%recv%buffer(3*i)
+          do i = 1, coupling%recv%numnod
+            if(coupling%recv%quantity == coupling_COORDINATE) then
+              nodes%X(1,coupling%recv%node_id(i)) = coupling%recv%buffer(3*i-2)
+              nodes%X(2,coupling%recv%node_id(i)) = coupling%recv%buffer(3*i-1)
+              nodes%X(3,coupling%recv%node_id(i)) = coupling%recv%buffer(3*i)
+            else if(coupling%recv%quantity == coupling_VELOCITY) then
+              nodes%V(1,coupling%recv%node_id(i)) = coupling%recv%buffer(3*i-2)
+              nodes%V(2,coupling%recv%node_id(i)) = coupling%recv%buffer(3*i-1)
+              nodes%V(3,coupling%recv%node_id(i)) = coupling%recv%buffer(3*i)
+            else if(coupling%recv%quantity == coupling_ACCELERATION) then
+              nodes%A(1,coupling%recv%node_id(i)) = coupling%recv%buffer(3*i-2)
+              nodes%A(2,coupling%recv%node_id(i)) = coupling%recv%buffer(3*i-1)
+              nodes%A(3,coupling%recv%node_id(i)) = coupling%recv%buffer(3*i)
+            else if(coupling%recv%quantity == coupling_FORCE) then
+              nodes%F(1,coupling%recv%node_id(i)) = coupling%recv%buffer(3*i-2)
+              nodes%F(2,coupling%recv%node_id(i)) = coupling%recv%buffer(3*i-1)
+              nodes%F(3,coupling%recv%node_id(i)) = coupling%recv%buffer(3*i)
             endif
           end do
-        end subroutine cwipi_in
+        end subroutine coupling_in
 
 
 
-        subroutine cwipi_free(cwipi)
-#ifdef CWIPI
+        subroutine coupling_free(coupling)
+#ifdef WITH_CWIPI
           use cwipi
 #endif
             implicit none
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                     Arguments
 ! ----------------------------------------------------------------------------------------------------------------------
-          type(cwipi_), intent(inout) :: cwipi !< CWIPI structure
+          type(coupling_), intent(inout) :: coupling !< coupling structure
 
-          if(allocated(cwipi%send%buffer)) deallocate(cwipi%send%buffer)
-          if(allocated(cwipi%send%connec)) deallocate(cwipi%send%connec)
-          if(allocated(cwipi%send%node_id)) deallocate(cwipi%send%node_id)
-          if(allocated(cwipi%send%connectIndex)) deallocate(cwipi%send%connectIndex)
-          if(allocated(cwipi%recv%buffer)) deallocate(cwipi%recv%buffer)
-          if(allocated(cwipi%recv%connec)) deallocate(cwipi%recv%connec)
-          if(allocated(cwipi%recv%node_id)) deallocate(cwipi%recv%node_id)
-          if(allocated(cwipi%recv%connectIndex)) deallocate(cwipi%recv%connectIndex)
-#ifdef CWIPI
+          if(allocated(coupling%send%buffer)) deallocate(coupling%send%buffer)
+          if(allocated(coupling%send%connec)) deallocate(coupling%send%connec)
+          if(allocated(coupling%send%node_id)) deallocate(coupling%send%node_id)
+          if(allocated(coupling%send%connectIndex)) deallocate(coupling%send%connectIndex)
+          if(allocated(coupling%recv%buffer)) deallocate(coupling%recv%buffer)
+          if(allocated(coupling%recv%connec)) deallocate(coupling%recv%connec)
+          if(allocated(coupling%recv%node_id)) deallocate(coupling%recv%node_id)
+          if(allocated(coupling%recv%connectIndex)) deallocate(coupling%recv%connectIndex)
+#ifdef WITH_CWIPI
           call cwipi_delete_coupling_f("r2r")
           call cwipi_finalize()
 #endif
-        end subroutine cwipi_free
+        end subroutine coupling_free
 ! ----------------------------------------------------------------------------------------------------------------------
 
-      end module radioss_cwipi_mod
+      end module radioss_coupling_mod
 
 
 

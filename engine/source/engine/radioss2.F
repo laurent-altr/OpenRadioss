@@ -186,7 +186,7 @@ C-----------------------------------------------
       use nodal_arrays_mod
       use rbe3_mod
       USE TIME_HISTORY_MOD , only : TH_CLEAN
-      USE radioss_cwipi_mod
+      USE radioss_coupling_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -341,7 +341,7 @@ C-------------------------------------------------------------------------------
       TYPE(nodal_arrays_), target :: nodes 
       TYPE(timer_) :: TIMERS
       TYPE(rbe3_) :: rbe3
-      TYPE(cwipi_) :: CWIPI
+      TYPE(coupling_) :: coupling
 C------------------------------------------------------------------
 C to build a IBM PARALLEL version
 C In starter : define install parameter nspmd 
@@ -642,7 +642,7 @@ C------------------------------------------------
 C     Standard input reading
 C------------------------------------------------
       CALL LECINP(IRUNN,IRFL,IRFE,H3D_DATA,FLAG_CST_AMS,DYNAIN_DATA,
-     .            SENSORS,DT,OUTPUT,GLOB_THERM,CWIPI)
+     .            SENSORS,DT,OUTPUT,GLOB_THERM,coupling)
       NFSKYI=5
       IF(KDTINT==0 )NFSKYI=4
       
@@ -2165,7 +2165,7 @@ C---------------------------------------------------------------------
          IRUNN_BIS = IRUNN
 
          CALL RESOL_HEAD(ELEMENT, NODES, ITASK        ,AF              ,IAF             ,IDATA      ,RDATA,
-     .                   GRAPHE       ,IFLOW           ,RFLOW           ,CWIPI,
+     .                   GRAPHE       ,IFLOW           ,RFLOW           ,coupling,
      .                   STACK        ,IRUNN_BIS       , TIMERS,
      .                   MULTI_FVM    ,H3D_DATA        ,SUBSETS    ,IGRNOD    ,
      .                   IGRBRIC      ,IGRQUAD         ,IGRSH4N         ,IGRSH3N    ,IGRTRUSS  ,

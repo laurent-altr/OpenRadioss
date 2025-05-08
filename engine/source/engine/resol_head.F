@@ -68,7 +68,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
       !||====================================================================
       SUBROUTINE RESOL_HEAD( ELEMENT, NODES,
      .           ITASK       ,AF          ,IAF            ,IDATA      ,RDATA,
-     .           GRAPHE      ,IFLOW       ,RFLOW          ,CWIPI,
+     .           GRAPHE      ,IFLOW       ,RFLOW          ,coupling,
      .           STACK       ,IRUNN_BIS   , TIMERS,
      .           MULTI_FVM   ,H3D_DATA    ,SUBSETS    ,IGRNOD          ,
      .           IGRBRIC     ,IGRQUAD     ,IGRSH4N        ,IGRSH3N    ,IGRTRUSS        ,
@@ -82,7 +82,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
-      USE radioss_cwipi_mod
+      USE radioss_coupling_mod
       USE connectivity_mod
       use nodal_arrays_mod
       USE RESTMOD
@@ -190,7 +190,7 @@ C     REAL
       type (glob_therm_) ,intent(inout)       :: glob_therm
       type (pblast_) ,intent(inout)           :: PBLAST
       type (rbe3_) ,intent(inout)             :: RBE3
-      type(CWIPI_) :: CWIPI
+      type(coupling_) :: coupling
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
@@ -215,7 +215,7 @@ C
      .  AF              ,IAF            ,
      1  ISKWN          ,NETH           ,IPART          ,NOM_OPT     ,KXX              ,IXX       ,
      2  IXTG            ,IXS            ,IXQ            ,IXT            ,IXP         ,IXR       ,
-     3  IFILL          ,MAT_ELEM       , CWIPI,
+     3  IFILL          ,MAT_ELEM       , coupling,
      4  IMS             ,NPC            ,IBCL           ,
      5  IBFV            ,IECRAN         ,ILAS           ,LACCELM        ,NNLINK         ,LNLINK      ,
      6  IPARG           ,DD_IAD         ,IGRV           ,IEXLNK         ,KINET       ,

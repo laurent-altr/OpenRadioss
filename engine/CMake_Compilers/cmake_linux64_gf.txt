@@ -168,6 +168,8 @@ set( strict " -Werror=aliasing  -Werror=unused-dummy-argument  -Werror=do-subscr
 set( strict_wo_mpi " -Werror=aliasing ${unused_dummy_arg} -Werror=do-subscript -Werror=array-bounds -Werror=tabs -Werror=surprising ") 
 
 
+set(opt_flag "${opt_flag} -DCWIPI -I/home/lberenguer/cwipi/include -DWP=8 " )
+
 if ( debug STREQUAL "1" )
 # Fortran
 
@@ -237,14 +239,16 @@ endif()
 
 
 # Linking flags
-set (CMAKE_EXE_LINKER_FLAGS "-rdynamic ${OPENMP}  -ldl -lrt -lstdc++ ${FSANITIZE}  " )
+set (CWIPI_FLAG "-Wl,-rpath,/home/lberenguer/cwipi_coupling_test/cwipi-1.3.0/build/src: -lm /home/lberenguer/cwipi_coupling_test/cwipi-1.3.0/build/src/libcwpf.so.1.3.0 /home/lberenguer/cwipi_coupling_test/cwipi-1.3.0/build/src/libcwp.so.1.3.0 -lm -lstdc++ ")
+
+set (CMAKE_EXE_LINKER_FLAGS "-rdynamic ${OPENMP}  -ldl -lrt -lstdc++ ${FSANITIZE} ${CWIPI_FLAG}")
 
 #Libraries
 
 if ( static_link STREQUAL "1" )
-  set (LINK "rt  ${mumps_libs} ${zlib_lib} -ldl -static-libgfortran -static-libstdc++ -static-libgcc ${mpi_lib} -Wunused-function")
+  set (LINK "rt  ${mumps_libs} ${zlib_lib} -ldl -static-libgfortran -static-libstdc++ -static-libgcc ${mpi_lib} -Wunused-function ${CWIPI_FLAG}")
 else()
-  set (LINK "rt  ${mumps_libs} ${zlib_lib} ${mpi_lib} -ldl -Wunused-function")
+  set (LINK "rt  ${mumps_libs} ${zlib_lib} ${mpi_lib} -ldl -Wunused-function ${CWIPI_FLAG}")
 endif()
 string(STRIP ${LINK} LINK)
 

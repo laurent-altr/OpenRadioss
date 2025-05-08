@@ -517,7 +517,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
             SUBROUTINE RESOL(TIMERS, ELEMENT, NODES, AF,IAF,
      1        ISKWN   ,NETH   ,IPART  ,NOM_OPT,KXX    ,IXX    ,
      2        IXTG   ,IXS     ,IXQ    ,IXT    ,IXP    ,IXR    ,
-     3        IFILL  ,MAT_ELEM, CWIPI,
+     3        IFILL  ,MAT_ELEM, coupling,
      4        IMS    ,NPC    ,IBCL    ,
      5        IBFV   ,IDUM   ,LAS     ,LACCELM,NNLINK ,LNLINK ,
      6        IPARG  ,DD_IAD  ,IGRV   ,IEXLNK ,KINET  ,
@@ -600,7 +600,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
-              USE radioss_cwipi_mod
+              USE radioss_coupling_mod
               USE CONNECTIVITY_MOD
               USE NODAL_ARRAYS_MOD
               USE detach_node_mod
@@ -868,7 +868,7 @@ C-----------------------------------------------
      .           GAUGE(LLGAUGE,*),WAGAP(2,*),RTHBUF(*),FORNEQS(3,*),
      .           DPL0CLD(*),VEL0CLD(*)
               my_real , INTENT(IN) :: DGAPLOADINT(NINTER*NLOADP_HYD)
-              TYPE(cwipi_) :: CWIPI
+              TYPE(coupling_) :: coupling
               TYPE(timer_) :: TIMERS
               TYPE(connectivity_), INTENT(INOUT) :: ELEMENT
               TYPE(NODAL_ARRAYS_), INTENT(INOUT) :: NODES
@@ -2217,7 +2217,7 @@ C
      9         ISKWN  ,IFRAME  ,LOADS ,GLOB_THERM,PBLAST,RBE3)
 
 !$OMP END PARALLEL
-              CALL cwipi_init(cwipi, IGRSURF, nsurf,nodes)
+              CALL coupling_init(coupling, IGRSURF, nsurf,nodes)
               IF (ALEMUSCL_Param%IALEMUSCL == 0) DEALLOCATE(ADDTMPL)
 C========================================================================================
 C                                  NON PARALLEL SECTION (SMP)
@@ -4953,6 +4953,9 @@ C
 C--- //------------------------------
 C       FORCE ASSEMBLY
 C-------------------------------------
+#ifdef WITH_CWIPI
+        NODES%F(1:3,1:NUMNOD) = NODES%A(1:3,1:NUMNOD) 
+#endif
 
 C========================================================================================
 C                                     PARALLEL SECTION (SMP)
@@ -7104,6 +7107,14 @@ C===============================================================================
 C========================================================================================
 C                                     PARALLEL SECTION (SMP)
 C========================================================================================
+#ifdef WITH_CWIPI
+       !FORCE F was initialized to the acceleration before assembly
+       !before the call to ACCELE, A contains the forces
+       ! after the call to ACCELE, A contains the accelerations
+       NODES%F(1:3,1:NUMNOD) = NODES%A(1:3,1:NUMNOD) - NODES%F(1:3,1:NUMNOD)                                                  
+       call coupling_out(coupling, nodes, dble(TT))
+       call coupling_in(coupling, nodes, dble(TT))
+#endif
 
 !$OMP PARALLEL PRIVATE(ITSK,NODFTSK,NODLTSK,NODFT_NL,NODLT_NL)
                 ITSK = OMP_GET_THREAD_NUM()
@@ -9786,6 +9797,8 @@ C /KILL
      7               ISLEN20E,NODES%IKINE  ,DIAG_SMS,SENSORS%SENSOR_TAB,INTERFACES%INTBUF_TAB,INT24E2EUSE,
      8               FORNEQS ,MULTI_FVM,INTERFACES)
                 ENDIF
+           
+                CALL coupling_FREE(coupling)
 
                 IF(ALLOCATED(ISENDTO))DEALLOCATE(ISENDTO)
                 IF(ALLOCATED(IRCVFROM))DEALLOCATE(IRCVFROM)

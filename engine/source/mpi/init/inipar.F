@@ -32,9 +32,9 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
       !||--- uses       -----------------------------------------------------
       !||====================================================================
       SUBROUTINE INIPAR(ITID,ICAS,NNODES,INPUT,GOT_INPUT,NBTASK)
-#ifdef CWIPI
-      USE CWIPI
-#endif  
+#ifdef WITH_CWIPI
+        USE CWIPI 
+#endif
 C-----------------------------------------------------------------
 #include      "implicit_f.inc"
 #include      "comlock.inc"
@@ -90,8 +90,8 @@ C
         CALL MPI_COMM_SPLIT(MPI_COMM_WORLD,COLOUR,KEY,
      *                      SPMD_COMM_WORLD,IERROR)
 
-#ifdef CWIPI 
-      call cwipi_init_f(MPI_COMM_WORLD,"RADIOSS",SPMD_WORLD_COMM)
+#ifdef WITH_CWIPI 
+      call cwipi_init_f(MPI_COMM_WORLD,"RADIOSS",SPMD_COMM_WORLD)
       call cwipi_set_output_listing_f(6)
       call cwipi_dump_appli_properties_f()
 #endif
@@ -127,7 +127,7 @@ C nthread1 : nombre de threads fixe par la variable environnememt
           IF (GOT_NTH == 1) THEN
             IF (NTHREAD>1 .AND. (NTH/= NTHREAD .OR. (NTH==NTHREAD .AND.
      +          NTHREAD1>0.AND.NTHREAD0>1.AND.NTHREAD1/=NTHREAD0)))THEN
-              WRITE(IOUT,*)
+                WRITE(IOUT,*)
      +      '** WARNING : -nthread OPTION USED, DEFAULT SETTING IGNORED'
               WRITE(IOUT,*)' '
             END IF
