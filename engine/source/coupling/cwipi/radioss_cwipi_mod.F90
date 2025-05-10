@@ -42,6 +42,7 @@
           integer, dimension(:), allocatable :: connec
           integer, dimension(:), allocatable :: node_id
           double precision, dimension(:), allocatable :: buffer
+          integer :: rq !< requests
         end type coupling_field_
 
         type coupling_
@@ -111,8 +112,6 @@ end function make_unique
 !                                                      Body
 ! ----------------------------------------------------------------------------------------------------------------------
 
-          coupling%recv%quantity = NOTHING
-          coupling%send%quantity = NOTHING
 
           write(6,*) 'parse_coupling_string: input_string:', input_string
 
@@ -121,7 +120,7 @@ end function make_unique
             write(6,*) 'parse_coupling_string: input_string too short'
             return
           end if
-          if (input_string(1:7) /= '/coupling/') then
+          if (input_string(1:7) /= '/CWIPI/') then
             write(6,*) 'parse_coupling_string: input_string does not start with /coupling/'
             return
           end if
@@ -152,6 +151,7 @@ end function make_unique
             return
           end if
 
+          write(6,*) 'quantity:', quant_str,trim(quant_str)
 
           ! Convert quantity string to constant
           select case (trim(quant_str))
@@ -168,6 +168,7 @@ end function make_unique
            case default
             quantity = NOTHING  ! Set default quantity to NOTHING
             write(6,*) 'parse_coupling_string: invalid quantity:', quant_str
+            call arret(2)
           end select
 
           ! Convert direction string to constant
@@ -180,7 +181,12 @@ end function make_unique
             coupling%send%quantity = quantity
            case default
             write(6,*) 'parse_coupling_string: invalid direction:', dir_str 
+            call arret(2)
           end select
+
+          write(6,*) trim(dir_str),'quantity:', quantity
+
+          
         end subroutine parse_coupling_string
 
         subroutine coupling_init_field(field, surf,  nodes)
@@ -233,6 +239,7 @@ end function make_unique
             tmp(2) = surf%nodes(i,2)
             tmp(3) = surf%nodes(i,3)
             tmp(4) = surf%nodes(i,4)
+            !write(6,*) "surf%nodes", tmp(1), tmp(2), tmp(3), tmp(4)
             nb_unique_nodes = make_unique(tmp)
             field%connectIndex(i+1) = field%connectIndex(i+1) + nb_unique_nodes 
             do j = 1, nb_unique_nodes
@@ -252,21 +259,20 @@ end function make_unique
                 end if
                 next_node = next_node + 1
 
-                ! next_node should be equal to field%vtx_id(i) + j - 1 ?
 
-                if(next_node .ne. field%connectIndex(i) + j - 1) then
-                  write(6,*) 'Error in field%connectIndex?', field%connectIndex(i)+j-1, next_node
+                if(next_node .ne. field%connectIndex(i) + j ) then
+                  write(6,*) 'Error in field%connectIndex?', field%connectIndex(i)+j, next_node
                 end if
-                field%connec(next_node) = index(n) -1
+                field%connec(next_node) = index(n)
             enddo
           enddo
 
-          allocate(field%buffer(3*next_node)) 
+          allocate(field%buffer(3*counter)) 
           field%numnod = counter
 
         end subroutine coupling_init_field
 
-        subroutine coupling_init(coupling, surf, nsurf, nodes)
+        subroutine coupling_init(coupling, surf, nsurf, nodes )
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                     Module
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -291,6 +297,7 @@ end function make_unique
           integer :: surface_id  !< Variable to hold surface ID
           double precision :: tolerance !
           double precision, dimension(:), allocatable :: coords
+          character(5) :: APPNAME
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                      Body
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -316,13 +323,14 @@ end function make_unique
             coords(3*i-1) = nodes%X(2,coupling%send%node_id(i))
             coords(3*i)   = nodes%X(3,coupling%send%node_id(i))
           enddo
-
-
+        
 #ifdef WITH_CWIPI
 ! coupling INITIALIZAITON 
+      IF(APPLICATION_ID == 0) THEN
+      APPNAME = "code2"
       call cwipi_create_coupling_f("r2r", &
       cwipi_cpl_parallel_with_part,&
-      "aspi_reel_solver", &
+      APPNAME, &
       2,     & ! Dimension des entites geometriques
       tolerance, & ! Tolerance geometrique
       cwipi_static_mesh, &
@@ -330,6 +338,19 @@ end function make_unique
       1, &
       "Ensight Gold",&
       "text")
+      ELSE 
+      APPNAME = "code1"
+      call cwipi_create_coupling_f("r2r", &
+      cwipi_cpl_parallel_with_part,&
+      APPNAME, &
+      2,     & ! Dimension des entites geometriques
+      tolerance, & ! Tolerance geometrique
+      cwipi_static_mesh, &
+      cwipi_solver_cell_vertex, &
+      1, &
+      "Ensight Gold",&
+      "text")
+      ENDIF 
 
       call cwipi_define_mesh_f("r2r", &
       coupling%send%numnod, &
@@ -338,15 +359,16 @@ end function make_unique
       coupling%send%connectIndex, &
       coupling%send%connec)
 
+      call cwipi_set_output_listing_f(6)
       call cwipi_dump_appli_properties_f()
-      call cwipi_locate("r2r")
+      call cwipi_locate_f("r2r")
 #endif 
 
         deallocate(coords)
         end subroutine coupling_init
 
 
-        subroutine coupling_out(coupling,  nodes, t)
+        subroutine coupling_out(coupling,  nodes, t, quantity)
 
 #ifdef WITH_CWIPI
           use cwipi
@@ -359,6 +381,7 @@ end function make_unique
           type(coupling_), intent(inout) :: coupling !< coupling structure
           type(nodal_arrays_), intent(in) :: nodes !< Nodal arrays
           double precision, intent(in) :: t !< Time
+          integer, intent(in) :: quantity !< Quantity to send
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Local variables
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -372,7 +395,7 @@ end function make_unique
 !                                                      Body
 ! ----------------------------------------------------------------------------------------------------------------------
           time = t
-          if(coupling%send%quantity == NOTHING) return
+          if(coupling%send%quantity .NE. quantity) return
           ! Send the data to the other side
           if(.not.allocated(coupling%send%buffer)) then
             allocate(coupling%send%buffer(3*coupling%send%numnod))
@@ -406,7 +429,7 @@ end function make_unique
 #ifdef WITH_CWIPI
           call cwipi_update_location_f("r2r")
           call cwipi_locate_f("r2r")
-          call cwipi_issend_f("y2y2", &
+          call cwipi_issend_f("r2r", &
                             "exchange", &
                             0, &
                             3, &
@@ -414,14 +437,30 @@ end function make_unique
                             time, &
                             fieldName, &
                             coupling%send%buffer, &
-                            rq)
-            call cwipi_wait_issend_f("y2y2",rq)
+                            coupling%send%rq)
+           write(6,*) 'coupling_out: sended',size(coupling%send%buffer)
+!           call cwipi_wait_issend_f("r2r",rq)
 #endif
   
         end subroutine coupling_out
 
-
-        subroutine coupling_in(coupling, nodes, t)
+        subroutine coupling_out_wait(coupling)
+#ifdef WITH_CWIPI
+          use cwipi
+#endif
+          implicit none
+! ----------------------------------------------------------------------------------------------------------------------
+!                                                     Arguments
+! ----------------------------------------------------------------------------------------------------------------------
+          type(coupling_), intent(inout) :: coupling !< coupling structure
+! ----------------------------------------------------------------------------------------------------------------------
+!                                                   Local variables
+! ----------------------------------------------------------------------------------------------------------------------
+          write(6,*) 'coupling_out_wait: waiting for send to finish'
+          call cwipi_wait_issend_f("r2r", coupling%send%rq)
+        end subroutine coupling_out_wait
+          
+        subroutine coupling_in(coupling, nodes, t, quantity)
 #ifdef WITH_CWIPI
           use cwipi
 #endif
@@ -433,6 +472,7 @@ end function make_unique
           type(coupling_), intent(inout) :: coupling !< coupling structure
           type(nodal_arrays_), intent(inout) :: nodes !< Nodal arrays
           double precision :: t !< Time
+          integer :: quantity !< Quantity to receive
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Local variables
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -446,8 +486,16 @@ end function make_unique
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                      Body     
 ! ----------------------------------------------------------------------------------------------------------------------
+          write(6,*) 'coupling_in: coupling%recv%quantity:', coupling%recv%quantity, "quantity:", quantity
 
-          if(coupling%recv%quantity == NOTHING) return
+          if(coupling%recv%quantity .ne. quantity) then 
+            return
+          end if
+
+          if(coupling%recv%quantity == NOTHING) then 
+            return
+          end if 
+
           if(.not.allocated(coupling%recv%buffer)) then
             allocate(coupling%recv%buffer(3*coupling%recv%numnod))
           end if
@@ -465,6 +513,7 @@ end function make_unique
 
           ! Receive the data from the other side
 #ifdef WITH_CWIPI
+          write(6,*) 'coupling_in: cwipi_receive_f',size(coupling%recv%buffer)
           CALL cwipi_receive_f('r2r', &
                       'exchange', &
                       3, &
@@ -475,6 +524,9 @@ end function make_unique
                       nNotLocatedPoints, &
                       status)
 #endif
+          ! compute the sum of the recv%buffer
+          write(6,*) 'coupling_in: nNotLocatedPoints:', nNotLocatedPoints
+          write(6,*) "summ of recv%buffer:", sum(coupling%recv%buffer)
           do i = 1, coupling%recv%numnod
             if(coupling%recv%quantity == coupling_COORDINATE) then
               nodes%X(1,coupling%recv%node_id(i)) = coupling%recv%buffer(3*i-2)
@@ -485,9 +537,9 @@ end function make_unique
               nodes%V(2,coupling%recv%node_id(i)) = coupling%recv%buffer(3*i-1)
               nodes%V(3,coupling%recv%node_id(i)) = coupling%recv%buffer(3*i)
             else if(coupling%recv%quantity == coupling_ACCELERATION) then
-              nodes%A(1,coupling%recv%node_id(i)) = coupling%recv%buffer(3*i-2)
-              nodes%A(2,coupling%recv%node_id(i)) = coupling%recv%buffer(3*i-1)
-              nodes%A(3,coupling%recv%node_id(i)) = coupling%recv%buffer(3*i)
+              nodes%A(1,coupling%recv%node_id(i)) = nodes%A(1,coupling%recv%node_id(i)) + coupling%recv%buffer(3*i-2)
+              nodes%A(2,coupling%recv%node_id(i)) = nodes%A(2,coupling%recv%node_id(i)) + coupling%recv%buffer(3*i-1)
+              nodes%A(3,coupling%recv%node_id(i)) = nodes%A(3,coupling%recv%node_id(i)) + coupling%recv%buffer(3*i)
             else if(coupling%recv%quantity == coupling_FORCE) then
               nodes%F(1,coupling%recv%node_id(i)) = coupling%recv%buffer(3*i-2)
               nodes%F(2,coupling%recv%node_id(i)) = coupling%recv%buffer(3*i-1)
@@ -518,7 +570,7 @@ end function make_unique
           if(allocated(coupling%recv%connectIndex)) deallocate(coupling%recv%connectIndex)
 #ifdef WITH_CWIPI
           call cwipi_delete_coupling_f("r2r")
-          call cwipi_finalize()
+          call cwipi_finalize_f()
 #endif
         end subroutine coupling_free
 ! ----------------------------------------------------------------------------------------------------------------------

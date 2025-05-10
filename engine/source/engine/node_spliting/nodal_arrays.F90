@@ -316,7 +316,7 @@
             arrays%parent_node(i) = i
             enddo
             arrays%nchilds = 0
-#ifdef CWIPI
+#ifdef WITH_CWIPI
             !arrays%F is needed
             call my_alloc(arrays%F,3,numnod)
             arrays%F = 0

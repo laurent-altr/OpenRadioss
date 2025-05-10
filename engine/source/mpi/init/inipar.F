@@ -35,6 +35,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 #ifdef WITH_CWIPI
         USE CWIPI 
 #endif
+        USE COMMAND_LINE_ARGS_MOD
 C-----------------------------------------------------------------
 #include      "implicit_f.inc"
 #include      "comlock.inc"
@@ -69,6 +70,7 @@ C-----------------------------------------------
       INTEGER BUFFER(NSPMD*2),NSPMDx2
       INTEGER :: COLOUR
       INTEGER :: VALID
+      character(5) :: APPNAME
 #if defined(_OPENMP)
       INTEGER OMP_GET_MAX_THREADS
 #endif
@@ -87,11 +89,27 @@ C
 
         CALL MPI_COMM_GET_ATTR(MPI_COMM_WORLD, MPI_APPNUM,
      *                            COLOUR, VALID, IERROR)
-        CALL MPI_COMM_SPLIT(MPI_COMM_WORLD,COLOUR,KEY,
-     *                      SPMD_COMM_WORLD,IERROR)
+!        CALL MPI_COMM_SPLIT(MPI_COMM_WORLD,COLOUR,KEY,
+!     *                      SPMD_COMM_WORLD,IERROR)
+!
+!        CALL MPI_COMM_SIZE(SPMD_COMM_WORLD, NNODES, IERROR)
+!        CALL MPI_COMM_RANK(SPMD_COMM_WORLD, MYRANK, IERROR)
 
 #ifdef WITH_CWIPI 
-      call cwipi_init_f(MPI_COMM_WORLD,"RADIOSS",SPMD_COMM_WORLD)
+      ! convert COLOUR to a string APPNAME
+      WRITE(APPNAME, '(I0)') COLOUR
+      APPLICATION_ID = COLOUR
+      if(COLOUR == 0) then
+        APPLICATION_ID = 0
+        APPNAME = "code1"
+         write(ISTDO,*)'APPNAME = ', APPNAME, APPLICATION_ID
+        call cwipi_init_f(MPI_COMM_WORLD,APPNAME,SPMD_COMM_WORLD)
+      else
+         APPNAME = "code2"
+          APPLICATION_ID = 1
+          write(ISTDO,*)'APPNAME = ', APPNAME,APPLICATION_ID
+         call cwipi_init_f(MPI_COMM_WORLD,APPNAME,SPMD_COMM_WORLD)
+      end if
       call cwipi_set_output_listing_f(6)
       call cwipi_dump_appli_properties_f()
 #endif

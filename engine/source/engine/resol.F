@@ -946,6 +946,7 @@ C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
               LOGICAL LOUT
               CHARACTER FILNAM*100
+              CHARACTER(len = 20) :: fieldName
               INTEGER NODFT, NODLT,  I,J, N,
      .           K1, K2, K3, K4, K5, K6, K7, K8, K9, K10, K11, K, ISK,
      .           N0, N1, N2, NN,  NNOD, NSENSOR,
@@ -7109,11 +7110,9 @@ C                                     PARALLEL SECTION (SMP)
 C========================================================================================
 #ifdef WITH_CWIPI
        !FORCE F was initialized to the acceleration before assembly
-       !before the call to ACCELE, A contains the forces
-       ! after the call to ACCELE, A contains the accelerations
        NODES%F(1:3,1:NUMNOD) = NODES%A(1:3,1:NUMNOD) - NODES%F(1:3,1:NUMNOD)                                                  
-       call coupling_out(coupling, nodes, dble(TT))
-       call coupling_in(coupling, nodes, dble(TT))
+       call coupling_out(coupling, nodes, dble(TT),coupling_FORCE)
+       
 #endif
 
 !$OMP PARALLEL PRIVATE(ITSK,NODFTSK,NODLTSK,NODFT_NL,NODLT_NL)
@@ -7185,6 +7184,14 @@ C-----------------------------------------------
                 IF (GLOB_THERM%ITHERM_FE > 0 )
      .             CALL TEMPUR(NODES%TEMP ,NODES%MCP,FTHE,NODFTSK,NODLTSK,NODES%WEIGHT,MCP_OFF,GLOB_THERM%HEAT_STORED)
 !$OMP END PARALLEL
+#ifdef WITH_CWIPI
+       !FORCE F was initialized to the acceleration before assembly
+       !before the call to ACCELE, A contains the forces
+       ! after the call to ACCELE, A contains the accelerations
+       call coupling_out(coupling, nodes, dble(TT),COUPLING_ACCELERATION)
+#endif
+
+
 
 
 C------------------------------------------
@@ -9041,6 +9048,11 @@ C----------------------------
 
                 IF(IMON>0) CALL STARTIME(TIMERS,TIMER_INTEG)
 
+#ifdef WITH_CWIPI
+      write(6,*) __LINE__," coupling_in",COUPLING_ACCELERATION
+       call coupling_in(coupling, nodes, dble(TT),COUPLING_ACCELERATION)
+#endif
+
 C========================================================================================
 C                                     PARALLEL SECTION (SMP)
 C========================================================================================
@@ -9130,6 +9142,9 @@ C          LAGRANGE PUR
 C----------------------
 
                   IF(IMON>0) CALL STARTIME(TIMERS,TIMER_INTEG)
+#ifdef WITH_CWIPI
+       call coupling_in(coupling, nodes, dble(TT),coupling_VELOCITY)
+#endif
 
 C========================================================================================
 C                                     PARALLEL SECTION (SMP)
@@ -9167,6 +9182,12 @@ C
                   ENDIF
 C
 !$OMP END PARALLEL
+#ifdef WITH_CWIPI
+        call coupling_in(coupling, nodes, dble(TT),coupling_COORDINATE)
+        call coupling_out_wait(coupling)
+#endif
+
+
 
                   IF(IMON>0) CALL STOPTIME(TIMERS,TIMER_INTEG)
 C
