@@ -152,11 +152,17 @@ c provisoire
       INTEGER FIRST,NEW,LAST,IERROR
       LOGICAL DBG_type18_fvm
       SAVE IIX,IIY,IIZ
+      INTEGER, DIMENSION(:,:),ALLOCATABLE :: IREM_PACK
+      my_real, dimension(:,:), allocatable :: XREM_PACK
+      SAVE XREM_PACK,IREM_PACK
 C-----------------------------------------------
       IF(ITASK == 0)THEN
         REMOTE_S_NODE = 0
         CPT_VOX0 = 0
         ALLOCATE(NEXT_NOD(NSN+NSNR),STAT=IERROR)
+        ALLOCATE(XREM_PACK(4,NSNR),STAT=IERROR)
+        ALLOCATE(IREM_PACK(2,NSNR),STAT=IERROR)
+
         IF(IERROR/=0) THEN
           CALL ANCMSG(MSGID=19,ANMODE=ANINFO,
      .        C1='(/INTER/TYPE7)')
@@ -266,6 +272,7 @@ C=======================================================================
 C=======================================================================
 C 2   REMOTE NODE CLUSTERING
 C=======================================================================
+        K = 0
         DO J = 1, NSNR
 
           IF(XREM(1,J) < XMIN)  CYCLE
@@ -274,12 +281,21 @@ C=======================================================================
           IF(XREM(2,J) > YMAX)  CYCLE
           IF(XREM(3,J) < ZMIN)  CYCLE
           IF(XREM(3,J) > ZMAX)  CYCLE
+          K = K + 1 
+
+          XREM_PACK(1,K) = XREM(1,J)
+          XREM_PACK(2,K) = XREM(2,J)
+          XREM_PACK(3,K) = XREM(3,J)
+          XREM_PACK(4,K) = XREM(9,J)
+          IREM_PACK(1,K) = J 
+          IREM_PACK(1,K) = IREM(1,J)
+           
 
           REMOTE_S_NODE = REMOTE_S_NODE + 1
           LIST_REMOTE_S_NODE( REMOTE_S_NODE ) = J
-          IIX(NSN+J)=INT(NBX*(XREM(1,J)-XMINB)/(XMAXB-XMINB))
-          IIY(NSN+J)=INT(NBY*(XREM(2,J)-YMINB)/(YMAXB-YMINB))
-          IIZ(NSN+J)=INT(NBZ*(XREM(3,J)-ZMINB)/(ZMAXB-ZMINB))
+          IIX(NSN+J)=INT(NBX*(XREM_PACK(1,K)-XMINB)/(XMAXB-XMINB))
+          IIY(NSN+J)=INT(NBY*(XREM_PACK(2,K)-YMINB)/(YMAXB-YMINB))
+          IIZ(NSN+J)=INT(NBZ*(XREM_PACK(3,K)-ZMINB)/(ZMAXB-ZMINB))
           IIX(NSN+J)=MAX(1,2+MIN(NBX,IIX(NSN+J)))
           IIY(NSN+J)=MAX(1,2+MIN(NBY,IIY(NSN+J)))
           IIZ(NSN+J)=MAX(1,2+MIN(NBZ,IIZ(NSN+J)))
@@ -295,22 +311,24 @@ C=======================================================================
 
           IF(FIRST == 0)THEN
             ! empty cell
-            VOXEL(IIX(NSN+J),IIY(NSN+J),IIZ(NSN+J)) = NSN+J ! first
-            NEXT_NOD(NSN+J)     = 0 ! last one
-            LAST_NOD(NSN+J)     = 0 ! no last
+            VOXEL(IIX(NSN+K),IIY(NSN+K),IIZ(NSN+K)) = NSN+K ! first
+            NEXT_NOD(NSN+K)     = 0 ! last one
+            LAST_NOD(NSN+K)     = 0 ! no last
           ELSEIF(LAST_NOD(FIRST) == 0)THEN
             ! cell containing one node, add it as next node
-            NEXT_NOD(FIRST) = NSN+J  ! next
-            LAST_NOD(FIRST) = NSN+J  ! last
-            NEXT_NOD(NSN+J)  = 0     ! last one
+            NEXT_NOD(FIRST) = NSN+K  ! next
+            LAST_NOD(FIRST) = NSN+K  ! last
+            NEXT_NOD(NSN+K)  = 0     ! last one
           ELSE
             ! , jump to the last node of the cell
             LAST = LAST_NOD(FIRST)  ! last node in this voxel
-            NEXT_NOD(LAST)  = NSN+J ! next
-            LAST_NOD(FIRST) = NSN+J ! last
-            NEXT_NOD(NSN+J)     = 0 ! last one
+            NEXT_NOD(LAST)  = NSN+K ! next
+            LAST_NOD(FIRST) = NSN+K ! last
+            NEXT_NOD(NSN+K)     = 0 ! last one
           ENDIF
         ENDDO
+
+      IF(NSNR > K) write(6,*) "NSNR=",NSNR," K=",K
       END IF !ITASK == 0
 
       CALL MY_BARRIER ! Barrier to wait task0 treatment
@@ -455,11 +473,11 @@ C=======================================================================
                 ELSE
                   J=JJ-NSN
                   IF(FLAGREMNODE == 2) THEN
-                    NN = IREM(1,J)
+                    NN = IREM_PACK(1,J)
                     K = KREMNOD(2*(NE-1)+2) + 1
                     L = KREMNOD(2*(NE-1)+3)
                     DO M=K,L
-                      IF(REMNOD(M) == -IREM(2,J) ) THEN
+                      IF(REMNOD(M) == -IREM_PACK(2,J) ) THEN
                         DELNOD = DELNOD + 1
                         EXIT
                       ENDIF
@@ -467,11 +485,11 @@ C=======================================================================
                     IF(DELNOD /= 0)GOTO 200
                   ENDIF
 
-                  XS = XREM(1,J)
-                  YS = XREM(2,J)
-                  ZS = XREM(3,J)
+                  XS = XREM_PACK(1,J)
+                  YS = XREM_PACK(2,J)
+                  ZS = XREM_PACK(3,J)
                   IF(IGAP /= 0)THEN
-                    AAA = MARGE+CURV_MAX(NE)+MAX(MIN(GAPMAX,MAX(GAPMIN,XREM(9,J)+GAP_M(NE)))+DGAPLOAD,DRAD)
+                    AAA = MARGE+CURV_MAX(NE)+MAX(MIN(GAPMAX,MAX(GAPMIN,XREM_PACK(4,J)+GAP_M(NE)))+DGAPLOAD,DRAD)
                   ENDIF
                 ENDIF
 
@@ -503,6 +521,7 @@ C=======================================================================
 
                 J_STOK = J_STOK + 1
                 PROV_N(J_STOK) = JJ
+                IF(JJ > NSN) PROV_N(J_STOK) = IREM_PACK(2,JJ-NSN)
                 PROV_E(J_STOK) = NE
                 IF(J_STOK == NVSIZ)THEN
                   CALL I7STO(
@@ -601,6 +620,7 @@ C=======================================================================
         DEALLOCATE(IIX)
         DEALLOCATE(IIY)
         DEALLOCATE(IIZ)
+        DEALLOCATE(IREM_PACK,XREM_PACK)
       ENDIF
       IF(FLAGREMNODE == 2) THEN
         IF(ALLOCATED(TAGREMNODE)) DEALLOCATE(TAGREMNODE)
