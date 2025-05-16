@@ -160,8 +160,8 @@ C-----------------------------------------------
         REMOTE_S_NODE = 0
         CPT_VOX0 = 0
         ALLOCATE(NEXT_NOD(NSN+NSNR),STAT=IERROR)
-        ALLOCATE(XREM_PACK(4,NSNR),STAT=IERROR)
-        ALLOCATE(IREM_PACK(3,NSNR),STAT=IERROR)
+        ALLOCATE(XREM_PACK(4,NSN+NSNR),STAT=IERROR)
+        ALLOCATE(IREM_PACK(3,NSN+NSNR),STAT=IERROR)
 
         IF(IERROR/=0) THEN
           CALL ANCMSG(MSGID=19,ANMODE=ANINFO,
@@ -220,6 +220,7 @@ C=======================================================================
       IF(ITASK==0.AND.TOTAL_NB_NRTM>0)THEN
         !==========LAGRANGIAN and STAGGERED ALE==========!
         TEST_V0 = FIRST_TEST(NIN)
+        K = 0
         DO I=1,NSN
           IIX(I)=0
           IIY(I)=0
@@ -234,45 +235,54 @@ C=======================================================================
           IF(X(2,J) > YMAX)  CYCLE
           IF(X(3,J) < ZMIN)  CYCLE
           IF(X(3,J) > ZMAX)  CYCLE
-          IIX(I)=INT(NBX*(X(1,J)-XMINB)/(XMAXB-XMINB))
-          IIY(I)=INT(NBY*(X(2,J)-YMINB)/(YMAXB-YMINB))
-          IIZ(I)=INT(NBZ*(X(3,J)-ZMINB)/(ZMAXB-ZMINB))
-          IIX(I)=MAX(1,2+MIN(NBX,IIX(I)))
-          IIY(I)=MAX(1,2+MIN(NBY,IIY(I)))
-          IIZ(I)=MAX(1,2+MIN(NBZ,IIZ(I)))
-          FIRST = VOXEL(IIX(I),IIY(I),IIZ(I))
+          K = K +1 
+
+          XREM_PACK(1,K) = X(1,J)
+          XREM_PACK(2,K) = X(2,J)
+          XREM_PACK(3,K) = X(3,J)
+          XREM_PACK(4,K) = GAP_S(I)         
+          IREM_PACK(2,K) = 0         
+          IREM_PACK(1,K) = NSV(I)
+          IREM_PACK(3,K) = I
+
+          IIX(k)=INT(NBX*(XREM_PACK(1,K)-XMINB)/(XMAXB-XMINB))
+          IIY(k)=INT(NBY*(XREM_PACK(2,K)-YMINB)/(YMAXB-YMINB))
+          IIZ(k)=INT(NBZ*(XREM_PACK(3,K)-ZMINB)/(ZMAXB-ZMINB))
+          IIX(k)=MAX(1,2+MIN(NBX,IIX(K)))
+          IIY(k)=MAX(1,2+MIN(NBY,IIY(K)))
+          IIZ(k)=MAX(1,2+MIN(NBZ,IIZ(K)))
+          FIRST = VOXEL(IIX(K),IIY(K),IIZ(K))
           IF(TEST_V0) THEN
 ! count the number of SECONDARY nodes outiside the reduced box
-            IF(IIX(I) ==  1    .OR.  IIY(I) ==  1    .OR. IIZ(I) == 1 .AND.
-     .         IIX(I) ==  NBX+2 .OR. IIY(I) == NBY+2 .OR. IIZ(I) == NBZ+2) THEN
+            IF(IIX(k) ==  1    .OR.  IIY(k) ==  1    .OR. IIZ(k) == 1 .AND.
+     .         IIX(k) ==  NBX+2 .OR. IIY(k) == NBY+2 .OR. IIZ(k) == NBZ+2) THEN
               CPT_VOX0 = CPT_VOX0 +1
             ENDIF
           ENDIF
           IF(FIRST == 0)THEN
             !empty cell
-            VOXEL(IIX(I),IIY(I),IIZ(I)) = I ! first
-            NEXT_NOD(I)                 = 0 ! last one
-            LAST_NOD(I)                 = 0 ! no last
+            VOXEL(IIX(K),IIY(K),IIZ(K)) = K ! first
+            NEXT_NOD(K)                 = 0 ! last one
+            LAST_NOD(K)                 = 0 ! no last
           ELSEIF(LAST_NOD(FIRST) == 0)THEN
             !cell containing one node
             !add as next node
-            NEXT_NOD(FIRST) = I ! next
-            LAST_NOD(FIRST) = I ! last
-            NEXT_NOD(I)     = 0 ! last one
+            NEXT_NOD(FIRST) = K ! next
+            LAST_NOD(FIRST) = K ! last
+            NEXT_NOD(K)     = 0 ! last one
           ELSE
             !
             !jump to the last node of the cell
             LAST = LAST_NOD(FIRST) ! last node in this voxel
-            NEXT_NOD(LAST)  = I ! next
-            LAST_NOD(FIRST) = I ! last
-            NEXT_NOD(I)     = 0 ! last one
+            NEXT_NOD(LAST)  = K ! next
+            LAST_NOD(FIRST) = K ! last
+            NEXT_NOD(K)     = 0 ! last one
           ENDIF
         ENDDO
 
 C=======================================================================
 C 2   REMOTE NODE CLUSTERING
 C=======================================================================
-        K = 0
         DO J = 1, NSNR
 
           IF(XREM(1,J) < XMIN)  CYCLE
@@ -289,43 +299,43 @@ C=======================================================================
           XREM_PACK(4,K) = XREM(9,J)
           IREM_PACK(2,K) = IREM(2,J) 
           IREM_PACK(1,K) = IREM(1,J)
-          IREM_PACK(3,K) = J
+          IREM_PACK(3,K) = J+NSN
            
 
           REMOTE_S_NODE = REMOTE_S_NODE + 1
           LIST_REMOTE_S_NODE( REMOTE_S_NODE ) = K
-          IIX(NSN+K)=INT(NBX*(XREM_PACK(1,K)-XMINB)/(XMAXB-XMINB))
-          IIY(NSN+K)=INT(NBY*(XREM_PACK(2,K)-YMINB)/(YMAXB-YMINB))
-          IIZ(NSN+K)=INT(NBZ*(XREM_PACK(3,K)-ZMINB)/(ZMAXB-ZMINB))
-          IIX(NSN+K)=MAX(1,2+MIN(NBX,IIX(NSN+K)))
-          IIY(NSN+K)=MAX(1,2+MIN(NBY,IIY(NSN+K)))
-          IIZ(NSN+K)=MAX(1,2+MIN(NBZ,IIZ(NSN+K)))
+          IIX(K)=INT(NBX*(XREM_PACK(1,K)-XMINB)/(XMAXB-XMINB))
+          IIY(K)=INT(NBY*(XREM_PACK(2,K)-YMINB)/(YMAXB-YMINB))
+          IIZ(K)=INT(NBZ*(XREM_PACK(3,K)-ZMINB)/(ZMAXB-ZMINB))
+          IIX(K)=MAX(1,2+MIN(NBX,IIX(K)))
+          IIY(K)=MAX(1,2+MIN(NBY,IIY(K)))
+          IIZ(K)=MAX(1,2+MIN(NBZ,IIZ(K)))
 
-          FIRST = VOXEL(IIX(NSN+K),IIY(NSN+K),IIZ(NSN+K))
+          FIRST = VOXEL(IIX(K),IIY(K),IIZ(K))
           IF(TEST_V0) THEN
 ! count the number of SECONDARY nodes outiside the reduced box
-            IF(IIX(K+NSN) ==  1     .OR. IIY(K+NSN) ==  1     .OR. IIZ(K+NSN) == 1 .AND.
-     .         IIX(K+NSN) ==  NBX+2 .OR. IIY(K+NSN) ==  NBY+2 .OR. IIZ(K+NSN) == NBZ+2) THEN
+            IF(IIX(K) ==  1     .OR. IIY(K) ==  1     .OR. IIZ(K) == 1 .AND.
+     .         IIX(K) ==  NBX+2 .OR. IIY(K) ==  NBY+2 .OR. IIZ(K) == NBZ+2) THEN
               CPT_VOX0 = CPT_VOX0 +1
             ENDIF
           ENDIF
 
           IF(FIRST == 0)THEN
             ! empty cell
-            VOXEL(IIX(NSN+K),IIY(NSN+K),IIZ(NSN+K)) = NSN+K ! first
-            NEXT_NOD(NSN+K)     = 0 ! last one
-            LAST_NOD(NSN+K)     = 0 ! no last
+            VOXEL(IIX(K),IIY(K),IIZ(K)) = K ! first
+            NEXT_NOD(K)     = 0 ! last one
+            LAST_NOD(K)     = 0 ! no last
           ELSEIF(LAST_NOD(FIRST) == 0)THEN
             ! cell containing one node, add it as next node
-            NEXT_NOD(FIRST) = NSN+K  ! next
-            LAST_NOD(FIRST) = NSN+K  ! last
-            NEXT_NOD(NSN+K)  = 0     ! last one
+            NEXT_NOD(FIRST) = K  ! next
+            LAST_NOD(FIRST) = K  ! last
+            NEXT_NOD(K)  = 0     ! last one
           ELSE
             ! , jump to the last node of the cell
             LAST = LAST_NOD(FIRST)  ! last node in this voxel
-            NEXT_NOD(LAST)  = NSN+K ! next
-            LAST_NOD(FIRST) = NSN+K ! last
-            NEXT_NOD(NSN+K)     = 0 ! last one
+            NEXT_NOD(LAST)  = K ! next
+            LAST_NOD(FIRST) = K ! last
+            NEXT_NOD(K)     = 0 ! last one
           ENDIF
         ENDDO
 
@@ -455,7 +465,8 @@ C=======================================================================
 
                 !nnpelem = nnpelem + 1
                 IF(JJ<=NSN)THEN
-                  NN=NSV(JJ)
+                  !NN=NSV(JJ)
+                  NN = IREM_PACK(1,JJ)
 
                   IF(NN == M1)GOTO 200
                   IF(NN == M2)GOTO 200
@@ -463,39 +474,28 @@ C=======================================================================
                   IF(NN == M4)GOTO 200
 
                   IF(FLAGREMNODE == 2) THEN
-                    IF( TAGREMNODE(NSV(JJ)) == 1)GOTO 200
-                  ENDIF
-                  XS = X(1,NN)
-                  YS = X(2,NN)
-                  ZS = X(3,NN)
-                  IF(IGAP /= 0)THEN
-                    AAA = MARGE+CURV_MAX(NE)+MAX(MIN(GAPMAX,MAX(GAPMIN,GAP_S(JJ)+GAP_M(NE)))+DGAPLOAD,DRAD)
+                    IF( TAGREMNODE(NN) == 1)GOTO 200
                   ENDIF
                 ELSE
-                  J=JJ-NSN
                   IF(FLAGREMNODE == 2) THEN
-                    NN = IREM_PACK(1,J)
+                    NN = IREM_PACK(1,JJ)
                     K = KREMNOD(2*(NE-1)+2) + 1
                     L = KREMNOD(2*(NE-1)+3)
                     DO M=K,L
-                      IF(REMNOD(M) == -IREM_PACK(2,J) ) THEN
+                      IF(REMNOD(M) == -IREM_PACK(2,JJ) ) THEN
                         DELNOD = DELNOD + 1
                         EXIT
                       ENDIF
                     ENDDO
                     IF(DELNOD /= 0)GOTO 200
                   ENDIF
-
-                  !IF(J>SIZE(XREM_PACK,2)) write(6,*) J,JJ,NSN,SIZE(XREM_PACK,2)
-                  XS = XREM_PACK(1,J)
-                  YS = XREM_PACK(2,J)
-                  ZS = XREM_PACK(3,J)
-                  IF(IGAP /= 0)THEN
-                    AAA = MARGE+CURV_MAX(NE)+MAX(MIN(GAPMAX,MAX(GAPMIN,XREM_PACK(4,J)+GAP_M(NE)))+DGAPLOAD,DRAD)
-                  ENDIF
-                !JJ = IREM_PACK(3,J) + NSN
                 ENDIF
-
+                XS = XREM_PACK(1,JJ)
+                YS = XREM_PACK(2,JJ)
+                ZS = XREM_PACK(3,JJ)
+                IF(IGAP /= 0)THEN
+                  AAA = MARGE+CURV_MAX(NE)+MAX(MIN(GAPMAX,MAX(GAPMIN,XREM_PACK(4,JJ)+GAP_M(NE)))+DGAPLOAD,DRAD)
+                ENDIF
                 IF(XS<=XMINE-AAA)GOTO 200
                 IF(XS>=XMAXE+AAA)GOTO 200
                 IF(YS<=YMINE-AAA)GOTO 200
@@ -523,8 +523,8 @@ C=======================================================================
                 !nnrpelem = nnrpelem + 1
 
                 J_STOK = J_STOK + 1
-                PROV_N(J_STOK) = JJ
-                IF(JJ > NSN) PROV_N(J_STOK) = IREM_PACK(3,J) + NSN
+                !PROV_N(J_STOK) = JJ
+                PROV_N(J_STOK) = IREM_PACK(3,JJ) 
                 PROV_E(J_STOK) = NE
                 IF(J_STOK == NVSIZ)THEN
                   CALL I7STO(
