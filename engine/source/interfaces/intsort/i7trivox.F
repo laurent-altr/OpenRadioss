@@ -161,7 +161,7 @@ C-----------------------------------------------
         CPT_VOX0 = 0
         ALLOCATE(NEXT_NOD(NSN+NSNR),STAT=IERROR)
         ALLOCATE(XREM_PACK(4,NSNR),STAT=IERROR)
-        ALLOCATE(IREM_PACK(2,NSNR),STAT=IERROR)
+        ALLOCATE(IREM_PACK(3,NSNR),STAT=IERROR)
 
         IF(IERROR/=0) THEN
           CALL ANCMSG(MSGID=19,ANMODE=ANINFO,
@@ -287,24 +287,25 @@ C=======================================================================
           XREM_PACK(2,K) = XREM(2,J)
           XREM_PACK(3,K) = XREM(3,J)
           XREM_PACK(4,K) = XREM(9,J)
-          IREM_PACK(1,K) = J 
+          IREM_PACK(2,K) = IREM(2,J) 
           IREM_PACK(1,K) = IREM(1,J)
+          IREM_PACK(3,K) = J
            
 
           REMOTE_S_NODE = REMOTE_S_NODE + 1
-          LIST_REMOTE_S_NODE( REMOTE_S_NODE ) = J
-          IIX(NSN+J)=INT(NBX*(XREM_PACK(1,K)-XMINB)/(XMAXB-XMINB))
-          IIY(NSN+J)=INT(NBY*(XREM_PACK(2,K)-YMINB)/(YMAXB-YMINB))
-          IIZ(NSN+J)=INT(NBZ*(XREM_PACK(3,K)-ZMINB)/(ZMAXB-ZMINB))
-          IIX(NSN+J)=MAX(1,2+MIN(NBX,IIX(NSN+J)))
-          IIY(NSN+J)=MAX(1,2+MIN(NBY,IIY(NSN+J)))
-          IIZ(NSN+J)=MAX(1,2+MIN(NBZ,IIZ(NSN+J)))
+          LIST_REMOTE_S_NODE( REMOTE_S_NODE ) = K
+          IIX(NSN+K)=INT(NBX*(XREM_PACK(1,K)-XMINB)/(XMAXB-XMINB))
+          IIY(NSN+K)=INT(NBY*(XREM_PACK(2,K)-YMINB)/(YMAXB-YMINB))
+          IIZ(NSN+K)=INT(NBZ*(XREM_PACK(3,K)-ZMINB)/(ZMAXB-ZMINB))
+          IIX(NSN+K)=MAX(1,2+MIN(NBX,IIX(NSN+K)))
+          IIY(NSN+K)=MAX(1,2+MIN(NBY,IIY(NSN+K)))
+          IIZ(NSN+K)=MAX(1,2+MIN(NBZ,IIZ(NSN+K)))
 
-          FIRST = VOXEL(IIX(NSN+J),IIY(NSN+J),IIZ(NSN+J))
+          FIRST = VOXEL(IIX(NSN+K),IIY(NSN+K),IIZ(NSN+K))
           IF(TEST_V0) THEN
 ! count the number of SECONDARY nodes outiside the reduced box
-            IF(IIX(J+NSN) ==  1     .OR. IIY(J+NSN) ==  1     .OR. IIZ(J+NSN) == 1 .AND.
-     .         IIX(J+NSN) ==  NBX+2 .OR. IIY(J+NSN) ==  NBY+2 .OR. IIZ(J+NSN) == NBZ+2) THEN
+            IF(IIX(K+NSN) ==  1     .OR. IIY(K+NSN) ==  1     .OR. IIZ(K+NSN) == 1 .AND.
+     .         IIX(K+NSN) ==  NBX+2 .OR. IIY(K+NSN) ==  NBY+2 .OR. IIZ(K+NSN) == NBZ+2) THEN
               CPT_VOX0 = CPT_VOX0 +1
             ENDIF
           ENDIF
@@ -328,7 +329,7 @@ C=======================================================================
           ENDIF
         ENDDO
 
-      IF(NSNR > K) write(6,*) "NSNR=",NSNR," K=",K
+      !IF(NSNR > K) write(6,*) "NSNR=",NSNR," K=",K
       END IF !ITASK == 0
 
       CALL MY_BARRIER ! Barrier to wait task0 treatment
@@ -485,12 +486,14 @@ C=======================================================================
                     IF(DELNOD /= 0)GOTO 200
                   ENDIF
 
+                  !IF(J>SIZE(XREM_PACK,2)) write(6,*) J,JJ,NSN,SIZE(XREM_PACK,2)
                   XS = XREM_PACK(1,J)
                   YS = XREM_PACK(2,J)
                   ZS = XREM_PACK(3,J)
                   IF(IGAP /= 0)THEN
                     AAA = MARGE+CURV_MAX(NE)+MAX(MIN(GAPMAX,MAX(GAPMIN,XREM_PACK(4,J)+GAP_M(NE)))+DGAPLOAD,DRAD)
                   ENDIF
+                !JJ = IREM_PACK(3,J) + NSN
                 ENDIF
 
                 IF(XS<=XMINE-AAA)GOTO 200
@@ -521,7 +524,7 @@ C=======================================================================
 
                 J_STOK = J_STOK + 1
                 PROV_N(J_STOK) = JJ
-                IF(JJ > NSN) PROV_N(J_STOK) = IREM_PACK(2,JJ-NSN)
+                IF(JJ > NSN) PROV_N(J_STOK) = IREM_PACK(3,J) + NSN
                 PROV_E(J_STOK) = NE
                 IF(J_STOK == NVSIZ)THEN
                   CALL I7STO(
@@ -580,10 +583,11 @@ C=======================================================================
         NSNF = 1 + ITASK*REMOTE_S_NODE / NTHREAD
         NSNL = (ITASK+1)*REMOTE_S_NODE / NTHREAD
         IF(ITASK+1==NTHREAD) NSNL=REMOTE_S_NODE
-        DO JJ = NSNF, NSNL
-            J = LIST_REMOTE_S_NODE(JJ)
-            VOXEL(IIX(NSN+J),IIY(NSN+J),IIZ(NSN+J))=0
-        ENDDO
+!       DO JJ = NSNF, NSNL
+!           J = LIST_REMOTE_S_NODE(JJ)
+!           VOXEL(IIX(NSN+J),IIY(NSN+J),IIZ(NSN+J))=0
+!       ENDDO
+       VOXEL = 0
       ENDIF
       CALL MY_BARRIER()
 
