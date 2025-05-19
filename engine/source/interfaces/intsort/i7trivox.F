@@ -236,12 +236,12 @@ C=======================================================================
                   IF(X(3,J) < ZMIN)  CYCLE
                   IF(X(3,J) > ZMAX)  CYCLE
                   IREM_PACK(3,I) = I
-                  IIX(k)=INT(NBX*(XREM_PACK(1,K)-XMINB)/(XMAXB-XMINB))
-                  IIY(k)=INT(NBY*(XREM_PACK(2,K)-YMINB)/(YMAXB-YMINB))
-                  IIZ(k)=INT(NBZ*(XREM_PACK(3,K)-ZMINB)/(ZMAXB-ZMINB))
-                  IIX(k)=MAX(1,2+MIN(NBX,IIX(K)))
-                  IIY(k)=MAX(1,2+MIN(NBY,IIY(K)))
-                  IIZ(k)=MAX(1,2+MIN(NBZ,IIZ(K)))
+                  IIX(I)=INT(NBX*(X(1,J)-XMINB)/(XMAXB-XMINB))
+                  IIY(I)=INT(NBY*(X(2,J)-YMINB)/(YMAXB-YMINB))
+                  IIZ(I)=INT(NBZ*(X(3,J)-ZMINB)/(ZMAXB-ZMINB))
+                  IIX(I)=MAX(1,2+MIN(NBX,IIX(I)))
+                  IIY(I)=MAX(1,2+MIN(NBY,IIY(I)))
+                  IIZ(I)=MAX(1,2+MIN(NBZ,IIZ(I)))
                 ENDDO
 C=======================================================================
 C 2   REMOTE NODE CLUSTERING
@@ -254,24 +254,24 @@ C=======================================================================
                   IF(XREM(3,J) < ZMIN)  CYCLE
                   IF(XREM(3,J) > ZMAX)  CYCLE
                   IREM_PACK(3,J+NSN) = J+NSN
-                  IIX(K)=INT(NBX*(XREM_PACK(1,K)-XMINB)/(XMAXB-XMINB))
-                  IIY(K)=INT(NBY*(XREM_PACK(2,K)-YMINB)/(YMAXB-YMINB))
-                  IIZ(K)=INT(NBZ*(XREM_PACK(3,K)-ZMINB)/(ZMAXB-ZMINB))
-                  IIX(K)=MAX(1,2+MIN(NBX,IIX(K)))
-                  IIY(K)=MAX(1,2+MIN(NBY,IIY(K)))
-                  IIZ(K)=MAX(1,2+MIN(NBZ,IIZ(K)))
+                  IIX(J + NSN)=INT(NBX*(XREM(1,J)-XMINB)/(XMAXB-XMINB))
+                  IIY(J + NSN)=INT(NBY*(XREM(2,J)-YMINB)/(YMAXB-YMINB))
+                  IIZ(J + NSN)=INT(NBZ*(XREM(3,J)-ZMINB)/(ZMAXB-ZMINB))
+                  IIX(J + NSN)=MAX(1,2+MIN(NBX,IIX(J+NSN)))
+                  IIY(J + NSN)=MAX(1,2+MIN(NBY,IIY(J+NSN)))
+                  IIZ(J + NSN)=MAX(1,2+MIN(NBZ,IIZ(J+NSN)))
                 ENDDO
 
-                ALLOCATE(KEY(K))
-                ALLOCATE(VAL(K))
+                ALLOCATE(KEY(NSN+NSNR))
+                ALLOCATE(VAL(NSN+NSNR))
                 DO I = 1, NSN + NSNR
-                  KEY(I) = IREM_PACK(3,I)
+                  KEY(I) = I
                   VAL(I) = IIX(I) + 1000*IIY(I) + 1000000*IIZ(I)
                 ENDDO
                 CALL STLSORT_INT_INT(K,KEY,VAL)
-
-                DO I = 1, SIZE(KEY)
-                  IF(KEY(I) < 0) CYCLE
+                K = 0
+                DO I = 1, NSN + NSNR
+                  IF(VAL(I) < 0) CYCLE
                   K = K + 1
                   IF( KEY(I) <= NSN) THEN
                     J=NSV(KEY(I))
@@ -281,10 +281,10 @@ C=======================================================================
                     XREM_PACK(1,K) = X(1,J)
                     XREM_PACK(2,K) = X(2,J)
                     XREM_PACK(3,K) = X(3,J)
-                    XREM_PACK(4,K) = GAP_S(I)
+                    IF(IGAP >0) XREM_PACK(4,K) = GAP_S(KEY(I))
                     IREM_PACK(2,K) = 0
-                    IREM_PACK(1,K) = NSV(I)
-                    IREM_PACK(3,K) = I
+                    IREM_PACK(1,K) = NSV(KEY(I))
+                    IREM_PACK(3,K) = KEY(I)
 
                     IIX(k)=INT(NBX*(XREM_PACK(1,K)-XMINB)/(XMAXB-XMINB))
                     IIY(k)=INT(NBY*(XREM_PACK(2,K)-YMINB)/(YMAXB-YMINB))
@@ -317,10 +317,10 @@ C=======================================================================
                     XREM_PACK(1,K) = XREM(1,J)
                     XREM_PACK(2,K) = XREM(2,J)
                     XREM_PACK(3,K) = XREM(3,J)
-                    XREM_PACK(4,K) = XREM(9,J)
+                    IF(IGAP > 0) XREM_PACK(4,K) = XREM(9,J)
                     IREM_PACK(2,K) = IREM(2,J)
                     IREM_PACK(1,K) = IREM(1,J)
-                    IREM_PACK(3,K) = J+NSN
+                    IREM_PACK(3,K) = KEY(I) 
 
                     IIX(K)=INT(NBX*(XREM_PACK(1,K)-XMINB)/(XMAXB-XMINB))
                     IIY(K)=INT(NBY*(XREM_PACK(2,K)-YMINB)/(YMAXB-YMINB))
@@ -346,12 +346,17 @@ C=======================================================================
                     ELSE
                       ! , jump to the last node of the cell
                       LAST = LAST_NOD(FIRST)  ! last node in this voxel
+                      if(LAST < 0 .OR. LAST > NSN + NSNR) THEN
+                        WRITE(6,*) "ERROR: LAST = ", LAST,FIRST
+                        call flush(6)
+                      ENDIF
                       NEXT_NOD(LAST)  = K ! next
                       LAST_NOD(FIRST) = K ! last
                       NEXT_NOD(K)     = 0 ! last one
                     ENDIF
                   ENDIF
                 ENDDO
+                DEALLOCATE(KEY,VAL)
               END IF !ITASK == 0
 
               CALL MY_BARRIER ! Barrier to wait task0 treatment
@@ -581,10 +586,10 @@ C=======================================================================
               ! Barrier to avoid reinitialization before end of sorting
               CALL MY_BARRIER
               IF(TOTAL_NB_NRTM>0) THEN
-                NSNF = 1 + ITASK*NSN / NTHREAD
-                NSNL = (ITASK+1)*NSN / NTHREAD
+                NSNF = 1 + ITASK*(NSN+NSNR) / NTHREAD
+                NSNL = (ITASK+1)*(NSN+NSNR) / NTHREAD
                 DO I=NSNF,NSNL
-                  IF(IIX(I)/=0)THEN
+                  IF(IIX(I) > 0)THEN
                     VOXEL(IIX(I),IIY(I),IIZ(I))=0
                   ENDIF
                 ENDDO
