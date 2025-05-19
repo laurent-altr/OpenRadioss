@@ -346,10 +346,6 @@ C=======================================================================
                     ELSE
                       ! , jump to the last node of the cell
                       LAST = LAST_NOD(FIRST)  ! last node in this voxel
-                      if(LAST < 0 .OR. LAST > NSN + NSNR) THEN
-                        WRITE(6,*) "ERROR: LAST = ", LAST,FIRST
-                        call flush(6)
-                      ENDIF
                       NEXT_NOD(LAST)  = K ! next
                       LAST_NOD(FIRST) = K ! last
                       NEXT_NOD(K)     = 0 ! last one
