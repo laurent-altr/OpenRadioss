@@ -52,6 +52,7 @@ C   M o d u l e s
 C-----------------------------------------------
               USE MESSAGE_MOD
               USE TRI7BOX
+              USE STLSORT_MOD
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -130,7 +131,7 @@ C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
               INTEGER NB_NCN,NB_NCN1,NB_ECN,I,J,DIR,NB_NC,NB_EC,
-     .                N1,N2,N3,N4,NN,NE,K,L,NCAND_PROV,J_STOK,II,JJ,
+     .                N1,N2,N3,N4,NN,NE,K,L,NCAND_PROV,J_STOK,II,JJ,JJJ,
      .                PROV_N(MVSIZ),PROV_E(MVSIZ),
      .                OLDNUM(ISZNSNR), NSNF, NSNL,DELNOD,M
               INTEGER, DIMENSION(:), ALLOCATABLE :: TAGREMNODE
@@ -154,7 +155,7 @@ c provisoire
               SAVE IIX,IIY,IIZ
               INTEGER, DIMENSION(:,:),ALLOCATABLE :: IREM_PACK
               my_real, dimension(:,:), allocatable :: XREM_PACK
-              INTEGER, DIMENSION(:), ALLOCATABLE :: KEY,VAL
+              INTEGER, DIMENSION(:), ALLOCATABLE :: KEY,VAL,IKEY
               SAVE XREM_PACK,IREM_PACK
 C-----------------------------------------------
               IF(ITASK == 0)THEN
@@ -265,26 +266,36 @@ C=======================================================================
                 ALLOCATE(KEY(NSN+NSNR))
                 ALLOCATE(VAL(NSN+NSNR))
                 DO I = 1, NSN + NSNR
-                  KEY(I) = I
-                  VAL(I) = IIX(I) + 1000*IIY(I) + 1000000*IIZ(I)
+                  VAL(I) = I
+                  KEY(I) = IIX(I) + 1000*IIY(I) + 1000000*IIZ(I)
                 ENDDO
+                K = NSN + NSNR
                 CALL STLSORT_INT_INT(K,KEY,VAL)
+                IF(ISPMD == 0) THEN
+               ! DO I = 1, NSN + NSNR
+               !   IKEY(KEY(I)) = I
+               ! ENDDO
+
+                !DO J = 1,NSN+NSNR
+                !  write(6,"(2I10)") KEY(J),VAL(J)
+                !ENDDO
+                ENDIF
                 K = 0
                 DO I = 1, NSN + NSNR
-                  IF(VAL(I) < 0) CYCLE
+                  IF(KEY(I) < 0) CYCLE
                   K = K + 1
-                  IF( KEY(I) <= NSN) THEN
-                    J=NSV(KEY(I))
+                  IF( VAL(I) <= NSN) THEN
+                    J=NSV(VAL(I))
                     !C Optimisation // recherche les noeuds compris dans xmin xmax des
                     !C elements du processeur
 
                     XREM_PACK(1,K) = X(1,J)
                     XREM_PACK(2,K) = X(2,J)
                     XREM_PACK(3,K) = X(3,J)
-                    IF(IGAP >0) XREM_PACK(4,K) = GAP_S(KEY(I))
+                    IF(IGAP >0) XREM_PACK(4,K) = GAP_S(VAL(I))
                     IREM_PACK(2,K) = 0
-                    IREM_PACK(1,K) = NSV(KEY(I))
-                    IREM_PACK(3,K) = KEY(I)
+                    IREM_PACK(1,K) = NSV(VAL(I))
+                    IREM_PACK(3,K) = VAL(I)
 
                     IIX(k)=INT(NBX*(XREM_PACK(1,K)-XMINB)/(XMAXB-XMINB))
                     IIY(k)=INT(NBY*(XREM_PACK(2,K)-YMINB)/(YMAXB-YMINB))
@@ -313,14 +324,14 @@ C=======================================================================
                       NEXT_NOD(K)     = 0 ! last one
                     ENDIF
                   else
-                    J = KEY(I) - NSN
+                    J = VAL(I) - NSN
                     XREM_PACK(1,K) = XREM(1,J)
                     XREM_PACK(2,K) = XREM(2,J)
                     XREM_PACK(3,K) = XREM(3,J)
                     IF(IGAP > 0) XREM_PACK(4,K) = XREM(9,J)
                     IREM_PACK(2,K) = IREM(2,J)
                     IREM_PACK(1,K) = IREM(1,J)
-                    IREM_PACK(3,K) = KEY(I) 
+                    IREM_PACK(3,K) = VAL(I) 
 
                     IIX(K)=INT(NBX*(XREM_PACK(1,K)-XMINB)/(XMAXB-XMINB))
                     IIY(K)=INT(NBY*(XREM_PACK(2,K)-YMINB)/(YMAXB-YMINB))
@@ -468,25 +479,67 @@ C=======================================================================
 
                       ! nbpelem = nbpelem + 1
 
-                      JJ = VOXEL(IX,IY,IZ)
-                      DO WHILE(JJ /= 0)
-                        DELNOD = 0
-
+                      JJJ = VOXEL(IX,IY,IZ)
+                      IF(JJJ == 0) CYCLE
+                      !DO WHILE(JJ /= 0)
+ !                     IF(FLAGREMNODE .NE. 2 .AND. LAST_NOD(JJJ)-JJJ+1 + J_STOK < NVSIZ) THEN 
+                       IF(.FALSE.) THEN
+                       ! if we are sure that we can save all the candidate in PROV_N / PROV_E 
+                      !!  DO JJ = JJJ, LAST_NOD(JJJ)
+                      !!    IF(IREM_PACK(3,JJ)<=NSN)THEN
+                      !!      NN = IREM_PACK(1,JJ)
+                      !!      IF(NN == M1) CYCLE        
+                      !!      IF(NN == M2) CYCLE        
+                      !!      IF(NN == M3) CYCLE        
+                      !!      IF(NN == M4) CYCLE 
+                      !!    ENDIF 
+                      !!    XS = XREM_PACK(1,JJ)
+                      !!    YS = XREM_PACK(2,JJ)
+                      !!    ZS = XREM_PACK(3,JJ)
+                      !!    IF(IGAP /= 0)THEN
+                      !!      AAA = MARGE+CURV_MAX(NE)+MAX(MIN(GAPMAX,MAX(GAPMIN,XREM_PACK(4,JJ)+GAP_M(NE)))+DGAPLOAD,DRAD)
+                      !!    ENDIF
+                      !!    IF(XS<=XMINE-AAA) CYCLE        
+                      !!    IF(XS>=XMAXE+AAA) CYCLE        
+                      !!    IF(YS<=YMINE-AAA) CYCLE        
+                      !!    IF(YS>=YMAXE+AAA) CYCLE        
+                      !!    IF(ZS<=ZMINE-AAA) CYCLE        
+                      !!    IF(ZS>=ZMAXE+AAA) CYCLE        
+                      !!    D1X = XS - XX1
+                      !!    D1Y = YS - YY1
+                      !!    D1Z = ZS - ZZ1
+                      !!    D2X = XS - XX2
+                      !!    D2Y = YS - YY2
+                      !!    D2Z = ZS - ZZ2
+                      !!    DD1 = D1X*SX+D1Y*SY+D1Z*SZ
+                      !!    DD2 = D2X*SX+D2Y*SY+D2Z*SZ
+                      !!    IF(DD1*DD2 > ZERO)THEN
+                      !!      D2 = MIN(DD1*DD1,DD2*DD2)
+                      !!      A2 = AAA*AAA*S2
+                      !!      IF(D2 > A2)CYCLE
+                      !!    ENDIF
+                      !!    J_STOK = J_STOK + 1
+                      !!    PROV_N(J_STOK) = IREM_PACK(3,JJ)
+                      !!    PROV_E(J_STOK) = NE
+                      !!  ENDDO
+                      ELSE
+                      ! DO JJ = JJJ, MAX(JJJ,LAST_NOD(JJJ))
+                       JJ = JJJ
+                       DO WHILE(JJ /= 0)
+                      
                         !nnpelem = nnpelem + 1
                         IF(IREM_PACK(3,JJ)<=NSN)THEN
-                          !NN=NSV(JJ)
                           NN = IREM_PACK(1,JJ)
-
                           IF(NN == M1)GOTO 200
                           IF(NN == M2)GOTO 200
                           IF(NN == M3)GOTO 200
                           IF(NN == M4)GOTO 200
-
                           IF(FLAGREMNODE == 2) THEN
                             IF( TAGREMNODE(NN) == 1)GOTO 200
                           ENDIF
                         ELSE
                           IF(FLAGREMNODE == 2) THEN
+                            DELNOD = 0
                             NN = IREM_PACK(1,JJ)
                             K = KREMNOD(2*(NE-1)+2) + 1
                             L = KREMNOD(2*(NE-1)+3)
@@ -532,7 +585,6 @@ C=======================================================================
                         !nnrpelem = nnrpelem + 1
 
                         J_STOK = J_STOK + 1
-                        !PROV_N(J_STOK) = JJ
                         PROV_N(J_STOK) = IREM_PACK(3,JJ)
                         PROV_E(J_STOK) = NE
                         IF(J_STOK == NVSIZ)THEN
@@ -549,8 +601,10 @@ C=======================================================================
                           J_STOK = 0
                         ENDIF
   200                   CONTINUE
+                        IF(NEXT_NOD(JJ) .NE.0  .AND. NEXT_NOD(JJ) .NE. JJ + 1 .AND. ISPMD == 0) write(6,*) "ERROR: NEXT_NOD",JJ+1,NEXT_NOD(JJ)
                         JJ = NEXT_NOD(JJ)
                       ENDDO ! WHILE(JJ /= 0)
+                      ENDIF ! FLAGREMNODE .NE. 2 .AND. LAST_NOD(JJJ) + K_STOK < NVSIZ
                     ENDDO ! X
                   ENDDO  ! Y
                 ENDDO   ! Z
