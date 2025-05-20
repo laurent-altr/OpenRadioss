@@ -157,6 +157,7 @@ c provisoire
               my_real, dimension(:,:), allocatable :: XREM_PACK
               INTEGER, DIMENSION(:), ALLOCATABLE :: KEY,VAL,IKEY
               SAVE XREM_PACK,IREM_PACK
+              INTEGER :: COUNTER
 C-----------------------------------------------
               IF(ITASK == 0)THEN
                 REMOTE_S_NODE = 0
@@ -482,50 +483,60 @@ C=======================================================================
                       JJJ = VOXEL(IX,IY,IZ)
                       IF(JJJ == 0) CYCLE
                       !DO WHILE(JJ /= 0)
- !                     IF(FLAGREMNODE .NE. 2 .AND. LAST_NOD(JJJ)-JJJ+1 + J_STOK < NVSIZ) THEN 
-                       IF(.FALSE.) THEN
-                       ! if we are sure that we can save all the candidate in PROV_N / PROV_E 
-                      !!  DO JJ = JJJ, LAST_NOD(JJJ)
-                      !!    IF(IREM_PACK(3,JJ)<=NSN)THEN
-                      !!      NN = IREM_PACK(1,JJ)
-                      !!      IF(NN == M1) CYCLE        
-                      !!      IF(NN == M2) CYCLE        
-                      !!      IF(NN == M3) CYCLE        
-                      !!      IF(NN == M4) CYCLE 
-                      !!    ENDIF 
-                      !!    XS = XREM_PACK(1,JJ)
-                      !!    YS = XREM_PACK(2,JJ)
-                      !!    ZS = XREM_PACK(3,JJ)
-                      !!    IF(IGAP /= 0)THEN
-                      !!      AAA = MARGE+CURV_MAX(NE)+MAX(MIN(GAPMAX,MAX(GAPMIN,XREM_PACK(4,JJ)+GAP_M(NE)))+DGAPLOAD,DRAD)
-                      !!    ENDIF
-                      !!    IF(XS<=XMINE-AAA) CYCLE        
-                      !!    IF(XS>=XMAXE+AAA) CYCLE        
-                      !!    IF(YS<=YMINE-AAA) CYCLE        
-                      !!    IF(YS>=YMAXE+AAA) CYCLE        
-                      !!    IF(ZS<=ZMINE-AAA) CYCLE        
-                      !!    IF(ZS>=ZMAXE+AAA) CYCLE        
-                      !!    D1X = XS - XX1
-                      !!    D1Y = YS - YY1
-                      !!    D1Z = ZS - ZZ1
-                      !!    D2X = XS - XX2
-                      !!    D2Y = YS - YY2
-                      !!    D2Z = ZS - ZZ2
-                      !!    DD1 = D1X*SX+D1Y*SY+D1Z*SZ
-                      !!    DD2 = D2X*SX+D2Y*SY+D2Z*SZ
-                      !!    IF(DD1*DD2 > ZERO)THEN
-                      !!      D2 = MIN(DD1*DD1,DD2*DD2)
-                      !!      A2 = AAA*AAA*S2
-                      !!      IF(D2 > A2)CYCLE
-                      !!    ENDIF
-                      !!    J_STOK = J_STOK + 1
-                      !!    PROV_N(J_STOK) = IREM_PACK(3,JJ)
-                      !!    PROV_E(J_STOK) = NE
-                      !!  ENDDO
+                      IF(LAST_NOD(JJJ) == 0) THEN
+                        COUNTER = 1
                       ELSE
-                      ! DO JJ = JJJ, MAX(JJJ,LAST_NOD(JJJ))
+                        COUNTER = LAST_NOD(JJJ) - JJJ + 1
+                      ENDIF
+                      IF(FLAGREMNODE .NE. 2 .AND. COUNTER + J_STOK < NVSIZ) THEN 
+
+                      !IF(.FALSE.) THEN
+                       ! if we are sure that we can save all the candidate in PROV_N / PROV_E 
+                        DO JJ = JJJ, MAX(JJJ,LAST_NOD(JJJ))
+                          IF(IREM_PACK(3,JJ)<=NSN)THEN
+                            NN = IREM_PACK(1,JJ)
+                            IF(NN == M1) CYCLE        
+                            IF(NN == M2) CYCLE        
+                            IF(NN == M3) CYCLE        
+                            IF(NN == M4) CYCLE 
+                          ENDIF 
+                          XS = XREM_PACK(1,JJ)
+                          YS = XREM_PACK(2,JJ)
+                          ZS = XREM_PACK(3,JJ)
+                          IF(IGAP /= 0)THEN
+                            AAA = MARGE+CURV_MAX(NE)+MAX(MIN(GAPMAX,MAX(GAPMIN,XREM_PACK(4,JJ)+GAP_M(NE)))+DGAPLOAD,DRAD)
+                          ENDIF
+                          IF(XS<=XMINE-AAA) CYCLE        
+                          IF(XS>=XMAXE+AAA) CYCLE        
+                          IF(YS<=YMINE-AAA) CYCLE        
+                          IF(YS>=YMAXE+AAA) CYCLE        
+                          IF(ZS<=ZMINE-AAA) CYCLE        
+                          IF(ZS>=ZMAXE+AAA) CYCLE        
+                          D1X = XS - XX1
+                          D1Y = YS - YY1
+                          D1Z = ZS - ZZ1
+                          D2X = XS - XX2
+                          D2Y = YS - YY2
+                          D2Z = ZS - ZZ2
+                          DD1 = D1X*SX+D1Y*SY+D1Z*SZ
+                          DD2 = D2X*SX+D2Y*SY+D2Z*SZ
+                          IF(DD1*DD2 > ZERO)THEN
+                            D2 = MIN(DD1*DD1,DD2*DD2)
+                            A2 = AAA*AAA*S2
+                            IF(D2 > A2)CYCLE
+                          ENDIF
+                          J_STOK = J_STOK + 1
+                          PROV_N(J_STOK) = IREM_PACK(3,JJ)
+                          PROV_E(J_STOK) = NE
+                        ENDDO
+                      ELSE
                        JJ = JJJ
-                       DO WHILE(JJ /= 0)
+!                      DO WHILE(JJ /= 0)
+                      !!  DO JJ = JJJ, LAST_NOD(JJJ)
+                      DO JJ = JJJ, MAX(JJJ,LAST_NOD(JJJ))
+
+
+
                       
                         !nnpelem = nnpelem + 1
                         IF(IREM_PACK(3,JJ)<=NSN)THEN
@@ -601,8 +612,12 @@ C=======================================================================
                           J_STOK = 0
                         ENDIF
   200                   CONTINUE
-                        IF(NEXT_NOD(JJ) .NE.0  .AND. NEXT_NOD(JJ) .NE. JJ + 1 .AND. ISPMD == 0) write(6,*) "ERROR: NEXT_NOD",JJ+1,NEXT_NOD(JJ)
-                        JJ = NEXT_NOD(JJ)
+C                       IF(JJ+1 .NE. NEXT_NOD(JJ) .AND. NEXT_NOD(JJ) /= 0) then 
+C                         write(6,*) "ERROR" 
+C                         call arret(2) 
+C                       ENDIF
+                          !JJ = NEXT_NOD(JJ)
+!                       JJ = NEXT_NOD(JJ)
                       ENDDO ! WHILE(JJ /= 0)
                       ENDIF ! FLAGREMNODE .NE. 2 .AND. LAST_NOD(JJJ) + K_STOK < NVSIZ
                     ENDDO ! X
