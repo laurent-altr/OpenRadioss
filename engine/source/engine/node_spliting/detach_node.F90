@@ -613,6 +613,7 @@
             ! detach_shell(nft+1: nft+nel) = detach_shell(nft+1: nft+nel) - element%shell%damage(nft+1: nft+nel)
           enddo
 
+
           numnod0 = numnod
           allocate(nodal_damage(numnod))
 
@@ -630,6 +631,8 @@
             nodal_damage(n3) =max(nodal_damage(n3),element%shell%damage(i))
             nodal_damage(n4) =max(nodal_damage(n4),element%shell%damage(i))
           enddo
+
+          ! spmd reduction of nodal_damage 
  
 
           allocate(shell_list(numelc))
@@ -750,6 +753,7 @@
             end do
           enddo
 
+          ! call spmd_detach_node_begin(local_data)
           ! detach nodes from the shells
           if(shells_to_detach > 0) then
             write(6,*) "shells to be detached:",shells_to_detach
@@ -759,11 +763,14 @@
             do i = 1, ncrack
 !             write(6,*) "crack node",i,crack(i)
               call detach_node(nodes,crack(i),element,shell_list,shells_to_detach,npari,ninter, ipari, interf)
+       !      call detach_node(nodes,crack(i),element,shell_list,shells_to_detach,npari,ninter, ipari, interf, local_data)
+
               numnod = numnod + 1
               if(ispmd == 0) numnodg = numnodg + 1
             enddo
           endif
           endif
+          ! call spmd_detach_node_end(local_data)
 
 
           ! detach nodes from ill-shaped shells

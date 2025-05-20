@@ -68,6 +68,15 @@
           integer :: offset
           type(C_PTR) :: loc2glob
         end type shell_
+
+        type list_of_shells_
+          integer, dimension(:), allocatable :: index !< local id of the shell element to send to the other process
+        end type list_of_shells_
+        type ghost_shell_
+          integer, dimension(:,:), allocatable :: nodes !< nodes(1:4,i) :  nodes of the i-th shell element
+          my_real, dimension(:), allocatable :: damage 
+          type(list_of_shells_), dimension(:), allocatable :: list_of_shells !< local id of the shell element to send to the other process
+        end type ghost_shell_
         type solid_
           ! old storage of solids
           integer, dimension(:,:), allocatable :: ixs !< ixs(1,i) : Material ID of the i-th solid element
@@ -84,6 +93,7 @@
 
         type connectivity_
           type(shell_) :: shell
+          type(ghost_shell_) :: ghost_shell
           type(solid_) :: solid
           type(element_pon_) :: pon
         end type connectivity_ 
