@@ -600,6 +600,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
+              USE GHOST_SHELLS_MOD
               USE CONNECTIVITY_MOD
               USE NODAL_ARRAYS_MOD
               USE detach_node_mod
@@ -3141,7 +3142,7 @@ C=======================================================================
 C----------------------------------------
 C     BEGINNING OF EXPLICIT ITERATION LOOP
 C----------------------------------------
-
+              CALL init_ghost_shells(nodes, element,ispmd,nspmd,iad_elem,sfr_elem,fr_elem)
  100          CONTINUE
 
               NC_DEBUG = NCYCLE

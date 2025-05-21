@@ -43,7 +43,7 @@
       module connectivity_mod
         use iso_c_binding
         USE parith_on_mod
-#include "my_real.inc"
+        use precision_mod, only: wp
 !       INTEGER, PARAMETER :: NIXS = 11
 !       INTEGER, PARAMETER :: NIXC = 7
 !       INTEGER, PARAMETER :: NIXQ = 7
@@ -63,7 +63,7 @@
           integer, dimension(:), allocatable :: pid !< pid(i) :  PID of the i-th shell element
           integer, dimension(:), allocatable :: matid !< matid(i) :  Material ID of the i-th shell element
           integer, dimension(:), allocatable :: user_id !< user_id(i) :  user id of the shell element
-          my_real, dimension(:), allocatable :: damage
+          real(kind=wp), dimension(:), allocatable :: damage
           real, dimension(:), allocatable :: dist_to_center !< maximum distance of a node to the center of the element 
           integer :: offset
           type(C_PTR) :: loc2glob
@@ -74,7 +74,7 @@
         end type list_of_shells_
         type ghost_shell_
           integer, dimension(:,:), allocatable :: nodes !< nodes(1:4,i) :  nodes of the i-th shell element
-          my_real, dimension(:), allocatable :: damage 
+          real(kind=wp), dimension(:), allocatable :: damage 
           type(list_of_shells_), dimension(:), allocatable :: list_of_shells !< local id of the shell element to send to the other process
         end type ghost_shell_
         type solid_
@@ -118,10 +118,6 @@
 !                                                   Implicit none
 ! ----------------------------------------------------------------------------------------------------------------------
           implicit none
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                   Included files
-! ----------------------------------------------------------------------------------------------------------------------
-#include "my_real.inc"
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Arguments
 ! ----------------------------------------------------------------------------------------------------------------------

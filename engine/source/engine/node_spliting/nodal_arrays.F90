@@ -60,7 +60,7 @@
       !||--- uses       -----------------------------------------------------
       !||====================================================================
       module nodal_arrays_mod
-#include "my_real.inc"
+        use precision_mod, only : wp
         use iso_c_binding, only: C_PTR
         implicit none
         integer, parameter :: padding = 5 !< percentage of padding for reallocation
@@ -96,22 +96,22 @@
             integer, dimension(:), allocatable :: parent_node 
             integer, dimension(:), allocatable :: nchilds
 
-            my_real, dimension(:,:), allocatable :: A !< accelerations: 3 x numnod (x nthreads if parith/off)
-            my_real, dimension(:,:), allocatable :: AR !< accelerations
-            my_real, dimension(:,:), allocatable :: V !< velocities
-            my_real, dimension(:,:), allocatable :: X !< coordinates 3*(NUMNOD+NRCVVOIS)
-            my_real, dimension(:,:), allocatable :: D !< displacements 3*(NUMNOD+NRCVVOIS)
-            my_real, dimension(:,:), allocatable :: VR !<velocities 3*(NUMNOD*IRODDL)
-            my_real, dimension(:,:), allocatable :: DR !< displacements (SRD) 
-            my_real, dimension(:), allocatable :: MS !< mass     (numnod)          
-            my_real, dimension(:), allocatable :: IN !< inertia * IRODDL
-            my_real, dimension(:), allocatable :: STIFN !< nodal stiffness
-            my_real, dimension(:), allocatable :: STIFR !< numnod*iroddl(* nthreads)
-            my_real, dimension(:), allocatable :: MS0 !< initial mass
-            my_real, dimension(:), allocatable :: IN0 !< initial inertia
-            my_real, dimension(:), allocatable :: VISCN !< nodal 
-            my_real, dimension(:), allocatable :: MCP !< thermal
-            my_real, dimension(:), allocatable :: TEMP !< temperature
+            real(kind=wp), dimension(:,:), allocatable :: A !< accelerations: 3 x numnod (x nthreads if parith/off)
+            real(kind=wp), dimension(:,:), allocatable :: AR !< accelerations
+            real(kind=wp), dimension(:,:), allocatable :: V !< velocities
+            real(kind=wp), dimension(:,:), allocatable :: X !< coordinates 3*(NUMNOD+NRCVVOIS)
+            real(kind=wp), dimension(:,:), allocatable :: D !< displacements 3*(NUMNOD+NRCVVOIS)
+            real(kind=wp), dimension(:,:), allocatable :: VR !<velocities 3*(NUMNOD*IRODDL)
+            real(kind=wp), dimension(:,:), allocatable :: DR !< displacements (SRD) 
+            real(kind=wp), dimension(:), allocatable :: MS !< mass     (numnod)          
+            real(kind=wp), dimension(:), allocatable :: IN !< inertia * IRODDL
+            real(kind=wp), dimension(:), allocatable :: STIFN !< nodal stiffness
+            real(kind=wp), dimension(:), allocatable :: STIFR !< numnod*iroddl(* nthreads)
+            real(kind=wp), dimension(:), allocatable :: MS0 !< initial mass
+            real(kind=wp), dimension(:), allocatable :: IN0 !< initial inertia
+            real(kind=wp), dimension(:), allocatable :: VISCN !< nodal 
+            real(kind=wp), dimension(:), allocatable :: MCP !< thermal
+            real(kind=wp), dimension(:), allocatable :: TEMP !< temperature
           
             ! 3*NUMNOD if IRESP == 1, else 3
             double precision, dimension(:,:), allocatable :: DDP !< double precision D 
@@ -124,9 +124,9 @@
 !           integer :: current_numnod
 !           integer :: max_numnod
 !      ! animation SFANI, SANIN, STANI
-!           my_real, dimension(3,:), allocatable :: FANI
-!           my_real, dimension(:), allocatable :: ANIN
-!           my_real, dimension(:), allocatable :: TANI
+!           real(kind=wp), dimension(3,:), allocatable :: FANI
+!           real(kind=wp), dimension(:), allocatable :: ANIN
+!           real(kind=wp), dimension(:), allocatable :: TANI
 !       end type
       contains
 ! ======================================================================================================================
@@ -144,15 +144,11 @@
 ! ----------------------------------------------------------------------------------------------------------------------
           implicit none
 ! ----------------------------------------------------------------------------------------------------------------------
-!                                                   Included files
-! ----------------------------------------------------------------------------------------------------------------------
-#include "my_real.inc"
-! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Arguments
 ! ----------------------------------------------------------------------------------------------------------------------
-          my_real, pointer, dimension(:,:), contiguous :: ptrX
+          real(kind=wp), pointer, dimension(:,:), contiguous :: ptrX
           integer, intent(in) :: numnod
-          my_real, target , dimension(3,numnod) :: X
+          real(kind=wp), target , dimension(3,numnod) :: X
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Body
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -179,10 +175,6 @@
 !                                                   Implicit none
 ! ----------------------------------------------------------------------------------------------------------------------
           implicit none
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                   Included files
-! ----------------------------------------------------------------------------------------------------------------------
-#include "my_real.inc"
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Arguments
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -338,10 +330,6 @@
 ! ----------------------------------------------------------------------------------------------------------------------
           implicit none
 ! ----------------------------------------------------------------------------------------------------------------------
-!                                                   Included files
-! ----------------------------------------------------------------------------------------------------------------------
-#include "my_real.inc"
-! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Arguments
 ! ----------------------------------------------------------------------------------------------------------------------
             type(nodal_arrays_) :: arrays
@@ -456,10 +444,6 @@
 !                                                   Implicit none
 ! ----------------------------------------------------------------------------------------------------------------------
           implicit none
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                   Included files
-! ----------------------------------------------------------------------------------------------------------------------
-#include "my_real.inc"
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Arguments
 ! ----------------------------------------------------------------------------------------------------------------------

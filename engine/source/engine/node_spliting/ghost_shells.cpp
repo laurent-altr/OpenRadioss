@@ -12,7 +12,7 @@ extern "C"
 {
     // function build_reverse_connectivity(shells,nb_shells,mask,nspmd) result(c) bind(C,name="cpp_build_reverse_connectivity")
 
-    reverse_connectivity * cpp_build_reverse_connectivity(
+    reverse_connectivity *cpp_build_reverse_connectivity(
         int *shells, // 4 x nb_shells array : node id of the shells
         int nb_shells,
         int *mask, // nspmd x nb_shells array: 1 => shell is to be considered
@@ -33,6 +33,8 @@ extern "C"
                     break;
                 }
             }
+            if (!consider)
+                continue;
             for (int j = 0; j < 4; j++)
             {
                 if (shells[i * 4 + j] > max_node_id)
@@ -41,8 +43,7 @@ extern "C"
                 }
             }
         }
-        std::vector<std::set<int>>  node2shell(max_node_id + 1); 
-
+        std::vector<std::set<int>> node2shell(max_node_id + 1);
 
         for (int i = 0; i < nb_shells; i++)
         {
@@ -80,12 +81,19 @@ extern "C"
         return c;
     }
 
-
-    int* cpp_get_shells_list(void *c, int p, int* n)
+    int *cpp_get_shells_list(void *c, int p, int *n)
     {
         // p is the process id
         // n is the size of the shell list [out]
         reverse_connectivity *rc = static_cast<reverse_connectivity *>(c);
+
+        // Check if p is within bounds
+        if (p < 0 || p >= rc->size())
+        {
+            // Out of bounds, return empty result
+            *n = 0;
+            return nullptr;
+        }
 
         *n = (*rc)[p].size();
         if (*n == 0)
@@ -94,21 +102,20 @@ extern "C"
         }
         else
         {
-            // return the pointer do *data
+            // return the pointer to data
             return (*rc)[p].data();
-       }
+        }
     }
     void cpp_destroy_reverse_connectivity(void *c)
     {
         // destroy the reverse_connectivity object
         reverse_connectivity *rc = static_cast<reverse_connectivity *>(c);
-        //free each vector in the reverse_connectivity
+        // free each vector in the reverse_connectivity
         for (auto &vec : *rc)
         {
             vec.clear();
         }
         // free the reverse_connectivity object
         delete rc;
-        rc = nullptr;
     }
 }
