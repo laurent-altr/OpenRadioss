@@ -75,7 +75,8 @@
         type ghost_shell_
           integer, dimension(:,:), allocatable :: nodes !< nodes(1:4,i) :  nodes of the i-th shell element
           real(kind=wp), dimension(:), allocatable :: damage 
-          type(list_of_shells_), dimension(:), allocatable :: list_of_shells !< local id of the shell element to send to the other process
+          type(list_of_shells_), dimension(:), allocatable :: shells_to_send !< local id of the shell element to send to the other process
+          integer, dimension(:), allocatable :: offset !< offset of the shell element to receive from the other process 
         end type ghost_shell_
         type solid_
           ! old storage of solids

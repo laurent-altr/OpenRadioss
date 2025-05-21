@@ -53,11 +53,27 @@
             function get_shells_list(reverse_connectivity,p,n) result(cpp_ptr) bind(C,name="cpp_get_shells_list")
                 use iso_c_binding
                 implicit none
-                type(c_ptr), intent(in) :: reverse_connectivity
+                type(c_ptr), value, intent(in) :: reverse_connectivity
                 type(c_ptr) :: cpp_ptr
-                integer(c_int), intent(in) :: p
+                integer(c_int), value, intent(in) :: p
                 integer(c_int), intent(inout) :: n
             end function get_shells_list
+
+            function get_shell_list_size(reverse_connectivity,p) result(n) bind(C,name="cpp_get_shells_list_size")
+                use iso_c_binding
+                implicit none
+                type(c_ptr), value, intent(in) :: reverse_connectivity
+                integer(c_int), value, intent(in) :: p
+                integer(c_int) :: n
+            end function get_shell_list_size
+            !void cpp_copy_shells_list(void *c, int pc, int *shells) 
+            subroutine copy_shells_list(c,pc,shells) bind(C,name="cpp_copy_shells_list")
+                use iso_c_binding
+                implicit none
+                type(c_ptr), value, intent(in) :: c
+                integer(c_int), value, intent(in) :: pc
+                integer(c_int), intent(inout) :: shells(*)
+            end subroutine copy_shells_list
 
 
         end interface
@@ -91,11 +107,11 @@
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Local variables
 ! ----------------------------------------------------------------------------------------------------------------------
-          integer :: i,j,p,n
+          integer :: i,j,p,n,offset
           integer :: ierr
           type(c_ptr) :: reverse_connectivity
           type(c_ptr) :: cpp_ptr
-          integer(c_int), pointer :: list_of_shells(:)
+          integer(c_int), pointer :: shells_to_send(:)
           integer :: nb_shells !< number of shells
           integer :: numnodes !< number of nodes
           integer, dimension(:,:), allocatable :: mask!< mask for the nodes
@@ -103,121 +119,128 @@
           integer :: local_id
           type(spmd_buffer_type), dimension(nspmd) :: spmd_buffer
           integer :: TAG
+          integer :: bs
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Body
 ! ----------------------------------------------------------------------------------------------------------------------
           TAG = 1000
           numnodes = nodes%numnod
-          nb_shells = size(element%shell%ixc,1)
-          allocate(mask(numnodes,nspmd))
+          nb_shells = size(element%shell%ixc,2)
+          allocate(mask(nspmd,numnodes))
           mask = 0
 
           do p = 1, nspmd
-            do j = iad_node(2,p), iad_node(1,p+1)-1
+            do j = iad_node(1,p), iad_node(1,p+1)-1
               mask(p,fr_node(j)) = 1
             enddo
           enddo
+
+          do p = 1, nspmd
+            spmd_buffer(p)%recv_request = MPI_REQUEST_NULL
+            spmd_buffer(p)%send_request = MPI_REQUEST_NULL
+          enddo
+
 
           ! For each node with mask == 1, we identify the corresponding shells from 1 to nb_shells
           reverse_connectivity = build_reverse_connectivity(element%shell%nodes,nb_shells,mask,nspmd)
           deallocate(mask)
 
           ! count the number of shell to be exchanged for each processor
-          allocate(element%ghost_shell%list_of_shells(nspmd))
+          allocate(element%ghost_shell%shells_to_send(nspmd))
+          buffer_size_out = 0
+          buffer_size_in = 0
           do p = 1, nspmd
             if(ispmd+1 == p) cycle ! skip the current process
-            cpp_ptr= get_shells_list(reverse_connectivity,p,n)
-            call c_f_pointer(cpp_ptr, list_of_shells,[n])
+            n = get_shell_list_size(reverse_connectivity,p)                                            
             buffer_size_out(p) = n
             allocate(spmd_buffer(p)%sendbuf(4*n))
-            allocate(element%ghost_shell%list_of_shells(p)%index(n))
+            allocate(element%ghost_shell%shells_to_send(p)%index(n))
             if(n > 0) then
               ! copy the list of shells to be exchanged
-              element%ghost_shell%list_of_shells(p)%index(1:n) = list_of_shells(1:n)
+              !element%ghost_shell%shells_to_send(p)%index(1:n) = shells_to_send(1:n)
+              call copy_shells_list(reverse_connectivity,p,element%ghost_shell%shells_to_send(p)%index)
             endif
           enddo
-          ! Call MPI_Alltoall to exchange the number of shells to be exchanged
-          call MPI_Alltoall(buffer_size_out,nspmd,MPI_INTEGER,buffer_size_in,nspmd,MPI_INTEGER,SPMD_COMM_WORLD,ierr)
+
+          call MPI_Alltoall(buffer_size_out,1,MPI_INTEGER,buffer_size_in,1,MPI_INTEGER,SPMD_COMM_WORLD,ierr)
 
 
           do p = 1, nspmd
             if(ispmd+1 == p) cycle ! skip the current process
             ! mpi Irecv to receive the data
             allocate(spmd_buffer(p)%recvbuf(4*buffer_size_in(p)))
-            n = buffer_size_in(p)
-            if( n > 0 ) then
-              call MPI_Irecv(spmd_buffer(p)%recvbuf,4*n,MPI_INTEGER,p-1,TAG,SPMD_COMM_WORLD,spmd_buffer(p)%recv_request,ierr)
-              do i = 1, n
-                element%ghost_shell%nodes(1,i) = spmd_buffer(p)%recvbuf(1+4*(i-1))
-                element%ghost_shell%nodes(2,i) = spmd_buffer(p)%recvbuf(2+4*(i-1))
-                element%ghost_shell%nodes(3,i) = spmd_buffer(p)%recvbuf(3+4*(i-1))
-                element%ghost_shell%nodes(4,i) = spmd_buffer(p)%recvbuf(4+4*(i-1))
-                ! convert back user id to local id
-                do j = 1,4
-                  local_id = get_local_node_id(nodes,element%ghost_shell%nodes(j,i))
-                  if (local_id > 0) then
-                    element%ghost_shell%nodes(j,i) = local_id
-                  else
-                    element%ghost_shell%nodes(j,i) = -element%ghost_shell%nodes(j,i) ! negative id for nodes unknown on this processor
-                  endif
-                enddo
-
-              enddo
+            bs = buffer_size_in(p)*4
+            if( bs > 0 ) then
+               call MPI_Irecv(spmd_buffer(p)%recvbuf,bs,MPI_INTEGER,p-1,TAG,SPMD_COMM_WORLD,spmd_buffer(p)%recv_request,ierr)
             endif
 
             ! mpi Isend to send the data
-            cpp_ptr =get_shells_list(reverse_connectivity,p,n)
+            !cpp_ptr =get_shells_list(reverse_connectivity,p,n)
+            n = size(element%ghost_shell%shells_to_send(p)%index)
             if( n > 0 ) then
-              call c_f_pointer(cpp_ptr, list_of_shells,[n])
+              !call c_f_pointer(cpp_ptr, shells_to_send,[n])
               do i = 1, n
-                j = list_of_shells(i)
+                j = element%ghost_shell%shells_to_send(p)%index(i)
                 spmd_buffer(p)%sendbuf(1+4*(i-1)) = nodes%itab(element%shell%nodes(1,j))
                 spmd_buffer(p)%sendbuf(2+4*(i-1)) = nodes%itab(element%shell%nodes(2,j))
                 spmd_buffer(p)%sendbuf(3+4*(i-1)) = nodes%itab(element%shell%nodes(3,j))
                 spmd_buffer(p)%sendbuf(4+4*(i-1)) = nodes%itab(element%shell%nodes(4,j))
               enddo
-              call MPI_Isend(spmd_buffer(p)%sendbuf,4*n,MPI_INTEGER,p-1,TAG,SPMD_COMM_WORLD,spmd_buffer(p)%send_request,ierr)
+              bs = 4*n
+              call MPI_Isend(spmd_buffer(p)%sendbuf,bs,MPI_INTEGER,p-1,TAG,SPMD_COMM_WORLD,spmd_buffer(p)%send_request,ierr)
             endif
           enddo
 
-
-
+          ! allocate element%ghost_shell%nodes
+          n = sum(buffer_size_in)
+          if (n > 0) then
+            allocate(element%ghost_shell%nodes(4,n))
+          endif
+          allocate(element%ghost_shell%offset(nspmd))
+          element%ghost_shell%offset = 0
           ! Wait for all the sends to complete
-          do p = 1, nspmd
-            if(ispmd+1 == p) cycle ! skip the current process
-            cpp_ptr = get_shells_list(reverse_connectivity,p,n)
-            if(n > 0) then
-              call MPI_Wait(spmd_buffer(p)%send_request,ierr)
-              do i = 1, n
-                element%ghost_shell%nodes(1,i) = spmd_buffer(p)%recvbuf(1+4*(i-1))
-                element%ghost_shell%nodes(2,i) = spmd_buffer(p)%recvbuf(2+4*(i-1))
-                element%ghost_shell%nodes(3,i) = spmd_buffer(p)%recvbuf(3+4*(i-1))
-                element%ghost_shell%nodes(4,i) = spmd_buffer(p)%recvbuf(4+4*(i-1))
-                ! convert back user id to local id
-                do j = 1,4
-                  local_id = get_local_node_id(nodes,element%ghost_shell%nodes(j,i))
-                  if (local_id > 0) then
-                    element%ghost_shell%nodes(j,i) = local_id
-                  else
-                    element%ghost_shell%nodes(j,i) = -element%ghost_shell%nodes(j,i) ! negative id for nodes unknown on this processor
-                  endif
-                enddo
-              enddo
-              deallocate(spmd_buffer(p)%sendbuf)
-            endif
-          enddo
-
+          offset = 0
           do p = 1, nspmd
             if(ispmd+1 == p) cycle ! skip the current process
             n = buffer_size_in(p)
+            element%ghost_shell%offset(p) = offset+1
+            if(n > 0) then
+              call MPI_Wait(spmd_buffer(p)%recv_request,MPI_STATUS_IGNORE,ierr)
+              do i = 1, n
+                element%ghost_shell%nodes(1,i+offset) = spmd_buffer(p)%recvbuf(1+4*(i-1))
+                element%ghost_shell%nodes(2,i+offset) = spmd_buffer(p)%recvbuf(2+4*(i-1))
+                element%ghost_shell%nodes(3,i+offset) = spmd_buffer(p)%recvbuf(3+4*(i-1))
+                element%ghost_shell%nodes(4,i+offset) = spmd_buffer(p)%recvbuf(4+4*(i-1))
+                ! convert back user id to local id
+                do j = 1,4
+                  local_id = get_local_node_id(nodes,element%ghost_shell%nodes(j,i+offset))
+                  if (local_id > 0) then
+                    element%ghost_shell%nodes(j,i+offset) = local_id
+                  else
+                    element%ghost_shell%nodes(j,i+offset) = -element%ghost_shell%nodes(j,i+offset) ! negative id for nodes unknown on this processor
+                  endif
+                enddo
+              enddo
+              offset = offset + n
+            endif
+          enddo
+
+          do p = 1, nspmd
+            if(ispmd+1 == p) cycle ! skip the current process
+            n = buffer_size_out(p)
             if( n > 0 ) then
-              call MPI_Wait(spmd_buffer(p)%recv_request,ierr)
+              call MPI_Wait(spmd_buffer(p)%send_request,MPI_STATUS_IGNORE,ierr)
+              deallocate(spmd_buffer(p)%sendbuf)
+            endif
+            if(buffer_size_in(p) > 0) then
               deallocate(spmd_buffer(p)%recvbuf)
             endif
           enddo
 
-          call destroy_reverse_connectivity(reverse_connectivity)
+           call destroy_reverse_connectivity(reverse_connectivity)
         end subroutine
+
+
 
       end module ghost_shells_mod
 
