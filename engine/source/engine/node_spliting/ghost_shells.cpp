@@ -3,8 +3,8 @@
 #include <algorithm>
 #include <set>
 
-// define the type reverse_connectivity as a vector<vector<int>>
-typedef std::vector<std::vector<int>> reverse_connectivity;
+// define the type ghosts as a vector<vector<int>>
+typedef std::vector<std::vector<int>> ghosts;
 
 // Fortran callable functions
 
@@ -36,15 +36,15 @@ bool is_shell_ghost_on_proc(
 
 extern "C"
 {
-    // function build_reverse_connectivity(shells,nb_shells,mask,nspmd) result(c) bind(C,name="cpp_build_reverse_connectivity")
+    // function build_ghosts(shells,nb_shells,mask,nspmd) result(c) bind(C,name="cpp_build_ghosts")
 
-    reverse_connectivity *cpp_build_reverse_connectivity(
+    ghosts *cpp_build_ghosts(
         int *shells, // 4 x nb_shells array : node id of the shells
         int nb_shells,
         int *mask, // nspmd x nb_shells array: 1 => shell is to be considered
         int nspmd)
     {
-        reverse_connectivity *c = new reverse_connectivity(nspmd);
+        ghosts *c = new ghosts(nspmd);
         // find the maximum node id in the array shells of size 4 x nb_shells
         int max_node_id = 0;
         // find the maximum value in the shell array of size 4 x nb_shells
@@ -84,7 +84,7 @@ extern "C"
     {
         // p is the process id
         // n is the size of the shell list [out]
-        reverse_connectivity *rc = static_cast<reverse_connectivity *>(c);
+        ghosts *rc = static_cast<ghosts *>(c);
 
 
         const int p = pc - 1; // Fortran to C index conversion
@@ -116,7 +116,7 @@ extern "C"
     int cpp_get_shells_list_size(void *c, int pc)
     {
         // p is the process id
-        reverse_connectivity *rc = static_cast<reverse_connectivity *>(c);
+        ghosts *rc = static_cast<ghosts *>(c);
         const int p = pc - 1; // Fortran to C index conversion
         if (c == nullptr)
         {
@@ -133,7 +133,7 @@ extern "C"
     void cpp_copy_shells_list(void *c, int pc, int *shells)
     {
         // p is the process id
-        reverse_connectivity *rc = static_cast<reverse_connectivity *>(c);
+        ghosts *rc = static_cast<ghosts *>(c);
         const int p = pc - 1; // Fortran to C index conversion
         if (c == nullptr)
         {
@@ -148,16 +148,16 @@ extern "C"
         std::copy((*rc)[p].begin(), (*rc)[p].end(), shells);
     }
 
-    void cpp_destroy_reverse_connectivity(void *c)
+    void cpp_destroy_ghosts(void *c)
     {
-        // destroy the reverse_connectivity object
-        reverse_connectivity *rc = static_cast<reverse_connectivity *>(c);
-        // free each vector in the reverse_connectivity
+        // destroy the ghosts object
+        ghosts *rc = static_cast<ghosts *>(c);
+        // free each vector in the ghosts
         for (auto &vec : *rc)
         {
             vec.clear();
         }
-        // free the reverse_connectivity object
+        // free the ghosts object
         delete rc;
     }
 }

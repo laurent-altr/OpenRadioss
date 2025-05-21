@@ -32,9 +32,9 @@
 
 
         interface
-           !call build_reverse_connectivity(element%shell,4*nb_shells,mask,reverse_connectivity)
+           !call build_ghosts(element%shell,4*nb_shells,mask,ghosts)
 
-            function build_reverse_connectivity(shells,nb_shells,mask,nspmd) result(c) bind(C,name="cpp_build_reverse_connectivity")
+            function build_ghosts(shells,nb_shells,mask,nspmd) result(c) bind(C,name="cpp_build_ghosts")
                 use iso_c_binding
                 implicit none
                 integer(c_int), intent(in), value :: nspmd
@@ -42,27 +42,27 @@
                 integer(c_int), intent(in) :: shells(4,nb_shells)
                 integer(c_int), intent(in) :: mask(nspmd,*)
                 type(c_ptr) :: c
-            end function build_reverse_connectivity
+            end function build_ghosts
     
-            subroutine destroy_reverse_connectivity(reverse_connectivity) bind(C,name="cpp_destroy_reverse_connectivity")
+            subroutine destroy_ghosts(ghosts) bind(C,name="cpp_destroy_ghosts")
                 use iso_c_binding
                 implicit none
-                type(c_ptr), value :: reverse_connectivity
-            end subroutine destroy_reverse_connectivity
+                type(c_ptr), value :: ghosts
+            end subroutine destroy_ghosts
 
-            function get_shells_list(reverse_connectivity,p,n) result(cpp_ptr) bind(C,name="cpp_get_shells_list")
+            function get_shells_list(ghosts,p,n) result(cpp_ptr) bind(C,name="cpp_get_shells_list")
                 use iso_c_binding
                 implicit none
-                type(c_ptr), value, intent(in) :: reverse_connectivity
+                type(c_ptr), value, intent(in) :: ghosts
                 type(c_ptr) :: cpp_ptr
                 integer(c_int), value, intent(in) :: p
                 integer(c_int), intent(inout) :: n
             end function get_shells_list
 
-            function get_shell_list_size(reverse_connectivity,p) result(n) bind(C,name="cpp_get_shells_list_size")
+            function get_shell_list_size(ghosts,p) result(n) bind(C,name="cpp_get_shells_list_size")
                 use iso_c_binding
                 implicit none
-                type(c_ptr), value, intent(in) :: reverse_connectivity
+                type(c_ptr), value, intent(in) :: ghosts
                 integer(c_int), value, intent(in) :: p
                 integer(c_int) :: n
             end function get_shell_list_size
@@ -109,7 +109,7 @@
 ! ----------------------------------------------------------------------------------------------------------------------
           integer :: i,j,p,n,offset
           integer :: ierr
-          type(c_ptr) :: reverse_connectivity
+          type(c_ptr) :: ghosts
           type(c_ptr) :: cpp_ptr
           integer(c_int), pointer :: shells_to_send(:)
           integer :: nb_shells !< number of shells
@@ -142,7 +142,7 @@
 
 
           ! For each node with mask == 1, we identify the corresponding shells from 1 to nb_shells
-          reverse_connectivity = build_reverse_connectivity(element%shell%nodes,nb_shells,mask,nspmd)
+          ghosts = build_ghosts(element%shell%nodes,nb_shells,mask,nspmd)
           deallocate(mask)
 
           ! count the number of shell to be exchanged for each processor
@@ -151,14 +151,14 @@
           buffer_size_in = 0
           do p = 1, nspmd
             if(ispmd+1 == p) cycle ! skip the current process
-            n = get_shell_list_size(reverse_connectivity,p)                                            
+            n = get_shell_list_size(ghosts,p)                                            
             buffer_size_out(p) = n
             allocate(spmd_buffer(p)%sendbuf(4*n))
             allocate(element%ghost_shell%shells_to_send(p)%index(n))
             if(n > 0) then
               ! copy the list of shells to be exchanged
               !element%ghost_shell%shells_to_send(p)%index(1:n) = shells_to_send(1:n)
-              call copy_shells_list(reverse_connectivity,p,element%ghost_shell%shells_to_send(p)%index)
+              call copy_shells_list(ghosts,p,element%ghost_shell%shells_to_send(p)%index)
             endif
           enddo
 
@@ -175,7 +175,7 @@
             endif
 
             ! mpi Isend to send the data
-            !cpp_ptr =get_shells_list(reverse_connectivity,p,n)
+            !cpp_ptr =get_shells_list(ghosts,p,n)
             n = size(element%ghost_shell%shells_to_send(p)%index)
             if( n > 0 ) then
               !call c_f_pointer(cpp_ptr, shells_to_send,[n])
@@ -237,7 +237,7 @@
             endif
           enddo
 
-           call destroy_reverse_connectivity(reverse_connectivity)
+           call destroy_ghosts(ghosts)
         end subroutine
 
 
