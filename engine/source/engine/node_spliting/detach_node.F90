@@ -28,14 +28,14 @@
       module detach_node_mod
         implicit none
       contains
-      !||====================================================================
-      !||    find_segment_in_list          ../engine/source/engine/node_spliting/detach_node.F90
-      !||--- called by ------------------------------------------------------
-      !||    detach_node_from_interfaces   ../engine/source/engine/node_spliting/detach_node.F90
-      !||--- uses       -----------------------------------------------------
-      !||    connectivity_mod              ../common_source/modules/connectivity.F90
-      !||    constant_mod                  ../common_source/modules/constant_mod.F
-      !||====================================================================
+        !||====================================================================
+        !||    find_segment_in_list          ../engine/source/engine/node_spliting/detach_node.F90
+        !||--- called by ------------------------------------------------------
+        !||    detach_node_from_interfaces   ../engine/source/engine/node_spliting/detach_node.F90
+        !||--- uses       -----------------------------------------------------
+        !||    connectivity_mod              ../common_source/modules/connectivity.F90
+        !||    constant_mod                  ../common_source/modules/constant_mod.F
+        !||====================================================================
         function find_segment_in_list(segment,list,size,elements) result(is_found)
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Modules
@@ -77,18 +77,18 @@
 
         end function find_segment_in_list
 
-      !||====================================================================
-      !||    detach_node_from_interfaces   ../engine/source/engine/node_spliting/detach_node.F90
-      !||--- called by ------------------------------------------------------
-      !||    detach_node                   ../engine/source/engine/node_spliting/detach_node.F90
-      !||--- calls      -----------------------------------------------------
-      !||    find_segment_in_list          ../engine/source/engine/node_spliting/detach_node.F90
-      !||--- uses       -----------------------------------------------------
-      !||    connectivity_mod              ../common_source/modules/connectivity.F90
-      !||    constant_mod                  ../common_source/modules/constant_mod.F
-      !||    extend_array_mod              ../common_source/tools/memory/extend_array.F90
-      !||    nodal_arrays_mod              ../engine/source/engine/node_spliting/nodal_arrays.F90
-      !||====================================================================
+        !||====================================================================
+        !||    detach_node_from_interfaces   ../engine/source/engine/node_spliting/detach_node.F90
+        !||--- called by ------------------------------------------------------
+        !||    detach_node                   ../engine/source/engine/node_spliting/detach_node.F90
+        !||--- calls      -----------------------------------------------------
+        !||    find_segment_in_list          ../engine/source/engine/node_spliting/detach_node.F90
+        !||--- uses       -----------------------------------------------------
+        !||    connectivity_mod              ../common_source/modules/connectivity.F90
+        !||    constant_mod                  ../common_source/modules/constant_mod.F
+        !||    extend_array_mod              ../common_source/tools/memory/extend_array.F90
+        !||    nodal_arrays_mod              ../engine/source/engine/node_spliting/nodal_arrays.F90
+        !||====================================================================
         subroutine detach_node_from_interfaces(nodes, node_id,npari,ninter, ipari, interf, elements, shell_list, list_size)
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Modules
@@ -239,15 +239,15 @@
 
         end subroutine detach_node_from_interfaces
         !\brief This subroutine sets the values of the new node using the values of the old node
-      !||====================================================================
-      !||    set_new_node_values   ../engine/source/engine/node_spliting/detach_node.F90
-      !||--- called by ------------------------------------------------------
-      !||    detach_node           ../engine/source/engine/node_spliting/detach_node.F90
-      !||--- uses       -----------------------------------------------------
-      !||    connectivity_mod      ../common_source/modules/connectivity.F90
-      !||    constant_mod          ../common_source/modules/constant_mod.F
-      !||    nodal_arrays_mod      ../engine/source/engine/node_spliting/nodal_arrays.F90
-      !||====================================================================
+        !||====================================================================
+        !||    set_new_node_values   ../engine/source/engine/node_spliting/detach_node.F90
+        !||--- called by ------------------------------------------------------
+        !||    detach_node           ../engine/source/engine/node_spliting/detach_node.F90
+        !||--- uses       -----------------------------------------------------
+        !||    connectivity_mod      ../common_source/modules/connectivity.F90
+        !||    constant_mod          ../common_source/modules/constant_mod.F
+        !||    nodal_arrays_mod      ../engine/source/engine/node_spliting/nodal_arrays.F90
+        !||====================================================================
         subroutine set_new_node_values(nodes,i)
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Modules
@@ -347,18 +347,18 @@
 !                                                   procedures
 ! ======================================================================================================================
         !\brief This subroutine detaches a node from a list of shells
-      !||====================================================================
-      !||    detach_node_from_shells   ../engine/source/engine/node_spliting/detach_node.F90
-      !||--- called by ------------------------------------------------------
-      !||    detach_node               ../engine/source/engine/node_spliting/detach_node.F90
-      !||--- calls      -----------------------------------------------------
-      !||    update_pon_shells         ../engine/source/engine/node_spliting/update_pon.F90
-      !||--- uses       -----------------------------------------------------
-      !||    connectivity_mod          ../common_source/modules/connectivity.F90
-      !||    constant_mod              ../common_source/modules/constant_mod.F
-      !||    nodal_arrays_mod          ../engine/source/engine/node_spliting/nodal_arrays.F90
-      !||    update_pon_mod            ../engine/source/engine/node_spliting/update_pon.F90
-      !||====================================================================
+        !||====================================================================
+        !||    detach_node_from_shells   ../engine/source/engine/node_spliting/detach_node.F90
+        !||--- called by ------------------------------------------------------
+        !||    detach_node               ../engine/source/engine/node_spliting/detach_node.F90
+        !||--- calls      -----------------------------------------------------
+        !||    update_pon_shells         ../engine/source/engine/node_spliting/update_pon.F90
+        !||--- uses       -----------------------------------------------------
+        !||    connectivity_mod          ../common_source/modules/connectivity.F90
+        !||    constant_mod              ../common_source/modules/constant_mod.F
+        !||    nodal_arrays_mod          ../engine/source/engine/node_spliting/nodal_arrays.F90
+        !||    update_pon_mod            ../engine/source/engine/node_spliting/update_pon.F90
+        !||====================================================================
         subroutine detach_node_from_shells(nodes, node_id ,elements,shell_list,list_size)
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Modules
@@ -396,7 +396,7 @@
               if(elements%shell%nodes(j,shell_list(i)) == node_id) then
                 elements%shell%nodes(j,shell_list(i)) = new_local_id
                 elements%shell%ixc(j+1,shell_list(i)) = new_local_id
-             !  write(6,*) '---- Detached node ', old_uid, ' from shell ',shell_list(i),elements%shell%user_id(shell_list(i))
+                !  write(6,*) '---- Detached node ', old_uid, ' from shell ',shell_list(i),elements%shell%user_id(shell_list(i))
               end if
             enddo
           end do
@@ -407,20 +407,20 @@
 
         end subroutine detach_node_from_shells
         !\brief This subroutine detaches a node from a list of shells
-      !||====================================================================
-      !||    detach_node                   ../engine/source/engine/node_spliting/detach_node.F90
-      !||--- called by ------------------------------------------------------
-      !||    test_jc_shell_detach          ../engine/source/engine/node_spliting/detach_node.F90
-      !||--- calls      -----------------------------------------------------
-      !||    detach_node_from_interfaces   ../engine/source/engine/node_spliting/detach_node.F90
-      !||    detach_node_from_shells       ../engine/source/engine/node_spliting/detach_node.F90
-      !||    extend_nodal_arrays           ../engine/source/engine/node_spliting/nodal_arrays.F90
-      !||    set_new_node_values           ../engine/source/engine/node_spliting/detach_node.F90
-      !||--- uses       -----------------------------------------------------
-      !||    connectivity_mod              ../common_source/modules/connectivity.F90
-      !||    constant_mod                  ../common_source/modules/constant_mod.F
-      !||    nodal_arrays_mod              ../engine/source/engine/node_spliting/nodal_arrays.F90
-      !||====================================================================
+        !||====================================================================
+        !||    detach_node                   ../engine/source/engine/node_spliting/detach_node.F90
+        !||--- called by ------------------------------------------------------
+        !||    test_jc_shell_detach          ../engine/source/engine/node_spliting/detach_node.F90
+        !||--- calls      -----------------------------------------------------
+        !||    detach_node_from_interfaces   ../engine/source/engine/node_spliting/detach_node.F90
+        !||    detach_node_from_shells       ../engine/source/engine/node_spliting/detach_node.F90
+        !||    extend_nodal_arrays           ../engine/source/engine/node_spliting/nodal_arrays.F90
+        !||    set_new_node_values           ../engine/source/engine/node_spliting/detach_node.F90
+        !||--- uses       -----------------------------------------------------
+        !||    connectivity_mod              ../common_source/modules/connectivity.F90
+        !||    constant_mod                  ../common_source/modules/constant_mod.F
+        !||    nodal_arrays_mod              ../engine/source/engine/node_spliting/nodal_arrays.F90
+        !||====================================================================
         subroutine detach_node(nodes, node_id ,elements,shell_list,list_size,npari,ninter, ipari, interf)
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Modules
@@ -461,7 +461,7 @@
             return
           endif
           write(6,*) "detach_node",node_id,nodes%itab(node_id),"from:",shell_list(1:list_size)
-          call flush(6) 
+          call flush(6)
           new_uid = nodes%max_uid + 1
           nodes%max_uid = new_uid
           old_uid = nodes%itab(node_id)
@@ -484,16 +484,16 @@
 !       !\brief This subroutine detaches a node from a list of shells
         ! it is just a proof of concept to demonstrate how to detach a node from a list of shells
         ! the crack propagation is non phsyical (based on Jonhson-Cook damage)
-      !||====================================================================
-      !||    test_jc_shell_detach   ../engine/source/engine/node_spliting/detach_node.F90
-      !||--- calls      -----------------------------------------------------
-      !||    detach_node            ../engine/source/engine/node_spliting/detach_node.F90
-      !||--- uses       -----------------------------------------------------
-      !||    connectivity_mod       ../common_source/modules/connectivity.F90
-      !||    constant_mod           ../common_source/modules/constant_mod.F
-      !||    elbufdef_mod           ../common_source/modules/mat_elem/elbufdef_mod.F90
-      !||    nodal_arrays_mod       ../engine/source/engine/node_spliting/nodal_arrays.F90
-      !||====================================================================
+        !||====================================================================
+        !||    test_jc_shell_detach   ../engine/source/engine/node_spliting/detach_node.F90
+        !||--- calls      -----------------------------------------------------
+        !||    detach_node            ../engine/source/engine/node_spliting/detach_node.F90
+        !||--- uses       -----------------------------------------------------
+        !||    connectivity_mod       ../common_source/modules/connectivity.F90
+        !||    constant_mod           ../common_source/modules/constant_mod.F
+        !||    elbufdef_mod           ../common_source/modules/mat_elem/elbufdef_mod.F90
+        !||    nodal_arrays_mod       ../engine/source/engine/node_spliting/nodal_arrays.F90
+        !||====================================================================
         subroutine test_jc_shell_detach(nodes, element, interf, npari, ninter, ipari, numnod, &
           numnodg, elbuf, ngroup, ngrouc, nparg, iparg, igrouc, numelc, ispmd, &
           lcnel, cnel, addcnel)
@@ -580,7 +580,7 @@
             nel     = iparg(2,ng)
             nft     = iparg(3,ng)
             ! gather jc dfmax values
-           !detach_shell(nft+1: nft+nel) =  elbuf(ng)%bufly(1)%fail(1,1,1)%floc(1)%dammx(1:nel)
+            !detach_shell(nft+1: nft+nel) =  elbuf(ng)%bufly(1)%fail(1,1,1)%floc(1)%dammx(1:nel)
             do k = 1, size(elbuf(ng)%bufly,1)
               do n1 = 1,size(elbuf(ng)%bufly(k)%fail,1)
                 do n2 = 1,size(elbuf(ng)%bufly(k)%fail,2)
@@ -616,8 +616,8 @@
             nodal_damage(n4) =max(nodal_damage(n4),element%shell%damage(i))
           enddo
 
-          ! spmd reduction of nodal_damage 
- 
+          ! spmd reduction of nodal_damage
+
 
           allocate(shell_list(numelc))
           shell_list = 0
@@ -628,7 +628,7 @@
           ! the starting point of the crack is the node with the highest damage
           do i = 1, numnod
             if(nodal_damage(i) == 0.0D0) cycle
-!           if(nodes%nchilds(nodes%parent_node(i)) > 0) cycle 
+!           if(nodes%nchilds(nodes%parent_node(i)) > 0) cycle
             discrepancy = nodal_damage(i)
             if (discrepancy > max_discrepancy.and. discrepancy > 0.75D0) then
               max_discrepancy = discrepancy
@@ -653,37 +653,37 @@
 !             if(element%shell%damage(shell_id) > 0.0D0) cycle
               do j = 1, 4
                 n1 = element%shell%ixc(j+1,shell_id)
-                if(nodes%nchilds(nodes%parent_node(n1)) > 0) cycle 
+                if(nodes%nchilds(nodes%parent_node(n1)) > 0) cycle
                 if(any(crack(1:ncrack) == n1)) cycle
                 if(n1 == crack_root) cycle
-                  discrepancy = 1.0D0
-                  ratio = 1.0D0
-                  if(ncrack >= 2) then
-                     d1 = dot_product(nodes%X(1:3,crack(ncrack)) - nodes%X(1:3,crack(ncrack-1)),&
-                                     nodes%X(1:3,n1) - nodes%X(1:3,crack(ncrack)))
-                     d2 = sqrt(dot_product(nodes%X(1:3,crack(ncrack)) - nodes%X(1:3,crack(ncrack-1)),&
-                                           nodes%X(1:3,crack(ncrack)) - nodes%X(1:3,crack(ncrack-1))))
-                     d4 = sqrt(dot_product(nodes%X(1:3,n1) - nodes%X(1:3,crack(ncrack)),&
-                                           nodes%X(1:3,n1) - nodes%X(1:3,crack(ncrack))))
-                     if(d2 > 1.0D-6 .and. d4 > 1.0D-6) then
-                       ratio = (d1 / (d2 * d4)) 
-                     else
-                       ratio = 1.0D0 
-                     end if
+                discrepancy = 1.0D0
+                ratio = 1.0D0
+                if(ncrack >= 2) then
+                  d1 = dot_product(nodes%X(1:3,crack(ncrack)) - nodes%X(1:3,crack(ncrack-1)),&
+                    nodes%X(1:3,n1) - nodes%X(1:3,crack(ncrack)))
+                  d2 = sqrt(dot_product(nodes%X(1:3,crack(ncrack)) - nodes%X(1:3,crack(ncrack-1)),&
+                    nodes%X(1:3,crack(ncrack)) - nodes%X(1:3,crack(ncrack-1))))
+                  d4 = sqrt(dot_product(nodes%X(1:3,n1) - nodes%X(1:3,crack(ncrack)),&
+                    nodes%X(1:3,n1) - nodes%X(1:3,crack(ncrack))))
+                  if(d2 > 1.0D-6 .and. d4 > 1.0D-6) then
+                    ratio = (d1 / (d2 * d4))
+                  else
+                    ratio = 1.0D0
                   end if
-                  ! search if the node is not already in the crack list
-                  ! if the node is already in the crack list, then skip it
-                  if( ANY(crack(1:ncrack) == n1) ) cycle
-                  if (discrepancy*ratio > max_discrepancy) then
-                    max_discrepancy = discrepancy*ratio
-                    next_root = n1
-                   !write(6,*) "next_root?",next_root,max_discrepancy
-                  end if
-              ! endif
+                end if
+                ! search if the node is not already in the crack list
+                ! if the node is already in the crack list, then skip it
+                if( ANY(crack(1:ncrack) == n1) ) cycle
+                if (discrepancy*ratio > max_discrepancy) then
+                  max_discrepancy = discrepancy*ratio
+                  next_root = n1
+                  !write(6,*) "next_root?",next_root,max_discrepancy
+                end if
+                ! endif
               enddo
             enddo
             if(next_root > 0 .and. max_discrepancy > 0.2D0) then
-           !  write(6,*) "next_root",next_root,max_discrepancy
+              !  write(6,*) "next_root",next_root,max_discrepancy
               crack_root = next_root
             else
               crack_root = 0
@@ -694,65 +694,65 @@
 
           ! select the shells to be detached, looking at the side of the crack
           if(ncrack > 3) then
-          do i = 1, numelc
+            do i = 1, numelc
 !           shell_centroid = 0.0
-            normal = 0.0
-            vec = 0.0
-            ! Identify the first crack node in this shell
-             if(detach_shell(i) > 0.999d0) cycle
-            ! if the element has already a crack passing through one of its nodes
-            ! then it cannot be detached again
-!           if(element%shell%damage(i)  > 0.0D0) cycle 
+              normal = 0.0
+              vec = 0.0
+              ! Identify the first crack node in this shell
+              if(detach_shell(i) > 0.999d0) cycle
+              ! if the element has already a crack passing through one of its nodes
+              ! then it cannot be detached again
+!           if(element%shell%damage(i)  > 0.0D0) cycle
 !           do l = 2, 5
 !             shell_centroid(1:3) = shell_centroid(1:3) + nodes%X(1:3,element%shell%IXC(l, i))
 !           end do
 !           shell_centroid(1:3) = shell_centroid(1:3) / 4.0  ! Average over 4 nodes
-            do j = 2, 5
-              do k = 1, ncrack-1
-                if (element%shell%IXC(j, i) == crack(k)) then
+              do j = 2, 5
+                do k = 1, ncrack-1
+                  if (element%shell%IXC(j, i) == crack(k)) then
 
-                  ! Compute local normal using the next crack node
-                  normal(1:3) = nodes%X(1:3,crack(k+1)) - nodes%X(1:3,crack(k))
+                    ! Compute local normal using the next crack node
+                    normal(1:3) = nodes%X(1:3,crack(k+1)) - nodes%X(1:3,crack(k))
 
-                  ! Normalize the local normal
-                  distance = sqrt(sum(normal**2))
-                  if (distance > 0) normal = normal / distance
+                    ! Normalize the local normal
+                    distance = sqrt(sum(normal**2))
+                    if (distance > 0) normal = normal / distance
 
-                  ! Compute vector from crack node to shell centroid
-                  vec(1:3) = shell_centroid(1:3) - nodes%X(1:3,crack(k))
+                    ! Compute vector from crack node to shell centroid
+                    vec(1:3) = shell_centroid(1:3) - nodes%X(1:3,crack(k))
 
-                  ! Compute signed distance using dot product
-                  distance = sum(vec(1:3) * normal(1:3))
+                    ! Compute signed distance using dot product
+                    distance = sum(vec(1:3) * normal(1:3))
 
-                  if (distance > 0) then
-                    shells_to_detach = shells_to_detach + 1
-                    shell_list(shells_to_detach) = i
-                    element%shell%damage(i) = 1.0D0! detach_shell(i)
+                    if (distance > 0) then
+                      shells_to_detach = shells_to_detach + 1
+                      shell_list(shells_to_detach) = i
+                      element%shell%damage(i) = 1.0D0! detach_shell(i)
 
 !                   element%shell%damage(i) = 1.0D0
+                    end if
+                    exit  ! Only process the first crack node found in this shell
                   end if
-                  exit  ! Only process the first crack node found in this shell
-                end if
+                end do
               end do
-            end do
-          enddo
-
-          ! call spmd_detach_node_begin(local_data)
-          ! detach nodes from the shells
-          if(shells_to_detach > 0) then
-            write(6,*) "shells to be detached:",shells_to_detach
-            do i =1, shells_to_detach
-              write(6,*) "   shell",shell_list(i),element%shell%user_id(shell_list(i)),detach_shell(shell_list(i))
             enddo
-            do i = 1, ncrack
+
+            ! call spmd_detach_node_begin(local_data)
+            ! detach nodes from the shells
+            if(shells_to_detach > 0) then
+              write(6,*) "shells to be detached:",shells_to_detach
+              do i =1, shells_to_detach
+                write(6,*) "   shell",shell_list(i),element%shell%user_id(shell_list(i)),detach_shell(shell_list(i))
+              enddo
+              do i = 1, ncrack
 !             write(6,*) "crack node",i,crack(i)
-              call detach_node(nodes,crack(i),element,shell_list,shells_to_detach,npari,ninter, ipari, interf)
-       !      call detach_node(nodes,crack(i),element,shell_list,shells_to_detach,npari,ninter, ipari, interf, local_data)
+                call detach_node(nodes,crack(i),element,shell_list,shells_to_detach,npari,ninter, ipari, interf)
+                !      call detach_node(nodes,crack(i),element,shell_list,shells_to_detach,npari,ninter, ipari, interf, local_data)
 
-              numnod = numnod + 1
-              if(ispmd == 0) numnodg = numnodg + 1
-            enddo
-          endif
+                numnod = numnod + 1
+                if(ispmd == 0) numnodg = numnodg + 1
+              enddo
+            endif
           endif
           ! call spmd_detach_node_end(local_data)
 
@@ -775,10 +775,10 @@
               distance = sqrt((v(1) - nodes%X(1,element%shell%ixc(j+1,i)))**2 + &
                 (v(2) - nodes%X(2,element%shell%ixc(j+1,i)))**2 + &
                 (v(3) - nodes%X(3,element%shell%ixc(j+1,i)))**2)
-                if(nodes%nchilds(nodes%parent_node(element%shell%ixc(j+1,i))) < 1) then
-                  dmax = max(dmax,distance / element%shell%dist_to_center(i)) 
-                endif
-!               if(element%shell%user_id(i) == 989) then 
+              if(nodes%nchilds(nodes%parent_node(element%shell%ixc(j+1,i))) < 1) then
+                dmax = max(dmax,distance / element%shell%dist_to_center(i))
+              endif
+!               if(element%shell%user_id(i) == 989) then
 !                 write(6,*) j,nodes%nchilds(nodes%parent_node(element%shell%ixc(j+1,i))),distance/element%shell%dist_to_center(i)
 !               endif
 
@@ -789,8 +789,8 @@
                 crack(1) = element%shell%ixc(j+1,i)
                 shell_list(1) = i
                 shells_to_detach = 1
-                element%shell%damage(i) = 1.0D0 
-              ! write(6,*) "detach ill-formed shell",element%shell%user_id(i),nodes%itab(crack(1)),distance/element%shell%dist_to_center(i)
+                element%shell%damage(i) = 1.0D0
+                ! write(6,*) "detach ill-formed shell",element%shell%user_id(i),nodes%itab(crack(1)),distance/element%shell%dist_to_center(i)
                 call detach_node(nodes,crack(1),element,shell_list,shells_to_detach,npari,ninter, ipari, interf)
                 numnod = numnod + 1
                 if(ispmd == 0) numnodg = numnodg + 1
