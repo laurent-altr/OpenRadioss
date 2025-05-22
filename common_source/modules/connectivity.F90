@@ -77,7 +77,11 @@
           real(kind=wp), dimension(:), allocatable :: damage 
           type(list_of_shells_), dimension(:), allocatable :: shells_to_send !< local id of the shell element to send to the other process
           integer, dimension(:), allocatable :: offset !< offset of the shell element to receive from the other process 
+          integer, dimension(:), allocatable :: addcnel !< address for the node to elemenent (shell) connectivity
+          integer, dimension(:), allocatable :: cnel ! element index in nodes arrays
         end type ghost_shell_
+
+
         type solid_
           ! old storage of solids
           integer, dimension(:,:), allocatable :: ixs !< ixs(1,i) : Material ID of the i-th solid element

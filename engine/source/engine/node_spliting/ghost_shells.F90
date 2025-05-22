@@ -32,48 +32,48 @@
 
 
         interface
-           !call build_ghosts(element%shell,4*nb_shells,mask,ghosts)
+          !call build_ghosts(element%shell,4*nb_shells,mask,ghosts)
 
-            function build_ghosts(shells,nb_shells,mask,nspmd) result(c) bind(C,name="cpp_build_ghosts")
-                use iso_c_binding
-                implicit none
-                integer(c_int), intent(in), value :: nspmd
-                integer(c_int), intent(in), value :: nb_shells
-                integer(c_int), intent(in) :: shells(4,nb_shells)
-                integer(c_int), intent(in) :: mask(nspmd,*)
-                type(c_ptr) :: c
-            end function build_ghosts
-    
-            subroutine destroy_ghosts(ghosts) bind(C,name="cpp_destroy_ghosts")
-                use iso_c_binding
-                implicit none
-                type(c_ptr), value :: ghosts
-            end subroutine destroy_ghosts
+          function build_ghosts(shells,nb_shells,mask,nspmd) result(c) bind(C,name="cpp_build_ghosts")
+            use iso_c_binding
+            implicit none
+            integer(c_int), intent(in), value :: nspmd
+            integer(c_int), intent(in), value :: nb_shells
+            integer(c_int), intent(in) :: shells(4,nb_shells)
+            integer(c_int), intent(in) :: mask(nspmd,*)
+            type(c_ptr) :: c
+          end function build_ghosts
 
-            function get_shells_list(ghosts,p,n) result(cpp_ptr) bind(C,name="cpp_get_shells_list")
-                use iso_c_binding
-                implicit none
-                type(c_ptr), value, intent(in) :: ghosts
-                type(c_ptr) :: cpp_ptr
-                integer(c_int), value, intent(in) :: p
-                integer(c_int), intent(inout) :: n
-            end function get_shells_list
+          subroutine destroy_ghosts(ghosts) bind(C,name="cpp_destroy_ghosts")
+            use iso_c_binding
+            implicit none
+            type(c_ptr), value :: ghosts
+          end subroutine destroy_ghosts
 
-            function get_shell_list_size(ghosts,p) result(n) bind(C,name="cpp_get_shells_list_size")
-                use iso_c_binding
-                implicit none
-                type(c_ptr), value, intent(in) :: ghosts
-                integer(c_int), value, intent(in) :: p
-                integer(c_int) :: n
-            end function get_shell_list_size
-            !void cpp_copy_shells_list(void *c, int pc, int *shells) 
-            subroutine copy_shells_list(c,pc,shells) bind(C,name="cpp_copy_shells_list")
-                use iso_c_binding
-                implicit none
-                type(c_ptr), value, intent(in) :: c
-                integer(c_int), value, intent(in) :: pc
-                integer(c_int), intent(inout) :: shells(*)
-            end subroutine copy_shells_list
+          function get_shells_list(ghosts,p,n) result(cpp_ptr) bind(C,name="cpp_get_shells_list")
+            use iso_c_binding
+            implicit none
+            type(c_ptr), value, intent(in) :: ghosts
+            type(c_ptr) :: cpp_ptr
+            integer(c_int), value, intent(in) :: p
+            integer(c_int), intent(inout) :: n
+          end function get_shells_list
+
+          function get_shell_list_size(ghosts,p) result(n) bind(C,name="cpp_get_shells_list_size")
+            use iso_c_binding
+            implicit none
+            type(c_ptr), value, intent(in) :: ghosts
+            integer(c_int), value, intent(in) :: p
+            integer(c_int) :: n
+          end function get_shell_list_size
+          !void cpp_copy_shells_list(void *c, int pc, int *shells)
+          subroutine copy_shells_list(c,pc,shells) bind(C,name="cpp_copy_shells_list")
+            use iso_c_binding
+            implicit none
+            type(c_ptr), value, intent(in) :: c
+            integer(c_int), value, intent(in) :: pc
+            integer(c_int), intent(inout) :: shells(*)
+          end subroutine copy_shells_list
 
 
         end interface
@@ -120,6 +120,8 @@
           type(spmd_buffer_type), dimension(nspmd) :: spmd_buffer
           integer :: TAG
           integer :: bs
+          integer :: node_id
+          integer, dimension(:), allocatable :: connected_ghosts_shells
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Body
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -151,7 +153,7 @@
           buffer_size_in = 0
           do p = 1, nspmd
             if(ispmd+1 == p) cycle ! skip the current process
-            n = get_shell_list_size(ghosts,p)                                            
+            n = get_shell_list_size(ghosts,p)
             buffer_size_out(p) = n
             allocate(spmd_buffer(p)%sendbuf(4*n))
             allocate(element%ghost_shell%shells_to_send(p)%index(n))
@@ -171,7 +173,7 @@
             allocate(spmd_buffer(p)%recvbuf(4*buffer_size_in(p)))
             bs = buffer_size_in(p)*4
             if( bs > 0 ) then
-               call MPI_Irecv(spmd_buffer(p)%recvbuf,bs,MPI_INTEGER,p-1,TAG,SPMD_COMM_WORLD,spmd_buffer(p)%recv_request,ierr)
+              call spmd_irecv(spmd_buffer(p)%recvbuf,bs,p-1,TAG,spmd_buffer(p)%recv_request)
             endif
 
             ! mpi Isend to send the data
@@ -187,16 +189,14 @@
                 spmd_buffer(p)%sendbuf(4+4*(i-1)) = nodes%itab(element%shell%nodes(4,j))
               enddo
               bs = 4*n
-              call MPI_Isend(spmd_buffer(p)%sendbuf,bs,MPI_INTEGER,p-1,TAG,SPMD_COMM_WORLD,spmd_buffer(p)%send_request,ierr)
+              call spmd_isend(spmd_buffer(p)%sendbuf,bs,p-1,TAG,spmd_buffer(p)%send_request)
             endif
           enddo
 
           ! allocate element%ghost_shell%nodes
           n = sum(buffer_size_in)
-          if (n > 0) then
-            allocate(element%ghost_shell%nodes(4,n))
-          endif
-          allocate(element%ghost_shell%offset(nspmd))
+          allocate(element%ghost_shell%nodes(4,n))
+          allocate(element%ghost_shell%offset(nspmd+1))
           element%ghost_shell%offset = 0
           ! Wait for all the sends to complete
           offset = 0
@@ -224,6 +224,7 @@
               offset = offset + n
             endif
           enddo
+          element%ghost_shell%offset(nspmd+1) = offset+1
 
           do p = 1, nspmd
             if(ispmd+1 == p) cycle ! skip the current process
@@ -237,10 +238,174 @@
             endif
           enddo
 
-           call destroy_ghosts(ghosts)
+          call destroy_ghosts(ghosts)
+
+          allocate(connected_ghosts_shells(numnodes))
+          connected_ghosts_shells = 0
+          do i = 1, size(element%ghost_shell%nodes,2)
+            do j = 1, 4
+              node_id = element%ghost_shell%nodes(j,i)
+              ! if node id is > 0, and is not duplicated in nodes(1:4,i)
+              if(node_id > 0) then
+                ! node is local to the processor
+                if(j > 1) then
+                  if(any(element%ghost_shell%nodes(1:j-1,i) == node_id)) cycle
+                endif
+                connected_ghosts_shells(node_id) = connected_ghosts_shells(node_id) + 1
+              endif
+            enddo
+          enddo
+
+          allocate(element%ghost_shell%addcnel(numnodes+1))
+          element%ghost_shell%addcnel(1) = 1
+          do n = 2, numnodes+1
+            element%ghost_shell%addcnel(n) = element%ghost_shell%addcnel(n-1) + connected_ghosts_shells(n-1)
+            ! look for negative value in addcnel
+          enddo
+
+          ! allocate the ghost shell connectivity
+          allocate(element%ghost_shell%cnel(element%ghost_shell%addcnel(numnodes+1) - 1))
+
+          do i = 1, size(element%ghost_shell%nodes,2)
+            do j = 1, 4
+              node_id = element%ghost_shell%nodes(j,i)
+              ! if node id is > 0, and is not duplicated in nodes(1:4,i)
+              if(node_id > 0) then
+                ! node is local to the processor
+                if(j > 1) then
+                  if(any(element%ghost_shell%nodes(1:j-1,i) == node_id)) cycle
+                endif
+                ! node is a local node
+                element%ghost_shell%cnel(element%ghost_shell%addcnel(node_id)) = i
+                element%ghost_shell%addcnel(node_id) = element%ghost_shell%addcnel(node_id) + 1
+                ! look for negative value in addcnel
+              endif
+            enddo
+          enddo
+
+          ! flush and reset addcnel
+          element%ghost_shell%addcnel(1) = 1
+          element%ghost_shell%addcnel(2:numnodes+1) = 0
+          do n = 2, numnodes+1
+            element%ghost_shell%addcnel(n) = element%ghost_shell%addcnel(n) + connected_ghosts_shells(n-1)
+          enddo
+
+          deallocate(connected_ghosts_shells)
         end subroutine
 
 
+        subroutine spmd_exchange_ghost_shells(element,ispmd,nspmd,chunkSize,sendbuf,recvbuf)
+! ----------------------------------------------------------------------------------------------------------------------
+!                                                   Modules
+! ----------------------------------------------------------------------------------------------------------------------
+          use iso_c_binding
+          use nodal_arrays_mod
+          use connectivity_mod
+          use spmd_mod
+          use umap_mod
+          use precision_mod
+! ----------------------------------------------------------------------------------------------------------------------
+!                                                   Implicit none
+! ----------------------------------------------------------------------------------------------------------------------
+          implicit none
+! ----------------------------------------------------------------------------------------------------------------------
+!                                                   Arguments
+! ----------------------------------------------------------------------------------------------------------------------
+#include "spmd.inc"
+          integer, intent(in) :: ispmd !< rank of the current process
+          integer, intent(in) :: nspmd !< number of processes in the current MPI communicator
+          type(connectivity_) :: element !< connectivity arrays
+          integer, intent(in) :: chunkSize !< size of the chunk to send
+          real(kind=wp), dimension(:), intent(in) :: sendbuf !< buffer to send, size = chunkSize * numelc
+          real(kind=wp), dimension(:), intent(out) :: recvbuf !< buffer to receive, size = chunkSize * number of ghost shells
+! ----------------------------------------------------------------------------------------------------------------------
+!                                                   Local variables
+! ----------------------------------------------------------------------------------------------------------------------
+          type(spmd_buffer_type), dimension(nspmd) :: spmd_buffer
+          integer :: ierr
+          integer :: p
+          integer :: i,j,n,ns,nr
+          integer :: TAG
+          integer :: offset
+!-----------------------------------------------------------------------------------------------------------------------
+!                                                   Body
+!-----------------------------------------------------------------------------------------------------------------------
+          do p = 1, nspmd
+            if(ispmd+1 == p) cycle ! skip the current process
+            spmd_buffer(p)%recv_request = MPI_REQUEST_NULL
+            spmd_buffer(p)%send_request = MPI_REQUEST_NULL
+            n = size(element%ghost_shell%shells_to_send(p)%index)
+            allocate(spmd_buffer(p)%sendbuf(chunkSize*n))
+          enddo
+
+          ! mpi Irecv to receive the data
+          do p = 1, nspmd
+            if(ispmd+1 == p) cycle ! skip the current process
+            n = element%ghost_shell%offset(p+1) - element%ghost_shell%offset(p)
+            if(n > 0) then
+              nr = chunkSize*n
+              allocate(spmd_buffer(p)%recvbuf(nr))
+              call spmd_irecv(spmd_buffer(p)%recvbuf,nr,p-1,TAG,spmd_buffer(p)%recv_request)
+            endif
+          enddo
+
+          do p = 1, nspmd
+            if(ispmd+1 == p) cycle ! skip the current process
+            n = size(element%ghost_shell%shells_to_send(p)%index)
+            if(n > 0) then
+              ! fill the buffer
+              do i = 1, n
+                j = element%ghost_shell%shells_to_send(p)%index(i)
+                ! copy a chunk of data
+                spmd_buffer(p)%sendbuf((i-1)*chunkSize+1:i*chunkSize) = sendbuf((j-1)*chunkSize+1:j*chunkSize)
+              enddo
+              ns = n * chunkSize
+              call spmd_isend(spmd_buffer(p)%sendbuf,ns,p-1,TAG,spmd_buffer(p)%send_request)
+            endif
+          enddo
+
+
+          ! unpack the recieved data
+          do p = 1, nspmd
+            if(ispmd+1 == p) cycle ! skip the current process
+            n = element%ghost_shell%offset(p+1) - element%ghost_shell%offset(p)
+            if(n > 0) then
+              call MPI_Wait(spmd_buffer(p)%recv_request,MPI_STATUS_IGNORE,ierr)
+              do i = 1, n
+                ! copy a chunk of data
+                offset = element%ghost_shell%offset(p)
+                do j = 1, chunkSize
+                  recvbuf(1+(i-1+offset)*chunkSize+j) = spmd_buffer(p)%recvbuf((i-1)*chunkSize+j)
+                enddo
+              enddo
+            endif
+          enddo
+
+          ! wait for all the sends to complete
+          offset = 0
+          do p = 1, nspmd
+            if(ispmd+1 == p) cycle ! skip the current process
+            n = element%ghost_shell%offset(p+1) - element%ghost_shell%offset(p)
+            if(n > 0) then
+              offset = element%ghost_shell%offset(p)
+              call MPI_Wait(spmd_buffer(p)%recv_request,MPI_STATUS_IGNORE,ierr)
+              do i = 1, n
+                recvbuf(1+(i-1+offset)*chunkSize) = spmd_buffer(p)%recvbuf(1+(i-1)*chunkSize)
+              enddo
+            endif
+          enddo
+
+
+          do p = 1, nspmd
+            if(ispmd+1 == p) cycle ! skip the current process
+            ! Free Send Request
+            if(spmd_buffer(p)%send_request /= MPI_REQUEST_NULL) then
+              call MPI_Wait(spmd_buffer(p)%send_request,MPI_STATUS_IGNORE,ierr)
+            endif
+            deallocate(spmd_buffer(p)%recvbuf)
+            deallocate(spmd_buffer(p)%sendbuf)
+          enddo
+        end subroutine spmd_exchange_ghost_shells
 
       end module ghost_shells_mod
 
