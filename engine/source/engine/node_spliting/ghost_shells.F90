@@ -22,7 +22,7 @@
 !Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
 
       module ghost_shells_mod
-
+        implicit none
         type :: spmd_buffer_type
           integer, dimension(:), allocatable :: sendbuf
           integer, dimension(:), allocatable :: recvbuf
@@ -34,13 +34,14 @@
         interface
           !call build_ghosts(element%shell,4*nb_shells,mask,ghosts)
 
-          function build_ghosts(shells,nb_shells,mask,nspmd) result(c) bind(C,name="cpp_build_ghosts")
+          function build_ghosts(shells,nb_shells,mask,nspmd,numnodes) result(c) bind(C,name="cpp_build_ghosts")
             use iso_c_binding
             implicit none
             integer(c_int), intent(in), value :: nspmd
+            integer(c_int), intent(in), value :: numnodes
             integer(c_int), intent(in), value :: nb_shells
             integer(c_int), intent(in) :: shells(4,nb_shells)
-            integer(c_int), intent(in) :: mask(nspmd,*)
+            integer(c_int), intent(in) :: mask(nspmd,numnodes)
             type(c_ptr) :: c
           end function build_ghosts
 
@@ -67,12 +68,13 @@
             integer(c_int) :: n
           end function get_shell_list_size
           !void cpp_copy_shells_list(void *c, int pc, int *shells)
-          subroutine copy_shells_list(c,pc,shells) bind(C,name="cpp_copy_shells_list")
+          subroutine copy_shells_list(c,pc,shells,n) bind(C,name="cpp_copy_shells_list")
             use iso_c_binding
             implicit none
             type(c_ptr), value, intent(in) :: c
             integer(c_int), value, intent(in) :: pc
-            integer(c_int), intent(inout) :: shells(*)
+            integer(c_int), value, intent(in) :: n
+            integer(c_int), intent(inout) :: shells(n)
           end subroutine copy_shells_list
 
 
@@ -102,8 +104,8 @@
           integer, intent(in) :: iad_node(2,nspmd+1) !< index in bondary nodes:   J=IAD_NODE(2,I),IAD_NODE(1,I+1)-1
           integer, intent(in) :: sfr_node  !< nb nodes in the boundary
           integer, intent(in) :: fr_node(sfr_node) !<                               node = fr_node(J)
-          type(nodal_arrays_) :: nodes !< nodal arrays
-          type(connectivity_) :: element !< connectivity arrays
+          type(nodal_arrays_),intent(in) :: nodes !< nodal arrays
+          type(connectivity_),intent(inout) :: element !< connectivity arrays
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Local variables
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -144,7 +146,7 @@
 
 
           ! For each node with mask == 1, we identify the corresponding shells from 1 to nb_shells
-          ghosts = build_ghosts(element%shell%nodes,nb_shells,mask,nspmd)
+          ghosts = build_ghosts(element%shell%nodes,nb_shells,mask,nspmd,numnodes)
           deallocate(mask)
 
           ! count the number of shell to be exchanged for each processor
@@ -160,7 +162,7 @@
             if(n > 0) then
               ! copy the list of shells to be exchanged
               !element%ghost_shell%shells_to_send(p)%index(1:n) = shells_to_send(1:n)
-              call copy_shells_list(ghosts,p,element%ghost_shell%shells_to_send(p)%index)
+              call copy_shells_list(ghosts,p,element%ghost_shell%shells_to_send(p)%index,n)
             endif
           enddo
 
@@ -291,7 +293,7 @@
           enddo
 
           deallocate(connected_ghosts_shells)
-        end subroutine
+        end subroutine init_ghost_shells
 
 
         subroutine spmd_exchange_ghost_shells(element,ispmd,nspmd,chunkSize,sendbuf,recvbuf)
@@ -314,7 +316,7 @@
 #include "spmd.inc"
           integer, intent(in) :: ispmd !< rank of the current process
           integer, intent(in) :: nspmd !< number of processes in the current MPI communicator
-          type(connectivity_) :: element !< connectivity arrays
+          type(connectivity_), intent(inout) :: element !< connectivity arrays
           integer, intent(in) :: chunkSize !< size of the chunk to send
           real(kind=wp), dimension(:), intent(in) :: sendbuf !< buffer to send, size = chunkSize * numelc
           real(kind=wp), dimension(:), intent(out) :: recvbuf !< buffer to receive, size = chunkSize * number of ghost shells

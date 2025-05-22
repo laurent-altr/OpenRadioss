@@ -27,6 +27,7 @@
       !||    resol                     ../engine/source/engine/resol.F
       !||====================================================================
         module update_pon_mod
+          implicit none
         contains
         !\brief replace old_ids with new_ids in the shell data structure
       !||====================================================================
@@ -125,7 +126,7 @@
               shell_id = shell_list(i)
               do j = 1, 4
                 if(elements%shell%nodes(j, shell_id) == new_id) then
-                    elements%pon%iadc(j,shell_id) = elements%pon%adsky(new_numnod) + contributions_count                               
+                    elements%pon%iadc(j,shell_id) = elements%pon%adsky(new_numnod) + contributions_count
 !                   if(elements%pon%iadc(j,shell_id) < imin_fsky .or. elements%pon%iadc(j,shell_id) > imax_fsky) then
 !                      write(6,*) __LINE__, 'ERROR: IADC(', shell_id, ',', j, ') = ', elements%pon%adsky(new_numnod) + contributions_count
 !                   endif

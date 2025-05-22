@@ -26,6 +26,7 @@
       !||    resol             ../engine/source/engine/resol.F
       !||====================================================================
       module detach_node_mod
+        implicit none
       contains
       !||====================================================================
       !||    find_segment_in_list          ../engine/source/engine/node_spliting/detach_node.F90
@@ -586,7 +587,7 @@
                   do n3 = 1,size(elbuf(ng)%bufly(k)%fail,3)
                     do l = 1,size(elbuf(ng)%bufly(k)%fail(n1,n2,n3)%floc,1)
                       do n = 1, size(elbuf(ng)%bufly(k)%fail(n1,n2,n3)%floc(l)%dammx,1)
-                        detach_shell(nft+n) = max(detach_shell(nft+n), elbuf(ng)%bufly(k)%fail(n1,n2,n3)%floc(l)%dammx(n))                                                     
+                        detach_shell(nft+n) = max(detach_shell(nft+n), elbuf(ng)%bufly(k)%fail(n1,n2,n3)%floc(l)%dammx(n))
                       enddo
                     enddo
                   enddo

@@ -42,20 +42,13 @@ extern "C"
         int *shells, // 4 x nb_shells array : node id of the shells
         int nb_shells,
         int *mask, // nspmd x nb_shells array: 1 => shell is to be considered
-        int nspmd)
+        int nspmd,
+        int numnod)
     {
         ghosts *c = new ghosts(nspmd);
         // find the maximum node id in the array shells of size 4 x nb_shells
-        int max_node_id = 0;
+        int max_node_id = numnod;
         // find the maximum value in the shell array of size 4 x nb_shells
-        for (int i = 0; i < nb_shells; i++)
-        {
-            for (int j = 0; j < 4; j++)
-            {
-                max_node_id = std::max(max_node_id, shells[i * 4 + j]);
-            }
-        }
-
         for (int i = 0; i < nb_shells; i++)
         {
             for (int p = 0; p < nspmd; p++)
