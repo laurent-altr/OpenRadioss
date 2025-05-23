@@ -677,46 +677,50 @@
           max_discrepancy = -1.0d0
           crack_root = 0
 
-          ! the starting point of the crack is the node with the highest damage
+          ! looking for new cracks roots
           do i = 1, numnod
             if(nodal_damage(i) == 0.0d0) cycle
-            discrepancy = nodal_damage(i)
-            if (discrepancy > max_discrepancy.and. discrepancy > 0.75d0) then
-              max_discrepancy = discrepancy
-              crack_root = i
-            end if
-          enddo
-
-          if(crack_root >0) then
-            ! search if crack root is in cracks
-            is_new_crack = .true.
-            do i = 1, cracks%ncracks
-              if(crack_root == cracks%current_node(i)) then
-                is_new_crack = .false.
-                exit
+            if(nodal_damage(i) > 0.75D0) then
+            do j = addcnel(i), addcnel(i+1)-1
+              shell_id = cnel(j) - element%shell%offset
+              if(detach_shell(shell_id) > 0.999d0) cycle
+              if(detach_shell(shell_id) < 0.5D0) cycle
+              n1 = element%shell%ixc(2,shell_id)
+              n2 = element%shell%ixc(3,shell_id)
+              n3 = element%shell%ixc(4,shell_id)
+              n4 = element%shell%ixc(5,shell_id)
+              if(nodal_damage(n1) == 0.0d0) cycle
+              if(nodal_damage(n2) == 0.0d0) cycle
+              if(nodal_damage(n3) == 0.0d0) cycle
+              if(nodal_damage(n4) == 0.0d0) cycle
+              is_new_crack = .true.
+              do c = 1, cracks%ncracks
+                if(crack_root == cracks%current_node(c)) then
+                  is_new_crack = .false.
+                  exit
+                end if
+              enddo
+              if(is_new_crack) then
+                if(cracks%ncracks == 0) then
+                  allocate(cracks%current_node(1))
+                  allocate(cracks%previous_node(1))
+                  cracks%current_node(1) = 0
+                  cracks%previous_node(1) = 0
+                else
+                  ! add the new crack to the list of cracks
+                  call extend_array(cracks%current_node,cracks%ncracks,cracks%ncracks+1)
+                  call extend_array(cracks%previous_node,cracks%ncracks,cracks%ncracks+1)
+                end if
+                cracks%ncracks = cracks%ncracks + 1
+                cracks%previous_node(cracks%ncracks) = cracks%current_node(cracks%ncracks)
+                cracks%current_node(cracks%ncracks) = crack_root
               end if
             enddo
-            if(is_new_crack) then
-              if(cracks%ncracks == 0) then
-                allocate(cracks%current_node(1))
-                allocate(cracks%previous_node(1))
-                cracks%current_node(1) = 0
-                cracks%previous_node(1) = 0
-              else
-                ! add the new crack to the list of cracks
-                call extend_array(cracks%current_node,cracks%ncracks,cracks%ncracks+1)
-                call extend_array(cracks%previous_node,cracks%ncracks,cracks%ncracks+1)
-              end if
-              cracks%ncracks = cracks%ncracks + 1
-              cracks%previous_node(cracks%ncracks) = cracks%current_node(cracks%ncracks) 
-              cracks%current_node(cracks%ncracks) = crack_root
-            end if
+            endif
+          enddo
 
-          end if
-
-          ! crack propagation : list nodes
+          ! crack propagation 
           ncrack = 0
-!         do while (crack_root >0 .AND. ncrack < 1)
           do c = 1, cracks%ncracks
             if(cracks%previous_node(c) > 0) then
               ncrack = 2
@@ -814,11 +818,11 @@
                 do i =1, shells_to_detach
                   write(6,*) "   shell",shell_list(i),element%shell%user_id(shell_list(i)),detach_shell(shell_list(i))
                 enddo
+                cracks%previous_node(c) = cracks%current_node(c)
+                cracks%current_node(c) = crack(c)
                 do i = 1, ncrack
-!             write(6,*) "crack node",i,crack(i)
                   call detach_node(nodes,crack(i),element,shell_list,shells_to_detach,npari,ninter, ipari, interf)
                   !      call detach_node(nodes,crack(i),element,shell_list,shells_to_detach,npari,ninter, ipari, interf, local_data)
-
                   numnod = numnod + 1
                   if(ispmd == 0) numnodg = numnodg + 1
                 enddo
