@@ -27,6 +27,12 @@
       !||====================================================================
       module detach_node_mod
         implicit none
+
+        type cracks_
+          integer :: ncracks
+          integer, dimension(:), allocatable :: current_node
+          integer, dimension(:), allocatable :: previous_node
+        end type cracks_
       contains
         !||====================================================================
         !||    find_segment_in_list          ../engine/source/engine/node_spliting/detach_node.F90
@@ -495,16 +501,19 @@
         !||    nodal_arrays_mod       ../engine/source/engine/node_spliting/nodal_arrays.F90
         !||====================================================================
         subroutine test_jc_shell_detach(nodes, element, interf, npari, ninter, ipari, numnod, &
-          numnodg, elbuf, ngroup, ngrouc, nparg, iparg, igrouc, numelc, ispmd, &
-          lcnel, cnel, addcnel)
+          numnodg, elbuf, ngroup, ngrouc, nparg, iparg, igrouc, numelc, ispmd, nspmd, &
+          lcnel, cnel, addcnel, cracks)
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Modules
 ! ----------------------------------------------------------------------------------------------------------------------
+          use ghost_shells_mod
+          use precision_mod, only : wp
           USE constant_mod, only : TWO
           USE connectivity_mod
           USE nodal_arrays_mod
           USE interfaces_mod
           USE elbufdef_mod
+          use extend_array_mod
           implicit none
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Arguments
@@ -524,14 +533,16 @@
           integer, intent(inout) :: ipari(npari,ninter)    !< parameters of the interf
           integer, intent(inout) :: numnod, numnodg
           integer, intent(in) :: ispmd !< rank of the processor (MPI)
+          integer, intent(in) :: nspmd !< number of processors (MPI)
           integer, intent(in) ::lcnel
           integer, dimension(0:numnod+1), intent(in) :: addcnel ! address for the cnel array
           integer, dimension(0:lcnel), intent(in) :: cnel ! connectivity node-->element
+          type(cracks_), intent(inout) :: cracks !< crack structure
 
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Local variables
 ! ----------------------------------------------------------------------------------------------------------------------
-          double precision, dimension(:), allocatable :: detach_shell
+          real(kind=wp), dimension(:), allocatable :: detach_shell
           integer :: ig,ng,numnod0,i,j,k,l,m,n,n1,n2,n3,n4,nel,nft
           double precision :: discrepancy,max_discrepancy
           integer :: crack_root, next_root
@@ -547,15 +558,21 @@
           double precision, parameter :: treshold = 1.04D0
           double precision :: ratio,dmax
           logical :: skip
+          integer :: nGhostShells
+          real(kind=wp), dimension(:), allocatable :: ghostShellDamage
+          real(kind=wp), dimension(:), allocatable :: ghostShellCoordinates,shellCoordinates
+          logical :: is_new_crack
+          integer :: c
+
 ! ----------------------------------------------------------------------------------------------------------------------
-!                                                   Body
+!                                                   body
 ! ----------------------------------------------------------------------------------------------------------------------
 
           allocate(detach_shell(0:numelc))
-          detach_shell = 0.0D0
+          detach_shell = 0.0d0
           if(.not. allocated(element%shell%damage)) then
             allocate(element%shell%damage(1:numelc))
-            element%shell%damage = 0.0D0
+            element%shell%damage = 0.0d0
             allocate(element%shell%dist_to_center(1:numelc))
             do i = 1, numelc
               n1 = element%shell%ixc(2,i)
@@ -563,14 +580,14 @@
               n3 = element%shell%ixc(4,i)
               n4 = element%shell%ixc(5,i)
               !barycenter
-              v(1) = (nodes%X(1,n1) + nodes%X(1,n2) + nodes%X(1,n3) + nodes%X(1,n4))/4.0D0
-              v(2) = (nodes%X(2,n1) + nodes%X(2,n2) + nodes%X(2,n3) + nodes%X(2,n4))/4.0D0
-              v(3) = (nodes%X(3,n1) + nodes%X(3,n2) + nodes%X(3,n3) + nodes%X(3,n4))/4.0D0
-              distance = 0.0D0
+              v(1) = (nodes%x(1,n1) + nodes%x(1,n2) + nodes%x(1,n3) + nodes%x(1,n4))/4.0d0
+              v(2) = (nodes%x(2,n1) + nodes%x(2,n2) + nodes%x(2,n3) + nodes%x(2,n4))/4.0d0
+              v(3) = (nodes%x(3,n1) + nodes%x(3,n2) + nodes%x(3,n3) + nodes%x(3,n4))/4.0d0
+              distance = 0.0d0
               do j = 1,4
-                distance = max(distance, sqrt((v(1) - nodes%X(1,element%shell%ixc(j+1,i)))**2 + &
-                  (v(2) - nodes%X(2,element%shell%ixc(j+1,i)))**2 + &
-                  (v(3) - nodes%X(3,element%shell%ixc(j+1,i)))**2))
+                distance = max(distance, sqrt((v(1) - nodes%x(1,element%shell%ixc(j+1,i)))**2 + &
+                  (v(2) - nodes%x(2,element%shell%ixc(j+1,i)))**2 + &
+                  (v(3) - nodes%x(3,element%shell%ixc(j+1,i)))**2))
               enddo
               element%shell%dist_to_center(i) = distance
             enddo
@@ -597,13 +614,39 @@
             ! detach_shell(nft+1: nft+nel) = detach_shell(nft+1: nft+nel) - element%shell%damage(nft+1: nft+nel)
           enddo
 
+          nghostshells = size(element%ghost_shell%nodes,2)
+          allocate(ghostshelldamage(nghostshells))
+          ghostshelldamage = 0.0d0
+          call spmd_exchange_ghost_shells(element,ispmd,nspmd,1,detach_shell,ghostshelldamage)
+          allocate(shellCoordinates(numelc*12))
+          do i = 1, numelc              
+            n1 = element%shell%ixc(2,i)
+            n2 = element%shell%ixc(3,i)
+            n3 = element%shell%ixc(4,i)
+            n4 = element%shell%ixc(5,i)
+            shellCoordinates((i-1)*12+1) = nodes%x(1,n1)
+            shellCoordinates((i-1)*12+2) = nodes%x(2,n1)
+            shellCoordinates((i-1)*12+3) = nodes%x(3,n1)
+            shellCoordinates((i-1)*12+4) = nodes%x(1,n2)
+            shellCoordinates((i-1)*12+5) = nodes%x(2,n2)
+            shellCoordinates((i-1)*12+6) = nodes%x(3,n2)
+            shellCoordinates((i-1)*12+7) = nodes%x(1,n3)
+            shellCoordinates((i-1)*12+8) = nodes%x(2,n3)
+            shellCoordinates((i-1)*12+9) = nodes%x(3,n3)
+            shellCoordinates((i-1)*12+10) = nodes%x(1,n4)
+            shellCoordinates((i-1)*12+11) = nodes%x(2,n4)
+            shellCoordinates((i-1)*12+12) = nodes%x(3,n4)
+          enddo
+          allocate(ghostShellCoordinates(nghostshells*12))
+          call spmd_exchange_ghost_shells(element,ispmd,nspmd,12,shellCoordinates,ghostShellCoordinates)
+          
 
           numnod0 = numnod
           allocate(nodal_damage(numnod))
 
           ! cumulate the damage of the shells on the nodes
-          nodal_damage = 0.0D0
-          do i = 1, size( element%shell%user_id,1)
+          nodal_damage = 0.0d0
+          do i = 1, numelc
             n1 = element%shell%ixc(2,i)
             n2 = element%shell%ixc(3,i)
             n3 = element%shell%ixc(4,i)
@@ -616,40 +659,78 @@
             nodal_damage(n4) =max(nodal_damage(n4),element%shell%damage(i))
           enddo
 
-          ! spmd reduction of nodal_damage
+          do i = 1, nghostshells
+            element%ghost_shell%damage(i) = ghostshelldamage(i)
+            if(ghostshelldamage(i) > 0.9999d0) cycle ! already broken
+            do j = 1, 4
+              n1 = element%ghost_shell%nodes(j,i)
+              if(n1 <= 0) cycle
+              nodal_damage(n1) =max(nodal_damage(n1),element%ghost_shell%damage(i))
+            enddo
+          enddo
+          deallocate(ghostshelldamage)
 
 
           allocate(shell_list(numelc))
           shell_list = 0
           shells_to_detach = 0
-          max_discrepancy = -1.0D0
+          max_discrepancy = -1.0d0
           crack_root = 0
 
           ! the starting point of the crack is the node with the highest damage
           do i = 1, numnod
-            if(nodal_damage(i) == 0.0D0) cycle
-!           if(nodes%nchilds(nodes%parent_node(i)) > 0) cycle
+            if(nodal_damage(i) == 0.0d0) cycle
             discrepancy = nodal_damage(i)
-            if (discrepancy > max_discrepancy.and. discrepancy > 0.75D0) then
+            if (discrepancy > max_discrepancy.and. discrepancy > 0.75d0) then
               max_discrepancy = discrepancy
               crack_root = i
             end if
           enddo
 
-!         if(crack_root >0) write(6,*)  "crack_root",crack_root,max_discrepancy
+          if(crack_root >0) then
+            ! search if crack root is in cracks
+            is_new_crack = .true.
+            do i = 1, cracks%ncracks
+              if(crack_root == cracks%current_node(i)) then
+                is_new_crack = .false.
+                exit
+              end if
+            enddo
+            if(is_new_crack) then
+              if(cracks%ncracks == 0) then
+                allocate(cracks%current_node(1))
+                allocate(cracks%previous_node(1))
+                cracks%current_node(1) = 0
+                cracks%previous_node(1) = 0
+              else
+                ! add the new crack to the list of cracks
+                call extend_array(cracks%current_node,cracks%ncracks,cracks%ncracks+1)
+                call extend_array(cracks%previous_node,cracks%ncracks,cracks%ncracks+1)
+              end if
+              cracks%ncracks = cracks%ncracks + 1
+              cracks%previous_node(cracks%ncracks) = cracks%current_node(cracks%ncracks) 
+              cracks%current_node(cracks%ncracks) = crack_root
+            end if
+
+          end if
 
           ! crack propagation : list nodes
           ncrack = 0
-          do while (crack_root >0 .AND. ncrack < 20)
-            ncrack = ncrack + 1
-            crack(ncrack) = crack_root
+!         do while (crack_root >0 .AND. ncrack < 1)
+          do c = 1, cracks%ncracks
+            if(cracks%previous_node(c) > 0) then
+              ncrack = 2
+              crack(2) = cracks%current_node(c)
+              crack(1) = cracks%previous_node(c)
+            end if
+            crack_root = cracks%current_node(c)
             ! loop over elements connected to the nodes
             max_discrepancy = -1.0D0
             next_root = 0
             do i = addcnel(crack_root), addcnel(crack_root+1)-1
               shell_id = cnel(i) - element%shell%offset
               if(detach_shell(shell_id) > 0.999d0) cycle
-              if(detach_shell(shell_id) < 0.2D0) cycle
+              if(detach_shell(shell_id) < 0.5D0) cycle
 !             if(element%shell%damage(shell_id) > 0.0D0) cycle
               do j = 1, 4
                 n1 = element%shell%ixc(j+1,shell_id)
@@ -688,72 +769,62 @@
             else
               crack_root = 0
             endif
-          enddo
-
-!         if(ncrack>0) write(6,*) "ncrack=",ncrack
-
-          ! select the shells to be detached, looking at the side of the crack
-          if(ncrack > 3) then
-            do i = 1, numelc
+            ! select the shells to be detached, looking at the side of the crack
+            if(ncrack == 2) then
+              do i = 1, numelc
 !           shell_centroid = 0.0
-              normal = 0.0
-              vec = 0.0
-              ! Identify the first crack node in this shell
-              if(detach_shell(i) > 0.999d0) cycle
-              ! if the element has already a crack passing through one of its nodes
-              ! then it cannot be detached again
-!           if(element%shell%damage(i)  > 0.0D0) cycle
-!           do l = 2, 5
-!             shell_centroid(1:3) = shell_centroid(1:3) + nodes%X(1:3,element%shell%IXC(l, i))
-!           end do
-!           shell_centroid(1:3) = shell_centroid(1:3) / 4.0  ! Average over 4 nodes
-              do j = 2, 5
-                do k = 1, ncrack-1
-                  if (element%shell%IXC(j, i) == crack(k)) then
+                normal = 0.0
+                vec = 0.0
+                ! Identify the first crack node in this shell
+                if(detach_shell(i) > 0.999d0) cycle
+                do j = 2, 5
+                  do k = 1, ncrack-1
+                    if (element%shell%IXC(j, i) == crack(k)) then
 
-                    ! Compute local normal using the next crack node
-                    normal(1:3) = nodes%X(1:3,crack(k+1)) - nodes%X(1:3,crack(k))
+                      ! Compute local normal using the next crack node
+                      normal(1:3) = nodes%X(1:3,crack(k+1)) - nodes%X(1:3,crack(k))
 
-                    ! Normalize the local normal
-                    distance = sqrt(sum(normal**2))
-                    if (distance > 0) normal = normal / distance
+                      ! Normalize the local normal
+                      distance = sqrt(sum(normal**2))
+                      if (distance > 0) normal = normal / distance
 
-                    ! Compute vector from crack node to shell centroid
-                    vec(1:3) = shell_centroid(1:3) - nodes%X(1:3,crack(k))
+                      ! Compute vector from crack node to shell centroid
+                      vec(1:3) = shell_centroid(1:3) - nodes%X(1:3,crack(k))
 
-                    ! Compute signed distance using dot product
-                    distance = sum(vec(1:3) * normal(1:3))
+                      ! Compute signed distance using dot product
+                      distance = sum(vec(1:3) * normal(1:3))
 
-                    if (distance > 0) then
-                      shells_to_detach = shells_to_detach + 1
-                      shell_list(shells_to_detach) = i
-                      element%shell%damage(i) = 1.0D0! detach_shell(i)
+                      if (distance > 0) then
+                        shells_to_detach = shells_to_detach + 1
+                        shell_list(shells_to_detach) = i
+                        element%shell%damage(i) = 1.0D0! detach_shell(i)
 
 !                   element%shell%damage(i) = 1.0D0
+                      end if
+                      exit  ! Only process the first crack node found in this shell
                     end if
-                    exit  ! Only process the first crack node found in this shell
-                  end if
+                  end do
                 end do
-              end do
-            enddo
-
-            ! call spmd_detach_node_begin(local_data)
-            ! detach nodes from the shells
-            if(shells_to_detach > 0) then
-              write(6,*) "shells to be detached:",shells_to_detach
-              do i =1, shells_to_detach
-                write(6,*) "   shell",shell_list(i),element%shell%user_id(shell_list(i)),detach_shell(shell_list(i))
               enddo
-              do i = 1, ncrack
+
+              ! call spmd_detach_node_begin(local_data)
+              ! detach nodes from the shells
+              if(shells_to_detach > 0) then
+                write(6,*) "shells to be detached:",shells_to_detach
+                do i =1, shells_to_detach
+                  write(6,*) "   shell",shell_list(i),element%shell%user_id(shell_list(i)),detach_shell(shell_list(i))
+                enddo
+                do i = 1, ncrack
 !             write(6,*) "crack node",i,crack(i)
-                call detach_node(nodes,crack(i),element,shell_list,shells_to_detach,npari,ninter, ipari, interf)
-                !      call detach_node(nodes,crack(i),element,shell_list,shells_to_detach,npari,ninter, ipari, interf, local_data)
+                  call detach_node(nodes,crack(i),element,shell_list,shells_to_detach,npari,ninter, ipari, interf)
+                  !      call detach_node(nodes,crack(i),element,shell_list,shells_to_detach,npari,ninter, ipari, interf, local_data)
 
-                numnod = numnod + 1
-                if(ispmd == 0) numnodg = numnodg + 1
-              enddo
+                  numnod = numnod + 1
+                  if(ispmd == 0) numnodg = numnodg + 1
+                enddo
+              endif
             endif
-          endif
+          enddo
           ! call spmd_detach_node_end(local_data)
 
 
@@ -804,6 +875,8 @@
           deallocate(detach_shell)
           deallocate(shell_list)
           deallocate(nodal_damage)
+          deallocate(ghostShellCoordinates)
+          deallocate(shellCoordinates)
 
         end subroutine test_jc_shell_detach
 

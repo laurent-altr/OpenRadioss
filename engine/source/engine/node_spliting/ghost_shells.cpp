@@ -123,7 +123,7 @@ extern "C"
         return (*rc)[p].size();
     }
 
-    void cpp_copy_shells_list(void *c, int pc, int *shells)
+    void cpp_copy_shells_list(void *c, int pc, int *shells,int n)
     {
         // p is the process id
         ghosts *rc = static_cast<ghosts *>(c);

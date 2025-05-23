@@ -1277,6 +1277,7 @@ C-------------------------------------------------------------------------------
               INTEGER MAXFUNC
               PARAMETER (MAXFUNC  = 100)
               integer :: numnod_old
+              TYPE(cracks_) :: cracks
 C-----------------------------------------------------------------------------------
 C Err THK
 C-----------------------------------------------------------------------------------
@@ -1299,6 +1300,7 @@ C-------------------------------------------------------------------------------
               type(SPH_WORK_)  :: SPH_WORK   !< working Areas for SPLISSV and SPHPREP
               type (ams_work_) :: ams_work   !< Working areas for AMS
 C-----------------------------------------------------------------------------------
+              cracks%ncracks = 0
               ELEMENT%SHELL%OFFSET = NUMELS + NUMELQ
               CALL PREPARE_DEBUG(NODES%ITAB,NUMNOD)
               interfaces%NINTER = NINTER
@@ -5658,50 +5660,50 @@ C Init var parallel SMP
               ENDIF
 c ========================================================================================
 C                                     node splitting
-!            numnod_old = numnod
-!            call test_jc_shell_detach(nodes, element, interfaces, npari, ninter, ipari, numnod,
-!    .                numnodg, elbuf_tab, ngroup, ngrouc, nparg, iparg, igrouc, numelc, ispmd,
-!    .                lcnel, cnel, addcnel)
+             numnod_old = numnod
+             call test_jc_shell_detach(nodes, element, interfaces, npari, ninter, ipari, numnod,
+     .                numnodg, elbuf_tab, ngroup, ngrouc, nparg, iparg, igrouc, numelc, ispmd, nspmd,
+     .                lcnel, cnel, addcnel, cracks)
 
-!            if(numnod_old < numnod ) then
-!              write(6,*) 'Node splitting detected:', numnod_old, numnod
-!              CALL INIT_NODAL_STATE( IPARI,SHOOT_STRUCT,INTERFACES%INTBUF_TAB,IAD_ELEM,FR_ELEM,
-!    .                              NODES%ITAB,NODES,GEO,ADDCNEL,CNEL,
-!    .                              IXS,ELEMENT%SHELL%IXC,IXT,IXP,IXR,IXTG,
-!    .                              SIZE_ADDCNEL,SIZE_CNEL ,
-!    .                              numelsg,numelqg,numelcg,numeltrg,numelpg,
-!    .                              numelrg,numeltgg )
+             if(numnod_old < numnod ) then
+               write(6,*) 'Node splitting detected:', numnod_old, numnod
+               CALL INIT_NODAL_STATE( IPARI,SHOOT_STRUCT,INTERFACES%INTBUF_TAB,IAD_ELEM,FR_ELEM,
+     .                              NODES%ITAB,NODES,GEO,ADDCNEL,CNEL,
+     .                              IXS,ELEMENT%SHELL%IXC,IXT,IXP,IXR,IXTG,
+     .                              SIZE_ADDCNEL,SIZE_CNEL ,
+     .                              numelsg,numelqg,numelcg,numeltrg,numelpg,
+     .                              numelrg,numeltgg )
 
 
-!              IF(IDEL7NG>0.OR.IRAD2R>0.OR.ALEMUSCL_Param%IALEMUSCL>0.OR.PDEL>0) THEN
-!                SIZE_ADDCNEL = NUMNOD+1
-!                SIZE_CNEL = LCNEL
-!                NELEML = NUMELS+NUMELQ+NUMELC+NUMELT+NUMELP+NUMELR+NUMELTG
-!                S_ELEM_STATE = NELEML
-!                DEALLOCATE(CNEL)
-!                ALLOCATE(CNEL(0:SIZE_CNEL))
-!                DEALLOCATE(ADDCNEL)
-!                ALLOCATE(ADDCNEL(0:SIZE_ADDCNEL))
-!                DEALLOCATE(ADDTMPL)
-!                ALLOCATE(ADDTMPL(0:NUMNOD+1))
-!                NELEML = NUMELS+NUMELQ+NUMELC+NUMELT+NUMELP+NUMELR+NUMELTG
-!                ALEMUSCL_Buffer%pCNEL => CNEL
-!                ALEMUSCL_Buffer%pADDCNEL => ADDCNEL
-!                ALEMUSCL_Buffer%pADDTMPL => ADDTMPL
-!!             IXS(L1)  ,IXS(L2), IXS(L3)
-!!              10          20       16
-!                L1 = 1+NIXS*NUMELS + NSVOIS*NIXS
-!                L2 = L1+6*NUMELS10
-!                L3 = L2+12*NUMELS20
+               IF(IDEL7NG>0.OR.IRAD2R>0.OR.ALEMUSCL_Param%IALEMUSCL>0.OR.PDEL>0) THEN
+                 SIZE_ADDCNEL = NUMNOD+1
+                 SIZE_CNEL = LCNEL
+                 NELEML = NUMELS+NUMELQ+NUMELC+NUMELT+NUMELP+NUMELR+NUMELTG
+                 S_ELEM_STATE = NELEML
+                 DEALLOCATE(CNEL)
+                 ALLOCATE(CNEL(0:SIZE_CNEL))
+                 DEALLOCATE(ADDCNEL)
+                 ALLOCATE(ADDCNEL(0:SIZE_ADDCNEL))
+                 DEALLOCATE(ADDTMPL)
+                 ALLOCATE(ADDTMPL(0:NUMNOD+1))
+                 NELEML = NUMELS+NUMELQ+NUMELC+NUMELT+NUMELP+NUMELR+NUMELTG
+                 ALEMUSCL_Buffer%pCNEL => CNEL
+                 ALEMUSCL_Buffer%pADDCNEL => ADDCNEL
+                 ALEMUSCL_Buffer%pADDTMPL => ADDTMPL
+ !             IXS(L1)  ,IXS(L2), IXS(L3)
+ !              10          20       16
+                 L1 = 1+NIXS*NUMELS + NSVOIS*NIXS
+                 L2 = L1+6*NUMELS10
+                 L3 = L2+12*NUMELS20
 
-!                CALL CHKINIT(
-!    2              IXS        ,IXQ       ,ELEMENT%SHELL%IXC       ,IXT         ,IXP       ,
-!    3              IXR        ,IXTG      ,IXS(L1)       ,IXS(L2)     ,
-!    4              IXS(L3)      ,IXTG1     ,GEO       ,ADDCNEL     ,CNEL      ,
-!    5              ADDTMPL    ,IPARG     )
+                 CALL CHKINIT(
+     2              IXS        ,IXQ       ,ELEMENT%SHELL%IXC       ,IXT         ,IXP       ,
+     3              IXR        ,IXTG      ,IXS(L1)       ,IXS(L2)     ,
+     4              IXS(L3)      ,IXTG1     ,GEO       ,ADDCNEL     ,CNEL      ,
+     5              ADDTMPL    ,IPARG     )
 
-!              ENDIF
-!            endif
+               ENDIF
+             endif
 
 
 C========================================================================================

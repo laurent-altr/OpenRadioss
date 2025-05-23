@@ -120,7 +120,12 @@
         integer, parameter,public :: SPMD_MIN = 2
         integer, parameter,public :: SPMD_SUM = 3
         integer, parameter,public :: SPMD_PROD = 4
-
+#ifdef REAL8
+        integer, parameter, public :: SPMD_REAL8 = 1
+#else
+        integer, parameter, public :: SPMD_REAL8 = 0
+#endif
+      
 #ifndef MPI
         integer, parameter, public :: MPI_STATUS_IGNORE = 0
         integer, parameter, public :: MPI_STATUS_SIZE = 1

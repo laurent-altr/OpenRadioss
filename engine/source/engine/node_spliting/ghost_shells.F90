@@ -22,6 +22,7 @@
 !Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
 
       module ghost_shells_mod
+        use precision_mod, only: wp
         implicit none
         type :: spmd_buffer_type
           integer, dimension(:), allocatable :: sendbuf
@@ -29,6 +30,15 @@
           integer :: send_request
           integer:: recv_request
         end type spmd_buffer_type
+
+        type :: spmd_real_buffer_type
+          real(kind=wp), dimension(:), allocatable :: sendbuf
+          real(kind=wp), dimension(:), allocatable :: recvbuf
+          integer :: send_request
+          integer:: recv_request
+        end type spmd_real_buffer_type
+
+
 
 
         interface
@@ -323,7 +333,7 @@
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Local variables
 ! ----------------------------------------------------------------------------------------------------------------------
-          type(spmd_buffer_type), dimension(nspmd) :: spmd_buffer
+          type(spmd_real_buffer_type), dimension(nspmd) :: spmd_buffer
           integer :: ierr
           integer :: p
           integer :: i,j,n,ns,nr
@@ -396,7 +406,6 @@
               enddo
             endif
           enddo
-
 
           do p = 1, nspmd
             if(ispmd+1 == p) cycle ! skip the current process
