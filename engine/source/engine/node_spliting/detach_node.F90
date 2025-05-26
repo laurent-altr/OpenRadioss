@@ -277,7 +277,7 @@
 ! ----------------------------------------------------------------------------------------------------------------------
 !           write(6,*) "set_new_node_values",nodes%numnod
           numnod = nodes%numnod
-          nodes%itab(numnod+1) = nodes%max_uid
+          nodes%itab(numnod+1) = nodes%max_uid ! -nodes%itab(i) !temporary id of the new node 
           nodes%IKINE(numnod+1) = nodes%IKINE(i)
           nodes%V(1:3,numnod+1) = nodes%V(1:3,i)
           nodes%X(1:3,numnod+1) = nodes%X(1:3,i)
@@ -343,7 +343,7 @@
 !           write(6,*) "stifn numnod+1",nodes%stifn(numnod+1)  ,"            ",nodes%itab(numnod+1),nodes%itab(i)
 !           write(6,*) "stifn        i",nodes%stifn(i)  ,"            ",nodes%itab(numnod+1),nodes%itab(i)
 
-          nodes%ITABM1(numnod+1) = nodes%max_uid
+          nodes%ITABM1(numnod+1) = nodes%max_uid !-nodes%itab(numnod+1)
           nodes%ITABM1(2*(numnod+1)) = numnod + 1
 
 
@@ -506,6 +506,7 @@
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Modules
 ! ----------------------------------------------------------------------------------------------------------------------
+          use spmd_mod
           use ghost_shells_mod
           use precision_mod, only : wp
           USE constant_mod, only : TWO
@@ -563,6 +564,13 @@
           real(kind=wp), dimension(:), allocatable :: ghostShellCoordinates,shellCoordinates
           logical :: is_new_crack
           integer :: c
+          integer, dimension(:), allocatable :: detached_nodes, detached_nodes_local
+          integer, dimension(:), allocatable :: nb_detached_nodes_global
+          integer, dimension(:), allocatable :: nb_detached_nodes
+          integer :: total_new_nodes, total_new_unique_nodes
+          logical :: is_new 
+          integer :: displ(nspmd)
+          integer :: ierr
 
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   body
@@ -679,6 +687,7 @@
 
           ! looking for new cracks roots
           do i = 1, numnod
+            crack_root = i
             if(nodal_damage(i) == 0.0d0) cycle
             if(nodal_damage(i) > 0.75D0) then
             do j = addcnel(i), addcnel(i+1)-1
@@ -698,6 +707,10 @@
                 if(crack_root == cracks%current_node(c)) then
                   is_new_crack = .false.
                   exit
+                else if(crack_root == cracks%previous_node(c)) then
+                  is_new_crack = .false.
+                  exit
+                  exit
                 end if
               enddo
               if(is_new_crack) then
@@ -710,9 +723,11 @@
                   ! add the new crack to the list of cracks
                   call extend_array(cracks%current_node,cracks%ncracks,cracks%ncracks+1)
                   call extend_array(cracks%previous_node,cracks%ncracks,cracks%ncracks+1)
+                  cracks%current_node(cracks%ncracks+1) = 0
+                  cracks%previous_node(cracks%ncracks+1) = 0
                 end if
                 cracks%ncracks = cracks%ncracks + 1
-                cracks%previous_node(cracks%ncracks) = cracks%current_node(cracks%ncracks)
+                cracks%previous_node(cracks%ncracks) = 0 !cracks%current_node(cracks%ncracks)
                 cracks%current_node(cracks%ncracks) = crack_root
               end if
             enddo
@@ -872,10 +887,82 @@
               endif
             enddo
           enddo
-!         if(dmax > 0.0D0) write(6,*) "dmax=",dmax
+
+
+          return
+
+          ! list nodes that are detached from the shells at this timestep
+          allocate(nb_detached_nodes(nspmd))
+          allocate(nb_detached_nodes_global(nspmd))
+          nb_detached_nodes_global = 0
+          nb_detached_nodes(1:nspmd) = 0
+          nb_detached_nodes(ispmd+1) = numnod - numnod0
+          ! call mpi_allreduce
+          call spmd_allreduce(nb_detached_nodes,nb_detached_nodes_global,nspmd,SPMD_MAX)
+
+          total_new_nodes = sum(nb_detached_nodes_global(1:nspmd))
+          allocate(detached_nodes_local(nb_detached_nodes_global(ispmd+1)))
+          allocate(detached_nodes(total_new_nodes))
+          do i = 1,nb_detached_nodes_global(ispmd+1)
+            detached_nodes_local(i) = nodes%itab(numnod0 + i)
+          enddo
+
+          ! reuse displ as displ
+          displ(1:nspmd) = 0
+          do i = 2, nspmd
+            displ(i) = displ(i-1) + nb_detached_nodes_global(i-1)                             
+          enddo
+
+#ifdef MPI
+!         call MPI_allgatherv(detached_nodes_local,nb_detached_nodes_global(ispmd+1),MPI_INTEGER, &
+!           detached_nodes,nb_detached_nodes_global,displ,MPI_INTEGER,SPMD_COMM_WORLD,ierr)
+          
+#else
+          detached_nodes = detached_nodes_local
+#endif
+
+          ! If the detached node is at a boundary of an MPI domain, it can be detached multiple times
+          ! we need to identify those duplicates and assign a new unique id to them
+          total_new_unique_nodes = 0
+          do i = 1, total_new_nodes
+            is_new = .true.
+            do j = 1, i-1
+              if(detached_nodes(i) == detached_nodes(j)) then
+                is_new = .false.
+                exit
+              endif
+            enddo
+            if(is_new) then 
+              total_new_unique_nodes = total_new_unique_nodes + 1
+              nodes%max_uid = nodes%max_uid + 1
+              do j = i+1,total_new_nodes
+                if(detached_nodes(j) == detached_nodes(i)) then
+                  detached_nodes(j) = nodes%max_uid
+                endif
+              enddo
+              detached_nodes(i) = nodes%max_uid
+            endif
+          enddo
+
+          do i = 1,nb_detached_nodes_global(ispmd+1)
+            nodes%itab(numnod0 + i) = detached_nodes(i+displ(ispmd+1))
+            nodes%itabm1(numnod0 + i) = detached_nodes(i+displ(ispmd+1))
+            nodes%itabm1(2*(numnod0 + i)) = numnod0 + i
+          enddo
+          if(ispmd == 0) numnodg = numnodg + total_new_unique_nodes
+
+          if(total_new_unique_nodes .ne. total_new_nodes) then
+            ! some boundary nodes were detached by different processors
+            ! need to update  FR_ELEM, IAD_ELEM (fr_node / iad_node)
+
+          endif
 
 
 
+
+          deallocate(nb_detached_nodes)
+          deallocate(detached_nodes_local)
+          deallocate(nb_detached_nodes_global)
           deallocate(detach_shell)
           deallocate(shell_list)
           deallocate(nodal_damage)
