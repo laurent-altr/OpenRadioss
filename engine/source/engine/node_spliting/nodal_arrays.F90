@@ -117,6 +117,13 @@
           double precision, dimension(:,:), allocatable :: DDP !< double precision D
           double precision, dimension(:,:), allocatable :: XDP !< double precision X
           double precision, dimension(:,:), allocatable :: ACC_DP !< double precision acceleration
+
+
+
+          ! SPMD boundary nodes
+          INTEGER :: BOUNDARY_SIZE !< size of BOUNDARY
+          integer, dimension(:), allocatable :: BOUNDARY
+          integer, dimension(:,:), allocatable :: BOUNDARY_ADD
         end type nodal_arrays_
         ! faire la rupture vers checkstfn
 !       type animation_buffers

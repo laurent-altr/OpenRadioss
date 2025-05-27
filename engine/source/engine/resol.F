@@ -522,8 +522,8 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
      5        IBFV   ,IDUM   ,LAS     ,LACCELM,NNLINK ,LNLINK ,
      6        IPARG  ,DD_IAD  ,IGRV   ,IEXLNK ,KINET  ,
      7        IPARI  ,        NPRW    ,ICONX  ,NPBY   ,
-     8        LPBY   ,LRIVET ,NSTRF   ,LJOINT ,NODPOR ,MONVOL ,IAD_ELEM,
-     9        FR_ELEM,ILINK  ,
+     8        LPBY   ,LRIVET ,NSTRF   ,LJOINT ,NODPOR ,MONVOL ,
+     9        ILINK  ,
      A        LLINK  ,LINALE ,NEFLSW  ,NNFLSW ,ICUT   ,CLUSTER,
      B                ITASK  ,INOISE  ,
      C        THKE   ,DAMP      ,
@@ -781,8 +781,8 @@ C-----------------------------------------------
      .           LRIVET(*), NSTRF(*), LJOINT(*),  ILINK(*),
      .           LLINK(*), LINALE(*), NEFLSW(*), NNFLSW(*),
      .           NODPOR(*),ICUT(*) , INOISE(*),MONVOL(*),
-     .           LACCELM(3,*),DD_IAD(NSPMD+1,*),FR_ELEM(*),
-     .           IAD_ELEM(2,*),IAD_RBY(*),FR_RBY(*),NNLINK(10,*),LNLINK(*),
+     .           LACCELM(3,*),DD_IAD(NSPMD+1,*),
+     .           IAD_RBY(*),FR_RBY(*),NNLINK(10,*),LNLINK(*),
      .           IAF(*),IGRV(*),
      .           KXX(NIXX,*),IXX(*),IEXLNK(NR2R,*),
      .           IFRAME(LISKN,*),KXSP(NISP,*),IXSP(*),NOD2SP(*),
@@ -1410,13 +1410,13 @@ C
               NUMSPH_GLO_R2R = 0
               FLG_SPHINOUT_R2R = 0
 
-              CALL ASSINIT(ELEMENT%PON%ADSKY,IAD_ELEM,FR_ELEM,PROCNE,LISENDP,LIRECVP)
+              CALL ASSINIT(ELEMENT%PON%ADSKY,NODES%BOUNDARY_ADD,NODES%BOUNDARY,PROCNE,LISENDP,LIRECVP)
               IF(IPLYXFEM > 0 )
-     .          CALL ASSINIT_PXFEM(ADSKY_PXFEM,INOD_PXFEM,IAD_ELEM,FR_ELEM,
+     .          CALL ASSINIT_PXFEM(ADSKY_PXFEM,INOD_PXFEM,NODES%BOUNDARY_ADD,NODES%BOUNDARY,
      .                             PROCNE_PXFEM,LISENDP_PXFEM,LIRECVP_PXFEM)
               IF (ICRACK3D > 0 .AND. NSPMD > 1)
-     .          CALL ASSINIT_CRKXFEM(ADSKY_CRK,INOD_CRK,IAD_ELEM,
-     .                               FR_ELEM,PROCNE_CRK,LISENDP_CRK,
+     .          CALL ASSINIT_CRKXFEM(ADSKY_CRK,INOD_CRK,NODES%BOUNDARY_ADD,
+     .                               NODES%BOUNDARY,PROCNE_CRK,LISENDP_CRK,
      .                               LIRECVP_CRK)
               ALLOCATE(ISENDTO (NINTER+1,NSPMD+1))
               ALLOCATE(IRCVFROM(NINTER+1,NSPMD+1))
@@ -2147,7 +2147,7 @@ C Init var parallel SMP
 C
               CALL RESOL_INIT(
      1         ITSK     ,FR_NBCC  ,
-     2         ISENDTO  ,IRCVFROM ,IAD_ELEM ,FR_ELEM  ,NODES%ITABM1   ,
+     2         ISENDTO  ,IRCVFROM ,NODES%BOUNDARY_ADD ,NODES%BOUNDARY  ,NODES%ITABM1   ,
      3         IPARI    ,IPARG    ,NODES%ITAB     ,IXS(L1)  ,IXS(L2)  ,
      4         I13A     ,I13B     ,I13C     ,I13D     ,I13E     ,
      5         I13F     ,I13G     ,I13H     ,I13I     ,I15A     ,
@@ -2212,7 +2212,7 @@ C
      4         IGRBEAM ,IGRSPRING,IGRPART  ,FORNEQS  ,INT7ITIED,
      5         FXVEL_FGEO,FAILWAVE,NLOC_DMG,PINCH_DATA ,SLLOADP,
      6         NODES%TAG_S_RBY,NFNCA2  ,NFTCA2  ,NODES%IN0 ,SORT_COMM,STACK,OUTPUT,
-     7         THKE   ,SFR_ELEM  ,SH_OFFSET_TAB,
+     7         THKE   ,NODES%BOUNDARY_SIZE  ,SH_OFFSET_TAB,
      8         NEED_COMM_INT25_SOLID_EROSION,COMM_INT25_SOLID_EROSION ,
      9         ISKWN  ,IFRAME  ,LOADS ,GLOB_THERM,PBLAST,RBE3)
 
@@ -2282,11 +2282,11 @@ c      we constraint all DDLs
                 ALLOCATE(IAD_I24(NBINTC+1,NSPMD))
                 SFR_I24=0
                 CALL  SPMD_I24_PREPARE(1,IPARI, INTERFACES%INTBUF_TAB,
-     *                                IAD_ELEM, FR_ELEM,INTLIST,NBINTC,
+     *                                NODES%BOUNDARY_ADD, NODES%BOUNDARY,INTLIST,NBINTC,
      *                                IAD_I24 , SFR_I24, IDUM,I24MAXNSNE)
                 ALLOCATE(FR_I24(SFR_I24))
                 CALL  SPMD_I24_PREPARE(2,IPARI, INTERFACES%INTBUF_TAB,
-     *                                IAD_ELEM, FR_ELEM,INTLIST,NBINTC,
+     *                                NODES%BOUNDARY_ADD, NODES%BOUNDARY,INTLIST,NBINTC,
      *                                IAD_I24 , SFR_I24, FR_I24,I24MAXNSNE)
 C E2E Fictive Node Position, Velocity, Mass
                 CALL  I24E2E_FICTIVE_NODES_UPDATE(INTLIST,NBINTC,IPARI,INTERFACES%INTBUF_TAB,
@@ -2300,12 +2300,12 @@ C E2E Fictive Node Position, Velocity, Mass
               IF(NINTER25 /= 0)THEN
                 ALLOCATE(IAD_I25(NBINTC+1,NSPMD))
                 CALL  SPMD_I25_PREPARE(1,IPARI, INTERFACES%INTBUF_TAB,
-     *                                IAD_ELEM, FR_ELEM,INTLIST,NBINTC,
+     *                                NODES%BOUNDARY_ADD, NODES%BOUNDARY,INTLIST,NBINTC,
      *                                IAD_I25 , SFR_I25, IDUM)
 
                 ALLOCATE(FR_I25(SFR_I25))
                 CALL  SPMD_I25_PREPARE(2,IPARI, INTERFACES%INTBUF_TAB,
-     *                                IAD_ELEM, FR_ELEM,INTLIST,NBINTC,
+     *                                NODES%BOUNDARY_ADD, NODES%BOUNDARY,INTLIST,NBINTC,
      *                                IAD_I25 , SFR_I25, FR_I25)
 
               ELSE
@@ -2365,7 +2365,7 @@ C ---------------------
               ! -------------------------
               ! initialization of SHOOT_STRUCT for
               ! the deactivation node algo
-              CALL INIT_NODAL_STATE( IPARI,SHOOT_STRUCT,INTERFACES%INTBUF_TAB,IAD_ELEM,FR_ELEM,
+              CALL INIT_NODAL_STATE( IPARI,SHOOT_STRUCT,INTERFACES%INTBUF_TAB,NODES%BOUNDARY_ADD,NODES%BOUNDARY,
      .                               NODES%ITAB,NODES,GEO,ADDCNEL,CNEL,
      .                               IXS,ELEMENT%SHELL%IXC,IXT,IXP,IXR,IXTG,
      .                               SIZE_ADDCNEL,SIZE_CNEL ,
@@ -2484,7 +2484,7 @@ C Init var parallel SMP
      1             GEO        ,IXS       ,IXS(L1)   ,IXS(L1)   ,IXS(L3)  ,IXQ    ,
      2             ELEMENT%SHELL%IXC         ,IXT      ,IXP       ,IXR       ,IXTG     ,
      3             nodes%deleted_node,NODFTSK  ,NODLTSK   ,IPARG     ,ELBUF    ,ITSK   ,
-     4             IXTG1    ,IAD_ELEM  ,FR_ELEM   ,NODES%ITAB     ,
+     4             IXTG1    ,NODES%BOUNDARY_ADD  ,NODES%BOUNDARY   ,NODES%ITAB     ,
      5             ADDCNEL     ,CNEL     ,KXSP      ,ELBUF_TAB ,TAGEL    ,IEXLNK ,
      6             IGRNOD      ,DD_R2R   ,DD_R2R_ELEM,SDD_R2R_ELEM,IDEL7NOK_SAV ,
      7             IDEL7NOK_R2R,TAGTRIMC,TAGTRIMTG,S_ELEM_STATE,ELEM_STATE,
@@ -2513,7 +2513,7 @@ C Init var parallel SMP
                 ! exchange of surfaces (ie. 4 nodes) to deactivate and deactivation
                 ! ONLY FOR LOCAL SURFACE / REMOTE ELEMENT
                 IF(NSPMD>1) THEN
-                  IF(ITSK==0) CALL SPMD_EXCH_DELETED_SURF_EDGE( IAD_ELEM,NODES,SHOOT_STRUCT,INTERFACES%INTBUF_TAB,NEWFRONT,
+                  IF(ITSK==0) CALL SPMD_EXCH_DELETED_SURF_EDGE( NODES%BOUNDARY_ADD,NODES,SHOOT_STRUCT,INTERFACES%INTBUF_TAB,NEWFRONT,
      .                                 IPARI,GEO,
      .                                 IXS,ELEMENT%SHELL%IXC,IXT,IXP,IXR,IXTG,IXS(L1),
      .                                 ADDCNEL,CNEL,nodes%work_array_node(omp_address),TAGEL )
@@ -2545,7 +2545,7 @@ C Init var parallel SMP
                 IF(INT24USE>0.OR.NINTER25/=0) THEN
                   IF(ITSK==0) CALL CHECK_REMOTE_SURFACE_STATE( SHOOT_STRUCT%NUMBER_REMOTE_SURF,SHOOT_STRUCT%REMOTE_SURF,
      .                                                         SHOOT_STRUCT%SHIFT_INTERFACE,INTERFACES%INTBUF_TAB,
-     .                                                         IPARI,IAD_ELEM,SHOOT_STRUCT )
+     .                                                         IPARI,NODES%BOUNDARY_ADD,SHOOT_STRUCT )
                   CALL MY_BARRIER()
                   IF(NINTER25/=0.AND.INTERFACES%PARAMETERS%INT25_EROSION_SOLID > 0) THEN
                     IF(ITSK==0) THEN
@@ -2562,7 +2562,7 @@ C Init var parallel SMP
      .                                                NBDDEDGT,NBDDEDG_MAX,
      .                                                ELEM_STATE,IPARI,INTLIST,NODES,
      .                                                NEWFRONT,IXS,ELEMENT%SHELL%IXC,IXTG,
-     .                                                IAD_ELEM,ptrX,
+     .                                                NODES%BOUNDARY_ADD,ptrX,
      .                                                INTERFACES%INTBUF_TAB,INTERFACES%SPMD_ARRAYS,SHOOT_STRUCT  )
                       ENDIF
                     ENDIF
@@ -2577,7 +2577,7 @@ C Init var parallel SMP
      3             NEWFRONT,nodes%work_array_node(omp_address) ,NODES%MS       ,NODES%IN ,ANIN(NDMA+1),NODES%ITAB  ,
      4             NODES%ITABM1  ,ADDCNEL     , CNEL    ,INDIDEL     ,NINDEX1 ,NINDEX2   ,
      5             NINDEX3 ,NINDEX4     ,TAGEL    ,INT24USE    ,IBUFSEGLO ,INDSEGLO,
-     6             IBUFIDEL ,INTERFACES%INTBUF_TAB,IAD_ELEM)
+     6             IBUFIDEL ,INTERFACES%INTBUF_TAB,NODES%BOUNDARY_ADD)
 
 
 !$OMP END PARALLEL
@@ -2632,7 +2632,7 @@ C
      6          IPART(I15C),IPART(I15D),IPART(I15E),IPART(I15F),IPART(I15G),
      7          IPART(I15H),IPART(I15I),TAGPRT_SMS ,TAGREL_SMS ,NODES%ITAB       ,
      8          NODES%WEIGHT     ,IRBE2      ,RBE3%IRBE3      ,LRBE2      ,RBE3%LRBE3      ,
-     9          IAD_ELEM   ,FR_ELEM    ,NPRW       ,LPRW       ,IPART      ,
+     9          NODES%BOUNDARY_ADD   ,NODES%BOUNDARY    ,NPRW       ,LPRW       ,IPART      ,
      A          IGEO       ,NATIV_SMS  )
 
                 ALLOCATE(KDI_SMS(KNZ_SMS),PK_SMS(KNZ_SMS),STAT=IERROR)
@@ -2651,7 +2651,7 @@ C
      6                 JADR_SMS,JADTG_SMS,INDX1_SMS,TAGPRT_SMS,IAD_SMS ,
      7           TAGREL_SMS,IPART(I15A),IPART(I15B),IPART(I15C),IPART(I15D),
      8          IPART(I15E),IPART(I15F),IPART(I15G),IPART(I15H),IPART(I15I),
-     9                 IAD_ELEM  ,FR_ELEM,NPBY     ,LPBY     ,KINET    ,
+     9                 NODES%BOUNDARY_ADD  ,NODES%BOUNDARY,NPBY     ,LPBY     ,KINET    ,
      A                 TAGSLV_RBY_SMS,IPARI  ,INTERFACES%INTBUF_TAB,IADI2,
      B                 LAD_SMS   ,IPART,IGEO     ,NODES%WEIGHT    ,
      C                 NATIV_SMS)
@@ -2672,7 +2672,7 @@ C
      6                 KAD_SMS,KDI_SMS    ,PK_SMS     ,
      7           TAGREL_SMS,IPART(I15A),IPART(I15B),IPART(I15C),IPART(I15D),
      8          IPART(I15E),IPART(I15F),IPART(I15G),IPART(I15H),IPART(I15I),
-     9                 IAD_ELEM  ,FR_ELEM,NPBY     ,LPBY     ,KINET    ,
+     9                 NODES%BOUNDARY_ADD  ,NODES%BOUNDARY,NPBY     ,LPBY     ,KINET    ,
      A                 TAGSLV_RBY_SMS,IPARI  ,INTERFACES%INTBUF_TAB,IADI2,
      B                 LAD_SMS   ,IPART      ,IGEO      ,NODES%WEIGHT  ,NATIV_SMS,
      C                 IAD_SMS   ,IDI_SMS,JAD_SMS  ,JDI_SMS   ,T2MAIN_SMS)
@@ -2693,7 +2693,7 @@ C
      5                 JADTG_SMS,INDX1_SMS,TAGPRT_SMS,KAD_SMS ,KDI_SMS  ,
      6           TAGREL_SMS,IPART(I15A),IPART(I15B),IPART(I15C),IPART(I15D),
      7          IPART(I15E),IPART(I15F),IPART(I15G),IPART(I15H),IPART(I15I),
-     8                 IAD_ELEM  ,FR_ELEM,NPBY     ,LPBY     ,KINET    ,
+     8                 NODES%BOUNDARY_ADD  ,NODES%BOUNDARY,NPBY     ,LPBY     ,KINET    ,
      9                 TAGSLV_RBY_SMS,IPARI  ,INTERFACES%INTBUF_TAB,IADI2    ,
      A                 LAD_SMS   ,NPRW ,LPRW,TAGMSR_RBY_SMS,
      B             TAGSLV_I21_SMS ,TAGMSR_I21_SMS, JADI21_SMS,INTSTAMP  ,
@@ -2722,7 +2722,7 @@ C
      5                 JADTG_SMS,INDX1_SMS,TAGPRT_SMS,KAD_SMS,KDI_SMS  ,
      6           TAGREL_SMS,IPART(I15A),IPART(I15B),IPART(I15C),IPART(I15D),
      7          IPART(I15E),IPART(I15F),IPART(I15G),IPART(I15H),IPART(I15I),
-     8                 IAD_ELEM  ,FR_ELEM,NPBY     ,LPBY     ,KINET    ,
+     8                 NODES%BOUNDARY_ADD  ,NODES%BOUNDARY,NPBY     ,LPBY     ,KINET    ,
      9                 TAGSLV_RBY_SMS,IPARI  ,INTERFACES%INTBUF_TAB,IADI2    ,
      A                 LAD_SMS ,JSM_SMS ,TAGSLV_I21_SMS,INTSTAMP  ,IPART    ,
      B                 IGEO    ,TAGMSR_RBY_SMS,NODES%WEIGHT,NATIV_SMS,
@@ -2753,7 +2753,7 @@ C             Obsolete
      1            ILINK     ,LLINK    ,NNLINK    ,LNLINK    ,TAG_LNK_SMS,
      2            FR_LL     ,FR_RL    ,NODES%WEIGHT    ,NODES%ITAB      ,LJOINT     ,
      3            IADCJ     ,FR_CJ    ,NPRW      ,LPRW      ,FR_WALL    ,
-     4            NRWL_SMS  ,IAD_ELEM ,FR_ELEM   )
+     4            NRWL_SMS  ,NODES%BOUNDARY_ADD ,NODES%BOUNDARY   )
                 END IF
 
                 IF(IDTMINS_INT/=0)THEN
@@ -2764,7 +2764,7 @@ C re-tag rigid bodies (all nodes)
                 END IF
 
                 CALL SMS_INI_INT(
-     1          IPARI    ,INTERFACES%INTBUF_TAB    ,IAD_ELEM   ,FR_ELEM  ,INTLIST,
+     1          IPARI    ,INTERFACES%INTBUF_TAB    ,NODES%BOUNDARY_ADD   ,NODES%BOUNDARY  ,INTLIST,
      2          NBINTC)
 
               ELSEIF(IDTMINS_INT/=0)THEN
@@ -2787,14 +2787,14 @@ C           /DT/INTER/AMS
      1          ILINK     ,LLINK    ,NNLINK    ,LNLINK    ,TAG_LNK_SMS,
      2          FR_LL     ,FR_RL    ,NODES%WEIGHT    ,NODES%ITAB      ,LJOINT     ,
      3          IADCJ     ,FR_CJ    ,NPRW      ,LPRW      ,FR_WALL    ,
-     4          NRWL_SMS  ,IAD_ELEM ,FR_ELEM   )
+     4          NRWL_SMS  ,NODES%BOUNDARY_ADD ,NODES%BOUNDARY   )
 
                 CALL SMS_INI_RBY(
      1          KINET   ,NPRW     ,LPRW    ,NPBY    , LPBY     ,
      2          TAGMSR_RBY_SMS,TAGSLV_RBY_SMS)
 
                 CALL SMS_INI_INT(
-     1          IPARI    ,INTERFACES%INTBUF_TAB   ,IAD_ELEM   ,FR_ELEM  ,INTLIST,
+     1          IPARI    ,INTERFACES%INTBUF_TAB   ,NODES%BOUNDARY_ADD   ,NODES%BOUNDARY  ,INTLIST,
      2          NBINTC)
 
               ELSE
@@ -2845,7 +2845,7 @@ C---------------------------------------------------------------------
                 ALLOCATE(UNCOMP_FRI2M(NUMNOD))
 
                 CALL AMS_PREPARE_POFF_ASSEMBLY(
-     *                     IAD_ELEM,FR_ELEM,NB_FR,UNCOMP_FR,
+     *                     NODES%BOUNDARY_ADD,NODES%BOUNDARY,NB_FR,UNCOMP_FR,
      *                      IAD_I2M,FR_I2M,NB_FRI2M,UNCOMP_FRI2M)
 
                 ALLOCATE(FR_LOC(NB_FR))
@@ -2934,7 +2934,7 @@ C----------------------------------
      4          IXP       ,IXR       ,IXTG      ,IXTG1     ,IXS(L1)   ,
      5          IXS(L2)   ,IXS(L3)   ,IPARG     ,
      6          ELBUF     ,NINT7     ,NBINTC    ,NODES%X         ,DMCP      ,
-     7          FR_ELEM   ,IAD_ELEM  ,FR_I2M    ,IAD_I2M   ,
+     7          NODES%BOUNDARY   ,NODES%BOUNDARY_ADD  ,FR_I2M    ,IAD_I2M   ,
      8          NPRW      ,NUM_IMP1  ,NUM_IMPL  ,MONVOL    ,IGRSURF   ,
      9          FR_MV     ,IPM       ,IGEO      ,IAD_RBY   ,
      A          FR_RBY    ,SH4TREE   ,SH3TREE   ,RBE3%IRBE3     ,RBE3%LRBE3     ,
@@ -2979,13 +2979,13 @@ C------ one routine for EIG
      7                            XCUT        ,FANI(1,1+NFIA), NODES%ITAB    ,FANI(1,1+NFEA),FANI(1,1+NFOA),
      8                            ANIN        , LPBY        , NPBY     , NSTRF     , RWBUF   ,
      9                            NPRW        , TANI        , ELBUF_TAB ,MAT_ELEM%MAT_PARAM, DD_IAD  ,
-     A                            IAD_ELEM    , FR_ELEM     , NODES%WEIGHT   , EANI      , IPART   ,
+     A                            NODES%BOUNDARY_ADD    , NODES%BOUNDARY     , NODES%WEIGHT   , EANI      , IPART   ,
      B                            RBY         , NOM_OPT     , IGRSURF  ,
      C                            BUFSF       , IDATA       , RDATA    , BUFMAT    , BUFGEO  ,
      D                            KXX         , IXX         , KXSP     , IXSP      , NOD2SP  ,
      E                            SPBUF       , IXS(L1)     , IXS(L2)  , IXS(L3)   , NODES%VR      ,
      F                            MONVOL      , VOLMON      , IPM      , IGEO      , IPARG   ,
-     G                            NODGLOB     , IAD_ELEM    , FR_ELEM  , FR_SEC    , FR_RBY2 ,
+     G                            NODGLOB     , NODES%BOUNDARY_ADD    , NODES%BOUNDARY  , FR_SEC    , FR_RBY2 ,
      H                            IAD_RBY2    , FR_WALL     ,  IPARI   ,
      I                            INTERFACES%INTBUF_TAB  , NODES%D           ,PARTSAV   ,
      J                            FSAV(1,NFNCA+1),FSAV(1,NFTCA+1), NODES%TEMP      , THKE    ,
@@ -3144,7 +3144,7 @@ C=======================================================================
 C----------------------------------------
 C     BEGINNING OF EXPLICIT ITERATION LOOP
 C----------------------------------------
-              CALL init_ghost_shells(nodes, element,ispmd,nspmd,iad_elem,sfr_elem,fr_elem)
+              CALL init_ghost_shells(nodes, element,ispmd,nspmd,nodes%boundary_add,nodes%boundary_size,nodes%boundary)
  100          CONTINUE
 
               NC_DEBUG = NCYCLE
@@ -3231,9 +3231,9 @@ C       /---------------/
 
                 IF(NSPMD>1) THEN
                   LENGTH = 1
-                  LENR = IAD_ELEM(1,NSPMD+1)-IAD_ELEM(1,1)
+                  LENR = NODES%BOUNDARY_ADD(1,NSPMD+1)-NODES%BOUNDARY_ADD(1,1)
                   CALL SPMD_EXCH_THKNOD(
-     +              THKNOD,IAD_ELEM ,FR_ELEM,LENGTH,LENR)
+     +              THKNOD,NODES%BOUNDARY_ADD ,NODES%BOUNDARY,LENGTH,LENR)
                 ENDIF
               END IF
 
@@ -3633,7 +3633,7 @@ C--------------------------------------------------------
               IF (INT24USE == 1)THEN
                 IF (IMON>0) CALL STARTIME(TIMERS,TIMER_CONTFOR)
                 CALL SPMD_EXCH_I24(IPARI    ,INTERFACES%INTBUF_TAB       ,NODES%ITAB  ,
-     *                             IAD_ELEM ,FR_ELEM ,INTLIST ,NBINTC,
+     *                             NODES%BOUNDARY_ADD ,NODES%BOUNDARY ,INTLIST ,NBINTC,
      *                             IAD_I24  ,FR_I24  ,SFR_I24,I24MAXNSNE,4,
      *                             INT24E2EUSE)
                 IF (IMON>0) CALL STOPTIME(TIMERS,TIMER_CONTFOR)
@@ -3664,8 +3664,8 @@ C---------------------------------------------
                 IF(GLOB_THERM%ITHERM == 0)THEN
                   L1 = 1+NIXS*NUMELS + NSVOIS*NIXS
                   CALL S4LAGSFEM(IPARG, IXS, NODES%X, NODES%V, ELBUF_TAB, SFEM_NODVAR, S_SFEM_NODVAR,
-     .                           IAD_ELEM, FR_ELEM, IXS(L1), NODES%XDP, SXDP,
-     .                           NUMNOD, SFR_ELEM , NSPMD, NUMELS, NUMELS8, NUMELS10,  NPARG, NGROUP, IRESP)
+     .                           NODES%BOUNDARY_ADD, NODES%BOUNDARY, IXS(L1), NODES%XDP, SXDP,
+     .                           NUMNOD, NODES%BOUNDARY_SIZE , NSPMD, NUMELS, NUMELS8, NUMELS10,  NPARG, NGROUP, IRESP)
                 ENDIF
               ENDIF
 
@@ -3706,8 +3706,8 @@ C===============================================================================
                 ITSK = OMP_GET_THREAD_NUM()
                 CALL INTTRI(TIMERS,
      1             IPARI   ,ptrX     ,W     , INTER_ERRORS,
-     2             NODES%V       ,NODES%MS      ,NODES%IN      ,IAD_ELEM  ,
-     3             FR_ELEM ,NODES%VR      ,ISENDTO ,IRCVFROM  ,
+     2             NODES%V       ,NODES%MS      ,NODES%IN      ,NODES%BOUNDARY_ADD  ,
+     3             NODES%BOUNDARY ,NODES%VR      ,ISENDTO ,IRCVFROM  ,
      4             NEWFRONT  ,ITSK    ,WA      ,DT2TT     ,
      5             NODES%ITAB      ,NELTSTT ,ITYPTSTT,NODES%WEIGHT    ,
      6             INTLIST ,NBINTC  ,KINET   ,DRETRI    ,
@@ -3808,10 +3808,10 @@ C--------------------------------------------------------
                 IF(NSPMD > 1)THEN
                   IF (IMON>0) CALL STARTIME(TIMERS,TIMER_EXFOR)
                   CALL SPMD_EXCH_I25(IPARI    ,INTERFACES%INTBUF_TAB       ,NODES%ITAB  ,
-     *                               IAD_ELEM ,FR_ELEM ,INTLIST ,NBINTC,
+     *                               NODES%BOUNDARY_ADD ,NODES%BOUNDARY ,INTLIST ,NBINTC,
      *                               IAD_I25  ,FR_I25  ,SFR_I25 ,1     )
                   CALL SPMD_EXCH_I25(IPARI    ,INTERFACES%INTBUF_TAB     ,NODES%ITAB  ,
-     *                               IAD_ELEM ,FR_ELEM ,INTLIST ,NBINTC,
+     *                               NODES%BOUNDARY_ADD ,NODES%BOUNDARY ,INTLIST ,NBINTC,
      *                               IAD_I25  ,FR_I25  ,SFR_I25 ,2     )
                   IF (IMON>0) CALL STOPTIME(TIMERS,TIMER_EXFOR)
                 END IF
@@ -3840,7 +3840,7 @@ C
                   CALL ADMERR(
      .             ELEMENT%SHELL%IXC     ,IXTG     ,NODES%X        ,IPARG       ,ELBUF_TAB   ,
      .             IPART   ,IPART(K3),IPART(K8),ERR_THK_SH4 ,ERR_THK_SH3 ,
-     .             IAD_ELEM ,FR_ELEM ,NODES%WEIGHT   ,SH4TREE     ,SH3TREE     ,
+     .             NODES%BOUNDARY_ADD ,NODES%BOUNDARY ,NODES%WEIGHT   ,SH4TREE     ,SH3TREE     ,
      .             admerr_AREA_SH4, admerr_AREA_SH3, admerr_AREA_NOD,
      .             admerr_THICK_SH4,admerr_THICK_SH3,admerr_THICK_NOD  )
                 END IF
@@ -3970,7 +3970,7 @@ C
      8               NELTSTT               ,ITYPTSTT ,IPART         ,IPART(K1)         ,IPART(K2)           ,ITSK    ,
      A               NODFTSK               ,NODLTSK  ,NBRCVOIS      ,NODES%TEMP              ,OUTPUT%TH%TH_SURF%CHANNELS,
      B               NBSDVOIS              ,LNRCVOIS ,LNSDVOIS      ,NERCVOIS          ,NESDVOIS           ,LERCVOIS  ,
-     C               LESDVOIS              ,ISIZXV   ,IAD_ELEM      ,FR_ELEM           ,ELEMENT%PON%FSKYM,MSNF      ,
+     C               LESDVOIS              ,ISIZXV   ,NODES%BOUNDARY_ADD      ,NODES%BOUNDARY           ,ELEMENT%PON%FSKYM,MSNF      ,
      D               IPARI                 ,SEGVAR   ,NODES%ITAB    ,ISKWN             ,DIFFUSION          ,IRESP,
      E               VOLMON                ,FSAV     ,IGRSURF       ,NELTSA            ,
      F               ITYPTSA               ,NODES%WEIGHT ,NPSEGCOM  ,LSEGCOM           ,IPM                ,IGEO,
@@ -4236,10 +4236,10 @@ C--------------------------------------------------------
                   IF(NINTER25 /= 0)THEN
                     IF (IMON>0) CALL STARTIME(TIMERS,TIMER_EXFOR)
                     CALL SPMD_EXCH_I25(IPARI    ,INTERFACES%INTBUF_TAB,NODES%ITAB  ,
-     *                                 IAD_ELEM ,FR_ELEM ,INTLIST ,NBINTC,
+     *                                 NODES%BOUNDARY_ADD ,NODES%BOUNDARY ,INTLIST ,NBINTC,
      *                                 IAD_I25  ,FR_I25  ,SFR_I25 ,3     )
                     CALL SPMD_EXCH_I25(IPARI    ,INTERFACES%INTBUF_TAB,NODES%ITAB  ,
-     *                                 IAD_ELEM ,FR_ELEM ,INTLIST ,NBINTC,
+     *                                 NODES%BOUNDARY_ADD ,NODES%BOUNDARY ,INTLIST ,NBINTC,
      *                                 IAD_I25  ,FR_I25  ,SFR_I25 ,4     )
                     IF (IMON>0) CALL STOPTIME(TIMERS,TIMER_EXFOR)
                   ENDIF
@@ -4296,7 +4296,7 @@ C Init var parallel SMP
      8            NUM_IMPL(1,ITSK+1),NS_IMP(IADISK) ,NE_IMP(IADISK) ,IND_IMP(IADISK) ,NT_IMP          ,
      9            FR_I18            ,IGRBRIC        ,EMINX          ,
      A            IXS               ,IXS(L3)        ,IXS(L2)        ,FANI(1,NFNCA+1) ,FANI(1,NFTCA+1) ,
-     B            IAD_ELEM          ,FR_ELEM        ,RCONTACT       ,ACONTACT        ,PCONTACT        ,
+     B            NODES%BOUNDARY_ADD          ,NODES%BOUNDARY        ,RCONTACT       ,ACONTACT        ,PCONTACT        ,
      C            NODES%TEMP              ,FTHE(IDX_FTHE) ,FTHESKYI       ,IPARG           ,NSENSOR         ,
      D            PM                ,INTSTAMP       ,NODES%WEIGHT   ,NISKYFIE        ,IRLEN20         ,
      E            ISLEN20           ,IRLEN20T       ,ISLEN20T       ,IRLEN20E        ,ISLEN20E        ,
@@ -4424,7 +4424,7 @@ C--------------------------------------------------------
               IF (INT24USE == 1)THEN
                 IF (IMON>0) CALL STARTIME(TIMERS,TIMER_CONTFOR)
                 CALL SPMD_EXCH_I24(IPARI    ,INTERFACES%INTBUF_TAB,NODES%ITAB  ,
-     *                             IAD_ELEM ,FR_ELEM ,INTLIST ,NBINTC,
+     *                             NODES%BOUNDARY_ADD ,NODES%BOUNDARY ,INTLIST ,NBINTC,
      *                             IAD_I24  ,FR_I24  ,SFR_I24,I24MAXNSNE,1,
      *                             INT24E2EUSE )
 
@@ -4803,11 +4803,11 @@ C Multidomains : synchro proc of flag_activation
 C----------------------------------------------
               IF (NSPMD>1) THEN
                 IF ((SDD_R2R_ELEM>0).AND.(FLG_SPHINOUT_R2R>0)) THEN
-                  LENR = IAD_ELEM(1,NSPMD+1)-IAD_ELEM(1,1)
-                  CALL SPMD_EXCH_R2R_SPHOFF(OFF_SPH_R2R,IAD_ELEM,FR_ELEM,DD_R2R,DD_R2R_ELEM,LENR)
-                  CALL SPMD_EXCH_R2R_SPH(NODES%X,IAD_ELEM,FR_ELEM,DD_R2R,DD_R2R_ELEM,LENR)
-                  CALL SPMD_EXCH_R2R_SPH(NODES%D,IAD_ELEM,FR_ELEM,DD_R2R,DD_R2R_ELEM,LENR)
-                  CALL SPMD_EXCH_R2R_SPH(NODES%V,IAD_ELEM,FR_ELEM,DD_R2R,DD_R2R_ELEM,LENR)
+                  LENR = NODES%BOUNDARY_ADD(1,NSPMD+1)-NODES%BOUNDARY_ADD(1,1)
+                  CALL SPMD_EXCH_R2R_SPHOFF(OFF_SPH_R2R,NODES%BOUNDARY_ADD,NODES%BOUNDARY,DD_R2R,DD_R2R_ELEM,LENR)
+                  CALL SPMD_EXCH_R2R_SPH(NODES%X,NODES%BOUNDARY_ADD,NODES%BOUNDARY,DD_R2R,DD_R2R_ELEM,LENR)
+                  CALL SPMD_EXCH_R2R_SPH(NODES%D,NODES%BOUNDARY_ADD,NODES%BOUNDARY,DD_R2R,DD_R2R_ELEM,LENR)
+                  CALL SPMD_EXCH_R2R_SPH(NODES%V,NODES%BOUNDARY_ADD,NODES%BOUNDARY,DD_R2R,DD_R2R_ELEM,LENR)
                 ENDIF
               ENDIF
 
@@ -4929,8 +4929,8 @@ C
                 CALL SPMD_EXCH_SUB_PON(NLOC_DMG)
               ENDIF
               IF(NSPMD > 1.AND. NINTLOADP > 0)THEN
-                LENR = IAD_ELEM(1,NSPMD+1)-IAD_ELEM(1,1)
-                CALL SPMD_EXCH_TAGNCONT(TAGNCONT,IAD_ELEM ,FR_ELEM,LENR     )
+                LENR = NODES%BOUNDARY_ADD(1,NSPMD+1)-NODES%BOUNDARY_ADD(1,1)
+                CALL SPMD_EXCH_TAGNCONT(TAGNCONT,NODES%BOUNDARY_ADD ,NODES%BOUNDARY,LENR     )
               ENDIF
 !   ----------------------------------
 
@@ -5106,12 +5106,12 @@ C
                   IF(ANIM_V(26)+H3D_DATA%N_VECT_CONT_MAX /=0.AND.NINTSTAMP==0) LENC = 3
                   IF(H3D_DATA%N_VECT_PCONT_MAX /=0.AND.NINTSTAMP==0) LENC = LENC+6
 C
-                  LENR = IAD_ELEM(1,NSPMD+1)-IAD_ELEM(1,1)
+                  LENR = NODES%BOUNDARY_ADD(1,NSPMD+1)-NODES%BOUNDARY_ADD(1,1)
                   IF(IDTMINS /= 0)THEN
 
                     CALL SPMD_EXCH_A_AMS_POFF(
      1               NODES%A       ,NODES%AR     ,NODES%STIFN, NODES%STIFR ,NODES%MS   ,
-     2               IAD_ELEM,FR_ELEM,MSNF ,ALE%SUB%IFSUBM,LENGTH ,
+     2               NODES%BOUNDARY_ADD,NODES%BOUNDARY,MSNF ,ALE%SUB%IFSUBM,LENGTH ,
      3               LENR    ,FTHE , NODES%MCP,FR_LOC,NB_FR   ,
      4               MS_2D ,MCP_OFF,FORNEQS ,NFACNIT    ,
      5               LENC ,FANI ,H3D_DATA,FANI(1,NFNCA+1),
@@ -5119,7 +5119,7 @@ C
                   ELSE
                     CALL SPMD_EXCH_A(
      1               NODES%A , NODES%ACC_DP      ,NODES%AR     ,NODES%STIFN,NODES%STIFR ,NODES%MS   ,
-     2               IAD_ELEM,FR_ELEM,MSNF ,ALE%SUB%IFSUBM,LENGTH ,
+     2               NODES%BOUNDARY_ADD,NODES%BOUNDARY,MSNF ,ALE%SUB%IFSUBM,LENGTH ,
      3               LENR    ,FTHE , NODES%MCP, DMSPH,CONDN,
      4               MS_2D,MCP_OFF,
      5               FORNEQS ,NFACNIT,LENC ,FANI ,H3D_DATA,
@@ -5151,7 +5151,7 @@ C
 C
                   LENS = FR_NBCC(1,NSPMD+1)
                   LENR = FR_NBCC(2,NSPMD+1)
-                  LENI = IAD_ELEM(1,NSPMD+1)-IAD_ELEM(1,1)
+                  LENI = NODES%BOUNDARY_ADD(1,NSPMD+1)-NODES%BOUNDARY_ADD(1,1)
 C
                   LENS1 = 0
                   LENR1 = 0
@@ -5175,7 +5175,7 @@ C
                   IF(H3D_DATA%N_VECT_PCONT_MAX /=0.AND.NINTSTAMP==0) LENC = LENC+6*LENI
 
                   CALL SPMD_EXCH2_A_PON(INTERFACES,
-     1             IAD_ELEM    ,FR_ELEM   ,ELEMENT%PON%ADSKY   ,PROCNE    ,FR_NBCC     ,
+     1             NODES%BOUNDARY_ADD    ,NODES%BOUNDARY   ,ELEMENT%PON%ADSKY   ,PROCNE    ,FR_NBCC     ,
      2             LENGTH        ,LENR      ,LENS    ,ELEMENT%PON%FSKY      ,ELEMENT%PON%FSKY        ,
      3             ELEMENT%PON%FSKYM       ,ALE%SUB%IFSUBM    ,SIZI    ,LENI      ,ELEMENT%PON%IADSDP      ,
      4             ELEMENT%PON%IADRCP      ,ELEMENT%PON%ISENDP    ,ELEMENT%PON%IRECVP  ,FFSKY     ,PROCNE_PXFEM,
@@ -5370,7 +5370,7 @@ C===============================================================================
               IF (INT24USE == 1)THEN
                 IF (IMON>0) CALL STARTIME(TIMERS,TIMER_CONTFOR)
                 CALL SPMD_EXCH_I24(IPARI    ,INTERFACES%INTBUF_TAB,NODES%ITAB  ,
-     *                             IAD_ELEM ,FR_ELEM ,INTLIST ,NBINTC,
+     *                             NODES%BOUNDARY_ADD ,NODES%BOUNDARY ,INTLIST ,NBINTC,
      *                             IAD_I24  ,FR_I24  ,SFR_I24,I24MAXNSNE,2,
      *                             INT24E2EUSE )
                 IF (IMON>0) CALL STOPTIME(TIMERS,TIMER_CONTFOR)
@@ -5381,9 +5381,9 @@ C Communication Interface type20 DAANC6
 C
               IF(NBINT20>0.AND.NSPMD>1) THEN
                 LENGTH = 21
-                LENR = IAD_ELEM(1,NSPMD+1)-IAD_ELEM(1,1)
+                LENR = NODES%BOUNDARY_ADD(1,NSPMD+1)-NODES%BOUNDARY_ADD(1,1)
                 CALL SPMD_EXCH_DA20(
-     1           INTERFACES%INTBUF_TAB,IPARI,IAD_ELEM,FR_ELEM,
+     1           INTERFACES%INTBUF_TAB,IPARI,NODES%BOUNDARY_ADD,NODES%BOUNDARY,
      2           LENGTH ,NBINT20,LENR ,INTLIST ,NBINTC )
               ENDIF
 C
@@ -5391,17 +5391,17 @@ C Communication ICONTACT AIRBAG
 C
               IF(KCONTACT/=0.AND.NSPMD>1) THEN
                 LENGTH = 1
-                LENR = IAD_ELEM(1,NSPMD+1)-IAD_ELEM(1,1)
+                LENR = NODES%BOUNDARY_ADD(1,NSPMD+1)-NODES%BOUNDARY_ADD(1,1)
                 CALL SPMD_EXCH_ICONT(ICONTACT
-     +            ,IAD_ELEM ,FR_ELEM,LENGTH,LENR)
+     +            ,NODES%BOUNDARY_ADD ,NODES%BOUNDARY,LENGTH,LENR)
               ENDIF
 C
 C Communication IFOAM
 C
               IF(IALELAG > 0.AND.NSPMD>1) THEN
                 LENGTH = 1
-                LENR = IAD_ELEM(1,NSPMD+1)-IAD_ELEM(1,1)
-                CALL SPMD_EXCH_ICONT(IFOAM,IAD_ELEM ,FR_ELEM,LENGTH,LENR)
+                LENR = NODES%BOUNDARY_ADD(1,NSPMD+1)-NODES%BOUNDARY_ADD(1,1)
+                CALL SPMD_EXCH_ICONT(IFOAM,NODES%BOUNDARY_ADD ,NODES%BOUNDARY,LENGTH,LENR)
               ENDIF
 C
 #ifdef DNC
@@ -5449,9 +5449,9 @@ C-----------------------------------------------
               IF (IFRWV > 0) THEN
                 IF (NSPMD > 1) THEN
                   LENGTH = 1
-                  LENR = IAD_ELEM(1,NSPMD+1)-IAD_ELEM(1,1)
+                  LENR = NODES%BOUNDARY_ADD(1,NSPMD+1)-NODES%BOUNDARY_ADD(1,1)
 C FR_WAVE boundary exchange
-                  CALL SPMD_EXCH_WAVE(FR_WAVE,IAD_ELEM ,FR_ELEM,LENGTH,LENR)
+                  CALL SPMD_EXCH_WAVE(FR_WAVE,NODES%BOUNDARY_ADD ,NODES%BOUNDARY,LENGTH,LENR)
                 END IF
 
 C========================================================================================
@@ -5542,7 +5542,7 @@ C Init var parallel SMP
      1                 GEO        ,IXS       ,IXS(L1)   ,IXS(L1)   ,IXS(L3)  ,IXQ    ,
      2                 ELEMENT%SHELL%IXC         ,IXT      ,IXP       ,IXR       ,IXTG     ,
      3                 nodes%deleted_node,NODFTSK  ,NODLTSK   ,IPARG     ,ELBUF    ,ITSK   ,
-     4                 IXTG1    ,IAD_ELEM  ,FR_ELEM   ,NODES%ITAB     ,
+     4                 IXTG1    ,NODES%BOUNDARY_ADD  ,NODES%BOUNDARY   ,NODES%ITAB     ,
      5                 ADDCNEL     ,CNEL     ,KXSP      ,ELBUF_TAB ,TAGEL    ,IEXLNK ,
      6                 IGRNOD      ,DD_R2R   ,DD_R2R_ELEM,SDD_R2R_ELEM,IDEL7NOK_SAV  ,
      7                 IDEL7NOK_R2R,TAGTRIMC,TAGTRIMTG,S_ELEM_STATE,ELEM_STATE,
@@ -5571,7 +5571,7 @@ C Init var parallel SMP
                     ! exchange of surfaces (ie. 4 nodes) to deactivate and deactivation
                     ! ONLY FOR LOCAL SURFACE / REMOTE ELEMENT
                     IF(NSPMD>1) THEN
-                      IF(ITSK==0) CALL SPMD_EXCH_DELETED_SURF_EDGE( IAD_ELEM,NODES,SHOOT_STRUCT,INTERFACES%INTBUF_TAB,NEWFRONT,
+                      IF(ITSK==0) CALL SPMD_EXCH_DELETED_SURF_EDGE( NODES%BOUNDARY_ADD,NODES,SHOOT_STRUCT,INTERFACES%INTBUF_TAB,NEWFRONT,
      .                                     IPARI,GEO,
      .                                     IXS,ELEMENT%SHELL%IXC,IXT,IXP,IXR,IXTG,IXS(L1),
      .                                     ADDCNEL,CNEL,nodes%work_array_node(omp_address),TAGEL )
@@ -5604,7 +5604,7 @@ C Init var parallel SMP
                     IF(INT24USE>0.OR.NINTER25/=0) THEN
                       IF(ITSK==0) CALL CHECK_REMOTE_SURFACE_STATE( SHOOT_STRUCT%NUMBER_REMOTE_SURF,SHOOT_STRUCT%REMOTE_SURF,
      .                                                             SHOOT_STRUCT%SHIFT_INTERFACE,INTERFACES%INTBUF_TAB,
-     .                                                             IPARI,IAD_ELEM,SHOOT_STRUCT  )
+     .                                                             IPARI,NODES%BOUNDARY_ADD,SHOOT_STRUCT  )
                       CALL MY_BARRIER()
                       IF(NINTER25/=0.AND.INTERFACES%PARAMETERS%INT25_EROSION_SOLID > 0) THEN
                         IF(ITSK==0) THEN
@@ -5622,7 +5622,7 @@ C Init var parallel SMP
      .                                                  NBDDEDGT,NBDDEDG_MAX,
      .                                                  ELEM_STATE,IPARI,INTLIST,NODES,
      .                                                  NEWFRONT,IXS,ELEMENT%SHELL%IXC,IXTG,
-     .                                                  IAD_ELEM,NODES%X,
+     .                                                  NODES%BOUNDARY_ADD,NODES%X,
      .                                                  INTERFACES%INTBUF_TAB,INTERFACES%SPMD_ARRAYS,SHOOT_STRUCT  )
                           ENDIF
                         ENDIF
@@ -5639,7 +5639,7 @@ C Init var parallel SMP
      3                 NEWFRONT,nodes%work_array_node(omp_address) ,NODES%MS       ,NODES%IN ,ANIN(NDMA+1),NODES%ITAB  ,
      4                 NODES%ITABM1  ,ADDCNEL     , CNEL    ,INDIDEL     ,NINDEX1 ,NINDEX2   ,
      5                 NINDEX3 ,NINDEX4     ,TAGEL    ,INT24USE    ,IBUFSEGLO ,INDSEGLO,
-     6                 IBUFIDEL ,INTERFACES%INTBUF_TAB,IAD_ELEM)
+     6                 IBUFIDEL ,INTERFACES%INTBUF_TAB,NODES%BOUNDARY_ADD)
 
                   ENDIF
 
@@ -5649,7 +5649,7 @@ C Init var parallel SMP
      2                 IXR     ,IXTG    ,nodes%deleted_node,ITSK   ,nodes%work_array_node(omp_address),NODES%ITAB    ,
      3                 NODES  ,ADDCNEL ,CNEL        ,TAGEL  ,IPARG      ,GEO     ,
      4                 IBUFPDEL,NINDEXPDEL,NINDEXP   ,NPRESLOAD,LOADP_TAGDEL      ,
-     5                 ILOADP  ,LLOADP  ,IAD_ELEM)
+     5                 ILOADP  ,LLOADP  ,NODES%BOUNDARY_ADD)
 
                   ENDIF
 
@@ -5661,18 +5661,18 @@ C Init var parallel SMP
 c ========================================================================================
 C                                     node splitting
              numnod_old = numnod
-             call test_jc_shell_detach(nodes, element, interfaces, npari, ninter, ipari, numnod,
-     .                numnodg, elbuf_tab, ngroup, ngrouc, nparg, iparg, igrouc, numelc, ispmd, nspmd,
-     .                lcnel, cnel, addcnel, cracks)
+!            call test_jc_shell_detach(nodes, element, interfaces, npari, ninter, ipari, numnod,
+!    .                numnodg, elbuf_tab, ngroup, ngrouc, nparg, iparg, igrouc, numelc, ispmd, nspmd,
+!    .                lcnel, cnel, addcnel, cracks)
 
              if(numnod_old < numnod ) then
                write(6,*) 'Node splitting detected:', numnod_old, numnod
-               CALL INIT_NODAL_STATE( IPARI,SHOOT_STRUCT,INTERFACES%INTBUF_TAB,IAD_ELEM,FR_ELEM,
+               CALL INIT_NODAL_STATE( IPARI,SHOOT_STRUCT,INTERFACES%INTBUF_TAB,NODES%BOUNDARY_ADD,NODES%BOUNDARY,
      .                              NODES%ITAB,NODES,GEO,ADDCNEL,CNEL,
      .                              IXS,ELEMENT%SHELL%IXC,IXT,IXP,IXR,IXTG,
      .                              SIZE_ADDCNEL,SIZE_CNEL ,
      .                              numelsg,numelqg,numelcg,numeltrg,numelpg,
-     .                              numelrg,numeltgg )
+     .                              numelrg,numeltgg , IXS(L1))
 
 
                IF(IDEL7NG>0.OR.IRAD2R>0.OR.ALEMUSCL_Param%IALEMUSCL>0.OR.PDEL>0) THEN
@@ -5690,8 +5690,6 @@ C                                     node splitting
                  ALEMUSCL_Buffer%pCNEL => CNEL
                  ALEMUSCL_Buffer%pADDCNEL => ADDCNEL
                  ALEMUSCL_Buffer%pADDTMPL => ADDTMPL
- !             IXS(L1)  ,IXS(L2), IXS(L3)
- !              10          20       16
                  L1 = 1+NIXS*NUMELS + NSVOIS*NIXS
                  L2 = L1+6*NUMELS10
                  L3 = L2+12*NUMELS20
@@ -5813,7 +5811,7 @@ C        /---------------/
                 CALL I18MAIN_KINE_1(IPARI,INTERFACES%INTBUF_TAB,NODES%X       ,NODES%V       ,
      2                   NODES%A          ,NODES%ISKEW     ,SKEWS%SKEW     ,NODES%ICODT   ,WA      ,
      3                   NODES%MS         ,NODES%ITAB      ,ITSK+1   ,KINET   ,NODES%STIFN   ,
-     4                   MTF        ,CAND_SAV  ,INT18ADD ,IAD_ELEM,FR_ELEM ,
+     4                   MTF        ,CAND_SAV  ,INT18ADD ,NODES%BOUNDARY_ADD,NODES%BOUNDARY ,
      5                   TAGPENE    ,H3D_DATA  ,MULTI_FVM,ALE_CONNECTIVITY%NE_CONNECT,XCELL,XCELL_REMOTE)
 !$OMP END PARALLEL
               ENDIF
@@ -5837,7 +5835,7 @@ C===============================================================================
      3               NODES%STIFN  ,NODES%STIFR  ,K        ,NODES%ITAB   ,FR_I2M ,IAD_I2M     ,
      4               ADDCNI2,PROCNI2,IADI2    ,I2MSCH ,DMAS   ,ANIN(NDMA+1),
      5               SKEWS%SKEW   ,I2SIZE ,FR_NBCCI2,ANIN(NDIN+1)   ,IGEO,BUFGEO ,
-     6               FSAV   ,NPC    ,TF       ,FANI(1,NFT2+1) ,IAD_ELEM,FR_ELEM,
+     6               FSAV   ,NPC    ,TF       ,FANI(1,NFT2+1) ,NODES%BOUNDARY_ADD,NODES%BOUNDARY,
      7               NATIV_SMS,DMINT2,ANIN(NDAMA2+1),NB_FRI2M ,FR_LOCI2M,
      8               DT2T  ,NELTST ,ITYPTST   ,INTERFACES%INTBUF_TAB ,NODES%TEMP     ,NODES%MCP   ,
      9               FTHE  ,CONDN  ,GLOB_THERM,
@@ -5885,7 +5883,7 @@ C===============================================================================
 C
               IF(INTPLYXFEM > 0) THEN
                 CALL I24PXFEM(
-     1             IPARI  ,INTERFACES%INTBUF_TAB ,WAGAP,IAD_ELEM,FR_ELEM)
+     1             IPARI  ,INTERFACES%INTBUF_TAB ,WAGAP,NODES%BOUNDARY_ADD,NODES%BOUNDARY)
               ENDIF
 C
 C----------------------------------------------------------
@@ -6007,7 +6005,7 @@ C-----------------------------------------------------
      .                       FSAV,   FXBFP,   FXBEFW,  FXBFC,   NODES%D,
      .                       DT2T,   ITYPTST, NELTST,  FXBGRVI, FXBGRVR,
      .                       IGRV,   NPC,     TF    ,  FXBGRP,  FXBGRW ,
-     .                       IPARG , NSENSOR,SENSORS%SENSOR_TAB,IAD_ELEM, FR_ELEM,
+     .                       IPARG , NSENSOR,SENSORS%SENSOR_TAB,NODES%BOUNDARY_ADD, NODES%BOUNDARY,
      .                       AGRV  )
               END IF
 
@@ -6106,8 +6104,8 @@ C
      5                     JADC_SMS ,JADS_SMS ,JADT_SMS ,JADP_SMS ,JADR_SMS  ,
      6                     JADTG_SMS,DIAG_SMS ,TAGPRT_SMS,TAGREL_SMS,
      7             IPART(I15A),IPART(I15B),IPART(I15C),IPART(I15D),IPART(I15E),
-     8             IPART(I15F),IPART(I15G),IPART(I15H),IPART(I15I),IAD_ELEM   ,
-     9                     FR_ELEM  ,NPBY    ,LPBY  ,TAGSLV_RBY_SMS ,LAD_SMS  ,
+     8             IPART(I15F),IPART(I15G),IPART(I15H),IPART(I15I),NODES%BOUNDARY_ADD   ,
+     9                     NODES%BOUNDARY  ,NPBY    ,LPBY  ,TAGSLV_RBY_SMS ,LAD_SMS  ,
      A                     JSM_SMS ,DMELTG    ,DMELC      ,MSKYI_SMS,
      B                     ISKYI_SMS,JADI_SMS,JDII_SMS  ,LTI_SMS    ,NODXI_SMS,
      C                     DMELS    ,DMELTR  ,DMELP     ,DMELRT     ,IGEO     ,
@@ -6142,7 +6140,7 @@ C--- COUPLAGE RADIOSS 2 RADIOSS
                 CALL R2R_EXCHANGE(
      1            IEXLNK   ,IGRNOD  ,NODES%D       ,NODES%V       ,NODES%VR     ,
      2            NODES%A        ,NODES%AR      ,NODES%MS      ,NODES%IN     ,NODES%STIFN   ,NODES%STIFR  ,
-     3            R2R_ON   ,DD_R2R  ,NODES%WEIGHT ,IAD_ELEM,FR_ELEM ,RBY    ,
+     3            R2R_ON   ,DD_R2R  ,NODES%WEIGHT ,NODES%BOUNDARY_ADD,NODES%BOUNDARY ,RBY    ,
      4            NODES%XDP      ,NODES%X       ,DD_R2R_ELEM, SDD_R2R_ELEM,OFF_SPH_R2R,
      5            NUMSPH_GLO_R2R,NLOC_DMG)
 C
@@ -6382,8 +6380,8 @@ C-----------------------------
      .                                INT24USE,NBINTC,INTLIST,IPARI,INTERFACES%INTBUF_TAB)
                   IF(IEXICODT>0) THEN
                     LENGTH = 1
-                    LENR = IAD_ELEM(1,NSPMD+1)-IAD_ELEM(1,1)
-                    CALL SPMD_EXCH_ICODT(NODES%ICODT,IAD_ELEM,FR_ELEM,LENGTH,LENR)
+                    LENR = NODES%BOUNDARY_ADD(1,NSPMD+1)-NODES%BOUNDARY_ADD(1,1)
+                    CALL SPMD_EXCH_ICODT(NODES%ICODT,NODES%BOUNDARY_ADD,NODES%BOUNDARY,LENGTH,LENR)
                     IEXICODT = 0
                   ENDIF
                 ENDIF
@@ -6584,8 +6582,8 @@ C processes in charge of the FVMBAGS know NPOLH)
 
                 IF(IEXICODT>0) THEN
                   LENGTH = 1
-                  LENR = IAD_ELEM(1,NSPMD+1)-IAD_ELEM(1,1)
-                  CALL SPMD_EXCH_ICODT(NODES%ICODT,IAD_ELEM,FR_ELEM,LENGTH,LENR)
+                  LENR = NODES%BOUNDARY_ADD(1,NSPMD+1)-NODES%BOUNDARY_ADD(1,1)
+                  CALL SPMD_EXCH_ICODT(NODES%ICODT,NODES%BOUNDARY_ADD,NODES%BOUNDARY,LENGTH,LENR)
                   IEXICODT = 0
                 ENDIF
               ENDIF
@@ -6677,7 +6675,7 @@ C--------------------------------------------------------------C
                 CALL R2R_GETDATA(IEXLNK  ,IGRNOD  ,NODES%X       ,NODES%V       ,
      .                           NODES%VR      ,NODES%A       ,NODES%AR      ,NODES%MS      ,NODES%IN      ,
      .                           NODES%XDP     ,NODES%D       ,R2R_ON  ,DD_R2R  ,NODES%WEIGHT  ,
-     .                           IAD_ELEM,FR_ELEM ,NODES%STIFN   ,NODES%STIFR   ,DD_R2R_ELEM  ,
+     .                           NODES%BOUNDARY_ADD,NODES%BOUNDARY ,NODES%STIFN   ,NODES%STIFR   ,DD_R2R_ELEM  ,
      .                           SDD_R2R_ELEM,NLOC_DMG, OUTPUT%WFEXT, OUTPUT%WFEXT_MD)
 
                 IF (IMONM > 0) CALL STOPTIME(TIMERS,54)
@@ -6788,7 +6786,7 @@ C===============================================================================
      2                NODXI_SMS,NODES%MS        ,NODES%MS0      ,NODES%A         ,NODES%ICODT     ,
      3                NODES%ICODR    ,NODES%ISKEW     ,SKEWS%SKEW,JAD_SMS   ,JDI_SMS   ,
      4                LT_SMS   ,X_SMS     ,P_SMS    ,Z_SMS     ,Y_SMS     ,
-     5                PREC_SMS ,INDX1_SMS ,DIAG_SMS ,IAD_ELEM  ,FR_ELEM   ,
+     5                PREC_SMS ,INDX1_SMS ,DIAG_SMS ,NODES%BOUNDARY_ADD  ,NODES%BOUNDARY   ,
      6                NODES%WEIGHT   ,NPBY      ,LPBY      ,
      7                TAGSLV_RBY_SMS,LAD_SMS ,KAD_SMS ,JSM_SMS ,IBFV      ,
      8                VEL      ,NPC      ,TF       ,NODES%V         ,NODES%X          ,
@@ -6886,7 +6884,7 @@ C-----------------------------------------------
                     CALL SECTION_IO (
      1              NSTRF,NODES%D,NODES%DR,NODES%V,NODES%VR,FSAV(1,1+NINTER+NRWALL+NRBODY),
      2              SECFCUM,NODES%A             ,NODES%AR    ,SECBUF,NODES%MS      ,NODES%IN     ,
-     3              NODES%X      ,FANI(1,NFOA+1),NODES%WEIGHT,XSEC  ,IAD_ELEM,FR_ELEM,
+     3              NODES%X      ,FANI(1,NFOA+1),NODES%WEIGHT,XSEC  ,NODES%BOUNDARY_ADD,NODES%BOUNDARY,
      4              RG_CUT ,IAD_CUT       ,FR_CUT,NODES%WEIGHT_MD,IOLDSECT,
      5              SENSORS%STABSEN,SENSORS%SFSAV,SENSORS%TABSENSOR,SENSORS%FSAV, OUTPUT%WFEXT)
                     IF(IMON>0) CALL STOPTIME(TIMERS,TIMER_IO)
@@ -7039,7 +7037,7 @@ C===============================================================================
      5            ISPCOND   ,XFRAME   ,WASPSYM,IPART(K10),PARTSAV(IPMTSK),
      6            WASPH(KSPH21) ,WSMCOMP%BUF ,WASPH(KSPACTIV) ,IPART,ITSK,
      7            SPH2SOL   ,SOL2SPH  ,IRST    ,IXS        ,IPARG     ,
-     8            NGROUNC   ,IGROUNC  ,ELBUF_TAB,IAD_ELEM  ,FR_ELEM   ,
+     8            NGROUNC   ,IGROUNC  ,ELBUF_TAB,NODES%BOUNDARY_ADD  ,NODES%BOUNDARY   ,
      9            IGEO      ,SOL2SPH_TYP,SPH_WORK)
 
 !$OMP END PARALLEL
@@ -7282,8 +7280,8 @@ C Multidomains : resynchro des accelerations en SPH
 C----------------------------------------------
                 IF (NSPMD>1) THEN
                   IF ((SDD_R2R_ELEM>0).AND.(NUMSPH_GLO_R2R>0)) THEN
-                    LENR = IAD_ELEM(1,NSPMD+1)-IAD_ELEM(1,1)
-                    CALL SPMD_EXCH_R2R_SPH(NODES%A,IAD_ELEM,FR_ELEM,DD_R2R,DD_R2R_ELEM,LENR)
+                    LENR = NODES%BOUNDARY_ADD(1,NSPMD+1)-NODES%BOUNDARY_ADD(1,1)
+                    CALL SPMD_EXCH_R2R_SPH(NODES%A,NODES%BOUNDARY_ADD,NODES%BOUNDARY,DD_R2R,DD_R2R_ELEM,LENR)
                   ENDIF
                 ENDIF
 
@@ -7351,7 +7349,7 @@ C----------------------
                   IF (NFXBODY>0) THEN
                     CALL FXGRVCOR(FXBIPM, FXBGRVI, NODES%A,  IGRV, AGRV,
      .                            NPC,    TF,      NODES%MS, NODES%V   , SKEWS%SKEW,
-     .                            FXBGRW, IAD_ELEM, FR_ELEM, OUTPUT%WFEXT)
+     .                            FXBGRW, NODES%BOUNDARY_ADD, NODES%BOUNDARY, OUTPUT%WFEXT)
                   END IF
                   IF (IMON>0) CALL STOPTIME(TIMERS,46)
                   IF (IMONM > 0) CALL STOPTIME(TIMERS,TIMER_KIN)
@@ -7452,7 +7450,7 @@ C----------------------
                   ENDIF
                   IF(NSPMD > 1)THEN
                     ! transmit updated valued on domain ispmd=0 to other domains (values may be used by parallelized ebcs options)
-                    call spmd_xv_inter_type1(numnod, sfr_elem, ispmd, nspmd, iad_elem, fr_elem,
+                    call spmd_xv_inter_type1(numnod, NODES%BOUNDARY_SIZE, ispmd, nspmd, NODES%BOUNDARY_ADD, NODES%BOUNDARY,
      1                                       nodes%a, nodes%v, ninter, ipari, npari)
                   ENDIF
                 ENDIF
@@ -7471,7 +7469,7 @@ C        /---------------/
      2                          NODES%A    ,NODES%ISKEW,SKEWS%SKEW ,NODES%ICODT,WA,
      3                          NODES%MS   ,NODES%ITAB ,FSAV ,ITSK+1,KINET,
      4                          NODES%STIFN,MTF  ,CAND_SAV,FANI,INT18ADD,
-     5                          IAD_ELEM,FR_ELEM,H3D_DATA )
+     5                          NODES%BOUNDARY_ADD,NODES%BOUNDARY,H3D_DATA )
 !$OMP END PARALLEL
                 ENDIF
 C========================================================================================
@@ -7888,7 +7886,7 @@ C---------------
                 CALL SECTION_IO (
      1            NSTRF,NODES%D,NODES%DR,NODES%V,NODES%VR,FSAV(1,1+NINTER+NRWALL+NRBODY),
      2            SECFCUM,NODES%A             ,NODES%AR    ,SECBUF,NODES%MS      ,NODES%IN     ,
-     3            NODES%X      ,FANI(1,NFOA+1),NODES%WEIGHT,XSEC  ,IAD_ELEM,FR_ELEM,
+     3            NODES%X      ,FANI(1,NFOA+1),NODES%WEIGHT,XSEC  ,NODES%BOUNDARY_ADD,NODES%BOUNDARY,
      4            RG_CUT ,IAD_CUT       ,FR_CUT,NODES%WEIGHT_MD,IOLDSECT,
      5            SENSORS%STABSEN,SENSORS%SFSAV,SENSORS%TABSENSOR ,SENSORS%FSAV ,OUTPUT%WFEXT )
                 IF(IMON>0) CALL STOPTIME(TIMERS,TIMER_IO)
@@ -8030,7 +8028,7 @@ C--------------------------------------------------
      .                       FXBMVN, FXBMCD, FXBSE , FXBSV , FXBVIT,
      .                       FXBACC, FXBRPM, NODES%V     , NODES%VR    , NODES%A     ,
      .                       NODES%AR    , NODES%MS    , NODES%IN    , NODES%WEIGHT, FSAV  ,
-     .                       FXBFC , FXBEDP, IAD_ELEM, FR_ELEM)
+     .                       FXBFC , FXBEDP, NODES%BOUNDARY_ADD, NODES%BOUNDARY)
               END IF
 C--------------------
 C      RBE3
@@ -8349,7 +8347,7 @@ C===============================================================================
      8               TF       ,NEWFRONT ,ICONTACT ,RWBUF    ,LPRW     ,
      9               NPRW     ,RBYL     ,NODES%D        ,NODES%DR       ,KINET    ,
      A               NODGLOB  ,NODES%WEIGHT   ,NBNCL    ,NBIKL    ,NBNODL   ,
-     B               NBNODLR  ,FR_LAGF  ,LLAGF    ,IAD_ELEM ,FR_ELEM  ,
+     B               NBNODLR  ,FR_LAGF  ,LLAGF    ,NODES%BOUNDARY_ADD ,NODES%BOUNDARY  ,
      C               INTERFACES%INTBUF_TAB ,H3D_DATA, PYTHON)
                 END IF
               ENDIF
@@ -8396,7 +8394,7 @@ C===============================================================================
                 NODFTSK   = 1+ITSK*NUMNOD/ NTHREAD
                 NODLTSK   = (ITSK+1)*NUMNOD/NTHREAD
 
-                CALL ERR_THK(ELEMENT%SHELL%IXC     ,IXTG    ,IPARG   ,IAD_ELEM,FR_ELEM    ,
+                CALL ERR_THK(ELEMENT%SHELL%IXC     ,IXTG    ,IPARG   ,NODES%BOUNDARY_ADD,NODES%BOUNDARY    ,
      .                       NODES%WEIGHT  ,NODES%X       ,ELBUF_TAB,IPART   ,IPART(K3)  ,
      .                       IPART(K8)  ,ITSK   ,NODFTSK ,NODLTSK ,ERR_THK_SH4,
      .                       ERR_THK_SH3,SH4TREE,SH3TREE,
@@ -8455,7 +8453,7 @@ C--------------------------------------------------
                   CALL SMS_ENCIN_2(TIMERS,
      1                  ITSK     ,NODFTSK  ,NODLTSK  ,NODXI_SMS ,
      2                  NODES%MS       ,JAD_SMS  ,JDI_SMS  ,LT_SMS    ,INDX1_SMS,
-     3                  DIAG_SMS ,IAD_ELEM ,FR_ELEM  ,NODES%WEIGHT    ,NODES%V        ,
+     3                  DIAG_SMS ,NODES%BOUNDARY_ADD ,NODES%BOUNDARY  ,NODES%WEIGHT    ,NODES%V        ,
      4                  NODES%A        ,X_SMS    ,Y_SMS    ,Z_SMS     ,XMOM_SMS ,
      5                  NODES%ICODT    ,NODES%ICODR    ,NODES%ISKEW    ,SKEWS%SKEW      ,IBFV      ,
      6                  VEL      ,NPC      ,TF       ,NODES%X         ,NODES%D         ,
@@ -8487,8 +8485,8 @@ C===============================================================================
               IF (ICRACK3D > 0 .AND. NLEVSET > 0) THEN
                 CALL XFEOFF(XFEM_TAB ,
      .                      IPARG  ,ELEMENT%SHELL%IXC      ,NGROUC      ,IGROUC  ,IEL_CRK    ,
-     .                      ELCUTC ,IXTG     ,IADC_CRK    ,IAD_ELEM,IAD_EDGE   ,
-     .                      FR_EDGE,FR_NBEDGE,FR_ELEM     ,NXLAYMAX,INOD_CRK   ,
+     .                      ELCUTC ,IXTG     ,IADC_CRK    ,NODES%BOUNDARY_ADD,IAD_EDGE   ,
+     .                      FR_EDGE,FR_NBEDGE,NODES%BOUNDARY     ,NXLAYMAX,INOD_CRK   ,
      .                      CRKEDGE,XEDGE4N  ,XEDGE3N    )
               ENDIF
 
@@ -8526,7 +8524,7 @@ C Init var parallel SMP
      8           NELTSTT    ,ITYPTSTT ,IPART      ,IPART(K1)    ,IPART(K2)      ,ITSK      ,
      A           NODFTSK    ,NODLTSK  ,NBRCVOIS   ,
      B           NBSDVOIS   ,LNRCVOIS ,LNSDVOIS   ,NERCVOIS     ,NESDVOIS       ,LERCVOIS  ,
-     C           LESDVOIS   ,ISIZXV   ,IAD_ELEM   ,FR_ELEM      ,ELEMENT%PON%FSKYM,MSNF      ,
+     C           LESDVOIS   ,ISIZXV   ,NODES%BOUNDARY_ADD   ,NODES%BOUNDARY      ,ELEMENT%PON%FSKYM,MSNF      ,
      D           IPARI      ,SEGVAR   ,NODES%ITAB       ,ISKWN        ,
      E           FSAV     ,
      F           NODES%WEIGHT     ,NPSEGCOM ,LSEGCOM    ,IPM          ,IGEO           ,
@@ -8575,7 +8573,7 @@ C--------------------------------------------------
                 CALL UPD_TMAX(ELBUF_TAB,IPARG   ,GEO     ,PM   ,
      .                   IXS  ,IXS(L1) ,IXS(L3) ,IXS(L2) ,IXQ     ,
      .                   ELEMENT%SHELL%IXC  ,IXTG   ,IXT    ,IXP     ,IXR     ,
-     .                   NODES%X  ,NODES%D       ,NODES%V       ,IAD_ELEM,FR_ELEM ,
+     .                   NODES%X  ,NODES%D       ,NODES%V       ,NODES%BOUNDARY_ADD,NODES%BOUNDARY ,
      .                     NODES%WEIGHT ,IPM   ,IGEO    ,STACK   ,ITSK    )
 
 !$OMP END PARALLEL
@@ -8664,7 +8662,7 @@ C Regular animation
      J          FSAVD         ,LRIVET         ,RIVET          ,ISKWN          ,IFRAME        ,
      M          XFRAME        ,IXS(L1)        ,IXS(L2)        ,IXS(L3)        ,NDMA          ,
      N          MONVOL        ,VOLMON         ,IPM            ,IGEO           ,NODGLOB       ,
-     .          IAD_ELEM      ,FR_ELEM        ,
+     .          NODES%BOUNDARY_ADD      ,NODES%BOUNDARY        ,
      U          FR_RBY2       ,IAD_RBY2       ,FR_WALL        ,FR_SEC         ,FXBIPM        ,FXBRPM   ,
      V          NDIN          ,FXBDEP         ,FXBVIT         ,FXBACC         ,IFLOW         ,
      W          RFLOW         ,IPARTL         ,NPARTL         ,IACCP          ,NACCP         ,
@@ -8841,7 +8839,7 @@ C===============================================================================
      7     NODES%X          ,NODES%D              ,NODES%V     ,NODES%VR          ,NODES%DR   ,THKE     ,DAMP        ,NODES%MS,
      8     NODES%IN         ,PM                   ,SKEWS%SKEW  ,GEO               ,EANI       ,BUFMAT      ,BUFGEO      ,BUFSF,
      9     TF               ,FORC                 ,VEL         ,FSAV              ,AGRV       ,FR_WAVE,PARTS0   ,
-     A     ELBUF            ,RBY                  ,RIVET       ,FR_ELEM           ,IAD_ELEM   ,NSENSOR          ,
+     A     ELBUF            ,RBY                  ,RIVET       ,NODES%BOUNDARY           ,NODES%BOUNDARY_ADD   ,NSENSOR          ,
      B     WA               ,NODES%A              ,NODES%AR    ,NODES%STIFN       ,NODES%STIFR,PARTSAV,ELEMENT%PON%FSKY,
      C     INTERFACES%PON%FSKYI,IFRAME            ,XFRAME      ,W16               ,IACTIV     ,ELEMENT%PON%FSKYM,IGEO,IPM     ,
      D     OUTPUT%WFEXT     ,NODFT                ,NODLT       ,NT_IMP            ,NUM_IMP    ,NS_IMP           ,NE_IMP,IND_IMP,
@@ -8873,7 +8871,7 @@ C----       10,11,12:ELBUF_C,BUFMAT_C,X_C,13,14:DD,DDR,15,16:X_ac,V_zero,23,24:A
      7            NODES%X      ,NODES%D      ,NODES%V      ,NODES%VR     ,NODES%DR     ,THKE   ,DAMP   ,NODES%MS     ,
      8            NODES%IN     ,PM     ,SKEWS   ,GEO    ,EANI   ,BUFMAT ,BUFGEO ,BUFSF  ,
      9            TF     ,FORC   ,VEL    ,FSAV   ,AGRV   ,FR_WAVE,PARTS0 ,
-     A            ELBUF  ,RBY   ,RIVET,FR_ELEM,IAD_ELEM,
+     A            ELBUF  ,RBY   ,RIVET,NODES%BOUNDARY,NODES%BOUNDARY_ADD,
      B            WA     ,NODES%A      ,NODES%AR     ,NODES%STIFN  ,NODES%STIFR  ,PARTSAV,ELEMENT%PON%FSKY   ,
      C            INTERFACES%PON%FSKYI  ,IFRAME ,XFRAME ,W16    ,IACTIV ,ELEMENT%PON%FSKYM  ,IGEO   ,IPM    ,
      D            OUTPUT%WFEXT  ,NODFT  ,NODLT  ,NT_IMP ,NUM_IMP,NS_IMP ,NE_IMP ,IND_IMP,
@@ -8924,8 +8922,8 @@ C
      H            NOM_OPT,        IGRSURF,         BUFSF,     IDATA,
      I            RDATA,          KXX,             IXX,       KXSP,           IXSP,
      J            NOD2SP,         SPBUF,           IXS(L1),   IXS(L2),        IXS(L3),
-     K            NODES%VR,             MONVOL,          VOLMON,    NODGLOB,        IAD_ELEM,
-     L            FR_ELEM,        FR_SEC,          FR_RBY2,   IAD_RBY2,       FR_WALL,
+     K            NODES%VR,             MONVOL,          VOLMON,    NODGLOB,        NODES%BOUNDARY_ADD,
+     L            NODES%BOUNDARY,        FR_SEC,          FR_RBY2,   IAD_RBY2,       FR_WALL,
      M            NODES%V,              NODES%A,               GRAPHE,    PARTSAV ,       XFRAME  ,
      N            DIRUL,
      O            FSAV(1,NFNCA+1), FSAV(1,NFTCA+1),NODES%TEMP      ,SH4TREE,        SH3TREE,
@@ -9183,7 +9181,7 @@ C===============================================================================
      7              NODES%ISKEW           ,NODES%ICODT         ,ELBUF_TAB   ,
      8              NPC             ,LINALE        ,NPRW        ,LAS         ,
      9              IPARI           ,NODFTSK       ,NODLTSK     ,ITSK        ,
-     A              IAD_ELEM        ,FR_ELEM       ,NBRCVOIS    ,NBSDVOIS    ,LNRCVOIS   ,
+     A              NODES%BOUNDARY_ADD        ,NODES%BOUNDARY       ,NBRCVOIS    ,NBSDVOIS    ,LNRCVOIS   ,
      B              LNSDVOIS        ,NODES%WEIGHT        ,ELEMENT%PON%ADSKY,ELEMENT%PON%FSKY,ELEMENT%PON%IADS,
      C              FR_WALL         ,NPORGEO       ,PROCNE      ,
      D              FR_NBCC         ,ELEMENT%PON%IADQ    ,NODES%XDP         ,IGRNOD      ,
@@ -9236,7 +9234,7 @@ c
      .                 ENRTAG       ,CRKEDGE    ,XEDGE4N     ,XEDGE3N )
 C
                   IF (NSPMD > 1)       ! exchange ENRTAG
-     .              CALL SPMD_CRK_ADV(IAD_ELEM ,FR_ELEM ,INOD_CRK ,ENRTAG)
+     .              CALL SPMD_CRK_ADV(NODES%BOUNDARY_ADD ,NODES%BOUNDARY ,INOD_CRK ,ENRTAG)
 
 C========================================================================================
 C                                   PARALLEL SECTION (SMP)
@@ -9277,7 +9275,7 @@ c----------------------------------------------------------------------
 c        spmd xfem velocity exchange
 c----------------------------------------------------------------------
                   IF (NSPMD > 1) THEN
-                    CALL SPMD_EXCH_CRKVEL(IAD_ELEM ,FR_ELEM ,INOD_CRK ,NODES%ITAB   ,
+                    CALL SPMD_EXCH_CRKVEL(NODES%BOUNDARY_ADD ,NODES%BOUNDARY ,INOD_CRK ,NODES%ITAB   ,
      .                                    NODES%X        ,NODES%V       ,NODES%VR       )
                   ENDIF
 C========================================================================================
@@ -9298,7 +9296,7 @@ C===============================================================================
 
                   CALL UPXFEM2(IPARG      ,ELEMENT%SHELL%IXC    ,NGROUC  ,IGROUC  ,IADC_CRK    ,
      .                         IEL_CRK    ,ELCUTC ,IXTG    ,ENRTAG  ,INOD_CRK    ,
-     .                         IAD_ELEM   ,FR_ELEM,IAD_EDGE,FR_EDGE ,FR_NBEDGE   ,
+     .                         NODES%BOUNDARY_ADD   ,NODES%BOUNDARY,IAD_EDGE,FR_EDGE ,FR_NBEDGE   ,
      .                         CRKEDGE    )
 
 
@@ -9389,7 +9387,7 @@ C  IOUTPRT for assembly synthesis, not need for spring which call *bilan each cy
                 CALL TH_TIME_OUTPUT(ITHOUT, SENSORS,OUTPUT)
                 IF(ITHOUT > 0) THEN
                   CALL INTER_NODAL_AREAS(IXS     ,ELEMENT%SHELL%IXC     ,IXTG      ,FASOLFR   ,NODES%X          ,
-     .                                   IAD_ELEM,FR_ELEM ,NODES%WEIGHT    ,IXQ       ,SEGQUADFR  ,
+     .                                   NODES%BOUNDARY_ADD,NODES%BOUNDARY ,NODES%WEIGHT    ,IXQ       ,SEGQUADFR  ,
      .                                   IXS(L1) ,INTERFACES%PARAMETERS%INTAREAN)
                 ENDIF
 
@@ -9413,7 +9411,7 @@ C mass & velocity
                 IF(IMON>0) CALL STARTIME(TIMERS,13)
                 IF(ISIZXV>0) CALL SPMD_SD_XV(
      1             NODES%X     ,NODES%D       ,NODES%V      ,NODES%VR    ,NODES%MS   ,
-     2             NODES%IN    ,IAD_ELEM,FR_ELEM,NODES%WEIGHT,IMSCH,
+     2             NODES%IN    ,NODES%BOUNDARY_ADD,NODES%BOUNDARY,NODES%WEIGHT,IMSCH,
      3             W     ,ISIZXV ,ILENXV  ,NODES%XDP)
                 IF (IMONM > 0) CALL STARTIME(TIMERS,23)
                 L1 = 1+NIXS*NUMELS + NSVOIS*NIXS
@@ -9444,7 +9442,7 @@ C mass & velocity
               IF (INT24USE == 1)THEN
                 IF (IMON>0) CALL STARTIME(TIMERS,TIMER_CONTFOR)
                 CALL SPMD_EXCH_I24(IPARI,    INTERFACES%INTBUF_TAB       ,NODES%ITAB  ,
-     *                             IAD_ELEM, FR_ELEM ,INTLIST ,NBINTC,
+     *                             NODES%BOUNDARY_ADD, NODES%BOUNDARY ,INTLIST ,NBINTC,
      *                             IAD_I24  ,FR_I24  ,SFR_I24,I24MAXNSNE,3,
      *                             INT24E2EUSE)
                 IF (IMON>0) CALL STOPTIME(TIMERS,TIMER_CONTFOR)
@@ -9551,12 +9549,12 @@ C--- //0 ----------------
                 IF (INT24USE == 1)THEN
                   IF (IMON>0) CALL STARTIME(TIMERS,TIMER_CONTFOR)
                   CALL SPMD_EXCH_I24(IPARI,    INTERFACES%INTBUF_TAB ,NODES%ITAB  ,
-     *                               IAD_ELEM, FR_ELEM ,INTLIST ,NBINTC,
+     *                               NODES%BOUNDARY_ADD, NODES%BOUNDARY ,INTLIST ,NBINTC,
      *                               IAD_I24  ,FR_I24  ,SFR_I24,I24MAXNSNE,3,
      *                               INT24E2EUSE)
 
                   CALL SPMD_EXCH_I24(IPARI,    INTERFACES%INTBUF_TAB ,NODES%ITAB  ,
-     *                               IAD_ELEM, FR_ELEM ,INTLIST ,NBINTC,
+     *                               NODES%BOUNDARY_ADD, NODES%BOUNDARY ,INTLIST ,NBINTC,
      *                               IAD_I24  ,FR_I24  ,SFR_I24,I24MAXNSNE,4,
      *                               INT24E2EUSE)
 

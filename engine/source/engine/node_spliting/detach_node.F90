@@ -889,7 +889,6 @@
           enddo
 
 
-          return
 
           ! list nodes that are detached from the shells at this timestep
           allocate(nb_detached_nodes(nspmd))
