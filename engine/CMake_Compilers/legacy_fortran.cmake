@@ -113,6 +113,7 @@ set_source_files_properties( ${source_directory}/source/mpi/spmd_send.F90 PROPER
 set_source_files_properties( ${source_directory}/source/mpi/spmd_isend.F90 PROPERTIES COMPILE_FLAGS "${legacy_flags}" )
 set_source_files_properties( ${source_directory}/source/mpi/spmd_recv.F90 PROPERTIES COMPILE_FLAGS "${legacy_flags}" )
 set_source_files_properties( ${source_directory}/source/mpi/spmd_irecv.F90 PROPERTIES COMPILE_FLAGS "${legacy_flags}" )
+set_source_files_properties( ${source_directory}/source/mpi/spmd_allgatherv.F90 PROPERTIES COMPILE_FLAGS "${legacy_flags}" )
 set_source_files_properties( ${source_directory}/source/mpi/airbags/spmd_exch_fvstats.F PROPERTIES COMPILE_FLAGS "${legacy_flags}" )
 set_source_files_properties( ${source_directory}/source/mpi/airbags/spmd_fvb_igath.F PROPERTIES COMPILE_FLAGS "${legacy_flags}" )
 set_source_files_properties( ${source_directory}/source/mpi/airbags/spmd_fvb.F PROPERTIES COMPILE_FLAGS "${legacy_flags}" )

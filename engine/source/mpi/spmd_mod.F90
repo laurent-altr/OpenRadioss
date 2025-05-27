@@ -109,6 +109,7 @@
         use spmd_isend_mod, only: spmd_isend
         use spmd_irecv_mod, only: spmd_irecv
         use spmd_wait_mod, only: spmd_wait, spmd_waitall, spmd_waitany
+        use spmd_allgatherv_mod, only: spmd_allgatherv
         implicit none
         ! Define the interface for spmd_send
 ! dummy tags for MPI calls that do not have a tag
@@ -166,6 +167,7 @@
         public :: spmd_waitany
         public :: spmd_probe
         public :: spmd_barrier
+        public :: spmd_allgatherv
 
       contains
 ! ======================================================================================================================
