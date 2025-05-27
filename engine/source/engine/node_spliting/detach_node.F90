@@ -277,7 +277,7 @@
 ! ----------------------------------------------------------------------------------------------------------------------
 !           write(6,*) "set_new_node_values",nodes%numnod
           numnod = nodes%numnod
-          nodes%itab(numnod+1) = -nodes%itab(i) !temporary id of the new node 
+          nodes%itab(numnod+1) = nodes%max_uid ! -nodes%itab(i) !temporary id of the new node 
           nodes%IKINE(numnod+1) = nodes%IKINE(i)
           nodes%V(1:3,numnod+1) = nodes%V(1:3,i)
           nodes%X(1:3,numnod+1) = nodes%X(1:3,i)
@@ -392,8 +392,8 @@
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Body
 ! ----------------------------------------------------------------------------------------------------------------------
-!         new_uid = nodes%max_uid
-!         old_uid = nodes%itab(node_id)
+          new_uid = nodes%max_uid
+          old_uid = nodes%itab(node_id)
           new_local_id = nodes%numnod +1
 !           write(6,*) 'detach_from_shells old_uid = ', old_uid, ' new_uid = ', new_uid
 !           write(6,*) 'new_local_id = ', new_local_id
@@ -459,17 +459,17 @@
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Body
 ! ----------------------------------------------------------------------------------------------------------------------
-          write(6,*) "node_id",node_id, nodes%numnod
+          !write(6,*) "node_id",node_id, nodes%numnod
           call flush(6)
           if(node_id > nodes%numnod .or. node_id < 1) then
             write(6,*) "node_id",node_id, "is not in the list of nodes"
             call flush(6)
             return
           endif
-          write(6,*) "detach_node",node_id,nodes%itab(node_id),"from:",shell_list(1:list_size)
-          call flush(6)
-!         new_uid = nodes%max_uid + 1
-!         nodes%max_uid = new_uid
+          !write(6,*) "detach_node",node_id,nodes%itab(node_id),"from:",shell_list(1:list_size)
+          !call flush(6)
+          new_uid = nodes%max_uid + 1
+          nodes%max_uid = new_uid
           old_uid = nodes%itab(node_id)
           numnod = nodes%numnod
           new_local_id = nodes%numnod + 1
@@ -571,11 +571,14 @@
           logical :: is_new 
           integer :: displ(nspmd)
           integer :: ierr
+          integer :: old_max_uid
+          integer :: numnodg0
 
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   body
 ! ----------------------------------------------------------------------------------------------------------------------
-
+          old_max_uid = nodes%max_uid
+          numnodg0 = numnodg
           allocate(detach_shell(0:numelc))
           detach_shell = 0.0d0
           if(.not. allocated(element%shell%damage)) then
@@ -889,7 +892,6 @@
           enddo
 
 
-
           ! list nodes that are detached from the shells at this timestep
           allocate(nb_detached_nodes(nspmd))
           allocate(nb_detached_nodes_global(nspmd))
@@ -913,7 +915,7 @@
           enddo
 
           if(nspmd > 1) then 
-            call spmd_allgatherv(detached_nodes_local,nb_detached_nodes_global(ispmd+1), &
+          call spmd_allgatherv(detached_nodes_local,nb_detached_nodes_global(ispmd+1), &
             detached_nodes,nb_detached_nodes_global,displ)
           else
             detached_nodes = detached_nodes_local
@@ -932,22 +934,23 @@
             enddo
             if(is_new) then 
               total_new_unique_nodes = total_new_unique_nodes + 1
-              nodes%max_uid = nodes%max_uid + 1
+              old_max_uid = old_max_uid + 1
               do j = i+1,total_new_nodes
                 if(detached_nodes(j) == detached_nodes(i)) then
-                  detached_nodes(j) = nodes%max_uid
+                  detached_nodes(j) = old_max_uid
                 endif
               enddo
-              detached_nodes(i) = nodes%max_uid
+              detached_nodes(i) = old_max_uid
             endif
           enddo
 
           do i = 1,nb_detached_nodes_global(ispmd+1)
-            nodes%itab(numnod0 + i) = detached_nodes(i+displ(ispmd+1))
-            nodes%itabm1(numnod0 + i) = detached_nodes(i+displ(ispmd+1))
-            nodes%itabm1(2*(numnod0 + i)) = numnod0 + i
+             nodes%itab(numnod0 + i) = detached_nodes(i+displ(ispmd+1))
+             nodes%itabm1(numnod0 + i) = detached_nodes(i+displ(ispmd+1))
+             nodes%itabm1(2*(numnod0 + i)) = numnod0 + i
           enddo
-          if(ispmd == 0) numnodg = numnodg + total_new_unique_nodes
+
+          if(ispmd == 0) numnodg = numnodg0 + total_new_unique_nodes
 
           if(total_new_unique_nodes .ne. total_new_nodes) then
             ! some boundary nodes were detached by different processors
