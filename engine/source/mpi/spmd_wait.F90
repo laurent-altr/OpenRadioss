@@ -29,7 +29,7 @@
         integer, parameter, public :: MPI_STATUS_IGNORE = 0
         integer, parameter, public :: MPI_STATUS_SIZE = 1
 #endif
- 
+
 
       contains
         !||====================================================================

@@ -22,7 +22,7 @@
 !Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
 
 
-       module spmd_send_mod
+      module spmd_send_mod
 
         implicit none
         private
@@ -35,7 +35,7 @@
           module procedure spmd_send_double     !< Sends a single double precision number
         end interface spmd_send
         public spmd_send
-        contains
+      contains
         subroutine spmd_send_reals(buf, buf_count, dest, tag,  comm)
           use spmd_error_mod, only: spmd_in, spmd_out
           implicit none
@@ -147,4 +147,4 @@
 #endif
         end subroutine spmd_send_double
 
-    end module spmd_send_mod
+      end module spmd_send_mod

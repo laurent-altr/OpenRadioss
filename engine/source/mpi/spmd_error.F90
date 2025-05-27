@@ -22,56 +22,56 @@
 !Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
 
       module spmd_error_mod
-    use iso_c_binding
-    implicit none
-    
-    interface
-        function c_getpid() bind(c, name="getpid")
+        use iso_c_binding
+        implicit none
+
+        interface
+          function c_getpid() bind(c, name="getpid")
             import :: c_int
             integer(c_int) :: c_getpid
-        end function c_getpid
-        
-        function c_system(command) bind(c, name="system")
+          end function c_getpid
+
+          function c_system(command) bind(c, name="system")
             import :: c_char, c_int
             character(kind=c_char), intent(in) :: command(*)
             integer(c_int) :: c_system
-        end function c_system
-    end interface
+          end function c_system
+        end interface
 
-    contains
+      contains
 
 #ifdef DEBUG_SPMD
         subroutine print_traceback()
-        implicit none
-        integer(c_int) :: pid
-        character(len=200) :: command
-        character(len=200, kind=c_char) :: c_command
-        integer :: i, result
-        
-        write(*,*) "=== TRACEBACK START ==="
-        
-        pid = c_getpid()
-        write(*,*) "Process ID:", pid
-        
-        write(command, '("gdb -batch -ex ""set confirm off"" -ex ""bt"" -p ", I0, " 2>/dev/null")') pid
-        
-        ! Convert Fortran string to C string
-        do i = 1, len_trim(command)
+          implicit none
+          integer(c_int) :: pid
+          character(len=200) :: command
+          character(len=200, kind=c_char) :: c_command
+          integer :: i, result
+
+          write(*,*) "=== TRACEBACK START ==="
+
+          pid = c_getpid()
+          write(*,*) "Process ID:", pid
+
+          write(command, '("gdb -batch -ex ""set confirm off"" -ex ""bt"" -p ", I0, " 2>/dev/null")') pid
+
+          ! Convert Fortran string to C string
+          do i = 1, len_trim(command)
             c_command(i:i) = command(i:i)
-        end do
-        c_command(len_trim(command)+1:len_trim(command)+1) = c_null_char
-        
-        !write(*,*) "Executing:", trim(command)
-        result = c_system(c_command)
-        
-        if (result /= 0) then
+          end do
+          c_command(len_trim(command)+1:len_trim(command)+1) = c_null_char
+
+          !write(*,*) "Executing:", trim(command)
+          result = c_system(c_command)
+
+          if (result /= 0) then
             write(*,*) "Note: gdb command returned status", result
             write(*,*) "If no backtrace appeared, gdb might not be available"
             write(*,*) "or the process might not have debug symbols."
-        end if
-        
-        write(*,*) "=== TRACEBACK END ==="
-    end subroutine print_traceback
+          end if
+
+          write(*,*) "=== TRACEBACK END ==="
+        end subroutine print_traceback
 #endif
 
 
@@ -142,7 +142,7 @@
 !                                                   Body
 ! ----------------------------------------------------------------------------------------------------------------------
 #ifdef DEBUG_SPMD
-         ! call print_traceback()
+          ! call print_traceback()
           write(6,*) 'Entering MPI call: ', tag
 #endif
         end subroutine spmd_in
