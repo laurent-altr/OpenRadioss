@@ -874,9 +874,9 @@
               "nb_detached_nodes_local",nb_detached_nodes_local
             call flush(6)
           endif
-          do i = 1,nb_detached_nodes_global(ispmd+1)
-            detached_nodes_local(i) =  nodes%itab(numnod0 + i)  !nodes%itab(nodes%parent_node(numnod0 + i))
-          enddo
+!         do i = 1,nb_detached_nodes_global(ispmd+1)
+!           detached_nodes_local(i) =  nodes%itab(numnod0 + i)  !nodes%itab(nodes%parent_node(numnod0 + i))
+!         enddo
 
           ! reuse displ as displ
           displ(1:nspmd) = 0
