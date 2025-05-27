@@ -60,6 +60,8 @@
             call MPI_Allgatherv(sendbuf, sendcount, MPI_REAL, recvbuf, recvcounts, displs, MPI_REAL, SPMD_COMM_WORLD, ierr)
           endif
           call spmd_out(tag,ierr)
+#else
+          recvbuf(1:recvcounts) = sendbuf(1:recvcounts)
 #endif
         end subroutine spmd_allgatherv_reals
 ! ======================================================================================================================
@@ -88,6 +90,8 @@
             call MPI_Allgatherv(sendbuf, sendcount, MPI_INT, recvbuf, recvcounts, displs, MPI_INT, SPMD_COMM_WORLD, ierr)
           endif
           call spmd_out(tag,ierr)
+#else
+          recvbuf(1:recvcounts) = sendbuf(1:recvcounts)
 #endif
         end subroutine spmd_allgatherv_ints
 ! ======================================================================================================================
@@ -116,6 +120,8 @@
             call MPI_Allgatherv(sendbuf, sendcount, MPI_DOUBLE_PRECISION, recvbuf, recvcounts, displs, MPI_DOUBLE_PRECISION, SPMD_COMM_WORLD, ierr)
           endif
           call spmd_out(tag,ierr)
+#else
+            recvbuf(1:recvcounts) = sendbuf(1:recvcounts)
 #endif
         end subroutine spmd_allgatherv_doubles
         !||====================================================================

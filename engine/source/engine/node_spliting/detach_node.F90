@@ -277,7 +277,7 @@
 ! ----------------------------------------------------------------------------------------------------------------------
 !           write(6,*) "set_new_node_values",nodes%numnod
           numnod = nodes%numnod
-          nodes%itab(numnod+1) = nodes%max_uid ! -nodes%itab(i) !temporary id of the new node 
+          nodes%itab(numnod+1) = -nodes%itab(i) !temporary id of the new node 
           nodes%IKINE(numnod+1) = nodes%IKINE(i)
           nodes%V(1:3,numnod+1) = nodes%V(1:3,i)
           nodes%X(1:3,numnod+1) = nodes%X(1:3,i)
@@ -392,8 +392,8 @@
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Body
 ! ----------------------------------------------------------------------------------------------------------------------
-          new_uid = nodes%max_uid
-          old_uid = nodes%itab(node_id)
+!         new_uid = nodes%max_uid
+!         old_uid = nodes%itab(node_id)
           new_local_id = nodes%numnod +1
 !           write(6,*) 'detach_from_shells old_uid = ', old_uid, ' new_uid = ', new_uid
 !           write(6,*) 'new_local_id = ', new_local_id
@@ -468,8 +468,8 @@
           endif
           write(6,*) "detach_node",node_id,nodes%itab(node_id),"from:",shell_list(1:list_size)
           call flush(6)
-          new_uid = nodes%max_uid + 1
-          nodes%max_uid = new_uid
+!         new_uid = nodes%max_uid + 1
+!         nodes%max_uid = new_uid
           old_uid = nodes%itab(node_id)
           numnod = nodes%numnod
           new_local_id = nodes%numnod + 1
@@ -912,13 +912,12 @@
             displ(i) = displ(i-1) + nb_detached_nodes_global(i-1)                             
           enddo
 
-#ifdef MPI
-!         call MPI_allgatherv(detached_nodes_local,nb_detached_nodes_global(ispmd+1),MPI_INTEGER, &
-!           detached_nodes,nb_detached_nodes_global,displ,MPI_INTEGER,SPMD_COMM_WORLD,ierr)
-          
-#else
-          detached_nodes = detached_nodes_local
-#endif
+          if(nspmd > 1) then 
+            call spmd_allgatherv(detached_nodes_local,nb_detached_nodes_global(ispmd+1), &
+            detached_nodes,nb_detached_nodes_global,displ)
+          else
+            detached_nodes = detached_nodes_local
+          endif
 
           ! If the detached node is at a boundary of an MPI domain, it can be detached multiple times
           ! we need to identify those duplicates and assign a new unique id to them

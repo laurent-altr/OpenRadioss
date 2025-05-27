@@ -5661,9 +5661,9 @@ C Init var parallel SMP
 c ========================================================================================
 C                                     node splitting
              numnod_old = numnod
-!            call test_jc_shell_detach(nodes, element, interfaces, npari, ninter, ipari, numnod,
-!    .                numnodg, elbuf_tab, ngroup, ngrouc, nparg, iparg, igrouc, numelc, ispmd, nspmd,
-!    .                lcnel, cnel, addcnel, cracks)
+             call test_jc_shell_detach(nodes, element, interfaces, npari, ninter, ipari, numnod,
+     .                numnodg, elbuf_tab, ngroup, ngrouc, nparg, iparg, igrouc, numelc, ispmd, nspmd,
+     .                lcnel, cnel, addcnel, cracks)
 
              if(numnod_old < numnod ) then
                write(6,*) 'Node splitting detected:', numnod_old, numnod
