@@ -544,7 +544,7 @@
 !                                                   Local variables
 ! ----------------------------------------------------------------------------------------------------------------------
           real(kind=wp), dimension(:), allocatable :: detach_shell
-          integer :: ig,ng,numnod0,i,j,k,l,m,n,n1,n2,n3,n4,nel,nft
+          integer :: ig,ng,numnod0,i,j,k,l,m,n,n1,n2,n3,n4,nel,nft,p
           double precision :: discrepancy,max_discrepancy
           integer :: crack_root, next_root
           integer, dimension(20) :: crack !< id of the noodes that are part of the crack
@@ -567,8 +567,10 @@
           integer, dimension(:), allocatable :: detached_nodes, detached_nodes_local
           integer, dimension(:), allocatable :: nb_detached_nodes_global
           integer, dimension(:), allocatable :: nb_detached_nodes
+          integer :: nb_detached_nodes_local
+          logical, dimension(:), allocatable :: is_unique 
           integer :: total_new_nodes, total_new_unique_nodes
-          logical :: is_new 
+          logical :: is_new, boundary_node_detached
           integer :: displ(nspmd)
           integer :: ierr
           integer :: old_max_uid
@@ -681,6 +683,8 @@
           enddo
           deallocate(ghostshelldamage)
 
+          allocate(detached_nodes_local(numnod))
+          nb_detached_nodes_local = 0
 
           allocate(shell_list(numelc))
           shell_list = 0
@@ -839,6 +843,8 @@
                 cracks%previous_node(c) = cracks%current_node(c)
                 cracks%current_node(c) = crack(c)
                 do i = 1, ncrack
+                  nb_detached_nodes_local = nb_detached_nodes_local + 1
+                  detached_nodes_local(nb_detached_nodes_local) = nodes%itab(crack(i))
                   call detach_node(nodes,crack(i),element,shell_list,shells_to_detach,npari,ninter, ipari, interf)
                   !      call detach_node(nodes,crack(i),element,shell_list,shells_to_detach,npari,ninter, ipari, interf, local_data)
                   numnod = numnod + 1
@@ -849,6 +855,94 @@
           enddo
           ! call spmd_detach_node_end(local_data)
 
+
+          ! list nodes that are detached from the shells at this timestep
+          allocate(nb_detached_nodes(nspmd))
+          allocate(nb_detached_nodes_global(nspmd))
+          nb_detached_nodes_global = 0
+          nb_detached_nodes(1:nspmd) = 0
+          nb_detached_nodes(ispmd+1) = numnod - numnod0
+          ! call mpi_allreduce
+          call spmd_allreduce(nb_detached_nodes,nb_detached_nodes_global,nspmd,SPMD_MAX)
+
+          total_new_nodes = sum(nb_detached_nodes_global(1:nspmd))
+          !allocate(detached_nodes_local(nb_detached_nodes_global(ispmd+1)))
+          allocate(detached_nodes(total_new_nodes))
+          if(nb_detached_nodes_global(ispmd+1) .ne. nb_detached_nodes_local) then
+            write(6,*) "Error: number of detached nodes is not equal to the number of local detached nodes"
+            write(6,*) "nb_detached_nodes_global(ispmd+1)",nb_detached_nodes_global(ispmd+1), &
+              "nb_detached_nodes_local",nb_detached_nodes_local
+            call flush(6)
+          endif
+          do i = 1,nb_detached_nodes_global(ispmd+1)
+            detached_nodes_local(i) =  nodes%itab(numnod0 + i)  !nodes%itab(nodes%parent_node(numnod0 + i))
+          enddo
+
+          ! reuse displ as displ
+          displ(1:nspmd) = 0
+          do i = 2, nspmd
+            displ(i) = displ(i-1) + nb_detached_nodes_global(i-1)                             
+          enddo
+
+          if(nspmd > 1) then 
+          call spmd_allgatherv(detached_nodes_local,nb_detached_nodes_global(ispmd+1), &
+            detached_nodes,nb_detached_nodes_global,displ)
+          else
+            detached_nodes = detached_nodes_local
+          endif
+
+          ! If the detached node is at a boundary of an MPI domain, it can be detached multiple times
+          ! we need to identify those duplicates and assign a new unique id to them
+          boundary_node_detached = .false.
+          total_new_unique_nodes = 0
+          allocate(is_unique(total_new_nodes))
+          is_unique = .true.
+          do i = 1, total_new_nodes
+            is_new = .true.
+            do j = 1, i-1
+              if(detached_nodes(i) == detached_nodes(j)) then
+                is_new = .false.
+                exit
+              endif
+            enddo
+            if(is_new) then 
+              total_new_unique_nodes = total_new_unique_nodes + 1
+              old_max_uid = old_max_uid + 1
+              do j = i+1,total_new_nodes
+                if(detached_nodes(j) == detached_nodes(i)) then
+                  detached_nodes(j) = old_max_uid
+                  is_unique(j) = .false.
+                  is_unique(i) = .false.
+                endif
+              enddo
+              detached_nodes(i) = old_max_uid
+            endif
+          enddo
+
+          do i = 1,nb_detached_nodes_global(ispmd+1)
+             if(.not. is_unique(i+displ(ispmd+1))) boundary_node_detached = .true.     
+             write(6,*) "New node ",i," detached node id: ", detached_nodes(i+displ(ispmd+1)),nodes%itabm1(numnod0 + i)
+           !  nodes%itab(numnod0 + i) = detached_nodes(i+displ(ispmd+1))
+           !  nodes%itabm1(numnod0 + i) = detached_nodes(i+displ(ispmd+1))
+           !  nodes%itabm1(2*(numnod0 + i)) = numnod0 + i
+          enddo
+
+          if(ispmd == 0) numnodg = numnodg0 + total_new_unique_nodes
+
+          do p = 1, nspmd
+            if(p == ispmd) cycle
+            do i = nodes%boundary_add(1,P),nodes%boundary_add(1,P+1)-1
+
+            enddo
+          enddo
+
+          if(total_new_unique_nodes .ne. total_new_nodes) then
+            ! some boundary nodes were detached by different processors
+            ! need to update  FR_ELEM, IAD_ELEM (fr_node / iad_node)
+          else                                                
+            ! a boundary node was detached only be me
+
+          endif
 
           ! detach nodes from ill-shaped shells
           dmax = 0.0
@@ -879,6 +973,7 @@
               if(distance > treshold * element%shell%dist_to_center(i)) then
                 if(nodes%nchilds(nodes%parent_node(element%shell%ixc(j+1,i))) > 3) cycle
 
+
                 crack(1) = element%shell%ixc(j+1,i)
                 shell_list(1) = i
                 shells_to_detach = 1
@@ -892,75 +987,11 @@
           enddo
 
 
-          ! list nodes that are detached from the shells at this timestep
-          allocate(nb_detached_nodes(nspmd))
-          allocate(nb_detached_nodes_global(nspmd))
-          nb_detached_nodes_global = 0
-          nb_detached_nodes(1:nspmd) = 0
-          nb_detached_nodes(ispmd+1) = numnod - numnod0
-          ! call mpi_allreduce
-          call spmd_allreduce(nb_detached_nodes,nb_detached_nodes_global,nspmd,SPMD_MAX)
-
-          total_new_nodes = sum(nb_detached_nodes_global(1:nspmd))
-          allocate(detached_nodes_local(nb_detached_nodes_global(ispmd+1)))
-          allocate(detached_nodes(total_new_nodes))
-          do i = 1,nb_detached_nodes_global(ispmd+1)
-            detached_nodes_local(i) = nodes%itab(numnod0 + i)
-          enddo
-
-          ! reuse displ as displ
-          displ(1:nspmd) = 0
-          do i = 2, nspmd
-            displ(i) = displ(i-1) + nb_detached_nodes_global(i-1)                             
-          enddo
-
-          if(nspmd > 1) then 
-          call spmd_allgatherv(detached_nodes_local,nb_detached_nodes_global(ispmd+1), &
-            detached_nodes,nb_detached_nodes_global,displ)
-          else
-            detached_nodes = detached_nodes_local
-          endif
-
-          ! If the detached node is at a boundary of an MPI domain, it can be detached multiple times
-          ! we need to identify those duplicates and assign a new unique id to them
-          total_new_unique_nodes = 0
-          do i = 1, total_new_nodes
-            is_new = .true.
-            do j = 1, i-1
-              if(detached_nodes(i) == detached_nodes(j)) then
-                is_new = .false.
-                exit
-              endif
-            enddo
-            if(is_new) then 
-              total_new_unique_nodes = total_new_unique_nodes + 1
-              old_max_uid = old_max_uid + 1
-              do j = i+1,total_new_nodes
-                if(detached_nodes(j) == detached_nodes(i)) then
-                  detached_nodes(j) = old_max_uid
-                endif
-              enddo
-              detached_nodes(i) = old_max_uid
-            endif
-          enddo
-
-          do i = 1,nb_detached_nodes_global(ispmd+1)
-             nodes%itab(numnod0 + i) = detached_nodes(i+displ(ispmd+1))
-             nodes%itabm1(numnod0 + i) = detached_nodes(i+displ(ispmd+1))
-             nodes%itabm1(2*(numnod0 + i)) = numnod0 + i
-          enddo
-
-          if(ispmd == 0) numnodg = numnodg0 + total_new_unique_nodes
-
-          if(total_new_unique_nodes .ne. total_new_nodes) then
-            ! some boundary nodes were detached by different processors
-            ! need to update  FR_ELEM, IAD_ELEM (fr_node / iad_node)
-
-          endif
 
 
 
 
+          deallocate(is_unique)
           deallocate(nb_detached_nodes)
           deallocate(detached_nodes_local)
           deallocate(nb_detached_nodes_global)
