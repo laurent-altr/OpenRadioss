@@ -430,7 +430,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
       !||    qa_out_mod                       ../common_source/qa/qa_out_mod.F
       !||    scratchfile_mod                  ../engine/share/modules/scratchfiles_mod.F
       !||====================================================================
-      SUBROUTINE ARRET (N)  
+      SUBROUTINE ARRET(N)  
       USE H3D_MOD
       USE INOUTFILE_MOD
       USE QA_OUT_MOD
