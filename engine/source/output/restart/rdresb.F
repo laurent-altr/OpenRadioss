@@ -300,7 +300,8 @@ C fichier de restart au format binaire ieee
 C
         CALL CUR_FIL_C(0)
 
-        CALL READ_I_C(NODGLOB,SNODGLOB)
+        !CALL READ_I_C(NODGLOB,SNODGLOB)
+        CALL READ_I_C(NODES%NODGLOB,SNODGLOB)
 
         CALL READ_I_C(NODES%MAIN_PROC,SWEIGHT)
 
@@ -806,7 +807,7 @@ C lecture directe de ADDCNE
         IF(IPARIT==1) THEN
           CALL READ_I_C(ELEMENT%PON%ADSKY,NUMNOD+1)
 C lecture directe de PROCNE
-          CALL READ_I_C(PROCNE,LCNE0)
+          CALL READ_I_C(ELEMENT%PON%PROCNE,LCNE0)
 C lecture directe structure interface type2
           IF (I2NSNT > 0) THEN
             CALL READ_I_C(ADDCNI2,NUMNOD+1)

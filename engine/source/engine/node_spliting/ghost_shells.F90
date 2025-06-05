@@ -175,9 +175,8 @@
               call copy_shells_list(ghosts,p,element%ghost_shell%shells_to_send(p)%index,n)
             endif
           enddo
-
-          call MPI_Alltoall(buffer_size_out,1,MPI_INTEGER,buffer_size_in,1,MPI_INTEGER,SPMD_COMM_WORLD,ierr)
-
+!          call MPI_Alltoall(buffer_size_out,1,MPI_INTEGER,buffer_size_in,1,MPI_INTEGER,SPMD_COMM_WORLD,ierr)
+          call spmd_alltoall(buffer_size_out,1,buffer_size_in,1)
 
           do p = 1, nspmd
             if(ispmd+1 == p) cycle ! skip the current process
@@ -210,14 +209,18 @@
           allocate(element%ghost_shell%nodes(4,n))
           allocate(element%ghost_shell%offset(nspmd+1))
           element%ghost_shell%offset = 0
+          allocate(element%ghost_shell%damage(n))
+          element%ghost_shell%damage = 0
+
           ! Wait for all the sends to complete
           offset = 0
           do p = 1, nspmd
+            element%ghost_shell%offset(p) = offset+1
             if(ispmd+1 == p) cycle ! skip the current process
             n = buffer_size_in(p)
-            element%ghost_shell%offset(p) = offset+1
+            !write(6,*) "init receiving ",n," shells from process ",p,"offset=",offset+1
             if(n > 0) then
-              call MPI_Wait(spmd_buffer(p)%recv_request,MPI_STATUS_IGNORE,ierr)
+              call spmd_Wait(spmd_buffer(p)%recv_request)
               do i = 1, n
                 element%ghost_shell%nodes(1,i+offset) = spmd_buffer(p)%recvbuf(1+4*(i-1))
                 element%ghost_shell%nodes(2,i+offset) = spmd_buffer(p)%recvbuf(2+4*(i-1))
@@ -242,7 +245,7 @@
             if(ispmd+1 == p) cycle ! skip the current process
             n = buffer_size_out(p)
             if( n > 0 ) then
-              call MPI_Wait(spmd_buffer(p)%send_request,MPI_STATUS_IGNORE,ierr)
+              call spmd_Wait(spmd_buffer(p)%send_request)
               deallocate(spmd_buffer(p)%sendbuf)
             endif
             if(buffer_size_in(p) > 0) then
@@ -337,15 +340,16 @@
           integer :: ierr
           integer :: p
           integer :: i,j,n,ns,nr
-          integer :: TAG
-          integer :: offset
+          integer :: offset,recv_offset,send_offset
+          integer, parameter :: TAG = 1000 !< tag for the MPI messages
 !-----------------------------------------------------------------------------------------------------------------------
 !                                                   Body
 !-----------------------------------------------------------------------------------------------------------------------
+          !write(6,*) "spmd_exchange_ghost_shells: process ",ispmd+1
           do p = 1, nspmd
-            if(ispmd+1 == p) cycle ! skip the current process
             spmd_buffer(p)%recv_request = MPI_REQUEST_NULL
             spmd_buffer(p)%send_request = MPI_REQUEST_NULL
+            if(ispmd+1 == p) cycle ! skip the current process
             n = size(element%ghost_shell%shells_to_send(p)%index)
             allocate(spmd_buffer(p)%sendbuf(chunkSize*n))
           enddo
@@ -354,9 +358,12 @@
           do p = 1, nspmd
             if(ispmd+1 == p) cycle ! skip the current process
             n = element%ghost_shell%offset(p+1) - element%ghost_shell%offset(p)
+            !write(*,*) "spmd_exchange_ghost_shells: process ",ispmd+1," receiving ",n," shells from process ",p
+
             if(n > 0) then
               nr = chunkSize*n
               allocate(spmd_buffer(p)%recvbuf(nr))
+              spmd_buffer(p)%recvbuf = 0 ! initialize the buffer
               call spmd_irecv(spmd_buffer(p)%recvbuf,nr,p-1,TAG,spmd_buffer(p)%recv_request)
             endif
           enddo
@@ -364,57 +371,40 @@
           do p = 1, nspmd
             if(ispmd+1 == p) cycle ! skip the current process
             n = size(element%ghost_shell%shells_to_send(p)%index)
+            send_offset = (element%ghost_shell%offset(p) - 1) * chunkSize
             if(n > 0) then
-              ! fill the buffer
-              do i = 1, n
-                j = element%ghost_shell%shells_to_send(p)%index(i)
-                ! copy a chunk of data
-                spmd_buffer(p)%sendbuf((i-1)*chunkSize+1:i*chunkSize) = sendbuf((j-1)*chunkSize+1:j*chunkSize)
-              enddo
+              ! fill the buffer: copy the contiguous chunk for process p
+              !write(6,*) "sendbuf(",send_offset+1,":",send_offset+n*chunkSize,")",size(sendbuf)
+              spmd_buffer(p)%sendbuf(1:n*chunkSize) = sendbuf(send_offset + 1 : send_offset + n*chunkSize)
               ns = n * chunkSize
               call spmd_isend(spmd_buffer(p)%sendbuf,ns,p-1,TAG,spmd_buffer(p)%send_request)
             endif
           enddo
 
-
-          ! unpack the recieved data
+          ! unpack the received data
           do p = 1, nspmd
             if(ispmd+1 == p) cycle ! skip the current process
             n = element%ghost_shell%offset(p+1) - element%ghost_shell%offset(p)
+            recv_offset = (element%ghost_shell%offset(p) - 1) * chunkSize
             if(n > 0) then
-              call MPI_Wait(spmd_buffer(p)%recv_request,MPI_STATUS_IGNORE,ierr)
-              do i = 1, n
-                ! copy a chunk of data
-                offset = element%ghost_shell%offset(p)
-                do j = 1, chunkSize
-                  recvbuf(1+(i-1+offset)*chunkSize+j) = spmd_buffer(p)%recvbuf((i-1)*chunkSize+j)
-                enddo
-              enddo
+              call spmd_Wait(spmd_buffer(p)%recv_request)
+              ! copy the contiguous chunk for process p
+              !write(6,*) "recvbuf(",recv_offset+1,":",recv_offset+n*chunkSize,")",size(recvbuf)
+              !call flush(6)
+              recvbuf(recv_offset + 1 : recv_offset + n*chunkSize) = spmd_buffer(p)%recvbuf(1:n*chunkSize)
             endif
           enddo
 
           ! wait for all the sends to complete
-          offset = 0
-          do p = 1, nspmd
-            if(ispmd+1 == p) cycle ! skip the current process
-            n = element%ghost_shell%offset(p+1) - element%ghost_shell%offset(p)
-            if(n > 0) then
-              offset = element%ghost_shell%offset(p)
-              call MPI_Wait(spmd_buffer(p)%recv_request,MPI_STATUS_IGNORE,ierr)
-              do i = 1, n
-                recvbuf(1+(i-1+offset)*chunkSize) = spmd_buffer(p)%recvbuf(1+(i-1)*chunkSize)
-              enddo
-            endif
-          enddo
 
           do p = 1, nspmd
             if(ispmd+1 == p) cycle ! skip the current process
             ! Free Send Request
             if(spmd_buffer(p)%send_request /= MPI_REQUEST_NULL) then
-              call MPI_Wait(spmd_buffer(p)%send_request,MPI_STATUS_IGNORE,ierr)
+              call spmd_Wait(spmd_buffer(p)%send_request)
             endif
-            deallocate(spmd_buffer(p)%recvbuf)
-            deallocate(spmd_buffer(p)%sendbuf)
+            if(allocated(spmd_buffer(p)%recvbuf)) deallocate(spmd_buffer(p)%recvbuf)
+            if(allocated(spmd_buffer(p)%sendbuf)) deallocate(spmd_buffer(p)%sendbuf)
           enddo
         end subroutine spmd_exchange_ghost_shells
 

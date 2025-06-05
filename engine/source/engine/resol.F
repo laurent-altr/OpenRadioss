@@ -546,11 +546,11 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
      U        LESDVOIS,NPSEGCOM,LSEGCOM ,NPORGEO ,
      V        IXTG1   ,NPBYL   ,LPBYL   ,RBYL    ,IGEO    ,IPM     ,
      W        MADPRT  ,MADSH4  ,MADSH3  ,MADSOL  ,MADNOD  ,MADFAIL ,
-     X        IAD_RBY ,FR_RBY  ,FR_WALL ,PROCNE  ,IAD_RBY2,
+     X        IAD_RBY ,FR_RBY  ,FR_WALL ,IAD_RBY2,
      Y        FR_RBY2 ,IAD_I2M ,FR_I2M  ,ADDCNI2 ,PROCNI2 ,IADI2   ,FR_MV   ,
      Z        IADMV2  ,FR_LL   ,FR_RL   ,IADCJ   ,
      a        FR_CJ   ,FR_SEC  ,
-     b        IAD_SEC ,IAD_CUT ,FR_CUT  ,RG_CUT  ,NEWFRONT,FR_MAD  ,NODGLOB ,
+     b        IAD_SEC ,IAD_CUT ,FR_CUT  ,RG_CUT  ,NEWFRONT,FR_MAD  ,
      c        FXBIPM  ,FXBRPM  ,FXBNOD  ,FXBMOD  ,FXBGLM  ,FXBCPM  ,FXBCPS  ,
      d        FXBLM   ,FXBFLS  ,FXBDLS  ,FXBDEP  ,FXBVIT  ,FXBACC  ,FXBELM  ,
      e        FXBSIG  ,FXBGRVI ,FXBGRVR ,EIGIPM  ,EIGIBUF ,EIGRPM  ,
@@ -794,13 +794,13 @@ C-----------------------------------------------
      .           NPSEGCOM(*), LSEGCOM(*), IGEO(NPROPGI,*),
      .           IPM(NPROPMI,*),MADPRT(*), MADSH4(*), MADSH3(*), MADSOL(*),
      .           MADNOD(*),MADFAIL(*),
-     .           PROCNE(*), FR_WALL(*),IAD_RBY2(*),
+     .           FR_WALL(*),IAD_RBY2(*),
      .           FR_RBY2(*),IAD_I2M(*),FR_I2M(*),ADDCNI2(*),PROCNI2(*),IADI2(*),
      .           FR_MV(*), IADMV2(*),  FR_LL(*),  FR_RL(*),
      .           IADCJ(*), FR_CJ(*),
      .           FR_SEC(*), IAD_SEC(4,*),
      .           IAD_CUT(NSPMD+2,*), FR_CUT(*), RG_CUT(*), NEWFRONT(*),
-     .           FR_MAD(5,*), NODGLOB(*), LNODPOR(*), FR_I18(*),
+     .           FR_MAD(5,*), LNODPOR(*), FR_I18(*),
      .           FXBIPM(NBIPM,*),FXBNOD(*),FXBELM(*), FXBGRVI(*),
      .           EIGIPM(NEIPM,*), EIGIBUF(*), IFLOW(*), FASOLFR(*),
      .           DD_R2R(NSPMD+1,*), LGRAV(*), FR_LAGF(3,*), LLAGF(*),
@@ -1276,8 +1276,9 @@ C-------------------------------------------------------------------------------
               DATA IUN/1/
               INTEGER MAXFUNC
               PARAMETER (MAXFUNC  = 100)
-              integer :: numnod_old
+              integer :: numnod_old,numnodm_old
               TYPE(cracks_) :: cracks
+              integer :: new_crack
 C-----------------------------------------------------------------------------------
 C Err THK
 C-----------------------------------------------------------------------------------
@@ -1410,7 +1411,7 @@ C
               NUMSPH_GLO_R2R = 0
               FLG_SPHINOUT_R2R = 0
 
-              CALL ASSINIT(ELEMENT%PON%ADSKY,NODES%BOUNDARY_ADD,NODES%BOUNDARY,PROCNE,LISENDP,LIRECVP)
+              CALL ASSINIT(ELEMENT%PON%ADSKY,NODES%BOUNDARY_ADD,NODES%BOUNDARY,ELEMENT%PON%PROCNE,LISENDP,LIRECVP)
               IF(IPLYXFEM > 0 )
      .          CALL ASSINIT_PXFEM(ADSKY_PXFEM,INOD_PXFEM,NODES%BOUNDARY_ADD,NODES%BOUNDARY,
      .                             PROCNE_PXFEM,LISENDP_PXFEM,LIRECVP_PXFEM)
@@ -2170,7 +2171,7 @@ C
      M         IXTG1    ,IBCL     ,NODES%VISCN    ,DD_R2R   ,
      O         ELBUF    ,IPART    ,MADPRT   ,MADSH4   ,
      P         MADSH3   ,MADSOL   ,MADNOD   ,MADFAIL  ,IGEO     ,
-     Q         INTLIST  ,NBINTC   ,PROCNE   ,NISKYFI  ,NODES%WEIGHT   ,
+     Q         INTLIST  ,NBINTC   ,ELEMENT%PON%PROCNE   ,NISKYFI  ,NODES%WEIGHT   ,
      R         ISIZXV   ,ILENXV   ,ADDCNI2  ,PROCNI2  ,IAD_I2M  ,
      S         FR_I2M   ,FR_NBCCI2,I2SIZE   ,FR_MAD   ,LWIBEM   ,
      T         LWRBEM   ,FXBFP    ,FXBEFW   ,FXBEDP   ,FXBGRP   ,
@@ -2832,9 +2833,9 @@ C---------------------------------------------------------------------
                   ELSE
                     SIZ = 0
                   END IF
-                  CALL SPMD_COLLECTM(TAGNOD_SMS,NODES%ITAB,NODES%WEIGHT,NODGLOB,SIZ)
+                  CALL SPMD_COLLECTM(TAGNOD_SMS,NODES%ITAB,NODES%WEIGHT,NODES%NODGLOB,SIZ)
                 ELSE
-                  CALL COLLECTM(TAGNOD_SMS,NODES%ITAB,NODES%WEIGHT,NODGLOB)
+                  CALL COLLECTM(TAGNOD_SMS,NODES%ITAB,NODES%WEIGHT,NODES%NODGLOB)
                 END IF
               END IF
 C---------------------------------------------------------------------
@@ -2985,7 +2986,7 @@ C------ one routine for EIG
      D                            KXX         , IXX         , KXSP     , IXSP      , NOD2SP  ,
      E                            SPBUF       , IXS(L1)     , IXS(L2)  , IXS(L3)   , NODES%VR      ,
      F                            MONVOL      , VOLMON      , IPM      , IGEO      , IPARG   ,
-     G                            NODGLOB     , NODES%BOUNDARY_ADD    , NODES%BOUNDARY  , FR_SEC    , FR_RBY2 ,
+     G                            NODES%NODGLOB     , NODES%BOUNDARY_ADD    , NODES%BOUNDARY  , FR_SEC    , FR_RBY2 ,
      H                            IAD_RBY2    , FR_WALL     ,  IPARI   ,
      I                            INTERFACES%INTBUF_TAB  , NODES%D           ,PARTSAV   ,
      J                            FSAV(1,NFNCA+1),FSAV(1,NFTCA+1), NODES%TEMP      , THKE    ,
@@ -4301,7 +4302,7 @@ C Init var parallel SMP
      D            PM                ,INTSTAMP       ,NODES%WEIGHT   ,NISKYFIE        ,IRLEN20         ,
      E            ISLEN20           ,IRLEN20T       ,ISLEN20T       ,IRLEN20E        ,ISLEN20E        ,
      F            MSKYI_SMS         ,ISKYI_SMS      ,NATIV_SMS      ,INT18ADD        ,FCONTG          ,
-     G            FNCONTG           ,FTCONTG        ,NODGLOB        ,NODES%MS0       ,NPC             ,
+     G            FNCONTG           ,FTCONTG        ,NODES%NODGLOB        ,NODES%MS0       ,NPC             ,
      H            WA                ,SENSORS%SENSOR_TAB,QFRICINT    ,NCONT           ,INDEXCONT       ,
      I            TAGCONT           ,INOD_PXFEM     ,MS_PLY         ,WAGAP           ,ELBUF_TAB       ,
      J            CONDN(IDX_CONDN)  ,CONDNSKYI      ,NV46           ,
@@ -5175,7 +5176,7 @@ C
                   IF(H3D_DATA%N_VECT_PCONT_MAX /=0.AND.NINTSTAMP==0) LENC = LENC+6*LENI
 
                   CALL SPMD_EXCH2_A_PON(INTERFACES,
-     1             NODES%BOUNDARY_ADD    ,NODES%BOUNDARY   ,ELEMENT%PON%ADSKY   ,PROCNE    ,FR_NBCC     ,
+     1             NODES%BOUNDARY_ADD    ,NODES%BOUNDARY   ,ELEMENT%PON%ADSKY   ,ELEMENT%PON%PROCNE    ,FR_NBCC     ,
      2             LENGTH        ,LENR      ,LENS    ,ELEMENT%PON%FSKY      ,ELEMENT%PON%FSKY        ,
      3             ELEMENT%PON%FSKYM       ,ALE%SUB%IFSUBM    ,SIZI    ,LENI      ,ELEMENT%PON%IADSDP      ,
      4             ELEMENT%PON%IADRCP      ,ELEMENT%PON%ISENDP    ,ELEMENT%PON%IRECVP  ,FFSKY     ,PROCNE_PXFEM,
@@ -5188,6 +5189,17 @@ C
                 ENDIF
                 IF (IMON>0) CALL STOPTIME(TIMERS,TIMER_EXFOR)
               ENDIF
+
+!              DO i = 1, NSPMD
+!                DO j = NODES%BOUNDARY_ADD(1,i),NODES%BOUNDARY_ADD(1,i+1)-1
+!                   k = NODES%BOUNDARY(j) 
+!                   if(k > NUMNOD .OR. K < 1) THEN
+!                      WRITE(6,*) "Error in boundary node number",k," for domain",i
+!                      STOP
+!                    ENDIF
+!                    write(6,*) nodes%ITAB(k),"X",NODES%X(1,k),NODES%X(2,k),NODES%X(3,k)
+!                 ENDDO
+!              ENDDO
 
 C--- //------------------------------
 C       PARITH/ON ASSEMBLY OF FORCES AFTER COMMUNICATION
@@ -5293,6 +5305,13 @@ C
               IF(KDTINT/=0) CALL MODSTI(NODFTSK,NODLTSK,NODES%STIFN,NODES%VISCN,NODES%MS)
 
 !$OMP END PARALLEL
+!             DO i = 1,numnod
+!                if(nodes%itab(i) == 907470) then
+!                  write(6,'(I10,A,6Z20)') nodes%itab(i)," A ",nodes%A(1,i),nodes%A(2,i),nodes%A(3,i)
+!    .                                                        ,nodes%X(1,i),nodes%X(2,i),nodes%X(3,i)
+!                endif
+!             enddo
+!
 C
               IF(IPARIT==1) DEALLOCATE( FSKY_L )
               IF (IMON>0) CALL STOPTIME(TIMERS,TIMER_ASM)
@@ -5314,7 +5333,7 @@ C===============================================================================
                 IF ( NCYCLE>=DEBSTART .AND.
      .               MOD(NCYCLE-DEBSTART,RSTFREQ)==0 ) THEN
                   CALL SPMD_COLLECT_NLOCAL(NLOC_DMG%FNL(:,1),NLOC_DMG%L_NLOC ,NLOC_DMG%NNOD,
-     .                                     NLOC_DMG%POSI    ,NLOC_DMG,SIZ,NODGLOB,NODES%ITAB     )
+     .                                     NLOC_DMG%POSI    ,NLOC_DMG,SIZ,NODES%NODGLOB,NODES%ITAB     )
                 ENDIF
               ENDIF
 
@@ -5436,9 +5455,9 @@ C---------------------------------------------------------------------
                     ELSE
                       SIZ = 0
                     END IF
-                    CALL SPMD_COLLECT(NODES%A,NODES%ITAB,NODES%WEIGHT,NODGLOB,SIZ)
+                    CALL SPMD_COLLECT(NODES%A,NODES%ITAB,NODES%WEIGHT,NODES%NODGLOB,SIZ)
                   ELSE
-                    CALL COLLECT(NODES%A,NODES%ITAB,NODES%WEIGHT,NODGLOB)
+                    CALL COLLECT(NODES%A,NODES%ITAB,NODES%WEIGHT,NODES%NODGLOB)
                   END IF
                 END IF
               END IF
@@ -5661,12 +5680,14 @@ C Init var parallel SMP
 c ========================================================================================
 C                                     node splitting
              numnod_old = numnod
+             numnodm_old = numnodm
              call test_jc_shell_detach(nodes, element, interfaces, npari, ninter, ipari, numnod,
      .                numnodg, elbuf_tab, ngroup, ngrouc, nparg, iparg, igrouc, numelc, ispmd, nspmd,
-     .                lcnel, cnel, addcnel, cracks)
+     .                lcnel, cnel, addcnel, cracks, new_crack)
 
-             if(numnod_old < numnod ) then
-               write(6,*) 'Node splitting detected:', numnod_old, numnod
+             if(new_crack > 0) then
+               numnodm = numnodm_old + new_crack
+               !write(6,*) new_crack,'Node splitting detected:', numnod_old, numnod
                CALL INIT_NODAL_STATE( IPARI,SHOOT_STRUCT,INTERFACES%INTBUF_TAB,NODES%BOUNDARY_ADD,NODES%BOUNDARY,
      .                              NODES%ITAB,NODES,GEO,ADDCNEL,CNEL,
      .                              IXS,ELEMENT%SHELL%IXC,IXT,IXP,IXR,IXTG,
@@ -5701,6 +5722,7 @@ C                                     node splitting
      5              ADDTMPL    ,IPARG     )
 
                ENDIF
+               LCNE0 = SIZE(ELEMENT%PON%PROCNE)
              endif
 
 
@@ -7210,9 +7232,9 @@ C---------------------------------------------------------------------
                       ELSE
                         SIZ = 0
                       END IF
-                      CALL SPMD_COLLECTT(NODES%TEMP,NODES%ITAB,NODES%WEIGHT,NODGLOB,SIZ)
+                      CALL SPMD_COLLECTT(NODES%TEMP,NODES%ITAB,NODES%WEIGHT,NODES%NODGLOB,SIZ)
                     ELSE
-                      CALL COLLECTT(NODES%TEMP,NODES%ITAB,NODES%WEIGHT,NODGLOB)
+                      CALL COLLECTT(NODES%TEMP,NODES%ITAB,NODES%WEIGHT,NODES%NODGLOB)
                     END IF
                   END IF
                 END IF
@@ -8346,7 +8368,7 @@ C===============================================================================
      7               NPBYL    ,LPBYL    ,IBFV     ,VEL      ,NPC      ,
      8               TF       ,NEWFRONT ,ICONTACT ,RWBUF    ,LPRW     ,
      9               NPRW     ,RBYL     ,NODES%D        ,NODES%DR       ,KINET    ,
-     A               NODGLOB  ,NODES%WEIGHT   ,NBNCL    ,NBIKL    ,NBNODL   ,
+     A               NODES%NODGLOB  ,NODES%WEIGHT   ,NBNCL    ,NBIKL    ,NBNODL   ,
      B               NBNODLR  ,FR_LAGF  ,LLAGF    ,NODES%BOUNDARY_ADD ,NODES%BOUNDARY  ,
      C               INTERFACES%INTBUF_TAB ,H3D_DATA, PYTHON)
                 END IF
@@ -8626,7 +8648,7 @@ C Regular animation
                   IF(MOD(NCYCLE,DEBUG(MACRO_DEBUG_CHKSM)) == 0  ) THEN
                     CALL SPMD_FLUSH_ACCEL(NCYCLE,  ISPMD,   NSPMD, NUMNOD,
      .                                    NUMNODG, NUMNODM, NODES%A,     NODES%ITAB,
-     .                                    NODES%WEIGHT,  NODGLOB)
+     .                                    NODES%WEIGHT,  NODES%NODGLOB)
                   ENDIF
                 ENDIF
 
@@ -8661,7 +8683,7 @@ C Regular animation
      I          KXSP          ,IXSP           ,NOD2SP         ,SPBUF          ,NODES%DR,
      J          FSAVD         ,LRIVET         ,RIVET          ,ISKWN          ,IFRAME        ,
      M          XFRAME        ,IXS(L1)        ,IXS(L2)        ,IXS(L3)        ,NDMA          ,
-     N          MONVOL        ,VOLMON         ,IPM            ,IGEO           ,NODGLOB       ,
+     N          MONVOL        ,VOLMON         ,IPM            ,IGEO           ,NODES%NODGLOB       ,
      .          NODES%BOUNDARY_ADD      ,NODES%BOUNDARY        ,
      U          FR_RBY2       ,IAD_RBY2       ,FR_WALL        ,FR_SEC         ,FXBIPM        ,FXBRPM   ,
      V          NDIN          ,FXBDEP         ,FXBVIT         ,FXBACC         ,IFLOW         ,
@@ -8694,7 +8716,7 @@ C Regular animation
 C
                 IF((MSTOP == 1 .AND. ICTLSTOP == 0) .OR. MSTOP == 2 .OR. DT2<=ZERO)THEN
                   CALL SORTIE_ERROR(
-     1             NODES%V        ,NODGLOB    ,NODES%WEIGHT     ,NODES%ITAB       ,NODES%MS          ,
+     1             NODES%V        ,NODES%NODGLOB    ,NODES%WEIGHT     ,NODES%ITAB       ,NODES%MS          ,
      2             NODES%MS0      ,10         ,PARTSAV    ,IPART      ,PM          ,
      3             IGEO     )
                 END IF
@@ -8879,7 +8901,7 @@ C----       10,11,12:ELBUF_C,BUFMAT_C,X_C,13,14:DD,DDR,15,16:X_ac,V_zero,23,24:A
      M            FANI(1,1+NFOA+2*(NSECT+NRBODY)),RWSAV  ,FSAVD ,
      N            GRAPHE , FAC_K  ,IPIV_K ,NKCOND,NSENSOR,
      O            MONVOL ,IGRSURF,FR_MV  ,VOLMON ,DIRUL,
-     P            NODGLOB,MUMPS_PAR,CDDLP ,ISENDTO,IRCVFROM,NEWFRONT,IMSCH  ,
+     P            NODES%NODGLOB,MUMPS_PAR,CDDLP ,ISENDTO,IRCVFROM,NEWFRONT,IMSCH  ,
      Q            I2MSCH ,ISIZXV,ILENXV ,ISLEN7  ,IRLEN7 ,ISLEN11,IRLEN11,ISLEN17,
      R            IRLEN17,IRLEN7T,ISLEN7T,KINET  ,NUM_IMP1,NODES%TEMP  ,DT2PREV,WA     ,
      S            LGRAV  ,SH4TREE,SH3TREE,IRLEN20,ISLEN20,IRLEN20T,ISLEN20T,
@@ -8922,7 +8944,7 @@ C
      H            NOM_OPT,        IGRSURF,         BUFSF,     IDATA,
      I            RDATA,          KXX,             IXX,       KXSP,           IXSP,
      J            NOD2SP,         SPBUF,           IXS(L1),   IXS(L2),        IXS(L3),
-     K            NODES%VR,             MONVOL,          VOLMON,    NODGLOB,        NODES%BOUNDARY_ADD,
+     K            NODES%VR,             MONVOL,          VOLMON,    NODES%NODGLOB,  NODES%BOUNDARY_ADD,
      L            NODES%BOUNDARY,        FR_SEC,          FR_RBY2,   IAD_RBY2,       FR_WALL,
      M            NODES%V,              NODES%A,               GRAPHE,    PARTSAV ,       XFRAME  ,
      N            DIRUL,
@@ -9183,7 +9205,7 @@ C===============================================================================
      9              IPARI           ,NODFTSK       ,NODLTSK     ,ITSK        ,
      A              NODES%BOUNDARY_ADD        ,NODES%BOUNDARY       ,NBRCVOIS    ,NBSDVOIS    ,LNRCVOIS   ,
      B              LNSDVOIS        ,NODES%WEIGHT        ,ELEMENT%PON%ADSKY,ELEMENT%PON%FSKY,ELEMENT%PON%IADS,
-     C              FR_WALL         ,NPORGEO       ,PROCNE      ,
+     C              FR_WALL         ,NPORGEO       ,ELEMENT%PON%PROCNE      ,
      D              FR_NBCC         ,ELEMENT%PON%IADQ    ,NODES%XDP         ,IGRNOD      ,
      E              NODES%DR              ,INTERFACES%INTBUF_TAB    ,NODES%ITAB        ,MULTI_FVM   ,
      F              ALE_CONNECTIVITY,NODES%DDP           ,NE_NERCVOIS ,NE_NESDVOIS ,

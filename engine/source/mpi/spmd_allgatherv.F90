@@ -61,7 +61,7 @@
           endif
           call spmd_out(tag,ierr)
 #else
-          recvbuf(1:recvcounts) = sendbuf(1:recvcounts)
+          recvbuf(1:sendcount) = sendbuf(1:sendcount)
 #endif
         end subroutine spmd_allgatherv_reals
 ! ======================================================================================================================
@@ -91,7 +91,7 @@
           endif
           call spmd_out(tag,ierr)
 #else
-          recvbuf(1:recvcounts) = sendbuf(1:recvcounts)
+          recvbuf(1:sendcount) = sendbuf(1:sendcount)
 #endif
         end subroutine spmd_allgatherv_ints
 ! ======================================================================================================================
@@ -121,7 +121,7 @@
           endif
           call spmd_out(tag,ierr)
 #else
-            recvbuf(1:recvcounts) = sendbuf(1:recvcounts)
+            recvbuf(1:sendcount) = sendbuf(1:sendcount)
 #endif
         end subroutine spmd_allgatherv_doubles
         !||====================================================================

@@ -47,6 +47,7 @@ C-----------------------------------------------
        my_real
      .   X(3,*)
        INTEGER WEIGHT(*),NODGLOB(*),NUM,SRECBUF
+      ! num = numnodG (all nodes on p0, 0 on others)
 C-----------------------------------------------
 C   L O C A L   V A R I A B L E S
 C-----------------------------------------------
@@ -65,6 +66,8 @@ C-----------------------------------------------
        ALLOCATE(BUFSR(3,NUMNODM))
        ALLOCATE(XGLOB(3,NUM))
        ALLOCATE(IBUF(NUMNODM))
+       write(6,*) "numnod=",numnod,"numnodg=",NUM,"numnnodm=",NUMNODM
+
         
        IF (ISPMD/=0) THEN
 
@@ -78,10 +81,7 @@ C-----------------------------------------------
              BUFSR(3,SIZ) = X(3,I) 
            END IF
          END DO
-
-C   a cause de la version simple precision, on ne peux pas metre l'entier
-C   dans le buffer flottant car on n a que 2puiss 24 bits dispo ~ 16 Million
-C   de noeuds au max
+         write(6,*) "SIZ=",SIZ
 
          MSGTYP = MSGOFF2 
          CALL MPI_SEND(IBUF,SIZ,MPI_INTEGER,IT_SPMD(1),MSGTYP,
@@ -94,15 +94,17 @@ C
 
 
        ELSE
-
+          SIZ = 0
           DO I=1,NUMNOD
             IF (WEIGHT(I)==1) THEN
+              SIZ = SIZ + 1
               NG = NODGLOB(I)
               XGLOB(1,NG) = X(1,I)
               XGLOB(2,NG) = X(2,I)
               XGLOB(3,NG) = X(3,I)
             ENDIF
           ENDDO
+          write(6,*) "SIZ=",SIZ
 
 
           DO I=2,NSPMD
@@ -112,7 +114,7 @@ C   Reception du buffer entier des adresses NODGLOB
 
             CALL MPI_PROBE(IT_SPMD(I),MSGTYP,
      .                    SPMD_COMM_WORLD,STATUS,ierror)
-              CALL MPI_GET_COUNT(STATUS,MPI_INTEGER,SIZ,ierror)
+            CALL MPI_GET_COUNT(STATUS,MPI_INTEGER,SIZ,ierror)
 
             CALL MPI_RECV(IBUF,SIZ,MPI_INTEGER,IT_SPMD(I),MSGTYP,
      .                  SPMD_COMM_WORLD,STATUS,ierror)
@@ -126,9 +128,19 @@ C   Reception du buffer flottant des adresses NODGLOB
          
             NREC = SIZ 
 
-
             DO K = 1, NREC
               NG = IBUF(K)
+              if(ng > size(XGLOB,2).or. ng < 1) then
+                write(*,*) 'Error: xglob',ng,size(XGLOB,2)
+                call flush(6  )
+                stop
+              end if
+              if(k>size(BUFSR,2).or. k < 1) then
+                write(*,*) 'Error: bufsr',k,size(BUFSR,2)
+                call flush(6  )
+                stop
+              end if
+             
               XGLOB(1,NG) = BUFSR(1,K)
               XGLOB(2,NG) = BUFSR(2,K)
               XGLOB(3,NG) = BUFSR(3,K)

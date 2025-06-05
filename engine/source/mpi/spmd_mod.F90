@@ -110,6 +110,7 @@
         use spmd_irecv_mod, only: spmd_irecv
         use spmd_wait_mod, only: spmd_wait, spmd_waitall, spmd_waitany
         use spmd_allgatherv_mod, only: spmd_allgatherv
+        use spmd_alltoall_mod, only: spmd_alltoall 
         implicit none
         ! Define the interface for spmd_send
 ! dummy tags for MPI calls that do not have a tag
@@ -133,6 +134,7 @@
 #ifndef MPI
         integer, parameter, public :: MPI_STATUS_IGNORE = 0
         integer, parameter, public :: MPI_STATUS_SIZE = 1
+        integer, parameter, public :: MPI_REQUEST_NULL = 0
 #endif
         ! \brief Interface for spmd_reduce, a wrapper for MPI_REDUCE
         interface spmd_reduce
@@ -168,6 +170,7 @@
         public :: spmd_probe
         public :: spmd_barrier
         public :: spmd_allgatherv
+        public :: spmd_alltoall
 
       contains
 ! ======================================================================================================================
@@ -437,6 +440,8 @@
 
           call MPI_Reduce(sendbuf, recvbuf, buf_count, MPI_REAL, mpi_op, root, used_comm, ierr)
           call spmd_out(TAG_REDUCE,ierr)
+#else
+          recvbuf(1:buf_count) = sendbuf(1:buf_count)
 #endif
         end subroutine spmd_reduce_ints
 ! ======================================================================================================================
@@ -471,7 +476,6 @@
           call spmd_out(TAG_REDUCE,ierr)
 #else
           recvbuf(1:buf_count) = sendbuf(1:buf_count)
-
 #endif
         end subroutine spmd_reduce_doubles
 ! ======================================================================================================================
@@ -506,7 +510,6 @@
           call spmd_out(TAG_ALLREDUCE,ierr)
 #else
           recvbuf(1:buf_count) = sendbuf(1:buf_count)
-
 #endif
         end subroutine
 ! ======================================================================================================================
@@ -541,7 +544,6 @@
           call spmd_out(TAG_ALLREDUCE,ierr)
 #else
           recvbuf(1:buf_count) = sendbuf(1:buf_count)
-
 #endif
         end subroutine
 ! ======================================================================================================================
@@ -641,6 +643,8 @@
 
           call MPI_Reduce(sendbuf, recvbuf, buf_count, MPI_REAL, mpi_op, root, used_comm, ierr)
           call spmd_out(TAG_REDUCE,ierr)
+#else
+          recvbuf = sendbuf  ! In case MPI is not defined, just copy the value
 #endif
         end subroutine spmd_reduce_int
 ! ======================================================================================================================
@@ -673,6 +677,8 @@
 
           call MPI_Reduce(sendbuf, recvbuf, buf_count, MPI_REAL, mpi_op, root, used_comm, ierr)
           call spmd_out(TAG_REDUCE,ierr)
+#else
+          recvbuf = sendbuf  ! In case MPI is not defined, just copy the value
 #endif
         end subroutine spmd_reduce_double
 ! ======================================================================================================================
@@ -705,6 +711,8 @@
 
           call MPI_Allreduce(sendbuf, recvbuf, buf_count, MPI_INTEGER, mpi_op, used_comm, ierr)
           call spmd_out(TAG_ALLREDUCE,ierr)
+#else
+          recvbuf = sendbuf  ! In case MPI is not defined, just copy the value
 #endif
         end subroutine
 ! ======================================================================================================================
@@ -737,6 +745,8 @@
 
           call MPI_Allreduce(sendbuf, recvbuf, buf_count, MPI_DOUBLE_PRECISION, mpi_op, used_comm, ierr)
           call spmd_out(TAG_ALLREDUCE,ierr)
+#else
+          recvbuf = sendbuf  ! In case MPI is not defined, just copy the value
 #endif
         end subroutine
 ! ======================================================================================================================
@@ -769,6 +779,8 @@
 
           call MPI_Allreduce(sendbuf, recvbuf, buf_count, MPI_DOUBLE_PRECISION, mpi_op, used_comm, ierr)
           call spmd_out(TAG_ALLREDUCE,ierr)
+#else
+          recvbuf = sendbuf  ! In case MPI is not defined, just copy the value
 #endif
         end subroutine
       end module spmd_mod

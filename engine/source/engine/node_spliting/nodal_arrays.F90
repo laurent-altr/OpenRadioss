@@ -95,6 +95,7 @@
           integer, dimension(:), allocatable :: work_array_node ! working array to mark nodes (connected to active element or deleted element)
           integer, dimension(:), allocatable :: parent_node
           integer, dimension(:), allocatable :: nchilds
+          integer, dimension(:), allocatable :: nodglob !<global internal id (starter id?) 
 
           real(kind=wp), dimension(:,:), allocatable :: A !< accelerations: 3 x numnod (x nthreads if parith/off)
           real(kind=wp), dimension(:,:), allocatable :: AR !< accelerations
@@ -224,6 +225,7 @@
           call my_alloc(arrays%parent_node,numnod)
           call my_alloc(arrays%nchilds,numnod)
           call my_alloc(arrays%itab,numnod)
+          call my_alloc(arrays%nodglob,numnod)
           call my_alloc(arrays%IKINE,numnod)
           call my_alloc(arrays%ICODT,sicodt)
           call my_alloc(arrays%ICODR,numnod*iroddl)
@@ -261,6 +263,7 @@
           call my_alloc(arrays%MAIN_PROC,numnod)
           call my_alloc(arrays%WEIGHT_MD,numnod)
           call my_alloc(arrays%ITABM1,2*numnod)
+
 
           if(iparith == 0) then
             call my_alloc(arrays%A,3,numnod*nthreads)
@@ -355,6 +358,7 @@
             arrays%max_numnod = int(numnod * (1.0D0 + padding/100.0D0))
             arrays%max_numnod = max(arrays%max_numnod, numnod+1)
             call extend_array(arrays%itab,size(arrays%itab), arrays%max_numnod)
+            call extend_array(arrays%nodglob, size(arrays%nodglob), arrays%max_numnod)
             call extend_array(arrays%IKINE, size(arrays%IKINE), arrays%max_numnod)
             call extend_array(arrays%V, 3, size(arrays%V, 2), 3, arrays%max_numnod + arrays%nrcvvois)
             call extend_array(arrays%X, 3, size(arrays%X, 2), 3, arrays%max_numnod + arrays%nrcvvois)

@@ -163,6 +163,9 @@ C-----------------------------------------------
             NCT = ADSKY(N)-1
             NC = ADSKY(N+1)-ADSKY(N)
             DO K = NCT+1, NCT+NC ! ADSKY(N) to ADSKY(N+1)-1
+!             if(nodes%itab(n) == 907470) then 
+!                write(6,"(I10,3Z20)") K-NCT,FSKY(1,K),FSKY(2,K),FSKY(3,K)     
+!             endif
               NODES%A(1,N)   = NODES%A(1,N)   + FSKY(1,K)
               NODES%A(2,N)   = NODES%A(2,N)   + FSKY(2,K)
               NODES%A(3,N)   = NODES%A(3,N)   + FSKY(3,K)
