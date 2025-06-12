@@ -3149,6 +3149,7 @@ C----------------------------------------
  100          CONTINUE
 
               NC_DEBUG = NCYCLE
+
 C========================================================================================
 C                                     NON PARALLEL SECTION (SMP)
 C========================================================================================
@@ -5200,6 +5201,13 @@ C
 !                    write(6,*) nodes%ITAB(k),"X",NODES%X(1,k),NODES%X(2,k),NODES%X(3,k)
 !                 ENDDO
 !              ENDDO
+!              do i = 1 ,numnod
+!               if(nodes%itab(i) == 921825 .and. NCYCLE > 4370 .and. ispmd==nspmd-1) then
+!                 write(6,'(i10,3Z20)') __LINE__, nodes%x(1,i), nodes%x(2,i), nodes%x(3,i)
+!                 write(6,'(i10,3Z20)') __LINE__, nodes%v(1,i), nodes%v(2,i), nodes%v(3,i)
+!                 write(6,'(i10,3Z20)') __LINE__, nodes%A(1,i), nodes%A(2,i), nodes%A(3,i)
+!               endif
+!              enddo
 
 C--- //------------------------------
 C       PARITH/ON ASSEMBLY OF FORCES AFTER COMMUNICATION
@@ -5306,11 +5314,21 @@ C
 
 !$OMP END PARALLEL
 !             DO i = 1,numnod
-!                if(nodes%itab(i) == 907470) then
+
+!                if(nodes%itab(i) == 921692) then
 !                  write(6,'(I10,A,6Z20)') nodes%itab(i)," A ",nodes%A(1,i),nodes%A(2,i),nodes%A(3,i)
 !    .                                                        ,nodes%X(1,i),nodes%X(2,i),nodes%X(3,i)
 !                endif
 !             enddo
+!              do i = 1 ,numnod
+!               if(nodes%itab(i) == 921825 .and. NCYCLE > 4370 .and. ispmd==nspmd-1) then
+!                 write(6,'(i10,3Z20)') __LINE__, nodes%A(1,i), nodes%A(2,i), nodes%A(3,i)
+!                 write(6,'(i10,3Z20)') __LINE__, nodes%V(1,i), nodes%v(2,i), nodes%v(3,i)
+!                 write(6,'(i10,3Z20)') __LINE__, nodes%X(1,i), nodes%X(2,i), nodes%X(3,i)
+!               endif
+!              enddo
+
+
 !
 C
               IF(IPARIT==1) DEALLOCATE( FSKY_L )
@@ -5677,6 +5695,15 @@ C Init var parallel SMP
                   CALL DEALLOC_SHOOT_INTER( SHOOT_STRUCT )
                 ENDIF
               ENDIF
+c              do i = 1 ,numnod
+c               if(nodes%itab(i) == 921825 .and. NCYCLE > 4370 .and. ispmd==nspmd-1) then
+c                 write(6,'(i10,3Z20)') __LINE__, nodes%x(1,i), nodes%x(2,i), nodes%x(3,i)
+c                 write(6,'(i10,3Z20)') __LINE__, nodes%v(1,i), nodes%v(2,i), nodes%v(3,i)
+c                 write(6,'(i10,3Z20)') __LINE__, nodes%A(1,i), nodes%A(2,i), nodes%A(3,i)
+c               endif
+c              enddo
+
+
 c ========================================================================================
 C                                     node splitting
              numnod_old = numnod
@@ -5684,6 +5711,15 @@ C                                     node splitting
              call test_jc_shell_detach(nodes, element, interfaces, npari, ninter, ipari, numnod,
      .                numnodg, elbuf_tab, ngroup, ngrouc, nparg, iparg, igrouc, numelc, ispmd, nspmd,
      .                lcnel, cnel, addcnel, cracks, new_crack)
+c              do i = 1 ,numnod
+c               if(nodes%itab(i) == 921825 .and. NCYCLE > 4370 .and. ispmd==nspmd-1) then
+c                 write(6,'(i10,3Z20)') __LINE__, nodes%x(1,i), nodes%x(2,i), nodes%x(3,i)
+c                 write(6,'(i10,3Z20)') __LINE__, nodes%v(1,i), nodes%v(2,i), nodes%v(3,i)
+c                 write(6,'(i10,3Z20)') __LINE__, nodes%A(1,i), nodes%A(2,i), nodes%A(3,i)
+c               endif
+c              enddo
+
+
 
              if(new_crack > 0) then
                numnodm = numnodm_old + new_crack
@@ -5694,6 +5730,16 @@ C                                     node splitting
      .                              SIZE_ADDCNEL,SIZE_CNEL ,
      .                              numelsg,numelqg,numelcg,numeltrg,numelpg,
      .                              numelrg,numeltgg , IXS(L1))
+
+c              do i = 1 ,numnod
+c               if(nodes%itab(i) == 921825 .and. NCYCLE > 4370 .and. ispmd==nspmd-1) then
+c                 write(6,'(i10,3Z20)') __LINE__, nodes%x(1,i), nodes%x(2,i), nodes%x(3,i)
+c                 write(6,'(i10,3Z20)') __LINE__, nodes%v(1,i), nodes%v(2,i), nodes%v(3,i)
+c                 write(6,'(i10,3Z20)') __LINE__, nodes%A(1,i), nodes%A(2,i), nodes%A(3,i)
+c               endif
+c              enddo
+
+
 
 
                IF(IDEL7NG>0.OR.IRAD2R>0.OR.ALEMUSCL_Param%IALEMUSCL>0.OR.PDEL>0) THEN
@@ -5724,6 +5770,15 @@ C                                     node splitting
                ENDIF
                LCNE0 = SIZE(ELEMENT%PON%PROCNE)
              endif
+!              do i = 1 ,numnod
+!               if(nodes%itab(i) == 921825 .and. NCYCLE > 4370 .and. ispmd==nspmd-1) then
+!                 write(6,'(i10,3Z20)') __LINE__, nodes%x(1,i), nodes%x(2,i), nodes%x(3,i)
+!                 write(6,'(i10,3Z20)') __LINE__, nodes%v(1,i), nodes%v(2,i), nodes%v(3,i)
+!                 write(6,'(i10,3Z20)') __LINE__, nodes%A(1,i), nodes%A(2,i), nodes%A(3,i)
+!               endif
+!              enddo
+
+
 
 
 C========================================================================================
@@ -5813,6 +5868,15 @@ C-----------------------------------------------------
               IF (NSLIPRING + NRETRACTOR + N_ANCHOR_REMOTE > 0) THEN
                 CALL KINE_SEATBELT_FORCE(NODES%A,NODES%STIFN,FLAG_SLIPRING_UPDATE,FLAG_RETRACTOR_UPDATE)
               ENDIF
+!              do i = 1 ,numnod
+!               if(nodes%itab(i) == 921825 .and. NCYCLE > 4370 .and. ispmd==nspmd-1) then
+!                 write(6,'(i10,3Z20)') __LINE__, nodes%x(1,i), nodes%x(2,i), nodes%x(3,i)
+!                 write(6,'(i10,3Z20)') __LINE__, nodes%v(1,i), nodes%v(2,i), nodes%v(3,i)
+!                 write(6,'(i10,3Z20)') __LINE__, nodes%A(1,i), nodes%A(2,i), nodes%A(3,i)
+!               endif
+!              enddo
+
+
 
 C-----------------------------------------------------
 C         INTERFACES 18 KINE
@@ -5872,6 +5936,16 @@ C
                 IF((IDTMINS/=0.OR.IDTMINS_INT/=0).AND.NCYCLE==0)ISMSCH=1
 
               ENDIF
+!              do i = 1 ,numnod
+!               if(nodes%itab(i) == 921825 .and. NCYCLE > 4370 .and. ispmd==nspmd-1) then
+!                 write(6,'(i10,3Z20)') __LINE__, nodes%x(1,i), nodes%x(2,i), nodes%x(3,i)
+!                 write(6,'(i10,3Z20)') __LINE__, nodes%A(1,i), nodes%A(2,i), nodes%A(3,i)
+!                 write(6,'(i10,3Z20)') __LINE__, nodes%v(1,i), nodes%v(2,i), nodes%v(3,i)
+
+!               endif
+!              enddo
+
+
 C
 C----------------------------------
 C       ITET2 of S10 Forces condensation; pass 2
@@ -5894,6 +5968,16 @@ C===============================================================================
      2                       ITAGND  ,NODFTSK,NODLTSK,GREFTSK,GRELTSK,
      3                       ITSK  ,NODES%ITAB   ,NODES%STIFN  , STIFND)
 !$OMP END PARALLEL
+!              do i = 1 ,numnod
+!               if(nodes%itab(i) == 921825 .and. NCYCLE > 4370 .and. ispmd==nspmd-1) then
+!                 write(6,'(i10,3Z20)') __LINE__, nodes%x(1,i), nodes%x(2,i), nodes%x(3,i)
+!                 write(6,'(i10,3Z20)') __LINE__, nodes%A(1,i), nodes%A(2,i), nodes%A(3,i)
+!                 write(6,'(i10,3Z20)') __LINE__, nodes%v(1,i), nodes%v(2,i), nodes%v(3,i)
+
+!               endif
+!              enddo
+
+
 
 C========================================================================================
 C                                     NON PARALLEL SECTION (SMP)
@@ -5957,6 +6041,16 @@ C Implicit barrier on NEGMAS
                 IF(NEGMAS/=0) CALL ARRET(2)
               ENDIF
 
+!              do i = 1 ,numnod
+!               if(nodes%itab(i) == 921825 .and. NCYCLE > 4370 .and. ispmd==nspmd-1) then
+!                 write(6,'(i10,3Z20)') __LINE__, nodes%x(1,i), nodes%x(2,i), nodes%x(3,i)
+!                 write(6,'(i10,3Z20)') __LINE__, nodes%A(1,i), nodes%A(2,i), nodes%A(3,i)
+!                 write(6,'(i10,3Z20)') __LINE__, nodes%v(1,i), nodes%v(2,i), nodes%v(3,i)
+
+!               endif
+!              enddo
+
+
 C========================================================================================
 C                                     NON PARALLEL SECTION (SMP)
 C========================================================================================
@@ -6012,6 +6106,15 @@ C===============================================================================
                 IF (IMONM > 0) CALL STOPTIME(TIMERS,40)
 C-----------------------------------------------------
               ENDIF
+!              do i = 1 ,numnod
+!               if(nodes%itab(i) == 921825 .and. NCYCLE > 4370 .and. ispmd==nspmd-1) then
+!                 write(6,'(i10,3Z20)') __LINE__, nodes%x(1,i), nodes%x(2,i), nodes%x(3,i)
+!                 write(6,'(i10,3Z20)') __LINE__, nodes%A(1,i), nodes%A(2,i), nodes%A(3,i)
+!                 write(6,'(i10,3Z20)') __LINE__, nodes%v(1,i), nodes%v(2,i), nodes%v(3,i)
+!               endif
+!              enddo
+
+
 C========================================================================================
 C                                     NON PARALLEL SECTION (SMP)
 C========================================================================================
@@ -6063,10 +6166,21 @@ C===============================================================================
 
               ENDIF
 
+
+
 C----------------------------------------------------------
 C     Rigid wall - Force node (moving RWALL)
 C----------------------------------------------------------
               IF(NRWALL>0)CALL RGWALF(NODES%A ,RWBUF ,NPRW ,NODES%MS )
+!              do i = 1 ,numnod
+!               if(nodes%itab(i) == 921825 .and. NCYCLE > 4370 .and. ispmd==nspmd-1) then
+!                 write(6,'(i10,3Z20)') __LINE__, nodes%x(1,i), nodes%x(2,i), nodes%x(3,i)
+!                 write(6,'(i10,3Z20)') __LINE__, nodes%A(1,i), nodes%A(2,i), nodes%A(3,i)
+!                 write(6,'(i10,3Z20)') __LINE__, nodes%v(1,i), nodes%v(2,i), nodes%v(3,i)
+!               endif
+!              enddo
+
+
 
 C-----------------------------------------------
 C     SELECTIVE MASS SCALING
@@ -6185,6 +6299,15 @@ C===============================================================================
 C----------------------------
   23          CONTINUE
 
+!              do i = 1 ,numnod
+!               if(nodes%itab(i) == 921825 .and. NCYCLE > 4370 .and. ispmd==nspmd-1) then
+!                 write(6,'(i10,3Z20)') __LINE__, nodes%x(1,i), nodes%x(2,i), nodes%x(3,i)
+!                 write(6,'(i10,3Z20)') __LINE__, nodes%A(1,i), nodes%A(2,i), nodes%A(3,i)
+!                 write(6,'(i10,3Z20)') __LINE__, nodes%v(1,i), nodes%v(2,i), nodes%v(3,i)
+!               endif
+!              enddo
+
+
 C----------------------------------------------------------
 C       INTER/TYPE21 TIME STEP
 C----------------------------------------------------------
@@ -6291,6 +6414,14 @@ C
 C========================================================================================
 C                                     PARALLEL SECTION (SMP)
 C========================================================================================
+!              do i = 1 ,numnod
+!               if(nodes%itab(i) == 921825 .and. NCYCLE > 4370 .and. ispmd==nspmd-1) then
+!                 write(6,'(i10,3Z20)') __LINE__, nodes%x(1,i), nodes%x(2,i), nodes%x(3,i)
+!                 write(6,'(i10,3Z20)') __LINE__, nodes%A(1,i), nodes%A(2,i), nodes%A(3,i)
+!                 write(6,'(i10,3Z20)') __LINE__, nodes%v(1,i), nodes%v(2,i), nodes%v(3,i)
+!               endif
+!              enddo
+
 
 !$OMP PARALLEL
 !$OMP+PRIVATE(ITSK,DT2TT,NELTSTT,ITYPTSTT,NODFTSK,NODLTSK)
@@ -6360,6 +6491,16 @@ C------------Need to stop computation at Tstop for /DT/THERM----------
 #include "lockoff.inc"
 
 !$OMP END PARALLEL
+!              do i = 1 ,numnod
+!               if(nodes%itab(i) == 921825 .and. NCYCLE > 4370 .and. ispmd==nspmd-1) then
+!                 write(6,'(i10,4Z20)') __LINE__, nodes%A(1,i), nodes%A(2,i), nodes%A(3,i),nodes%weight(i)
+!                 write(6,'(i10,3Z20)') __LINE__, nodes%A(1,i), nodes%A(2,i), nodes%A(3,i)
+!                 write(6,'(i10,3Z20)') __LINE__, nodes%v(1,i), nodes%v(2,i), nodes%v(3,i)
+
+!               endif
+!              enddo
+
+
 
 C ----RAZ of NODES%STIFN AND NODES%STIFR for kjoints with element time step----------------------
               IF ((FLG_KJ2_RAZ==1).AND.(I7KGLO==0).AND.(IDTMINS==0).AND.(NODADT==0)) THEN
@@ -6445,6 +6586,7 @@ C Init var parallel SMP
 #include "lockoff.inc"
 
 !$OMP END PARALLEL
+
 
 C========================================================================================
 C                                     NON PARALLEL SECTION (SMP)
@@ -6624,6 +6766,15 @@ C --------------------------
                 DEALLOCATE(STK_SN,STK_SR)
               ENDIF
 
+!              do i = 1 ,numnod
+!               if(nodes%itab(i) == 921825 .and. NCYCLE > 4370 .and. ispmd==nspmd-1) then
+!                 write(6,'(i10,3Z20)') __LINE__, nodes%A(1,i), nodes%A(2,i), nodes%A(3,i)
+!                 write(6,'(i10,3Z20)') __LINE__, nodes%V(1,i), nodes%V(2,i), nodes%V(3,i)
+!                 write(6,'(i10,3Z20)') __LINE__, nodes%X(1,i), nodes%X(2,i), nodes%X(3,i)
+!               endif
+!              enddo
+
+
 C--------------------------------------------------------------C
 C      RADIOSS 2 RADIOSS COUPLING
 C--------------------------------------------------------------C
@@ -6779,6 +6930,15 @@ C-----------------------------------------------
               CALL FORANI2(FANI,NODES%A,NFIA,NFEA,NODFTSK,NODLTSK,H3D_DATA)
 
 !$OMP END PARALLEL
+!              do i = 1 ,numnod
+!               if(nodes%itab(i) == 921825 .and. NCYCLE > 4370 .and. ispmd==nspmd-1) then
+!                 write(6,'(i10,3Z20)') __LINE__, nodes%A(1,i), nodes%A(2,i), nodes%A(3,i)
+!                 write(6,'(i10,3Z20)') __LINE__, nodes%V(1,i), nodes%V(2,i), nodes%V(3,i)
+!                 write(6,'(i10,3Z20)') __LINE__, nodes%X(1,i), nodes%X(2,i), nodes%X(3,i)
+!               endif
+!              enddo
+
+
 
               IF (IMON>0) CALL STOPTIME(TIMERS,TIMER_IO)
 C-----------------------------------------------
@@ -6834,6 +6994,7 @@ C===============================================================================
      S                IRWL_WORK,SMS_VFI,sz_mw6,MW6,OUTPUT%WFEXT,ams_work)
 
 !$OMP END PARALLEL
+
 
                 IF (ALLOCATED(CJWORK)) DEALLOCATE(CJWORK)
                 IF (ALLOCATED(FREA)) DEALLOCATE(FREA)
@@ -6914,6 +7075,15 @@ C-----------------------------------------------
                 ENDIF ! ILAG+IALE+IEULER/=0
 
 !$OMP END PARALLEL
+!              do i = 1 ,numnod
+!               if(nodes%itab(i) == 921825 .and. NCYCLE > 4370 .and. ispmd==nspmd-1) then
+!                 write(6,'(i10,3Z20)') __LINE__, nodes%A(1,i), nodes%A(2,i), nodes%A(3,i)
+!                 write(6,'(i10,3Z20)') __LINE__, nodes%V(1,i), nodes%V(2,i), nodes%V(3,i)
+!                 write(6,'(i10,3Z20)') __LINE__, nodes%X(1,i), nodes%X(2,i), nodes%X(3,i)
+!               endif
+!              enddo
+
+
 
                 IF (IMON>0) CALL STOPTIME(TIMERS,TIMER_INTEG)
 C-----------------------------------------------
@@ -7027,6 +7197,15 @@ C-------  ----------------
                 ENDIF
 
 !$OMP END PARALLEL
+!              do i = 1 ,numnod
+!               if(nodes%itab(i) == 921825 .and. NCYCLE > 4370 .and. ispmd==nspmd-1) then
+!                 write(6,'(i10,3Z20)') __LINE__, nodes%A(1,i), nodes%A(2,i), nodes%A(3,i)
+!                 write(6,'(i10,3Z20)') __LINE__, nodes%V(1,i), nodes%V(2,i), nodes%V(3,i)
+!                 write(6,'(i10,3Z20)') __LINE__, nodes%X(1,i), nodes%X(2,i), nodes%X(3,i)  
+!               endif
+!              enddo
+
+
 
 C-----------------------------------------------
 C         SPH SMOOTHING OF VELOCITIES
@@ -7063,6 +7242,15 @@ C===============================================================================
      9            IGEO      ,SOL2SPH_TYP,SPH_WORK)
 
 !$OMP END PARALLEL
+               do i = 1 ,numnod
+                if(nodes%itab(i) == 921825 .and. NCYCLE > 4370 .and. ispmd==nspmd-1) then
+                  write(6,'(i10,3Z20)') __LINE__, nodes%A(1,i), nodes%A(2,i), nodes%A(3,i)
+                  write(6,'(i10,3Z20)') __LINE__, nodes%V(1,i), nodes%V(2,i), nodes%V(3,i)
+                  write(6,'(i10,3Z20)') __LINE__, nodes%X(1,i), nodes%X(2,i), nodes%X(3,i)
+                endif
+               enddo
+
+
                   DEALLOCATE(WASPSYM)
 
 C========================================================================================
@@ -7102,6 +7290,16 @@ C Init var parallel SMP
 !$OMP END PARALLEL
 
                 ENDIF  ! (NUMSPH/=0).OR.(SOL2SPH_FLAG==1)
+
+c              do i = 1 ,numnod
+c               if(nodes%itab(i) == 921825 .and. NCYCLE > 4370 .and. ispmd==nspmd-1) then
+c                 write(6,'(i10,3Z20)') __LINE__, nodes%X(1,i), nodes%X(2,i), nodes%X(3,i)
+c                 write(6,'(i10,3Z20)') __LINE__, nodes%A(1,i), nodes%A(2,i), nodes%A(3,i)
+c                 write(6,'(i10,3Z20)') __LINE__, nodes%V(1,i), nodes%V(2,i), nodes%V(3,i)
+c               endif
+c              enddo
+
+
 C========================================================================================
 C                                     NON PARALLEL SECTION (SMP)
 C========================================================================================
@@ -7124,6 +7322,14 @@ C===============================================================================
 C========================================================================================
 C                                     PARALLEL SECTION (SMP)
 C========================================================================================
+C              do i = 1 ,numnod
+C               if(nodes%itab(i) == 921825 .and. NCYCLE > 4370 .and. ispmd==nspmd-1) then
+C                 write(6,'(i10,3Z20)') __LINE__, nodes%X(1,i), nodes%X(2,i), nodes%X(3,i)
+C                 write(6,'(i10,3Z20)') __LINE__, nodes%A(1,i), nodes%A(2,i), nodes%A(3,i)
+C                 write(6,'(i10,3Z20)') __LINE__, nodes%V(1,i), nodes%V(2,i), nodes%V(3,i)
+C               endif
+C              enddo
+
 
 !$OMP PARALLEL PRIVATE(ITSK,NODFTSK,NODLTSK,NODFT_NL,NODLT_NL)
                 ITSK = OMP_GET_THREAD_NUM()
@@ -7143,10 +7349,26 @@ C-----------------------------------------------
      2                               NODFTSK, NODLTSK, NODES%ITAB, MSNF , NODES%MS   ,
      3                               ALE_CONNECTIVITY%NALE     )
                 ENDIF
+!              do i = 1 ,numnod
+!               if(nodes%itab(i) == 921825 .and. NCYCLE > 4370 .and. ispmd==nspmd-1) then
+!                 write(6,'(i10,3Z20)') __LINE__, nodes%A(1,i), nodes%A(2,i), nodes%A(3,i)
+!                 write(6,'(A,Z20)') "MS=", nodes%MS(i)
+!               endif
+!              enddo
+
+
 
                 CALL ACCELE(NODES%A       ,NODES%AR      ,NODES%V    ,NODES%MS     ,NODES%IN     ,
      2                      ALE%GLOBAL%SNALE ,ALE_CONNECTIVITY%NALE   ,MS_2D  ,
      3                      SIZE_NPBY,NPBY )
+
+c              do i = 1 ,numnod
+c               if(nodes%itab(i) == 921825 .and. NCYCLE > 4370 .and. ispmd==nspmd-1) then
+c                 write(6,'(i10,3Z20)') __LINE__, nodes%A(1,i), nodes%A(2,i), nodes%A(3,i)
+c               endif
+c              enddo
+
+
 C
                 IF(IPLYXFEM > 0 )
      .            CALL PLY_ACCELE(INOD_PXFEM,MS_PLY,ZI_PLY,NODES%MS,
@@ -7238,6 +7460,15 @@ C---------------------------------------------------------------------
                     END IF
                   END IF
                 END IF
+
+c              do i = 1 ,numnod
+c               if(nodes%itab(i) == 921825 .and. NCYCLE > 4370 .and. ispmd==nspmd-1) then
+c                 write(6,'(i10,3Z20)') __LINE__, nodes%X(1,i), nodes%X(2,i), nodes%X(3,i)
+c                 write(6,'(i10,3Z20)') __LINE__, nodes%A(1,i), nodes%A(2,i), nodes%A(3,i)
+c                 write(6,'(i10,3Z20)') __LINE__, nodes%V(1,i), nodes%V(2,i), nodes%V(3,i)
+c               endif
+c              enddo
+
 
 C========================================================================================
 C                                     NON PARALLEL SECTION (SMP)
@@ -7360,6 +7591,15 @@ C===============================================================================
      3                          NODES%WEIGHT ,LGRAV   ,ITSK  ,NSENSOR, PYTHON, OUTPUT%WFEXT)
                   ENDIF
 !$OMP END PARALLEL
+!              do i = 1 ,numnod
+!               if(nodes%itab(i) == 921825 .and. NCYCLE > 4370 .and. ispmd==nspmd-1) then
+!                 write(6,'(i10,3Z20)') __LINE__, nodes%A(1,i), nodes%A(2,i), nodes%A(3,i)
+!                 write(6,'(i10,3Z20)') __LINE__, nodes%V(1,i), nodes%V(2,i), nodes%V(3,i)
+!                 write(6,'(i10,3Z20)') __LINE__, nodes%X(1,i), nodes%X(2,i), nodes%X(3,i)
+!               endif
+!              enddo
+
+
 
 C========================================================================================
 C                                     NON PARALLEL SECTION (SMP)
@@ -7401,6 +7641,16 @@ C===============================================================================
 
                   IF (IMON>0) CALL STOPTIME(TIMERS,TIMER_KIN)
                 ENDIF
+
+!              do i = 1 ,numnod
+!               if(nodes%itab(i) == 921825 .and. NCYCLE > 4370 .and. ispmd==nspmd-1) then
+!                 write(6,'(i10,3Z20)') __LINE__, nodes%A(1,i), nodes%A(2,i), nodes%A(3,i)
+!                 write(6,'(i10,3Z20)') __LINE__, nodes%X(1,i), nodes%X(2,i), nodes%X(3,i)
+!                 write(6,'(i10,3Z20)') __LINE__, nodes%V(1,i), nodes%V(2,i), nodes%V(3,i)  
+!               endif
+!              enddo
+
+
 
 C========================================================================================
 C                                     PARALLEL SECTION (SMP)
@@ -7548,6 +7798,15 @@ C---
                   CALL STOPTIME(TIMERS,42)
                   CALL STARTIME(TIMERS,43)
                 END IF
+!              do i = 1 ,numnod
+!               if(nodes%itab(i) == 921825 .and. NCYCLE > 4370 .and. ispmd==nspmd-1) then
+!                 write(6,'(i10,3Z20)') __LINE__, nodes%A(1,i), nodes%A(2,i), nodes%A(3,i)
+!                 write(6,'(i10,3Z20)') __LINE__, nodes%X(1,i), nodes%X(2,i), nodes%X(3,i)
+!                 write(6,'(i10,3Z20)') __LINE__, nodes%V(1,i), nodes%V(2,i), nodes%V(3,i)
+!               endif
+!              enddo
+
+
 
 C========================================================================================
 C                                     PARALLEL SECTION (SMP)
@@ -7733,6 +7992,16 @@ C-----------------------------------------------
                 CALL REACTION_FORCES_2(NODFTSK,NODLTSK,NODES%A,NODES%AR,NODES%MS,NODES%IN,FREAC,IFLAG)
 
 !$OMP END PARALLEL
+!              do i = 1 ,numnod
+!               if(nodes%itab(i) == 921825 .and. NCYCLE > 4370 .and. ispmd==nspmd-1) then
+!                 write(6,'(i10,3Z20)') __LINE__, nodes%A(1,i), nodes%A(2,i), nodes%A(3,i)
+!                 write(6,'(i10,3Z20)') __LINE__, nodes%V(1,i), nodes%V(2,i), nodes%V(3,i)
+!                 write(6,'(i10,3Z20)') __LINE__, nodes%X(1,i), nodes%X(2,i), nodes%X(3,i)
+
+!               endif
+!              enddo
+
+
 
               END IF
 
@@ -7848,6 +8117,16 @@ C----------------------------------------------
 C========================================================================================
 C                                     PARALLEL SECTION (SMP)
 C========================================================================================
+!              do i = 1 ,numnod
+!               if(nodes%itab(i) == 921825 .and. NCYCLE > 4370 .and. ispmd==nspmd-1) then
+!                 write(6,'(i10,3Z20)') __LINE__, nodes%A(1,i), nodes%A(2,i), nodes%A(3,i)
+!                 write(6,'(i10,3Z20)') __LINE__, nodes%V(1,i), nodes%V(2,i), nodes%V(3,i)
+!                 write(6,'(i10,3Z20)') __LINE__, nodes%X(1,i), nodes%X(2,i), nodes%X(3,i)
+
+!               endif
+!              enddo
+
+
 
               IF (IMON>0) CALL STARTIME(TIMERS,TIMER_KIN)
               IF (IMONM > 0) CALL STARTIME(TIMERS,43)
@@ -9050,6 +9329,16 @@ C----------------------------
 
                 IF(IMON>0) CALL STARTIME(TIMERS,TIMER_INTEG)
 
+!              do i = 1 ,numnod
+!               if(nodes%itab(i) == 921825 .and. NCYCLE > 4370 .and. ispmd==nspmd-1) then
+!                 write(6,'(i10,3Z20)') __LINE__, nodes%A(1,i), nodes%A(2,i), nodes%A(3,i)
+!                 write(6,'(i10,3Z20)') __LINE__, nodes%X(1,i), nodes%X(2,i), nodes%X(3,i)
+!                 write(6,'(i10,3Z20)') __LINE__, nodes%V(1,i), nodes%V(2,i), nodes%V(3,i)
+
+!               endif
+!              enddo
+
+
 C========================================================================================
 C                                     PARALLEL SECTION (SMP)
 C========================================================================================
@@ -9139,6 +9428,15 @@ C          LAGRANGE PUR
 C----------------------
 
                   IF(IMON>0) CALL STARTIME(TIMERS,TIMER_INTEG)
+!              do i = 1 ,numnod
+!               if(nodes%itab(i) == 921825 .and. NCYCLE > 4370 .and. ispmd==nspmd-1) then
+!                 write(6,'(i10,3Z20)') __LINE__, nodes%A(1,i), nodes%A(2,i), nodes%A(3,i)
+!                 write(6,'(i10,3Z20)') __LINE__, nodes%v(1,i), nodes%v(2,i), nodes%v(3,i)
+!                 write(6,'(i10,3Z20)') __LINE__, nodes%X(1,i), nodes%X(2,i), nodes%X(3,i)
+!               endif
+!              enddo
+
+
 
 C========================================================================================
 C                                     PARALLEL SECTION (SMP)
@@ -9176,6 +9474,15 @@ C
                   ENDIF
 C
 !$OMP END PARALLEL
+!              do i = 1 ,numnod
+!               if(nodes%itab(i) == 921825 .and. NCYCLE > 4370 .and. ispmd==nspmd-1) then
+!                 write(6,'(i10,3Z20)') __LINE__, nodes%x(1,i), nodes%x(2,i), nodes%x(3,i)
+!                 write(6,'(i10,3Z20)') __LINE__, nodes%v(1,i), nodes%v(2,i), nodes%v(3,i)
+!                 write(6,'(i10,3Z20)') __LINE__, nodes%A(1,i), nodes%A(2,i), nodes%A(3,i)
+!               endif
+!              enddo
+
+
 
                   IF(IMON>0) CALL STOPTIME(TIMERS,TIMER_INTEG)
 C

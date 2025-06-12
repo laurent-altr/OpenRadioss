@@ -282,6 +282,7 @@
           nodes%V(1:3,numnod+1) = nodes%V(1:3,i)
           nodes%X(1:3,numnod+1) = nodes%X(1:3,i)
           nodes%D(1:3,numnod+1) = nodes%D(1:3,i)
+!         if(nodes%itab(i) == 921825) write(6,*) "old x",nodes%X(1:3,i)
           nodes%iskew(numnod+1) = nodes%iskew(i)
           nodes%ICODE(numnod+1) = nodes%ICODE(i)
           nodes%TAG_S_RBY(numnod+1) = nodes%TAG_S_RBY(i)
@@ -301,10 +302,11 @@
           if(nodes%used_dr) then
             nodes%DR(1:3,numnod+1) = nodes%DR(1:3,i)
           endif
-          nodes%MS(numnod+1) = nodes%MS(i) / TWO
-          nodes%MS(i) = nodes%MS(i) / TWO
-          nodes%MS0(numnod+1) = nodes%MS0(i) /TWO
-          nodes%MS0(i) = nodes%MS0(i) /TWO
+          nodes%MS(numnod+1) = nodes%MS(i)  / TWO
+!         nodes%MS(i) = nodes%MS(i)  / TWO
+          nodes%MS0(numnod+1) = nodes%MS0(i)   /TWO
+!         nodes%MS0(i) = nodes%MS0(i)  /TWO
+
 #ifdef MYREAL4
           nodes%DDP(1:3,numnod+1) = nodes%DDP(1:3,i)
           nodes%XDP(1:3,numnod+1) = nodes%XDP(1:3,i)
@@ -313,7 +315,7 @@
           endif
 
 #endif
-          nodes%WEIGHT(numnod+1) = nodes%WEIGHT(i)
+          nodes%WEIGHT(numnod+1) = 1 ! nodes%WEIGHT(i)
           nodes%WEIGHT_MD(numnod+1) = nodes%WEIGHT_MD(i)
           nodes%MAIN_PROC(numnod+1) = nodes%MAIN_PROC(i)
 
@@ -395,17 +397,35 @@
           new_uid = nodes%max_uid
           old_uid = nodes%itab(node_id)
           new_local_id = nodes%numnod +1
-!           write(6,*) 'detach_from_shells old_uid = ', old_uid, ' new_uid = ', new_uid
-!           write(6,*) 'new_local_id = ', new_local_id
+          write(6,*) 'detach_from_shells old_uid = ', old_uid
+!         write(6,*) 'new_local_id = ', new_local_id
           do i = 1, list_size
             do j = 1,4
               if(elements%shell%nodes(j,shell_list(i)) == node_id) then
                 elements%shell%nodes(j,shell_list(i)) = new_local_id
                 elements%shell%ixc(j+1,shell_list(i)) = new_local_id
-                !  write(6,*) '---- Detached node ', old_uid, ' from shell ',shell_list(i),elements%shell%user_id(shell_list(i))
+!               write(6,*) '---- Detached node ', old_uid, ' from shell ',elements%shell%user_id(shell_list(i))
+!               write(6,*) 'SHell nodes = ', nodes%itab(elements%shell%nodes(1,shell_list(i))), &
+!                 nodes%itab(elements%shell%nodes(2,shell_list(i))), &
+!                 nodes%itab(elements%shell%nodes(3,shell_list(i))), &
+!                 nodes%itab(elements%shell%nodes(4,shell_list(i)))
               end if
             enddo
           end do
+!         do i = 1, size(elements%shell%nodes,2)
+!           if(  nodes%itab(elements%shell%nodes(1,i)) ==  921692  &
+!           .or. nodes%itab(elements%shell%nodes(2,i)) ==  921692  &
+!           .or. nodes%itab(elements%shell%nodes(3,i)) ==  921692  &
+!           .or. nodes%itab(elements%shell%nodes(4,i)) ==  921692) then
+!             write(6,'(I10,A,4I10)') elements%shell%user_id(i),' has nodes:', &
+!               nodes%itab(elements%shell%nodes(1,i)), &
+!               nodes%itab(elements%shell%nodes(2,i)), &
+!               nodes%itab(elements%shell%nodes(3,i)), &
+!               nodes%itab(elements%shell%nodes(4,i))
+!           end if
+!         end do
+
+
           if(nodes%iparith > 0) then! /PARITH/ON
             call update_pon_shells(elements,list_size,shell_list,new_local_id,node_id)
           endif
@@ -575,6 +595,8 @@
           integer :: ierr
           integer :: old_max_uid
           integer :: numnodg0
+          integer, dimension(:), allocatable :: permutation, shell_glob_id
+          integer :: ii
 
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   body
@@ -653,6 +675,16 @@
           enddo
           allocate(ghostShellCoordinates(nghostshells*12))
           call spmd_exchange_ghost_shells(element,ispmd,nspmd,12,shellCoordinates,ghostShellCoordinates)
+
+
+!         do i = 1, numnod
+!           if(nodes%itab(i) == 921825) then
+!             !write acceleration of the detached nodes
+!             write(6,"(I10,3Z20)") __LINE__,nodes%A(1,i),nodes%A(2,i),nodes%A(3,i)
+!           endif
+!         enddo
+
+
           
 
           numnod0 = numnod
@@ -743,9 +775,19 @@
              endif
            enddo
 
+          allocate(permutation(numelc))
+          allocate(shell_glob_id(numelc))
+
+          do i = 1, numelc
+            permutation(i) = i
+            shell_glob_id(i) = element%shell%user_id(i)
+          enddo
+          CALL STLSORT_INT_INT(NUMELC,shell_glob_id,permutation)
+
           ! detach nodes from ill-shaped shells
           dmax = 0.0
-          do i = 1, numelc
+          do ii = 1, numelc
+            i = permutation(ii) ! the shells are treated in the order of their user_id, for reproducibility
             n1 = element%shell%ixc(2,i)
             n2 = element%shell%ixc(3,i)
             n3 = element%shell%ixc(4,i)
@@ -773,13 +815,24 @@
                 nb_detached_nodes_local = nb_detached_nodes_local + 1
                 write(6,*) "detach ill-formed shell",element%shell%user_id(i),nodes%itab(crack(1))
                 detached_nodes_local(nb_detached_nodes_local) = nodes%itab(crack(1))
-                nodes%A(1:3,crack(1)) = 0.0      
+                !nodes%A(1:3,crack(1)) = 0.0      
                 call detach_node(nodes,crack(1),element,shell_list,shells_to_detach,npari,ninter, ipari, interf)
                 numnod = numnod + 1
                 if(ispmd == 0) numnodg = numnodg + 1
               endif
             enddo
           enddo
+          deallocate(permutation)
+          deallocate(shell_glob_id)
+
+!         do i = 1, numnod
+!           if(nodes%itab(i) == 921825) then
+!             !write acceleration of the detached nodes
+!             write(6,"(I10,3Z20)") __LINE__,nodes%A(1,i),nodes%A(2,i),nodes%A(3,i)
+!           endif
+!         enddo
+
+
 
           ! list nodes that are detached from the shells at this timestep
           allocate(nb_detached_nodes(nspmd))
@@ -825,23 +878,47 @@
           else
             old_max_uid = nodes%max_uid
           endif
-
+        
+          !write(6,*) "numnodg0",numnodg0
+!         if(total_new_nodes >0) write(6,*) "MASS nb_detached_nodes_global",nb_detached_nodes_global(1:nspmd)
+!         if(total_new_nodes >0) write(6,*) "MASS detached_nodes",detached_nodes(1:total_new_nodes)
           !Not finalized: new nodes may be boundary nodes (i.e. new node attached to two shells from different processors)
+          k = 0
+          ! ordre different  en fonction  du nombre de processeurs: il faut parcourir les detached_nodes dans l'ordre croissant
           do P = 1, nspmd
             do i = 1, nb_detached_nodes_global(P)
+              k = k + 1
               old_max_uid = old_max_uid + 1
               numnodg0 = numnodg0 + 1
               if( p ==  ispmd+1) then
                  nodes%itab(numnod0 + i) = old_max_uid
                  nodes%itabm1(numnod0 + i) = old_max_uid                                
                  nodes%itabm1(2*(numnod0 + i)) = numnod0 + i
-                 nodes%nodglob(numnod0 + i) = numnodg0 
+                 nodes%nodglob(numnod0 + i) = numnodg0
+                 !write(6,*) numnod0 + i, "has uid", old_max_uid, "and nodglob", numnodg0
+              endif
+              j = get_local_node_id(nodes,detached_nodes(k))
+              if(j > 0) then
+               nodes%MS(j) = nodes%MS(j) / TWO
+               nodes%MS0(j) = nodes%MS0(j) /TWO
+!              if(nodes%itab(j) == 921825) then
+!                write(6,*) p,"MASS =",nodes%MS(j),nodes%MS0(j),nodes%weight(j)                                             
+!              endif
+
               endif
             enddo
           enddo
           nodes%max_uid = old_max_uid
 
-          if(ispmd == 0) numnodg = numnodg0
+!         do i = 1, numnod
+!           if(nodes%itab(i) == 921825) then
+!             !write acceleration of the detached nodes
+!             write(6,"(I10,5Z20)") __LINE__,nodes%ms(i),nodes%ms0(i),nodes%A(1,i),nodes%A(2,i),nodes%A(3,i)
+!           endif
+!         enddo
+
+          numnodg = numnodg0
+          !write(6,*) "numnodg",numnodg
 
           if (allocated(is_unique)) deallocate(is_unique)
           if (allocated(nb_detached_nodes)) deallocate(nb_detached_nodes)

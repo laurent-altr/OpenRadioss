@@ -126,7 +126,7 @@
             do j = 1, 4
               if(elements%shell%nodes(j, shell_id) == new_id) then
                 elements%pon%iadc(j,shell_id) = elements%pon%adsky(new_numnod) + contributions_count
-                write(6,*) "IADC(", shell_id, ",", j, ") = ", elements%pon%iadc(j,shell_id)
+               ! write(6,*) "IADC(", shell_id, ",", j, ") = ", elements%pon%iadc(j,shell_id)
                 contributions_count = contributions_count + 1
               endif
             enddo
@@ -136,7 +136,7 @@
           !        subroutine extend_array_double_2d(a, oldsize1, oldsize2, newsize1, newsize2, msg, stat)
           i = size(elements%pon%fsky, 2) + contributions_count
           call extend_array(elements%pon%fsky, 8,elements%pon%sfsky/8, 8, i)
-          write(6,*) old_id,"FSKY size: ", elements%pon%sfsky, " new size: ", i
+          write(6,*) "old id=", old_id, "new id=", new_id
           elements%pon%sfsky = i * 8
           elements%pon%fsky(1:8, 1:i) = 0 
 !          contributions_count = 0
