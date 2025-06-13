@@ -65,6 +65,7 @@
           integer, dimension(:), allocatable :: user_id !< user_id(i) :  user id of the shell element
           real(kind=wp), dimension(:), allocatable :: damage
           real, dimension(:), allocatable :: dist_to_center !< maximum distance of a node to the center of the element 
+          integer, dimension(:), allocatable :: permutation !< permutation of the shell element in order to have the shells sorted by user_id
           integer :: offset
           type(C_PTR) :: loc2glob
         end type shell_
@@ -126,20 +127,24 @@
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Arguments
 ! ----------------------------------------------------------------------------------------------------------------------
-            type(shell_) :: shell!< connectivity of elements
+            type(shell_) :: shell !< connectivity of elements
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Local variables
 ! ----------------------------------------------------------------------------------------------------------------------
             integer :: i
+            integer :: numelc
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Body
 ! ----------------------------------------------------------------------------------------------------------------------
             shell%loc2glob = create_umap()
-            call reserve_capacity(shell%loc2glob, size(shell%user_id))
-            do i = 1, size(shell%user_id)
+            numelc = size(shell%user_id)
+            allocate(shell%permutation(numelc))
+            call reserve_capacity(shell%loc2glob, numelc)
+            do i = 1, numelc
               call add_entry_umap(shell%loc2glob, shell%user_id(i), i)
+              shell%permutation(i) = i
             end do
-
+            CALL STLSORT_INT_INT(numelc,shell%user_id,shell%permutation)
         end subroutine init_global_shell_id
 
 

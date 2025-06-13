@@ -488,8 +488,8 @@
           endif
           !write(6,*) "detach_node",node_id,nodes%itab(node_id),"from:",shell_list(1:list_size)
           !call flush(6)
-          new_uid = nodes%max_uid + 1
-          nodes%max_uid = new_uid
+!         new_uid = nodes%max_uid + 1
+!         nodes%max_uid = new_uid
           old_uid = nodes%itab(node_id)
           numnod = nodes%numnod
           new_local_id = nodes%numnod + 1
@@ -595,7 +595,7 @@
           integer :: ierr
           integer :: old_max_uid
           integer :: numnodg0
-          integer, dimension(:), allocatable :: permutation, shell_glob_id
+          integer, dimension(:), allocatable :: permutation, processor, local_pos
           integer :: ii
 
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -775,19 +775,11 @@
              endif
            enddo
 
-          allocate(permutation(numelc))
-          allocate(shell_glob_id(numelc))
-
-          do i = 1, numelc
-            permutation(i) = i
-            shell_glob_id(i) = element%shell%user_id(i)
-          enddo
-          CALL STLSORT_INT_INT(NUMELC,shell_glob_id,permutation)
 
           ! detach nodes from ill-shaped shells
           dmax = 0.0
           do ii = 1, numelc
-            i = permutation(ii) ! the shells are treated in the order of their user_id, for reproducibility
+            i =  element%shell%permutation(ii) ! the shells are treated in the order of their user_id, for reproducibility
             n1 = element%shell%ixc(2,i)
             n2 = element%shell%ixc(3,i)
             n3 = element%shell%ixc(4,i)
@@ -815,24 +807,12 @@
                 nb_detached_nodes_local = nb_detached_nodes_local + 1
                 write(6,*) "detach ill-formed shell",element%shell%user_id(i),nodes%itab(crack(1))
                 detached_nodes_local(nb_detached_nodes_local) = nodes%itab(crack(1))
-                !nodes%A(1:3,crack(1)) = 0.0      
                 call detach_node(nodes,crack(1),element,shell_list,shells_to_detach,npari,ninter, ipari, interf)
                 numnod = numnod + 1
                 if(ispmd == 0) numnodg = numnodg + 1
               endif
             enddo
           enddo
-          deallocate(permutation)
-          deallocate(shell_glob_id)
-
-!         do i = 1, numnod
-!           if(nodes%itab(i) == 921825) then
-!             !write acceleration of the detached nodes
-!             write(6,"(I10,3Z20)") __LINE__,nodes%A(1,i),nodes%A(2,i),nodes%A(3,i)
-!           endif
-!         enddo
-
-
 
           ! list nodes that are detached from the shells at this timestep
           allocate(nb_detached_nodes(nspmd))
@@ -883,39 +863,83 @@
 !         if(total_new_nodes >0) write(6,*) "MASS nb_detached_nodes_global",nb_detached_nodes_global(1:nspmd)
 !         if(total_new_nodes >0) write(6,*) "MASS detached_nodes",detached_nodes(1:total_new_nodes)
           !Not finalized: new nodes may be boundary nodes (i.e. new node attached to two shells from different processors)
+
+          k = sum(nb_detached_nodes_global(1:nspmd)) 
+          allocate(processor(k))
+          allocate(local_pos(k))
           k = 0
-          ! ordre different  en fonction  du nombre de processeurs: il faut parcourir les detached_nodes dans l'ordre croissant
           do P = 1, nspmd
             do i = 1, nb_detached_nodes_global(P)
               k = k + 1
-              old_max_uid = old_max_uid + 1
-              numnodg0 = numnodg0 + 1
-              if( p ==  ispmd+1) then
-                 nodes%itab(numnod0 + i) = old_max_uid
-                 nodes%itabm1(numnod0 + i) = old_max_uid                                
-                 nodes%itabm1(2*(numnod0 + i)) = numnod0 + i
-                 nodes%nodglob(numnod0 + i) = numnodg0
-                 !write(6,*) numnod0 + i, "has uid", old_max_uid, "and nodglob", numnodg0
+              processor(k) = P
+              if(ispmd+1 == P) then
+                 local_pos(k) = i                                                           
+              else
+                 local_pos(k) = 0
               endif
-              j = get_local_node_id(nodes,detached_nodes(k))
-              if(j > 0) then
-               nodes%MS(j) = nodes%MS(j) / TWO
-               nodes%MS0(j) = nodes%MS0(j) /TWO
-!              if(nodes%itab(j) == 921825) then
-!                write(6,*) p,"MASS =",nodes%MS(j),nodes%MS0(j),nodes%weight(j)                                             
-!              endif
-
-              endif
-            enddo
+            enddo 
           enddo
+ 
+          k = sum(nb_detached_nodes_global(1:nspmd)) 
+          allocate(permutation(k))
+          do i = 1,k 
+            permutation(i) = i
+          enddo
+          ! sort the detached nodes in ascending order of the user id of the parent node
+          CALL STLSORT_INT_INT(k,detached_nodes,permutation)
+          do ii = 1, k
+            i = permutation(ii)
+            P = processor(i)
+            old_max_uid = old_max_uid + 1
+            numnodg0 = numnodg0 + 1
+            if( P == ispmd+1) then
+              j = local_pos(i)
+              if(j <= 0) write(6,*) "Error: local_pos is zero for detached node ",i," on processor ",P
+              nodes%itab(numnod0 + j) = old_max_uid
+              nodes%itabm1(numnod0 + j) = old_max_uid                                
+              nodes%itabm1(2*(numnod0 + j)) = numnod0 + j
+              nodes%nodglob(numnod0 + j) = numnodg0
+              write(6,*) "detached node ",nodes%itab(numnod0 + j),"form parent ",nodes%itab(nodes%parent_node(numnod0+j))
+            endif
+            j = get_local_node_id(nodes,detached_nodes(i))
+            if(j > 0) then
+             nodes%MS(j) = nodes%MS(j) / TWO
+             nodes%MS0(j) = nodes%MS0(j) /TWO
+            endif
+          enddo
+
+          if(old_max_uid /= nodes%max_uid) then
+            write(6,*) "old_max_uid",old_max_uid,"nodes%max_uid",nodes%max_uid
+          endif
           nodes%max_uid = old_max_uid
 
-!         do i = 1, numnod
-!           if(nodes%itab(i) == 921825) then
-!             !write acceleration of the detached nodes
-!             write(6,"(I10,5Z20)") __LINE__,nodes%ms(i),nodes%ms0(i),nodes%A(1,i),nodes%A(2,i),nodes%A(3,i)
-!           endif
+
+
+
+!         k = 0
+!         ! ordre different  en fonction  du nombre de processeurs: il faut parcourir les detached_nodes dans l'ordre croissant
+!         do P = 1, nspmd
+!           do i = 1, nb_detached_nodes_global(P)
+!             k = k + 1
+!             old_max_uid = old_max_uid + 1
+!             numnodg0 = numnodg0 + 1
+!             if( p ==  ispmd+1) then
+!                nodes%itab(numnod0 + i) = old_max_uid
+!                nodes%itabm1(numnod0 + i) = old_max_uid                                
+!                nodes%itabm1(2*(numnod0 + i)) = numnod0 + i
+!                nodes%nodglob(numnod0 + i) = numnodg0
+!             endif
+!             j = get_local_node_id(nodes,detached_nodes(k))
+!             if(j > 0) then
+!              nodes%MS(j) = nodes%MS(j) / TWO
+!              nodes%MS0(j) = nodes%MS0(j) /TWO
+!             endif
+!           enddo
 !         enddo
+
+          deallocate(permutation)
+          deallocate(processor)
+          deallocate(local_pos)
 
           numnodg = numnodg0
           !write(6,*) "numnodg",numnodg
