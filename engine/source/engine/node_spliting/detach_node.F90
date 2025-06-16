@@ -27,12 +27,6 @@
       !||====================================================================
       module detach_node_mod
         implicit none
-
-        type cracks_
-          integer :: ncracks
-          integer, dimension(:), allocatable :: current_node
-          integer, dimension(:), allocatable :: previous_node
-        end type cracks_
       contains
         !||====================================================================
         !||    find_segment_in_list          ../engine/source/engine/node_spliting/detach_node.F90
@@ -522,7 +516,7 @@
         !||====================================================================
         subroutine test_jc_shell_detach(nodes, element, interf, npari, ninter, ipari, numnod, &
           numnodg, elbuf, ngroup, ngrouc, nparg, iparg, igrouc, numelc, ispmd, nspmd, &
-          lcnel, cnel, addcnel, cracks, new_crack)
+          new_crack)
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Modules
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -555,10 +549,6 @@
           integer, intent(inout) :: numnod, numnodg
           integer, intent(in) :: ispmd !< rank of the processor (MPI)
           integer, intent(in) :: nspmd !< number of processors (MPI)
-          integer, intent(in) ::lcnel
-          integer, dimension(0:numnod+1), intent(in) :: addcnel ! address for the cnel array
-          integer, dimension(0:lcnel), intent(in) :: cnel ! connectivity node-->element
-          type(cracks_), intent(inout) :: cracks !< crack structure
           integer, intent(out) :: new_crack !< flag to indicate if a new crack is created
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Local variables
@@ -727,54 +717,44 @@
           crack_root = 0
 
 !          ! looking for new cracks roots
-           do i = 1, numnod
-             crack_root = i
-             if(nodal_damage(i) == 0.0d0) cycle
-             if(nodal_damage(i) > 0.75D0) then
-             do j = addcnel(i), addcnel(i+1)-1
-               shell_id = cnel(j) - element%shell%offset
-               if(detach_shell(shell_id) > 0.999d0) cycle
-               if(detach_shell(shell_id) < 0.25D0) cycle
-               n1 = element%shell%ixc(2,shell_id)
-               n2 = element%shell%ixc(3,shell_id)
-               n3 = element%shell%ixc(4,shell_id)
-               n4 = element%shell%ixc(5,shell_id)
-               if(nodal_damage(n1) == 0.0d0) cycle
-               if(nodal_damage(n2) == 0.0d0) cycle
-               if(nodal_damage(n3) == 0.0d0) cycle
-               if(nodal_damage(n4) == 0.0d0) cycle
-               is_new_crack = .true.
-               do c = 1, cracks%ncracks
-                 if(crack_root == cracks%current_node(c)) then
-                   is_new_crack = .false.
-                   exit
-                 else if(crack_root == cracks%previous_node(c)) then
-                   is_new_crack = .false.
-                   exit
-                   exit
-                 end if
-               enddo
-               if(is_new_crack) then
-                 !write(6,*) "new crack root found",cracks%ncracks+1
-                 if(cracks%ncracks == 0) then
-                   allocate(cracks%current_node(1))
-                   allocate(cracks%previous_node(1))
-                   cracks%current_node(1) = 0
-                   cracks%previous_node(1) = 0
-                 else
-                   ! add the new crack to the list of cracks
-                   call extend_array(cracks%current_node,cracks%ncracks,cracks%ncracks+1)
-                   call extend_array(cracks%previous_node,cracks%ncracks,cracks%ncracks+1)
-                   cracks%current_node(cracks%ncracks+1) = 0
-                   cracks%previous_node(cracks%ncracks+1) = 0
-                 end if
-                 cracks%ncracks = cracks%ncracks + 1
-                 cracks%previous_node(cracks%ncracks) = 0 !cracks%current_node(cracks%ncracks)
-                 cracks%current_node(cracks%ncracks) = crack_root
-               end if
-             enddo
-             endif
-           enddo
+!          do i = 1, numnod
+!            crack_root = i
+!            if(nodal_damage(i) == 0.0d0) cycle
+!            if(nodal_damage(i) > 0.75D0) then
+!            do j = addcnel(i), addcnel(i+1)-1
+!              shell_id = cnel(j) - element%shell%offset
+!              if(detach_shell(shell_id) > 0.999d0) cycle
+!              if(detach_shell(shell_id) < 0.25D0) cycle
+!              n1 = element%shell%ixc(2,shell_id)
+!              n2 = element%shell%ixc(3,shell_id)
+!              n3 = element%shell%ixc(4,shell_id)
+!              n4 = element%shell%ixc(5,shell_id)
+!              if(nodal_damage(n1) == 0.0d0) cycle
+!              if(nodal_damage(n2) == 0.0d0) cycle
+!              if(nodal_damage(n3) == 0.0d0) cycle
+!              if(nodal_damage(n4) == 0.0d0) cycle
+!              is_new_crack = .true.
+!              if(is_new_crack) then
+!                !write(6,*) "new crack root found",cracks%ncracks+1
+!                if(cracks%ncracks == 0) then
+!                  allocate(cracks%current_node(1))
+!                  allocate(cracks%previous_node(1))
+!                  cracks%current_node(1) = 0
+!                  cracks%previous_node(1) = 0
+!                else
+!                  ! add the new crack to the list of cracks
+!                  call extend_array(cracks%current_node,cracks%ncracks,cracks%ncracks+1)
+!                  call extend_array(cracks%previous_node,cracks%ncracks,cracks%ncracks+1)
+!                  cracks%current_node(cracks%ncracks+1) = 0
+!                  cracks%previous_node(cracks%ncracks+1) = 0
+!                end if
+!                cracks%ncracks = cracks%ncracks + 1
+!                cracks%previous_node(cracks%ncracks) = 0 !cracks%current_node(cracks%ncracks)
+!                cracks%current_node(cracks%ncracks) = crack_root
+!              end if
+!            enddo
+!            endif
+!          enddo
 
 
           ! detach nodes from ill-shaped shells
