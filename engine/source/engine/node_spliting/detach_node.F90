@@ -269,14 +269,12 @@
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Body
 ! ----------------------------------------------------------------------------------------------------------------------
-!           write(6,*) "set_new_node_values",nodes%numnod
           numnod = nodes%numnod
           nodes%itab(numnod+1) = nodes%max_uid ! -nodes%itab(i) !temporary id of the new node 
           nodes%IKINE(numnod+1) = nodes%IKINE(i)
           nodes%V(1:3,numnod+1) = nodes%V(1:3,i)
           nodes%X(1:3,numnod+1) = nodes%X(1:3,i)
           nodes%D(1:3,numnod+1) = nodes%D(1:3,i)
-!         if(nodes%itab(i) == 921825) write(6,*) "old x",nodes%X(1:3,i)
           nodes%iskew(numnod+1) = nodes%iskew(i)
           nodes%ICODE(numnod+1) = nodes%ICODE(i)
           nodes%TAG_S_RBY(numnod+1) = nodes%TAG_S_RBY(i)
@@ -333,11 +331,6 @@
           enddo
           nodes%parent_node(numnod+1) = p
 !         nodes%nchilds(p) = nodes%nchilds(p) + 1
-!         write(6,*) "node",p,"has",nodes%nchilds(p),"childs"
-!           if(nodes%itab(numnod+1) == 922550) write(6,*) 'stifn(',nodes%itab(i),') = ', nodes%stifn(i)
-!           if(nodes%itab(i) == 907888) write(6,*) 'stifn(',nodes%itab(i),') = ', nodes%stifn(i)
-!           write(6,*) "stifn numnod+1",nodes%stifn(numnod+1)  ,"            ",nodes%itab(numnod+1),nodes%itab(i)
-!           write(6,*) "stifn        i",nodes%stifn(i)  ,"            ",nodes%itab(numnod+1),nodes%itab(i)
 
           nodes%ITABM1(numnod+1) = nodes%max_uid !-nodes%itab(numnod+1)
           nodes%ITABM1(2*(numnod+1)) = numnod + 1
@@ -391,34 +384,14 @@
           new_uid = nodes%max_uid
           old_uid = nodes%itab(node_id)
           new_local_id = nodes%numnod +1
-          write(6,*) 'detach_from_shells old_uid = ', old_uid
-!         write(6,*) 'new_local_id = ', new_local_id
           do i = 1, list_size
             do j = 1,4
               if(elements%shell%nodes(j,shell_list(i)) == node_id) then
                 elements%shell%nodes(j,shell_list(i)) = new_local_id
                 elements%shell%ixc(j+1,shell_list(i)) = new_local_id
-!               write(6,*) '---- Detached node ', old_uid, ' from shell ',elements%shell%user_id(shell_list(i))
-!               write(6,*) 'SHell nodes = ', nodes%itab(elements%shell%nodes(1,shell_list(i))), &
-!                 nodes%itab(elements%shell%nodes(2,shell_list(i))), &
-!                 nodes%itab(elements%shell%nodes(3,shell_list(i))), &
-!                 nodes%itab(elements%shell%nodes(4,shell_list(i)))
               end if
             enddo
           end do
-!         do i = 1, size(elements%shell%nodes,2)
-!           if(  nodes%itab(elements%shell%nodes(1,i)) ==  921692  &
-!           .or. nodes%itab(elements%shell%nodes(2,i)) ==  921692  &
-!           .or. nodes%itab(elements%shell%nodes(3,i)) ==  921692  &
-!           .or. nodes%itab(elements%shell%nodes(4,i)) ==  921692) then
-!             write(6,'(I10,A,4I10)') elements%shell%user_id(i),' has nodes:', &
-!               nodes%itab(elements%shell%nodes(1,i)), &
-!               nodes%itab(elements%shell%nodes(2,i)), &
-!               nodes%itab(elements%shell%nodes(3,i)), &
-!               nodes%itab(elements%shell%nodes(4,i))
-!           end if
-!         end do
-
 
           if(nodes%iparith > 0) then! /PARITH/ON
             call update_pon_shells(elements,list_size,shell_list,new_local_id,node_id)
@@ -473,13 +446,6 @@
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Body
 ! ----------------------------------------------------------------------------------------------------------------------
-          !write(6,*) "node_id",node_id, nodes%numnod
-          call flush(6)
-          if(node_id > nodes%numnod .or. node_id < 1) then
-            write(6,*) "node_id",node_id, "is not in the list of nodes"
-            call flush(6)
-            return
-          endif
           !write(6,*) "detach_node",node_id,nodes%itab(node_id),"from:",shell_list(1:list_size)
           !call flush(6)
 !         new_uid = nodes%max_uid + 1
@@ -697,12 +663,12 @@
               nodal_damage(n1) =max(nodal_damage(n1),element%ghost_shell%damage(i))
             enddo
           enddo
-          do i = 1, numnod
-            if(nodes%itab(i) ==  917176) THEN 
-              !write acceleration of the detached nodes
-              write(6,"(I10,Z20,2I10)") 917176, nodal_damage(i),nodes%itab(nodes%parent_node(i)),nodes%nchilds(nodes%parent_node(i))
-            endif
-          enddo
+!         do i = 1, numnod
+!           if(nodes%itab(i) ==  917176) THEN 
+!             !write acceleration of the detached nodes
+!             write(6,"(I10,Z20,2I10)") 917176, nodal_damage(i),nodes%itab(nodes%parent_node(i)),nodes%nchilds(nodes%parent_node(i))
+!           endif
+!         enddo
 
 
           deallocate(ghostshelldamage)
@@ -716,48 +682,7 @@
           max_discrepancy = -1.0d0
           crack_root = 0
 
-!          ! looking for new cracks roots
-!          do i = 1, numnod
-!            crack_root = i
-!            if(nodal_damage(i) == 0.0d0) cycle
-!            if(nodal_damage(i) > 0.75D0) then
-!            do j = addcnel(i), addcnel(i+1)-1
-!              shell_id = cnel(j) - element%shell%offset
-!              if(detach_shell(shell_id) > 0.999d0) cycle
-!              if(detach_shell(shell_id) < 0.25D0) cycle
-!              n1 = element%shell%ixc(2,shell_id)
-!              n2 = element%shell%ixc(3,shell_id)
-!              n3 = element%shell%ixc(4,shell_id)
-!              n4 = element%shell%ixc(5,shell_id)
-!              if(nodal_damage(n1) == 0.0d0) cycle
-!              if(nodal_damage(n2) == 0.0d0) cycle
-!              if(nodal_damage(n3) == 0.0d0) cycle
-!              if(nodal_damage(n4) == 0.0d0) cycle
-!              is_new_crack = .true.
-!              if(is_new_crack) then
-!                !write(6,*) "new crack root found",cracks%ncracks+1
-!                if(cracks%ncracks == 0) then
-!                  allocate(cracks%current_node(1))
-!                  allocate(cracks%previous_node(1))
-!                  cracks%current_node(1) = 0
-!                  cracks%previous_node(1) = 0
-!                else
-!                  ! add the new crack to the list of cracks
-!                  call extend_array(cracks%current_node,cracks%ncracks,cracks%ncracks+1)
-!                  call extend_array(cracks%previous_node,cracks%ncracks,cracks%ncracks+1)
-!                  cracks%current_node(cracks%ncracks+1) = 0
-!                  cracks%previous_node(cracks%ncracks+1) = 0
-!                end if
-!                cracks%ncracks = cracks%ncracks + 1
-!                cracks%previous_node(cracks%ncracks) = 0 !cracks%current_node(cracks%ncracks)
-!                cracks%current_node(cracks%ncracks) = crack_root
-!              end if
-!            enddo
-!            endif
-!          enddo
-
-
-          ! detach nodes from ill-shaped shells
+          ! detach nodes based on simple 
           dmax = 0.0
           do ii = 1, numelc
             i =  element%shell%permutation(ii) ! the shells are treated in the order of their user_id, for reproducibility
@@ -765,13 +690,11 @@
             n2 = element%shell%ixc(3,i)
             n3 = element%shell%ixc(4,i)
             n4 = element%shell%ixc(5,i)
-            ! if the element has already a crack passing through one of its nodes at this timestep: skip
-            !barycenter
             v(1) = (nodes%X(1,n1) + nodes%X(1,n2) + nodes%X(1,n3) + nodes%X(1,n4))/4.0D0
             v(2) = (nodes%X(2,n1) + nodes%X(2,n2) + nodes%X(2,n3) + nodes%X(2,n4))/4.0D0
             v(3) = (nodes%X(3,n1) + nodes%X(3,n2) + nodes%X(3,n3) + nodes%X(3,n4))/4.0D0
             distance = 0.0D0
-            if(detach_shell(i) >= 0.99999d0) cycle
+            if(detach_shell(i) >= 0.99999d0) cycle ! deleted shell
             do j = 1,4
               distance = sqrt((v(1) - nodes%X(1,element%shell%ixc(j+1,i)))**2 + &
                 (v(2) - nodes%X(2,element%shell%ixc(j+1,i)))**2 + &
@@ -786,12 +709,11 @@
                 shells_to_detach = 1
                 element%shell%damage(i) = 1.0D0
                 nb_detached_nodes_local = nb_detached_nodes_local + 1
-                write(6,*) "detach",nodes%itab(crack(1)),nodes%itab(nodes%parent_node(crack(1))), &
-                nodes%nchilds(nodes%parent_node(crack(1)))
-                write(6,'(8I10)') element%shell%ixc(1,i), nodes%itab(element%shell%ixc(2,i)), &
+                !write(6,*) "detach",nodes%itab(crack(1)),nodes%itab(nodes%parent_node(crack(1))), &
+                !nodes%nchilds(nodes%parent_node(crack(1)))
+!               write(6,'(I10,A,5I10)') numnodg0," detach",nodes%itab(crack(1)),nodes%itab(element%shell%ixc(2,i)), &
                 nodes%itab(element%shell%ixc(3,i)), nodes%itab(element%shell%ixc(4,i)), &
-                nodes%itab(element%shell%ixc(5,i)), element%shell%ixc(6,i), &
-                element%shell%ixc(7,i)
+                nodes%itab(element%shell%ixc(5,i))
                 detached_nodes_local(nb_detached_nodes_local) = nodes%itab(crack(1))
                 call detach_node(nodes,crack(1),element,shell_list,shells_to_detach,npari,ninter, ipari, interf)
                 numnod = numnod + 1
@@ -880,12 +802,12 @@
             numnodg0 = numnodg0 + 1
             if( P == ispmd+1) then
               j = local_pos(i)
-              if(j <= 0) write(6,*) "Error: local_pos is zero for detached node ",i," on processor ",P
+              !if(j <= 0) write(6,*) "Error: local_pos is zero for detached node ",i," on processor ",P
               nodes%itab(numnod0 + j) = old_max_uid
               nodes%itabm1(numnod0 + j) = old_max_uid                                
               nodes%itabm1(2*(numnod0 + j)) = numnod0 + j
               nodes%nodglob(numnod0 + j) = numnodg0
-              write(6,*) "detached node ",nodes%itab(numnod0 + j),"form parent ",nodes%itab(nodes%parent_node(numnod0+j))
+              !write(6,*) old_max_uid,"detached node ",nodes%itab(numnod0 + j),"form",nodes%itab(nodes%parent_node(numnod0+j))
             endif
             j = get_local_node_id(nodes,detached_nodes(i))
             if(j > 0) then
@@ -899,37 +821,11 @@
 !           write(6,*) "old_max_uid",old_max_uid,"nodes%max_uid",nodes%max_uid
 !         endif
           nodes%max_uid = old_max_uid
-
-
-
-
-!         k = 0
-!         ! ordre different  en fonction  du nombre de processeurs: il faut parcourir les detached_nodes dans l'ordre croissant
-!         do P = 1, nspmd
-!           do i = 1, nb_detached_nodes_global(P)
-!             k = k + 1
-!             old_max_uid = old_max_uid + 1
-!             numnodg0 = numnodg0 + 1
-!             if( p ==  ispmd+1) then
-!                nodes%itab(numnod0 + i) = old_max_uid
-!                nodes%itabm1(numnod0 + i) = old_max_uid                                
-!                nodes%itabm1(2*(numnod0 + i)) = numnod0 + i
-!                nodes%nodglob(numnod0 + i) = numnodg0
-!             endif
-!             j = get_local_node_id(nodes,detached_nodes(k))
-!             if(j > 0) then
-!              nodes%MS(j) = nodes%MS(j) / TWO
-!              nodes%MS0(j) = nodes%MS0(j) /TWO
-!             endif
-!           enddo
-!         enddo
-
           deallocate(permutation)
           deallocate(processor)
           deallocate(local_pos)
 
           numnodg = numnodg0
-          !write(6,*) "numnodg",numnodg
 
           if (allocated(is_unique)) deallocate(is_unique)
           if (allocated(nb_detached_nodes)) deallocate(nb_detached_nodes)
