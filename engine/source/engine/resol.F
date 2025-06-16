@@ -5796,6 +5796,7 @@ C-----------------------------------------------------
               IF (NSLIPRING + NRETRACTOR + N_ANCHOR_REMOTE > 0) THEN
                 CALL KINE_SEATBELT_FORCE(NODES%A,NODES%STIFN,FLAG_SLIPRING_UPDATE,FLAG_RETRACTOR_UPDATE)
               ENDIF
+
 C-----------------------------------------------------
 C         INTERFACES 18 KINE
 C-----------------------------------------------------
@@ -5876,6 +5877,7 @@ C===============================================================================
      2                       ITAGND  ,NODFTSK,NODLTSK,GREFTSK,GRELTSK,
      3                       ITSK  ,NODES%ITAB   ,NODES%STIFN  , STIFND)
 !$OMP END PARALLEL
+
 C========================================================================================
 C                                     NON PARALLEL SECTION (SMP)
 C========================================================================================
@@ -5993,8 +5995,6 @@ C===============================================================================
                 IF (IMONM > 0) CALL STOPTIME(TIMERS,40)
 C-----------------------------------------------------
               ENDIF
-
-
 C========================================================================================
 C                                     NON PARALLEL SECTION (SMP)
 C========================================================================================
@@ -6046,13 +6046,10 @@ C===============================================================================
 
               ENDIF
 
-
-
 C----------------------------------------------------------
 C     Rigid wall - Force node (moving RWALL)
 C----------------------------------------------------------
               IF(NRWALL>0)CALL RGWALF(NODES%A ,RWBUF ,NPRW ,NODES%MS )
-
 
 C-----------------------------------------------
 C     SELECTIVE MASS SCALING
@@ -6171,7 +6168,6 @@ C===============================================================================
 C----------------------------
   23          CONTINUE
 
-
 C----------------------------------------------------------
 C       INTER/TYPE21 TIME STEP
 C----------------------------------------------------------
@@ -6279,7 +6275,6 @@ C===============================================================================
 C                                     PARALLEL SECTION (SMP)
 C========================================================================================
 
-
 !$OMP PARALLEL
 !$OMP+PRIVATE(ITSK,DT2TT,NELTSTT,ITYPTSTT,NODFTSK,NODLTSK)
 !$OMP+PRIVATE(DMAST,DINERT)
@@ -6348,8 +6343,6 @@ C------------Need to stop computation at Tstop for /DT/THERM----------
 #include "lockoff.inc"
 
 !$OMP END PARALLEL
-
-
 
 C ----RAZ of NODES%STIFN AND NODES%STIFR for kjoints with element time step----------------------
               IF ((FLG_KJ2_RAZ==1).AND.(I7KGLO==0).AND.(IDTMINS==0).AND.(NODADT==0)) THEN
@@ -6435,7 +6428,6 @@ C Init var parallel SMP
 #include "lockoff.inc"
 
 !$OMP END PARALLEL
-
 
 C========================================================================================
 C                                     NON PARALLEL SECTION (SMP)
@@ -6615,7 +6607,6 @@ C --------------------------
                 DEALLOCATE(STK_SN,STK_SR)
               ENDIF
 
-
 C--------------------------------------------------------------C
 C      RADIOSS 2 RADIOSS COUPLING
 C--------------------------------------------------------------C
@@ -6772,7 +6763,6 @@ C-----------------------------------------------
 
 !$OMP END PARALLEL
 
-
               IF (IMON>0) CALL STOPTIME(TIMERS,TIMER_IO)
 C-----------------------------------------------
 C     SELECTIVE MASS SCALING
@@ -6827,7 +6817,6 @@ C===============================================================================
      S                IRWL_WORK,SMS_VFI,sz_mw6,MW6,OUTPUT%WFEXT,ams_work)
 
 !$OMP END PARALLEL
-
 
                 IF (ALLOCATED(CJWORK)) DEALLOCATE(CJWORK)
                 IF (ALLOCATED(FREA)) DEALLOCATE(FREA)
@@ -6908,7 +6897,6 @@ C-----------------------------------------------
                 ENDIF ! ILAG+IALE+IEULER/=0
 
 !$OMP END PARALLEL
-
 
                 IF (IMON>0) CALL STOPTIME(TIMERS,TIMER_INTEG)
 C-----------------------------------------------
@@ -7060,7 +7048,6 @@ C===============================================================================
      9            IGEO      ,SOL2SPH_TYP,SPH_WORK)
 
 !$OMP END PARALLEL
-
                   DEALLOCATE(WASPSYM)
 
 C========================================================================================
@@ -7100,8 +7087,6 @@ C Init var parallel SMP
 !$OMP END PARALLEL
 
                 ENDIF  ! (NUMSPH/=0).OR.(SOL2SPH_FLAG==1)
-
-
 C========================================================================================
 C                                     NON PARALLEL SECTION (SMP)
 C========================================================================================
@@ -9175,6 +9160,7 @@ C
                   ENDIF
 C
 !$OMP END PARALLEL
+
                   IF(IMON>0) CALL STOPTIME(TIMERS,TIMER_INTEG)
 C
                 ELSEIF(IALE/=0)THEN
