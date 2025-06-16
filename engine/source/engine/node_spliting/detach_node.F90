@@ -338,7 +338,7 @@
             p = nodes%parent_node(p)
           enddo
           nodes%parent_node(numnod+1) = p
-          nodes%nchilds(p) = nodes%nchilds(p) + 1
+!         nodes%nchilds(p) = nodes%nchilds(p) + 1
 !         write(6,*) "node",p,"has",nodes%nchilds(p),"childs"
 !           if(nodes%itab(numnod+1) == 922550) write(6,*) 'stifn(',nodes%itab(i),') = ', nodes%stifn(i)
 !           if(nodes%itab(i) == 907888) write(6,*) 'stifn(',nodes%itab(i),') = ', nodes%stifn(i)
@@ -677,13 +677,6 @@
           call spmd_exchange_ghost_shells(element,ispmd,nspmd,12,shellCoordinates,ghostShellCoordinates)
 
 
-!         do i = 1, numnod
-!           if(nodes%itab(i) == 921825) then
-!             !write acceleration of the detached nodes
-!             write(6,"(I10,3Z20)") __LINE__,nodes%A(1,i),nodes%A(2,i),nodes%A(3,i)
-!           endif
-!         enddo
-
 
           
 
@@ -714,6 +707,14 @@
               nodal_damage(n1) =max(nodal_damage(n1),element%ghost_shell%damage(i))
             enddo
           enddo
+          do i = 1, numnod
+            if(nodes%itab(i) ==  917176) THEN 
+              !write acceleration of the detached nodes
+              write(6,"(I10,Z20,2I10)") 917176, nodal_damage(i),nodes%itab(nodes%parent_node(i)),nodes%nchilds(nodes%parent_node(i))
+            endif
+          enddo
+
+
           deallocate(ghostshelldamage)
 
           allocate(detached_nodes_local(numnod))
@@ -805,7 +806,12 @@
                 shells_to_detach = 1
                 element%shell%damage(i) = 1.0D0
                 nb_detached_nodes_local = nb_detached_nodes_local + 1
-                write(6,*) "detach ill-formed shell",element%shell%user_id(i),nodes%itab(crack(1))
+                write(6,*) "detach",nodes%itab(crack(1)),nodes%itab(nodes%parent_node(crack(1))), &
+                nodes%nchilds(nodes%parent_node(crack(1)))
+                write(6,'(8I10)') element%shell%ixc(1,i), nodes%itab(element%shell%ixc(2,i)), &
+                nodes%itab(element%shell%ixc(3,i)), nodes%itab(element%shell%ixc(4,i)), &
+                nodes%itab(element%shell%ixc(5,i)), element%shell%ixc(6,i), &
+                element%shell%ixc(7,i)
                 detached_nodes_local(nb_detached_nodes_local) = nodes%itab(crack(1))
                 call detach_node(nodes,crack(1),element,shell_list,shells_to_detach,npari,ninter, ipari, interf)
                 numnod = numnod + 1
@@ -905,12 +911,13 @@
             if(j > 0) then
              nodes%MS(j) = nodes%MS(j) / TWO
              nodes%MS0(j) = nodes%MS0(j) /TWO
+             nodes%nchilds(nodes%parent_node(j)) = nodes%nchilds(nodes%parent_node(j)) + 1 
             endif
           enddo
 
-          if(old_max_uid /= nodes%max_uid) then
-            write(6,*) "old_max_uid",old_max_uid,"nodes%max_uid",nodes%max_uid
-          endif
+!         if(old_max_uid /= nodes%max_uid) then
+!           write(6,*) "old_max_uid",old_max_uid,"nodes%max_uid",nodes%max_uid
+!         endif
           nodes%max_uid = old_max_uid
 
 
