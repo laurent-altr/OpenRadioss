@@ -72,6 +72,7 @@ C-----------------------------------------------
       USE HM_OPTION_READ_MOD
       USE UNITAB_MOD
       USE NAMES_AND_TITLES_MOD , ONLY : NCHARTITLE, NCHARLINE, NCHARFIELD
+      USE SECTION_MOD
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -428,47 +429,47 @@ C
          KK=1+NGRNOD
          NNOD = 0
          CPT = 1
-         CALL SEC_NODES_SOL(IGUS,ISTYP,NGRBRIC,IGRBRIC,X0,A,
-     2                 B,C,D,E,F,ITAB,IXS,IXS10,IXS16,IXS20,
-     3                 NIXS,KK,NNOD,NSTRF,NBINTER,N1 ,K1,
+         CALL SEC_NODES_SOL(IGUS,ISTYP,IGRBRIC,X0,A,
+     2                 B,C,D,E,F,IXS,IXS10,IXS16,IXS20,
+     3                 NIXS,NNOD,NSTRF,NBINTER,K1,
      4                 CPT,NODTAG,ISOLNOD,TAGELEMS,
-     5                 X1,Y1,Z1,X2,Y2,Z2,R)
+     5                 X1,Y1,Z1,X2,Y2,Z2,R,NUMNOD,NGRBRIC,NUMELS,NUMELS8,NUMELS10,NUMELS20,NPART)
 
          KK=KK+NGRBRIC
          CALL SEC_NODES(IGUQ,ISTYP,NGRQUAD,IGRQUAD,X0,A,
-     2                 B,C,D,E,F,ITAB,IXQ,NIXQ,KK,NNOD,NSTRF,
-     3                 NBINTER,N1,K1,4,CPT,NODTAG,TAGELEMS(1+NUMELS),
-     4                 X1,Y1,Z1,X2,Y2,Z2,R)
+     2                 B,C,D,E,F,IXQ,NIXQ,NNOD,NSTRF,
+     3                 NBINTER,K1,4,CPT,NODTAG,TAGELEMS(1+NUMELS),
+     4                 X1,Y1,Z1,X2,Y2,Z2,R,NUMNOD,NPART)
          KK=KK+NGRQUAD
          CALL SEC_NODES(IGUC,ISTYP,NGRSHEL,IGRSH4N,X0,A,
-     2                 B,C,D,E,F,ITAB,IXC,NIXC,KK,NNOD,NSTRF,
-     3                 NBINTER,N1,K1,4,CPT,NODTAG,TAGELEMS(1+NUMELS
+     2                 B,C,D,E,F,IXC,NIXC,NNOD,NSTRF,
+     3                 NBINTER,K1,4,CPT,NODTAG,TAGELEMS(1+NUMELS
      .               +NUMELQ),
-     4               X1,Y1,Z1,X2,Y2,Z2,R)
+     4               X1,Y1,Z1,X2,Y2,Z2,R,NUMNOD, NPART)
          KK=KK+NGRSHEL
          CALL SEC_NODES(IGUT,ISTYP,NGRTRUS,IGRTRUSS,X0,A,
-     2                 B,C,D,E,F,ITAB,IXT,NIXT,KK,NNOD,NSTRF,
-     3                 NBINTER,N1,K1,2,CPT,NODTAG,TAGELEMS(1+NUMELS
+     2                 B,C,D,E,F,IXT,NIXT,NNOD,NSTRF,
+     3                 NBINTER,K1,2,CPT,NODTAG,TAGELEMS(1+NUMELS
      .              +NUMELQ+NUMELC),
-     4               X1,Y1,Z1,X2,Y2,Z2,R)
+     4               X1,Y1,Z1,X2,Y2,Z2,R,NUMNOD,NPART)
          KK=KK+NGRTRUS
          CALL SEC_NODES(IGUP,ISTYP,NGRBEAM,IGRBEAM,X0,A,
-     2                 B,C,D,E,F,ITAB,IXP,NIXP,KK,NNOD,NSTRF,
-     3                 NBINTER,N1,K1,2,CPT,NODTAG,TAGELEMS(1+NUMELS
+     2                 B,C,D,E,F,IXP,NIXP,NNOD,NSTRF,
+     3                 NBINTER,K1,2,CPT,NODTAG,TAGELEMS(1+NUMELS
      .              +NUMELQ+NUMELC+NUMELT),
-     4               X1,Y1,Z1,X2,Y2,Z2,R)
+     4               X1,Y1,Z1,X2,Y2,Z2,R,NUMNOD,NPART)
          KK=KK+NGRBEAM
          CALL SEC_NODES(IGUR,ISTYP,NGRSPRI,IGRSPRING,X0,A,
-     2                 B,C,D,E,F,ITAB,IXR,NIXR,KK,NNOD,NSTRF,
-     3                 NBINTER,N1,K1,2,CPT,NODTAG,TAGELEMS(1+NUMELS
+     2                 B,C,D,E,F,IXR,NIXR,NNOD,NSTRF,
+     3                 NBINTER,K1,2,CPT,NODTAG,TAGELEMS(1+NUMELS
      .              +NUMELQ+NUMELC+NUMELT+NUMELP),
-     4               X1,Y1,Z1,X2,Y2,Z2,R)
+     4               X1,Y1,Z1,X2,Y2,Z2,R,NUMNOD,NPART)
          KK=KK+NGRSPRI
          CALL SEC_NODES(IGUTG,ISTYP,NGRSH3N,IGRSH3N,X0,A,
-     2                B,C,D,E,F,ITAB,IXTG,NIXTG,KK,NNOD,NSTRF,
-     3                 NBINTER,N1,K1,3,CPT,NODTAG,TAGELEMS(1+NUMELS
+     2                B,C,D,E,F,IXTG,NIXTG,NNOD,NSTRF,
+     3                 NBINTER,K1,3,CPT,NODTAG,TAGELEMS(1+NUMELS
      .              +NUMELQ+NUMELC+NUMELT+NUMELP+NUMELR),
-     4               X1,Y1,Z1,X2,Y2,Z2,R)
+     4               X1,Y1,Z1,X2,Y2,Z2,R,NUMNOD,NPART)
        ENDIF
 
        K2=K1+NBINTER
@@ -1004,437 +1005,3 @@ C-----------------------------------------------
       RETURN
       END
 C
-      !||====================================================================
-      !||    sec_nodes      ../starter/source/tools/sect/hm_read_sect.F
-      !||--- called by ------------------------------------------------------
-      !||    lecsec42       ../starter/source/tools/sect/hm_read_sect.F
-      !||--- uses       -----------------------------------------------------
-      !||====================================================================
-      SUBROUTINE SEC_NODES(IGU1,ISTYP,NGRELE,IGRELE,X0,A,
-     2                  B,C,D,E,F,ITAB,IX,NIX,KK,NNOD,NSTRF,
-     3                  NBINTER,N1 ,K1,NBNODES,J,NODTAG,TAGELEMS,
-     4                  X1,Y1,Z1,X2,Y2,Z2,R)
-C-----------------------------------------------
-C   M o d u l e s
-C-----------------------------------------------
-      USE GROUPDEF_MOD
-C-----------------------------------------------
-C   I m p l i c i t   T y p e s
-C-----------------------------------------------
-#include      "implicit_f.inc"
-C-----------------------------------------------
-C   C o m m o n   B l o c k s
-C-----------------------------------------------
-#include      "com04_c.inc"
-C-----------------------------------------------
-C   D u m m y   A r g u m e n t s
-C-----------------------------------------------
-      INTEGER IGU1,ISTYP,NGRELE,NIX,KK,NNOD,NBINTER,N1,K1,NBNODES,J
-      INTEGER ITAB(NUMNOD), IX(NIX,*), NSTRF(*),  NODTAG(NUMNOD),TAGELEMS(*)
-      my_real  X0(3,*),A,B,C,D,E,F,X1,Y1,Z1,X2,Y2,Z2,R
-C-----------------------------------------------
-      TYPE (GROUP_)  ,DIMENSION(NGRELE)   :: IGRELE
-C-----------------------------------------------
-C   L o c a l   V a r i a b l e s
-C-----------------------------------------------
-      INTEGER K,L,ISU,IADV,IE,TAGELEM1,TAGELEM2,TAGELEM3,NBPROJOK
-      !TAGNDOUBL(NUMNOD),TAGNODES(NUMNOD*2+NPART)
-      INTEGER, DIMENSION(:), ALLOCATABLE :: TAGNDOUBL, TAGNODES
-      my_real  POS,PROJX,PROJY,PROJZ,P1,P2
-C-----------------------------------------------
-C   S o u r c e   F i l e s
-C-----------------------------------------------
-C
-C List nodes related to section.
-C
-        ALLOCATE(TAGNDOUBL(NUMNOD))
-        ALLOCATE(TAGNODES(NUMNOD*2+NPART))
-        PROJX = ZERO
-        PROJY = ZERO
-        PROJZ = ZERO
-        P1 = ZERO
-        P2 = ZERO
-        ISU = -HUGE(ISU)
-        TAGNDOUBL = 0
-          TAGNODES  = 0
-          IF (IGU1 /= 0) THEN
-            DO L=1,NGRELE
-              IF ( IGRELE(L)%ID == IGU1 )THEN
-                ISU = L
-              ENDIF
-            ENDDO
-          DO L=1,IGRELE(ISU)%NENTITY
-            IE=IGRELE(ISU)%ENTITY(L)
-              IF (IE  /=  0) THEN
-                TAGELEM1=0
-                TAGELEM2=0
-              TAGELEM3=0
-              NBPROJOK = 0
-              DO K=2,NBNODES+1
-C             taging nodes connected to elem
-                P1 = ZERO
-                P2 = ZERO
-                POS = (X0(1,IX(K,IE))-D)*A + (X0(2,IX(K,IE))-E)*B + (X0(3,IX(K,IE))-F)*C
-                IF (ISTYP == 1) THEN
-                  PROJX = X0(1,IX(K,IE))-POS*A
-                  PROJY = X0(2,IX(K,IE))-POS*B
-                  PROJZ = X0(3,IX(K,IE))-POS*C
-                  PROJX = PROJX-D
-                  PROJY = PROJY-E
-                  PROJZ = PROJZ-F
-c
-                  IF ( (X2-D) /=  ZERO .AND. (Y1-E)-(X1-D)*(Y2-E) /=  ZERO)THEN
-                    P1 = (PROJY-PROJX*(Y2-E)/(X2-D))/ ((Y1-E)-(X1-D)*(Y2-E)/(X2-D))
-                  ELSEIF( (Y2-E) /=  ZERO .AND. (Z1-F)-(Y1-E)*(Z2-F) /=  ZERO)THEN
-                    P1 = (PROJZ-PROJY*(Z2-F)/(Y2-E))/ ((Z1-F)-(Y1-E)*(Z2-F)/(Y2-E))
-                  ELSEIF( (Z2-F) /=  ZERO .AND. (X1-D)-(Z1-F)*(X2-D) /=  ZERO)THEN
-                    P1 = (PROJX-PROJZ*(X2-D)/(Z2-F))/ ((X1-D)-(Z1-F)*(X2-D)/(Z2-F))
-                  ENDIF
-                  IF ( (X1-D) /=  ZERO .AND. (Y2-E)-(X2-D)*(Y1-E)  /=  ZERO)THEN
-                    P2 = (PROJY-PROJX*(Y1-E)/(X1-D))/ ((Y2-E)-(X2-D)*(Y1-E)/(X1-D))
-                  ELSEIF ( (Y1-E) /=  ZERO .AND. (Z2-F)-(Y2-E)*(Z1-F)  /=  ZERO)THEN
-                    P2 = (PROJZ-PROJY*(Z1-F)/(Y1-E))/ ((Z2-F)-(Y2-E)*(Z1-F)/(Y1-E))
-                  ELSEIF ( (Z1-F) /=  ZERO .AND. (X2-D)-(Z2-F)*(X1-D)  /=  ZERO)THEN
-                    P2 = (PROJX-PROJZ*(X1-D)/(Z1-F))/ ((X2-D)-(Z2-F)*(X1-D)/(Z1-F))
-                  ENDIF
-c
-                  IF((X2-D)== ZERO .AND. (X1-D)/= ZERO) P1 = PROJX / (X1-D)
-                  IF((X1-D)== ZERO .AND. (X2-D)/= ZERO) P2 = PROJX / (X2-D)
-                  IF((Y2-E)== ZERO .AND. (Y1-E)/= ZERO) P1 = PROJY / (Y1-E)
-                  IF((Y1-E)== ZERO .AND. (Y2-E)/= ZERO) P2 = PROJY / (Y2-E)
-                  IF((Z2-F)== ZERO .AND. (Z1-F)/= ZERO) P1 = PROJZ / (Z1-F)
-                  IF((Z1-F)== ZERO .AND. (Z2-F)/= ZERO) P2 = PROJZ / (Z2-F)
-
-                  IF( P1 <= 1 .AND. P1 >= 0 .AND. P2 <= 1 .AND. P2 >= 0) NBPROJOK = NBPROJOK + 1
-
-                ELSEIF (ISTYP == 2) THEN
-                  PROJX = X0(1,IX(K,IE))-POS*A
-                  PROJY = X0(2,IX(K,IE))-POS*B
-                  PROJZ = X0(3,IX(K,IE))-POS*C
-                  PROJX = PROJX-D
-                  PROJY = PROJY-E
-                  PROJZ = PROJZ-F
-                  P1 = SQRT(PROJX**2+PROJY**2+PROJZ**2)
-                  IF( P1 <= R)   NBPROJOK = NBPROJOK + 1
-                ENDIF
-
-                IF ( POS < ZERO) THEN
-            TAGNODES(IX(K,IE))= -1
-                    TAGNDOUBL(IX(K,IE)) = TAGNDOUBL(IX(K,IE)) + 1
-                    TAGELEM1 = 1
-                  ELSEIF ( POS == ZERO) THEN
-            TAGNODES(IX(K,IE))= 0
-                    TAGNDOUBL(IX(K,IE)) = TAGNDOUBL(IX(K,IE)) + 1
-                    TAGELEM2 = 1
-                  ELSE
-            TAGNODES(IX(K,IE))= 1
-                    TAGNDOUBL(IX(K,IE)) = TAGNDOUBL(IX(K,IE)) + 1
-                    TAGELEM3 = 1
-                  ENDIF
-              ENDDO
-                IF ( (ISTYP == 0 .OR. NBPROJOK >= 1) .AND.
-     .             ( TAGELEM1+TAGELEM3 /= 1
-     .          .OR. ( TAGELEM2 == 1 .AND. TAGELEM3 == 1 )))
-     .               TAGELEMS(IE) = 1
-              ENDIF
-            ENDDO
-          DO L=1,IGRELE(ISU)%NENTITY
-            IE=IGRELE(ISU)%ENTITY(L)
-              IF (IE  /=  0) THEN
-                IF (TAGELEMS(IE) == 1) THEN
-                  DO K=2,NBNODES+1
-            IF ( TAGNDOUBL(IX(K,IE)) >= 1
-     .              .AND. TAGNODES(IX(K,IE)) > 0
-     .              .AND. NODTAG(IX(K,IE)) == 0) THEN
-              NSTRF(K1+NBINTER+J-1) = IX(K,IE)
-              TAGNDOUBL(IX(K,IE)) = 0
-              NODTAG(IX(K,IE)) = 1
-              J = J + 1
-              NNOD = NNOD + 1
-            ENDIF
-                  ENDDO
-                ENDIF
-              ENDIF
-            ENDDO
-          ENDIF
-      DEALLOCATE(TAGNDOUBL)
-      DEALLOCATE(TAGNODES)
-      RETURN
-      END
-C
-      !||====================================================================
-      !||    sec_nodes_sol   ../starter/source/tools/sect/hm_read_sect.F
-      !||--- called by ------------------------------------------------------
-      !||    lecsec42        ../starter/source/tools/sect/hm_read_sect.F
-      !||    lecsec4bolt     ../starter/source/tools/sect/lecsec4bolt.F
-      !||--- uses       -----------------------------------------------------
-      !||====================================================================
-      SUBROUTINE SEC_NODES_SOL(IGU1,ISTYP,NGR,IGRBRIC,X0,A,
-     2                   B,C,D,E,F,ITAB,IXS,IXS10,IXS16,IXS20,
-     3                   NIX,KK,NNOD,NSTRF,NBINTER,N1 ,K1,
-     4                   J,NODTAG,ISOLNOD,TAGELEMS,
-     5                   X1,Y1,Z1,X2,Y2,Z2,R)
-C-----------------------------------------------
-C   M o d u l e s
-C-----------------------------------------------
-      USE GROUPDEF_MOD
-C-----------------------------------------------
-C   I m p l i c i t   T y p e s
-C-----------------------------------------------
-#include      "implicit_f.inc"
-C-----------------------------------------------
-C   C o m m o n   B l o c k s
-C-----------------------------------------------
-#include      "com04_c.inc"
-C-----------------------------------------------
-C   D u m m y   A r g u m e n t s
-C-----------------------------------------------
-      INTEGER IGU1,ISTYP,NGR,NIX,KK,NNOD,NBINTER,N1,K1,J
-      INTEGER ITAB(NUMNOD),IXS(NIX,NUMELS), NSTRF(*),
-     .        NODTAG(NUMNOD), IXS10(6,*),IXS16(8,*),IXS20(12,*),
-     .        ISOLNOD(*),TAGELEMS(*)
-      my_real X0(3,*),A,B,C,D,E,F,X1,Y1,Z1,X2,Y2,Z2,R
-C-----------------------------------------------
-      TYPE (GROUP_)  ,DIMENSION(NGRBRIC)  :: IGRBRIC
-C-----------------------------------------------
-C   L o c a l   V a r i a b l e s
-C-----------------------------------------------
-      INTEGER K,L,ISU,IADV,IE,TAGELEM1,TAGELEM2,TAGELEM3, NBNODES,NBPROJOK,OFFSET
-      INTEGER, DIMENSION(:), ALLOCATABLE :: TAGNDOUBL,TAGNODES
-      my_real POS,PROJX,PROJY,PROJZ,P1,P2
-C-----------------------------------------------
-C   S o u r c e   F i l e s
-C-----------------------------------------------
-C
-C List nodes related to section if frame is used
-C
-        ALLOCATE( TAGNDOUBL(NUMNOD),TAGNODES(NUMNOD*2+NPART) )
-        TAGNDOUBL = 0
-          TAGNODES  = 0
-          IF (IGU1 /= 0) THEN
-            DO L=1,NGRBRIC
-              IF ( IGRBRIC(L)%ID == IGU1 )THEN
-                ISU = L
-              ENDIF
-            ENDDO
-          DO L=1,IGRBRIC(ISU)%NENTITY
-            IE=IGRBRIC(ISU)%ENTITY(L)
-              IF (IE  /=  0) THEN
-                NBNODES = ISOLNOD(IE)
-                IF (NBNODES == 4 .OR. NBNODES == 6) NBNODES = 8
-                TAGELEM1=0
-                TAGELEM2=0
-              TAGELEM3=0
-              NBPROJOK = 0
-              DO K=2,NBNODES+1
-C              tag les noeuds connectes a l'element
-                IF (NBNODES == 10 .AND. K > 5) THEN
-                  OFFSET = NUMELS8
-            POS = (X0(1,IXS10(K-5,IE-OFFSET))-D)*A +
-     .           (X0(2,IXS10(K-5,IE-OFFSET))-E)*B +
-     .           (X0(3,IXS10(K-5,IE-OFFSET))-F)*C
-                  IF (ISTYP >= 1) THEN
-                    PROJX = X0(1,IXS10(K-5,IE-OFFSET))-POS*A
-                    PROJY = X0(2,IXS10(K-5,IE-OFFSET))-POS*B
-                    PROJZ = X0(3,IXS10(K-5,IE-OFFSET))-POS*C
-                  ENDIF
-          ELSEIF (NBNODES == 16 .AND. K > 9) THEN
-                  OFFSET = NUMELS8+NUMELS10+NUMELS20
-            POS = (X0(1,IXS16(K-9,IE-OFFSET))-D)*A +
-     .           (X0(2,IXS16(K-9,IE-OFFSET))-E)*B +
-     .           (X0(3,IXS16(K-9,IE-OFFSET))-F)*C
-                  IF (ISTYP >= 1) THEN
-                    PROJX = X0(1,IXS16(K-9,IE-OFFSET))-POS*A
-                    PROJY = X0(2,IXS16(K-9,IE-OFFSET))-POS*B
-                    PROJZ = X0(3,IXS16(K-9,IE-OFFSET))-POS*C
-                  ENDIF
-          ELSEIF (NBNODES == 20 .AND. K > 9) THEN
-                  OFFSET = NUMELS8+NUMELS10
-            POS = (X0(1,IXS20(K-9,IE-OFFSET))-D)*A +
-     .           (X0(2,IXS20(K-9,IE-OFFSET))-E)*B +
-     .           (X0(3,IXS20(K-9,IE-OFFSET))-F)*C
-                  IF (ISTYP >= 1) THEN
-                    PROJX = X0(1,IXS20(K-9,IE-OFFSET))-POS*A
-                    PROJY = X0(2,IXS20(K-9,IE-OFFSET))-POS*B
-                    PROJZ = X0(3,IXS20(K-9,IE-OFFSET))-POS*C
-                  ENDIF
-          ELSE
-            POS = (X0(1,IXS(K,IE))-D)*A +
-     .           (X0(2,IXS(K,IE))-E)*B +
-     .           (X0(3,IXS(K,IE))-F)*C
-                  IF (ISTYP >= 1) THEN
-                    PROJX = X0(1,IXS(K,IE))-POS*A
-                    PROJY = X0(2,IXS(K,IE))-POS*B
-                    PROJZ = X0(3,IXS(K,IE))-POS*C
-                  ENDIF
-          ENDIF
-                IF (ISTYP == 1) THEN
-                  PROJX = PROJX - D
-                  PROJY = PROJY - E
-                  PROJZ = PROJZ - F
-c
-                  IF ( (X2-D) /=  ZERO .AND.
-     .              (Y1-E)-(X1-D)*(Y2-E) /=  ZERO)THEN
-                    P1 = (PROJY-PROJX*(Y2-E)/(X2-D))/
-     .                ((Y1-E)-(X1-D)*(Y2-E)/(X2-D))
-                  ELSEIF( (Y2-E) /=  ZERO .AND.
-     .              (Z1-F)-(Y1-E)*(Z2-F) /=  ZERO)THEN
-                    P1 = (PROJZ-PROJY*(Z2-F)/(Y2-E))/
-     .                ((Z1-F)-(Y1-E)*(Z2-F)/(Y2-E))
-                  ELSEIF( (Z2-F) /=  ZERO .AND.
-     .              (X1-D)-(Z1-F)*(X2-D) /=  ZERO)THEN
-                    P1 = (PROJX-PROJZ*(X2-D)/(Z2-F))/
-     .                ((X1-D)-(Z1-F)*(X2-D)/(Z2-F))
-                  ENDIF
-                  IF ( (X1-D) /=  ZERO .AND.
-     .              (Y2-E)-(X2-D)*(Y1-E)  /=  ZERO)THEN
-                    P2 = (PROJY-PROJX*(Y1-E)/(X1-D))/
-     .                ((Y2-E)-(X2-D)*(Y1-E)/(X1-D))
-                  ELSEIF ( (Y1-E) /=  ZERO .AND.
-     .              (Z2-F)-(Y2-E)*(Z1-F)  /=  ZERO)THEN
-                    P2 = (PROJZ-PROJY*(Z1-F)/(Y1-E))/
-     .                ((Z2-F)-(Y2-E)*(Z1-F)/(Y1-E))
-                  ELSEIF ( (Z1-F) /=  ZERO .AND.
-     .              (X2-D)-(Z2-F)*(X1-D)  /=  ZERO)THEN
-                    P2 = (PROJX-PROJZ*(X1-D)/(Z1-F))/
-     .                ((X2-D)-(Z2-F)*(X1-D)/(Z1-F))
-                  ENDIF
-c
-                  IF((X2-D)== ZERO .AND. (X1-D)/= ZERO) P1 = PROJX / (X1-D)
-                  IF((X1-D)== ZERO .AND. (X2-D)/= ZERO) P2 = PROJX / (X2-D)
-                  IF((Y2-E)== ZERO .AND. (Y1-E)/= ZERO) P1 = PROJY / (Y1-E)
-                  IF((Y1-E)== ZERO .AND. (Y2-E)/= ZERO) P2 = PROJY / (Y2-E)
-                  IF((Z2-F)== ZERO .AND. (Z1-F)/= ZERO) P1 = PROJZ / (Z1-F)
-                  IF((Z1-F)== ZERO .AND. (Z2-F)/= ZERO) P2 = PROJZ / (Z2-F)
-                  IF( P1 <= 1 .AND. P1 >= 0 .AND. P2 <= 1 .AND. P2 >= 0)NBPROJOK = NBPROJOK + 1
-
-                ELSEIF (ISTYP == 2) THEN
-                  PROJX = PROJX - D
-                  PROJY = PROJY - E
-                  PROJZ = PROJZ - F
-                  P1 = SQRT(PROJX**2+PROJY**2+PROJZ**2)
-                  IF( P1 <= R)   NBPROJOK = NBPROJOK + 1
-                ENDIF
-          IF ( POS < ZERO) THEN
-            IF (NBNODES == 10 .AND. K>5) THEN
-                    OFFSET = NUMELS8
-              TAGNODES(IXS10(K-5,IE-OFFSET))= -1
-              TAGNDOUBL(IXS10(K-5,IE-OFFSET)) = TAGNDOUBL(IXS10(K-5,IE-OFFSET)) + 1
-            ELSEIF (NBNODES == 16 .AND. K>9) THEN
-                    OFFSET = NUMELS8+NUMELS10+NUMELS20
-              TAGNODES(IXS16(K-9,IE-OFFSET))= -1
-              TAGNDOUBL(IXS16(K-9,IE-OFFSET)) = TAGNDOUBL(IXS16(K-9,IE-OFFSET)) + 1
-            ELSEIF (NBNODES == 20 .AND. K>9) THEN
-                    OFFSET = NUMELS8+NUMELS10
-              TAGNODES(IXS20(K-9,IE-OFFSET))= -1
-              TAGNDOUBL(IXS20(K-9,IE-OFFSET)) = TAGNDOUBL(IXS20(K-9,IE-OFFSET)) + 1
-            ELSE 
-              TAGNODES(IXS(K,IE))= -1
-              TAGNDOUBL(IXS(K,IE)) = TAGNDOUBL(IXS(K,IE)) + 1
-            ENDIF
-            TAGELEM1 = 1
-          ELSEIF ( POS == ZERO) THEN
-            IF(NBNODES == 10 .AND. K>5) THEN
-                    OFFSET = NUMELS8
-              TAGNODES(IXS10(K-5,IE-OFFSET))= 0
-              TAGNDOUBL(IXS10(K-5,IE-OFFSET)) = TAGNDOUBL(IXS10(K-5,IE-OFFSET)) + 1
-            ELSEIF (NBNODES == 16 .AND. K>9) THEN
-                    OFFSET = NUMELS8+NUMELS10+NUMELS20
-              TAGNODES(IXS16(K-9,IE-OFFSET))= 0
-              TAGNDOUBL(IXS16(K-9,IE-OFFSET)) = TAGNDOUBL(IXS16(K-9,IE-OFFSET)) + 1
-            ELSEIF (NBNODES == 20 .AND. K>9) THEN
-                    OFFSET = NUMELS8+NUMELS10
-              TAGNODES(IXS20(K-9,IE-OFFSET))= 0
-              TAGNDOUBL(IXS20(K-9,IE-OFFSET)) = TAGNDOUBL(IXS20(K-9,IE-OFFSET)) + 1
-            ELSE
-              TAGNODES(IXS(K,IE))= 0
-              TAGNDOUBL(IXS(K,IE)) = TAGNDOUBL(IXS(K,IE)) + 1
-            ENDIF
-            TAGELEM2 = 1
-          ELSE
-            IF (NBNODES == 10 .AND. K>5) THEN
-                    OFFSET = NUMELS8
-              TAGNODES(IXS10(K-5,IE-OFFSET))= 1
-              TAGNDOUBL(IXS10(K-5,IE-OFFSET)) = TAGNDOUBL(IXS10(K-5,IE-OFFSET)) + 1
-            ELSEIF (NBNODES == 16 .AND. K>9) THEN
-                    OFFSET = NUMELS8+NUMELS10+NUMELS20
-              TAGNODES(IXS16(K-9,IE-OFFSET))= 1
-              TAGNDOUBL(IXS16(K-9,IE-OFFSET)) = TAGNDOUBL(IXS16(K-9,IE-OFFSET)) + 1
-            ELSEIF (NBNODES == 20 .AND. K>9) THEN
-                    OFFSET = NUMELS8+NUMELS10
-              TAGNODES(IXS20(K-9,IE-OFFSET))= 1
-              TAGNDOUBL(IXS20(K-9,IE-OFFSET)) = TAGNDOUBL(IXS20(K-9,IE-OFFSET)) + 1
-            ELSE
-              TAGNODES(IXS(K,IE))= 1
-              TAGNDOUBL(IXS(K,IE)) = TAGNDOUBL(IXS(K,IE)) + 1
-            ENDIF
-            TAGELEM3 = 1
-          ENDIF
-              ENDDO
-                IF ( (ISTYP == 0 .OR. NBPROJOK >= 1) .AND.
-     .             ( TAGELEM1+TAGELEM3 /= 1
-     .          .OR. ( TAGELEM2 == 1 .AND. TAGELEM3 == 1 )))
-     .               TAGELEMS(IE) = 1
-              ENDIF
-            ENDDO
-!
-          DO L=1,IGRBRIC(ISU)%NENTITY
-            IE=IGRBRIC(ISU)%ENTITY(L)
-              IF (IE  /=  0) THEN
-                NBNODES = ISOLNOD(IE)
-                IF (NBNODES == 4 .OR. NBNODES == 6) NBNODES = 8
-                IF (TAGELEMS(IE) == 1) THEN
-                  DO K=2,NBNODES+1
-                  IF (NBNODES == 10 .AND. K > 5) THEN
-                    OFFSET = NUMELS8
-                      IF ( TAGNDOUBL(IXS10(K-5,IE-OFFSET)) >= 1
-     .             .AND. TAGNODES(IXS10(K-5,IE-OFFSET)) > 0
-     .             .AND. NODTAG(IXS10(K-5,IE-OFFSET)) == 0) THEN
-                        NSTRF(K1+NBINTER+J-1) = IXS10(K-5,IE-OFFSET)
-                        TAGNDOUBL(IXS10(K-5,IE-OFFSET)) = 0
-                        NODTAG(IXS10(K-5,IE-OFFSET)) = 1
-                        J = J + 1
-                        NNOD = NNOD + 1
-                      ENDIF
-                  ELSEIF (NBNODES == 16 .AND. K > 9) THEN
-                    OFFSET = NUMELS8+NUMELS10+NUMELS20
-                      IF ( TAGNDOUBL(IXS16(K-9,IE-OFFSET)) >= 1
-     .             .AND. TAGNODES(IXS16(K-9,IE-OFFSET)) > 0
-     .             .AND. NODTAG(IXS16(K-9,IE-OFFSET)) == 0) THEN
-                        NSTRF(K1+NBINTER+J-1) = IXS16(K-9,IE-OFFSET)
-                        TAGNDOUBL(IXS16(K-9,IE-OFFSET)) = 0
-                        NODTAG(IXS16(K-9,IE-OFFSET)) = 1
-                        J = J + 1
-                        NNOD = NNOD + 1
-                      ENDIF
-                  ELSEIF (NBNODES == 20 .AND. K > 9) THEN
-                    OFFSET = NUMELS8+NUMELS10
-                      IF ( TAGNDOUBL(IXS20(K-9,IE-OFFSET)) >= 1
-     .             .AND. TAGNODES(IXS20(K-9,IE-OFFSET)) > 0
-     .             .AND. NODTAG(IXS20(K-9,IE-OFFSET)) == 0) THEN
-                        NSTRF(K1+NBINTER+J-1) = IXS20(K-9,IE-OFFSET)
-                        TAGNDOUBL(IXS20(K-9,IE-OFFSET)) = 0
-                        NODTAG(IXS20(K-9,IE-OFFSET)) = 1
-                        J = J + 1
-                        NNOD = NNOD + 1
-                      ENDIF
-                  ELSE
-                      IF ( TAGNDOUBL(IXS(K,IE)) >= 1
-     .             .AND. TAGNODES(IXS(K,IE)) > 0
-     .             .AND. NODTAG(IXS(K,IE)) == 0) THEN
-                        NSTRF(K1+NBINTER+J-1) = IXS(K,IE)
-                        TAGNDOUBL(IXS(K,IE)) = 0
-                        NODTAG(IXS(K,IE)) = 1
-                        J = J + 1
-                        NNOD = NNOD + 1
-                      ENDIF
-                    ENDIF
-                  ENDDO
-                ENDIF
-              ENDIF
-            ENDDO
-          ENDIF
-
-        DEALLOCATE( TAGNDOUBL,TAGNODES )
-      RETURN
-      END

@@ -64,6 +64,7 @@ C-----------------------------------------------
       USE GROUPDEF_MOD
       USE HM_OPTION_READ_MOD
       USE NAMES_AND_TITLES_MOD , ONLY : NCHARTITLE, NCHARLINE, NCHARFIELD
+      USE SECTION_MOD
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -363,11 +364,11 @@ C
           KK=1+NGRNOD                                                    
             NNOD = 0                                                       
             CPT = 1                                                        
-            CALL SEC_NODES_SOL(IGUS,ISTYP,NGRBRIC,IGRBRIC,X0,A,            
-     2                  B,C,D,E,F,ITAB,IXS,IXS10,IXS16,IXS20,            
-     3                  NIXS,KK,NNOD,NSTRF,NBINTER,N1 ,K1,               
+            CALL SEC_NODES_SOL(IGUS,ISTYP,IGRBRIC,X0,A,            
+     2                  B,C,D,E,F,IXS,IXS10,IXS16,IXS20,            
+     3                  NIXS,NNOD,NSTRF,NBINTER,K1,               
      4                  CPT,NODTAG,ISOLNOD,TAGELEMS,                     
-     5                  X1,Y1,Z1,X2,Y2,Z2,R)                             
+     5                  X1,Y1,Z1,X2,Y2,Z2,R,NUMNOD,NGRBRIC,NUMELS,NUMELS8,NUMELS10,NUMELS20,NPART) 
 
           KK=KK+NGRBRIC                                                  
         ENDIF                                                            

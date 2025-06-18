@@ -76,8 +76,8 @@ if ( CMAKE_C_COMPILER_VERSION VERSION_GREATER 10)
 set( portability "-fallow-argument-mismatch -fallow-invalid-boz -std=legacy")
 endif()
 
-#set( strict "-Waliasing -Wunused-dummy-argument -Werror=unused-dummy-argument -Wdo-subscript -Warray-bounds -Wtabs -Werror=tabs -pedantic-errors -Wsurprising -Wuse-without-only -Werror=use-without-only ") 
-set( strict "-Werror=aliasing -Werror=unused-dummy-argument -Werror=do-subscript -Werror=array-bounds -Werror=surprising -Werror=tabs") 
+#set( strict "-Waliasing -Wunused-dummy-argument -Werror=unused-dummy-argument  -Warray-bounds -Wtabs -Werror=tabs -pedantic-errors -Wsurprising -Wuse-without-only -Werror=use-without-only ") 
+set( strict "-Werror=aliasing -Werror=unused-dummy-argument -Werror=array-bounds -Werror=surprising -Werror=tabs") 
 
 #no lto, OpenMP can be used
 set( OPENMP "-fopenmp" )
@@ -89,9 +89,9 @@ set( OPENMP "-fopenmp" )
 if ( debug STREQUAL "1" )
 
 # Fortran
-#set_source_files_properties( ${source_files}  PROPERTIES COMPILE_FLAGS " -Wall ${FSANITIZE} ${precision_flag} -DMETIS5 ${cppmach} ${cpprel} -DCPP_comp=f90 -DCOMP_GFORTRAN=1 -fdec-math -g -O0 -ffp-contract=off -frounding-math ${OPENMP} -fbacktrace -ffixed-line-length-none -Wdo-subscript ${ADF} ${portability}" )
+#set_source_files_properties( ${source_files}  PROPERTIES COMPILE_FLAGS " -Wall ${FSANITIZE} ${precision_flag} -DMETIS5 ${cppmach} ${cpprel} -DCPP_comp=f90 -DCOMP_GFORTRAN=1 -fdec-math -g -O0 -ffp-contract=off -frounding-math ${OPENMP} -fbacktrace -ffixed-line-length-none  ${ADF} ${portability}" )
 
-set( legacy_flags " -Wall ${FSANITIZE} ${precision_flag} -DMETIS5 ${cppmach} ${cpprel} -DCPP_comp=f90 -DCOMP_GFORTRAN=1 -fdec-math -g -O0 -ffp-contract=off -frounding-math ${OPENMP} -fbacktrace -ffixed-line-length-none -Wdo-subscript ${ADF} ${portability}") 
+set( legacy_flags " -Wall ${FSANITIZE} ${precision_flag} -DMETIS5 ${cppmach} ${cpprel} -DCPP_comp=f90 -DCOMP_GFORTRAN=1 -fdec-math -g -O0 -ffp-contract=off -frounding-math ${OPENMP} -fbacktrace -ffixed-line-length-none ${ADF} ${portability}") 
 
 set_source_files_properties( ${source_files}  PROPERTIES COMPILE_FLAGS "${FSANITIZE} -Wall ${strict} ${precision_flag} -DMETIS5 ${cppmach} ${cpprel} -DCPP_comp=f90 -DCOMP_GFORTRAN=1 -fdec-math -g -O0 -ffp-contract=off -frounding-math ${OPENMP} -fbacktrace -ffixed-line-length-none ${ADF} " )
 
@@ -106,7 +106,7 @@ elseif ( debug STREQUAL "analysis" )
 
 # Fortran
 
-set( legacy_flags "  -fplugin=../../scripts/gcc_plugin/fortran_signatures.so  -Wall ${FSANITIZE} ${precision_flag} -DMETIS5 ${cppmach} ${cpprel} -DCPP_comp=f90 -DCOMP_GFORTRAN=1 -fdec-math -g -O0 -ffp-contract=off -frounding-math ${OPENMP} -fbacktrace -ffixed-line-length-none -Wdo-subscript ${ADF} ${portability}") 
+set( legacy_flags "  -fplugin=../../scripts/gcc_plugin/fortran_signatures.so  -Wall ${FSANITIZE} ${precision_flag} -DMETIS5 ${cppmach} ${cpprel} -DCPP_comp=f90 -DCOMP_GFORTRAN=1 -fdec-math -g -O0 -ffp-contract=off -frounding-math ${OPENMP} -fbacktrace -ffixed-line-length-none  ${ADF} ${portability}") 
 
 set_source_files_properties( ${source_files}  PROPERTIES COMPILE_FLAGS " -fplugin=../../scripts/gcc_plugin/fortran_signatures.so  ${FSANITIZE} -Wall ${strict} ${precision_flag} -DMETIS5 ${cppmach} ${cpprel} -DCPP_comp=f90 -DCOMP_GFORTRAN=1 -fdec-math -g -O0 -ffp-contract=off -frounding-math ${OPENMP} -fbacktrace -ffixed-line-length-none ${ADF} " )
 
@@ -123,9 +123,9 @@ elseif ( debug STREQUAL "asan" )
 set( FSANITIZE "-fsanitize=address -fsanitize=undefined -fsanitize=bounds-strict -DSANITIZE") 
 
 # Fortran
-#set_source_files_properties( ${source_files}  PROPERTIES COMPILE_FLAGS " -Wall ${FSANITIZE} ${precision_flag} -DMETIS5 ${cppmach} ${cpprel} -DCPP_comp=f90 -DCOMP_GFORTRAN=1 -fdec-math -g -O0 -ffp-contract=off -frounding-math ${OPENMP} -fbacktrace -ffixed-line-length-none -Wdo-subscript ${ADF} ${portability}" )
+#set_source_files_properties( ${source_files}  PROPERTIES COMPILE_FLAGS " -Wall ${FSANITIZE} ${precision_flag} -DMETIS5 ${cppmach} ${cpprel} -DCPP_comp=f90 -DCOMP_GFORTRAN=1 -fdec-math -g -O0 -ffp-contract=off -frounding-math ${OPENMP} -fbacktrace -ffixed-line-length-none ${ADF} ${portability}" )
 
-set( legacy_flags " -Wall ${FSANITIZE} ${precision_flag} -DMETIS5 ${cppmach} ${cpprel} -DCPP_comp=f90 -DCOMP_GFORTRAN=1 -fdec-math -g -O0 -ffp-contract=off -frounding-math ${OPENMP} -fbacktrace -ffixed-line-length-none -Wdo-subscript ${ADF} ${portability}") 
+set( legacy_flags " -Wall ${FSANITIZE} ${precision_flag} -DMETIS5 ${cppmach} ${cpprel} -DCPP_comp=f90 -DCOMP_GFORTRAN=1 -fdec-math -g -O0 -ffp-contract=off -frounding-math ${OPENMP} -fbacktrace -ffixed-line-length-none  ${ADF} ${portability}") 
 
 set_source_files_properties( ${source_files}  PROPERTIES COMPILE_FLAGS "${FSANITIZE} -Wall ${strict} ${precision_flag} -DMETIS5 ${cppmach} ${cpprel} -DCPP_comp=f90 -DCOMP_GFORTRAN=1 -fdec-math -g -O0 -ffp-contract=off -frounding-math ${OPENMP} -fbacktrace -ffixed-line-length-none ${ADF} " )
 
