@@ -2139,7 +2139,7 @@ C
         IF(ICDEL/=0)  UBVEC(ICDEL)  = 1.10
         IF(ICCAND/=0) UBVEC(ICCAND) = 1.10
         IF(ICKIN/=0)  UBVEC(ICKIN)  = 1.10
-        IF(ICR2R/=0)  UBVEC(ICR2R) = 1.30  ! weird !!!
+        IF(ICR2R/=0)  UBVEC(ICR2R) = 1.30  
         IF(ICNOD_SMS/=0) UBVEC(ICNOD_SMS) = 1.05
 c        i=0
 c        call METIS_EstimateMemory(NELEM,XADJ,ADJNCY,0,2,I)

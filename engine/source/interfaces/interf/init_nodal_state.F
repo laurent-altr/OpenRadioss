@@ -200,7 +200,6 @@ C-----------------------------------------------
                 DO I=1,NSN
                     NODE_ID = INTBUF_TAB(NIN)%NSV(I)
                     ! need to check the node_id value : for typ24 + edge to edge,
-                    ! a famous developer introduced NODE_ID greater than the number of node NUMNOD :(
                     IF(NODE_ID<=NUMNOD) SHOOT_STRUCT%SHIFT_S_NODE(NODE_ID+1) = SHOOT_STRUCT%SHIFT_S_NODE(NODE_ID+1) + 1
                 ENDDO
             ENDIF
