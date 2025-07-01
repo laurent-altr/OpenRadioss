@@ -658,7 +658,7 @@ C------------------------------------------------
 
       IF(PRECICE_AVAILABLE) THEN
          FILNAM=ROOTNAM(1:ROOTLEN)//'_'//CHRUN//'.cpl'
-         CALL PRECICE_READ_FILE(preCICE,TRIM(FILNAM))
+         CALL PRECICE_READ_FILE(preCICE,TRIM(FILNAM), LEN_trim(FILNAM))
       endif
 
       NFSKYI=5

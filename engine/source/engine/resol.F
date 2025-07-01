@@ -3183,7 +3183,7 @@ C First: try with reduced bounding box
               CALL PYTHON_UPDATE_TIME(TT,DT2)
               CALL PYTHON_UPDATE_NODAL_ENTITIES(NUMNOD, X=NODES%X,A=NODES%A,V=NODES%V,D=NODES%D,DR=NODES%DR,VR=NODES%VR)
               CALL PYTHON_SYNC(PYTHON%CONTEXT)
-              IF(PRECICE_AVAILABLE) THEN
+              IF(preCICE%active) THEN
               ! ALLOCATION AND INITIALIZATION OF PRECICE COUPLING
                 ALLOCATE(DISPL(3,NUMNOD))
                 ALLOCATE(X_PREV(3,NUMNOD))
@@ -3747,7 +3747,7 @@ C----------------------------------------
                   NATIV_SMS_SIZ = 0
                 ENDIF
 
-                IF(PRECICE_AVAILABLE .AND. TT > ZERO) DT2T = MIN(DT2T,preCICE%DT_LIMIT)
+                IF(preCICE%active .AND. TT > ZERO) DT2T = MIN(DT2T,preCICE%DT_LIMIT)
 
 C========================================================================================
 C                                     PARALLEL SECTION (SMP)
@@ -5015,7 +5015,7 @@ C
 C--- //------------------------------
 C       FORCE ASSEMBLY
 C-------------------------------------
-             IF(PRECICE_AVAILABLE) THEN
+             IF(preCICE%active) THEN
                FORCES(1:3,1:NUMNOD) = nodes%A(1:3,1:NUMNOD)
              ENDIF
 C========================================================================================
@@ -7148,7 +7148,7 @@ C===============================================================================
                 ENDIF
 
 
-                IF(PRECICE_AVAILABLE) THEN
+                IF(preCICE%active) THEN
                   ! FORCES WAS INITIALIZED TO THE ACCELERTION, BEFORE ASSEMBLY
                   ! BEFORE THE CALL TO ACCELE, A CONTAINS THE FORCES
                   ! AFTER THE CALL TO ACCELE, A CONTAINS THE ACCELERATION
@@ -8747,7 +8747,7 @@ C
                 CALL TRACE_OUT(5)
 C-------ADYREL----
                 IF (ISTAT==3) CALL ENER_W0
-                IF(PRECICE_AVAILABLE) CALL PRECICE_ADVANCE(preCICE,DT2)
+                IF(preCICE%active) CALL PRECICE_ADVANCE(preCICE,DT2)
 C------------
 C       TEMPS
 C------------
@@ -9264,7 +9264,7 @@ C===============================================================================
               ENDIF
               CALL PYTHON_SYNC(PYTHON%CONTEXT)
               CALL PYTHON_UPDATE_NODAL_ENTITIES(NUMNOD,X=NODES%X, D=NODES%D, DR=NODES%DR)
-              IF(PRECICE_AVAILABLE) THEN
+              IF(preCICE%active) THEN
                 DT2MAX_COUPLING = DT2 
                 DO I = 1, NUMNOD
                   DISPL(1,I) = nodes%X(1,I) - X_PREV(1,I)
@@ -9755,7 +9755,7 @@ C--- //0 ----------------
      8                FORNEQS ,MULTI_FVM,INTERFACES)
                 END IF
 
-                IF(PRECICE_AVAILABLE) THEN
+                IF(preCICE%active) THEN
                   CALL PRECICE_ONGOING(ONGOING)
                     ! FAKE TIME STEPS TO FINALIZE PRECICE
                     DO WHILE (ONGOING)

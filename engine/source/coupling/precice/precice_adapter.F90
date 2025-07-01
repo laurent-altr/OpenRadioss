@@ -66,9 +66,10 @@ module precice_adapter_mod
         end type precice_data
 
         type precice_type
-          character*50 :: participant_name !< name of the precice participant given by /PRECICE/PARTICIPANT_NAME
-          character*50 :: config_file !< name of the precice config file
-          character*50 :: mesh_name !< name of the precice mesh
+          logical :: active
+          character(len=precice_char_len) :: participant_name !< name of the precice participant given by /PRECICE/PARTICIPANT_NAME
+          character(len=precice_char_len) :: config_file !< name of the precice config file
+          character(len=precice_char_len) :: mesh_name !< name of the precice mesh
           ! NOTE: Action strings removed - v3.x uses direct function calls
 
           ! data
@@ -98,16 +99,33 @@ module precice_adapter_mod
         end interface
 
       contains
-
+      
 !=======================================================================================================================
 !                                                  Subroutines
 !=======================================================================================================================
+        subroutine fortran_to_c_string(fortran_str, c_str, str_len)
+          use iso_c_binding
+          implicit none
+          character(*), intent(in) :: fortran_str
+          character(kind=c_char), intent(out) :: c_str(*)
+          integer(kind=c_int), intent(out) :: str_len
+          integer :: i
+          
+          str_len = len_trim(fortran_str)
+          do i = 1, str_len
+            c_str(i) = fortran_str(i:i)
+          enddo
+          c_str(str_len+1) = c_null_char
+        end subroutine
+
+
 !! \brief remove C_NULL_CHAR from a string
         subroutine remove_null_char(str)
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                     Modules
 ! ----------------------------------------------------------------------------------------------------------------------
           use, intrinsic :: iso_c_binding, only: C_NULL_CHAR
+          implicit none
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                     Arguments
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -157,7 +175,7 @@ module precice_adapter_mod
         end function
 
 !! \brief This subroutine reads the precice input file *.cpl
-        subroutine precice_read_file(precice, input_filename)
+        subroutine precice_read_file(precice, input_filename,len)
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                     Modules
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -167,7 +185,8 @@ module precice_adapter_mod
 !                                                     Arguments
 ! ----------------------------------------------------------------------------------------------------------------------
           type(precice_type), intent(inout) :: precice !< precice adapter
-          character(len=precice_char_len) :: input_filename !< name of the precice input file
+          integer, intent(in) :: len !< length of the input filename
+          character(len=len) :: input_filename !< name of the precice input file
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Local variables
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -177,9 +196,16 @@ module precice_adapter_mod
           character(len=precice_char_len) :: read_data_name !< name of the precice data to be read
           character(len=precice_char_len) :: write_data_name !< name of the precice data to be written
           integer :: grnod_id !< id of GRNOD of the interface
+          ! C version of the input_filename
+          character(kind=c_char), dimension(:), allocatable :: input_filename_c
+          integer :: trimmed_length !< length of the input filename without trailing spaces
+          integer :: i  
+          logical :: file_exists !< true if the file exists
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                      Body
 ! ----------------------------------------------------------------------------------------------------------------------
+          ! check if the file exists in the current directory
+
           precice%mesh_name = repeat(" ", precice_char_len)
           precice%read_data%name = repeat(" ", precice_char_len)
           precice%write_data%name = repeat(" ", precice_char_len)
@@ -192,7 +218,28 @@ module precice_adapter_mod
           participant_name = repeat(" ", precice_char_len)
           config_file = repeat(" ", precice_char_len)
 
-          call precice_read_cpl(input_filename, participant_name, config_file, mesh_name, write_data_name, read_data_name, grnod_id)
+          inquire(file=input_filename, exist=file_exists)
+          if(.not. file_exists) then
+            write(6,*) "No ", input_filename, " file found in the current directory"
+            write(6,*) "preCICE will not be active"
+            preCICE%active = .false.
+            return
+          end if
+          preCICE%active = .true.
+          write(6,*) "preCICE active, reading file ", input_filename
+          call flush(6)
+
+ 
+          ! write input_filename to the console
+          ! add C_NULL_CHAR before the first whitespace ofinput_filename
+          allocate(input_filename_c(len_trim(input_filename) + 1))
+          trimmed_length = len_trim(input_filename)
+           do i = 1, trimmed_length
+              input_filename_c(i) = input_filename(i:i)
+          end do
+          input_filename_c(trimmed_length + 1) = C_NULL_CHAR
+          call precice_read_cpl(input_filename_c, participant_name, config_file, mesh_name, write_data_name, read_data_name, grnod_id)
+          deallocate(input_filename_c)
 
           call remove_null_char(participant_name)
           call remove_null_char(config_file)
@@ -200,12 +247,24 @@ module precice_adapter_mod
           call remove_null_char(read_data_name)
           call remove_null_char(write_data_name)
           precice%grnod_id = grnod_id
+
           precice%config_file(1:len_trim(config_file)) = config_file
+          precice%config_file(len_trim(config_file)+1:precice_char_len) = repeat(" ", precice_char_len - len_trim(config_file))
+
           precice%participant_name(1:len_trim(participant_name)) = participant_name
+          precice%participant_name(len_trim(participant_name)+1:precice_char_len) = repeat(" ", precice_char_len - len_trim(participant_name))
+
           precice%mesh_name(1:len_trim(mesh_name)) = mesh_name
+          precice%mesh_name(len_trim(mesh_name)+1:precice_char_len) = repeat(" ", precice_char_len - len_trim(mesh_name))
+
           precice%read_data%name(1:len_trim(read_data_name)) = read_data_name
+          precice%read_data%name(len_trim(read_data_name)+1:precice_char_len) = repeat(" ", precice_char_len - len_trim(read_data_name))
+        
           precice%write_data%name(1:len_trim(write_data_name)) = write_data_name
+          precice%write_data%name(len_trim(write_data_name)+1:precice_char_len) = repeat(" ", precice_char_len - len_trim(write_data_name))
+
           precice%read_data%name_id = find_variable_name_id(precice%read_data%name)
+
           precice%write_data%name_id = find_variable_name_id(precice%write_data%name)
 
           write(6,*) "data names=", precice%read_data%name, precice%write_data%name,&
@@ -282,6 +341,10 @@ module precice_adapter_mod
           integer :: nb_coupling_nodes
           double precision, dimension(:), allocatable :: nodes
           integer :: bool
+          integer(kind=c_int) :: len1, len2
+          character(kind=c_char), dimension(precice_char_len) ::c_participant_name, c_config_file
+          character(kind=c_char), dimension(precice_char_len) :: c_mesh_name, c_name
+          integer(kind=c_int), target :: c_mpi_rank, c_mpi_commsize
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                       Body
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -289,9 +352,37 @@ module precice_adapter_mod
           write(6,*) "participant=",precice%participant_name
           write(6,*) "config_file=",precice%config_file
           write(6,*) "mpi_rank=",mpi_rank,mpi_commsize
+          call flush(6)
+          c_mpi_rank = mpi_rank
+          c_mpi_commsize = mpi_commsize
+
+!         len1 = len_trim(precice%participant_name)
+!         do i = 1, len1
+!           c_participant_name(i) = precice%participant_name(i:i)
+!         enddo
+!         c_participant_name(len1+1) = c_null_char
+
+!         len2 = len_trim(precice%config_file)
+!         do i = 1, len2
+!           c_config_file(i) = precice%config_file(i:i)
+!         enddo
+!         c_config_file(len2+1) = c_null_char
+
+          call fortran_to_c_string(precice%participant_name, c_participant_name, len1)
+          call fortran_to_c_string(precice%config_file, c_config_file, len2)
+          
+          ! Debug output
+          write(6,*) "About to call precicef_create"
+          write(6,*) "len1=", len1, "len2=", len2
+          write(6,*) "mpi_rank=", mpi_rank, "mpi_commsize=", mpi_commsize
+          call flush(6)
+
 
 #ifdef WITH_PRECICE
-          call precicef_create(precice%participant_name,precice%config_file,mpi_rank,mpi_commsize,50,50)
+
+          !call precicef_create(c_participant_name,c_config_file,c_mpi_rank,c_mpi_commsize,len1,len2)
+         call precicef_create(c_participant_name, c_config_file, &
+                    mpi_rank, mpi_commsize, len1, len2)
 #else
           write(6,*) "ERROR: precice is not available"
           stop
@@ -309,9 +400,22 @@ module precice_adapter_mod
 
           if(allocated(precice%vertex_ids)) deallocate(precice%vertex_ids)
           allocate(precice%vertex_ids(nb_coupling_nodes))
+
+!         len1 = len_trim(precice%mesh_name)
+!         do i = 1, len1
+!           c_mesh_name(i) = precice%mesh_name(i:i)
+!         enddo
+!         c_mesh_name(len1+1) = c_null_char  ! proper null terminator
+          call fortran_to_c_string(precice%mesh_name, c_mesh_name, len1)
 #ifdef WITH_PRECICE
           ! v3.x: Use mesh name instead of mesh ID
-          call precicef_set_vertices(precice%mesh_name, nb_coupling_nodes, nodes, precice%vertex_ids, precice_char_len)
+!         void precicef_set_vertices_(
+!             const char *meshName,
+!             const int  *size,
+!             double     *coordinates,
+!             int        *ids,
+!             int         meshNameLength);
+          call precicef_set_vertices(c_mesh_name, nb_coupling_nodes, nodes, precice%vertex_ids, len1)
 #endif
           deallocate(nodes)
 
@@ -323,8 +427,10 @@ module precice_adapter_mod
           call precicef_requires_initial_data(bool)
           if(bool == 1) then
             write(6,*) trim(precice%participant_name)," writing initial data"
-            call precicef_write_data(precice%mesh_name, precice%write_data%name, precice%vertex_ids, &
-                 & nb_coupling_nodes, precice%write_data%values, precice_char_len, precice_char_len)
+            call fortran_to_c_string(precice%write_data%name, c_name, len2)
+            call fortran_to_c_string(precice%mesh_name, c_mesh_name, len1)
+            call precicef_write_data(c_mesh_name, c_name, precice%vertex_ids, &
+                 & nb_coupling_nodes, precice%write_data%values, len1, len2)
           endif
 
           ! v3.x: initialize() no longer returns dt_limit and handles data initialization internally
@@ -383,6 +489,7 @@ module precice_adapter_mod
         end subroutine
 
         subroutine precice_read(precice,dt,global_values,nb_nodes,mode,name_id)
+          use iso_c_binding
           use precice_mod
           use precision_mod, only : WP
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -406,6 +513,8 @@ module precice_adapter_mod
           integer :: nb_coupling_nodes
           double precision :: dt_double
           double precision :: relative_read_time
+          character(kind=c_char), dimension(precice_char_len) :: c_mesh_name,c_name
+          integer(kind=c_int) :: len1, len2
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                       Body
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -420,10 +529,12 @@ module precice_adapter_mod
           write(6,*) trim(precice%participant_name)," reading data ",precice%read_data%name
 
 #ifdef WITH_PRECICE
+           call fortran_to_c_string(precice%mesh_name, c_mesh_name, len1)
+           call fortran_to_c_string(precice%read_data%name, c_name, len2)
           ! v3.x: Use mesh name, data name, and relative read time
-          call precicef_read_data(precice%mesh_name, precice%read_data%name, precice%vertex_ids, &
+          call precicef_read_data(c_mesh_name, c_name, precice%vertex_ids, &
                & nb_coupling_nodes, relative_read_time, precice%read_data%values, &
-               & precice_char_len, precice_char_len)
+               & len1, len2)
 #endif
 
           if( mode == replace ) then
