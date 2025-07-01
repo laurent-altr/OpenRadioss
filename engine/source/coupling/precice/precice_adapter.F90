@@ -20,7 +20,7 @@
 !Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 !Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 !Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
-module precice_adapter
+module precice_adapter_mod
         implicit none
 
 !=======================================================================================================================
@@ -540,4 +540,4 @@ module precice_adapter
 #endif
         end subroutine
 
-      end module precice_adapter
+      end module precice_adapter_mod

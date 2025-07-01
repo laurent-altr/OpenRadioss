@@ -524,7 +524,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
       !||    user_windows_mod                             ../common_source/modules/user_windows_mod.F
       !||    xfem2vars_mod                                ../engine/share/modules/xfem2vars_mod.F
       !||====================================================================
-            SUBROUTINE RESOL(TIMERS, ELEMENT, NODES, AF,IAF,
+            SUBROUTINE RESOL(TIMERS, ELEMENT, NODES, preCICE, AF,IAF,
      1        ISKWN   ,NETH   ,IPART  ,NOM_OPT,KXX    ,IXX    ,
      2        IXTG   ,IXS     ,IXQ    ,IXT    ,IXP    ,IXR    ,
      3        IFILL  ,MAT_ELEM,
@@ -716,6 +716,7 @@ C-----------------------------------------------
               USE UPDATE_PON_MOD
               USE DEBUG_MOD
               use inter_init_component_mod , only : inter_init_component
+              use precice_adapter_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -896,6 +897,7 @@ C-----------------------------------------------
               TYPE(UNIT_TYPE_) :: UNITAB !structure containing units conversion ratios
               INTEGER MIN_TAB(4)
               my_real :: DT2R
+              TYPE(precice_type), intent(inout) :: preCICE 
 C
 C     Mat + Prop timers
               INTEGER, DIMENSION(NUMMAT) :: POIN_UMP
@@ -1311,6 +1313,18 @@ C-------------------------------------------------------------------------------
               type (ams_work_) :: ams_work   !< Working areas for AMS
 
               type(component_), dimension(:), allocatable :: component
+C-----------------------------------------------------------------------------------
+C preCICE coupling
+              logical :: ongoing
+              character(len=50) :: config_file
+              character(len=50) :: participant_name
+              character(len=50) :: data_name
+              character(len=50) :: mesh_name
+              character(len=50) :: data_name2
+              integer :: nb_coupling_nodes
+              integer, dimension(:), allocatable :: node_ids
+              double precision, dimension(:,:), allocatable :: displ,X_prev,forces
+              double precision :: dt2max_coupling
 C-----------------------------------------------------------------------------------
               ELEMENT%SHELL%OFFSET = NUMELS + NUMELQ
               CALL PREPARE_DEBUG(NODES%ITAB,NUMNOD)
@@ -3169,6 +3183,25 @@ C First: try with reduced bounding box
               CALL PYTHON_UPDATE_TIME(TT,DT2)
               CALL PYTHON_UPDATE_NODAL_ENTITIES(NUMNOD, X=NODES%X,A=NODES%A,V=NODES%V,D=NODES%D,DR=NODES%DR,VR=NODES%VR)
               CALL PYTHON_SYNC(PYTHON%CONTEXT)
+              IF(PRECICE_AVAILABLE) THEN
+              ! ALLOCATION AND INITIALIZATION OF PRECICE COUPLING
+                ALLOCATE(DISPL(3,NUMNOD))
+                ALLOCATE(X_PREV(3,NUMNOD))
+                ALLOCATE(FORCES(3,NUMNOD))
+                FORCES = ZERO
+                DO I = 1,NUMNOD
+                  DISPL(1,I) = nodes%X(1,I)
+                  DISPL(2,I) = nodes%X(2,I)
+                  DISPL(3,I) = nodes%X(3,I)
+                  X_PREV(1,I) =nodes%X(1,I)
+                  X_PREV(2,I) =nodes%X(2,I)
+                  X_PREV(3,I) =nodes%X(3,I)
+                ENDDO
+                CALL PRECICE_SET_NODES(preCICE, IGRNOD, NGRNOD)
+                CALL PRECICE_INITIALIZE(preCICE,NODES%X,NUMNOD,ISPMD,NSPMD)
+                CALL PRECICE_ONGOING(ONGOING)
+              ENDIF
+
 C===========================================================================
 C                 BEGINNING OF EXPLICIT ITERATION LOOP
 C===========================================================================                                        
@@ -3713,6 +3746,8 @@ C----------------------------------------
                 ELSE
                   NATIV_SMS_SIZ = 0
                 ENDIF
+
+                IF(PRECICE_AVAILABLE .AND. TT > ZERO) DT2T = MIN(DT2T,preCICE%DT_LIMIT)
 
 C========================================================================================
 C                                     PARALLEL SECTION (SMP)
@@ -4980,7 +5015,9 @@ C
 C--- //------------------------------
 C       FORCE ASSEMBLY
 C-------------------------------------
-
+             IF(PRECICE_AVAILABLE) THEN
+               FORCES(1:3,1:NUMNOD) = nodes%A(1:3,1:NUMNOD)
+             ENDIF
 C========================================================================================
 C                                     PARALLEL SECTION (SMP)
 C========================================================================================
@@ -7109,6 +7146,17 @@ C===============================================================================
                 IF(IPARIT == 0.AND.NSPMD > 1.AND. NLOC_DMG%IMOD > 0)THEN
                   CALL SPMD_EXCH_SUB_POFF(NLOC_DMG)
                 ENDIF
+
+
+                IF(PRECICE_AVAILABLE) THEN
+                  ! FORCES WAS INITIALIZED TO THE ACCELERTION, BEFORE ASSEMBLY
+                  ! BEFORE THE CALL TO ACCELE, A CONTAINS THE FORCES
+                  ! AFTER THE CALL TO ACCELE, A CONTAINS THE ACCELERATION
+                  FORCES(1:3,1:NUMNOD) = nodes%A(1:3,1:NUMNOD) - FORCES(1:3,1:NUMNOD) 
+                  !FORCES ARE ADDED TO ACCELERATION
+                  CALL PRECICE_READ(preCICE,DT2,nodes%A,NUMNOD,2,PRECICE_FORCES)
+                  CALL PRECICE_WRITE(preCICE,DT2,FORCES,NUMNOD,PRECICE_FORCES)
+                ENDIF
 C========================================================================================
 C                                     PARALLEL SECTION (SMP)
 C========================================================================================
@@ -8699,6 +8747,7 @@ C
                 CALL TRACE_OUT(5)
 C-------ADYREL----
                 IF (ISTAT==3) CALL ENER_W0
+                IF(PRECICE_AVAILABLE) CALL PRECICE_ADVANCE(preCICE,DT2)
 C------------
 C       TEMPS
 C------------
@@ -9215,6 +9264,24 @@ C===============================================================================
               ENDIF
               CALL PYTHON_SYNC(PYTHON%CONTEXT)
               CALL PYTHON_UPDATE_NODAL_ENTITIES(NUMNOD,X=NODES%X, D=NODES%D, DR=NODES%DR)
+              IF(PRECICE_AVAILABLE) THEN
+                DT2MAX_COUPLING = DT2 
+                DO I = 1, NUMNOD
+                  DISPL(1,I) = nodes%X(1,I) - X_PREV(1,I)
+                  DISPL(2,I) = nodes%X(2,I) - X_PREV(2,I)
+                  DISPL(3,I) = nodes%X(3,I) - X_PREV(3,I)
+                ENDDO
+                CALL PRECICE_WRITE(preCICE,DT2,NODES%X,NUMNOD,PRECICE_POSITIONS)
+                CALL PRECICE_WRITE(preCICE,DT2,DISPL,NUMNOD,PRECICE_DISPLACEMENTS)
+              
+                CALL PRECICE_READ(preCICE,DT2,NODES%X,NUMNOD,1,PRECICE_POSITIONS)
+                CALL PRECICE_READ(preCICE,DT2,NODES%X,NUMNOD,2,PRECICE_DISPLACEMENTS) ! X = X + DISPL
+                DO I = 1, NUMNOD
+                  X_PREV(1,I) = nodes%X(1,I)
+                  X_PREV(2,I) = nodes%X(2,I)
+                  X_PREV(3,I) = nodes%X(3,I)
+                ENDDO
+              ENDIF
 C========================================================================================
 C                                   NON PARALLEL SECTION (SMP)
 C========================================================================================
@@ -9687,6 +9754,17 @@ C--- //0 ----------------
      7                ISLEN20E,NODES%IKINE   ,DIAG_SMS,SENSORS%SENSOR_TAB,INTERFACES%INTBUF_TAB ,INT24E2EUSE ,
      8                FORNEQS ,MULTI_FVM,INTERFACES)
                 END IF
+
+                IF(PRECICE_AVAILABLE) THEN
+                  CALL PRECICE_ONGOING(ONGOING)
+                    ! FAKE TIME STEPS TO FINALIZE PRECICE
+                    DO WHILE (ONGOING)
+                      DT2 = HUGE(DT2)
+                      CALL PRECICE_ADVANCE(preCICE,DT2)
+                      CALL PRECICE_ONGOING(ONGOING)
+                    END DO
+                    CALL PRECICE_FINALIZE(preCICE)
+                ENDIF
 
                 IF(ALLOCATED(ISENDTO))DEALLOCATE(ISENDTO)
                 IF(ALLOCATED(IRCVFROM))DEALLOCATE(IRCVFROM)
