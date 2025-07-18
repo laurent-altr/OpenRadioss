@@ -32,9 +32,10 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
       !||--- uses       -----------------------------------------------------
       !||    spmd_comm_world_mod   ../engine/source/mpi/spmd_comm_world.F90
       !||====================================================================
-      SUBROUTINE INIPAR(ITID,ICAS,NNODES,INPUT,GOT_INPUT,NBTASK)
+      SUBROUTINE INIPAR(coupling,ITID,ICAS,NNODES,INPUT,GOT_INPUT,NBTASK)
 C-----------------------------------------------------------------
         USE SPMD_COMM_WORLD_MOD, ONLY : SPMD_COMM_WORLD
+        USE COUPLING_ADAPTER_MOD
 #include      "implicit_f.inc"
 #include      "comlock.inc"
 #include      "r4r8_p.inc"
@@ -47,6 +48,7 @@ C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
       INTEGER ITID(*),ICAS, NNODES,GOT_INPUT,NBTASK(*)
       CHARACTER*100 INPUT
+      type(coupling_type), intent(inout) :: coupling
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
 C-----------------------------------------------
@@ -96,9 +98,13 @@ C
         ELSE
            COLOUR = 0  ! Default color if attribute not found
         ENDIF
-      
+#ifndef WITH_CWIPI 
         CALL MPI_COMM_SPLIT(MPI_COMM_WORLD,COLOUR,KEY,
      *                      SPMD_COMM_WORLD,IERROR)
+#else
+        call coupling_create(coupling) 
+        SPMD_COMM_WORLD = coupling_get_communicator(coupling%adapter_ptr)
+#endif
 
         CALL MPI_COMM_SIZE(SPMD_COMM_WORLD, NNODES, IERROR)
         CALL MPI_COMM_RANK(SPMD_COMM_WORLD, MYRANK, IERROR)
@@ -186,7 +192,7 @@ C nthread1 : nombre de threads fixe par la variable environnement sur le MIC
      .        NTHREAD,' FOR MPI PROCESS',ISPMD+1 
           ENDIF
 #endif
-cccc               
+cccc               /ic
 C control of nthread per MPI process
           CALL MPI_GATHER(NTHREAD,1,MPI_INTEGER,NBTASK,1,MPI_INTEGER,
      .                    IT_SPMD(1),SPMD_COMM_WORLD,IERROR)            

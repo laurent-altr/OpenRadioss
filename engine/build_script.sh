@@ -100,7 +100,9 @@ mumps_root=""
 scalapack_root=""
 lapack_root=""
 precice="0"
-precice_exe=""
+coupling_exe=""
+cwipi=0
+cwipi_path=""
 com=0
 release=0
 ad=none
@@ -197,7 +199,18 @@ else
        if [ "$arg" == "-preCICE" ]
        then
         precice="1"
-        precice_exe="_precice"
+        coupling_exe="_precice"
+       fi
+       
+       if [ "$arg" == "-cwipi" ]
+       then
+	 cwipi=1
+	 coupling_exe="_cwipi"
+	 cwipi_path=`echo $var|awk -F '=' '{print $2}'`
+	 if [ -z "$cwipi_path" ]
+	 then
+	   cwipi_path="/usr/local/cwipi"
+	 fi
        fi
 
        if [ "$arg" == "-addflag" ]
@@ -286,7 +299,7 @@ else
      ddebug=""
    fi 
 
-engine_exec=${eng_vers}_${arch}${dmpi}${suffix}${precice_exe}${ddebug}
+engine_exec=${eng_vers}_${arch}${dmpi}${suffix}${coupling_exe}${ddebug}
 build_directory=cbuild_${engine_exec}${cf}
 
 

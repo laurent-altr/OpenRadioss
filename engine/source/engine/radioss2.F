@@ -620,7 +620,7 @@ C--------------------------------------------------
 C Get Hardware characteristics before init // (system incompatible with infiniband)
       CALL PRINTCPU(1)
 C Init NTHREAD(=NPROC) tasks
-      CALL INIPAR(ITID,1,NNODES,INPUTNAM,GOT_INPUT,NBTASK)
+      CALL INIPAR(coupling,ITID,1,NNODES,INPUTNAM,GOT_INPUT,NBTASK)
 C KMP_STACKSIZE/OMP_STACKSIZE Environment variable check
       CALL SOLVER_STACKSIZE()
 C--------------------------------------------------
@@ -893,7 +893,7 @@ C      IF(ISPMD==0) CALL XTIME0(NNODES)
 C      CALL TRACE_OUT(19)
 
 
-      CALL INIPAR(ITID,3,NNODES,INPUTNAM,GOT_INPUT,NBTASK)
+      CALL INIPAR(coupling,ITID,3,NNODES,INPUTNAM,GOT_INPUT,NBTASK)
 
       IF(NSPMD > 1 ) THEN
         !CALL SPMD_ALLREDUCE_INT(GLOB_THERM%NFXFLUX,NFXFLUX_GLOB,1,"SUM ")
@@ -2222,7 +2222,7 @@ C New MADYMO coupling
 #endif
 C----------------------------------------------------------------------X
 C End tasks
-      CALL INIPAR(ITID,2,NNODES,INPUTNAM,GOT_INPUT,NBTASK)
+      CALL INIPAR(coupling,ITID,2,NNODES,INPUTNAM,GOT_INPUT,NBTASK)
 C---------------------------------------------------------------------
       IF(MSTOP==1) THEN
         N = 3

@@ -4,7 +4,7 @@
 #include <sstream>
 #include <algorithm>
 #include <cstring>
-
+// File coupling.cpp
 // =============================================================================
 // Dummy Coupling Adapter Implementation (always available)
 // =============================================================================
@@ -68,7 +68,6 @@ int DummyCouplingAdapter::getNumberOfCouplingNodes() const {
 // =============================================================================
 
 #ifdef WITH_PRECICE
-
 PreciceCouplingAdapter::PreciceCouplingAdapter() 
     : active_(false)
     , maxTimeStepSize_(0.0)
@@ -421,8 +420,9 @@ void PreciceCouplingAdapter::injectNodeData(double *globalValues, int totalNodes
                     << ", skipping injection." << std::endl;
     }
 }
+#elif defined(WITH_CWIPI)
 
-#endif // WITH_PRECICE
+#endif 
 
 // =============================================================================
 // Factory Function
@@ -431,6 +431,8 @@ void PreciceCouplingAdapter::injectNodeData(double *globalValues, int totalNodes
 CouplingAdapter* createCouplingAdapter() {
 #ifdef WITH_PRECICE
     return new PreciceCouplingAdapter();
+#elif defined(WITH_CWIPI)
+    return new CwipiCouplingAdapter();
 #else
     return new DummyCouplingAdapter();
 #endif
@@ -443,6 +445,11 @@ CouplingAdapter* createCouplingAdapter() {
 extern "C" {
     void* coupling_adapter_create() {
         return createCouplingAdapter();
+    }
+
+    int coupling_adapter_get_communicator(void* adapter) {
+        CouplingAdapter* ca = static_cast<CouplingAdapter*>(adapter);
+        return ca->getCommunicator();
     }
     
     void coupling_adapter_destroy(void* adapter) {

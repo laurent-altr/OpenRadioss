@@ -153,6 +153,13 @@
             integer(c_int) :: coupling_adapter_get_group_node_id
           end function coupling_adapter_get_group_node_id
 
+          function coupling_get_communicator(adapter) &
+            bind(c, name='coupling_adapter_get_communicator')
+            use iso_c_binding
+            type(c_ptr), value :: adapter
+            integer(c_int) :: coupling_get_communicator
+          end function coupling_get_communicator
+
         end interface
 
       contains
@@ -200,7 +207,9 @@
 !-----------------------------------------------------------------------------------------------------------------------
           character(kind=c_char) :: c_filename(len_trim(input_filename) + 1)
           integer :: i, result
-          call coupling_create(coupling)
+          if(.not.coupling%active) then
+            call coupling_create(coupling)
+          endif
           if (.not. c_associated(coupling%adapter_ptr)) return
 
           ! Convert Fortran string to C string

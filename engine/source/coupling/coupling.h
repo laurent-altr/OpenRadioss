@@ -1,10 +1,11 @@
 #ifndef ADAPTER_H
 #define ADAPTER_H
+
 #include <string>
 #include <vector>
 #include <memory>
 #include <array>
-
+// file coupling.h
 // Abstract base class for coupling adapters
 class CouplingAdapter {
 private:
@@ -28,8 +29,8 @@ public:
     // Simulation control
     virtual void advance(double& dt) = 0;
     virtual bool isCouplingOngoing() const = 0;
-    virtual bool requiresWritingCheckpoint() const = 0;
-    virtual bool requiresReadingCheckpoint() const = 0;
+    virtual bool requiresWritingCheckpoint() const {return false; };
+    virtual bool requiresReadingCheckpoint() const {return false; };
     
     // Finalization
     virtual void finalize() = 0;
@@ -43,6 +44,9 @@ public:
     }
     void setGroupNodeId(int id) {
         groupNodeId_ = id;
+    }
+    virtual int getCommunicator() const {
+        return 0; // Return the communicator for this adapter
     }
 
     // data that can be exchanged during the coupling process, can be extended                                                   
@@ -105,8 +109,6 @@ public:
 // =========================================================
 #ifdef WITH_PRECICE
 #include "precice/precice.hpp"
-
-// preCICE implementation of coupling adapter
 class PreciceCouplingAdapter : public CouplingAdapter {
 public:
     PreciceCouplingAdapter();
@@ -152,8 +154,41 @@ private:
     void injectNodeData(double* globalValues, int totalNodes, int dataType);
 
 };
+#elif defined(WITH_CWIPI)
+#include "cwipi.h"
+class PreciceCouplingAdapter : public CouplingAdapter {
+public:
+    PreciceCouplingAdapter();
+    ~PreciceCouplingAdapter() override;
+    
+    // Implement abstract interface
+    bool configure(const std::string& configFile) override;
+    void setNodes(const std::vector<int>& nodeIds) override;
+    bool initialize(const double* coordinates, int totalNodes, int mpiRank, int mpiSize) override;
+    void writeData(const double* values, int totalNodes, double dt, int dataType) override;
+    void readData(double* values, int totalNodes, double dt, int dataType) override;
+    void advance(double& dt) override;
+    bool isCouplingOngoing() const override;
+    bool requiresWritingCheckpoint() const override;
+    bool requiresReadingCheckpoint() const override;
+    void finalize() override;
+    bool isActive() const override;
+    double getMaxTimeStepSize() const override;
+    int getNumberOfCouplingNodes() const override;
 
-#endif // WITH_PRECICE
+    struct CouplingData {
+      bool isActive = false; // Whether this data type is active
+      Mode mode = Mode::SKIP; // Mode for this data type
+      std::vector<double> buffer;
+    };
+
+private:
+    // Configuration data
+    bool active_;
+
+};
+
+#endif 
 
 // Factory function to create the appropriate adapter
 CouplingAdapter* createCouplingAdapter();
