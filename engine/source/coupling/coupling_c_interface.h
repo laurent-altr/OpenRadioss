@@ -40,7 +40,9 @@ int coupling_adapter_is_active(void* adapter);
 double coupling_adapter_get_max_time_step_size(void* adapter);
 int coupling_adapter_get_num_coupling_nodes(void* adapter);
 int coupling_adapter_get_group_node_id(void* adapter);
+int coupling_adapter_get_surface_id(void* adapter);
 int coupling_adapter_get_communicator(void* adapter);
+
 
 #ifdef __cplusplus
 }

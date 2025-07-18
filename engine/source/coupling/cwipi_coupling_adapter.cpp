@@ -8,10 +8,16 @@
 
 CwipiCouplingAdapter::CwipiCouplingAdapter() 
     : active_(false)
-    , maxTimeStepSize_(0.0)
-    , couplingId_(-1)
-    , meshId_(-1)
+    , maxTimeStepSize_(1e30)
     , initialized_(false)
+    , dimension_(3)
+    , tolerance_(0.1)
+    , order_(1)
+    , numElements_(0)
+    , applicationName_("Radioss")
+    , coupledAppName_("Radioss")
+    , couplingName_("Coupling")
+    , exchangeName_("Exchange")
 {
 }
 
@@ -54,12 +60,27 @@ bool CwipiCouplingAdapter::configure(const std::string& configFile) {
             std::string key = parts[1];
             std::string value = parts[2];
             
+            // Handle cases where VALUE might contain additional path segments
+            if (parts.size() > 3) {
+                for (size_t i = 3; i < parts.size(); ++i) {
+                    value += "/" + parts[i];
+                }
+            }
+            
             if (key == "APPLICATION_NAME") {
                 applicationName_ = value;
-            } else if (key == "CONFIG_FILE") {
-                configFile_ = value;
-            } else if (key == "MESH_NAME") {
-                meshName_ = value;
+            } else if (key == "COUPLED_APP_NAME") {
+                coupledAppName_ = value;
+            } else if (key == "COUPLING_NAME") {
+                couplingName_ = value;
+            } else if (key == "EXCHANGE_NAME") {
+                exchangeName_ = value;
+            } else if (key == "DIMENSION") {
+                dimension_ = std::stoi(value);
+            } else if (key == "TOLERANCE") {
+                tolerance_ = std::stod(value);
+            } else if (key == "ORDER") {
+                order_ = std::stoi(value);
             } else if (key == "READ") {
                 DataType dataType = stringToDataType(value);
                 if (dataType == DataType::NOTHING) {
@@ -79,8 +100,13 @@ bool CwipiCouplingAdapter::configure(const std::string& configFile) {
                     continue;
                 }
                 writeData_[static_cast<size_t>(dataType)].isActive = true;
-            } else if (key == "INTERFACE") {
+            } else if (key == "GRNOD") {
                 setGroupNodeId(std::stoi(value));
+            else if (key == "SURFID") {
+                //surface_id_ = std::stoi(value);
+                setSurfaceId(std::stoi(value));
+            } else {
+                std::cout << "Warning: Unknown CWIPI configuration key '" << key << "'." << std::endl;
             }
         }
     }
@@ -108,25 +134,62 @@ void CwipiCouplingAdapter::setNodes(const std::vector<int>& nodeIds) {
     }
 }
 
+void CwipiCouplingAdapter::setMesh(const int* elem_node_offsets, const int* elem_node_indices, int num_elements) {
+    numElements_ = num_elements;
+    eltsConnecPointer_.assign(elem_node_offsets, elem_node_offsets + num_elements + 1);
+    eltsConnec_.assign(elem_node_indices, elem_node_indices + elem_node_offsets[num_elements]);
+}
+
 bool CwipiCouplingAdapter::initialize(const double* coordinates, int totalNodes, int mpiRank, int mpiSize) {
     if (!active_) return false;
     
     try {
-        // Initialize CWIPI
-        // TODO: Implement CWIPI initialization
-        // This is where you would call cwipi_init() and related functions
+        // 1. Initialize CWIPI
+        cwipi_init(MPI_COMM_WORLD, applicationName_.c_str(), &localComm_);
         
-        // Example skeleton (to be implemented):
-        // cwipi_init(MPI_COMM_WORLD, applicationName_.c_str(), &couplingId_);
+        // 2. Create coupling
+        cwipi_create_coupling(couplingName_.c_str(),
+                             CWIPI_COUPLING_PARALLEL_WITH_PARTITIONING,
+                             coupledAppName_.c_str(),
+                             dimension_,
+                             tolerance_,
+                             CWIPI_STATIC_MESH,
+                             CWIPI_SOLVER_CELL_VERTEX,
+                             -1,  // No postprocessing
+                             "EnSight Gold",
+                             "text");
         
-        // Set up mesh
-        // TODO: Define mesh vertices and connectivity
+        // 3. Set up mesh vertices for coupling nodes
+        std::vector<double> meshVertices;
+        meshVertices.reserve(couplingNodeIds_.size() * 3);
         
-        // Set up coupling fields
-        // TODO: Define coupling fields for data exchange
+        for (int nodeId : couplingNodeIds_) {
+            // Convert from 1-based Fortran indexing to 0-based C++ indexing
+            int idx = nodeId - 1;
+            meshVertices.push_back(coordinates[idx * 3]);
+            meshVertices.push_back(coordinates[idx * 3 + 1]);
+            meshVertices.push_back(coordinates[idx * 3 + 2]);
+        }
+        
+        // 4. Define mesh
+        if (order_ == 1) {
+            cwipi_define_mesh(couplingName_.c_str(),
+                             couplingNodeIds_.size(),
+                             numElements_,
+                             meshVertices.data(),
+                             eltsConnecPointer_.data(),
+                             eltsConnec_.data());
+        } else {
+            cwipi_ho_define_mesh(couplingName_.c_str(),
+                                couplingNodeIds_.size(),
+                                numElements_,
+                                order_,
+                                meshVertices.data(),
+                                eltsConnecPointer_.data(),
+                                eltsConnec_.data());
+        }
         
         initialized_ = true;
-        maxTimeStepSize_ = 1e30; // Default large value
         
     } catch (const std::exception& e) {
         std::cerr << "Error initializing CWIPI: " << e.what() << std::endl;
@@ -143,9 +206,22 @@ void CwipiCouplingAdapter::writeData(const double* values, int totalNodes, doubl
         return;
     }
     
-    // TODO: Implement CWIPI data writing
-    // extractNodeData(values, totalNodes, dataType);
-    // Call appropriate CWIPI functions to send data
+    // Extract data for coupling nodes
+    extractNodeData(values, totalNodes, dataType);
+    
+    // Start async send
+    std::string fieldName = getFieldName(static_cast<DataType>(dataType));
+    int tag = getTag(static_cast<DataType>(dataType));
+    
+    cwipi_issend(couplingName_.c_str(),
+                exchangeName_.c_str(),
+                tag,
+                1,    // time step (user controlled)
+                1,    // n_step
+                0.0,  // physical_time (user controlled)
+                fieldName.c_str(),
+                writeData_[dataType].buffer.data(),
+                &writeData_[dataType].sendRequest);
 }
 
 void CwipiCouplingAdapter::readData(double* values, int totalNodes, double dt, int dataType) {
@@ -155,23 +231,54 @@ void CwipiCouplingAdapter::readData(double* values, int totalNodes, double dt, i
         return;
     }
     
-    // TODO: Implement CWIPI data reading
-    // Call appropriate CWIPI functions to receive data
-    // injectNodeData(values, totalNodes, dataType);
+    // Start async receive
+    std::string fieldName = getFieldName(static_cast<DataType>(dataType));
+    int tag = getTag(static_cast<DataType>(dataType));
+    
+    cwipi_irecv(couplingName_.c_str(),
+               exchangeName_.c_str(),
+               tag,
+               1,    // time step
+               1,    // n_step
+               0.0,  // physical_time
+               fieldName.c_str(),
+               readData_[dataType].buffer.data(),
+               &readData_[dataType].recvRequest);
+    
+    // Wait for receive completion
+    cwipi_wait_irecv(couplingName_.c_str(), readData_[dataType].recvRequest);
+    
+    // Wait for any pending sends to complete
+    for (size_t i = 0; i < writeData_.size(); ++i) {
+        if (writeData_[i].isActive && writeData_[i].sendRequest != -1) {
+            cwipi_wait_issend(couplingName_.c_str(), writeData_[i].sendRequest);
+            writeData_[i].sendRequest = -1;  // Reset request
+        }
+    }
+    
+    // Check for not located points
+    int nNotLocated = cwipi_get_n_not_located_points(couplingName_.c_str());
+    if (nNotLocated > 0) {
+        std::cout << "Warning: " << nNotLocated << " points not located in coupling " 
+                  << couplingName_ << std::endl;
+    }
+    
+    // Inject received data into global arrays
+    injectNodeData(values, totalNodes, dataType);
 }
 
 void CwipiCouplingAdapter::advance(double& dt) {
     if (!active_ || !initialized_) return;
     
-    // TODO: Implement CWIPI time advancement
-    // This might involve synchronization calls
+    // Trigger location/interpolation update
+    cwipi_locate(couplingName_.c_str());
 }
 
 bool CwipiCouplingAdapter::isCouplingOngoing() const {
     if (!active_ || !initialized_) return false;
     
-    // TODO: Implement coupling status check
-    // Return true if coupling should continue
+    // CWIPI doesn't have an inherent "ongoing" state like preCICE
+    // Return true if coupling is active and initialized
     return true;
 }
 
@@ -187,20 +294,30 @@ void CwipiCouplingAdapter::finalize() {
     if (!active_) return;
     
     if (initialized_) {
-        // TODO: Implement CWIPI finalization
-        // cwipi_finalize();
+        // Delete coupling
+        cwipi_delete_coupling(couplingName_.c_str());
+        
+        // Finalize CWIPI
+        cwipi_finalize();
         initialized_ = false;
     }
     
     // Clear all data structures
     couplingNodeIds_.clear();
+    eltsConnecPointer_.clear();
+    eltsConnec_.clear();
+    
     for (auto& data : readData_) {
         data.buffer.clear();
         data.isActive = false;
+        data.sendRequest = -1;
+        data.recvRequest = -1;
     }
     for (auto& data : writeData_) {
         data.buffer.clear();
         data.isActive = false;
+        data.sendRequest = -1;
+        data.recvRequest = -1;
     }
     
     active_ = false;
@@ -253,4 +370,17 @@ void CwipiCouplingAdapter::injectNodeData(double* globalValues, int totalNodes, 
     }
 }
 
-#endif 
+std::string CwipiCouplingAdapter::getFieldName(DataType type) {
+    switch(type) {
+        case DataType::POSITIONS: return "positions";
+        case DataType::FORCES: return "forces";
+        case DataType::DISPLACEMENTS: return "displacements";
+        default: return "unknown";
+    }
+}
+
+int CwipiCouplingAdapter::getTag(DataType type) {
+    return static_cast<int>(type);
+}
+
+#endif

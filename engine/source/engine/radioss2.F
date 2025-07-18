@@ -658,10 +658,8 @@ C------------------------------------------------
       CALL LECINP(IRUNN,IRFL,IRFE,H3D_DATA,FLAG_CST_AMS,DYNAIN_DATA,
      .            SENSORS,DT,OUTPUT,GLOB_THERM)
 
-#ifdef WITH_PRECICE
-       FILNAM=ROOTNAM(1:ROOTLEN)//'_'//CHRUN//'.cpl'
-       call coupling_configure(coupling, TRIM(FILNAM))  
-#endif
+      FILNAM=ROOTNAM(1:ROOTLEN)//'_'//CHRUN//'.cpl'
+      call coupling_configure(coupling, TRIM(FILNAM))  
       NFSKYI=5
 
       IF(KDTINT==0 )NFSKYI=4

@@ -39,6 +39,8 @@ public:
     virtual int getNumberOfCouplingNodes() const = 0;
     int getGroupNodeId() const { return groupNodeId_; }
     void setGroupNodeId(int id) { groupNodeId_ = id; }
+    int getSurfaceId() const { return surfaceId_; }
+    void setSurfaceId(int id) { surfaceId_ = id; }
     virtual int getCommunicator() const { return 0; }
 
     // Data types that can be exchanged during the coupling process

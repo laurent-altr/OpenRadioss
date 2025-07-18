@@ -88,9 +88,29 @@ int coupling_adapter_get_group_node_id(void* adapter) {
     return ca->getGroupNodeId();
 }
 
+int coupling_adapter_get_surface_id(void* adapter) {
+    CouplingAdapter* ca = static_cast<CouplingAdapter*>(adapter);
+    return ca->getSurfaceId();
+}
+
 int coupling_adapter_get_communicator(void* adapter) {
     CouplingAdapter* ca = static_cast<CouplingAdapter*>(adapter);
     return ca->getCommunicator();
+}
+
+
+void coupling_adapter_set_mesh(void* adapter, const int* elem_node_offsets, const int* elem_node_indices, int num_elements) {
+    CouplingAdapter* ca = static_cast<CouplingAdapter*>(adapter);
+    
+    // Try to cast to CwipiCouplingAdapter to call setMesh
+#ifdef WITH_CWIPI
+    CwipiCouplingAdapter* cwipi_adapter = dynamic_cast<CwipiCouplingAdapter*>(ca);
+    if (cwipi_adapter) {
+        cwipi_adapter->setMesh(elem_node_offsets, elem_node_indices, num_elements);
+        return;
+    }
+#endif
+    
 }
 
 } // extern "C"
