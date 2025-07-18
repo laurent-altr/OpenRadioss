@@ -72,6 +72,7 @@ C-----------------------------------------------
       INTEGER :: COLOUR
       INTEGER (kind=MPI_ADDRESS_KIND) :: COLOUR_ADDR
       INTEGER :: VALID
+      CHARACTER FILNAM*100
 #if defined(_OPENMP)
       INTEGER OMP_GET_MAX_THREADS
 #endif
@@ -98,14 +99,14 @@ C
         ELSE
            COLOUR = 0  ! Default color if attribute not found
         ENDIF
+        call coupling_configure(coupling, TRIM(coupling%FILNAM))  
+
 #ifndef WITH_CWIPI 
         CALL MPI_COMM_SPLIT(MPI_COMM_WORLD,COLOUR,KEY,
      *                      SPMD_COMM_WORLD,IERROR)
 #else
-        call coupling_create(coupling) 
         SPMD_COMM_WORLD = coupling_get_communicator(coupling%adapter_ptr)
 #endif
-
         CALL MPI_COMM_SIZE(SPMD_COMM_WORLD, NNODES, IERROR)
         CALL MPI_COMM_RANK(SPMD_COMM_WORLD, MYRANK, IERROR)
 C

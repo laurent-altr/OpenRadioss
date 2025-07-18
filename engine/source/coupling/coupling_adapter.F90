@@ -53,6 +53,7 @@
           integer :: grnod_id = 0
           integer :: surface_id = 0
           integer :: coupler
+          character :: FILNAM *100
         end type coupling_type
 
         ! C interface declarations
@@ -300,6 +301,9 @@
 !------------------------------------------------------------------------------------------------------------------------
           if (.not. c_associated(coupling%adapter_ptr)) return
           coupling%grnod_id = coupling_adapter_get_group_node_id(coupling%adapter_ptr)
+          if(coupling%grnod_id == 0) then
+            return
+          end if
           ! Find the group with matching ID
           j = 0
           do i = 1, ngrnod

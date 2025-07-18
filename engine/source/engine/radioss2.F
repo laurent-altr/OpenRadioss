@@ -620,6 +620,8 @@ C--------------------------------------------------
 C Get Hardware characteristics before init // (system incompatible with infiniband)
       CALL PRINTCPU(1)
 C Init NTHREAD(=NPROC) tasks
+      coupling%FILNAM=ROOTN(1:LENROOTN)//'.cpl'
+      write(6,'(A)') 'Coupling file name: '//TRIM(coupling%FILNAM)
       CALL INIPAR(coupling,ITID,1,NNODES,INPUTNAM,GOT_INPUT,NBTASK)
 C KMP_STACKSIZE/OMP_STACKSIZE Environment variable check
       CALL SOLVER_STACKSIZE()
@@ -658,9 +660,7 @@ C------------------------------------------------
       CALL LECINP(IRUNN,IRFL,IRFE,H3D_DATA,FLAG_CST_AMS,DYNAIN_DATA,
      .            SENSORS,DT,OUTPUT,GLOB_THERM)
 
-      FILNAM=ROOTNAM(1:ROOTLEN)//'_'//CHRUN//'.cpl'
-      call coupling_configure(coupling, TRIM(FILNAM))  
-      NFSKYI=5
+       NFSKYI=5
 
       IF(KDTINT==0 )NFSKYI=4
       

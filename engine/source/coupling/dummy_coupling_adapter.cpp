@@ -2,7 +2,7 @@
 #include <iostream>
 
 bool DummyCouplingAdapter::configure(const std::string& configFile) {
-    std::cout << "No coupling library available - coupling disabled" << std::endl;
+//    std::cout << "No coupling library available - coupling disabled" << std::endl;
     return true;
 }
 
@@ -11,7 +11,7 @@ void DummyCouplingAdapter::setNodes(const std::vector<int>& nodeIds) {
 }
 
 bool DummyCouplingAdapter::initialize(const double* coordinates, int totalNodes, int mpiRank, int mpiSize) {
-    std::cout << "Dummy coupling adapter initialized (no actual coupling)" << std::endl;
+//    std::cout << "Dummy coupling adapter initialized (no actual coupling)" << std::endl;
     return true;
 }
 
