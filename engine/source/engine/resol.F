@@ -4634,7 +4634,7 @@ C   User Libraries get the possibility to use GET_U_NOD_X & GET_U_NOD_V in user 
               GETUNOD_NOCOM=1
 C -------------------------------------------------------------------
               LLT1 = I87G+3*NUMELTG
-              WA(1:SWAP) = ZERO
+              WA(1:SWA) = ZERO
 !$OMP PARALLEL
 !$OMP+ PRIVATE(ITSK,NODFTSK,NODLTSK,NUMNTSK,NDTSK,IPMTSK,IGMTSK)
 !$OMP+ PRIVATE(PARTFTSK,PARTLTSK,NWAFTSK,DT2TT,NELTSTT,ITYPTSTT)
@@ -4877,7 +4877,7 @@ C----------------------------------
 #include "lockoff.inc"
 
 !$OMP END PARALLEL
-               WA(1:SWAP) = ZERO
+               WA(1:SWA) = ZERO
 
 C -------------------------------------------------------------------
 C   User Libraries get the possibility to use GET_U_NOD_X & GET_U_NOD_V in user elements properties (Solids & Springs)
