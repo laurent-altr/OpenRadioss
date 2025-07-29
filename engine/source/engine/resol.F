@@ -4877,9 +4877,12 @@ C----------------------------------
 #include "lockoff.inc"
 
 !$OMP END PARALLEL
+               WA(1:SWAP) = ZERO
+
 C -------------------------------------------------------------------
 C   User Libraries get the possibility to use GET_U_NOD_X & GET_U_NOD_V in user elements properties (Solids & Springs)
                 GETUNOD_NOCOM=0
+ 
 C -------------------------------------------------------------------
 
 C=======================================================================================
