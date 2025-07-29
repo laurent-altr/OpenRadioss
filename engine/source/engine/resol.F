@@ -4692,6 +4692,8 @@ C Init var parallel SMP
               END IF
 #include "lockoff.inc"
 !$OMP END PARALLEL
+              WA(1:SWA) = ZERO
+
               CALL TRACE_OUT(14)
               IF (IMON>0) CALL STOPTIME(TIMERS,TIMER_ELEMENT)
 
@@ -4782,6 +4784,8 @@ C
               END IF
 #include "lockoff.inc"
 !$OMP END PARALLEL
+              WA(1:SWA) = ZERO
+
               CALL TRACE_OUT(14)
 
               IF (IMON>0) CALL STOPTIME(TIMERS,TIMER_ELEMENT)
@@ -4820,6 +4824,8 @@ C Init var parallel SMP
      B            WASPH(KSPACTIV),ICONTACT_OLD,OFF_SPH_R2R,WSMCOMP,IRUNN_BIS,
      C            SPH_IORD1,SPH_WORK,OUTPUT%WFEXT)
 !$OMP END PARALLEL
+              WA(1:SWA) = ZERO
+
 
                 IF (IMONM > 0) CALL STOPTIME(TIMERS,87)
 C========================================================================================
@@ -5391,6 +5397,7 @@ C
               IF(KDTINT/=0) CALL MODSTI(NODFTSK,NODLTSK,NODES%STIFN,NODES%VISCN,NODES%MS)
 
 !$OMP END PARALLEL
+              WA(1:SWA) = ZERO
 C
               IF(IPARIT==1) DEALLOCATE( FSKY_L )
               IF (IMON>0) CALL STOPTIME(TIMERS,TIMER_ASM)
@@ -5907,6 +5914,7 @@ C-----------------------------------------------------
 C========================================================================================
 C                    PARALLEL SECTION (SMP)
 C========================================================================================
+              WA(1:SWA) = ZERO
 
 !$OMP PARALLEL PRIVATE(ITSK)
                 ITSK = OMP_GET_THREAD_NUM()
@@ -5921,6 +5929,8 @@ C        /---------------/
      5                   TAGPENE    ,H3D_DATA  ,MULTI_FVM,ALE_CONNECTIVITY%NE_CONNECT,XCELL,XCELL_REMOTE)
 !$OMP END PARALLEL
               ENDIF
+              WA(1:SWA) = ZERO
+
 C------------------------
 C         INTERFACES TIED
 C--- //0 ----------------
@@ -6063,6 +6073,7 @@ C-----------------------------------------------------
 C========================================================================================
 C                                     NON PARALLEL SECTION (SMP)
 C========================================================================================
+              WA(1:SWA) = ZERO
 
                 CALL RBYSENS(
      1           IPARG,IPARI       ,NODES%MS    ,NODES%IN   ,
@@ -6078,6 +6089,8 @@ C===============================================================================
 C========================================================================================
 C                                     PARALLEL SECTION (SMP)
 C========================================================================================
+              WA(1:SWA) = ZERO
+
 !$OMP PARALLEL
 
                 CALL RBYFOR(TIMERS,
@@ -7124,6 +7137,7 @@ C------------------------
 C========================================================================================
 C                                     PARALLEL SECTION (SMP)
 C========================================================================================
+              WA(1:SWA) = ZERO
 
 !$OMP PARALLEL PRIVATE(ITSK,IPMTSK)
                   ITSK = OMP_GET_THREAD_NUM()
@@ -7141,6 +7155,8 @@ C===============================================================================
      9            IGEO      ,SOL2SPH_TYP,SPH_WORK)
 
 !$OMP END PARALLEL
+              WA(1:SWA) = ZERO
+
                   DEALLOCATE(WASPSYM)
 
 C========================================================================================
@@ -7352,6 +7368,7 @@ C--- //0 ----------------
                     IF (IMON>0) CALL STOPTIME(TIMERS,6)
                   ENDIF
                 END IF
+              WA(1:SWA) = ZERO
 
 C========================================================================================
 C                                     NON PARALLEL SECTION (SMP)
@@ -7375,6 +7392,7 @@ C--- //0 ----------------
                   IF (IMONM > 0) CALL STOPTIME(TIMERS,48)
                   IF (IMON>0) CALL STOPTIME(TIMERS,6)
                 ENDIF
+              WA(1:SWA) = ZERO
 
 C-----------------------------------------------
 C Multidomains : resynchronization of accelerations in SPH
@@ -7561,6 +7579,8 @@ C----------------------
 C========================================================================================
 C                                     PARALLEL SECTION (SMP)
 C========================================================================================
+              WA(1:SWA) = ZERO
+
 !$OMP PARALLEL PRIVATE(ITSK)
                   ITSK = OMP_GET_THREAD_NUM()
 C        /---------------/
@@ -7572,6 +7592,8 @@ C        /---------------/
      4                          NODES%STIFN,MTF  ,CAND_SAV,FANI,INT18ADD,
      5                          NODES%BOUNDARY_ADD,NODES%BOUNDARY,H3D_DATA )
 !$OMP END PARALLEL
+              WA(1:SWA) = ZERO
+
                 ENDIF
 C========================================================================================
 C                                     NON PARALLEL SECTION (SMP)
@@ -8174,6 +8196,8 @@ C------------------------
 C         INTERFACES TIED
 C--- //0 ----------------
 
+              WA(1:SWA) = ZERO
+
               IF(NINTER/=0)THEN
                 IF (IMON>0) THEN
                   CALL STARTIME(TIMERS,6)
@@ -8191,6 +8215,8 @@ C--- //0 ----------------
                   CALL STOPTIME(TIMERS,6)
                 ENDIF
               ENDIF
+              WA(1:SWA) = ZERO
+
 C
 C-----------------------------------------------------
 C         KINEMATIC CONDITIONS FOR SEATBELTS
@@ -8394,6 +8420,7 @@ C case NSPMD == 1 and options supported only in SMP
 C========================================================================================
 C                                     PARALLEL SECTION (SMP)
 C========================================================================================
+              WA(1:SWA) = ZERO
 
 !$OMP PARALLEL
 !$OMP+ PRIVATE(ITSK,NODFTSK,NODLTSK,NUMNTSK,NDTSK,IPMTSK,IGMTSK)
@@ -8419,6 +8446,7 @@ C Init var parallel SMP
      B               PYTHON,NODES)
 
 !$OMP END PARALLEL
+              WA(1:SWA) = ZERO
 
 C========================================================================================
 C                                     NON PARALLEL SECTION (SMP)
@@ -8730,6 +8758,7 @@ C Regular animation
                   CALL ASSIGN_PTRX(PTRX, NODES%X,NUMNOD)
                   CALL ASSIGN_PTRX(PTRX_OFFSET, NODES%X,NUMNOD)
                 ENDIF
+              WA(1:SWA) = ZERO
 
                 CALL SORTIE_MAIN(TIMERS,
      1          PM            ,NODES%D        ,NODES%V           ,ALE_CONNECTIVITY          ,W             ,
@@ -9250,6 +9279,7 @@ C-------------------------------------
 C========================================================================================
 C                                     PARALLEL SECTION (SMP)
 C========================================================================================
+              WA(1:SWA) = ZERO
 
 !$OMP PARALLEL PRIVATE(ITSK,NODFTSK,NODLTSK)
 
@@ -9275,6 +9305,8 @@ C===============================================================================
      G              NE_LERCVOIS     ,NE_LESDVOIS           ,XCELL       ,XFACE       , OUTPUT%WFEXT)
 
 !$OMP END PARALLEL
+              WA(1:SWA) = ZERO
+
 
 C-------------------------
 C       -EULER+LAGRANGE-
