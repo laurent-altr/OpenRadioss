@@ -116,7 +116,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
      D  A        ,AR      ,V         ,VR        ,
      E  X       ,D        ,MS      ,IN        ,STIFN     ,
      F  STIFR   ,DMAS     ,DINER   ,FANI      ,ANIN      ,
-     G           WA       ,UWA     ,PM        ,GEO       ,
+     G  UWA     ,PM        ,GEO       ,
      H  PARTSAV ,PARTS0   ,MONVOL    ,
      I  I87H    ,I87I     ,I87J    ,I87K      ,
      J  I15J    ,KXX      ,
@@ -302,7 +302,7 @@ C-----------------------------------------------
       INTEGER, INTENT(INOUT) :: INT7ITIED
       my_real
      .   X(3,*), D(3,*), V(3,*), VR(3,*),
-     .   MS(*), IN(*),  WA(*),  A(3,*), AR(3,*),
+     .   MS(*), IN(*),  A(3,*), AR(3,*),
      .   FANI(3,*), UWA(*), STIFN(*),  STIFR(*),
      .   ANIN(*), PARTSAV(NPSAV,*),PARTS0(*),
      .   DMAS, DINER     ,

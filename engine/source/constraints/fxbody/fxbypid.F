@@ -34,7 +34,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||====================================================================
       SUBROUTINE FXBYPID(IPARG ,         IXS   , IXQ   , IXC       ,
      .                   IXT   , IXP   , IXR   , IXTG  , FXBIPM    , 
-     .                   FXBNOD, ONOF  , ITAG  , ONFELT, ELBUF_STR )
+     .                   FXBNOD, ONOF  , ONFELT, ELBUF_STR )
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
@@ -56,7 +56,7 @@ C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
       INTEGER IPARG(NPARG,*),IXS(NIXS,*), IXQ(NIXQ,*),IXC(NIXC,*), 
      .        IXT(NIXT,*),IXP(NIXP,*),IXR(NIXR,*),IXTG(NIXTG,*),
-     .        FXBIPM(*),FXBNOD(*),ONOF,ITAG(*),ONFELT
+     .        FXBIPM(*),FXBNOD(*),ONOF,ONFELT
       TYPE(ELBUF_STRUCT_),TARGET ,DIMENSION(NGROUP)     :: ELBUF_STR
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
@@ -64,6 +64,7 @@ C-----------------------------------------------
       INTEGER NSN,NG,MLW,ITY,NEL,NFT,IAD,I,II,NALL,IGOF,ISHFT,IWIOUT
       my_real,
      .    DIMENSION(:), POINTER :: OFFG
+      integer, dimension(:), allocatable :: ITAG
 C-----------------------------------------------
 C   E x t e r n a l   F u n c t i o n s
 C-----------------------------------------------
@@ -84,6 +85,7 @@ C
 C-----------------------
 C Tag secondary nodes
 C-----------------------
+      ALLOCATE(ITAG(NUMNOD))
       DO I=1,NUMNOD
        ITAG(I)=0
       ENDDO
@@ -278,6 +280,7 @@ C Recovery of active or de-activated elements in the right order
 C
       ENDIF
       IF (ISPMD == 0) WRITE(IOUT,*) ' END FXBYPID'
+      DEALLOCATE(ITAG)
 c-----------
       RETURN
       END SUBROUTINE FXBYPID

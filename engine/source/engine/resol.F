@@ -2221,7 +2221,7 @@ C
      D         NODES%A        ,NODES%AR       ,NODES%V        ,NODES%VR       ,
      E         NODES%X        ,NODES%D        ,NODES%MS       ,NODES%IN ,NODES%STIFN    ,
      F         NODES%STIFR    ,DMAS     ,DINER    ,FANI     ,ANIN     ,
-     G                   WA       ,UWA      ,PM       ,GEO      ,
+     G         UWA      ,PM       ,GEO      ,
      H         PARTSAV  ,PARTS0   ,MONVOL   ,
      I         I87H     ,I87I     ,I87J     ,I87K     ,
      J         I15J     ,KXX      ,
@@ -2969,7 +2969,7 @@ C
                   CALL FXBYPID(
      .                IPARG         ,         IXS , IXQ    , ELEMENT%SHELL%IXC        ,
      .                IXT           , IXP   , IXR , IXTG   , FXBIPM(1,N),
-     .                FXBNOD(ADRNOD), ONOF  , WA  , ONFELT ,ELBUF_TAB   )
+     .                FXBNOD(ADRNOD), ONOF  , ONFELT ,ELBUF_TAB   )
                 ENDDO
               END IF
 C
@@ -3662,10 +3662,10 @@ C
                 ENDIF
                 CALL MONVOL0(
      1            MONVOL          ,VOLMON             ,ptrX               ,NODES%A   ,
-     2            NPC             ,TF                 ,NODES%V            ,WA        ,
+     2            NPC             ,TF                 ,NODES%V            ,NN        ,
      3            FSAV(1,N)       ,NSENSOR            ,SENSORS%SENSOR_TAB ,IGRSURF   ,
      4            FR_MV           ,ELEMENT%PON%IAD_MV ,SICONTACT          ,SPORO     ,
-     5            ELEMENT%PON%FSKY,ICONTACT           ,WA(N0)             ,IPARG     ,
+     5            ELEMENT%PON%FSKY,ICONTACT            ,IPARG     ,
      6            ELBUF_TAB       ,GEO                ,IGEO               ,
      7            PM              ,IPM                ,IPART              ,IPART(K3) ,
      8            IPART(K8)       ,IGROUPC            ,IGROUPTG           ,NODA_FEXT ,
@@ -4920,10 +4920,10 @@ C
                 ENDIF
                 CALL MONVOL0(
      1            MONVOL            ,VOLMON             ,ptrX               ,NODES%A   ,
-     2            NPC               ,TF                 ,NODES%V            ,WA        ,
+     2            NPC               ,TF                 ,NODES%V            ,NN       ,
      3            FSAV(1,N)         ,NSENSOR            ,SENSORS%SENSOR_TAB ,IGRSURF   ,
      4            FR_MV             ,ELEMENT%PON%IAD_MV ,SICONTACT          ,SPORO     ,
-     5            ELEMENT%PON%FSKY  ,ICONTACT           ,WA(N0)             ,IPARG     ,
+     5            ELEMENT%PON%FSKY  ,ICONTACT           ,IPARG     ,
      6            ELBUF_TAB         ,GEO                ,IGEO               ,
      7            PM                ,IPM                ,IPART              ,IPART(K3) ,
      8            IPART(K8)         ,IGROUPC            ,IGROUPTG           ,NODA_FEXT      ,
