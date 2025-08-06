@@ -445,11 +445,12 @@
           ! ITABM1 is of size 2*arrays%max_numnod, but only the first 2*arrays%numnod elements are used
           ! When adding an element, the second half have to be shifted
           ! ITABM1 is used in SYSFUS2, that should be replaced by a hash table
-          do i = numnod, 1, -1
-            arrays%ITABM1(2 * numnod - i + 1) = arrays%ITABM1(2 * old_numnod - i + 1)
-            ! i = 1 ; arrays%ITABM1(2 * numnod) = arrays%ITABM1(2 * old_numnod)
-            ! i = numnod ; arrays%ITABM1(numnod+1) = arrays%ITABM1(old_numnod+1)
-          end do
+          if (numnod > old_numnod) then
+            do i = old_numnod+1,2*old_numnod
+              !shift the second half of ITABM1
+              arrays%ITABM1(i) = arrays%ITABM1(i - old_numnod)
+            end do
+          end if
 ! ----------------------------------------------------------------------------------------------------------------------
         end subroutine extend_nodal_arrays
 
