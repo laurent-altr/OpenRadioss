@@ -71,7 +71,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
      E       ISLEN20   ,IRLEN20T   ,ISLEN20T   ,IRLEN20E  ,ISLEN20E        ,
      F       MSKYI_SMS ,ISKYI_SMS  ,NODNX_SMS  ,INT18ADD  ,FCONTG          ,
      G       FNCONTG   ,FTCONTG    ,NODGLOB    ,MS0       ,NPC             ,
-     H       WA        ,SENSOR_TAB ,QFRICINT   ,NCONT     ,INDEXCONT       ,
+     H       SENSOR_TAB ,QFRICINT   ,NCONT     ,INDEXCONT       ,
      I       TAGCONT   ,INOD_PXFEM ,MS_PLY     ,WAGAP     ,ELBUF_TAB       ,
      J       CONDN     ,CONDNSKYI  ,NV46      ,
      K       SFBSAV6   ,FBSAV6     ,NODADT_THERM,THEACCFACT,
@@ -157,7 +157,7 @@ C-----------------------------------------------
      .   VISCN(*), FNCONT(3,*),FTCONT(3,*),RCONTACT(*),TEMP(*),
      .   FTHESKYI(LSKYI),PM(NPROPM,*),FTHE(*),
      .   ACONTACT(*), PCONTACT(*), MSKYI_SMS(*),
-     .   FCONTG(3,*),FNCONTG(3,*),FTCONTG(3,*),WA(*),
+     .   FCONTG(3,*),FNCONTG(3,*),FTCONTG(3,*),
      .   QFRICINT(*),MS_PLY(*),WAGAP(*),CONDN(*),CONDNSKYI(LSKYI),
      .   WIGE(*),KNOT(*),PSKIDS(*),FORNEQS(3,*),KNOTLOCPC(*),KNOTLOCEL(*),
      .   APINCH(3,*),STIFPINCH(*),T2FAC_SMS(*)
@@ -531,7 +531,7 @@ C
      6  IDUM      ,IDUM         ,IDUM         ,NRTMDIM    ,FNCONT      ,
      7  FTCONT    ,RCONTACT     ,ACONTACT     ,PCONTACT   ,KINET       ,
      8  WEIGHT    ,MSKYI_SMS   ,ISKYI_SMS     ,NODNX_SMS  ,NODGLOB     ,
-     9  NPC       ,TF          ,NISKYFI(N)    ,NEWFRONT(N),WA          ,
+     9  NPC       ,TF          ,NISKYFI(N)    ,NEWFRONT(N),
      A  FBSAV6,ISENSINT(1,N)   ,SFBSAV6         ,DT2T       ,H3D_DATA    )
 C-----------------------------------------------------------------------
         ELSEIF(NTY == 24.AND.TT>=TS) THEN

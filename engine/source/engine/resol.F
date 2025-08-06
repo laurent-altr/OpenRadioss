@@ -4224,7 +4224,7 @@ C----------------------------------------
                 ENDIF
                 CALL INTFOP8(
      1              IPARI  ,ptrX ,NODES%A ,
-     2              NODES%ICODT  ,FSAV    ,WA(1),NODES%V         ,NODES%MS             ,
+     2              NODES%ICODT  ,FSAV    ,NODES%V         ,NODES%MS             ,
      3              DT2TT  ,NELTSTT ,ITYPTSTT   ,NODES%ITAB    ,NODES%STIFN   ,
      4              NPC    ,TF      ,INTERFACES%PON%FSKYI     ,INTERFACES%PON%ISKY      ,NODES%VR              ,
      5              FANI   ,NODES%IN      ,BUFSF     ,FANI(1,NFNCA+1) ,NSENSOR,
@@ -4384,7 +4384,7 @@ C Init var parallel SMP
      E            ISLEN20           ,IRLEN20T       ,ISLEN20T       ,IRLEN20E        ,ISLEN20E        ,
      F            MSKYI_SMS         ,ISKYI_SMS      ,NATIV_SMS      ,INT18ADD        ,FCONTG          ,
      G            FNCONTG           ,FTCONTG        ,NODES%NODGLOB        ,NODES%MS0       ,NPC             ,
-     H            WA                ,SENSORS%SENSOR_TAB,QFRICINT    ,NCONT           ,INDEXCONT       ,
+     H            SENSORS%SENSOR_TAB,QFRICINT    ,NCONT           ,INDEXCONT       ,
      I            TAGCONT           ,INOD_PXFEM     ,MS_PLY         ,WAGAP           ,ELBUF_TAB       ,
      J            CONDN(IDX_CONDN)  ,CONDNSKYI      ,NV46           ,
      K            SENSORS%SFSAV     ,SENSORS%FSAV   ,GLOB_THERM%NODADT_THERM,GLOB_THERM%THEACCFACT,
@@ -4649,7 +4649,7 @@ C Init var parallel SMP
               CALL FORINTC(TIMERS,
      1           PM           ,GEO             ,NODES%X               ,NODES%A(1,NDTSK)     ,NODES%AR(1,NDTSK)  ,
      2           NODES%V            ,NODES%VR              ,NODES%MS              ,NODES%IN             ,NLOC_DMG     ,
-     3           WA(NWAFTSK)  ,NODES%STIFN(NDTSK)    ,NODES%STIFR(NDTSK)    ,ELEMENT%PON%FSKY           ,CRKSKY       ,
+     3           NODES%STIFN(NDTSK)    ,NODES%STIFR(NDTSK)    ,ELEMENT%PON%FSKY           ,CRKSKY       ,
      4           TF           ,BUFMAT          ,PARTSAV(IPMTSK) ,NODES%D              ,MAT_ELEM     ,
      5           NODES%DR           ,EANI            ,TANI            ,FANI(1,NFOA+1) ,
      6           FSAV         ,SENSORS         ,SKEWS%SKEW      ,ANIN(NDMA2+1)  ,FAILWAVE     ,
@@ -5342,36 +5342,6 @@ C         /---------------/
      .                 ADSKY_CRK,INOD_CRK ,CRKSKY  ,NODFTSK  ,NODLTSK  ,
      .                 NODENR   ,NODLEVXF ,NODES%ITAB    )
                 ENDIF
-              ELSEIF(IPARIT==2)THEN
-
-                IF(KDTINT/=0)THEN
-
-!$OMP SINGLE
-                  CALL ANCMSG(MSGID=165,ANMODE=ANINFO)
-!$OMP END SINGLE
-
-                  CALL ARRET(1)
-                ENDIF
-C
-                CALL ASSPAR3(
-     2               NODES%A          ,NODES%AR         ,ITSK       ,NODFTSK   ,
-     3               NODLTSK    ,NODES%STIFN      ,NODES%STIFR      ,NODES%ITAB      ,ELEMENT%PON%FSKY       ,
-     4               ELEMENT%PON%FSKY       ,INTERFACES%PON%ISKY       ,ELEMENT%PON%ADSKY      ,INTERFACES%PON%FSKYI     ,
-     5               WA         ,PARTFTSK   ,PARTLTSK   ,PARTSAV   ,NODES%MS         ,
-     6               FTHE       ,FTHESKY    ,FTHESKYI   ,GREFTSK     ,GRELTSK      ,
-     7               GRESAV     ,GLOB_THERM%ITHERM_FE   ,GLOB_THERM%INTHEAT    )
-
-              ELSEIF(IPARIT==3)THEN
-
-C Assemblage Parith/ON
-                N1 =  1 + NUMNOD
-                CALL ASSPAR5(
-     1               NTHREAD   ,NUMNOD    ,NODFTSK  ,NODLTSK  ,IRODDL   ,
-     2               NPART     ,PARTFTSK  ,PARTLTSK ,NODES%A        ,NODES%AR       ,
-     3              PARTSAV    ,NODES%STIFN      ,NODES%STIFR    ,NODES%A(1,N1)  ,NODES%AR(1,N1) ,
-     4              NODES%STIFN(N1)  ,NODES%STIFR(N1)  ,NODES%VISCN    ,NODES%VISCN(N1),GREFTSK    ,
-     5               GRELTSK     ,GRESAV     ,NGPE     ,NTHPART)
-C
               ENDIF
 
               IF(KDTINT/=0) CALL MODSTI(NODFTSK,NODLTSK,NODES%STIFN,NODES%VISCN,NODES%MS)
@@ -6054,7 +6024,7 @@ C===============================================================================
      1           IPARG,IPARI       ,NODES%MS    ,NODES%IN   ,
      2           IXS  ,IXQ  ,ELEMENT%SHELL%IXC   ,IXT   ,IXP  ,
      3           IXR  ,SKEWS%SKEW ,NODES%ITAB  ,NODES%ITABM1,ISKWN,
-     4           NPBY ,WA   ,LPBY  ,ELEMENT%PON%FSKY  ,NSENSOR,
+     4           NPBY ,LPBY  ,ELEMENT%PON%FSKY  ,NSENSOR,
      5           RBY  ,NODES%X    ,NODES%V     ,NODES%VR    ,IXTG ,
      6           IGRV ,LGRAV,SENSORS%SENSOR_TAB,NODES%A     ,NODES%AR   ,
      7           FSAV  ,NODES%STIFN ,NODES%STIFR,FANI(1,1+NFOA),NODES%WEIGHT,
