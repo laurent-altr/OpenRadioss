@@ -91,7 +91,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
      6                  NEFLSW  ,NNFLSW,ICUT   ,INOISE ,
      7                  X       ,V     ,VR     ,MS     ,IN    ,
      8                  SKEW    ,PLD           ,RBY    ,
-     9                  WA      ,CRFLSW,XCUT   ,ANIN   ,DAMPR ,
+     9                  CRFLSW,XCUT   ,ANIN   ,DAMPR ,
      A                  IGRNOD  ,KXSP  ,WEIGHT ,FR_RBY2,FR_RL ,
      B                  PARTSAV,IPART  ,PM    ,
      C                  MONVOL  ,VOLMON,IPART_STATE,GEO,TABLE ,
@@ -195,7 +195,7 @@ C-----------------------------------------------
      .   MDS_NDEPSVAR(*),IBCL(*),ILOADP(*),LLOADP(*)
       my_real
      .    SKEW(LSKEW,*),RBY(*),MS(*),IN(*),ANIN(*),
-     .    X(*), V(*), VR(*),WA(*),PLD(*),CRFLSW(*),XCUT(*),
+     .    X(*), V(*), VR(*),PLD(*),CRFLSW(*),XCUT(*),
      .    DAMPR(NRDAMP,*), PARTSAV(*),PM(NPROPM,*),
      .    VOLMON(*),GEO(NPROPG,*),XFRAME(NXFRAME,*)
       TYPE(TTABLE) TABLE(*)
@@ -2709,7 +2709,7 @@ C-------------------------------------------
      1    CALL   RBYONF(IPARG,IPARI       ,MS     ,IN     ,
      2                  IXS  ,IXQ  ,IXC   ,IXT    ,IXP    ,
      3                  IXR  ,SKEW ,ITAB  ,ITABM1 ,ISKWN  ,
-     4                  NPBY ,0    ,NRBYOF,WA     ,LPBY   ,
+     4                  NPBY ,0    ,NRBYOF,LPBY   ,
      5                  RBY  ,X    ,V     ,VR     ,IXTG   ,
      6                  IGRV ,IBGR ,WEIGHT,FR_RBY2,PARTSAV,
      7                  IPART,ELBUF_STR,ICFIELD,LCFIELD,TAGSLV_RBY)
@@ -2718,7 +2718,7 @@ C
      1    CALL   RBYONF(IPARG,IPARI       ,MS     ,IN     ,
      2                  IXS  ,IXQ  ,IXC   ,IXT    ,IXP    ,
      3                  IXR  ,SKEW ,ITAB  ,ITABM1 ,ISKWN  ,
-     4                  NPBY ,1    ,NRBYON,WA     ,LPBY   ,
+     4                  NPBY ,1    ,NRBYON,LPBY   ,
      5                  RBY  ,X    ,V     ,VR     ,IXTG   ,
      6                  IGRV ,IBGR ,WEIGHT,FR_RBY2,PARTSAV,
      7                  IPART,ELBUF_STR,ICFIELD,LCFIELD,TAGSLV_RBY)
@@ -2726,7 +2726,7 @@ C---------------------------------------------------------
 C     READING DATA FOR FLUX & ROTATION
 C---------------------------------------------------------
       IF (NSFLSW  /= 0.AND.MCHECK == 0) THEN
-        CALL LECFLSW (NSFLSW,NTFLSW,NEFLSW,NNFLSW,CRFLSW,X,IXS,IPARG,WA)
+        CALL LECFLSW(NSFLSW,NTFLSW,NEFLSW,NNFLSW,CRFLSW,X,IXS,IPARG)
       ENDIF
 C-------------------------------------------------
 C     MODIFICATION OF TIME FUNCTIONS

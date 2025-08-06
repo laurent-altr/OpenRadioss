@@ -32,7 +32,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    message_mod   ../engine/share/message_module/message_mod.F
 !||====================================================================
       SUBROUTINE LECFLSW (NSFLSW,NTFLSW,NEFLSW,NNFLSW,CRFLSW,
-     .                    X,IXS,IPARG,ITMP)
+     .                    X,IXS,IPARG)
       USE MESSAGE_MOD
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
@@ -49,7 +49,7 @@ C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
       INTEGER NSFLSW, NTFLSW
-      INTEGER NEFLSW(*), NNFLSW(8,*), IXS(NIXS,*), IPARG(NPARG,*), ITMP(*)
+      INTEGER NEFLSW(*), NNFLSW(8,*), IXS(NIXS,*), IPARG(NPARG,*)
       my_real CRFLSW(6,*), X(3,*)
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
@@ -59,6 +59,7 @@ C-----------------------------------------------
       my_real
      .   CRX, CRY, CRZ, SURS, X1, Y1, Z1, X2, Y2, Z2, X3, Y3, Z3, X4,
      .   Y4, Z4, SFX, SFY, SFZ, SFM, SURV
+      integer, dimension(:), allocatable :: ITMP
 C-----------------------------------------------
 C   E x t e r n a l   F u n c t i o n s
 C-----------------------------------------------
@@ -102,6 +103,7 @@ C       IB2=NNFLSW(7,IL) :  ADRESSE DE LA PRESSION (ECRASE NUMERO EXTERNE)
 C       IB3=NNFLSW(8,IL) :  ADRESSE DE L'ENERGIE
 C       ITMP(II) = IL    :  NUMERATION LOCALE DES ELEMENTS DES SECTIONS
 C
+      ALLOCATE(ITMP(NUMELS))
       DO 300 I = 1, NUMELS
         ITMP(I) = 0
   300 CONTINUE
@@ -197,5 +199,9 @@ C
      1   1H ,16HFIRST/LAST NUMB.,6HI.E.N.,4X,6HNODE-1,4X,6HNODE-2,4X,
      2                      6HNODE-3,4X,6HNODE-4,4X,6H NDIV    )
  1200 FORMAT (2H  ,10I10)
+
+      if(allocated(ITMP)) then
+        deallocate(ITMP)
+      end if
       RETURN
       END

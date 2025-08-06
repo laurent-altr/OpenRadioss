@@ -2237,7 +2237,7 @@ C
      D         NODES%A        ,NODES%AR       ,NODES%V        ,NODES%VR       ,
      E         NODES%X        ,NODES%D        ,NODES%MS       ,NODES%IN ,NODES%STIFN    ,
      F         NODES%STIFR    ,DMAS     ,DINER    ,FANI     ,ANIN     ,
-     G                   WA       ,UWA      ,PM       ,GEO      ,
+     G         UWA      ,PM       ,GEO      ,
      H         PARTSAV  ,PARTS0   ,MONVOL   ,
      I         I87H     ,I87I     ,I87J     ,I87K     ,
      J         I15J     ,KXX      ,
@@ -2986,7 +2986,7 @@ C
                   CALL FXBYPID(
      .                IPARG         ,         IXS , IXQ    , ELEMENT%SHELL%IXC        ,
      .                IXT           , IXP   , IXR , IXTG   , FXBIPM(1,N),
-     .                FXBNOD(ADRNOD), ONOF  , WA  , ONFELT ,ELBUF_TAB   )
+     .                FXBNOD(ADRNOD), ONOF  , ONFELT ,ELBUF_TAB   )
                 ENDDO
               END IF
 C
@@ -3738,10 +3738,10 @@ C
                 ENDIF
                 CALL MONVOL0(
      1            MONVOL          ,VOLMON             ,ptrX               ,NODES%A   ,
-     2            NPC             ,TF                 ,NODES%V            ,WA        ,
+     2            NPC             ,TF                 ,NODES%V            ,NN        ,
      3            FSAV(1,N)       ,NSENSOR            ,SENSORS%SENSOR_TAB ,IGRSURF   ,
      4            FR_MV           ,ELEMENT%PON%IAD_MV ,SICONTACT          ,SPORO     ,
-     5            ELEMENT%PON%FSKY,ICONTACT           ,WA(N0)             ,IPARG     ,
+     5            ELEMENT%PON%FSKY,ICONTACT            ,IPARG     ,
      6            ELBUF_TAB       ,GEO                ,IGEO               ,
      7            PM              ,IPM                ,IPART              ,IPART(K3) ,
      8            IPART(K8)       ,IGROUPC            ,IGROUPTG           ,NODA_FEXT ,
@@ -3910,28 +3910,25 @@ C Check if ISKY & FSKYI are sufficiently allocate
 C If not reallocate them
 C ----------------------------------------------------
 
-                IF(IPARIT >0)THEN
-                  IF(SIZE(INTERFACES%PON%ADSKYI,1) < NUMNOD+2) then
-                    deallocate(INTERFACES%PON%ADSKYI)
-                    allocate(INTERFACES%PON%ADSKYI(0:NUMNOD+1))
-                  endif
-                  IF ( NISKY+LSKYI_COUNT > SISKY) THEN
-                    CALL REALLOCATE_I_SKYLINE(LSKYI_COUNT,1,GLOB_THERM%INTHEAT,GLOB_THERM%nodadt_therm,INTERFACES%PON)
-                  ENDIF
-
-C
-C Remote Secnd Nodes
-                  IF (NSPMD >1)THEN
-                    CALL UPGRADE_REM_2RY(IPARI,COUNT_REMSLV,COUNT_REMSLVE,glob_therm%nodadt_therm)
-                    COUNT_REMSLV(1:NINTER)= 0
-                    COUNT_REMSLVE(1:NINTER)= 0
-                  ENDIF
-
-                ENDIF
-
                 IF (IMON > 0) CALL STOPTIME(TIMERS,TIMER_CONTSORT)
                 CALL TRACE_OUT(8)
               ENDIF
+              IF(IPARIT >0)THEN
+                IF(SIZE(INTERFACES%PON%ADSKYI,1) < NUMNOD+2) then
+                  deallocate(INTERFACES%PON%ADSKYI)
+                  allocate(INTERFACES%PON%ADSKYI(0:NUMNOD+1))
+                endif
+                IF ( NISKY+LSKYI_COUNT > SISKY) THEN
+                  CALL REALLOCATE_I_SKYLINE(LSKYI_COUNT,1,GLOB_THERM%INTHEAT,GLOB_THERM%nodadt_therm,INTERFACES%PON)
+                ENDIF
+C Remote Secnd Nodes
+                IF (NSPMD >1)THEN
+                  CALL UPGRADE_REM_2RY(IPARI,COUNT_REMSLV,COUNT_REMSLVE,glob_therm%nodadt_therm)
+                  COUNT_REMSLV(1:NINTER)= 0
+                  COUNT_REMSLVE(1:NINTER)= 0
+                ENDIF
+              ENDIF
+
 
 C ----------------------------------------------------
 C SMS - Check if ISKYI_SMS & MSKYI_SMS are sufficiently allocate
@@ -4300,7 +4297,7 @@ C----------------------------------------
                 ENDIF
                 CALL INTFOP8(
      1              IPARI  ,ptrX ,NODES%A ,
-     2              NODES%ICODT  ,FSAV    ,WA(1),NODES%V         ,NODES%MS             ,
+     2              NODES%ICODT  ,FSAV    ,NODES%V         ,NODES%MS             ,
      3              DT2TT  ,NELTSTT ,ITYPTSTT   ,NODES%ITAB    ,NODES%STIFN   ,
      4              NPC    ,TF      ,INTERFACES%PON%FSKYI     ,INTERFACES%PON%ISKY      ,NODES%VR              ,
      5              FANI   ,NODES%IN      ,BUFSF     ,FANI(1,NFNCA+1) ,NSENSOR,
@@ -4460,7 +4457,7 @@ C Init var parallel SMP
      E            ISLEN20           ,IRLEN20T       ,ISLEN20T       ,IRLEN20E        ,ISLEN20E        ,
      F            MSKYI_SMS         ,ISKYI_SMS      ,NATIV_SMS      ,INT18ADD        ,FCONTG          ,
      G            FNCONTG           ,FTCONTG        ,NODES%NODGLOB        ,NODES%MS0       ,NPC             ,
-     H            WA                ,SENSORS%SENSOR_TAB,QFRICINT    ,NCONT           ,INDEXCONT       ,
+     H            SENSORS%SENSOR_TAB,QFRICINT    ,NCONT           ,INDEXCONT       ,
      I            TAGCONT           ,INOD_PXFEM     ,MS_PLY         ,WAGAP           ,ELBUF_TAB       ,
      J            CONDN(IDX_CONDN)  ,CONDNSKYI      ,NV46           ,
      K            SENSORS%SFSAV     ,SENSORS%FSAV   ,GLOB_THERM%NODADT_THERM,GLOB_THERM%THEACCFACT,
@@ -4725,7 +4722,7 @@ C Init var parallel SMP
               CALL FORINTC(TIMERS,
      1           PM           ,GEO             ,NODES%X               ,NODES%A(1,NDTSK)     ,NODES%AR(1,NDTSK)  ,
      2           NODES%V            ,NODES%VR              ,NODES%MS              ,NODES%IN             ,NLOC_DMG     ,
-     3           WA(NWAFTSK)  ,NODES%STIFN(NDTSK)    ,NODES%STIFR(NDTSK)    ,ELEMENT%PON%FSKY           ,CRKSKY       ,
+     3           NODES%STIFN(NDTSK)    ,NODES%STIFR(NDTSK)    ,ELEMENT%PON%FSKY           ,CRKSKY       ,
      4           TF           ,BUFMAT          ,PARTSAV(IPMTSK) ,NODES%D              ,MAT_ELEM     ,
      5           NODES%DR           ,EANI            ,TANI            ,FANI(1,NFOA+1) ,
      6           FSAV         ,SENSORS         ,SKEWS%SKEW      ,ANIN(NDMA2+1)  ,FAILWAVE     ,
@@ -4996,10 +4993,10 @@ C
                 ENDIF
                 CALL MONVOL0(
      1            MONVOL            ,VOLMON             ,ptrX               ,NODES%A   ,
-     2            NPC               ,TF                 ,NODES%V            ,WA        ,
+     2            NPC               ,TF                 ,NODES%V            ,NN       ,
      3            FSAV(1,N)         ,NSENSOR            ,SENSORS%SENSOR_TAB ,IGRSURF   ,
      4            FR_MV             ,ELEMENT%PON%IAD_MV ,SICONTACT          ,SPORO     ,
-     5            ELEMENT%PON%FSKY  ,ICONTACT           ,WA(N0)             ,IPARG     ,
+     5            ELEMENT%PON%FSKY  ,ICONTACT           ,IPARG     ,
      6            ELBUF_TAB         ,GEO                ,IGEO               ,
      7            PM                ,IPM                ,IPART              ,IPART(K3) ,
      8            IPART(K8)         ,IGROUPC            ,IGROUPTG           ,NODA_FEXT      ,
@@ -5363,6 +5360,8 @@ C                                     PARALLEL SECTION (SMP)
 C========================================================================================
               IF(IPARIT==1) ALLOCATE( FSKY_L(NISKY) )
               DTNOD_NLOCAL = EP20
+
+ 
 !$OMP PARALLEL
 !$OMP+PRIVATE(ITSK,NODFTSK,NODLTSK,PARTFTSK,PARTLTSK,GREFTSK,GRELTSK,NODFTSK_2,NODLTSK_2,NODFT_NL,NODLT_NL)
               ITSK = OMP_GET_THREAD_NUM()
@@ -5418,36 +5417,6 @@ C         /---------------/
      .                 ADSKY_CRK,INOD_CRK ,CRKSKY  ,NODFTSK  ,NODLTSK  ,
      .                 NODENR   ,NODLEVXF ,NODES%ITAB    )
                 ENDIF
-              ELSEIF(IPARIT==2)THEN
-
-                IF(KDTINT/=0)THEN
-
-!$OMP SINGLE
-                  CALL ANCMSG(MSGID=165,ANMODE=ANINFO)
-!$OMP END SINGLE
-
-                  CALL ARRET(1)
-                ENDIF
-C
-                CALL ASSPAR3(
-     2               NODES%A          ,NODES%AR         ,ITSK       ,NODFTSK   ,
-     3               NODLTSK    ,NODES%STIFN      ,NODES%STIFR      ,NODES%ITAB      ,ELEMENT%PON%FSKY       ,
-     4               ELEMENT%PON%FSKY       ,INTERFACES%PON%ISKY       ,ELEMENT%PON%ADSKY      ,INTERFACES%PON%FSKYI     ,
-     5               WA         ,PARTFTSK   ,PARTLTSK   ,PARTSAV   ,NODES%MS         ,
-     6               FTHE       ,FTHESKY    ,FTHESKYI   ,GREFTSK     ,GRELTSK      ,
-     7               GRESAV     ,GLOB_THERM%ITHERM_FE   ,GLOB_THERM%INTHEAT    )
-
-              ELSEIF(IPARIT==3)THEN
-
-C Assemblage Parith/ON
-                N1 =  1 + NUMNOD
-                CALL ASSPAR5(
-     1               NTHREAD   ,NUMNOD    ,NODFTSK  ,NODLTSK  ,IRODDL   ,
-     2               NPART     ,PARTFTSK  ,PARTLTSK ,NODES%A        ,NODES%AR       ,
-     3              PARTSAV    ,NODES%STIFN      ,NODES%STIFR    ,NODES%A(1,N1)  ,NODES%AR(1,N1) ,
-     4              NODES%STIFN(N1)  ,NODES%STIFR(N1)  ,NODES%VISCN    ,NODES%VISCN(N1),GREFTSK    ,
-     5               GRELTSK     ,GRESAV     ,NGPE     ,NTHPART)
-C
               ENDIF
 
               IF(KDTINT/=0) CALL MODSTI(NODFTSK,NODLTSK,NODES%STIFN,NODES%VISCN,NODES%MS)
@@ -5830,52 +5799,52 @@ c ==============================================================================
 C                                     node splitting
 C  uncomment the following code for an example of node splitting (using non-physical deformation critera)
 
-!             numnod_old = numnod
-!             numnodm_old = numnodm
-!             call test_jc_shell_detach(nodes, element, interfaces, npari, ninter, ipari, numnod,
-!     .                numnodg, elbuf_tab, ngroup, ngrouc, nparg, iparg, igrouc, numelc, ispmd, nspmd,
-!     .                new_crack)
-!
-!
-!             if(new_crack > 0) then
-!               ! if at least 1 node has been detached, some data must be re-initialized
-!               numnodm = numnodm_old + new_crack
-!               CALL INIT_NODAL_STATE( IPARI,SHOOT_STRUCT,INTERFACES%INTBUF_TAB,NODES%BOUNDARY_ADD,NODES%BOUNDARY,
-!     .                              NODES%ITAB,NODES,GEO,ADDCNEL,CNEL,
-!     .                              IXS,ELEMENT%SHELL%IXC,IXT,IXP,IXR,IXTG,
-!     .                              SIZE_ADDCNEL,SIZE_CNEL ,
-!     .                              numelsg,numelqg,numelcg,numeltrg,numelpg,
-!     .                              numelrg,numeltgg , IXS(L1))
-!
-!
-!               IF(IDEL7NG>0.OR.IRAD2R>0.OR.ALEMUSCL_Param%IALEMUSCL>0.OR.PDEL>0) THEN
-!                 SIZE_ADDCNEL = NUMNOD+1
-!                 SIZE_CNEL = LCNEL
-!                 NELEML = NUMELS+NUMELQ+NUMELC+NUMELT+NUMELP+NUMELR+NUMELTG
-!                 S_ELEM_STATE = NELEML
-!                 DEALLOCATE(CNEL)
-!                 ALLOCATE(CNEL(0:SIZE_CNEL))
-!                 DEALLOCATE(ADDCNEL)
-!                 ALLOCATE(ADDCNEL(0:SIZE_ADDCNEL))
-!                 DEALLOCATE(ADDTMPL)
-!                 ALLOCATE(ADDTMPL(0:NUMNOD+1))
-!                 NELEML = NUMELS+NUMELQ+NUMELC+NUMELT+NUMELP+NUMELR+NUMELTG
-!                 ALEMUSCL_Buffer%pCNEL => CNEL
-!                 ALEMUSCL_Buffer%pADDCNEL => ADDCNEL
-!                 ALEMUSCL_Buffer%pADDTMPL => ADDTMPL
-!                 L1 = 1+NIXS*NUMELS + NSVOIS*NIXS
-!                 L2 = L1+6*NUMELS10
-!                 L3 = L2+12*NUMELS20
-!
-!                 CALL CHKINIT(
-!     2              IXS        ,IXQ       ,ELEMENT%SHELL%IXC       ,IXT         ,IXP       ,
-!     3              IXR        ,IXTG      ,IXS(L1)       ,IXS(L2)     ,
-!     4              IXS(L3)      ,IXTG1     ,GEO       ,ADDCNEL     ,CNEL      ,
-!     5              ADDTMPL    ,IPARG     )
-!
-!               ENDIF
-!               LCNE0 = SIZE(ELEMENT%PON%PROCNE)
-!             endif
+             numnod_old = numnod
+             numnodm_old = numnodm
+             call test_jc_shell_detach(nodes, element, interfaces, npari, ninter, ipari, numnod,
+     .                numnodg, elbuf_tab, ngroup, ngrouc, nparg, iparg, igrouc, numelc, ispmd, nspmd,
+     .                new_crack)
+              ! detach a node from nothing at each cycle
+
+             if(new_crack > 0) then
+               ! if at least 1 node has been detached, some data must be re-initialized
+               numnodm = numnodm_old + new_crack
+               CALL INIT_NODAL_STATE( IPARI,SHOOT_STRUCT,INTERFACES%INTBUF_TAB,NODES%BOUNDARY_ADD,NODES%BOUNDARY,
+     .                              NODES%ITAB,NODES,GEO,ADDCNEL,CNEL,
+     .                              IXS,ELEMENT%SHELL%IXC,IXT,IXP,IXR,IXTG,
+     .                              SIZE_ADDCNEL,SIZE_CNEL ,
+     .                              numelsg,numelqg,numelcg,numeltrg,numelpg,
+     .                              numelrg,numeltgg , IXS(L1))
+
+
+               IF(IDEL7NG>0.OR.IRAD2R>0.OR.ALEMUSCL_Param%IALEMUSCL>0.OR.PDEL>0) THEN
+                 SIZE_ADDCNEL = NUMNOD+1
+                 SIZE_CNEL = LCNEL
+                 NELEML = NUMELS+NUMELQ+NUMELC+NUMELT+NUMELP+NUMELR+NUMELTG
+                 S_ELEM_STATE = NELEML
+                 DEALLOCATE(CNEL)
+                 ALLOCATE(CNEL(0:SIZE_CNEL))
+                 DEALLOCATE(ADDCNEL)
+                 ALLOCATE(ADDCNEL(0:SIZE_ADDCNEL))
+                 DEALLOCATE(ADDTMPL)
+                 ALLOCATE(ADDTMPL(0:NUMNOD+1))
+                 NELEML = NUMELS+NUMELQ+NUMELC+NUMELT+NUMELP+NUMELR+NUMELTG
+                 ALEMUSCL_Buffer%pCNEL => CNEL
+                 ALEMUSCL_Buffer%pADDCNEL => ADDCNEL
+                 ALEMUSCL_Buffer%pADDTMPL => ADDTMPL
+                 L1 = 1+NIXS*NUMELS + NSVOIS*NIXS
+                 L2 = L1+6*NUMELS10
+                 L3 = L2+12*NUMELS20
+
+                 CALL CHKINIT(
+     2              IXS        ,IXQ       ,ELEMENT%SHELL%IXC       ,IXT         ,IXP       ,
+     3              IXR        ,IXTG      ,IXS(L1)       ,IXS(L2)     ,
+     4              IXS(L3)      ,IXTG1     ,GEO       ,ADDCNEL     ,CNEL      ,
+     5              ADDTMPL    ,IPARG     )
+
+               ENDIF
+               LCNE0 = SIZE(ELEMENT%PON%PROCNE)
+             endif
 
 C========================================================================================
 C                                     NON PARALLEL SECTION (SMP)
@@ -6135,7 +6104,7 @@ C===============================================================================
      1           IPARG,IPARI       ,NODES%MS    ,NODES%IN   ,
      2           IXS  ,IXQ  ,ELEMENT%SHELL%IXC   ,IXT   ,IXP  ,
      3           IXR  ,SKEWS%SKEW ,NODES%ITAB  ,NODES%ITABM1,ISKWN,
-     4           NPBY ,WA   ,LPBY  ,ELEMENT%PON%FSKY  ,NSENSOR,
+     4           NPBY ,LPBY  ,ELEMENT%PON%FSKY  ,NSENSOR,
      5           RBY  ,NODES%X    ,NODES%V     ,NODES%VR    ,IXTG ,
      6           IGRV ,LGRAV,SENSORS%SENSOR_TAB,NODES%A     ,NODES%AR   ,
      7           FSAV  ,NODES%STIFN ,NODES%STIFR,FANI(1,1+NFOA),NODES%WEIGHT,
@@ -8478,8 +8447,8 @@ C Init var parallel SMP
 
                   CALL LAG_MULT(
      1               IPARI    ,NODES%X        ,NODES%A        ,
-     2               WA(NWAFTSK),NODES%V        ,NODES%MS       ,NODES%IN       ,NODES%VR       ,
-     3               ITSK       ,WA       ,NODES%ITAB     ,IXS      ,IXS(L2)  ,
+     2               NODES%V        ,NODES%MS       ,NODES%IN       ,NODES%VR       ,
+     3               ITSK       ,NODES%ITAB     ,IXS      ,IXS(L2)  ,
      4               IXS(L3)  ,IGRNOD     ,FANI     ,FSAV     ,
      5               SKEWS%SKEW     ,NODES%AR       ,LAMBDA   ,LAGBUF   ,IBCSLAG  ,
      6               IXS(L1)  ,GJBUFI   ,GJBUFR   ,IBMPC    ,RBMPC    ,
@@ -8509,8 +8478,8 @@ C===============================================================================
                   END IF
                   CALL LAG_MULTP(
      1               IPARI    ,NODES%X        ,NODES%A        ,
-     2               WA       ,NODES%V        ,NODES%MS       ,NODES%IN       ,NODES%VR       ,
-     3                         WA       ,NODES%ITAB     ,IXS      ,IXS(L2)  ,
+     2               NODES%V        ,NODES%MS       ,NODES%IN       ,NODES%VR       ,
+     3               NODES%ITAB     ,IXS      ,IXS(L2)  ,
      4               IXS(L3)  ,FANI     ,FSAV     ,
      5               SKEWS%SKEW     ,NODES%AR       ,LAMBDA   ,LAGBUF   ,IBCSLAG  ,
      6               IXS(L1)  ,GJBUFI   ,GJBUFR   ,IBMPC    ,RBMPC    ,

@@ -51,7 +51,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
      6                   NS_IMP ,NE_IMP  ,IND_IMP   ,NRTMDIM ,FNCONT  ,
      7                   FTCONT ,RCONTACT ,ACONTACT ,PCONTACT,KINET   ,
      8                   WEIGHT ,MSKYI_SMS,ISKYI_SMS,NODNX_SMS ,NODGLOB,
-     9                   NPC    ,TF      , NISKYFI  ,NEWFRONT  ,MWAG   ,
+     9                   NPC    ,TF      , NISKYFI  ,NEWFRONT  ,
      A                   FBSAV6 ,ISENSINT,DIMFB     ,DT2T      ,H3D_DATA)
 C-----------------------------------------------
 C   M o d u l e s
@@ -88,7 +88,7 @@ C-----------------------------------------------
      .        NISKYFI
       INTEGER IPARI(NPARI,NINTER), ICODT(*),ICONTACT(*),
      .        ITAB(*), ISKY(*), KINET(*), ISKYI_SMS(*), NODNX_SMS(*),
-     .        TAGMSR_I21_SMS, NODGLOB(*), NPC(*), MWAG(*)
+     .        TAGMSR_I21_SMS, NODGLOB(*), NPC(*)
       INTEGER NB_JLT,NB_JLT_NEW,NB_STOK_N,JTASK,
      .        LINDMAX,DIMFB
       INTEGER NUM_IMP,NS_IMP(*),NE_IMP(*),IND_IMP(*), WEIGHT(*)

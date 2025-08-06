@@ -49,10 +49,10 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    sensor_mod            ../common_source/modules/sensor_mod.F90
 !||====================================================================
       SUBROUTINE MONVOL0(MONVOL   ,VOLMON  ,X       ,A      ,
-     2                   NPC      ,TF      ,V       ,NORMAL ,
+     2                   NPC      ,TF      ,V       , SNORMAL,
      3                   FSAV     ,NSENSOR ,SENSOR_TAB,IGRSURF,
      4                   FR_MV    ,IADMV   ,SICONTACT,SPORO,
-     5                   FSKY     ,ICONTACT,PORO    ,IPARG  ,
+     5                   FSKY     ,ICONTACT,IPARG  ,
      6                   ELBUF_TAB,GEO     ,IGEO    ,
      7                   PM       ,IPM     ,IPART   ,IPARTC ,
      8                   IPARTTG  ,IGROUPC ,IGROUPTG,FEXT   ,
@@ -91,7 +91,7 @@ C-----------------------------------------------
      .        IGEO(NPROPGI,*),IPART(*),IPARTC(*), IPARTTG(*),IPM(NPROPMI,*),IGROUPC(*), IGROUPTG(*)
       INTEGER FLAG ! 1 => Monvol, 2 => FVMBAG type 6 8
       INTEGER, DIMENSION(NSPMD+2), INTENT(in) :: FRONTIER_GLOBAL_MV !< global mpi frontier
-      my_real X(3,*), A(3,*), TF(*), V(3,*), NORMAL(3,*), PORO(*),
+      my_real X(3,*), A(3,*), TF(*), V(3,*), 
      .        VOLMON(*),FSAV(NTHVKI,*),FSKY(*),GEO(NPROPG,*),PM(NPROPM,*),FEXT(*)
       TYPE(ELBUF_STRUCT_), DIMENSION(NGROUP) :: ELBUF_TAB
       TYPE(H3D_DATABASE) :: H3D_DATA
@@ -100,6 +100,7 @@ C-----------------------------------------------
       TYPE (SENSOR_STR_) ,DIMENSION(NSENSOR), INTENT(IN) :: SENSOR_TAB
       TYPE(OUTPUT_),INTENT(INOUT) :: OUTPUT
       TYPE(PYTHON_), INTENT(IN) :: PYTHON     
+      INTEGER, intent(in) :: SNORMAL
 C-----------------------------------------------
 C     N(3,*)  NORMALE STOCKEE DANS WA
 C     PORO(*) STOCKE DANS WA
@@ -109,8 +110,12 @@ C-----------------------------------------------
       INTEGER  I,ITYP,NCA,NN,IS,K1,K2,K6,KK1,KK2,PMAIN,KIBJET,KRBJET,KIBHOL,KRBHOL,NJET,IADJET,RADJET,NVENT,IADHOL,RADHOL
       my_real, dimension(nvolu) :: vol
       integer :: uid
+      my_real, dimension(:,:), allocatable :: normal !< normal vector for each volume
+      my_real, dimension(:), allocatable :: PORO
       
 C
+      allocate(normal(3,snormal))
+      allocate(PORO(SPORO))
       K1 = 1
       KK1= 1
       DO I=1,NVOLU
@@ -317,5 +322,7 @@ C
         KK1 = KK1 + NRVOLU
         KK2 = KK2 + NRCBAG * NCA
       ENDDO
+      deallocate(normal)
+      deallocate(PORO)
       RETURN
       END

@@ -551,9 +551,11 @@ C-----------------------------------------------
         ENDDO
         DO K=1,NUMNOD
            I=NODGLOB(K)
-           VG(1,I)=V(1,K)
-           VG(2,I)=V(2,K)
-           VG(3,I)=V(3,K)
+           if(I > 0) THEN
+             VG(1,I)=V(1,K)
+             VG(2,I)=V(2,K)
+             VG(3,I)=V(3,K)
+           ENDIF
         ENDDO
 
         CALL SPMD_GLOB_FSUM9(VG,3*NUMNODG)

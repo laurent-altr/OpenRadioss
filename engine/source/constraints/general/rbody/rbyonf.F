@@ -34,7 +34,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
       SUBROUTINE RBYONF(IPARG   ,IPARI         ,MS     ,IN     ,
      2                  IXS     ,IXQ    ,IXC   ,IXT    ,IXP    ,
      3                  IXR     ,SKEW   ,ITAB  ,ITABM1 ,ISKWN  ,
-     4                  NPBY    ,ONOF   ,NRBYNF,ITAG   ,LPBY   ,
+     4                  NPBY    ,ONOF   ,NRBYNF,LPBY   ,
      5                  RBY     ,X      ,V     ,VR     ,IXTG   ,
      6                  IGRV    ,IBGR   ,WEIGHT,FR_RBY2,PARTSAV,
      7                  IPART   ,ELBUF_TAB,ICFIELD,LCFIELD,TAGSLV_RBY)
@@ -61,7 +61,7 @@ C-----------------------------------------------
       INTEGER IPARG(NPARG,*), IPARI(*), IXS(NIXS,*), IXQ(NIXQ,*),
      .   IXC(NIXC,*), IXT(NIXT,*), IXP(NIXP,*), IXR(NIXR,*),
      .   ITAB(*), ITABM1(*),IGRV(NIGRV,*),IBGR(*),IPART(*),
-     .   ISKWN(LISKN,*), NPBY(NNPBY,*),ITAG(*),LPBY(*), IXTG(NIXTG,*),
+     .   ISKWN(LISKN,*), NPBY(NNPBY,*),LPBY(*), IXTG(NIXTG,*),
      .   WEIGHT(*), FR_RBY2(*), ICFIELD(SIZFIELD,*), LCFIELD(*), TAGSLV_RBY(*)
       INTEGER ONOF,NRBYNF,PRI_OFF
 C     REAL
@@ -74,6 +74,7 @@ C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
       INTEGER I, J ,ITEMP(10),K, K0, N,NSL,NN,IAD,ONOF1,ISENS,IACTI,
      .        ONFELT,K1,K2,K3,K4,K5,K6,K7,K8,K9
+      integer, dimension(:), allocatable :: ITAG
 C======================================================================|
 C     MODIFICATION DES RIGID BODY
 C-------------------------------------------
@@ -85,6 +86,7 @@ C-------------------------------------------
       K6=K5+NUMELP
       K7=K6+NUMELR
 C
+      ALLOCATE(ITAG(2*NUMNOD))
       DO I=1,NUMNOD
        ITAG(I)=0
       ENDDO
@@ -208,6 +210,7 @@ C
         END DO
       ENDDO 
 C-----------
+      IF(ALLOCATED(ITAG)) DEALLOCATE(ITAG)
       RETURN
       END
 !||====================================================================
@@ -223,7 +226,7 @@ C-----------
       SUBROUTINE RBYSENS(IPARG,IPARI      ,MS    ,IN   ,
      2                  IXS  ,IXQ  ,IXC   ,IXT   ,IXP  ,
      3                  IXR  ,SKEW ,ITAB  ,ITABM1,ISKWN,
-     4                  NPBY ,ITAG  ,LPBY ,FSKY  ,NSENSOR,
+     4                  NPBY ,LPBY ,FSKY  ,NSENSOR,
      5                  RBY  ,X    ,V     ,VR    ,IXTG ,
      6                  IGRV ,IBGR ,SENSOR_TAB,A     ,AR   ,
      7                  FSAV,STIFN,STIFR  ,FANI  ,WEIGHT,
@@ -256,7 +259,7 @@ C-----------------------------------------------
       INTEGER IPARG(NPARG,*), IPARI(*), IXS(NIXS,*), IXQ(NIXQ,*),
      .   IXC(NIXC,*), IXT(NIXT,*), IXP(NIXP,*), IXR(NIXR,*),
      .   ITAB(*), ITABM1(*),IGRV(NIGRV,*),IBGR(*),
-     .   ISKWN(LISKN,*), NPBY(NNPBY,*),ITAG(*),LPBY(*), IXTG(NIXTG,*),
+     .   ISKWN(LISKN,*), NPBY(NNPBY,*),LPBY(*), IXTG(NIXTG,*),
      .   WEIGHT(*), IPART(*), FR_RBY2(3,*), ICFIELD(SIZFIELD,*), LCFIELD(*), TAGSLV_RBY(*)
 C     REAL
       my_real
@@ -273,6 +276,7 @@ C-----------------------------------------------
      .        N2, ISU,ADRSRF,IM, IDEB, IGET,IMAXNSN, IMAXP,
      .        NSN, NSNP, PROC, ND, PP, II, NSLARB_L, P,
      .        ONFELT,K1,K2,K3,K4,K5,K6,K7,K8,K9,IFAIL,ELT_ACTIV,PRI_OFF
+      integer, dimension(:), allocatable :: itag
       my_real
      .        CRIT
 C======================================================================|
@@ -295,6 +299,7 @@ C     ITAG :: Main node of active rbody w/o sensor => Rbody number
 C       is used for initialization of mass & inertia if the rbody is included into the rbody being activated
 C       i.e. mass and inertia of the "sub-rbody" secnd nodes must not be counted twice
 C-------------------------------------------
+      ALLOCATE(ITAG(2*NUMNOD))
       DO I=1,NUMNOD
        ITAG(I)=0
       ENDDO
@@ -621,6 +626,7 @@ C
       ENDDO 
 C
  200  CONTINUE
+      IF(ALLOCATED(ITAG)) DEALLOCATE(ITAG)
       RETURN
 C
       END
