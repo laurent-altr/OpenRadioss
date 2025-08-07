@@ -656,6 +656,7 @@
                   do n3 = 1,size(elbuf(ng)%bufly(k)%fail,3)
                     do l = 1,size(elbuf(ng)%bufly(k)%fail(n1,n2,n3)%floc,1)
                       do n = 1, size(elbuf(ng)%bufly(k)%fail(n1,n2,n3)%floc(l)%dammx,1)
+                        if(nft+n > nft+nel) cycle ! avoid out of bounds              
                         detach_shell(nft+n) = max(detach_shell(nft+n), elbuf(ng)%bufly(k)%fail(n1,n2,n3)%floc(l)%dammx(n))
                       enddo
                     enddo
@@ -740,6 +741,7 @@
                 element%shell%damage(i) = 1.0D0 ! 
                 nb_detached_nodes_local = nb_detached_nodes_local + 1
                 detached_nodes_local(nb_detached_nodes_local) = nodes%itab(crack(1))
+                write(6,*) "detaching node ",nodes%itab(crack(1))," from shell ",i," with damage ",detach_shell(i)
                 call detach_node(nodes,crack(1),element,shell_list,shells_to_detach,npari,ninter, ipari, interf)
                 numnod = numnod + 1
                 if(ispmd == 0) numnodg = numnodg + 1
@@ -834,7 +836,7 @@
               nodes%itabm1(numnod0 + j) = old_max_uid                                
               nodes%itabm1(2*(numnod0 + j)) = numnod0 + j
               nodes%nodglob(numnod0 + j) = numnodg0
-              !write(6,*) old_max_uid,"detached node ",nodes%itab(numnod0 + j),"form",nodes%itab(nodes%parent_node(numnod0+j))
+              write(6,*) old_max_uid,"detached node ",nodes%itab(numnod0 + j),"form",nodes%itab(nodes%parent_node(numnod0+j))
             endif
             j = get_local_node_id(nodes,detached_nodes(i))
             if(j > 0) then

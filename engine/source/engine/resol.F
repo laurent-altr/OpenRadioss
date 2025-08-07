@@ -3223,37 +3223,6 @@ C First: try with reduced bounding box
 C===========================================================================
 C                 BEGINNING OF EXPLICIT ITERATION LOOP
 C===========================================================================                                        
-              call extend_nodal_arrays(nodes,NUMNOD+500)
-              do i = 1,500
-              call update_pon_shells(element, 0, CNEL, NUMNOD+1) ! cnel not used, just a placeholder
-              numnod = numnod + 1
-              enddo
-              SIZE_ADDCNEL = NUMNOD+1
-              SIZE_CNEL = LCNEL
-              NELEML = NUMELS+NUMELQ+NUMELC+NUMELT+NUMELP+NUMELR+NUMELTG
-              S_ELEM_STATE = NELEML
-              DEALLOCATE(CNEL)
-              ALLOCATE(CNEL(0:SIZE_CNEL))
-              DEALLOCATE(ADDCNEL)
-              ALLOCATE(ADDCNEL(0:SIZE_ADDCNEL))
-              DEALLOCATE(ADDTMPL)
-              ALLOCATE(ADDTMPL(0:NUMNOD+1))
-              NELEML = NUMELS+NUMELQ+NUMELC+NUMELT+NUMELP+NUMELR+NUMELTG
-              ALEMUSCL_Buffer%pCNEL => CNEL
-              ALEMUSCL_Buffer%pADDCNEL => ADDCNEL
-              ALEMUSCL_Buffer%pADDTMPL => ADDTMPL
-              L1 = 1+NIXS*NUMELS + NSVOIS*NIXS
-              L2 = L1+6*NUMELS10
-              L3 = L2+12*NUMELS20
-
-              CALL CHKINIT(
-     2           IXS        ,IXQ       ,ELEMENT%SHELL%IXC       ,IXT         ,IXP       ,
-     3           IXR        ,IXTG      ,IXS(L1)       ,IXS(L2)     ,
-     4           IXS(L3)      ,IXTG1     ,GEO       ,ADDCNEL     ,CNEL      ,
-     5           ADDTMPL    ,IPARG     )
-
-               LCNE0 = SIZE(ELEMENT%PON%PROCNE)
-
  100          CONTINUE
 
               NC_DEBUG = NCYCLE
@@ -3869,15 +3838,11 @@ C ----------------------------------------------------
                 CALL TRACE_OUT(8)
               ENDIF
               IF(IPARIT >0)THEN
-                write(6,*) 'size of ADSKYI',SIZE(INTERFACES%PON%ADSKYI,1),NUMNOD+2
-                call flush(6)
                 IF(SIZE(INTERFACES%PON%ADSKYI,1) < NUMNOD+2) then
                   deallocate(INTERFACES%PON%ADSKYI)
                   allocate(INTERFACES%PON%ADSKYI(0:NUMNOD+1))
                 endif
                 IF ( NISKY+LSKYI_COUNT > SISKY) THEN
-                  write(6,*) 'Reallocate ISKYI'
-                  call flush(6)
                   CALL REALLOCATE_I_SKYLINE(LSKYI_COUNT,1,GLOB_THERM%INTHEAT,GLOB_THERM%nodadt_therm,INTERFACES%PON)
                 ENDIF
 C Remote Secnd Nodes
@@ -5753,52 +5718,52 @@ c ==============================================================================
 C                                     node splitting
 C  uncomment the following code for an example of node splitting (using non-physical deformation critera)
 
-!             numnod_old = numnod
-!             numnodm_old = numnodm
-!             call test_jc_shell_detach(nodes, element, interfaces, npari, ninter, ipari, numnod,
-!     .                numnodg, elbuf_tab, ngroup, ngrouc, nparg, iparg, igrouc, numelc, ispmd, nspmd,
-!     .                new_crack)
-!
-!
-!             if(new_crack > 0) then
-!               ! if at least 1 node has been detached, some data must be re-initialized
-!               numnodm = numnodm_old + new_crack
-!               CALL INIT_NODAL_STATE( IPARI,SHOOT_STRUCT,INTERFACES%INTBUF_TAB,NODES%BOUNDARY_ADD,NODES%BOUNDARY,
-!     .                              NODES%ITAB,NODES,GEO,ADDCNEL,CNEL,
-!     .                              IXS,ELEMENT%SHELL%IXC,IXT,IXP,IXR,IXTG,
-!     .                              SIZE_ADDCNEL,SIZE_CNEL ,
-!     .                              numelsg,numelqg,numelcg,numeltrg,numelpg,
-!     .                              numelrg,numeltgg , IXS(L1))
-!
-!
-!               IF(IDEL7NG>0.OR.IRAD2R>0.OR.ALEMUSCL_Param%IALEMUSCL>0.OR.PDEL>0) THEN
-!                 SIZE_ADDCNEL = NUMNOD+1
-!                 SIZE_CNEL = LCNEL
-!                 NELEML = NUMELS+NUMELQ+NUMELC+NUMELT+NUMELP+NUMELR+NUMELTG
-!                 S_ELEM_STATE = NELEML
-!                 DEALLOCATE(CNEL)
-!                 ALLOCATE(CNEL(0:SIZE_CNEL))
-!                 DEALLOCATE(ADDCNEL)
-!                 ALLOCATE(ADDCNEL(0:SIZE_ADDCNEL))
-!                 DEALLOCATE(ADDTMPL)
-!                 ALLOCATE(ADDTMPL(0:NUMNOD+1))
-!                 NELEML = NUMELS+NUMELQ+NUMELC+NUMELT+NUMELP+NUMELR+NUMELTG
-!                 ALEMUSCL_Buffer%pCNEL => CNEL
-!                 ALEMUSCL_Buffer%pADDCNEL => ADDCNEL
-!                 ALEMUSCL_Buffer%pADDTMPL => ADDTMPL
-!                 L1 = 1+NIXS*NUMELS + NSVOIS*NIXS
-!                 L2 = L1+6*NUMELS10
-!                 L3 = L2+12*NUMELS20
-!
-!                 CALL CHKINIT(
-!     2              IXS        ,IXQ       ,ELEMENT%SHELL%IXC       ,IXT         ,IXP       ,
-!     3              IXR        ,IXTG      ,IXS(L1)       ,IXS(L2)     ,
-!     4              IXS(L3)      ,IXTG1     ,GEO       ,ADDCNEL     ,CNEL      ,
-!     5              ADDTMPL    ,IPARG     )
-!
-!               ENDIF
-!               LCNE0 = SIZE(ELEMENT%PON%PROCNE)
-!             endif
+             numnod_old = numnod
+             numnodm_old = numnodm
+             call test_jc_shell_detach(nodes, element, interfaces, npari, ninter, ipari, numnod,
+     .                numnodg, elbuf_tab, ngroup, ngrouc, nparg, iparg, igrouc, numelc, ispmd, nspmd,
+     .                new_crack)
+              ! detach a node from nothing at each cycle
+
+             if(new_crack > 0) then
+               ! if at least 1 node has been detached, some data must be re-initialized
+               numnodm = numnodm_old + new_crack
+               CALL INIT_NODAL_STATE( IPARI,SHOOT_STRUCT,INTERFACES%INTBUF_TAB,NODES%BOUNDARY_ADD,NODES%BOUNDARY,
+     .                              NODES%ITAB,NODES,GEO,ADDCNEL,CNEL,
+     .                              IXS,ELEMENT%SHELL%IXC,IXT,IXP,IXR,IXTG,
+     .                              SIZE_ADDCNEL,SIZE_CNEL ,
+     .                              numelsg,numelqg,numelcg,numeltrg,numelpg,
+     .                              numelrg,numeltgg , IXS(L1))
+
+
+               IF(IDEL7NG>0.OR.IRAD2R>0.OR.ALEMUSCL_Param%IALEMUSCL>0.OR.PDEL>0) THEN
+                 SIZE_ADDCNEL = NUMNOD+1
+                 SIZE_CNEL = LCNEL
+                 NELEML = NUMELS+NUMELQ+NUMELC+NUMELT+NUMELP+NUMELR+NUMELTG
+                 S_ELEM_STATE = NELEML
+                 DEALLOCATE(CNEL)
+                 ALLOCATE(CNEL(0:SIZE_CNEL))
+                 DEALLOCATE(ADDCNEL)
+                 ALLOCATE(ADDCNEL(0:SIZE_ADDCNEL))
+                 DEALLOCATE(ADDTMPL)
+                 ALLOCATE(ADDTMPL(0:NUMNOD+1))
+                 NELEML = NUMELS+NUMELQ+NUMELC+NUMELT+NUMELP+NUMELR+NUMELTG
+                 ALEMUSCL_Buffer%pCNEL => CNEL
+                 ALEMUSCL_Buffer%pADDCNEL => ADDCNEL
+                 ALEMUSCL_Buffer%pADDTMPL => ADDTMPL
+                 L1 = 1+NIXS*NUMELS + NSVOIS*NIXS
+                 L2 = L1+6*NUMELS10
+                 L3 = L2+12*NUMELS20
+
+                 CALL CHKINIT(
+     2              IXS        ,IXQ       ,ELEMENT%SHELL%IXC       ,IXT         ,IXP       ,
+     3              IXR        ,IXTG      ,IXS(L1)       ,IXS(L2)     ,
+     4              IXS(L3)      ,IXTG1     ,GEO       ,ADDCNEL     ,CNEL      ,
+     5              ADDTMPL    ,IPARG     )
+
+               ENDIF
+               LCNE0 = SIZE(ELEMENT%PON%PROCNE)
+             endif
 
 C========================================================================================
 C                                     NON PARALLEL SECTION (SMP)
