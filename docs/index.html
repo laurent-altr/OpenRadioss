@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OpenRadioss - Open Source Finite Element Analysis</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #333;
+        }
+
+        header {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            color: white;
+            padding: 4rem 2rem;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+        }
+
+        header p {
+            font-size: 1.3rem;
+            opacity: 0.95;
+        }
+
+        .github-link {
+            display: inline-block;
+            margin-top: 1.5rem;
+            padding: 0.8rem 2rem;
+            background: white;
+            color: #1e3a8a;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: transform 0.2s;
+        }
+
+        .github-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        nav {
+            background: #f8fafc;
+            padding: 1rem 2rem;
+            border-bottom: 1px solid #e2e8f0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        nav ul {
+            list-style: none;
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+
+        nav a {
+            color: #1e3a8a;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        nav a:hover {
+            color: #3b82f6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+        }
+
+        section {
+            margin-bottom: 4rem;
+        }
+
+        h2 {
+            font-size: 2rem;
+            color: #1e3a8a;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 3px solid #3b82f6;
+        }
+
+        h3 {
+            font-size: 1.4rem;
+            color: #1e40af;
+            margin-top: 1.5rem;
+            margin-bottom: 0.8rem;
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .feature-card {
+            background: #f8fafc;
+            padding: 1.5rem;
+            border-radius: 8px;
+            border-left: 4px solid #3b82f6;
+        }
+
+        .feature-card h3 {
+            margin-top: 0;
+            font-size: 1.2rem;
+        }
+
+        .code-block {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 1.5rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+
+        .code-block code {
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 0.7rem 1.5rem;
+            background: #3b82f6;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            margin-right: 1rem;
+            margin-top: 1rem;
+            font-weight: 500;
+            transition: background 0.2s;
+        }
+
+        .btn:hover {
+            background: #2563eb;
+        }
+
+        .btn-secondary {
+            background: #64748b;
+        }
+
+        .btn-secondary:hover {
+            background: #475569;
+        }
+
+        footer {
+            background: #1e293b;
+            color: white;
+            padding: 2rem;
+            text-align: center;
+            margin-top: 4rem;
+        }
+
+        footer a {
+            color: #93c5fd;
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 2rem;
+            }
+            
+            header p {
+                font-size: 1.1rem;
+            }
+            
+            nav ul {
+                gap: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>OpenRadioss</h1>
+        <p>Open Source Finite Element Analysis Solver</p>
+        <a href="https://github.com/laurent-altr/OpenRadioss" class="github-link">
+            View on GitHub →
+        </a>
+    </header>
+
+    <nav>
+        <ul>
+            <li><a href="#about">About</a></li>
+            <li><a href="#features">Features</a></li>
+            <li><a href="#getting-started">Getting Started</a></li>
+            <li><a href="#documentation">Documentation</a></li>
+            <li><a href="#contributing">Contributing</a></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <section id="about">
+            <h2>About OpenRadioss</h2>
+            <p>
+                OpenRadioss is an open-source finite element analysis (FEA) solver designed for structural mechanics simulations. 
+                It provides powerful capabilities for crash simulation, impact analysis, and dynamic structural analysis.
+            </p>
+            <p>
+                Originally developed as a commercial solver, OpenRadioss has been released as open source to benefit the 
+                engineering and research community worldwide.
+            </p>
+        </section>
+
+        <section id="features">
+            <h2>Key Features</h2>
+            <div class="features">
+                <div class="feature-card">
+                    <h3>🚗 Crash Simulation</h3>
+                    <p>Advanced capabilities for vehicle crash testing and safety analysis with explicit time integration.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>⚡ High Performance</h3>
+                    <p>Optimized parallel computing support for large-scale simulations with millions of elements.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>🔧 Material Models</h3>
+                    <p>Comprehensive library of material laws including metals, composites, foams, and more.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>📊 Post-Processing</h3>
+                    <p>Compatible with major post-processing tools for visualization and analysis of results.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>🌐 Open Source</h3>
+                    <p>Fully open source under permissive licensing, enabling customization and community contributions.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>🔄 Industry Standard</h3>
+                    <p>Compatible with industry-standard input formats and workflows.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="getting-started">
+            <h2>Getting Started</h2>
+            
+            <h3>Installation</h3>
+            <p>Clone the repository and build from source:</p>
+            <div class="code-block">
+                <code>git clone https://github.com/laurent-altr/OpenRadioss.git<br>
+cd OpenRadioss<br>
+# Follow build instructions in README</code>
+            </div>
+
+            <h3>Quick Example</h3>
+            <p>Run a basic simulation:</p>
+            <div class="code-block">
+                <code>./openradioss input_file.rad</code>
+            </div>
+
+            <a href="#documentation" class="btn">View Full Documentation</a>
+            <a href="https://github.com/laurent-altr/OpenRadioss/releases" class="btn btn-secondary">Download Latest Release</a>
+        </section>
+
+        <section id="documentation">
+            <h2>Documentation</h2>
+            <p>Comprehensive documentation is available to help you get the most out of OpenRadioss:</p>
+            <ul style="margin-left: 2rem; margin-top: 1rem;">
+                <li><strong>User Manual</strong> - Complete guide to using OpenRadioss</li>
+                <li><strong>Theory Manual</strong> - Mathematical foundations and solver algorithms</li>
+                <li><strong>Reference Manual</strong> - Keyword reference and input format specifications</li>
+                <li><strong>Examples</strong> - Sample models and validation cases</li>
+            </ul>
+            <a href="https://github.com/laurent-altr/OpenRadioss/wiki" class="btn">Browse Documentation</a>
+        </section>
+
+        <section id="contributing">
+            <h2>Contributing</h2>
+            <p>
+                We welcome contributions from the community! Whether you're fixing bugs, adding features, 
+                improving documentation, or sharing example models, your contributions help make OpenRadioss better.
+            </p>
+            <h3>How to Contribute</h3>
+            <ul style="margin-left: 2rem; margin-top: 1rem;">
+                <li>Fork the repository on GitHub</li>
+                <li>Create a feature branch for your changes</li>
+                <li>Submit a pull request with a clear description</li>
+                <li>Report bugs and suggest features via GitHub Issues</li>
+            </ul>
+            <a href="https://github.com/laurent-altr/OpenRadioss/blob/main/CONTRIBUTING.md" class="btn">Contributing Guidelines</a>
+        </section>
+
+        <section id="community">
+            <h2>Community & Support</h2>
+            <p>Join our community to get help, share knowledge, and collaborate:</p>
+            <ul style="margin-left: 2rem; margin-top: 1rem;">
+                <li><strong>GitHub Discussions</strong> - Ask questions and share ideas</li>
+                <li><strong>Issue Tracker</strong> - Report bugs and request features</li>
+                <li><strong>Wiki</strong> - Community-maintained documentation and tutorials</li>
+            </ul>
+        </section>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 OpenRadioss Project | <a href="https://github.com/laurent-altr/OpenRadioss">GitHub</a> | <a href="https://github.com/laurent-altr/OpenRadioss/blob/main/LICENSE">License</a></p>
+        <p style="margin-top: 0.5rem; font-size: 0.9rem; opacity: 0.8;">Open Source Finite Element Analysis for Everyone</p>
+    </footer>
+</body>
+</html>
