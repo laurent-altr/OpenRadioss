@@ -402,7 +402,7 @@
       sz_r1_free = nel
       sz_ix = numelq + numels + nsvois
 !
-      !< First element global adress
+      !< First element global address
       nf1=nft+1
 !
 !-------------------------------------------------------------------------------

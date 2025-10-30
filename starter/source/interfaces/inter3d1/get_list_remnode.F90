@@ -51,7 +51,7 @@
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   modules
 ! ----------------------------------------------------------------------------------------------------------------------
-!  [ the module names in use must be in uppercase for now, it will change latter]
+!  [ the module names in use must be in uppercase for now, it will change later]
 !  [ only is mandatory, note the space before the ,]
           use intbufdef_mod , only : intbuf_struct_
           use constant_mod
