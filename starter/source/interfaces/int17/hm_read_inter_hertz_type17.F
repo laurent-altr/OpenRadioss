@@ -57,7 +57,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
-      INTEGER NOINT,NI,NTYP
+      INTEGER NOINT,NTYP
       INTEGER IPARI(*)
       my_real
      .   FRIGAP(*)
@@ -69,7 +69,7 @@ C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
       INTEGER 
-     .   IS1,IS2,ISU1,ISU2,ISU10,ISU20,MULTIMP,ITIED,UID
+     .   IS1,IS2,ISU1,ISU2,ISU10,ISU20,MULTIMP,ITIED
       my_real
      .   STARTT,BUMULT,STOPT,FRIC,GAP
       LOGICAL IS_AVAILABLE
