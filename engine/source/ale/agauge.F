@@ -264,7 +264,7 @@ C-----------------------------
 !$OMP END SINGLE
       ENDIF  
 C-----------------------------
-C     CALCULATION OF GAUGE MEASURES
+C Computing GAUGE MEASURES
 C-----------------------------
       DO NG=ITASK+1,NGROUP,NTHREAD
 C-----------------------------

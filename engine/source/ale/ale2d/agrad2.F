@@ -94,7 +94,7 @@ C-----------------------------------------------
         Z4(I) = X(3,IXQ(5,II))       
       ENDDO
 C------------------------------------------
-C     CALCULATION OF THE NORMAL AT EACH FACE
+C Computing THE NORMAL AT EACH FACE
 C------------------------------------------
       DO I=LFT,LLT
         N1Y(I) =  (Z2(I)-Z1(I))
@@ -152,7 +152,7 @@ C------------------------------------------
         DD4(I) = D4Y(I)**2+D4Z(I)**2
       ENDDO
 C---------------------------------
-C     GRADIENT * SURFACE
+C Computing gradient times surface area
 C---------------------------------
       DO I=LFT,LLT
         GRAD(1,I) = FOUR * (D1Y(I)*N1Y(I)+D1Z(I)*N1Z(I)) / MAX(EM15,DD1(I))

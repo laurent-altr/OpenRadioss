@@ -134,7 +134,7 @@ C-----------------------------------------------
           ADSKYI(N) = ADSKYI(N)+1
         ENDDO
 C-----------------------------------------------
-C   CALCULATION OF SKYLINE VECTOR ADDRESSES
+C Computing SKYLINE VECTOR ADDRESSES
 C-----------------------------------------------
         ADSKYI(0) = 1
         ADSKYI(1) = 1
