@@ -167,7 +167,7 @@ C     rupture property for interface type 2
 C          ( not a true user property )
 C--------------------------------------------------
           IGTYP=37
-          CALL HM_READ_PROP_USER4(IOUT  ,NUVAR ,PARGEO ,UNITAB ,LSUBMODEL)
+          CALL HM_READ_PROP_USER4(IOUT  ,NUVAR ,UNITAB ,LSUBMODEL)
 
              
         CASE ('TYPE43','CONNECT')
