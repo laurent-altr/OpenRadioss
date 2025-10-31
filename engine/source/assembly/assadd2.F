@@ -265,7 +265,7 @@ c
                     ENDIF                                                     
                   ENDDO                                                       
                         ENDIF                                                         
-c                                                                              
+C                                                                              
               ENDIF                                                           
 c---
             ENDDO !  loop over frontier nodes                                                            

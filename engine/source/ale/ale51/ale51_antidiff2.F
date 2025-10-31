@@ -118,13 +118,13 @@ C-----------------------------------------------
               !spmd
               FF(K)  = ALPH(JV(K))*FLUX(K,II)              
             ENDIF
-c           outgoing volume flux (estimation)
+C           outgoing volume flux (estimation)
             ALPHI  = ALPHI  + FF(K)
-c           initial outgoing flux
+C           initial outgoing flux
             PHI0 = PHI0 + FLUX(K,II) 
           ENDIF
         ENDDO
-c       outgoing rest
+C       outgoing rest
         UALPHI = PHI0 - ALPHI 
 C-----------------------------------------------
 C       outgoing volume flux by face
@@ -150,7 +150,7 @@ C-----------------------------------------------
               FF(K) = FLUX(K,II) + (FF(K)-FLUX(K,II))*AAA
             ENDIF
           ENDDO
-c        ELSE
+C        ELSE
         ENDIF
 C-----------------------------------------------
 C         outgoing flux

@@ -1138,12 +1138,12 @@ c
         IF(ITASK==0) CALL STOPTIME(TIMERS,MACRO_TIMER_IFSUB0)
       ENDIF!IF(IFSUB == 0)THEN
 
-c      !Fluid mass do not contribute in FEM : add external force for FSI
-c      IF(IALE+IEULER /= 0)THEN
-c        DO N=NODFT,NODLT
-c          MSNF(N) = ZERO
-c        ENDDO
-c      ENDIF
+C      !Fluid mass do not contribute in FEM : add external force for FSI
+C      IF(IALE+IEULER /= 0)THEN
+C        DO N=NODFT,NODLT
+C          MSNF(N) = ZERO
+C        ENDDO
+C      ENDIF
 
       !-----------------------------!
       !     PRESSURE GAUGE          !

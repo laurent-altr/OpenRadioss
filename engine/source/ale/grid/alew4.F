@@ -197,7 +197,7 @@ C
        IF ((ITY == 1 .OR. ITY == 2) .AND. MQE == 1) THEN
         ISOLNOD=IPARG(28,NG)
          
-c number of springs/node=3 
+C number of springs/node=3 
         IF(ITY == 2)THEN
           NTR=4
           DO ITR=1,NTR
@@ -294,7 +294,7 @@ C
             DDL(I)= ALE%GRID%VGX/ALE%GRID%VGZ
             IF(DDLF > 0.)DLF=ALE%GRID%GAMMA
             DL(I) = 1. /ALE%GRID%VGZ/ALE%GRID%VGZ *DLF
-c     DL(I)=0.
+C     DL(I)=0.
 C
          ENDDO
 C

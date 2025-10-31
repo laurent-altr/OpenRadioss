@@ -147,10 +147,10 @@ C-------------------------
          IDEF   = ICBAG(3,I)
          PDEF   = RCBAG(1,I)
          DTPDEFC= RCBAG(5,I)
-c         PVOIS  =RVOLUV(12,II)
-c           In order to avoid the same address problem
-c           de Rvoli (12) and Rvoluv (12) We use Rvoli (31)
-c           who was available
+C         PVOIS  =RVOLUV(12,II)
+C           In order to avoid the same address problem
+C           de Rvoli (12) and Rvoluv (12) We use Rvoli (31)
+C           who was available
          PVOIS  =RVOLUV(31,II)
          IF(IDEF==0.AND.POLD>PDEF+PVOIS)
      .      RCBAG(5,I)=DTPDEFC+DT1

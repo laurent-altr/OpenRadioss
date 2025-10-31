@@ -279,7 +279,7 @@ C-----------------------------------------------
            IAD2 = ALE_CONNECT%ee_connect%iad_connect(I + NFT)
            II=ALE_CONNECT%ee_connect%connected(IAD2 + 1 - 1)
            IF(II == 0) FLUX1(I)= ZERO
-c             
+C             
            II=ALE_CONNECT%ee_connect%connected(IAD2 + 2 - 1)
            IF(II == 0) FLUX2(I)= ZERO
 C
@@ -288,7 +288,7 @@ C
 C
            II=ALE_CONNECT%ee_connect%connected(IAD2 + 4 - 1)
            IF(II == 0)FLUX4(I)= ZERO
-c             
+C             
            II=ALE_CONNECT%ee_connect%connected(IAD2 + 5 - 1)
            IF(II == 0) FLUX5(I)=ZERO
 C           

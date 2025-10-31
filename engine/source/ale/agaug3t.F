@@ -64,7 +64,7 @@ C-----------------------------------------------
 C   S o u r c e   L i n e s
 C-----------------------------------------------     
 c--------------------------------------------------------------
-c  Searching for the new element associated to the gauge
+C  Searching for the new element associated to the gauge
 c--------------------------------------------------------------
       DO I=1,LLT
         II=I+NFT  
@@ -102,8 +102,8 @@ c--------------------------------------------------------------
 
 #include "lockon.inc"            
             IF(ALPHA == ONE .AND. ALPHA >= GAUGE(5,IG))THEN
-c the gauge is changing of element
-c element associated to the gauge
+C the gauge is changing of element
+C element associated to the gauge
               LGAUGE(1,IG)=-II
               GAUGE(5,IG)=ALPHA 
             ENDIF

@@ -266,8 +266,8 @@ C-----------------------------------------------
               FFACE(3,J,I)   = -HALF*Pf*NZ(J,I) 
               !print  *, "P1,P2,Pf", P1,P2,Pf 
               !print  *, " normal ", NX(J,I), NY(J,I), NZ(J,I) 
-c              write ( *, FMT='(A,I10,A,I3,A,3F20.12,A,F20.12)') 
-c     ." id=", ixs(11,ii)," ncycle=", NCYCLE, " F=", FFACE(1:3,J,I) , "Pf=", Pf                                                               
+C              write ( *, FMT='(A,I10,A,I3,A,3F20.12,A,F20.12)') 
+C     ." id=", ixs(11,ii)," ncycle=", NCYCLE, " F=", FFACE(1:3,J,I) , "Pf=", Pf                                                               
             ENDDO!next J                                                     
           ENDDO!next I                                                       
       END SELECT

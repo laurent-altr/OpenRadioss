@@ -960,7 +960,7 @@ C
             ENDDO
           ENDDO
 !$OMP END DO
-c ftheskyi and condnskyi are nor all reset to zero
+C ftheskyi and condnskyi are nor all reset to zero
 c
 C fin nisky/=0
         ENDIF
