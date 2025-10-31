@@ -750,7 +750,7 @@ c SPH inlet spmd structure
       INTEGER :: LEN_TMP_NAME
       CHARACTER(len=4096) :: TMP_NAME
 C-----------------------------------------------
-C structure de fichier v44 a modifier
+C file structure v44 to modify
 C-----------------------------------------------
       INTEGER LHEADER,LVARINT,LVARREA,LMXVINT,LMXVREA,LEN_G,LEN_M,
      .        LEN_S,LEN_ADM,LEN_IG,LEN_PM
@@ -1186,7 +1186,7 @@ C--------------------------------------------
      2               CEP    ,P-1     ,NSLAW_L ,NESLAW_L,
      3               LWSAV_L,NSKYRW_L)
 C--------------------------------------------
-C count Stockage Madymo
+C count Madymo storage
 C--------------------------------------------
       NMADSH4_L = 0
       NMADSH3_L = 0
@@ -2470,7 +2470,7 @@ C--------------------------------------------
         LEN_IA = LEN_IA + LAG_NHF+3*LAG_NCF+2
       END IF
 C--------------------------------------
-C     ECRITURE ICNDS10 Itet=2 of S10
+C     WRITE ICNDS10 Itet=2 of S10
 C--------------------------------------
       IF (NS10E_L > 0) THEN
         IF(NBDDCNDM > 0) THEN
