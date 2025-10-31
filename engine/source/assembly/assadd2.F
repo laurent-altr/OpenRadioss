@@ -124,7 +124,7 @@ C
       ENDIF
 C
 C SPMD CNE and ADDCNE already obtained
-C iadx deja calcule dans RADIOSS Starter
+C iadx already computed in RADIOSS Starter
 C
 C-----------------------------------------------
 C Computing elementary communication sizes
