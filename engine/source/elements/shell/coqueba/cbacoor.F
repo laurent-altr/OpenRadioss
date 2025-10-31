@@ -128,22 +128,22 @@ c  I  INOD(NUMNOD)        - Node numbers for PLYXFEM
 C-----------------------------------------------
 C   L O C A L   V A R I A B L E S
 C-----------------------------------------------
-      INTEGER I,II(6),J,K,L,M,I1,I2,I3,I4,EP,SPLAT,JJ
+      INTEGER I,II(6),J,K,L,M,I1,I2,I3,I4,EP,SPLAT
       INTEGER NN(4),JPLAT(MVSIZ)
       MY_REAL 
      .   XX2,XX3,XX4,YY1,YY2,YY3,YY4,ZZ1,ZZ2,ZZ3,ZZ4
       MY_REAL
      .   C1,C2,L13(MVSIZ),L24(MVSIZ),
-     .   AA,VV(3,NNOD),RR(3,NNOD)
+     .   VV(3,NNOD),RR(3,NNOD)
       MY_REAL
      .    TOL,PG,J0,J1,J2,DETA,COREL(3,4),X1,Y1,S1
       MY_REAL
      .    X13,X24,Y13,MX13,MX23,MX34,MY13,Y13_2,Z1,Z2,GAMA1,GAMA2,
      .    X21,X34,Y21,Y34,Z21,Z34,X41,X32,Y41,Y32,Z_2,Z41,Z32,L12,L34,
      .    A_4,SL,SZ2,SZ,JMX13,JMY13,JMZ13,J2MYZ,LM(MVSIZ),Y24,Y24_2,
-     .    MY23,MY34,SCAL,G1X1,G1X3,G1Y1,G1Y3,G2X1,G2X2,G2Y1,G2Y2,
-     .   AR(3),AD(NNOD),BTB(6),XX1,YY,ZZ,XY,XZ1,YZ,D(6), 
-     .   ALR(3),ALD(NNOD),DBAD(3),ABC,XXYZ2,ZZXY2,YYXZ2
+     .    MY23,MY34,G1X1,G1X3,G1Y1,G1Y3,G2X1,G2X2,G2Y1,G2Y2,
+     .   AR(3),XX1,YY,ZZ,XY,XZ1,YZ,D(6), 
+     .   ALR(3),ABC,XXYZ2,ZZXY2,YYXZ2
       my_real 
      .   LXYZ0(3),DETA1(MVSIZ),RX(MVSIZ), RY(MVSIZ), RZ(MVSIZ),
      .   SX(MVSIZ),SY(MVSIZ),
@@ -152,9 +152,7 @@ C
       my_real 
      .   VG13(3),VG24(3),VGHI(3),V13(MVSIZ,3),V24(MVSIZ,3),VHI(MVSIZ,3),
      .   FACI,FAC1,FAC2,
-     .   DT05,DT025,EXZ,EYZ,DDRX,DDRY,V13X,V24X,VHIX,DDRZ1,DDRZ2,DDRZ,
-     .    VNX1, VNY1, VNZ1,VNX2,VNY2,VNZ2,VNX3,VNY3,VNZ3,VNX4,VNY4,VNZ4,
-     .    NORM
+     .   DT05,DT025,EXZ,EYZ,DDRX,DDRY,V13X,V24X,VHIX,DDRZ1,DDRZ2
         DATA   PG/.577350269189626/
 C=======================================================================
       DO I=1,6
