@@ -282,7 +282,7 @@ C     ALE ON / OFF
                 J      = I+NFT      
                 K      = LLT*(IDX-1) + I 
                 PHI(J) = VAR(K)  
-                VAR(K) = VAR(K) *LBUF%VOL(I)   ![rhoU]*VOL, U needed for fluxes calculation                  
+                VAR(K) = VAR(K) *LBUF%VOL(I)   ![rhoU]*VOL, U needed for Computing fluxes                  
               ENDDO                                     
             ENDIF            
           
@@ -301,7 +301,7 @@ C     ALE ON / OFF
                 J      = I+NFT      
                 K      = LLT*(IDX-1) + I 
                 PHI(J) = VAR(K)  
-                VAR(K) = VAR(K) *LBUF%VOL(I)   ![rhoU]*VOL, U needed for fluxes calculation                                                    
+                VAR(K) = VAR(K) *LBUF%VOL(I)   ![rhoU]*VOL, U needed for Computing fluxes                                                    
               ENDDO                                     
             ENDIF  
 
@@ -320,7 +320,7 @@ C     ALE ON / OFF
                 J      = I+NFT      
                 K      = LLT*(IDX-1) + I 
                 PHI(J) = VAR(K)                     
-                VAR(K) = VAR(K) *LBUF%VOL(I)   ![rhoU]*VOL, U needed for fluxes calculation                                 
+                VAR(K) = VAR(K) *LBUF%VOL(I)   ![rhoU]*VOL, U needed for Computing fluxes                                 
               ENDDO                                     
             ENDIF   
                        

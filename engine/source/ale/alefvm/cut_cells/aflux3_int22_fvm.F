@@ -284,7 +284,7 @@ C-----------------------------------------------
               ENDIF
               SR2                         = SQRT(VALVOIS(J,4,IADj))
               !======================================================!
-              ! FLUXES CALCULATION ON EACH FACE(J) AND EACH ADJ CELL !
+              ! Computing fluxes ON EACH FACE(J) AND EACH ADJ CELL !
               !======================================================!
               IMAT                          = IXS(1,IE)
               IALEFVM_FLG                   = IPM(251,IMAT)

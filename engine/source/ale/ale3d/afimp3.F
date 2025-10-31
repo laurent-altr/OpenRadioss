@@ -112,7 +112,7 @@ C---------------------------------------------------------------------
         ENDDO!next J
       ENDDO!next I
 C-----------------------------------------------
-C     SURFACE CALCULATION
+C     Computing surface area
 C-----------------------------------------------
       DO I=LFT,LLT
         II =NFT+I
@@ -138,7 +138,7 @@ C-----------------------------------------------
         Z4(I)=X(3,NC4(I))
       ENDDO
 C------------------------------------------
-C     NORMAL VECTOR CALCULATION
+C     Computing normal vectors
 C------------------------------------------
       DO I=LFT,LLT
         II =NFT+I

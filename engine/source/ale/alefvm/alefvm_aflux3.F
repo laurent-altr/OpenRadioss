@@ -649,7 +649,7 @@ C-----------------------------------------------
       END SELECT !I_ALE_SOLVER
       
       !======================================================!
-      ! FLUXES CALCULATION ON EACH FACE                      !
+      ! Computing fluxes ON EACH FACE                      !
       !    FLUX_face = [0.5*V_face] . [2S*n]                 !       
       !======================================================!
       DO I=1,NEL
