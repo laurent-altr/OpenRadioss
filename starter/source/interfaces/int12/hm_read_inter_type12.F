@@ -78,14 +78,14 @@ C-----------------------------------------------
       my_real
      .   FRIC,GAP,STARTT,STOPT,BID,XC,YC,ZC,XR,YR,ZR,TETA,
      .   XT,YT,ZT
-
+      CHARACTER(LEN=40)::MESS
 !
       INTEGER, DIMENSION(:), POINTER :: INGR2USR
       LOGICAL IS_AVAILABLE
 C-----------------------------------------------
 C   E x t e r n a l   F u n c t i o n s
 C-----------------------------------------------
-      INTEGER NGR2USR
+      INTEGER USR2SYS,NGR2USR
 C-----------------------------------------------
 C=======================================================================
 C     READING ALE INTERFACE /INTER/TYPE12

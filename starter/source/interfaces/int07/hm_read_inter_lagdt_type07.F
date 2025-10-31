@@ -668,10 +668,4 @@ C------------
      .    '    FRICTION FILTERING FLAG. . . . . . . . . ',I10/,
      .    '    FILTERING FACTOR . . . . . . . . . . . . ',1PG20.13)
 
-
-     .'  MINIMUM PERCENTAGE OF PENETRATION                     ',
-     .   1PG20.13/,
-     .'  MAXIMUM ANGLE ON MAIN SIDE AT CONTACT LOCATION      ',
-     .   1PG20.13//)
-
       END
