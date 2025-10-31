@@ -1436,8 +1436,6 @@ c
         IF(ALLOCATED(POSLY))  DEALLOCATE(POSLY)
         IF(ALLOCATED(THK_LY)) DEALLOCATE(THK_LY)
 C-----------------------------------------------
- 490  CONTINUE   ! NGROUP
- 500  CONTINUE
 C-----------------------------------------------
       IF (NSPMD == 1)THEN
         DO N=1,NBF
