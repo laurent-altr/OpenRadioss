@@ -3046,6 +3046,9 @@ C
         ENDIF
 C------------------------------------------
         RETURN
+ 1000   FORMAT(' ND. =',I8,5X,'WITH POSSIBLE FREE CONNECTION CHECKED',/)
+ 1001   FORMAT(' NODE NUM. =',I10,5X,'TRA_DIR = ',1A,5X,'VAL.= ',G14.7)
+ 1002   FORMAT(' NODE NUM. =',I10,5X,'ROT_DIR = ',1A,5X,'VAL.= ',G14.7)
       END
 !||====================================================================
 !||    imp_chkm           ../engine/source/implicit/imp_solv.F
@@ -3723,6 +3726,9 @@ C    /---------------/
  1006   FORMAT(5X,'--SUPPLEMENTARY STIFFNESS MATRIX',1X, 'DUE TO INTERFACE IS CREATED --')
  1007   FORMAT(5X,' WITH DIM. : ND   =',I8,1X,'NZ  =',I8,1X,'NB_MAX =',I8)
  1009   FORMAT(3X,'**TIMESTEP WILL BE REDUCED TO AVOID DE-ACTIVATION ','IN INTERFACE :**',I8)
+ 1011   FORMAT(/,2X,'** END IMPLICIT MODEL CHECKING **'/,
+     .         5X,'TERMINATION WITH '/,I8,' ERRORS '/,I8,' WARNINGS'/
+     .         5X,'** DETAILS REPORTED IN LISTING FILE **'/)
         RETURN
       END
 !||====================================================================
