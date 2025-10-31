@@ -86,7 +86,7 @@ C     REAL
      .     G13T(MVSIZ), G23T(MVSIZ), G14T(MVSIZ), G24T(MVSIZ),
      .     G31T(MVSIZ), G32T(MVSIZ), G33T(MVSIZ),
      .     F1A,F2A,F3A,F4A,F5A, G11TA, G21TA, G12TA, G22TA, 
-     .     G13TA, G23TA, G14TA, G24TA, G31TA, G32TA, G33TA,
+     .     G13TA, G23TA, G14TA, G24TA, G31TA, G32TA, G33TA, G34TA,
      .     M1A,M2A,M3A,TEMP1,TEMP2,TEMP3
 C=======================================================================
 C               FOR ISIGI = 5 OR -5
