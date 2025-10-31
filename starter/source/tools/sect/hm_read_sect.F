@@ -1073,7 +1073,7 @@ C-----------------------------------------------
       INTEGER K,L,ISU,IE,TAGELEM1,TAGELEM2,TAGELEM3,NBPROJOK
       !TAGNDOUBL(NUMNOD),TAGNODES(NUMNOD*2+NPART)
       INTEGER, DIMENSION(:), ALLOCATABLE :: TAGNDOUBL, TAGNODES
-      my_real  PROJX,PROJY,PROJZ,P1,P2
+      my_real  POS,PROJX,PROJY,PROJZ,P1,P2
 C-----------------------------------------------
 C   S o u r c e   F i l e s
 C-----------------------------------------------
@@ -1234,7 +1234,7 @@ C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
       INTEGER K,L,ISU,IE,TAGELEM1,TAGELEM2,TAGELEM3, NBNODES,NBPROJOK,OFFSET
       INTEGER, DIMENSION(:), ALLOCATABLE :: TAGNDOUBL,TAGNODES
-      my_real PROJX,PROJY,PROJZ,P1,P2
+      my_real POS,PROJX,PROJY,PROJZ,P1,P2
 C-----------------------------------------------
 C   S o u r c e   F i l e s
 C-----------------------------------------------
