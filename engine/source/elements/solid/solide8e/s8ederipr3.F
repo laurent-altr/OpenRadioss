@@ -164,4 +164,6 @@ C
       ENDDO
 C
       RETURN
+ 2001 FORMAT(/' ZERO OR NEGATIVE SOLID SUB-VOLUME : ELEMENT NB:',
+     .          I10/)
       END

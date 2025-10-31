@@ -459,4 +459,7 @@ C                                                                     12
        ENDDO
       RETURN
 C
+ 2000 FORMAT(/' ZERO OR NEGATIVE VOLUME : DELETE 3D-ELEMENT NB',I10/)
+ 3000 FORMAT(/' ZERO OR NEGATIVE VOLUME : 3D-ELEMENT NB:',I10/,
+     +    ' SOLID-SHELL ELEMENT IS SWITCHED TO SMALL STRAIN OPTION'/) 
       END
