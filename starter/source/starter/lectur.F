@@ -5049,8 +5049,8 @@ c
       PYTHON%NB_SENSORS = 0
       CALL HM_READ_SENSORS(PYTHON,
      .     SENSORS   ,LACCELM  ,ITABM1    ,IPART     ,LGAUGE    ,
-     .     SUBSETS   ,NSETS    ,IGRSURF   ,IGRNOD    ,BUFSF     ,
-     .     SKEW      ,ISKWN    ,UNITAB    ,LSUBMODEL ,HM_NSENSOR,
+     .     SUBSETS   ,NSETS    ,IGRNOD    ,
+     .     ISKWN    ,UNITAB    ,LSUBMODEL ,HM_NSENSOR,
      .     SENSOR_USER_STRUCT)
       ! -----------------
       ! check if a user sensor is used with a list of node
