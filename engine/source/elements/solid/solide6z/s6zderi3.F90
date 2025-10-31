@@ -421,9 +421,5 @@
         volg(i) = det(i)
       enddo
 !
-1000 format(/' zero or negative volume : 3d-element nb',i10/)
-2000 format(/' zero or negative volume : delete 3d-element nb',i10/)
-3000 format(/' zero or negative volume : 3d-element nb:', i10, /, &
-            'solid-shell element is switched to small strain option'/)
     end subroutine s6zderi3
   end module s6zderi3_mod
