@@ -361,7 +361,7 @@ C--------------------------------------------------
 C      HM READING PROPERTY TYPE4 (SPRING)
 C--------------------------------------------------
              IGTYP=4
-             CALL HM_READ_PROP04(GEO(1,I),IGEO(1,I),UNITAB,PROP_ID,IGTYP,IDTITL,PROP_TAG,LSUBMODEL,IUNIT)
+             CALL HM_READ_PROP04(GEO(1,I),IGEO(1,I),UNITAB,PROP_ID,IGTYP,PROP_TAG,LSUBMODEL)
 
           CASE ('TYPE6','TYPE06','SOL_ORTH')
 c------------------------------
@@ -538,7 +538,7 @@ C            HM READING PROPERTY TYPE26 (SPR_TAB)
 C--------------------------------------------------
              IGTYP=26
              CALL HM_READ_PROP26(GEO(1,I), IGEO(1,I), UNITAB, PROP_ID,IGTYP, 
-     .                           PROP_TAG,IDTITL,LSUBMODEL)
+     .                           PROP_TAG,LSUBMODEL)
 c
           CASE ('TYPE27','SPR_BDAMP')
 C--------------------------------------------------
