@@ -31,6 +31,11 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
      1                  PM  ,X           ,IXQ  ,T  ,GRAD  ,
      2                  COEF,ALE_CONNECT ,FV)
 C-----------------------------------------------
+C   D e s c r i p t i o n
+C-----------------------------------------------
+C This subroutine computes imposed thermal fluxes on boundaries
+C for 2D ALE elements with temperature gradient boundary conditions
+C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
       USE ALE_CONNECTIVITY_MOD

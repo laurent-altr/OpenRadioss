@@ -35,6 +35,11 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
      .                  VOLN,DVOL,VD2,
      .                  NC1,NC2,NC3,NC4,NGL)
 C-----------------------------------------------
+C   D e s c r i p t i o n
+C-----------------------------------------------
+C This subroutine handles rezoning operations for 2D ALE elements
+C-----------------------------------------------
+C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
       USE MESSAGE_MOD

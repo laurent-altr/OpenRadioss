@@ -28,6 +28,11 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||====================================================================
       SUBROUTINE AGRAD3(IXS,X,ALE_CONNECTIVITY,GRAD,NEL)
 C-----------------------------------------------
+C   D e s c r i p t i o n
+C-----------------------------------------------
+C This subroutine computes gradients at element faces for 3D ALE
+C-----------------------------------------------
+C-----------------------------------------------
 C   D e s c r i p t i on
 C-----------------------------------------------
 C This subroutine is calculating 3D gradient on faces

@@ -36,6 +36,11 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||====================================================================
       SUBROUTINE AREZO2(ALE_CONNECT,VAR,PHI,FLUX,VOL)
 C-----------------------------------------------
+C   D e s c r i p t i o n
+C-----------------------------------------------
+C This subroutine performs element rezoning for 2D ALE formulation
+C-----------------------------------------------
+C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
        USE ALE_CONNECTIVITY_MOD

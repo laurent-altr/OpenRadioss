@@ -30,6 +30,11 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||====================================================================
       SUBROUTINE AFLUX3(PM,IXS,V,W,X,FLUX,FLU1,ALE_CONNECT,NSG, TAG22)
 C-----------------------------------------------
+C   D e s c r i p t i o n
+C-----------------------------------------------
+C This subroutine computes advective fluxes for 3D ALE elements
+C-----------------------------------------------
+C-----------------------------------------------
 C   M o d u l e s
 C----------------------------------------------- 
       USE I22BUFBRIC_MOD 

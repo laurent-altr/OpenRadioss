@@ -52,6 +52,12 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
      4  ITRIMAT     ,QMV       ,IFLG    ,IXS      ,IXQ     ,
      5  PM          ,X  )
 C-----------------------------------------------
+C   D e s c r i p t i o n
+C-----------------------------------------------
+C This subroutine computes convective fluxes for ALE and
+C Eulerian elements, handling multi-material flows and
+C managing SPMD communication of fluxes across domains
+C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
       USE INITBUF_MOD

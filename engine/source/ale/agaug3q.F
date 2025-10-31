@@ -30,6 +30,11 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
       SUBROUTINE AGAUG3Q(LGAUGE,GAUGE,PHI,IXQ  ,X    ,ALE_CONNECT )
       USE ALE_CONNECTIVITY_MOD
 C-----------------------------------------------
+C   D e s c r i p t i o n
+C-----------------------------------------------
+C This subroutine updates gauge positions within quadrilateral
+C elements for ALE gauges tracking material flow
+C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
 #include      "implicit_f.inc"

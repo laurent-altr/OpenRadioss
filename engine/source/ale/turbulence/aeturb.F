@@ -42,6 +42,11 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
      3  NERCVOIS    ,NESDVOIS  ,LERCVOIS ,LESDVOIS ,LENCOM,
      4  MATPARAM)
 C-----------------------------------------------
+C   D e s c r i p t i o n
+C-----------------------------------------------
+C This subroutine handles turbulent kinetic energy transport
+C-----------------------------------------------
+C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
       USE INITBUF_MOD
