@@ -526,7 +526,7 @@ C
         J1=(MX23*MY13-MX13*MY23)*PG
         J2=-(MX13*MY34-MX34*MY13)*PG
         J0=AREA(EP)*FOURTH
-C----   JAC(jacobiens aux points d'integration)peut etre negative------        
+C----   JAC(jacobiens aux points d'integration) peut etre negative------        
         JAC(EP,1)=ABS(J0+J2-J1)
         JAC(EP,2)=ABS(J0+J2+J1)
         JAC(EP,3)=ABS(J0-J2+J1)
