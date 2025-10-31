@@ -134,7 +134,7 @@ C-----------------------------------------------
      .   XX2,XX3,XX4,YY1,YY2,YY3,YY4,ZZ1,ZZ2,ZZ3,ZZ4
       MY_REAL
      .   C1,C2,L13(MVSIZ),L24(MVSIZ),
-     .   AA,RR(3,NNOD)
+     .   RR(3,NNOD)
       MY_REAL
      .    TOL,PG,J0,J1,J2,DETA,COREL(3,4),S1
       MY_REAL
@@ -1246,7 +1246,7 @@ C-----------------------------------------------
      .   XX2,XX3,XX4,YY1,YY2,YY3,YY4,ZZ1,ZZ2,ZZ3,ZZ4
       MY_REAL
      .   C1,C2,L13(MVSIZ),L24(MVSIZ),
-     .   VV(3,NNOD),RR(3,NNOD),OFF_L
+     .   RR(3,NNOD),OFF_L
       MY_REAL
      .    TOL,PG,J0,J1,J2,COREL(3,4),X1,Y1,LL(MVSIZ)
       MY_REAL
