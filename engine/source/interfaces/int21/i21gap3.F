@@ -60,7 +60,7 @@ C     REAL
       my_real
      .   GAPM, CRITERL, GAPSUPL
 C------------------------------------
-C     GAP VARIABLE NOEUDS SECONDS
+C     GAP VARIABLE FOR SECONDARY NODES
 C------------------------------------
       NSNF = 1 + ITASK*NSN / NTHREAD
       NSNL = (ITASK+1)*NSN / NTHREAD
@@ -71,8 +71,6 @@ C------------------------------------
      .                                            +GAP_S0(I),ZERO)
        ENDDO
       ENDIF
-C---------------------------------------------
-C     GAP VARIABLE FOR SECONDARY NODES
 C---------------------------------------------
 C
 C Calculation of the real gap to be used during the retry criterion
