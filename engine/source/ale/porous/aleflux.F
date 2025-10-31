@@ -152,7 +152,7 @@ C
        N6Z(I)=(X8(I)-X1(I))*(Y4(I)-Y5(I)) - (Y8(I)-Y1(I))*(X4(I)-X5(I))
       ENDDO
 C
-C CHECK AREA WITH ELEMENT CLOSURE
+C CHECK AREA WITH element CLOSURE
 C is not available for this new formulation
       IF(ICLOSE == 1) THEN
         DO I=LFT,LLT

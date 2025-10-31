@@ -111,7 +111,7 @@ C-----------------------------------------------
       my_real, PARAMETER :: SFAC = 1.05D0 ! Security factor of ICONV
 C
       !=======================================================================
-      ! - INITIALISATION OF COMPUTATION ON TIME STEP
+      ! - INITIALIZATION OF COMPUTATION ON TIME STEP
       !=======================================================================
       ! Recovering model parameters
       ! -> Elastic parameters

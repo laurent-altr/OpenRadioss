@@ -787,7 +787,7 @@ C
           CALL MY_BARRIER  !MM-ALE 20 + ALEFVM
           
          !---------------------------------------------
-         ! TETRA4 : SMOOTH FINITE ELEMENT FORMULATIONS
+         ! TETRA4 : SMOOTH FINITE element FORMULATIONS
          !---------------------------------------------
 !$OMP SINGLE
           IF(ISFEM >= 1) THEN
@@ -959,11 +959,11 @@ C
           CALL MY_BARRIER !wait for adjacent elems
           IF (ILAW11 /= 0) THEN            !Law11 or Law51 in/Out
             IF(NSPMD > 1) THEN
-             ! SPMD COMMUNICATION VOISINS LOI11
+             ! SPMD COMMUNICATION NEIGHBORS LAW11
              !
              ! WA[1..IADC-1] : FLUX
-             ! WA[IADC..IADD-1] : BUFVOIS (buffer elements voisins en SPMD)
-             ! WA[IADD..LENWA] : BUFCOM (wa pour comm spmd)
+             ! WA[IADC..IADD-1] : BUFVOIS (buffer for neighbor elements in SPMD)
+             ! WA[IADD..LENWA] : BUFCOM (wa for SPMD communication)
 !$OMP SINGLE
               CALL STARTIME(TIMERS,TIMER_SPMDCFD)
               LENCOM=NBRCVOIS(NSPMD+1)+NBSDVOIS(NSPMD+1)

@@ -186,7 +186,7 @@ C
                PHI(IS)= IG 
 C
 C              PHI(IS)=I
-c penetration ratio within element (initialisation)
+C Penetration ratio within element (initialization)
             GAUGE(5,IG)=ZERO
           ENDIF
         END DO

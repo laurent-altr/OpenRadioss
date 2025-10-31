@@ -117,7 +117,7 @@ C   S o u r c e   C o d e
 C-----------------------------------------------      
       
       ! calculation of transport force at the center
-      ! STANDARD UPWIND UTILISANT LES DONNEES MATERIAUX
+      ! STANDARD UPWIND UTILISANT LES DATA MATERIAUX
       IF(ALE%UPWIND%UPWM<2 .OR.MTN==11)THEN
         IF(MTN==11.AND.ALE%UPWIND%UPWM>1)THEN
           ! vdx, vdy, vdz are calculated in m11vs3

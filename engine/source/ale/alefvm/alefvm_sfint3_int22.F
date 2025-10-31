@@ -96,7 +96,7 @@ C-----------------------------------------------
 
 c      0. Domaine d'integration : supercell = main u (U secnd)
 c      1. Calculation of Pf
-c      2. Calcul de Ff(1:3) = -Pf.S.n
+c      2. CALCULATION de Ff(1:3) = -Pf.S.n
 c      3. Assemblge de FINT(1:3) = Sum Ff(1:3)
 
       !IPRES_MOM = 0,1,2,3,4  : (P1+P2)/2

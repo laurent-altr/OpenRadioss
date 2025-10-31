@@ -109,7 +109,7 @@ C-----------------------------------------------
         INTEGER :: CHUNK_NODE,CHUNK_NODE_1
         INTEGER, PARAMETER :: IVSIZE = 32
 C-----------------------------------------------
-C Element
+C element
 C-----------------------------------------------
 
         VIND_SIZE=MAX(NODLT-NODFT+1,IVSIZE)

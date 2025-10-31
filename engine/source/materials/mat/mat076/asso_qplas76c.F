@@ -124,7 +124,7 @@ c     UVAR(7)  : NUP
 C=======================================================================
 c
       !=======================================================================
-      ! - INITIALISATION OF COMPUTATION ON TIME STEP
+      ! - INITIALIZATION OF COMPUTATION ON TIME STEP
       !=======================================================================
       ! Recovering model parameters
       ! -> Elastic parameters
