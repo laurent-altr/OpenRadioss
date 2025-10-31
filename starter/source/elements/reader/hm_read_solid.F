@@ -104,7 +104,7 @@ C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
       INTEGER I, J, MT, I10,I20,I16
-      INTEGER IC1,IC2,IC3,IC4,IPID,STAT
+      INTEGER IC1,IC2,IC3,IC4,IPID,N,STAT
       INTEGER INDEX_PART,IXS10_SAV(6),IC5,IC6,
      .        IC7,IC8
       my_real BID
@@ -903,7 +903,7 @@ C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
       INTEGER I, J, IT, NT
       INTEGER NSPHDIR,STAT
-      INTEGER INDEX_PART
+      INTEGER FLAG_FMT,INDEX_PART
       CHARACTER MESS*40
       INTEGER, DIMENSION(:), ALLOCATABLE :: IPARTS
       INTEGER, DIMENSION(:), ALLOCATABLE :: SUB_SOL
