@@ -453,7 +453,7 @@ C
 C-------------------------------------------------------------------------
 C      SOLIDES
 C--------------------------------------------------------------
-       CALL SECSTRI(NSEGS,NSTRF(K3),IXS,IXS10,IXS16,IXS20,NSTRF(K2),NNOD,ITAB,I,NOPRINT)
+       CALL SECSTRI(NSEGS,NSTRF(K3),IXS,IXS10,IXS16,IXS20,NSTRF(K2),NNOD,NOPRINT)
        IF(NSTRF(K0)>=102)THEN
          CALL ZERORE(1,10+30*NNOD,SECBUF(KR0))
        ELSEIF(NSTRF(K0)>=101)THEN
