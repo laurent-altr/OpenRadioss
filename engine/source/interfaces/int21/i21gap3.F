@@ -72,6 +72,8 @@ C------------------------------------
        ENDDO
       ENDIF
 C---------------------------------------------
+C     GAP VARIABLE FOR SECONDARY NODES
+C---------------------------------------------
 C
 C Calculation of the real gap to be used during the retry criterion
 C

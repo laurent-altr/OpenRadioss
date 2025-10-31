@@ -73,7 +73,7 @@ C-----------------------------------------------
         LLT=NEL                                                         
 C-----------------------------------------------                        
         IF(ITY==51)THEN                                               
-C          PARTICULES SPH.                                              
+C          SPH PARTICLES                                              
 C-----------------------------------------------                        
            GBUF => ELBUF_TAB(NG)%GBUF                                                      
            IALEL=IPARG(7,NG)+IPARG(11,NG)                               
