@@ -80,13 +80,7 @@ C-----------------------------------------------
       INTEGER I, J
 C     REAL
       my_real
-     .     M4(MVSIZ), M5(MVSIZ), F1(MVSIZ), F2(MVSIZ), F3(MVSIZ), 
-     .     F4(MVSIZ), F5(MVSIZ), M1(MVSIZ), M2(MVSIZ), M3(MVSIZ),
-     .     G11T(MVSIZ), G21T(MVSIZ), G12T(MVSIZ), G22T(MVSIZ), 
-     .     G13T(MVSIZ), G23T(MVSIZ), G14T(MVSIZ), G24T(MVSIZ),
-     .     G31T(MVSIZ), G32T(MVSIZ), G33T(MVSIZ), G34T(MVSIZ),
-     .     F1A,F2A,F3A,F4A,F5A, G11TA, G21TA, G12TA, G22TA, 
-     .     G13TA, G23TA, G14TA, G24TA, G31TA, G32TA, G33TA, G34TA,
+     .     M4(MVSIZ), M5(MVSIZ), M1(MVSIZ), M2(MVSIZ), M3(MVSIZ),
      .     M1A,M2A,M3A,TEMP1,TEMP2,TEMP3
 C=======================================================================
 C               FOR ISIGI = 5 OR -5
