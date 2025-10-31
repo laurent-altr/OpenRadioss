@@ -71,7 +71,7 @@ CMasParINCLUDE 'cupdt3.intmap.inc'
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
-      INTEGER NVC1, NVC2, NVC3, NVC4, I, J, MX,MT
+      INTEGER NVC1, NVC2, NVC3, NVC4, I, J
       my_real
      .   OFF_L,CF(MVSIZ)
 C-----------------------------------------------
@@ -530,7 +530,7 @@ C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
 C ds 41i 001 13/16/00 +1
 C     INTEGER I, II, K
-      INTEGER I, II, K, J, MX,MT
+      INTEGER I, K
       my_real
      .   OFF_L
 C-----------------------------------------------
