@@ -88,7 +88,7 @@ C-----------------------------------------------
 C
       TYPE(ELBUF_STRUCT_) :: ELBUF_STR
 C-----------------------------------------------
-c FUNCTION: premilitary compute for QBAT
+c FUNCTION: preliminary compute for QBAT
 c
 c Note:
 c ARGUMENTS:  (I: input, O: output, IO: input * output, W: workspace)
@@ -110,7 +110,7 @@ c                           for plat element
 c  O   RXYZ(NEL,2,4)      - nodal rotational velocity (4 nodes) in local system 5 dof
 C                           R13->RXYZ(,1,),R24->RXYZ(,2,),RHI->RXYZ(,3,),RTI->RXYZ(,4,)----
 c                           for plat element
-c  O  JAC,HX,HY(4,NEL)    - Jacobien,asymmetric part(hourglass) at 4 Gauss points
+c  O  JAC,HX,HY(4,NEL)    - Jacobian,asymmetric part(hourglass) at 4 Gauss points
 c  O   VKSI,VETA(4,4)     - derivation of shape functions------
 c  O  VQ(NEL,9),VQN,VQG(NEL,9,4) - local system of element, nodal(4) and Gauss points(4)
 c  O  VJFI,VNRM,VASTN     - terms used for assumed strains
@@ -1208,7 +1208,7 @@ C-----------------------------------------------
       TYPE(ELBUF_STRUCT_) :: ELBUF_STR
 C-----RLZ(NNOD,*)
 C-----------------------------------------------
-c FUNCTION: premilitary compute for QBAT and Ismstr=10
+c FUNCTION: preliminary compute for QBAT and Ismstr=10
 c
 c Note:
 c ARGUMENTS:  (I: input, O: output, IO: input * output, W: workspace)
@@ -1229,7 +1229,7 @@ c                           for plat element
 c  O   RXYZ(3,4,NEL)      - nodal rotational velocity (4 nodes) in local system 5 dof
 C                           R13->RXYZ(,1,),R24->RXYZ(,2,),RHI->RXYZ(,3,),RTI->RXYZ(,4,)----
 c                           for plat element
-c  O  JAC,HX,HY(4,NEL)    - Jacobien,asymmetric part(hourglass) at 4 Gauss points
+c  O  JAC,HX,HY(4,NEL)    - Jacobian,asymmetric part(hourglass) at 4 Gauss points
 c  O  VQ(9,NEL),VQN,VQG(9,4,) - local system of element, nodal(4) and Gauss points(4)
 c  O  Xij_T,Yij_T(NEL)    - [B] components used for in-plane shear assumed strain
 c  IO XiS,YiS,ZiS(NEL)    - reference configurations used for small strain options
