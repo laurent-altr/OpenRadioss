@@ -30,12 +30,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 C-----------------------------------------------
 C   D e s c r i p t i o n
 C-----------------------------------------------
-C This subroutine computes gradients at element faces for 2D ALE
-C-----------------------------------------------
-C-----------------------------------------------
-C   D e s c r i p t i on
-C-----------------------------------------------
-C This subroutine computes 2D gradient on faces
+C This subroutine computes 2D gradients at element faces for ALE
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
