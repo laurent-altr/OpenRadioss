@@ -103,7 +103,7 @@ C-----------------------------------------------
         VDZ4(I)=V(3,NC4(I))
       ENDDO
 C-----------------------------------------------
-C     CALCUL DE (V MATIERE - V MAILLAGE) MOYEN
+C     CALCULATION OF (V MATERIAL - V MESH) AVERAGE
 C-----------------------------------------------
       DO I=LFT,LLT
         P1=FI1(I)+ONE
@@ -219,7 +219,7 @@ C-------------------------------
         ENDIF
       ENDDO
 C-----------------------------------------------
-C     CALCUL DE (V MATIERE - V MAILLAGE) MOYEN
+C     CALCULATION OF (V MATERIAL - V MESH) AVERAGE
 C-----------------------------------------------
       DO I=LFT,LLT
         P1=FI1(I)+ONE
