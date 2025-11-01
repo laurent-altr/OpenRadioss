@@ -77,7 +77,7 @@ C-----------------------------------------------
       END DO
 
       DO I=LFT,LLT
-         ! more precise estimator is to call EOSMAIN to compute BULK modulus updated for each element
+         ! More precise estimator is to call EOSMAIN to compute BULK modulus updated for each element
          SSP(I)=SQRT(BULK(I)/RHO0(I))   ! G=0 with law6
       END DO
       

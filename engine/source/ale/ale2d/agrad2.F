@@ -94,7 +94,7 @@ C-----------------------------------------------
         Z4(I) = X(3,IXQ(5,II))       
       ENDDO
 C------------------------------------------
-C Computing THE NORMAL AT EACH FACE
+C Computing the normal at each face
 C------------------------------------------
       DO I=LFT,LLT
         N1Y(I) =  (Z2(I)-Z1(I))

@@ -60,9 +60,9 @@ C
          IF (ITYP==6 .OR. ITYP==8) THEN
            IFV = IFV + 1
            ID=MONVOL(K1-1+1)
-           ! INFO == 1 : FVSTATS1 called only by processor 0 after an
-           ! update of MONVOL
-           ! INFO == 0 : FVSTATS1 called by every processor
+           ! INFO == 1: FVSTATS1 called only by processor 0 after an
+           ! Update of MONVOL
+           ! INFO == 0: FVSTATS1 called by every processor
            IF((FVSPMD(IFV)%PMAIN-1 == ISPMD) .OR. (NSPMD == 1) .OR. INFO==1) THEN
              WRITE(IOUT,'(/1X,A,I10,A)')'** FINITE VOLUME',ID,' MERGE STATISTICS **'
              WRITE(IOUT,'(4X,A,I10)')
