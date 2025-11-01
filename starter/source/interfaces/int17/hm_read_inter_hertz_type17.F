@@ -169,7 +169,7 @@ C--------------------------------------------------------------
 C--------------------------------------------------------------
 
  1717 FORMAT(//
-     .    '    TYPE==17 SURFACE/SURFACE 16 NODES THICK SHELL' /,
+     .    '    TYPE=17 SURFACE/SURFACE 16 NODES THICK SHELL' /,
      .    '              HERTZ PRESSURE FORMULATION' //,
      .    '    FIRST SOLID ELEMENT GROUP. . . . . . .  . . ',I10/,
      .    '    SECOND SOLID ELEMENT GROUP . . . . . .  . . ',I10/,
