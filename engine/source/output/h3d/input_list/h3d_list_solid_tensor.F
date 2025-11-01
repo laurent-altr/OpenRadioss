@@ -121,7 +121,7 @@ c-----------------------------------------------
       H3D_KEYWORD_SOLID_TENSOR(I)%IS_IT  = 1
       H3D_KEYWORD_SOLID_TENSOR(I)%IS_IT_ALL  = 1
       H3D_KEYWORD_SOLID_TENSOR(I)%TEXT1  = 'Infinitesimal Strain'
-      H3D_KEYWORD_SOLID_TENSOR(I)%COMMENT  = 'Total strain tensor is calculated from 2(initial&actual) configurations'
+      H3D_KEYWORD_SOLID_TENSOR(I)%COMMENT  = 'Total strain tensor is calculated from 2 (initial & actual) configurations'
 c-----------------------------------------------
       I = I + 1
       H3D_KEYWORD_SOLID_TENSOR(I)%KEY3  = 'TENS/STRESS/CORNER_DATA'

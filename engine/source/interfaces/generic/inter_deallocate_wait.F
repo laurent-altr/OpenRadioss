@@ -39,7 +39,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
      1                          NSENSOR,IRECVFROM,SENSOR_TAB,INTER_STRUCT,SORT_COMM )
 !$COMMENT
 !       INTER_DEALLOCATE_WAIT description
-!       wait the message "send the secondary nodes" & deallocation of array
+!       wait for the message "send the secondary nodes" & deallocation of array
 !       INTER_DEALLOCATE_WAIT organization :
 !$ENDCOMMENT
 C-----------------------------------------------

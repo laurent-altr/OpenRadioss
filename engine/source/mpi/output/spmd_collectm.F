@@ -149,7 +149,7 @@ C
           RECGLOB(2,I) = RTRI(2,INDEX(I))
         END DO
 
-        WRITE(67,'(A)')'----- RESUME OF MATRIX STRUCTURE -----'
+        WRITE(67,'(A)')'----- SUMMARY OF MATRIX STRUCTURE -----'
         I =1
         NK=1
         N=RECGLOB(2,I)
