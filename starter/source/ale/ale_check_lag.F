@@ -34,7 +34,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 C-----------------------------------------------
 C   D e s c r i p t i o n
 C-----------------------------------------------
-C This subroutine is ensuring that no lagrangian elem is connected to an Eulerian component.
+C This subroutine ensures that no lagrangian elem is connected to an Eulerian component.
 C  NALE is marking nodes : 0 - Lagrange
 C                          1 - ALE
 C                          2 - EULER

@@ -117,7 +117,7 @@ c
             NODTAG(IXP(2,N))=1
             NODTAG(IXP(3,N))=1
             NODTAG(IXP(4,N))=1
-            ENDIF ! IF (IPART_STATE(IPRT) == 0)
+            ENDIF ! IF (IPART_STATE(IPRT) /= 0)
           ENDDO ! DO I=LFT,LLT
         ENDIF ! IF (ITY == 5)
       ENDDO ! DO NG=1,NGROUP
