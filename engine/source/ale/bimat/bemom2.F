@@ -100,8 +100,8 @@ C-------------------------------
         DZY(I)=PY1(I)*VZ13(I)+PY2(I)*VZ24(I)
       ENDDO
 C-----------------------------------------------
-C     CALCUL DE (V MATIERE - V MAILLAGE) MOYEN
-C---------------------------------------
+C     CALCULATION OF (V MATERIAL - V MESH) AVERAGE
+C-----------------------------------------------
       DO I=1,NEL
         VDY(I)=FOURTH*(VY1(I)+VY2(I)+VY3(I)+VY4(I))
         VDZ(I)=FOURTH*(VZ1(I)+VZ2(I)+VZ3(I)+VZ4(I))

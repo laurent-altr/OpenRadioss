@@ -117,7 +117,7 @@ C-----------------------------------------------
         VDZ4(I)=V(3,NC4(I)) - W(3,NC4(I))
       ENDDO
 C-----------------------------------------------
-C     CALCUL DE (V MATIERE - V MAILLAGE) MOYEN
+C     CALCULATION OF (V MATERIAL - V MESH) AVERAGE
 C-----------------------------------------------
       DO I=1,NEL
         VDY(I)=FOURTH*(VDY1(I)+VDY2(I)+VDY3(I)+VDY4(I))
