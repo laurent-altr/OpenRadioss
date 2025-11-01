@@ -639,7 +639,6 @@ C=======================================================================
         DEALLOCATE( SURF_ELM ) 
       ENDIF
       RETURN
- 900  CONTINUE
 c  Il n y a pas de label 900 ...
       CALL ANCMSG(MSGID=189,MSGTYPE=MSGERROR,ANMODE=ANINFO,I1=IGRSLIN(IGS)%ID)
       RETURN

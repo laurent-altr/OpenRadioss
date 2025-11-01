@@ -441,7 +441,6 @@ C     complete initialization of voxel
         ENDDO
         INIVOXEL = MAX(INIVOXEL,(NBX+2)*(NBY+2)*(NBZ+2)+1)
 C------------------
-  200 CONTINUE
 C------------------
 !$OMP PARALLEL        
         CALL I7TRIVOX1(

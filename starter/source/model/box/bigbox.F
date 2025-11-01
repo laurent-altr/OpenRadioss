@@ -998,7 +998,6 @@ C
          END DO
        END DO
 C---------------
-  40   CONTINUE
 C---
        IBOX(IB)%NENTITY=BOXSEG
        IBOX(IB)%SURFIAD=IADB0

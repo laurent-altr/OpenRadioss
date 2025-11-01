@@ -470,7 +470,6 @@ C--------Tag of CYL_JOINT to keep it----------------------------------
             TAGCYL(I)=ID_CYL
           ENDIF
 
-350       CONTINUE
         END DO
 
         NEW_NJOINT = COMPT

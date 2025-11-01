@@ -557,7 +557,6 @@ C-----------
       IF(ALLOCATED(BUFTMP)) DEALLOCATE(BUFTMP)
 
       RETURN
- 900  CONTINUE
       CALL ANCMSG(MSGID=189,
      .            MSGTYPE=MSGERROR,
      .            ANMODE=ANINFO,
