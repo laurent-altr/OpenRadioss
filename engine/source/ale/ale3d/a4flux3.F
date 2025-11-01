@@ -29,6 +29,11 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||====================================================================
       SUBROUTINE A4FLUX3(PM,IXS,V,W,X,FLUX,FLU1,ALE_CONNECT)
 C-----------------------------------------------
+C   D e s c r i p t i o n
+C-----------------------------------------------
+C This subroutine computes fluxes for 4-node tetrahedral elements
+C-----------------------------------------------
+C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
        USE ALE_CONNECTIVITY_MOD
@@ -181,7 +186,7 @@ C-----------------------------------------------
       END DO
       
       !======================================================!
-      ! FLUXES CALCULATION ON EACH FACE                      !
+      ! Computing fluxes ON EACH FACE                      !
       !    FLUX_face = [V_face].[n]                          ! 
       !    FLUX_face = 1/6 * ([3*V_face] . [2S*n])           !       
       !======================================================!

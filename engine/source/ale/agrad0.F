@@ -39,6 +39,11 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
       SUBROUTINE AGRAD0(IPARG    ,IXS      ,IXQ       ,X       ,ALE_CONNECT   ,
      .                  GRAD     ,VEUL     ,ELBUF_STR ,ITASK   )
 C-----------------------------------------------
+C   D e s c r i p t i o n
+C-----------------------------------------------
+C This subroutine dispatches gradient computation for ALE
+C elements (2D/3D) based on element type and formulation
+C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
       USE ELBUFDEF_MOD            

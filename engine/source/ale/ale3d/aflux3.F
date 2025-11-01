@@ -30,6 +30,11 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||====================================================================
       SUBROUTINE AFLUX3(PM,IXS,V,W,X,FLUX,FLU1,ALE_CONNECT,NSG, TAG22)
 C-----------------------------------------------
+C   D e s c r i p t i o n
+C-----------------------------------------------
+C This subroutine computes advective fluxes for 3D ALE elements
+C-----------------------------------------------
+C-----------------------------------------------
 C   M o d u l e s
 C----------------------------------------------- 
       USE I22BUFBRIC_MOD 
@@ -266,7 +271,7 @@ C-----------------------------------------------
       END DO
 
       !======================================================!
-      ! ELEMENT CLOSURE TEST                                 !
+      ! element CLOSURE TEST                                 !
       !    (If at least there is one domain with closure)    ! 
       !    2S [CF].[n] = 0  => [2S*n] = 0                    !
       !    where                                             !
@@ -275,7 +280,7 @@ C-----------------------------------------------
       !======================================================!
       IF(ICLOSE == 1) THEN
         DO I=LFT,LLT
-            ! Solid Element Centorid
+            ! Solid element Centorid
           XC(I)=ONE_OVER_8*(X1(I)+X2(I)+X3(I)+X4(I)+X5(I)+X6(I)+X7(I)+X8(I))
           YC(I)=ONE_OVER_8*(Y1(I)+Y2(I)+Y3(I)+Y4(I)+Y5(I)+Y6(I)+Y7(I)+Y8(I))
           ZC(I)=ONE_OVER_8*(Z1(I)+Z2(I)+Z3(I)+Z4(I)+Z5(I)+Z6(I)+Z7(I)+Z8(I))
@@ -371,7 +376,7 @@ C-----------------------------------------------
       ENDIF
       
       !======================================================!
-      ! FLUXES CALCULATION ON EACH FACE                      !
+      ! Computing fluxes ON EACH FACE                      !
       !    FLUX_face = [V_face].[n]                          ! 
       !              = [0.5*V_face] . [2S*n]                 !       
       !======================================================!

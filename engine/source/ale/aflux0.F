@@ -48,6 +48,11 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
      .                  VEUL        ,FILL      ,DFILL              ,VOL  ,
      .                  ALE_CONNECT ,ALPH      ,ITASK ,NV46        ,IPM  )
 C-----------------------------------------------
+C   D e s c r i p t i o n
+C-----------------------------------------------
+C This subroutine initializes and dispatches flux computation
+C for ALE and Eulerian formulations (2D/3D, FVM)
+C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
       USE INITBUF_MOD

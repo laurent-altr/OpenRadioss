@@ -34,6 +34,12 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
      3                 RVOLUV  ,NPC     ,TF      ,NSENSOR ,SENSOR_TAB ,
      4                 VOL     ,PMAIN   ,WFEXT ,PYTHON)
 C-----------------------------------------------
+C   D e s c r i p t i o n
+C-----------------------------------------------
+C This subroutine computes airbag state variables including
+C pressure, temperature, mass flow through vents and injectors,
+C and manages sensor-based activation
+C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------  
       USE python_funct_mod

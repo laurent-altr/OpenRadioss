@@ -38,6 +38,11 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
      4                 IGRSURF ,PORO    ,IVOLUV  ,RBAGVJET,
      4                 FR_MV   )
 C-----------------------------------------------
+C   D e s c r i p t i o n
+C-----------------------------------------------
+C This subroutine computes airbag surface forces and manages
+C external surface interactions for monitored volume
+C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
       USE GROUPDEF_MOD

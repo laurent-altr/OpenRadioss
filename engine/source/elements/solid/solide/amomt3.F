@@ -69,6 +69,11 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
      Z   NC6,     NC7,     NC8,     NALE,
      1   NEL,     NFT,     MTN,     IPM)
 C-----------------------------------------------
+C   D e s c r i p t i o n
+C-----------------------------------------------
+C This subroutine computes momentum for 3D ALE elements
+C-----------------------------------------------
+C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
       USE ALE_MOD

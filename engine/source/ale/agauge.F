@@ -81,49 +81,49 @@ C-----------------------------------------------
       my_real P,RHO,E,PA,U2,ALPHA(NBGAUGE)
       TYPE(G_BUFEL_) ,POINTER :: GBUF
 C-----------------------------------------------
-c     LGAUGE(3,*)
-c 1:  -Isolid           -(NUMELS_G+1) if SPH gauge
-c 2:  GaugeId
-c 3:  +Node or -Shell
+C     LGAUGE(3,*)
+C 1:  -Isolid           -(NUMELS_G+1) if SPH gauge
+C 2:  GaugeId
+C 3:  +Node or -Shell
 c
-c     => GAUGE(LLGAUGE,*), LLGAUGE = 37
-c 1:  Dist (distance from Shell)     Dist (distance from Shell)
-c 2:  XG           XG
-c 3:  YG           YG
-c 4:  ZG           ZG
-c 5:  Alpha (Solid penetration ratio)     not yet used
-c 6:               XSAV (SPH sorting)
-c 7:               YSAV (SPH sorting)
-c 8:               ZSAV (SPH sorting)
-c 9:               FF (sph only)
-c 10: Intantaneous Pressure
-c 11:              intantaneous PA
-c 12:              intantaneous Rho
-c 13:              intantaneous E
-c 14:              ! Butterworth !
-c 15:              ! Butterworth !
-c 16:              ! Butterworth !
-c 17:              ! Butterworth !
-c 18:              ! Butterworth !
-c 19:              ! Butterworth !
-c 20:                  ! Butterworth !
-c 21:            ! Butterworth !
-c 22:            ! Butterworth !
-c 23:            ! Butterworth !  
-c 24:              ! Butterworth !
-c 25:              ! Butterworth !
-c 26:              ! Butterworth !
-c 27:              ! Butterworth !
-c 28:              ! Butterworth !
-c 29:              ! Butterworth !
-c 30:  Pressure                 filtered Pressure
-c 31:  PA                     filtered PA
-c 32:  Rho                    filtered Rho
-c 33:  E                      filtered E       
-c 34:              ! Xpoint      !
-c 35:              ! Ypoint      !
-c 36:              ! Zpoint      !
-c 37:              ! Butterworth !
+C     => GAUGE(LLGAUGE,*), LLGAUGE = 37
+C 1:  Dist (distance from Shell)     Dist (distance from Shell)
+C 2:  XG           XG
+C 3:  YG           YG
+C 4:  ZG           ZG
+C 5:  Alpha (Solid penetration ratio)     not yet used
+C 6:               XSAV (SPH sorting)
+C 7:               YSAV (SPH sorting)
+C 8:               ZSAV (SPH sorting)
+C 9:               FF (sph only)
+C 10: Intantaneous Pressure
+C 11:              intantaneous PA
+C 12:              intantaneous Rho
+C 13:              intantaneous E
+C 14:              ! Butterworth !
+C 15:              ! Butterworth !
+C 16:              ! Butterworth !
+C 17:              ! Butterworth !
+C 18:              ! Butterworth !
+C 19:              ! Butterworth !
+C 20:                  ! Butterworth !
+C 21:            ! Butterworth !
+C 22:            ! Butterworth !
+C 23:            ! Butterworth !  
+C 24:              ! Butterworth !
+C 25:              ! Butterworth !
+C 26:              ! Butterworth !
+C 27:              ! Butterworth !
+C 28:              ! Butterworth !
+C 29:              ! Butterworth !
+C 30:  Pressure                 filtered Pressure
+C 31:  PA                     filtered PA
+C 32:  Rho                    filtered Rho
+C 33:  E                      filtered E       
+C 34:              ! Xpoint      !
+C 35:              ! Ypoint      !
+C 36:              ! Zpoint      !
+C 37:              ! Butterworth !
 C-----------------------------------------------
 
 C-----------------------------------------------
@@ -186,7 +186,7 @@ C
                PHI(IS)= IG 
 C
 C              PHI(IS)=I
-c penetration ratio within element (initialisation)
+C Penetration ratio within element (initialization)
             GAUGE(5,IG)=ZERO
           ENDIF
         END DO
@@ -264,7 +264,7 @@ C-----------------------------
 !$OMP END SINGLE
       ENDIF  
 C-----------------------------
-C     CALCULATION OF GAUGE MEASURES
+C Computing GAUGE MEASURES
 C-----------------------------
       DO NG=ITASK+1,NGROUP,NTHREAD
 C-----------------------------
@@ -290,7 +290,7 @@ C-----------------------------
           II=I+NFT
           IG = NINT(PHI(II))
           IF (IG <= 0) CYCLE
-c         
+C         
           P = (GBUF%SIG(JJ(1)+I) + GBUF%SIG(JJ(2)+I) + GBUF%SIG(JJ(3)+I))/THREE
           RHO = GBUF%RHO(I)
           E   = GBUF%EINT(I)
@@ -371,9 +371,9 @@ C
 C-----------------------------------------------
 C   Description
 C-----------------------------------------------
-c  Searching for element associated to the gauge
-c     algorithmic complexity:quadratic (numels*nbgauge) at time 0
-c     can be improved
+C  Searching for element associated to the gauge
+C     algorithmic complexity:quadratic (numels*nbgauge) at time 0
+C     can be improved
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -444,8 +444,8 @@ C
 
             IGAUGE=IG
             IF(IGAUGE == 0)CYCLE
-c element associated to the gauge
-c in case of multiple solutions do not need to choose the best one : AGAUG3 will update it.           
+C element associated to the gauge
+C in case of multiple solutions do not need to choose the best one : AGAUG3 will update it.           
 #include "lockon.inc"
             LGAUGE(1,IGAUGE)=-II
 #include "lockoff.inc"
@@ -498,7 +498,7 @@ C-----------------------------------------------
 C   S o u r c e   L i n e s
 C-----------------------------------------------     
 c--------------------------------------------------------------
-c  Searching for the new element associated to the gauge
+C  Searching for the new element associated to the gauge
 c--------------------------------------------------------------
       DO I=1,LLT
         II=I+NFT  
@@ -527,7 +527,7 @@ C
             XX2 = X(1,N4)-X(1,N2)
             YY2 = X(2,N4)-X(2,N2)
             ZZ2 = X(3,N4)-X(3,N2)
-c incoming vector surface
+C incoming vector surface
             A1  = YY1*ZZ2 - YY2*ZZ1
             A2  = XX2*ZZ1 - XX1*ZZ2
             A3  = XX1*YY2 - XX2*YY1
@@ -536,8 +536,8 @@ c incoming vector surface
             ALPHA = VOL/MAX(AREAP32,EM20)
 #include "lockon.inc"            
             IF(ALPHA >= ZERO .AND. ALPHA >= GAUGE(5,IG))THEN
-c the gauge is changing of element
-c element associated to the gauge
+C the gauge is changing of element
+C element associated to the gauge
               LGAUGE(1,IG)=-II
               GAUGE(5,IG)=ALPHA 
             ENDIF
@@ -560,49 +560,49 @@ c element associated to the gauge
 C-----------------------------------------------
 C   D e s c r i p t i o n
 C-----------------------------------------------
-c     LGAUGE(3,*)
-c 1:  -Isolid           -(NUMELS_G+1) if SPH gauge
-c 2:  GaugeId
-c 3:  +Node or -Shell
+C     LGAUGE(3,*)
+C 1:  -Isolid           -(NUMELS_G+1) if SPH gauge
+C 2:  GaugeId
+C 3:  +Node or -Shell
 c
-c     => GAUGE(LLGAUGE,*), LLGAUGE = 37
-c 1:  Dist (distance from Shell)     Dist (distance from Shell)
-c 2:  XG           XG
-c 3:  YG           YG
-c 4:  ZG           ZG
-c 5:  Alpha (Solid penetration ratio)     not yet used
-c 6:               XSAV (SPH sorting)
-c 7:               YSAV (SPH sorting)
-c 8:               ZSAV (SPH sorting)
-c 9:               FF (sph only)
-c 10: Intantaneous Pressure
-c 11:              intantaneous PA
-c 12:              intantaneous Rho
-c 13:              intantaneous E
-c 14:              ! Butterworth !
-c 15:              ! Butterworth !
-c 16:              ! Butterworth !
-c 17:              ! Butterworth !
-c 18:              ! Butterworth !
-c 19:              ! Butterworth !
-c 20:                  ! Butterworth !
-c 21:            ! Butterworth !
-c 22:            ! Butterworth !
-c 23:            ! Butterworth !  
-c 24:              ! Butterworth !
-c 25:              ! Butterworth !
-c 26:              ! Butterworth !
-c 27:              ! Butterworth !
-c 28:              ! Butterworth !
-c 29:              ! Butterworth !
-c 30:  Pressure                 filtered Pressure
-c 31:  PA                     filtered PA
-c 32:  Rho                    filtered Rho
-c 33:  E                      filtered E       
-c 34:              ! Xpoint      !
-c 35:              ! Ypoint      !
-c 36:              ! Zpoint      !
-c 37:              ! Butterworth !
+C     => GAUGE(LLGAUGE,*), LLGAUGE = 37
+C 1:  Dist (distance from Shell)     Dist (distance from Shell)
+C 2:  XG           XG
+C 3:  YG           YG
+C 4:  ZG           ZG
+C 5:  Alpha (Solid penetration ratio)     not yet used
+C 6:               XSAV (SPH sorting)
+C 7:               YSAV (SPH sorting)
+C 8:               ZSAV (SPH sorting)
+C 9:               FF (sph only)
+C 10: Intantaneous Pressure
+C 11:              intantaneous PA
+C 12:              intantaneous Rho
+C 13:              intantaneous E
+C 14:              ! Butterworth !
+C 15:              ! Butterworth !
+C 16:              ! Butterworth !
+C 17:              ! Butterworth !
+C 18:              ! Butterworth !
+C 19:              ! Butterworth !
+C 20:                  ! Butterworth !
+C 21:            ! Butterworth !
+C 22:            ! Butterworth !
+C 23:            ! Butterworth !  
+C 24:              ! Butterworth !
+C 25:              ! Butterworth !
+C 26:              ! Butterworth !
+C 27:              ! Butterworth !
+C 28:              ! Butterworth !
+C 29:              ! Butterworth !
+C 30:  Pressure                 filtered Pressure
+C 31:  PA                     filtered PA
+C 32:  Rho                    filtered Rho
+C 33:  E                      filtered E       
+C 34:              ! Xpoint      !
+C 35:              ! Ypoint      !
+C 36:              ! Zpoint      !
+C 37:              ! Butterworth !
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------

@@ -147,7 +147,7 @@ C-----------------------------------------------
         K3    = 3*N2
         
         IF(NL == 1)THEN
-         !initialisation
+         ! Initialization
 #include "vectorize.inc"
           DO J=IADF,IADL
             !Acceleration on FVM vertexes

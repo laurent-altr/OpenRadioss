@@ -174,7 +174,7 @@ C-----------------------------------------------
       CALL ALEFVM_EXPAND_MOM2 (IXS, MOM, NEL)
       
       DO I=1,NEL
-        !MOM=[rhoU]*VOL -> U : needed for fluxes calculation
+        !MOM=[rhoU]*VOL -> U : needed for Computing fluxes
         II          = I + NFT
         !MASS        = RHO(I) * VOL(I)
         !MOM(1,I)    = MOM(1,I) / MASS

@@ -30,6 +30,11 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
       SUBROUTINE AGAUG3Q(LGAUGE,GAUGE,PHI,IXQ  ,X    ,ALE_CONNECT )
       USE ALE_CONNECTIVITY_MOD
 C-----------------------------------------------
+C   D e s c r i p t i o n
+C-----------------------------------------------
+C This subroutine updates gauge positions within quadrilateral
+C elements for ALE gauges tracking material flow
+C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
 #include      "implicit_f.inc"
@@ -59,9 +64,9 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   S o u r c e   L i n e s
 C-----------------------------------------------     
-c--------------------------------------------------------------
-c  Searching for the new element associated to the gauge
-c--------------------------------------------------------------
+C--------------------------------------------------------------
+C  Searching for the new element associated to the gauge
+C--------------------------------------------------------------
       DO I=1,LLT
         II=I+NFT  
         IAD2 = ALE_CONNECT%ee_connect%iad_connect(II)
@@ -99,8 +104,8 @@ C
 
 #include "lockon.inc"            
             IF(ALPHA == ONE .AND. ALPHA >= GAUGE(5,IG))THEN
-c the gauge is changing of element
-c element associated to the gauge
+C the gauge is changing of element
+C element associated to the gauge
               LGAUGE(1,IG)=-II
               GAUGE(5,IG)=ALPHA 
             ENDIF

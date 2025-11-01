@@ -49,6 +49,11 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
      5   LERCVOIS,   LESDVOIS,   LENCOM,     IPM,
      6   MATPARAM)
 C-----------------------------------------------
+C   D e s c r i p t i o n
+C-----------------------------------------------
+C This subroutine solves thermal transport equations for ALE
+C-----------------------------------------------
+C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
       USE INITBUF_MOD

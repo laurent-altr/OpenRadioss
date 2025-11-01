@@ -152,7 +152,7 @@ C
        N6Z(I)=(X8(I)-X1(I))*(Y4(I)-Y5(I)) - (Y8(I)-Y1(I))*(X4(I)-X5(I))
       ENDDO
 C
-C CHECK AREA WITH ELEMENT CLOSURE
+C CHECK AREA WITH element CLOSURE
 C is not available for this new formulation
       IF(ICLOSE == 1) THEN
         DO I=LFT,LLT
@@ -243,7 +243,7 @@ C
         ENDDO
       ENDIF
 C--------------------
-C     CALCULATION OF FLUXES
+C Computing FLUXES
 C--------------------
       DO  I=LFT,LLT
         FLUX1(I)=(VX1(I)*N1X(I)+VY1(I)*N1Y(I)+VZ1(I)*N1Z(I))
@@ -279,7 +279,7 @@ C-----------------------------------------------
            IAD2 = ALE_CONNECT%ee_connect%iad_connect(I + NFT)
            II=ALE_CONNECT%ee_connect%connected(IAD2 + 1 - 1)
            IF(II == 0) FLUX1(I)= ZERO
-c             
+C             
            II=ALE_CONNECT%ee_connect%connected(IAD2 + 2 - 1)
            IF(II == 0) FLUX2(I)= ZERO
 C
@@ -288,7 +288,7 @@ C
 C
            II=ALE_CONNECT%ee_connect%connected(IAD2 + 4 - 1)
            IF(II == 0)FLUX4(I)= ZERO
-c             
+C             
            II=ALE_CONNECT%ee_connect%connected(IAD2 + 5 - 1)
            IF(II == 0) FLUX5(I)=ZERO
 C           

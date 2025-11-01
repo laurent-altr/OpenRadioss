@@ -29,6 +29,11 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||====================================================================
       SUBROUTINE AGRAD2(IXQ,X,ALE_CONNECT,GRAD)
 C-----------------------------------------------
+C   D e s c r i p t i o n
+C-----------------------------------------------
+C This subroutine computes gradients at element faces for 2D ALE
+C-----------------------------------------------
+C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
       USE ALE_CONNECTIVITY_MOD
@@ -89,7 +94,7 @@ C-----------------------------------------------
         Z4(I) = X(3,IXQ(5,II))       
       ENDDO
 C------------------------------------------
-C     CALCULATION OF THE NORMAL AT EACH FACE
+C Computing THE NORMAL AT EACH FACE
 C------------------------------------------
       DO I=LFT,LLT
         N1Y(I) =  (Z2(I)-Z1(I))
@@ -147,7 +152,7 @@ C------------------------------------------
         DD4(I) = D4Y(I)**2+D4Z(I)**2
       ENDDO
 C---------------------------------
-C     GRADIENT * SURFACE
+C Computing gradient times surface area
 C---------------------------------
       DO I=LFT,LLT
         GRAD(1,I) = FOUR * (D1Y(I)*N1Y(I)+D1Z(I)*N1Z(I)) / MAX(EM15,DD1(I))

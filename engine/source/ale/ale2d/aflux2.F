@@ -33,6 +33,11 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
      .                  FLUX       ,FLU1 ,FILL ,DFILL ,VOL ,
      .                  ALE_CONNECT,ALPH)
 C-----------------------------------------------
+C   D e s c r i p t i o n
+C-----------------------------------------------
+C This subroutine computes advective fluxes for 2D ALE elements
+C-----------------------------------------------
+C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
       USE ALE_CONNECTIVITY_MOD

@@ -48,7 +48,7 @@ C  which was temporarily introduced for experimental option /INTER/TYPE22 (FSI c
 C This cut cell method is not completed, abandoned, and is not an official option.
 C There is no other use for this scheme which is automatically enabled when /INTER/TYPE22 is defined (INT22>0 => IALEFVM=1).
 C
-c        Same as ALE51_ANTIDIFF3 but for cut cells 
+C        Same as ALE51_ANTIDIFF3 but for cut cells 
 C                                        (inter22)
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s

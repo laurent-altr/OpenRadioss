@@ -30,6 +30,11 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
       SUBROUTINE ACONV2(VTOT,PHI,FLUX,FLU1,ALE_CONNECT,QMV,IFLG, IXQ, X, IOFF)
       USE ALE_CONNECTIVITY_MOD
 C-----------------------------------------------
+C   D e s c r i p t i o n
+C-----------------------------------------------
+C This subroutine computes convective transport for 2D ALE
+C elements using upwind scheme with face-based fluxes
+C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
 #include      "implicit_f.inc"

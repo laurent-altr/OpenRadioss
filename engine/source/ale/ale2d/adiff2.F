@@ -35,8 +35,8 @@ C   D e s c r i p t i o n
 C-----------------------------------------------
 C Solving Heat equation
 C    alpha = k/rhocp is thermal diffusivity
-c    coeff is k (factor simplification since originally only EINT/V was updated)
-c       PHIN is EINT/V : updated at the end of the subroutine
+C    coeff is k (factor simplification since originally only EINT/V was updated)
+C       PHIN is EINT/V : updated at the end of the subroutine
 C       TEMP : updated at the end of the subroutine.
 C              Since temperature is calculated incrementally, both energy and temperature must be consistently updated.
 C-----------------------------------------------

@@ -189,7 +189,7 @@ C-----------------------------------------------
         VDY8(I)=V(2,NC8(I)) - W(2,NC8(I))
         VDZ8(I)=V(3,NC8(I)) - W(3,NC8(I))
   
-C coordinates
+C Extracting nodal coordinates
         X1(I)=X(1,NC1(I))  
         Y1(I)=X(2,NC1(I))  
         Z1(I)=X(3,NC1(I))  
@@ -779,7 +779,7 @@ C
 #include "lockoff.inc"
         ENDIF       
 C----------------------------
-C       CALCULATION OF CONVECTIVE FLUXES
+C Computing CONVECTIVE FLUXES
 C       MASSES SET TO ZERO
 C-----------------------------
 C            

@@ -31,6 +31,11 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
      1                  PM  ,X           ,IXQ  ,T  ,GRAD  ,
      2                  COEF,ALE_CONNECT ,FV)
 C-----------------------------------------------
+C   D e s c r i p t i o n
+C-----------------------------------------------
+C This subroutine computes imposed thermal fluxes on boundaries
+C for 2D ALE elements with temperature gradient boundary conditions
+C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
       USE ALE_CONNECTIVITY_MOD
@@ -82,7 +87,7 @@ C   S o u r c e   L i n e s
 C-----------------------------------------------
 
 C---------------------------------------------------------------------
-C     CALCULATION OF IMPOSED FLUXES
+C Computing IMPOSED FLUXES
 C---------------------------------------------------------------------
       IFIMP=0
       DO I=LFT,LLT
@@ -118,7 +123,7 @@ C---------------------------------------------------------------------
       ENDDO!next I
       
 C-----------------------------------------------
-C     SURFACE CALCULATION
+C     Computing surface area
 C-----------------------------------------------
       DO I=LFT,LLT
         II =NFT+I
@@ -143,7 +148,7 @@ C-----------------------------------------------
       ENDIF
       
 C------------------------------------------
-C     NORMAL VECTOR CALCULATION
+C     Computing normal vectors
 C------------------------------------------
       DO I=LFT,LLT
         II    = NFT+I
