@@ -133,7 +133,7 @@ C----------------------------------------------------------------------
 
         ELSEIF(IACTIV(10,N) == 2) THEN
 C----------------------------------------------------------------------
-C   DESACTIVATION DES ELEMENTS AT TIME ZERO
+C   ELEMENT DEACTIVATION AT TIME ZERO
 C----------------------------------------------------------------------
           IF(TT == ZERO) THEN
             CALL ELOFF(IXS     ,IXQ     ,IXC      ,IXP     ,IXT      ,

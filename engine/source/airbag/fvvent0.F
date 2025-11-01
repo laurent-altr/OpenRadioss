@@ -267,7 +267,7 @@ C------------------
            AOUTOT=AOUTOT+ELSOUT(IEL)
            RBAGHOL(16,IVENT)=RBAGHOL(16,IVENT)+AOUT
            RBAGHOL(17,IVENT)=RBAGHOL(17,IVENT)+AOUT1
-C internal Triangle
+C internal triangle
            IF(IEL > NEL) THEN
               POROSITY(IEL-NEL)=MIN(ONE,ELSOUT(IEL)/AREA)
            ENDIF

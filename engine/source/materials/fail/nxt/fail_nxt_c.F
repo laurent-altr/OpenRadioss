@@ -109,7 +109,7 @@ C-----------------------------------------------
 C=======================================================================
       DO I=1,NEL
         SIG1(I) = ZERO    ! 1st principal normalized stress
-        SIG2(I) = ZERO    ! 2d principal normalized stress
+        SIG2(I) = ZERO    ! 2nd principal normalized stress
         LAMBDANXT(I) = ZERO  ! Instability factor
       ENDDO 
       NINDX = 0                                                
