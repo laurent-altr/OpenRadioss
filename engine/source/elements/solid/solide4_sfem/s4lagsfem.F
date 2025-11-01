@@ -25,7 +25,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||--- called by ------------------------------------------------------
 !||    resol             ../engine/source/engine/resol.F
 !||--- calls      -----------------------------------------------------
-!||    foat_to_6_float   ../engine/source/system/parit.F
+!||    float_to_6_float   ../engine/source/system/parit.F
 !||    initbuf           ../engine/share/resol/initbuf.F
 !||    s10volnod3        ../engine/source/elements/solid/solide4_sfem/s10volnod3.F
 !||    s10volnodt3       ../engine/source/elements/solid/solide4_sfem/s10volnodt3.F
