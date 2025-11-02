@@ -2733,7 +2733,7 @@
 !
               endif   ! igtyp
 !-----------------------------------------------
-!         facteurs pour coques b.l. (zeng&combescure)
+!         factors for b.l. shells (zeng&combescure)
 !-----------------------------------------------
               if (ilaw /= 2  .and. ilaw /= 15 .and. ilaw /= 22 .and.    &
                 ilaw /= 25 .and. ilaw /= 27 .and. ilaw /= 32 &

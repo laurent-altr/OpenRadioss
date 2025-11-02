@@ -195,7 +195,7 @@
 !     timer                       signification
 !
 !     1                           resol
-!     2                           interfaces (total ou tri fop) [tri type 7, ALE]
+!     2                           interfaces (total or tri fop) [tri type 7, ALE]
 !     3                           elements
 !     4                           cond. cin.
 !     5                           integration
@@ -259,7 +259,7 @@
 !********* TIMERS 61 A 70 ACTIVE sur /MON/FULL ***************
 !    61                           AMS PCG  PCG       :: PCG sauf produits matrice-vecteur W=MV
 !    62                           AMS PCG  PARIT F   :: calcul des normes et produits scalaires P/ON (sum_6_float)
-!    63                           AMS PCG  COMM R    :: comm. pour calcul des normes et produiys scalaires
+!    63                           AMS PCG  COMM R    :: comm. for calculation of norms and scalar products
 !    64                           AMS PCG  COMP M.V  :: calcul W=MV hors communications
 !    65                           AMS PCG  COMM VFI  :: COMM. ECHANGE VFI cf contacts
 !    66                           IMP PCG
@@ -277,7 +277,7 @@
 !
 !    75 - 86                      utilise, mais non decrit ..
 !
-!    80                           AMS PCG COMM M.V   :: COMM. pour ASSEMBLAGE de W=MV
+!    80                           AMS PCG COMM M.V   :: COMM. for ASSEMBLY of W=MV
 !
 !    87                           sph preparation (sorting, ...)
 !    88                           sph interactions (forintp)
