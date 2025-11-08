@@ -118,7 +118,7 @@ C-------------------------------------
       ENDDO
 !$OMP END SINGLE 
 C-------------------------------------
-C CALCUL FORCE SUPER RIGID BODIES (non multi-thread)
+C FORCE COMPUTATION FOR SUPER RIGID BODIES (non multi-thread)
 C-------------------------------------
 
 !$OMP SINGLE
@@ -186,7 +186,7 @@ c
 !$OMP END SINGLE
 
 C-------------------------------------
-C CALCUL FORCE RIGID BODIES CLASSIQUES (multi-thread)
+C FORCE COMPUTATION FOR CLASSICAL RIGID BODIES (multi-thread)
 C-------------------------------------
 
 C-------------------------------------
@@ -303,7 +303,7 @@ C routine G/S for Parith/ON computation of A AR STIFN STIFR main nodes RB
 
       END IF
 C
-C Traitement fin parith/on multi-thread
+C End of parith/on multi-thread processing
 C
 !$OMP DO SCHEDULE(DYNAMIC,1)
 

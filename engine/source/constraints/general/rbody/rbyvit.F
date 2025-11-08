@@ -78,7 +78,7 @@ C-----------------------------------------------
        END IF
 !$OMP END SINGLE
 C-------------------------------------
-C CALCUL SUPER RIGID BODIES (non multi-thread) sur premiere tache libre
+C COMPUTATION FOR SUPER RIGID BODIES (non multi-thread) on first free task
 C-------------------------------------
 
 !$OMP SINGLE
@@ -109,7 +109,7 @@ C
 !$OMP END SINGLE
 
 C-------------------------------------
-C CALCUL FORCE RIGID BODIES CLASSIQUES (multi-thread)
+C FORCE COMPUTATION FOR CLASSICAL RIGID BODIES (multi-thread)
 C-------------------------------------
 
 !$OMP DO SCHEDULE(DYNAMIC,1)

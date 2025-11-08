@@ -1646,7 +1646,7 @@ C-----------------------------------------------
         IKINE(J)=0
       ENDDO
 C-------------------------------------
-C Traitement Rigid Bodies 
+C Processing Rigid Bodies
 C-------------------------------------
       K = 0
       DO N=1,NRBYKIN
