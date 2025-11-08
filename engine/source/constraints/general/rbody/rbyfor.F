@@ -190,7 +190,7 @@ C CALCUL FORCE RIGID BODIES CLASSIQUES (multi-thread)
 C-------------------------------------
 
 C-------------------------------------
-C Traitement rigid bodies (sans packet), avec scheduling dynamique
+C Processing rigid bodies (without packet), with dynamic scheduling
 C-------------------------------------
 
 !$OMP DO SCHEDULE(DYNAMIC,1)
@@ -292,7 +292,7 @@ C routine A2A for Parith/ON computation of A AR STIFN STIFR C CR on main nodes o
               CALL SPMD_EXCH_A_RB6_VREL(NRBDIM,IAD_RBY,FR_RBY6,IAD_RBY(NSPMD+1),RBY6,
      .                                  RBY6_C,SIZE_RBY6_C)
             ENDIF      
-C routine G/S de calcul Parith/ON de A AR STIFN STIFR noeuds main RB
+C routine G/S for Parith/ON computation of A AR STIFN STIFR main nodes RB
           ELSE
             CALL SPMD_EXCH_A_RB6G(NPBY,RBY6)
           END IF

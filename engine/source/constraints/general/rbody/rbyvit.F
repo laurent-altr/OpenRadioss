@@ -93,7 +93,7 @@ C-------------------------------------
             FT    = RBY(27,N)
             EXPN  = RBY(28,N)
             EXPT  = RBY(29,N)
-C correction variables globales faites dans rbycor
+C correction of global variables done in rbycor
             CALL RGBODV(V        ,VR         ,X     ,RBY(1,N)  ,LPBY(K),
      2                  NPBY(1,N),SKEW       ,ISKEW ,FSAV(1,J) ,ITAB   ,
      3                  WEIGHT   ,A         ,AR     ,MS        ,IN     ,
@@ -124,7 +124,7 @@ C-------------------------------------
             FT    = RBY(27,N)
             EXPN  = RBY(28,N)
             EXPT  = RBY(29,N)
-C correction variables globales faites dans rbycor
+C correction of global variables done in rbycor
             CALL RGBODV(V        ,VR         ,X     ,RBY(1,N)  ,LPBY(K),
      2                  NPBY(1,N),SKEW       ,ISKEW ,FSAV(1,J) ,ITAB   ,
      3                  WEIGHT   ,A         ,AR     ,MS        ,IN     ,
