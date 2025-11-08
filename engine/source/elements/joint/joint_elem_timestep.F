@@ -84,7 +84,7 @@ C--------> Loop over spring elements -------
             NV = NUVAR*(I-1) + 1
             IF (IGTYP==45) THEN    
 C           
-C--------> Calcul pas de temps nodal RB1 -------         
+C--------> Calculation of nodal time step RB1 -------         
                 IRB = NINT(GBUF%VAR(NV + 37))
               IF (IRB > 0) THEN
                   M1 = NPBY(1,IRB)
@@ -96,7 +96,7 @@ C--------> Calcul pas de temps nodal RB1 -------
                   DTRB1 = MIN(DTRB1,DTFAC1(11)*SQRT(TWO*IN(M1)/MAX(EM20,STIFR(M1))))
               ENDIF                               
 C
-C--------> Calcul pas de temps nodal RB2 ------- 
+C--------> Calculation of nodal time step RB2 ------- 
                 IRB = NINT(GBUF%VAR(NV + 38))
               IF (IRB > 0) THEN
                   M2 = NPBY(1,IRB)

@@ -43,7 +43,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !$ENDCOMMENT
             TYPE COMM_MPI_JOINT
                 INTEGER :: COLOR        ! color of the processor : 1 is the proc participates to the comm
-                INTEGER :: COMM,RANK    ! sub communicator for a given /CYL_JOINT + rank iin the sub communicator
+                INTEGER :: COMM,RANK    ! sub communicator for a given /CYL_JOINT + rank in the sub communicator
                 INTEGER, DIMENSION(:), ALLOCATABLE :: SIZE_SR   ! 
             END TYPE COMM_MPI_JOINT
 
