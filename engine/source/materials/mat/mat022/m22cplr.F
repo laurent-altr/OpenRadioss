@@ -105,7 +105,7 @@ C
         SIGNZX(I)= SIGNZX(I)+ALPEI*GS(I)*DEPSZX(I)
       ENDDO
 C-------------------
-C     CONTRAINTE VM
+C     VM STRESS
 C-------------------
 #include "vectorize.inc"
       DO I=JFT,JLT
@@ -169,7 +169,7 @@ C
 C
       IF (NINDX == 0) GOTO 800
 C---------------------------
-C    DEP EN CONTRAINTE PLANE
+C    DEP IN PLANE STRESS
 C---------------------------
 #include "vectorize.inc"
       DO J=1,NINDX
@@ -206,7 +206,7 @@ C
         ENDDO
       ENDDO
 C------------------------------------------
-C     CONTRAINTES PLASTIQUEMENT ADMISSIBLES
+C     PLASTICALLY ADMISSIBLE STRESSES
 C------------------------------------------
 #include "vectorize.inc" 
       DO J=1,NINDX
