@@ -27,11 +27,11 @@ C      Integers
 C--------------------------------------
      . INFINITY,ZERO,ONE ,TWO, THREE,FOUR,FIVE,SIX ,SEVEN, EIGHT,NINE,TEN,
      . ELEVEN,TWELVE ,FOURTEEN,FIFTEEN,SIXTEEN,TWENTY, TWENTY4,TWENTY5,
-     . TWENTY7,THIRTY ,THIRTY2,THIRTY6,FOURTY,FOURTY5,FOURTY8,
+     . TWENTY7,THIRTY ,THIRTY2,THIRTY6,FORTY,FORTY5,FORTY8,
      . FIFTY, SIXTY4,EIGHTY,EIGHTY16,EIGHTY19,
      . HUNDRED,HUNDRED28,HUNDRED50,HUNDRED80,THREE100,TWOHUNDRED25,TWOHUNDRED95,
      . TWOHUNDRED98,TWOHUNDRED93, THREEHUNDRED24,FIVEHUNDRED12,THREE1000,
-     . NINTY,
+     . NINETY,
 C--------------------------------------
 C      10^n
 C--------------------------------------
@@ -62,7 +62,7 @@ C--------------------------------------
 C      Fractions
 C--------------------------------------
      . HALF,THIRD,FOURTH,ONE_FIFTH,ONE_OVER_6,ONE_OVER_8,ONE_OVER_9,ONE_OVER_12,  
-     . ONE_OVER_16,ONE_OVER_64,ONE_OVER_512,TWO_THIRD,THREE_HALF,THREE_OVER_4,TRHEE_OVER_14,
+     . ONE_OVER_16,ONE_OVER_64,ONE_OVER_512,TWO_THIRD,THREE_HALF,THREE_OVER_4,THREE_OVER_14,
      . FOUR_OVER_3,FOUR_OVER_5,FIVE_OVER_3,FIVE_OVER_4,FIVE_OVER_6 ,SIX_OVER_5,SEVEN_HALF,   
      . SEVEN_OVER_5,SEVEN_OVER_9,NINE_OVER_2,NINE_OVER_20,
 C--------------------------------------
@@ -135,11 +135,11 @@ C      Integers
 C--------------------------------------
      . INFINITY,ZERO,ONE ,TWO, THREE,FOUR,FIVE,SIX ,SEVEN, EIGHT,NINE,TEN,
      . ELEVEN,TWELVE ,FOURTEEN,FIFTEEN,SIXTEEN,TWENTY, TWENTY4,TWENTY5,
-     . TWENTY7,THIRTY ,THIRTY2,THIRTY6,FOURTY,FOURTY5,FOURTY8,
+     . TWENTY7,THIRTY ,THIRTY2,THIRTY6,FORTY,FORTY5,FORTY8,
      . FIFTY, SIXTY4,EIGHTY,EIGHTY16,EIGHTY19,
      . HUNDRED,HUNDRED28,HUNDRED50,HUNDRED80,THREE100,TWOHUNDRED25,TWOHUNDRED95,
      . TWOHUNDRED98,TWOHUNDRED93, THREEHUNDRED24,FIVEHUNDRED12,THREE1000,
-     . NINTY,
+     . NINETY,
 C--------------------------------------
 C      10^n
 C--------------------------------------
@@ -170,7 +170,7 @@ C--------------------------------------
 C      Fractions
 C--------------------------------------
      . HALF,THIRD,FOURTH,ONE_FIFTH,ONE_OVER_6,ONE_OVER_8,ONE_OVER_9,ONE_OVER_12,  
-     . ONE_OVER_16,ONE_OVER_64,ONE_OVER_512,TWO_THIRD,THREE_HALF,THREE_OVER_4,TRHEE_OVER_14,
+     . ONE_OVER_16,ONE_OVER_64,ONE_OVER_512,TWO_THIRD,THREE_HALF,THREE_OVER_4,THREE_OVER_14,
      . FOUR_OVER_3,FOUR_OVER_5 ,FIVE_OVER_3,FIVE_OVER_4,FIVE_OVER_6 ,SIX_OVER_5,SEVEN_HALF,   
      . SEVEN_OVER_5,SEVEN_OVER_9,NINE_OVER_2,NINE_OVER_20,
 C--------------------------------------
@@ -215,11 +215,11 @@ C--------------------------------------
      . ONEP8333,TWOP444,TWOP6666666667,TWOP6667,FIVEP333,
      . ZEP54,ZEP1381966,ZEP5854102,
 C--------------------------------------
-C       Physics
+C      Physics
 C--------------------------------------
      . R_IGC, STEFBOLTZ,
 C--------------------------------------
-C      Math 
+C      Maths
 C--------------------------------------            
      . SQR2,SQR3,SQR5,SQR6,SQR7,SQR3_2,SQR4_3,SQR16_3,PI,INVPI,
 C--------------------------------------
