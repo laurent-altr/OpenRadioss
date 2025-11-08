@@ -3105,7 +3105,7 @@ C------ one routine for EIG
                 ISMDISP=0
               END IF !IF (IMPL_S==1.OR.NEIG>0) THEN
 C------------------------------------------------------
-C  Fin Implicit [MONO THREAD]
+C  End of Implicit [MONO THREAD]
 C------------------------------------------------------
 C------------------------------------------------------
 C  other initializations [MONO THREAD]
@@ -5641,7 +5641,7 @@ C-----------------------------------------------
                 CALL UPDATE_FAILWAVE(FAILWAVE)
               ENDIF
 C----------------------------------
-C     TRAITEMENT SHOOTING NODES
+C     PROCESSING SHOOTING NODES
 C----------------------------------
               IF (IMON>0) CALL STARTIME(TIMERS,TIMER_CONTFOR)
               IF (N2D/=0.AND.IDEL7==2) THEN
@@ -7815,7 +7815,7 @@ C-- // -----------
                 IF (IMON>0) CALL STOPTIME(TIMERS,TIMER_KIN)
                 IF (IMONM > 0) CALL STOPTIME(TIMERS,43)
               ENDIF
-C--------------------------- FIN CAS NON THERMIQUE PURE
+C--------------------------- END OF NON-THERMAL ONLY CASE
 
 C========================================================================================
 C                                     PARALLEL SECTION (SMP)
@@ -8237,7 +8237,7 @@ C                                          PARALLEL SECTION (SMP)
 C========================================================================================
 
 C----------------------------
-C  CALCUL //
+C  PARALLEL COMPUTATION
 C      [NRBODY1][NRBODY2]...   (ON FREE TASK)
 C // --------------------------
 
