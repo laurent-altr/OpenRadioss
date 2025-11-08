@@ -5985,7 +5985,7 @@ C     REAL
      .    U(*),F(*),D(3,*),DR(3,*),FEXT(3,*),MEXT(3,*),FINT(3,*),
      .    R01 ,MINT(3,*),VQ(3,3),R_IMP(*),DD(3,*),DDR(3,*)
 C-----------------------------------------------
-c FUNCTION: print-out solver info such as maximum residual, relative residuals, line-search coeff, tolerance
+c FUNCTION: print-out solver info such as maximum residual, relative residuals, line-search coefficient, tolerance
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
@@ -6403,7 +6403,7 @@ C-----------------------------------------------
      .     ,'Diverged step','Diverged step','Diverged step'
      .     ,'Diverged step','Diverged step','Diverged step'
         WRITE(ISOLTPL,1003)
-        WRITE(ISOLTPL,1004) 2,2,2,'Cumulative iterations','Line search coeff'
+        WRITE(ISOLTPL,1004) 2,2,2,'Cumulative iterations','Line search coefficient'
         WRITE(ISOLTPL,1002) 'On',1,50,1,3,50,1,'Line search coefficient',1
      .     ,'Line search coefficient','Line search coefficient','Line search coefficient'
      .     ,'Line search coefficient','Line search coefficient','Line search coefficient'

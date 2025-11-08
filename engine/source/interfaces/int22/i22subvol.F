@@ -1190,7 +1190,7 @@ C             if (IBUG22_subvol==1)WRITE (*,FMT='(A1)') " "
             BRICK_LIST(NIN,IB)%PCUT(ICELL)%Vel(1:3) = ONE_OVER_6 * (a1+a4+a5+a6+a3+a2)                                                                       
           END IF
           
-          !Treating complementary polyhedron (exemple : icode=2842;idble=2312)
+          !Treating complementary polyhedron (example : icode=2842;idble=2312)
           IF(bCOMPL)THEN
             pFACE(1:6) => BRICK_LIST(NIN,IB)%POLY(ICELL)%FACE(1:6)!%Surf
             pFACE0=> BRICK_LIST(NIN,IB)%POLY(ICELL)%FACE0%Surf
