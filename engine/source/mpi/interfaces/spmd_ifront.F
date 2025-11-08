@@ -522,7 +522,7 @@ C
         END DO
         DO II = 1, NBINTC
           NIN = INTLIST(II)
-C interface retriee avec sous interfaces ?
+C interface stripped with sub-interfaces ?
           IF(NEWFRONT(NIN)==2.AND.IPARI(36,NIN)>0.AND.
      +       IPARI(7,NIN)/=17) THEN
             IDEB = 0
