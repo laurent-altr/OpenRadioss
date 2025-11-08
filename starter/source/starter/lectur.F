@@ -8675,7 +8675,7 @@ C
       CALL TRACE_IN1(ERR_MSG,LEN_TRIM(ERR_MSG))
 C
 C----------------------------------
-C -- LECTURE OF INITIAL STATE DATA
+C -- READING OF INITIAL STATE DATA
 C----------------------------------
 C
       ALLOCATE(SIGI(NSIGS,LSIGI)                  ,STAT=stat)
