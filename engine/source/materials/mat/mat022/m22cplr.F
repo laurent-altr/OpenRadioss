@@ -124,7 +124,7 @@ C----------------------------
         IF (ICC(I) == 2) YLD(I) = MIN(YLD(I),YMAX(I))
       ENDDO
 C------------------------------------------
-C     CONTRAINTES PLASTIQUEMENT ADMISSIBLES
+C     PLASTICALLY ADMISSIBLE STRESSES
 C------------------------------------------
       IF (IPLA == 0) THEN
 C radial projection
