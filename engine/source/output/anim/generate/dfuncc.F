@@ -112,7 +112,7 @@ C-----------------------------------------------
      .   E1X,E1Y,E1Z,E2X,E2Y,E2Z,E3X,E3Y,E3Z,RX,RY,RZ,SX,SY,SZ,
      .   VG(5),VLY(5),VE(5),DMGMX_LY,EVAR_TMP,A01,A02,A03,A12,A,
      .   M,FF,GG,NN,
-     .   VEL(0:3),VFRAC(MVSIZ,21),PHI,ERR,NINTY
+     .   VEL(0:3),VFRAC(MVSIZ,21),PHI,ERR,NINETY
       INTEGER I,IDX,I1,II,J,NG,NEL,NPTR,NPTS,NPTT,NLAY,L,IFAIL,ILAY,
      .        IR,IS,IT,IL,MLW, NUVAR,IUS,PTF,PTM,PTS,NFAIL,
      .        N,K,K1,K2,JTURB,MT,IMID,IALEL,IPID,ISH3N,NNI,
@@ -151,7 +151,7 @@ C-----------------------------------------------
       LOGICAL detected
 C-----------------------------------------------
       CALL MY_ALLOC(WAL,NBF_L)
-      NINTY = 90.
+      NINETY = 90.
       NN1  = 1
       NN3  = 1
       NN4  = NN3 + NUMELQ
@@ -1696,9 +1696,9 @@ C
                         ENDIF                                       
 C
                         PHI =(HUNDRED80/PI)*ATAN2(DIR1_2,DIR1_1)  
-                        ERR = (ABS(PHI) - NINTY)/NINTY
+                        ERR = (ABS(PHI) - NINETY)/NINETY
                         EVAR(I) = PHI
-                        IF(ABS(ERR) < EM02) EVAR(I) = SIGN(NINTY,PHI)
+                        IF(ABS(ERR) < EM02) EVAR(I) = SIGN(NINETY,PHI)
                         IF(ABS(EVAR(I)) < ONE) EVAR(I) = ZERO
                         !!EVAR(I) = (HUNDRED80/PI)*ATAN2(DIR1_2,DIR1_1)  
                       ENDDO                                
@@ -1807,9 +1807,9 @@ C
                         ENDIF                                       
 C
                         PHI =(HUNDRED80/PI)*ATAN2(DIR1_2,DIR1_1)  
-                        ERR = (ABS(PHI) - NINTY)/NINTY
+                        ERR = (ABS(PHI) - NINETY)/NINETY
                         EVAR(I) = PHI
-                        IF(ABS(ERR) < EM02) EVAR(I) = SIGN(NINTY,PHI)
+                        IF(ABS(ERR) < EM02) EVAR(I) = SIGN(NINETY,PHI)
                         IF(ABS(EVAR(I)) < ONE) EVAR(I) = ZERO
                         !!EVAR(I) = (HUNDRED80/PI)*ATAN2(DIR1_2,DIR1_1)  
                       ENDDO    
@@ -1890,9 +1890,9 @@ C
                           DIR1_2 = LBUF_DIR%DIRA(I+NEL)          
                         ENDIF                                         
                         PHI =(HUNDRED80/PI)*ATAN2(DIR1_2,DIR1_1)  
-                        ERR = (ABS(PHI) - NINTY)/NINTY
+                        ERR = (ABS(PHI) - NINETY)/NINETY
                         EVAR(I) = PHI
-                        IF(ABS(ERR) < EM02) EVAR(I) = SIGN(NINTY,PHI)
+                        IF(ABS(ERR) < EM02) EVAR(I) = SIGN(NINETY,PHI)
                         IF(ABS(EVAR(I)) < ONE) EVAR(I) = ZERO          
                       ENDDO                                                  
                      ELSE  ! IDRAPE                    
@@ -1961,9 +1961,9 @@ C
                           DIR1_2 = BUFLY%DIRA(I+NEL)          
                         ENDIF                                         
                         PHI =(HUNDRED80/PI)*ATAN2(DIR1_2,DIR1_1)  
-                        ERR = (ABS(PHI) - NINTY)/NINTY
+                        ERR = (ABS(PHI) - NINETY)/NINETY
                         EVAR(I) = PHI
-                        IF(ABS(ERR) < EM02) EVAR(I) = SIGN(NINTY,PHI)
+                        IF(ABS(ERR) < EM02) EVAR(I) = SIGN(NINETY,PHI)
                         IF(ABS(EVAR(I)) < ONE) EVAR(I) = ZERO          
                       ENDDO  
                      ENDIF ! IDRAPE                                                    
@@ -3249,9 +3249,9 @@ C
                         ENDIF                                       
 c
                         PHI =(HUNDRED80/PI)*ATAN2(DIR1_2,DIR1_1)  
-                        ERR = (ABS(PHI) - NINTY)/NINTY
+                        ERR = (ABS(PHI) - NINETY)/NINETY
                         EVAR(I) = PHI
-                        IF(ABS(ERR) < EM02) EVAR(I) = SIGN(NINTY,PHI)
+                        IF(ABS(ERR) < EM02) EVAR(I) = SIGN(NINETY,PHI)
                         IF(ABS(EVAR(I)) < ONE) EVAR(I) = ZERO
                       ENDDO                                                       
                     ENDIF  ! MLW                            
@@ -3362,9 +3362,9 @@ C
                         ENDIF                                       
 c
                         PHI =(HUNDRED80/PI)*ATAN2(DIR1_2,DIR1_1)  
-                        ERR = (ABS(PHI) - NINTY)/NINTY
+                        ERR = (ABS(PHI) - NINETY)/NINETY
                         EVAR(I) = PHI
-                        IF(ABS(ERR) < EM02) EVAR(I) = SIGN(NINTY,PHI)
+                        IF(ABS(ERR) < EM02) EVAR(I) = SIGN(NINETY,PHI)
                         IF(ABS(EVAR(I)) < ONE) EVAR(I) = ZERO
                       ENDDO                                                       
                     ENDIF  ! MLW                                                  
@@ -3443,9 +3443,9 @@ C
                           DIR1_2 = LBUF_DIR%DIRA(I+NEL)                        
                         ENDIF                                         
                         PHI =(HUNDRED80/PI)*ATAN2(DIR1_2,DIR1_1)  
-                        ERR = (ABS(PHI) - NINTY)/NINTY
+                        ERR = (ABS(PHI) - NINETY)/NINETY
                         EVAR(I) = PHI
-                        IF(ABS(ERR) < EM02) EVAR(I) = SIGN(NINTY,PHI)
+                        IF(ABS(ERR) < EM02) EVAR(I) = SIGN(NINETY,PHI)
                         IF(ABS(EVAR(I)) < ONE) EVAR(I) = ZERO     
                       ENDDO                                                     
                     ENDIF                                                        
@@ -3517,9 +3517,9 @@ C
                           DIR1_2 = BUFLY%DIRA(I+NEL)                        
                         ENDIF                                         
                         PHI =(HUNDRED80/PI)*ATAN2(DIR1_2,DIR1_1)  
-                        ERR = (ABS(PHI) - NINTY)/NINTY
+                        ERR = (ABS(PHI) - NINETY)/NINETY
                         EVAR(I) = PHI
-                        IF(ABS(ERR) < EM02) EVAR(I) = SIGN(NINTY,PHI)
+                        IF(ABS(ERR) < EM02) EVAR(I) = SIGN(NINETY,PHI)
                         IF(ABS(EVAR(I)) < ONE) EVAR(I) = ZERO     
                       ENDDO                                                     
                     ENDIF                                                       
