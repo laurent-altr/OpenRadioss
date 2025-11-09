@@ -55,7 +55,7 @@ headline='      ALLOCATE(MESSAGESDATA('+str(count)+'))\n'
 f_out.write(headline)
 
 
-#rewind iput file and proceed with writing
+#rewind input file and proceed with writing
 f_in.seek(0)
 count=0
 for line in f_in:

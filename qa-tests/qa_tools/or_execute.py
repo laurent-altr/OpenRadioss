@@ -66,7 +66,7 @@ if __name__ == "__main__":
   starter_arg=""
   debug=""
   pon_string='4x1,1x4'
-  keywork='nothing'
+  keyword='nothing'
 
   # Parse command line arguments
   # -----------------------------
