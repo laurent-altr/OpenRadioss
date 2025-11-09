@@ -75,7 +75,7 @@
           real(kind=WP) :: dist_x, dist_y, dist_z                          !< distances to apply in each direction
           real(kind=WP) :: orig(3)                                         !< origin of skew
           real(kind=WP) :: detskew                                         !< determinant of skew matrix
-          real(kind=WP) :: invertskew_x(3),invertskew_Y(3),invertskew_Z(3) !< inverse of skew matrix
+          real(kind=WP) :: invertskew_x(3),invertskew_y(3),invertskew_z(3) !< inverse of skew matrix
           real(kind=WP) :: norm(3)                                         !< norms of inverse skew vectors
           real(kind=WP), dimension(:,:), allocatable :: xn                 !< local coordinates of group nodes
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -163,30 +163,30 @@
             invertskew_x(2) = (skew(8,isk)*skew(3,isk)-skew(2,isk)*skew(9,isk))/detskew
             invertskew_x(3) = (skew(2,isk)*skew(6,isk)-skew(5,isk)*skew(3,isk))/detskew
 
-            invertskew_Y(1) = (skew(7,isk)*skew(6,isk)-skew(4,isk)*skew(9,isk))/detskew
-            invertskew_Y(2) = (skew(1,isk)*skew(9,isk)-skew(7,isk)*skew(3,isk))/detskew
-            invertskew_Y(3) = (skew(4,isk)*skew(3,isk)-skew(1,isk)*skew(6,isk))/detskew
+            invertskew_y(1) = (skew(7,isk)*skew(6,isk)-skew(4,isk)*skew(9,isk))/detskew
+            invertskew_y(2) = (skew(1,isk)*skew(9,isk)-skew(7,isk)*skew(3,isk))/detskew
+            invertskew_y(3) = (skew(4,isk)*skew(3,isk)-skew(1,isk)*skew(6,isk))/detskew
 
-            invertskew_Z(1) = (skew(4,isk)*skew(8,isk)-skew(7,isk)*skew(5,isk))/detskew
-            invertskew_Z(2) = (skew(7,isk)*skew(2,isk)-skew(1,isk)*skew(8,isk))/detskew
-            invertskew_Z(3) = (skew(1,isk)*skew(5,isk)-skew(4,isk)*skew(2,isk))/detskew
+            invertskew_z(1) = (skew(4,isk)*skew(8,isk)-skew(7,isk)*skew(5,isk))/detskew
+            invertskew_z(2) = (skew(7,isk)*skew(2,isk)-skew(1,isk)*skew(8,isk))/detskew
+            invertskew_z(3) = (skew(1,isk)*skew(5,isk)-skew(4,isk)*skew(2,isk))/detskew
 
             ! normalize the inverse vectors to ensure they are unit vectors
             norm(1) = sqrt(invertskew_x(1)**2 + invertskew_x(2)**2 + invertskew_x(3)**2)
-            norm(2) = sqrt(invertskew_Y(1)**2 + invertskew_Y(2)**2 + invertskew_Y(3)**2)
-            norm(3) = sqrt(invertskew_Z(1)**2 + invertskew_Z(2)**2 + invertskew_Z(3)**2)
+            norm(2) = sqrt(invertskew_y(1)**2 + invertskew_y(2)**2 + invertskew_y(3)**2)
+            norm(3) = sqrt(invertskew_z(1)**2 + invertskew_z(2)**2 + invertskew_z(3)**2)
           
             invertskew_x(1) = invertskew_x(1)/norm(1)
             invertskew_x(2) = invertskew_x(2)/norm(1)
             invertskew_x(3) = invertskew_x(3)/norm(1)
 
-            invertskew_Y(1) = invertskew_Y(1)/norm(2)
-            invertskew_Y(2) = invertskew_Y(2)/norm(2)
-            invertskew_Y(3) = invertskew_Y(3)/norm(2)
+            invertskew_y(1) = invertskew_y(1)/norm(2)
+            invertskew_y(2) = invertskew_y(2)/norm(2)
+            invertskew_y(3) = invertskew_y(3)/norm(2)
 
-            invertskew_Z(1) = invertskew_Z(1)/norm(3)
-            invertskew_Z(2) = invertskew_Z(2)/norm(3)
-            invertskew_Z(3) = invertskew_Z(3)/norm(3)
+            invertskew_z(1) = invertskew_z(1)/norm(3)
+            invertskew_z(2) = invertskew_z(2)/norm(3)
+            invertskew_z(3) = invertskew_z(3)/norm(3)
           else
             ! For global coordinates, set inverse to identity
             detskew = 1.0_WP
@@ -194,13 +194,13 @@
             invertskew_x(2) = 0.0_WP
             invertskew_x(3) = 0.0_WP
 
-            invertskew_Y(1) = 0.0_WP
-            invertskew_Y(2) = 1.0_WP
-            invertskew_Y(3) = 0.0_WP
+            invertskew_y(1) = 0.0_WP
+            invertskew_y(2) = 1.0_WP
+            invertskew_y(3) = 0.0_WP
 
-            invertskew_Z(1) = 0.0_WP
-            invertskew_Z(2) = 0.0_WP
-            invertskew_Z(3) = 1.0_WP
+            invertskew_z(1) = 0.0_WP
+            invertskew_z(2) = 0.0_WP
+            invertskew_z(3) = 1.0_WP
           end if
 
           if(isk == 0)then
@@ -224,10 +224,10 @@
 
               x(1,igrnod) = invertskew_x(1) * (xn(1,i)) + invertskew_x(2) * (xn(2,i)) &
                         & + invertskew_x(3) * (xn(3,i)) + orig(1)
-              x(2,igrnod) = invertskew_Y(1) * (xn(1,i)) + invertskew_Y(2) * (xn(2,i)) &
-                        & + invertskew_Y(3) * (xn(3,i)) + orig(2)
-              x(3,igrnod) = invertskew_Z(1) * (xn(1,i)) + invertskew_Z(2) * (xn(2,i)) &
-                        & + invertskew_Z(3) * (xn(3,i)) + orig(3)
+              x(2,igrnod) = invertskew_y(1) * (xn(1,i)) + invertskew_y(2) * (xn(2,i)) &
+                        & + invertskew_y(3) * (xn(3,i)) + orig(2)
+              x(3,igrnod) = invertskew_z(1) * (xn(1,i)) + invertskew_z(2) * (xn(2,i)) &
+                        & + invertskew_z(3) * (xn(3,i)) + orig(3)
             end do
           end if
 
