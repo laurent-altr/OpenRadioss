@@ -1,0 +1,5 @@
+[codespell]
+# Ignore false positives
+ignore-words-list = precice,activ,inout,pres,daa
+# Skip directories
+skip = .git,qa-tests/miniqa
