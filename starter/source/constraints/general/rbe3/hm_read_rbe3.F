@@ -120,7 +120,7 @@ C     IRBE3(6,I) : IROT        =0 no rotational dependent
 C     IRBE3(7,I) : SENSOR NUMBER - not used yet
 C     IRBE3(8,I) : Imodif ! 4 : switch to penalty formulation (for testing)
 C     IRBE3(9,I) :  if penalty formulation : 0=kinematic, 1=penalty
-C     IRBE3(10,I) :  Numero interne du IRBE3 (necessaire pour Modif/SPMD)
+C     IRBE3(10,I) :  Internal number of IRBE3 (necessary for Modif/SPMD)
 C=======================================================================
 ! complete case of switching to penalty formulation; free nodes w/ spc?
 ! 1) hierachy level>1
