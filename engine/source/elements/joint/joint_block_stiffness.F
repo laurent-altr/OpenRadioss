@@ -148,7 +148,7 @@ C
      .             +((X(3,N2)-X(3,M2))**2)
               XX = MAX(XX1,XX2)
 C           
-C--------> Stiffness calculation node 1 side -------         
+C--------> Stiffness calculation for node 1 side -------         
               MASS1 = MS(M1)
               INER1 = IN(M1)
               KM1 = STIFN(M1)
@@ -164,7 +164,7 @@ C
             ENDIF          
               KXMAX = MIN(KX1,KX2)              
 C                                   
-C--------> Stiffness calculation node 2 side -------          
+C--------> Stiffness calculation for node 2 side -------          
               MASS2 = MS(M2)
               INER2 = IN(M2)
               KM2 = STIFN(M2)
@@ -182,11 +182,11 @@ C
               KXMAX = MIN(KX1,KX2,KXMAX)    
               KR = MIN(KR,KR1)
                        
-C--------> Final stiffness calculation and assignment------- 
+C--------> Final stiffness calculation and assignment -------
             KX = MAX(KXMAX,2*KM1,2*KM2)
               IF ((KX - KXMAX)>1e-8) FLAG_S = 1
             IF ((INER1 == ZERO).OR.(INER2 == ZERO)) THEN
-C--         Rotational stiffness set to zero if kjoint attached to a solid node --
+C--         Rotational stiffness set to zero if joint is attached to a solid node --
               KR = ZERO
                 KRMAX = KR
               FLAG_S = 0
@@ -217,49 +217,49 @@ C
             GBUF%VAR(NV + 16) = KX
             GBUF%VAR(NV + 17) = KR
               
-C--------> Spherical Joint-------
+C--------> Spherical Joint -------
             IF (JNTYP==1) THEN       
               GBUF%VAR(NV + 18) = KX
               GBUF%VAR(NV + 19) = KX
               GBUF%VAR(NV + 20) = KX
-C--------> Revolutional Joint-------
+C--------> Revolute Joint -------
             ELSEIF (JNTYP==2) THEN       
               GBUF%VAR(NV + 18) = KX
               GBUF%VAR(NV + 19) = KX
               GBUF%VAR(NV + 20) = KX
               GBUF%VAR(NV + 31) = KR 
               GBUF%VAR(NV + 32) = KR
-C--------> Cylindrical Joint-------
+C--------> Cylindrical Joint -------
             ELSEIF (JNTYP==3) THEN       
               GBUF%VAR(NV + 19) = KX
               GBUF%VAR(NV + 20) = KX
               GBUF%VAR(NV + 31) = KR
               GBUF%VAR(NV + 32) = KR
-C--------> Planar Joint-------
+C--------> Planar Joint -------
             ELSEIF (JNTYP==4) THEN       
               GBUF%VAR(NV + 18) = KX
               GBUF%VAR(NV + 31) = KR
               GBUF%VAR(NV + 32) = KR
-C--------> Universal Joint-------
+C--------> Universal Joint -------
             ELSEIF (JNTYP==5) THEN       
               GBUF%VAR(NV + 18) = KX
               GBUF%VAR(NV + 19) = KX
               GBUF%VAR(NV + 20) = KX
               GBUF%VAR(NV + 30) = KR
-C--------> Translational Joint-------
+C--------> Translational Joint -------
             ELSEIF (JNTYP==6) THEN        
               GBUF%VAR(NV + 19) = KX
               GBUF%VAR(NV + 20) = KX
               GBUF%VAR(NV + 30) = KR
               GBUF%VAR(NV + 31) = KR
               GBUF%VAR(NV + 32) = KR
-C--------> Oldham Joint-------
+C--------> Oldham Joint -------
             ELSEIF (JNTYP==7) THEN       
               GBUF%VAR(NV + 18) = KX
               GBUF%VAR(NV + 30) = KR
               GBUF%VAR(NV + 31) = KR
               GBUF%VAR(NV + 32) = KR
-C--------> Rigid Joint-------
+C--------> Rigid Joint -------
             ELSEIF (JNTYP==8) THEN
               GBUF%VAR(NV + 18) = KX
               GBUF%VAR(NV + 19) = KX
