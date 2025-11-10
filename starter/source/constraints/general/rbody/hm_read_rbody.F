@@ -892,7 +892,7 @@ C-----------------------
              ENDIF
            ENDDO
 C----------------------------------------
-C       TEST POUR L'ELIMINATION D'ONE GROUPE
+C       TEST FOR ELIMINATION OF A GROUP
 C----------------------------------------
            IF(IOK == 1)THEN
              IGOF = 1

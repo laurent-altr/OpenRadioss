@@ -220,7 +220,7 @@ C             group of SUBSET PART MAT OR PROP
               ENDIF
             ELSEIF((KEY(1:3) == 'BOX' .AND. NBBOX == 0 .AND.(KEY2(1:5) /= 'RECTA'.AND.
      .              KEY2(1:5) /= 'CYLIN'.AND.KEY2(1:5) /= 'SPHER')).OR.KEY(1:4) == 'GENE')THEN
-C             groupe d'elements dans un box (old/obsolete/not supported with new reader) OR  GENE
+C             group of elements in a box (old/obsolete/not supported with new reader) OR  GENE
               IT3=IT3+1
               IF (FLAG == 0) THEN
                 IGRELEM(IGS)%NENTITY=0
@@ -247,7 +247,7 @@ C                              cylindrical, spherical)
 C             multi box (box de box)
               IT6=IT6+1
             ELSEIF(KEY(1:8) == 'GEN_INCR')THEN
-C             groupe d'elements gen_inc first last offset
+C             group of elements gen_inc first last offset
 C       
               IT7=IT7+1
               IF (FLAG == 0) THEN

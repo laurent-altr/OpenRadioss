@@ -374,8 +374,8 @@ C no sorting necessary and dichotomy
                 NN = IGRNOD(I)%ENTITY(NNOD)
                 IGRNOD(I)%ENTITY(NNOD)=USR2SYS(NN,ITABM1,MESS,ID)
                 IGRNOD(I)%NENTITY=1
-C            ELSEIF(NNOD < 10 ou 100 ...)
-C algo avec tri simplifie et dichotomie, nnod limite a definir
+C            ELSEIF(NNOD < 10 or 100 ...)
+C algo with simplified sort and dichotomy, nnod limit to be defined
               ELSE
 C Algo optimized for non -negligeable size group in front of n nod
                 BUFTMP2(1:2*NNOD) = 0

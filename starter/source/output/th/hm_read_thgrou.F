@@ -3214,7 +3214,7 @@ C=======================================================================
      1          'SUBSET    ',SUBSET ,ITHFLAG  ,1     ,
      2          NVSUBTH  ,ITHBUF    ,VARPA    ,NSUBS )
 C
-C     LES GROUPES TH PART ET SUBSET NE SONT PLUS UTILISES
+C     TH GROUPS PART AND SUBSET ARE NO LONGER USED
 C
       NTHGRP2=IGS
 C------------------------------------------------
