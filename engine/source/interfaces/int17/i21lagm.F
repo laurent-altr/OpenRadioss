@@ -98,7 +98,7 @@ C        NC: number of contacts
 C        NK: Number of node for contact (8+1.16+1.8+8.16+16)
 C
 C        IC : contact number (1,NC)
-C        IK : local node number a un contact (1,NK)
+C        IK : local node number for a contact (1,NK)
 C        I  : global node number (1,NUMNOD)
 C
 C        IADLL(NC)        : IAD = IADLL(IC)
