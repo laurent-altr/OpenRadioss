@@ -255,7 +255,7 @@ card
      .                C1=TITR,
      .                I2=FLAG_HE)
       ENDIF
-      !FIN LECTURE PARAMETRES HYPERELASTQUES
+      !FIN READING PARAMETRES HYPERELASTQUES
       !--------------------------------------
       !--------------------------------------
 Card FOR PLASTICITY
