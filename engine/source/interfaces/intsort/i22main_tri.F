@@ -392,8 +392,7 @@ C -------------------------------------------------------------
       
 
       !IBUFSSG(IAD)[1:NBRIC_L] is multi-threaded
-      !computing MIN/MAX for 3D fluid elems
-      CALL I22SOLID_GETMINMAX (
+      !computing MIN/MAX for 3D fluid elements       CALL I22SOLID_GETMINMAX (
      1                        X,       IXS, IGRBRIC(ISU1)%ENTITY, NBRIC_L, 
      2                     ITAB,     ITASK, NIN       )
 
@@ -432,8 +431,7 @@ C -------------------------------------------------------------
 C     calculation of the min/max of the facets of each thread in the domain
 C -------------------------------------------------------------
 
-      !computing MIN/MAX for 2D elems
-      CALL I22SHELL_GETMINMAX(
+      !computing MIN/MAX for 2D elements       CALL I22SHELL_GETMINMAX(
      1               X, INTBUF_TAB%IRECTM(1+4*ESHIFT),     NRTM_T, INTBUF_TAB%STFM(1+ESHIFT), ITASK,
      2            ITAB,       ESHIFT, BMINMA_FLU, TZINF )
 
@@ -487,7 +485,7 @@ C -------------------------------------------------------------
 C -------------------------------------------------------------
 C     definition of the global shell array (local + remotes)
 C -------------------------------------------------------------
-C      Irect_l (1: 4, :): oven node itab (id): Numero Glolocal for Unicit with Xrem
+C      Irect_l (1: 4, :): oven node itab (id): Global number for Unicit with Xrem
 C      IRECT_L( 5: 8, :)                         : X-coordinates
 C      IRECT_L( 9:12, :)                         : Y-coordinates
 C      IRECT_L(13:16, :)                         : Z-coordinates
@@ -567,7 +565,7 @@ C -------------------------------------------------------------
       NB_N_B = 1
 
 C -------------------------------------------------------------
-C     CALCUL DES DIMENSIONS DOMAINE D'INTERET
+C     CALCULATION DES DIMENSIONS DOMAINE D'INTERET
 C     INTERSECTION DE : {FLUIDE LOCAL} & {LAGRANGIEN GLOBAL}
 C -------------------------------------------------------------
 
@@ -579,7 +577,7 @@ C -------------------------------------------------------------
       BMINMA_AND(6) = MAX(BMINMA_FLU(6),BMINMA_LAG_G(6))
       
 c     if(itask==0.and.ibug22_tri==1)print *, 
-c    .  "Faire test si dimension negative ",
+c    .  "To perform test si dimension negative ",
 c    .  "=>candidat=0 ! here or in i22trivox
 
        
