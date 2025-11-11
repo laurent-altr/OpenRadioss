@@ -74,7 +74,7 @@ C-----------------------------------------------
      .        IR5, IR6, IR7, IR8, IR9, IR10, IR11, II8, II9, II10, II11, IADIP, IADH, IADG, 
      .        II12, II13, II14, IPINT, NDIM, JFORM, FREESURF
 C-----------------------------------------------------------------------------------
-C Description des tableaux ITYP=1
+C Description of arrays ITYP=1
 C     II1 -> IFLOW: integer parameters
 C     II2  -> IBUF    : local-global surface node correspondences
 C     II3 -> Elem: Local Connectivitis of the Triangles
@@ -97,7 +97,7 @@ C     IR3  -> PRES   : pression
 C     IR4 -> U: velocity
 C     IR5  -> RINOUT : real variables for inlet-outlet surfaces
 C-----------------------------------------------------------------------------------
-C Description des tableaux ITYP=3
+C Description of arrays ITYP=3
 C     II1 -> IFLOW: integer parameters
 C     II2  -> IBUF    : local-global surface node correspondences
 C     II3 -> Elem: Local connectivitis of triangles/quadrangles+flag

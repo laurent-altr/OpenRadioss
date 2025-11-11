@@ -176,7 +176,7 @@ C linked list of polygons
      .                           PTR_OLD, FIRST2, PTR_CUR2, PTR_PREC2,
      .                           PTR_TMP2
       TYPE(POLYGONE), TARGET :: NOTHING
-C liste chainee polyedres
+C linked list of polyhedra
       TYPE POLYHEDRE
          INTEGER RANK
          INTEGER, DIMENSION(:), POINTER :: POLH

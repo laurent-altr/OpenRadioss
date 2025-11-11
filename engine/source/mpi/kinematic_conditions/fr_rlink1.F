@@ -180,7 +180,7 @@ C
         NODTMP(NSN+2) = SYSFUS2(M2,ITABM1,NUMNOD)
         DO I=1,NSN
           NODU(I) = NOD(I)
-          ! SYSFUS2 retourne 0 si noeud non trouve, local id otherwise
+          ! SYSFUS2 returns 0 if node not found, local id otherwise
           NODTMP(I) = SYSFUS2(NOD(I),ITABM1,NUMNOD)
         END DO
         !Department number of local nodes (ie number of nodes n <> 0)
