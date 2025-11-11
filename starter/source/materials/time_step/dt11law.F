@@ -27,9 +27,9 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||====================================================================
       SUBROUTINE DT11LAW(DELTAX, DTX)
 C----------------------------------------------------------------
-C     CALCUL DT ELEM LOI NO 11 COND.LIM. FLUIDE
+C     TIME STEP CALCULATION ELEM LAW NO 11 FLUID BOUNDARY CONDITION
 C
-C     DTEL N'A PAS DE SENS AUSSI EST IL MIS ARBITRAIREMENT A 1000
+C     DTEL HAS NO MEANING SO IT IS ARBITRARILY SET TO 1000
 C------------------------------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s

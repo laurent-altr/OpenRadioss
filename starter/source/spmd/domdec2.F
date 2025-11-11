@@ -2936,16 +2936,16 @@ C 12: NBDDPROC: NB PORC BORD
 C 13: NBDDBOUN :  nb de noeud frontiere
 C 14: NBDDNOD :   size of comm in number of nodes
 C 15: NBDDNRB :   size of comm in number of main rby nodes
-C 16: NRBYKIN_L : nombre de rigid body MAIN locaux
+C 16: NRBYKIN_L : number of local MAIN rigid body
 C 17: NUMSPH_L: Number of local sphine particles
 C 18: memi: whole local memory size my
-C 19: Memr: Size Local Memoire Reel AM
+C 19: Memr: Size Local Memory Real AM
 C 20: NSNT_L: Number of secondary contact interface nodes (7,10,11)
 C 21: NMNT_L: Number of nodes Contact interface (7,10,11)
 C 22: NSNT2_L: Number of secondary interface interface nodes
 C 23: NMNT2_L: Number of Type2 Interface Main Nodes
 C 24: Restaurants: Restart size in MB
-C 24: NSLARB_L : nombre de noeuds SECONDARY rigid body 
+C 24: NSLARB_L : number of SECONDARY rigid body nodes 
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------

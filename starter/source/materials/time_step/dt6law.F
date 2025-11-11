@@ -30,7 +30,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||====================================================================
       SUBROUTINE DT6LAW(PM,EINT,RK,RE,GEO,PID,MAT, DELTAX, AIRE, VOL, DTX)
 C
-C     CALCUL DES DT ELEMENTAIRES FLUIDE NEWTONIEN
+C     ELEMENT TIME STEP CALCULATION NEWTONIAN FLUID
 C
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
