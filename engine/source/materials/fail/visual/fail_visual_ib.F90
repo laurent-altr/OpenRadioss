@@ -103,13 +103,10 @@
           double precision, parameter :: pi38  = 1.178097245d0
           double precision, parameter :: spi8  = 0.3826834324d0
           double precision, parameter :: spi38 = 0.9238795325d0
-!c=======================================================================
-!c=======================================================================
           !c user variables
           !c! User variable # 1, to store the previous damage value
           !c! User variable # 2, to store the previous stress or strain value (for EMA filtering)
           !c! User variable # 3-11, Storage values for the Butterworth filter
-!c===============================================================================================
           nindx = 0
           nindxd  = 0
 
@@ -129,7 +126,6 @@
           ! first, calculation of the strain tensor
           do i=1,nel
             damage(i) = zero
-            !epsyy = 0, epszz = 0, epsyz = 0
           end do
 
           ! second, calculation of the maximum 1st principle strain

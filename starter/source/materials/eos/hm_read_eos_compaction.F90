@@ -129,8 +129,6 @@
             call ancmsg(MSGID=67,MSGTYPE=msgerror,ANMODE=aninfo,I1=imideos,C1='/EOS/COMPACTION',C2='C1 MUST BE POSITIVE')
           endif
 
-          !iform=1 : constant unload modulus bunl
-          !iform=2 : linear uload modulus from c1 to bunl (default)
           if(iform /= 1 .and. iform /= 2)then
             iform=2 !default
             ioutp=0

@@ -181,9 +181,6 @@
             node_iid(1:4) = irect1(1:4,iseg)
             ! user node identifiers
             node_uid(1:4) = 0 ; node_uid(1:npt) =  itab(irect1(1:npt,iseg))
-            ! nale_sum = 0+0+0+0 when checking a segment on LAGRANGIAN surface
-            ! nale_sum = 1+1+1+1 when checking a segment ALE surface
-            ! nale_sum = 2+2+2+2 when EULER surface provided instead of ALE surface
             nale_sum=sum(abs(nale(node_iid(1:npt))))   !warning : law151 has negative nale to distinguish collocated scheme from staggered scheme
             if(nale_sum /= npt)then
               is_valid = .false.
@@ -225,9 +222,6 @@
             node_iid(1:4) = irect2(1:4,iseg)
             ! user node identifiers
             node_uid(1:4) = 0 ; node_uid(1:npt) =  itab(irect2(1:npt,iseg))
-            ! nale_sum = 0+0+0+0 when checking a segment on LAGRANGIAN surface
-            ! nale_sum = 1+1+1+1 when checking a segment ALE surface
-            ! nale_sum = 2+2+2+2 when EULER surface provided instead of ALE surface
             nale_sum=sum(abs(nale(node_iid(1:npt))))   !warning : law151 has negative nale to distinguish collocated scheme from staggered scheme
             if(nale_sum == npt)then
               !     found full ALE segment when checking LAG surface

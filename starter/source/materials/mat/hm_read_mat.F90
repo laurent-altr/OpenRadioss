@@ -360,8 +360,6 @@
             jthe    = 0
 !---------------------------------------------------
 !        local material strain rate flag :
-!               israte =-1 => no strain rate computation
-!               israte = 0 => strain rate computation, no filtering (default)
 !               israte > 0 => strain rate filtering using fcut and exponential average
             israte  = 0              ! default value
 !---------------------------------------------------
@@ -1492,9 +1490,6 @@
             if (pm(32,i) == zero) pm(32,i) = matparam%bulk
 !
             ! to be defined
-            ! if (matparam%stiff_contact == zero) matparam%stiff_contact = pm(?,i)
-            ! if (matparam%stiff_hglass  == zero) matparam%stiff_hglass  = pm(?,i)
-            ! if (matparam%stiff_tstep   == zero) matparam%stiff_tstep   = pm(?,i)
 !---------------------------------------------------------
             if (matparam%therm%tref  == zero) matparam%therm%tref  = pm(79,i)
             if (matparam%therm%tini  == zero) matparam%therm%tini  = pm(79,i)

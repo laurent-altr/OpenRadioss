@@ -253,7 +253,6 @@
                     do jj = 1,nsu_2
                       ii = ind_2(jj)
                       if (itag2(ii)==0) cycle
-!                      marge = max(marge1(i),marge2(ii))
                       xmin2(1:3) = xmin(1:3)-marge-dim2(1:3,ii) ! increase the marge by dim2
                       xmax2(1:3) = xmax(1:3)+marge+dim2(1:3,ii)
                       if(xs2(1,ii) < xmin2(1) .or. xs2(1,ii) > xmax2(1)) cycle

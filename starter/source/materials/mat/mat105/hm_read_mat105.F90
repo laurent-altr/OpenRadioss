@@ -156,8 +156,6 @@
           if(fscale_p   == zero) fscale_p   = one*fscale_p_unit
           if(fscale_b   == zero) fscale_b   = one*fscale_b_unit
 
-!      IF(GAMMA <= ZERO)THEN
-!         CALL ANCMSG(MSGID=67,MSGTYPE=MSGERROR,ANMODE=ANINFO,I1=IMIDEOS,C1='/EOS/POWDER_BURN',C2='GAMMA MUST BE GREATER THAN 1.0')
 !      ENDIF
 
           if(bulk <= zero)then
@@ -207,7 +205,6 @@
           ifunc(1)   = funcb
           ifunc(2)   = funcg
 
-          !NUVAR = 7
           !UVAR(,1) :  !PP
           !UVAR(,2) :  !PG
           !UVAR(,3) :  !RHO_P

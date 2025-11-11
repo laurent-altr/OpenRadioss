@@ -184,7 +184,6 @@
             end if
             stfrm  = stfrm + wi(i)*stif
           end do
-!      print *,'stf_m,stf_s',stfrm,stifn(ns)
 !
           disdp(1:3)= x(1:3,ns) - xbar(1:3)
           rR(1:3)   = disdp(1:3)
@@ -203,7 +202,6 @@
 !         stfnr_p is fixed to rrbe3pen_stf(1,n_p)*rndotrn (Lsm2) excepting for spc case
             rrbe3pen_stf(2) = rrbe3pen_stf(1)*lsm2
           end if
-!      print *,'pen_stf',rrbe3pen_stf(1:2)
 !
 !-------set up rrbe3pen_fac
 !
@@ -245,7 +243,6 @@
           gamma_max = max(em20,gamma(1),gamma(5),gamma(9))
           if(abs(det/(gamma_max*gamma_max*gamma_max)) < em6) then!elements with colinear master nodes
 !
-!         if (irot==0) write(*,*)'error :RBE3: colinear master nodes' ! error out, add check in Starter si possible
             icoline = 1
 !
           else
@@ -268,7 +265,6 @@
             do i=1,nml
               wri(1:3) = frbe3(4:6,i)
               wmax=max(wri(1),wri(2),wri(3))
-!            facn = facn + wi(i)*wi(i)
               facr = facr + wmax*wmax
             end do
           else
@@ -322,7 +318,6 @@
           rdummy = one/ms(ns)+one/msbar
           dk_m = rrbe3pen_stf(1)/rdummy
           rrbe3pen_vi = two*damp*sqrt(dk_m)
-!      print *,'rrbe3pen_d',rrbe3pen_d(1:3)
 
 !
         end subroutine rbe3fpen_ininp

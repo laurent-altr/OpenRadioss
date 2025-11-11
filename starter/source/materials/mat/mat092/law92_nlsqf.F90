@@ -20,9 +20,7 @@
 !Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 !Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 !Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
-! IDEBUG=1 -> output debug information into .out file
 #define IDEBUG 0
-! IOCSV=1 -> output fitting to curv.csv
 #define IOCSV 0
 !||====================================================================
 !||    law92_nlsqf_mod   ../starter/source/materials/mat/mat092/law92_nlsqf.F90
@@ -300,7 +298,6 @@
 
                     IF ( CNT_HIT_EPS_LM >= LMT_HIT_EPS_LM ) THEN
                       IF (IDEBUG > 0) THEN
-                        !WRITE(IOUT,*) 'STOP AT ', __LINE__
                       ENDIF
                       LMSTOP = 1
                     ENDIF
@@ -308,7 +305,6 @@
                 ENDIF
               ELSEIF (ITER >= MAXITER_LM .OR. GAMMA >= GAMMA_STOP) THEN
                 IF (IDEBUG > 0) THEN
-                  !WRITE(IOUT,*) 'STOP AT ', __LINE__
                 ENDIF
                 LMSTOP = 1
               ENDIF

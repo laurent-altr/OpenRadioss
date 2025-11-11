@@ -140,7 +140,6 @@
 
           stf(1:nel)     = young *  area(1:nel)
           stifm(1:nel)   = stifm(1:nel)  + stf(1:nel)*off(1:nel)
-          ! omega = sqrt(2k/2*dmels), dt=2/omega, 2*dmels=dt**2 * 2k / 4
           if (idtmins==2 .and. jsms/=0) then
             dtb = (dtmins/dtfacs)**2
             do iel=1,nel
@@ -153,7 +152,6 @@
             dmg_s(i) = uvar(i,2)
             fdam_n(i) = one - dmg_n(i)
             fdam_s(i) = one - dmg_s(i)
-            ! write(*,*) ' dmg_n       = ',i,  dmg_n(i)
           end do
 
           do i = 1,nel

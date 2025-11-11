@@ -387,18 +387,8 @@
            !  !------------------SHOCK INDUCED TEMPERATURE CHANGE
            !  ! --- TEMPERATURE UPDATE (SHOCK-INDUCED ENTROPY) ---!
            !  ! retrieving Cv parameter
-           !  cv = eos_struct%cv
-           !  if(cv == zero)then
-           !    cp = mat_elem%mat_param(imat)%therm%rhocp / mat_elem%mat_param(imat)%rho0
-           !    cv = cp !hypothesis if eos did not provide cv
            !  end if
            !  ! temperature dT = Q/mcv
-           !  if(cv > zero)then
-           !    if(off(1) == one) then
-           !      mcv=lbuf%rho(i)*voln(i)*cv
-           !      qheat = -half*(qold(i)+lbuf%qvis(i))*dvol(i) !2nd order integration
-           !      dtemp = qheat/mcv ! heat related to entropy deposit
-           !      temp = temp + dtemp
            !    end if
            !  end if
 

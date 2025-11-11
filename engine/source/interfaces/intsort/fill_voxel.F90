@@ -264,7 +264,6 @@
 ! ======================================================================================================================
 
           if(nrtm > 0)then
-            !if((s%istart-1)*chunk+1 < nsn)write(6,*) 'start',(s%istart-1)*chunk+1,"nsn=",nsn,"nsnr=",nsnr
 
             if(s%istart == 1) then
               if(.not. allocated(s%last_nod)) s%size_node = 0
@@ -285,15 +284,12 @@
 
             !nchunks is the number of groups
             nchunks = (nsn + chunk - 1) / chunk
-            !do ic = istart, nchunks ! for each chunk
             do while (flag == 0)
 # ifdef MPI
-!                  call MPI_Test(request, flag, MPI_STATUS_IGNORE, ierr)
               if(nrequests > 0) then
                 call MPI_Testall(nrequests, requests, flag, MPI_STATUSES_IGNORE, ierr)
               else
                 flag = 0 ! if no request: finish the job
-!                   if((s%istart-1)*chunk+1 < nsn)write(6,*) 'start',(s%istart-1)*chunk+1,"nsn=",nsn,"nsnr=",nsnr
 
               end if
 #else
@@ -474,7 +470,6 @@
               next_nod(nsn+j)     = 0 ! last one
             end if
           end do
-          !deallocate(last_nod)
         END SUBROUTINE FILL_VOXEL_REMOTE
 
       END MODULE FILL_VOXEL_MOD

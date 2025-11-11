@@ -68,7 +68,6 @@
 !                                                   Body
 ! ----------------------------------------------------------------------------------------------------------------------
 
-          ! NWALE=7 => /ALE/GRID/FLOW-TRACKING
           !   when starting from a restart file we need to read these value to get the state from previous cycle
           if(ale%grid%nwale == 7)then
             rtmp(1:3) = ale%grid%flow_tracking_data%eigenvec(1:3,1)

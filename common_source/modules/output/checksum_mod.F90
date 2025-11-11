@@ -134,8 +134,6 @@
             end do
           end do
 
-          !  do i=1,checksum_option_count
-          !      print *, 'checksum%checksums(',i,') = ', trim(checksum%checksums(i))
           ! end do
         end subroutine checksum_restart_read
 

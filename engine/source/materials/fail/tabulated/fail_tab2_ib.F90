@@ -129,13 +129,10 @@
             softexp, dlim, tempfac, tempfac2, dft, var
           real(kind=WP), dimension(nel, 3) :: xvec
 
-!c=======================================================================
-!c=======================================================================
           !c user variables
           !c! user variable # 1,      instability damage
           !c! user variable # 2,      necking critical damage
           !c! user variable # 3,       element size
-!c===============================================================================================
           !step1: recovering failure criterion parameters and initiation
           !=======================================================================
           ! - initialisation of computation on time step

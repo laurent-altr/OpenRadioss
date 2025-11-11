@@ -164,8 +164,6 @@
 
           !Default values
           if(iform /= 1 .and. iform /= 2)then
-            !iform=1 : constant unload modulus bunl (old Radioss revision)
-            !iform=2 : linear uload modulus from c1 to bunl (default)
             iform=2 !default
           endif
 

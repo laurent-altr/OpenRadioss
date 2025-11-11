@@ -525,7 +525,6 @@
                     is_written_value(i) = 1
                   end do
                 else if(mlw == 151)then
-                  !ity = iparg(5, ng)
                   nb_face = 4
                   if (ity == 7)nb_face=3
                   do i=1,nel

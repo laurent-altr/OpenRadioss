@@ -265,7 +265,6 @@
 
               end if
               py%elements%local%values(ii) = scalar_results(j)
-              !write(6,*) "keyword",keyword(1:10),"value",scalar_results(j)
 
             end do
 

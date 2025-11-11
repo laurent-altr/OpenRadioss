@@ -447,7 +447,6 @@
           igtyp = igeo(11,pid(1))
           igmat = igeo(98,pid(1))
           inloc = iparg(78)
-          !jlag = iparg(14) ! Not used for shell elements (always Lagrangian).
           ! Initialized to 0, but may be interpreted as 1 if needed.
           nsensor = sensors%nsensor
 !
@@ -713,8 +712,6 @@
 !-----------------------------------------
 !         coordinates of integration point ipt
 !-----------------------------------------
-              !zz   => posly(1:nel,ipt)
-              !thly => thkly(jpos:jpos+nel-1)
               thklyl(1:nel) = thkly(jpos:jpos+nel-1)*thk0(1:nel)
 !
               if (igtyp == 1 .or. igtyp == 9) then
@@ -747,11 +744,9 @@
                 sigvzx(1:mvsiz) = zero
               endif
 !       -------------------------------
-!       igtyp = 1
 !       -------------------------------
               if (igtyp == 1) then
                 !       -----------
-                !       ismstr=10 + foam laws
                 !       -----------
                 if (ismstr==10 .and. (mtn == 1 .or. mtn == 42 .or.&
                   mtn == 69.or. mtn == 71 .or. mtn == 88)) then
@@ -814,11 +809,9 @@
                   endif
                 end if!(ismstr==10)
 !       -------------------------------
-!       igtyp = 16
 !       -------------------------------
               elseif (igtyp == 16) then
                 !       ------------
-                !       ismstr=11
                 !       ------------
                 if (ismstr == 11) then
 !             total strain in fiber coord sys
@@ -873,16 +866,13 @@
                 endif
 !------
 !       -------------------------------
-!       igtyp = 9 / 10 / 11 / 17 / 51 and 52
 !       -------------------------------
               else
 !--         igtyp 9/10/11/17/51/52
 !               -------------------------------
-!               igtyp = 51 or 52 + ilaw=58
 !               -------------------------------
                 if ((igtyp == 51 .or. igtyp == 52) .and. (ilaw == 58 .or. ilaw == 158)) then
                   !       ------------
-                  !       ismstr=11
                   !       ------------
                   if (ismstr == 11) then
 !             total strain in fiber coord sys
@@ -2025,7 +2015,6 @@
                   iparamf    => mat_elem%mat_param(imat)%fail(ifl)%iparam(1:nipar)
                   ifunc_fail => mat_elem%mat_param(imat)%fail(ifl)%ifunc(1:nfunc_fail)
                   itabl_fail => mat_elem%mat_param(imat)%fail(ifl)%table(1:ntabl_fail)
-!              if (ixfem == 0) pthkf(ilayer,ifl) = zero
 !------------------------------------
                   select case (irupt)
 !------------------------------------
@@ -2226,7 +2215,6 @@
                     &off       ,foff      ,lf_dammx  )
 !
                    case (14)     !    hashin failure model
-!                    do i=jft,jlt
 !                      epsp(i) = max(abs(epspxx(i)),abs(epspyy(i)),&
 !                      &                                   abs(epspxy(i)),em20)
 !                    enddo

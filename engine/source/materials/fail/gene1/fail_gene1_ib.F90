@@ -140,8 +140,6 @@
           real(kind=WP), dimension(nel) :: p, svm, e11, e22, e33, vol_strain, s11, s22, s33, eff_strain, &
             epsmax, sigmax, facl, sh12, sh13, e1c, e1fld, dfld, triax, hardr
           real(kind=WP), dimension(nel, 2) :: xvec
-!c=======================================================================
-!c=======================================================================
           !c user variables
           !c! user variable # 1,      regularization factors for length
           !c! user variable # 2,      t-butcher intg. value
@@ -150,7 +148,6 @@
           !c! user variable # 5,      for stress reduction with NSTEP
           !c! user variable # 6,      not used in beam18
           !c! user variable # 8,      aldt(1:nel), initial beam length
-!c===============================================================================================
           !step1: recovering failure criterion parameters and initiation
           !=======================================================================
           ! - initialisation of computation on time step
@@ -340,7 +337,6 @@
               !  -> computing the principal stresses
               i1 = signxx(i)
               i2 = -signxy(i)*signxy(i)-signzx(i)*signzx(i)
-              !i3 = 0.
               q  = (three*i2 - i1*i1)/nine
               r  = (two*i1*i1*i1-nine*i1*i2)/54.0    ! (2*i3^3-9*i1*i2+27*i3)/54
               r_inter = min(r/sqrt(max(em20,(-q**3))),one)

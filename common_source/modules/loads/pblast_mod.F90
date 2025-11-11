@@ -3402,10 +3402,6 @@
           logres = log10(bound1) + lambda*log10(bound2/bound1)
           p_inci = exp(logres*log10_)
           !incident lower pressure (ufc table from figure 2-7)
-          !bound1 = pblast_data%pso_(phi_i)
-          !bound2 = pblast_data%pso_(phi_i+1)
-          !logres = log10(bound1) + lambda*log10(bound2/bound1)
-          !p_inci_ = exp(logres*log10_)
 
           !incident upper impulse (ufc table from figure 2-7)
           bound1 = pblast%pblast_data%iso(phi_i)
@@ -3413,10 +3409,6 @@
           logres = log10(bound1) + lambda*log10(bound2/bound1)
           i_inci = exp(logres*log10_)
           !incident lower impulse (ufc table from figure 2-7)
-          !bound1 = pblast_data%iso_(phi_i)
-          !bound2 = pblast_data%iso_(phi_i+1)
-          !logres = log10(bound1) + lambda*log10(bound2/bound1)
-          !i_inci_ = exp(logres*log10_)
 
           !reflected upper pressure (ufc table from figure 2-7)
           bound1 = pblast%pblast_data%pr(phi_i)
@@ -3424,10 +3416,6 @@
           logres = log10(bound1) + lambda*log10(bound2/bound1)
           p_refl = exp(logres*log10_)
           !reflected lower pressure (ufc table from figure 2-7)
-          !bound1 = pblast_data%pr_(phi_i)
-          !bound2 = pblast_data%pr_(phi_i+1)
-          !logres = log10(bound1) + lambda*log10(bound2/bound1)
-          !p_refl_ = exp(logres*log10_)
           !reflected upper impulse (ufc table from figure 2-7)
 
           bound1 = pblast%pblast_data%irefl(phi_i)
@@ -3435,10 +3423,6 @@
           logres = log10(bound1) + lambda*log10(bound2/bound1)
           i_refl = exp(logres*log10_)
           !reflected lower impulse (ufc table from figure 2-7)
-          !bound1 = pblast_data%irefl_(phi_i)
-          !bound2 = pblast_data%irefl_(phi_i+1)
-          !logres = log10(bound1) + lambda*log10(bound2/bound1)
-          !i_refl_ = exp(logres*log10_)
 
           !first time for which p=p0 after t_arrival (ufc table from figure 2-7)
           bound1 = pblast%pblast_data%t0(phi_i)
@@ -3446,10 +3430,6 @@
           logres = log10(bound1) + lambda*log10(bound2/bound1)
           dt_0 = exp(logres*log10_)
           !second time for which p=p0 after t_arrival (ufc table from figure 2-7)
-          !bound1 = pblast_data%t0_(phi_i)
-          !bound2 = pblast_data%t0_(phi_i+1)
-          !logres = log10(bound1) + lambda*log10(bound2/bound1)
-          !dt_0_ = exp(logres*log10_)
 
           !time arrival (ufc table from figure 2-7)
           bound1 = pblast%pblast_data%ta(phi_i)
@@ -3459,11 +3439,8 @@
 
           !switch from normalized values. (pressure are not scaled by w13 in tables)
           i_inci  = i_inci * w13
-          !i_inci_ = i_inci_* w13
           i_refl  = i_refl * w13
-          !i_refl_ = i_refl_* w13
           if(dt_0 /= ep20)dt_0 = dt_0 * w13
-          !if(dt_0_ /= ep20)dt_0_ = dt_0_ * w13
           if(t_a /= ep20)t_a = t_a * w13
 
           !---decay  ('b' parameter in modified friedlander model)
@@ -3541,12 +3518,7 @@
           i_inci  =  i_inci / fac_i_bb
           p_refl  =  p_refl / fac_p_bb
           i_refl  =  i_refl / fac_i_bb
-          !p_inci_ =  p_inci_ / fac_p_bb
-          !i_inci_ =  i_inci_ / fac_i_bb
-          !p_refl_ =  p_refl_ / fac_p_bb
-          !i_refl_ =  i_refl_ / fac_i_bb
           if(dt_0 /= ep20)dt_0    =  dt_0    / fac_t_bb
-          !if(dt_0_ /= ep20)dt_0_   =  dt_0_   / fac_t_bb
           if(t_a /= ep20)then
             t_a     =  t_a     / fac_t_bb
             t_a    = t_a + tdet
@@ -3970,7 +3942,6 @@
           ! --- 1. two retained curves & interpolation factor alpha_zc
           ! --------------------------
 
-          ! pra =
           ! here curves are plot from zc=0.3 to zc=14.3 : need to calculate alpha_zc again since 10 curves are for different zc values : 0.3 "0.5" 0.8 etc....
           !   zc in ft/lb**0.33  (10 plots on fig 2-9 depending on zc)
           idx1 = max(1,dichotomic_search_r_asc(zc, pblast%pblast_data%curve_val_2_9, 10))

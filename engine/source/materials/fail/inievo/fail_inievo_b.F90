@@ -110,15 +110,12 @@
             dmgmax, dmgmul, maxshear, sigpmaj, alpha, dsize
           real(kind=WP), dimension(nel, 2) :: xvec
           real(kind=WP), dimension(:,:), allocatable :: dmgini, dmgevo
-!c=======================================================================
-!c=======================================================================
           !c user variables
           !c! user variable # 1,              initial beam length aldt(1:nel)
           !c! user variable # 2,              positive stress triaxiality bounded plastic strain
           !c! user variable # 3+(j-1)*3,      damage initiation variable
           !c! user variable # 4+(j-1)*3,      damage evolution variable
           !c! user variable # 5,              pla or sigy
-!c===============================================================================================
           !step1: recovering failure criterion parameters and initiation
           !=======================================================================
           ! - initialisation of computation on time step

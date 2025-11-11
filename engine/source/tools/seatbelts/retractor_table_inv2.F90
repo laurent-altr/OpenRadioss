@@ -96,8 +96,6 @@
 !
           error = ep20
           do i = 2, nxk
-!            dy2 = table%y%values(i) - yy
-!            if (dy2 >= zero .or. i == nxk) then
             if (((yy >= table%y%values(i-1)).and.(yy <= table%y%values(i))).or.  &
               ((yy >= table%y%values(i)).and.(yy <= table%y%values(i-1)))) then
               ipos = i - 1

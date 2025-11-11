@@ -105,10 +105,6 @@
           WRITE(ISTDO,*) "  NIXS     = ",NIXS      ! This is the number of characteristics per element in the IXS array
           WRITE(ISTDO,*) "  NELEML   = ",NELEML    ! This is the total number of elements
           WRITE(ISTDO,*) "  NUMELS   = ",NUMELS    ! This is the number of SOLIDS
-          !WRITE(ISTDO,*) '  NUMELS8  = ',NUMELS8   ! This is the number of 8-node solids
-          !WRITE(ISTDO,*) '  NUMELS10 = ',NUMELS10  ! This is the number of 10-node tetrahedra
-          !WRITE(ISTDO,*) '  NUMELS16 = ',NUMELS16  ! This is the number of 16-node solids
-          !WRITE(ISTDO,*) '  NUMELS20 = ',NUMELS20  ! This is the number of 20-node solids
           WRITE(ISTDO,*) "  NUMELQ   = ",NUMELQ    ! This is the number of quads
           WRITE(ISTDO,*) "  NUMELC   = ",NUMELC    ! This is the number of 4-shells
           WRITE(ISTDO,*) "  NUMELT   = ",NUMELT    ! This is the number of trias (aka 3-shells)
@@ -454,8 +450,6 @@
               end if
               k = k + 1
 !           Coupling tests where elements are manually eroded
-!            if (ivoutIO==200 .and. k < 125 .and. .false.) then  ! Testing Chinook plate that is 2 FE thick
-!            if (ivoutIO==200 .and. 0 < k .and. k < 101 .and. .false.) then  ! Testing Chinook plate that is 3 FE thick; removes central sheet
               if (ivoutIO==200 .and. .false.) then  ! Testing Chinook plate that is 3 FE thick; removes selected central elements
                 kill_element = .false.
                 if ( 1 <= k .and. k <=   6 ) kill_element = .true.

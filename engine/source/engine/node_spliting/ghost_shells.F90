@@ -50,7 +50,6 @@
 
 
         interface
-          !call build_ghosts(element%shell,4*nb_shells,mask,ghosts)
 
           function build_ghosts(shells,nb_shells,mask,nspmd,numnodes) result(c) bind(C,name="cpp_build_ghosts")
             use, intrinsic :: iso_c_binding
@@ -195,7 +194,6 @@
               call copy_shells_list(ghosts,p,element%ghost_shell%shells_to_send(p)%index,n)
             end if
           end do
-!          call MPI_Alltoall(buffer_size_out,1,MPI_INTEGER,buffer_size_in,1,MPI_INTEGER,SPMD_COMM_WORLD,ierr)
           call spmd_alltoall(buffer_size_out,1,buffer_size_in,1)
 
           do p = 1, nspmd
@@ -208,10 +206,8 @@
             end if
 
             ! mpi Isend to send the data
-            !cpp_ptr =get_shells_list(ghosts,p,n)
             n = size(element%ghost_shell%shells_to_send(p)%index)
             if( n > 0 ) then
-              !call c_f_pointer(cpp_ptr, shells_to_send,[n])
               do i = 1, n
                 j = element%ghost_shell%shells_to_send(p)%index(i)
                 spmd_buffer(p)%sendbuf(1+4*(i-1)) = nodes%itab(element%shell%nodes(1,j))
@@ -238,7 +234,6 @@
             element%ghost_shell%offset(p) = offset+1
             if(ispmd+1 == p) cycle ! skip the current process
             n = buffer_size_in(p)
-            !write(6,*) "init receiving ",n," shells from process ",p,"offset=",offset+1
             if(n > 0) then
               call spmd_Wait(spmd_buffer(p)%recv_request)
               do i = 1, n
@@ -378,7 +373,6 @@
 !-----------------------------------------------------------------------------------------------------------------------
 !                                                   Body
 !-----------------------------------------------------------------------------------------------------------------------
-          !write(6,*) "spmd_exchange_ghost_shells: process ",ispmd+1
           do p = 1, nspmd
             spmd_buffer(p)%recv_request = MPI_REQUEST_NULL
             spmd_buffer(p)%send_request = MPI_REQUEST_NULL
@@ -391,7 +385,6 @@
           do p = 1, nspmd
             if(ispmd+1 == p) cycle ! skip the current process
             n = element%ghost_shell%offset(p+1) - element%ghost_shell%offset(p)
-            !write(*,*) "spmd_exchange_ghost_shells: process ",ispmd+1," receiving ",n," shells from process ",p
 
             if(n > 0) then
               nr = chunkSize*n
@@ -407,7 +400,6 @@
             send_offset = (element%ghost_shell%offset(p) - 1) * chunkSize
             if(n > 0) then
               ! fill the buffer: copy the contiguous chunk for process p
-              !write(6,*) "sendbuf(",send_offset+1,":",send_offset+n*chunkSize,")",size(sendbuf)
               spmd_buffer(p)%sendbuf(1:n*chunkSize) = sendbuf(send_offset + 1 : send_offset + n*chunkSize)
               ns = n * chunkSize
               call spmd_isend(spmd_buffer(p)%sendbuf,ns,p-1,TAG,spmd_buffer(p)%send_request)
@@ -422,8 +414,6 @@
             if(n > 0) then
               call spmd_Wait(spmd_buffer(p)%recv_request)
               ! copy the contiguous chunk for process p
-              !write(6,*) "recvbuf(",recv_offset+1,":",recv_offset+n*chunkSize,")",size(recvbuf)
-              !call flush(6)
               recvbuf(recv_offset + 1 : recv_offset + n*chunkSize) = spmd_buffer(p)%recvbuf(1:n*chunkSize)
             end if
           end do

@@ -262,7 +262,6 @@
 !     default values
 ! ----------------------------------------------------------------------------------------------------------------------
           if (irate == 0) irate = 2          ! default value => independent strain rate by direction
-          ! irate = 1 => equivalent strain rate common for all directions
           if (fcut == zero) fcut = ep20
           x1scale = one
           x2scale = one
@@ -375,7 +374,6 @@
           mat_param%iparam(2)  = iflag2
           mat_param%iparam(3)  = icompact
           mat_param%iparam(4)  = irate  ! strain rate formulation : 0=strain rate by direction
-          !                           1=common component strain rate
           mat_param%uparam(1)  = e11
           mat_param%uparam(2)  = e22
           mat_param%uparam(3)  = e33

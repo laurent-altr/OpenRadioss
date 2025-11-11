@@ -196,9 +196,7 @@
                   end if
                   !test binary codes to identify blocked faces
                   kk = 0 !number of identified faces
-                  !if(015 == IAND(icode,015))then; kk=kk+1 ; bcs%iworking_array(2,nseg+kk) = 1 ; end if
                   if(204 == IAND(icode,204))then; kk=kk+1 ; bcs%iworking_array(2,nseg+kk) = 2 ; end if
-                  !if(240 == IAND(icode,240))then; kk=kk+1 ; bcs%iworking_array(2,nseg+kk) = 3 ; end if
                   if(051 == IAND(icode,051))then; kk=kk+1 ; bcs%iworking_array(2,nseg+kk) = 4 ; end if
                   if(102 == IAND(icode,102))then; kk=kk+1 ; bcs%iworking_array(2,nseg+kk) = 5 ; end if
                   if(153 == IAND(icode,153))then; kk=kk+1 ; bcs%iworking_array(2,nseg+kk) = 6 ; end if
@@ -277,7 +275,6 @@
 
             allocate(bcs%wall(ii)%list%elem(nseg))
             allocate(bcs%wall(ii)%list%face(nseg))
-            ! allocate(bcs%wall(ii)%list%adjacent_elem(nseg)) !do not need to store in global datastrucure : printout only => local alloc. / dealloc.
             allocate(adjacent_elem(nseg)) !Starter printout only (local array)
 
             !searching for adjacent elems on related face (and face from this adjacent elem)
@@ -329,7 +326,6 @@
                     end if
                   end if
                   ! print user ids
-                  !  do no print elem_i/elem_j and elem_j/elem_i it is the same internal face
                   if(ie < iv)write(iout, fmt="(5X,I10,2X,I10)")ie,iv
                 end do
                 write(iout, 2022)

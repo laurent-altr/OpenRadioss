@@ -102,7 +102,6 @@
             end if
           end do
 !
-          !if (ierr == 0) then
 !
           eos_param%ntable = nfunc
 !
@@ -203,7 +202,6 @@
 !
             end if   ! ndim
           end do     ! nfunc
-          !end if       ! ierr
 !
           deallocate (ifunc)
 !------------------------------

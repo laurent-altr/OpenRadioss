@@ -518,8 +518,6 @@
 !
 !C   alpha =1 ->eta zeta   
 !C 1 1 -1 -1 -1 -1 1 1
-!vy1467=vy1(i)-vy4(i)-vy6(i)+vy7(i)
-!vz2358=vz2(i)-vz3(i)-vz5(i)+vz8(i)
 !hgx1(i)=(vx1467+vx2358)*one_over_8
         hgx1(i)= hgx1(i) &
                  -(px1h1(i)*vx17+px2h1(i)*vx28 &

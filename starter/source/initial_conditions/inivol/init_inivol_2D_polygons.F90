@@ -173,10 +173,6 @@
           !---  polygon box (box used in a pre criterion to select relevant nodes with low CPU cost)
           xyz(1:3) = ep20
           xyz(4:6) = -ep20
-          ! SURF_TYPE = 0         : SEGMENTS
-          ! SURF_TYPE = 100       : SUPER-ELLIPSOIDE MADYMO.
-          ! SURF_TYPE = 101       : SUPER-ELLIPSOIDE RADIOSS.
-          ! SURF_TYPE = 200       : INFINITE PLANE
           if(idsurf > 0)then
             if (igrsurf(idsurf)%type == 0 ) then
               ! POLYGON DEFINED WITH USER SEGMENTS
@@ -206,10 +202,8 @@
 
             else if(igrsurf(idsurf)%type == 200)then
               iad0 = igrsurf(idsurf)%iad_bufr
-              !xp1 = bufsf(iad0+1)
               yp1 = bufsf(iad0+2)
               zp1 = bufsf(iad0+3)
-              !xp2 = bufsf(iad0+4)
               yp2 = bufsf(iad0+5)
               zp2 = bufsf(iad0+6)
               !tolerance (in order to avoid degenerated case)
@@ -257,10 +251,8 @@
 
             else if(igrsurf(idsurf)%type == 101)then
               iad0 = igrsurf(idsurf)%iad_bufr
-              !aa = bufsf(iad0+1)
               bb = bufsf(iad0+2)
               cc = bufsf(iad0+3)
-              !xg = bufsf(iad0+4)
               yg = bufsf(iad0+5)
               zg = bufsf(iad0+6)
               bb=bb*(one-em10)
@@ -472,8 +464,6 @@
                   node_id(4) =  ixq(5,ielg)
                   sum_tag = itag_n(node_id(1))+itag_n(node_id(2))+itag_n(node_id(3))+itag_n(node_id(4))
                   if(sum_tag == 4 .or. sum_tag == 0)then
-                    !sum_tag == 4 : elem is inside  (may be considered as outside if is_reversed is true)
-                    !sum_tag == 0 : elem is outside (may be considered as inside if is_reversed is true)
                     ! reversed option (Iopt)
                     if(is_reversed .and. sum_tag == 4)then
                       cycle
@@ -522,8 +512,6 @@
                   node_id(3) =  ixq(4,ielg)
                   sum_tag = itag_n(node_id(1))+itag_n(node_id(2))+itag_n(node_id(3))
                   if(sum_tag == 3 .or. sum_tag == 0)then
-                    !sum_tag == 3 : elem is inside  (may be considered as outside if is_reversed is true)
-                    !sum_tag == 0 : elem is outside (may be considered as inside if is_reversed is true)
                     ! reversed option (Iopt)
                     if(is_reversed)then
                       cycle

@@ -636,10 +636,7 @@
               !  go on with next point
             end do
 
-            !write( *,*) "  poly id:",ipoly
-            !do ii =1, result_list%polygon(ipoly)%numpoint
             !  !HM TCL SCRIPT TO CHECK ELEM ON SCREEN
-            !  write (*,FMT='(A,3F45.35)') "  *createnode ",0.0,result_list%polygon(ipoly)%point(ii)%y , &
             !                                                   result_list%polygon(ipoly)%point(ii)%z
             !end do
 

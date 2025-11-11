@@ -65,7 +65,6 @@
           integer, intent(in), optional :: comm
           integer :: ierr,  used_comm
 #ifdef MPI
-          !call spmd_in(TAG_ALLGATHER)
 
           ! Determine the communicator to use
           if (present(comm)) then
@@ -75,7 +74,6 @@
           end if
 
           call MPI_Allgather(sendbuf,buf_count, MPI_REAL, recvbuf, buf_count, MPI_REAL, used_comm, ierr)
-          !call spmd_out(TAG_ALLGATHER,ierr)
 #endif
         end subroutine spmd_allgather_reals
 ! ======================================================================================================================
@@ -92,7 +90,6 @@
           integer, intent(in), optional :: comm
           integer :: ierr,  used_comm
 #ifdef MPI
-          !call spmd_in(TAG_ALLGATHER)
 
           ! Determine the communicator to use
           if (present(comm)) then
@@ -102,7 +99,6 @@
           end if
 
           call MPI_Allgather(sendbuf,buf_count, MPI_DOUBLE_PRECISION, recvbuf, buf_count, MPI_DOUBLE_PRECISION, used_comm, ierr)
-          !call spmd_out(TAG_ALLGATHER,ierr)
 #endif
         end subroutine spmd_allgather_doubles
 ! ======================================================================================================================
@@ -119,7 +115,6 @@
           integer, intent(in), optional :: comm
           integer :: ierr,  used_comm
 #ifdef MPI
-          !call spmd_in(TAG_ALLGATHER)
 
           ! Determine the communicator to use
           if (present(comm)) then
@@ -129,7 +124,6 @@
           end if
 
           call MPI_Allgather(sendbuf,buf_count, MPI_INTEGER, recvbuf, buf_count, MPI_INTEGER, used_comm, ierr)
-          !call spmd_out(TAG_ALLGATHER,ierr)
 #endif
         end subroutine spmd_allgather_ints
       end module spmd_allgather_mod

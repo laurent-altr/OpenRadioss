@@ -138,13 +138,11 @@
               call hm_get_intv("Number_of_datalines" ,nlines ,is_available, lsubmodel)
               python%functs(i)%num_lines = nlines
               python%functs(i)%user_id = func_id
-!             write(6,*) "Python test: funct_id",func_id,"nlines",nlines
               position_in_code = 1
               if(nlines > 0) then
                 ! create tempo file
                 do j=1,nlines
                   call hm_get_string_index("arraydatalines", rline, j, max_line_length, is_available)
-!              write(6,fmt='(a)') trim(rline)
                   !append trim(rline) to "code"
                   line_len = len_trim(rline)
                   code(position_in_code:position_in_code+line_len-1) = trim(rline)
@@ -157,9 +155,7 @@
                 npc(l + 1) = npc(l)
                 npc(total_nb_funct + l + 1) = func_id
                 npc(2 * total_nb_funct + l + 1) = -i
-!               write(6,*) "Python test: code",code(1:position_in_code-1)
                 call python_funct_init(python%functs(i), code, position_in_code, nlines)
-!               write(6,*) "Check python function"
                 call python_check_function(python%functs(i)%name,error)
                 if(error > 0 .and. error_old == 0) then
                   ! converts python%functs(i)%name of type  character(kind=c_char), dimension(:), allocatable :: name
@@ -176,19 +172,12 @@
                 allocate(table(l)%Y)
                 allocate(table(l)%X(1)%values(funct_python_nsamples))
                 allocate(table(l)%Y%values(funct_python_nsamples))
-                !write(6,*) "Python test: funct_id",func_id,"name is",array_to_string(python%functs(i)%name)
                 if(array_to_string(python%functs(i)%name) =="sync"//C_NULL_CHAR) then
-                  !write(6,*) "Python test: funct_id",func_id,"is sync"
                 else if(array_to_string(python%functs(i)%name) == "initialize_environment"//C_NULL_CHAR) then
-                  !write(6,*) "Python test: funct_id",func_id," is initialize_environment"
                 else
 
-                  !write(6,*) "sample python function: ",array_to_string(python%functs(i)%name)
-                  !write(6,*) "test1",array_to_string(python%functs(i)%name) == "sync"//c_null_char
-                  !write(6,*) "test2",array_to_string(python%functs(i)%name) == "initialize_environment"//c_null_char
                   call python_sample_function(python%functs(i)%name,XX,YY,funct_python_nsamples)
                   do ipt =1, funct_python_nsamples
-                    !write(6,*) ipt,"X",table(l)%X(1)%values(ipt),"Y",table(l)%Y%values(ipt)
                     table(l)%X(1)%values(ipt) = XX(ipt)
                     PLD(NPC(L+1)) = table(l)%X(1)%values(ipt)
                     NPC(L + 1) = NPC(L + 1) + 1

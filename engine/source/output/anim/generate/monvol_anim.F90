@@ -210,8 +210,6 @@
           &:: VOLMON(*)
           REAL :: WA4(*)
           INTEGER, INTENT(IN) :: IOPT
-          ! OPT=1 : write internal nodes (1:NUMNOD)            : calls for /H3D
-          ! OPT=2 : write also additional nodes (1:NUMNOD+NNA) : calls for /ANIM
           INTEGER, INTENT(IN) :: NUMNOD, NIMV, NVOLU, NRVOLU, LICBAG, LIBAGJET
           INTEGER, INTENT(IN) :: LIBAGHOL, LRCBAG, LRBAGJET, LRBAGHOL, NSPMD
           INTEGER , INTENT(INOUT) :: IS_WRITTEN_NODE(NUMNOD)

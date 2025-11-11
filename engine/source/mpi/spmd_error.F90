@@ -133,7 +133,6 @@
           end do
           c_command(len_trim(command)+1:len_trim(command)+1) = c_null_char
 
-          !write(*,*) "Executing:", trim(command)
           result = c_system(c_command)
 
           if (result /= 0) then
@@ -231,7 +230,6 @@
 !                                                   Body
 ! ----------------------------------------------------------------------------------------------------------------------
 #ifdef DEBUG_SPMD
-          ! call print_traceback()
           write(6,*) "Entering MPI call: ", tag
 #endif
         end subroutine spmd_in

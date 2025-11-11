@@ -428,9 +428,6 @@
 !! 5   VOXEL RESET
 !!=======================================================================
 !!$OMP BARRIER
-!          if(total_nb_nrtm>0 .and. itask == 0 .and. i_mem == 0) then
-!            do jj = 1, nb_voxel_on
-!              cellid = list_nb_voxel_on(jj)
 !              voxel(cellid) = 0
 !            enddo
 !          endif
@@ -441,11 +438,8 @@
           if(flagremnode == 2) then
             if(allocated(tagremnode)) deallocate(tagremnode)
           end if
-!         if(itask == 0) deallocate(list_nb_voxel_on)
 
 !#ifndef NO_SERIALIZE
-!        if(nsn > 13602 .and. nrtm > 1800) then
-!        call INTER7_SERIALIZE(      "t10m.dat",
 !     &                                    nsn          ,
 !     &                                    oldnum       ,
 !     &                                    nsnr         ,
@@ -942,7 +936,6 @@
 !              import :: c_int
 !              integer(c_int), intent(in) :: cand_n(*), cand_e(*), cand_n_ref(*), cand_e_ref(*)
 !              integer(c_int), intent(in), value :: ii_stok_ref, ii_stok
-!          end subroutine compare_cand
 !          end interface
 !!-----------------------------------------------
 !!   D u m m y   A r g u m e n t s
@@ -1012,13 +1005,8 @@
 !          double precision :: start_time, end_time, elapsed_time
 !          double precision OMP_GET_WTIME
 !          external OMP_GET_WTIME
-!          i_mem = 0
-!          eshift = 0
-!          ii_stok_ref = 0
 !
-!          allocate(voxel(8000000))
 !
-!          call INTER7_DESERIALIZE(        filename     ,&
 !     &                                    nsn          ,&
 !     &                                    oldnum       ,&
 !     &                                    nsnr         ,&
@@ -1065,35 +1053,13 @@
 !     &                                    total_nb_nrtm,&
 !     &                                    numnod       )
 !
-!        allocate(cand_n(mulnsn))
-!        allocate(cand_e(mulnsn))
-!        allocate(cand_f(8*mulnsn))
-!        allocate(cand_p(mulnsn))
-!        allocate(ifpen(mulnsn))
-!        s_xrem = 1
-!        s_irem = 1
-!        allocate(xrem(s_xrem, nsnr))
-!        allocate(irem(s_irem, nsnr))
-!        ifpen = 0
-!        cand_n = 0
-!        cand_e = 0
-!        cand_f = 0
-!        cand_p = 0
-!        ii_stok = 0
-!        allocate(next_nod(nsn+nsnr))
-!        start_time = OMP_GET_WTIME()
 !!$OMP PARALLEL PRIVATE(i,itask)
 !!$OMP SINGLE
-!        do i=1,(nbx+2)*(nby+2)*(nbz+2)
 !          voxel(i)=0
 !        enddo
-!        allocate(list_nb_voxel_on((nbx+2)*(nby+2)*(nbz+2)))
-!        nb_voxel_on = 0
 !!$OMP END SINGLE
-!         ITASK = OMP_GET_THREAD_NUM()
 !
 !
-!        call INTER7_CANDIDATE_PAIRS(&
 !     &                                    nsn          ,&
 !     &                                    oldnum       ,&
 !     &                                    nsnr         ,&
@@ -1154,13 +1120,9 @@
 !     &                                    list_nb_voxel_on);
 !
 !!$OMP END PARALLEL
-!          end_time = OMP_GET_WTIME()
 !
-!          write(6,*) "Elapsed time =", end_time - start_time
 !
-!          call compare_cand(cand_n, cand_e, ii_stok, cand_n_ref, cand_e_ref, ii_stok_ref)
 !
-!          deallocate(voxel)
 !
 !        end subroutine
 

@@ -627,13 +627,11 @@
           mtag%l_dmg  = 13
           ! number of output mod
           ! matparam%nmod = 3
-          ! allocate(matparam%mode(matparam%nmod))
           !matparam%mode(1) = "fiber damage"
           !matparam%mode(2) = "matrix damage"
           !matparam%mode(3) = "shear matrix damage"
 !
           call init_mat_keyword(matparam ,"ELASTO_PLASTIC")
-          !call init_mat_keyword(matparam ,"incremental"   )
           call init_mat_keyword(matparam ,"TOTAL"   )
           call init_mat_keyword(matparam ,"LARGE_STRAIN"  )
           call init_mat_keyword(matparam ,"HOOK")

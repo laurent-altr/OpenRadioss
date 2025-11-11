@@ -448,8 +448,6 @@
           ! ITABM1 is used in SYSFUS2, that should be replaced by a hash table
           do i = numnod, 1, -1
             arrays%ITABM1(2 * numnod - i + 1) = arrays%ITABM1(2 * old_numnod - i + 1)
-            ! i = 1 ; arrays%ITABM1(2 * numnod) = arrays%ITABM1(2 * old_numnod)
-            ! i = numnod ; arrays%ITABM1(numnod+1) = arrays%ITABM1(old_numnod+1)
           end do
 ! ----------------------------------------------------------------------------------------------------------------------
         end subroutine extend_nodal_arrays

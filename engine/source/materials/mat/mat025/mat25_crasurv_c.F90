@@ -273,7 +273,6 @@
             if (crak(i,2) >= epsf2-epst2) then
               fail_old(i) = fail_old(i) + 16
             end if
-!       if (wpla(i) >= wplamx(i)) fail_old(i) = fail_old(i) + 4
           end do
 !
           nindx = 0

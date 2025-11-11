@@ -141,7 +141,6 @@
 !          UVAR(2) = PLAS  !post-treatment only
 !          UVAR(3) = BFRAC !post-treatment only
 ! phase k  dim=M51_NVPHAS
-!          IAD = M51_N0PHAS+(k-1)*M51_NVPHAS
 !          UVAR(1 + IAD) = AVk
 !          UVAR(2 + IAD) = SIGxk
 !          UVAR(3 + IAD) = SIGyk
@@ -226,7 +225,6 @@
           integer :: npf(snpf), nfunc, ifunc(nfunc)
           real(kind=WP) :: finter ,tf(stf)
           external finter
-!        Y = FINTER(IFUNC(J),X,NPF,TF,DYDX)
 !        Y       : y = f(x)
 !        X       : x
 !        DYDX    : f'(x) = dy/dx
@@ -855,24 +853,11 @@
             !     --> Energy should here corrected with TdH
             !                    (dE = dW+dQ = -PdV+TdH)
             !=======================================================================
-            ! IF(JTHE == 1)THEN
-            !   IF(V1OLD+V2OLD+V3OLD > EM03)THEN
             !     ! heat in
-            !     T = ( EINT1 - ECOLD1 + EINT2 - ECOLD2 + EINT3 - ECOLD3 + UVAR(I,2)) / (H1 + H2 + H3)
             !     !--------material_1---------!
-            !     AAA   = (T-TEMP1)*H1        ! 'TdH'
-            !     EDIF1   = EDIF1 + AAA       ! -> Heat 'Q'
-            !     EINT1   = EINT1 + AAA       ! -> E(k)=E(k)+ TdH
             !     !--------material_2---------!
-            !     AAA   = (T-TEMP2)*H2
-            !     EDIF2   = EDIF2 + AAA
-            !     EINT2   = EINT2 + AAA
             !     !--------material_3---------!
-            !     AAA   = (T-TEMP3)*H3
-            !     EDIF3   = EDIF3 + AAA
-            !     EINT3   = EINT3 + AAA
             !   END IF
-            !   ECOLD4 = ZERO
             ! END IF
             IF (TIME  ==  ZERO) THEN
               EINT(I)= EINT1 + EINT2 + EINT3 + EINT4
@@ -974,7 +959,6 @@
               SUBMAT_CODE = SUBMAT_CODE + 1
               V10 = MAS1 / RHO10
               ALPHA1OLD = V1OLD / VOLD
-              !   PRINT*, "ALPHA1OLD",ALPHA1OLD
               !ENDIF
               V1 = V1OLD - TIMESTEP*DDVOL1 + ALPHA1OLD * DDVOL(I)
               V1 = MAX(ZERO,V1)
@@ -988,7 +972,6 @@
               SUBMAT_CODE = SUBMAT_CODE + 2
               V20 = MAS2 / RHO20
               ALPHA2OLD = V2OLD / VOLD
-              !   PRINT*, "ALPHA2OLD",ALPHA2OLD
               !ENDIF
               V2 = V2OLD - TIMESTEP*DDVOL2 + ALPHA2OLD * DDVOL(I)
               V2 = MAX(ZERO,V2)
@@ -1003,7 +986,6 @@
               SUBMAT_CODE = SUBMAT_CODE + 4
               V30 = MAS3 / RHO30
               ALPHA3OLD = V3OLD / VOLD
-              !   PRINT*, "ALPHA3OLD",ALPHA3OLD
               !ENDIF
               V3 = V3OLD - TIMESTEP*DDVOL3 + ALPHA3OLD * DDVOL(I)
               V3 = MAX(ZERO,V3)
@@ -1018,7 +1000,6 @@
               SUBMAT_CODE = SUBMAT_CODE + 8
               V40 = MAS4 / RHO40
               ALPHA4OLD = V4OLD / VOLD
-              !   PRINT*, "ALPHA4OLD",ALPHA4OLD
               !ENDIF
               V4 = V4OLD - TIMESTEP*DDVOL4 + ALPHA4OLD * DDVOL(I)
               V4 = MAX(ZERO,V4)
@@ -1078,7 +1059,6 @@
               ! The only material is MAT1 (sol, liq, gas)
               !==========================================
               IF(SUBMAT_CODE == 1)THEN
-                !EINT1 = EINT1  - HALF*(PEXT + POLD + QQOLD(I)) * DDVOL(I) !2nd order integration (semi-implicit)
                 EINT1 = EINT1  -      (PEXT + POLD + QQOLD(I)) * DDVOL(I) !first order integration (explicit)
                 V1 = VOLUME(I)
                 RHO1 = MASS / V1
@@ -1106,7 +1086,6 @@
                 ! The only material is MAT2 (sol, liq, gas)
                 !==========================================
               ELSEIF(SUBMAT_CODE == 2)THEN
-                !EINT2 = EINT2  - HALF*(PEXT + POLD + QQOLD(I)) * DDVOL(I) !2nd order integration (semi-implicit)
                 EINT2 = EINT2  -      (PEXT + POLD + QQOLD(I)) * DDVOL(I) !first order integration (explicit)
                 V2 = VOLUME(I)
                 RHO2 = MASS / V2
@@ -1134,7 +1113,6 @@
                 ! The only material is MAT3 (sol, liq, gas)
                 !==========================================
               ELSEIF(SUBMAT_CODE == 4)THEN
-                !EINT3 = EINT3  - HALF*(PEXT + POLD + QQOLD(I)) * DDVOL(I) !2nd order integration (semi-implicit)
                 EINT3 = EINT3  -      (PEXT + POLD + QQOLD(I)) * DDVOL(I) !first order integration (explicit)
                 V3 = VOLUME(I)
                 RHO3 = MASS / V3
@@ -1499,7 +1477,6 @@
                 IF (V3  >  ZERO) ERROR = ERROR + ABS(DV3) / V3
                 IF (V4  >  ZERO) ERROR = ERROR + ABS(DV4) / V4
 
-                              !print *, "  ------------->  iter, p1,p2= ", ITER,P1,P2
 
                 IF (ERROR  <  TOL) THEN
                   CONT = 0
@@ -1544,7 +1521,6 @@
 
             ELSEIF(SUBMAT_CODE == 0) THEN
               !! This case should not occur.It means that MASS<=ZERO
-              !print *, "Warning, empty element"
               SOUNDSP(I)=EM20
 
             ENDIF
@@ -1837,8 +1813,6 @@
             !               POST-TREATMENT (DEBUG)
             !     must be commented in official releases
             !===================================================
-!          IF(IX(11,I+NFT)==ibug_ID(1) .OR. IX(11,I+NFT)==ibug_ID(2)) THEN
-!            CALL WRITE_BUF_LAW51(IX    , NFT        , NUVAR    , NEL      , UVAR     ,
 !       .                         I     , SUBMAT_CODE, DD       , dbVOLD   , dbVOLD_f ,
 !       .                         VOLUME, VOLD       , EPSPXX   , EPSPYY   , EPSPZZ   ,
 !       .                         TAG22 ,BFRAC(I)    , RHO10    , RHO20    , RHO30    ,

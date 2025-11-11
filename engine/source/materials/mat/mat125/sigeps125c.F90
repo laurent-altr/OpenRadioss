@@ -471,7 +471,6 @@
           select  case (fs)
            case(-1)
             ! Uncoupled failure criterion
-            !  FS = -1
             do i=1,nel
               limit_strain = epsxx(i)**2 + epsyy(i)**2 + epsxy(i)**2
               if(check(i) >= zero .and. limit_strain > uvar(i,2) .and. dmg(i,1) /= two .and. dmg(i,1) >= zero) then
@@ -498,8 +497,6 @@
                 w11 = dmg(i,2)
                 w22 = dmg(i,3)
                 w12 = dmg(i,4)
-                !if(check(i)  > zero) then
-                !  if( ( limit_strain < uvar(i,2) .and. dmg(i,1) > zero )  .or.       & 
                 !      ( limit_strain > uvar(i,2) .and. dmg(i,1) < zero ) ) dmg(i,1) = -dmg(i,1)
                 !endif      
               end if
@@ -611,7 +608,6 @@
               thk(i)     = thk(i) + dezz(i)*thkly(i)*off(i)
             end do ! nel
             !  coupling between matrix and shear
-            !  FS = 0
             !
            case(0)  ! fs = 0  !  should be added after fixing fs=1 formulation
             ! Coupling failure criterion
@@ -620,7 +616,6 @@
             ! coupled failure criterion
             ! fiber/shear
             ! matrix/shear
-            !  FS = 1  ! not finalized. Waiting to understand how we can handle the coupling.
           
           end select ! FS
 ! ----------------------------------------------------------------------------------------------------------------------

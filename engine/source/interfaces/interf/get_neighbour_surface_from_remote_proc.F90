@@ -183,8 +183,6 @@
             global_node_id_1 = list_r_segment(i,2)
             global_node_id_2 = list_r_segment(i,3)
             nin = list_r_segment(i,4)
-!            local_node_id_1 = sysfus2(global_node_id_1,itabm1,numnod) ! convert the global node id to local
-!            local_node_id_2 = sysfus2(global_node_id_2,itabm1,numnod) ! convert the global node id to local
             local_node_id_1 = get_local_node_id(nodes,global_node_id_1)
             local_node_id_2 = get_local_node_id(nodes,global_node_id_2)
 

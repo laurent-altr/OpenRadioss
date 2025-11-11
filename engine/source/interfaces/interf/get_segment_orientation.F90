@@ -190,8 +190,6 @@
 
             ! check if the element associated to the segment "segment_id" is deleted
             ! if the element is deleted --> need to consider the opposite condition for DDS
-            !     c = barycentre of the element
-            !     s = barycentre of the segment
             !
             !    element is on
             !     ________

@@ -170,7 +170,6 @@
           gamma_max = max(em20,gamma(1),gamma(5),gamma(9))
           if(abs(det/(gamma_max*gamma_max*gamma_max)) < em6) then!elements with colinear master nodes
 !
-!         if (irot==0) write(*,*)'error :RBE3: colinear master nodes' ! will check in ini
             icoline = 1
 !         omgRb(1:3)  = vrs(1:3)
 !
@@ -221,7 +220,6 @@
           end if
 ! incre. force,moment
 !          disp(1:3) = disdp(1:3) - rrbe3pen_d(1:3)
-!          lms2=disdp(1)*disdp(1)+disdp(2)*disdp(2)+disdp(3)*disdp(3)
           vrt(1) = rR(2)*omgRb(3)-rR(3)*omgRb(2)
           vrt(2) = rR(3)*omgRb(1)-rR(1)*omgRb(3)
           vrt(3) = rR(1)*omgRb(2)-rR(2)*omgRb(1)

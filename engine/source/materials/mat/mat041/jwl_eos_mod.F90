@@ -42,8 +42,6 @@
 !||====================================================================
         subroutine jwl_eos_state(a,b,r1,r2 ,r3,cv ,eta,tmp,dedv,p,bth,dpdt,en)
 !  JWL EoS
-!  p = a*exp(-r1/eta) + b*exp(-r2/eta) + r3*eta*tmp
-!  cv = volumetric heat capacity (cte)
 !  eta : rho/rho0 = V0/V = 1/v  (v relative volume)
 !
 !  input : eta, tmp

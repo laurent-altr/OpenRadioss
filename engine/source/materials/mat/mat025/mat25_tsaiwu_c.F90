@@ -207,7 +207,6 @@
             if (crak(i,2)>=epsf2(i)-epst2(i)) then
               fail_old(i) = fail_old(i) + 16
             end if
-!       if (wpla(i)>=wplamx(i))fail_old(i) = fail_old(i) + 4
           end do
 !
           nindx=0
@@ -638,11 +637,7 @@
           do i=1,nel
             sigy(i) = fyld(i)*sigy(i)
 
-!        if (abs(beta(i)) < one) then
-!          if (wpla(i) > zero .and. fyld(i) < fmax(i)) then
-!            ht = cn(i)*cb(i)*exp((cn(i)-one)*log(wpla(i)))
 !          else
-!            ht = em10
 !          end if
 !          etse(i) = ht/(ht+e11(i))
 !        end if

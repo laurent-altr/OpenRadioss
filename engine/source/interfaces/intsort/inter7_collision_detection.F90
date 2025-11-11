@@ -188,9 +188,7 @@
 !$OMP SINGLE
           if(nrtm>0)then
             ! finish to fill the voxel with local nondes
-            !     CALL FILL_VOXEL_LOCAL_PARTIAL(nsn,nsv,nsnr,nrtm,numnod,x,stfn,INTER_STRUCT, DUMMY, 0)
 
-!            call fill_voxel(FLAG_LOCAL,&
 !       &                    nsn,&
 !       &                    nsnr,&
 !       &                    inter_struct%nbx,&
@@ -212,7 +210,6 @@
 !       &                    inter_struct%box_limit_main)
 
 
-!            call fill_voxel(FLAG_NONE,&
 !       &                    1, &
 !       &                    nsn,&
 !       &                    nsnr,&
@@ -295,12 +292,9 @@
           & inter_struct%NEXT_NOD)
 
           IF(ITASK==0)  THEN
-!           IF(ALLOCATED(inter_struct%NEXT_NOD)) DEALLOCATE(inter_struct%NEXT_NOD)
             IF(ALLOCATED(PREV_REMOTE_NUMBER)) DEALLOCATE(PREV_REMOTE_NUMBER)
-!           if(allocated(inter_struct%list_nb_voxel_on)) deallocate(inter_struct%list_nb_voxel_on)
 
           END IF
-!     I_MEM = 2 ==> Not enough memory
           IF (I_MEM ==2) RETURN
           IF(I_MEM==1)THEN
             NB_N_B = NB_N_B + 1
@@ -314,8 +308,6 @@
             RETURN
             TZINF = THREE_OVER_4*TZINF
 ! taille de boite non diminuee
-!        MINBOX= THREE_OVER_4*MINBOX
-!        MAXBOX= THREE_OVER_4*MAXBOX
             IF( TZINF<=MAX(GAP+DGAPLOAD,DRAD)  ) THEN
               CALL ANCMSG(MSGID=98,ANMODE=ANINFO,&
               &I1=NOINT,C1="(I7BUCE)")

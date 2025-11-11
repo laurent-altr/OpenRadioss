@@ -101,11 +101,9 @@
           sensor_ptr%python_function_id = i
           func_id = sens_id
           code(1:max_code_length) = repeat(" ",max_code_length)
-          !call hm_option_read_key(lsubmodel, option_id = func_id) sens_id
           call hm_get_intv("Number_of_datalines" ,nlines ,is_available, lsubmodel)
           python%functs(i)%num_lines = nlines
           python%functs(i)%user_id = func_id
-!         write(6,*) "Python test: funct_id",func_id,"nlines",nlines
           position_in_code = 1
           if(nlines > 0) then
             ! create tempo file

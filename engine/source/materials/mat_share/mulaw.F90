@@ -1272,7 +1272,6 @@
               nv46=4
             end if
             !numerical viscosity is managed inside sigeps51.f
-            !facq0 = zero
             call sigeps51( snpc, stf, &
                           nel       ,npar        ,nuvar   ,nfunc ,ifunc     ,lbuf%tb   ,&
                           npf       ,tf          ,tt      ,dt1   ,uparam0   ,numel     ,&
@@ -1449,7 +1448,6 @@
             call mstrain_rate(nel    ,israte ,asrate ,epsd   ,idev   ,&
             &ep1    ,ep2    ,ep3    ,ep4    ,ep5    ,ep6)
 !
-! qa=qb=zero by default for law70
             if (igeo(31,pid(1)) == 1) facq0 = zero
 !
             call sigeps70(&

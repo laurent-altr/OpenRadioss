@@ -112,9 +112,6 @@
           ! skew is a 3x3 matrix stored in column-major order
 
           ! error : correct above
-          ! skew_X = (skew(1,isk), skew(2,isk), skew(3,isk)) ! - X axis direction
-          ! skew_Y = (skew(4,isk), skew(5,isk), skew(6,isk)) ! - Y axis direction
-          ! skew_Z = (skew(7,isk), skew(8,isk), skew(9,isk)) ! - Z axis direction
 
           if (isk > 0) then
             detskew = (skew(1,isk)*skew(5,isk)*skew(9,isk)) + (skew(4,isk)*skew(8,isk)*skew(3,isk))&

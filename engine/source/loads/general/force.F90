@@ -286,8 +286,6 @@
                     else
                       if(present(python)) then
                         fid = -ismooth ! the id the python function is saved in the position of ismooth in the npc array
-!                       call python_call_funct1d(python, fid,vel_old*fcx,f1)
-!                       call python_call_funct1d(python, fid,vel*fcx,f2)
                         call python_call_funct_cload(python,fid,vel_old*fcx,f1,n1,nodes)
                         call python_call_funct_cload(python,fid,vel*fcx,f2,n1,nodes)
                       end if
@@ -802,8 +800,6 @@
                     else
                       if(present(python)) then
                         fid = -ismooth ! the id the python function is saved in the position of ismooth in the npc array
-!                       call python_call_funct1d(python, fid,vel_old*fcx,f1)
-!                       call python_call_funct1d(python, fid,vel*fcx,f2)
                         call python_call_funct_cload(python,fid,vel_old*fcx,f1,n1,nodes)
                         call python_call_funct_cload(python,fid,vel*fcx,f2,n1,nodes)
 

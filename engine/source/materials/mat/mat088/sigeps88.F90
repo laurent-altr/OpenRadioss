@@ -401,7 +401,6 @@
         call table_mat_vinterp(matparam%table(1),nel,nel,vartmp(1:nel,5),      &
                                 xvec(1:nel,5),g(1:nel,3),dgdlam(1:nel,3))
         !< Initialize loading function values f = λ * g, and derivatives 
-        !  dfdlam = d(λ*g)/dλ
         do i = 1, nel
           !< Loading functions initialization
           f(i,1) = xvec(i,1)*g(i,1)
@@ -685,7 +684,6 @@
             !< - Find the dominant direction jdom(i) for each unloading element 
             !    i via the maximum normalized amplitude amax = max(|xhat|) among
             !    the 3 directions, with
-            !    xhat = (λ - λ_tg) / |λ_r - λ_tg|  (in [-1,1])
             !    (lam_r = stretch at unload start, λ_tg = anchor stretch)
             !    (xhat = 0 at anchor, xhat = ±1 at unload start)
             !    (also enforce monotonicity |xhat| ≤ previous value)

@@ -107,7 +107,6 @@
           mid   = int(uparam(14))
           nu    = uparam(22)
 
-          ! if(timestep==zero)return  !law3 is treeting this also on NC=0   (Einc must be added )
           do i=1,nel
             pold(i)    = uvar(i,18+kk)
             rho_old(i) = uvar(i,12+kk)

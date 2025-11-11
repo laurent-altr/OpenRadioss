@@ -728,18 +728,6 @@
 !
 !---  strain rate
 !
-!         do i=1,llt
-!           israte = ipm(3,mat(lft))
-!           if(israte == 0)then
-!             dav = (ep1(i)+ep2(i)+ep3(i)) * third
-!             e1 = ep1(i) - dav
-!             e2 = ep2(i) - dav
-!             e3 = ep3(i) - dav
-!             e4 = half*ep4(i)
-!             e5 = half*ep5(i)
-!             e6 = half*ep6(i)
-!             epsp =half*(e1**2+e2**2+e3**2) +e4**2+e5**2+e6**2
-!             epsp = sqrt(three*epsp)*two_third
 !             epsd(i)=epsp
 !           endif
 !         enddo
@@ -999,7 +987,6 @@
               elseif(irupt == 4)then
 !  ----user1
                 tt_local = tt
-!               call f04law(llt ,npar,nvarf,nfunc,ifunc,
 !     2                    npf ,tf  ,tt_local,dt1  ,bufmat,
 !     3                    ngl ,ipm ,npropmi,mat ,idel7nok,
 !     4                    ep1 ,ep2 ,ep3 ,ep4 ,ep5  ,ep6   ,
@@ -1019,7 +1006,6 @@
               elseif(irupt == 5)then
 !  ----user2
                 tt_local = tt
-!               call f05law(llt ,npar,nvarf,nfunc,ifunc,
 !     2                    npf ,tf  ,tt_local  ,dt1  ,bufmat,
 !     3                    ngl ,ipm ,npropmi,mat ,idel7nok,
 !     4                    ep1 ,ep2 ,ep3 ,ep4 ,ep5  ,ep6   ,
@@ -1039,7 +1025,6 @@
               elseif(irupt == 6)then
 !  ----user3
                 tt_local = tt
-!              call f06law(llt ,npar,nvarf,nfunc,ifunc,
 !     2                    npf ,tf  ,tt_local  ,dt1  ,bufmat,
 !     3                    ngl ,ipm ,npropmi,mat ,idel7nok,
 !     4                    ep1 ,ep2 ,ep3 ,ep4 ,ep5  ,ep6   ,

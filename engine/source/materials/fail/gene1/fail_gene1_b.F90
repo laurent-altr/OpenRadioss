@@ -134,8 +134,6 @@
           real(kind=WP), dimension(nel) :: p, svm, e11, e22, e33, vol_strain, s11, s22, s33, eff_strain, &
             epsmax, sigmax, facl, sh12, sh13, e1c, e1fld, dfld, triax, signxx, signxy, signzx,hardr
           real(kind=WP), dimension(nel, 2) :: xvec
-!c=======================================================================
-!c=======================================================================
           !c user variables
           !c! user variable # 1,      regularization factors for length
           !c! user variable # 2,      t-butcher intg. value
@@ -144,9 +142,7 @@
           !c! user variable # 5,      not used for beam3
           !c! user variable # 6,      epszx
           !c! user variable # 8,      aldt(1:nel), initial beam length
-!c===============================================================================================
 
-!c=======================================================================
           !step1: recovering failure criterion parameters and initiation
           !=======================================================================
           ! - initialisation of computation on time step
@@ -281,7 +277,6 @@
               e62 = e6*e6
               i1  = e1
               i2  = - e4*e4 - e6*e6
-              !i3 = 0
 
               ! -> computation of principal strains
               ! the value of e11 is verified, which is close to e1, as well as e22 and e33

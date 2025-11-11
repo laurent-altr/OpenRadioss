@@ -330,7 +330,6 @@
 !
           allocate (mat_param%uparam(mat_param%nuparam))
           allocate (mat_param%iparam(mat_param%niparam))
-!      allocate (mat_param%ifunc (mat_param%nfunc))
           allocate (mat_param%table (mat_param%ntable))
 !
 ! ----------------------------------------------------------------------------------------------------------------------

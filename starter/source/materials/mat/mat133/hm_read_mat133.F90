@@ -168,7 +168,6 @@
           nvartmp = 2                   !< Number of temporary variables
 
           !< Allocation of material parameters tables
-          !allocate (matparam%iparam(matparam%niparam))
           allocate (matparam%uparam(matparam%nuparam))
           allocate (matparam%table(matparam%ntable))
 

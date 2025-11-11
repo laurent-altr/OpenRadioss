@@ -92,7 +92,6 @@
                 if(jbc(3) /= 0)then
                   if(num_bcs == 4)then
                     ! bcs check also in engine, since engine options /bcs, /bcsr may update nodal bcs
-                    !call ancmsg(msgid=3065, anmode = aninfo, msgtype = msgerror, i1=interf_uid, i2=nty, i3=itab(inod), c1=title)
                     exit
                   else
                     num_bcs=num_bcs+1

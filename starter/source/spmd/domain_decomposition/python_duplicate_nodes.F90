@@ -62,7 +62,6 @@
 ! ----------------------------------------------------------------------------------------------------------------------
 
           call python_get_number_of_nodes(number_of_nodes_in_python)
-          !write(6,*) "number of nodes = ", number_of_nodes_in_python, " numnod = ", numnod
           allocate(nodes_global_ids(number_of_nodes_in_python))
           call python_get_nodes(nodes_global_ids)
 
@@ -72,7 +71,6 @@
               if(nodes_global_ids(i) == itab(j)) then
                 do p = 1, nspmd
                   call ifrontplus(j,p)
-                  !write(6,*) "python_front: node ", nodes_global_ids(i), " is on processor ", p
                 end do
               end if
             end do

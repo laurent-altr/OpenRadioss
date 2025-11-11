@@ -366,7 +366,6 @@
                   my_offset_4 = r_address + 7+5*nb_r_connected_segment
                   my_offset_6 = r_address + 7+6*nb_r_connected_segment
                   my_offset_7 = r_address + 7+10*nb_r_connected_segment
-!                  my_offset_8 = r_address + 7+10*nb_r_connected_segment+3+proc_number + 3
 
                   do ijk=1,nb_r_connected_segment
                     my_integer = transfer(r_buffer_2(r_proc_id)%my_real_array_1d(my_offset_1 + ijk),my_int_variable) ! get global neighbour segment id

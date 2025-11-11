@@ -371,7 +371,6 @@
 !--------------------------------------------------
                 if (mlw /= 1) then
                   if (igtyp == 18) then
-!   ilayer=null,   npt=null
                     ilayer=1
                     ir = 1
                     is = 1
@@ -385,7 +384,6 @@
                         value(i) = eplas/npt
                         is_written_value(i) = 1
                       end do
-!   ilayer=null,   npt=ipt
                     else if ( ipt <= npt .and. ipt > 0 .and. elbuf_tab(ng)%gbuf%g_pla > 0) then
                       do  i=1,nel
                         value(i) = elbuf_tab(ng)%bufly(ilayer)%lbuf(ir,is,ipt)%pla(i)
@@ -488,7 +486,6 @@
               else if(keyword == "FRACTION/MARTENSITE")then
 !--------------------------------------------------
                 if (igtyp == 18) then
-!   ilayer=null,   npt=null
                   if (mlw == 71) then
                     ilayer=1
                     ir = 1
@@ -503,7 +500,6 @@
                         value(i) = efrac/npt
                         is_written_value(i) = 1
                       end do
-!   ilayer=null,   npt=ipt
                     else if ( ipt <= npt .and. ipt > 0 ) then
                       do  i=1,nel
                         value(i) =  elbuf_tab(ng)%bufly(ilayer)%lbuf(ir,is,ipt)%frac(i)
@@ -516,7 +512,6 @@
               else if(keyword == "TEPS")then
 !--------------------------------------------------
                 if (igtyp == 18) then
-!   ilayer=null,   npt=null
                   if (mlw == 71) then
                     ilayer=1
                     ir = 1
@@ -531,7 +526,6 @@
                         value(i) = efrac/npt
                         is_written_value(i) = 1
                       end do
-!   ilayer=null,   npt=ipt
                     else if ( ipt <= npt .and. ipt > 0 ) then
 
                       do  i=1,nel

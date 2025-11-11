@@ -484,7 +484,6 @@
             de_in=de_in + fluxi*param_q*param_rho0s
 
             !temperature update
-            !temp =  (mass*tadj + dmass_g*param_gamma*param_t) / (mass+dmass_g)   ! This fromula embedded the enthalpy (additional term corresponding to the work required to inlet the burnt volume)
             temp = eint_new / (mass+dmass_g) / Cv   !this formula is more convenient as it does not requires any update enthalpy is not injected (may be useful for example to switch to an advection step rather than a source term)
             if(mtn == 51 )then
               !temperature
@@ -497,12 +496,9 @@
 
             !-- expand pressure to face nodes
             face_force = pp*surf                                        !pp for equilibrium
-            !mass = mass + dmass_g
             mass_face = mass*(npt*one)/(isolnod*one)
-            !vold = zero
             if(dt1 > zero)face_force = face_force + (vel_front) * mass_face / dt1   !pp= pp+ dp to input corresponding propellant
             !expand pressure loading to segment nodes
-            !face_force = pp*surf
             do kk=1,INT(npt)
               la(1,nn(kk)) = la(1,nn(kk)) - fac1* (face_force) * xn
               la(2,nn(kk)) = la(2,nn(kk)) - fac1* (face_force) * yn
@@ -521,9 +517,6 @@
             ! -------------
             ! for parith/on option : update forces in fsky array (specific assembly)
             if(iparit > 0) then
-              ! do not update reaction force as coupling with inter1 is expected : vn_fluid = vn_wall
-              ! do kk=1,npt
-              !   adress = elem_adress(kk,is) ! adress of fsky array for element is and node kk
               !   fsky(1,adress) = -face_force*xn*fac1
               !   fsky(2,adress) = -face_force*yn*fac1
               !   fsky(3,adress) = -face_force*zn*fac1
@@ -540,9 +533,6 @@
           ! -------------
           ! for parith/off option : update directly the acceleration array a() : no specific assembly
           if(iparit == 0) then
-            ! do not update reaction force as coupling with inter1 is expected : vn_fluid = vn_wall
-            !do ii=1,nod
-            !num=liste(ii)
             !a(1,num)=a(1,num)+la(1,ii)
             !a(2,num)=a(2,num)+la(2,ii)
             !a(3,num)=a(3,num)+la(3,ii)

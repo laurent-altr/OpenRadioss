@@ -170,7 +170,6 @@
           !
           ncyred = mat_param%iparam(3)
 
-          ! yc_over_sc= fourth*(yc/sc)**2  !
           ! strain rate dependency of strength
           ! xt
           if(ifunc(1) /= 0) then

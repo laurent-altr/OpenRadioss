@@ -143,7 +143,6 @@
 
           if (ienthalpy /=1 .and. ienthalpy /=-1)ienthalpy = 1
 
-          !param_q = cp * param_t     ! -> must be done during Starter check to identify adjacent EoS (iniebcs_propellant.F90)
 
           ebcs%title = titr
 

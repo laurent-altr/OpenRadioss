@@ -156,7 +156,6 @@
             !--------------
             ! von mises
             !--------------
-            !s_vm = sqrt(3.J2),  J2 = 1/2 (s1**2 + s2**2 + s3**2) + (s4**2 + s5**2 + s6**2)   where s is deviator
             vm2(i) = three_half * ( sigd(1,i)*sigd(1,i) + sigd(2,i)*sigd(2,i) + sigd(3,i)*sigd(3,i) ) &
               +three * ( sigd(4,i)*sigd(4,i) + sigd(5,i)*sigd(5,i) + sigd(6,i)*sigd(6,i) )
             vm = sqrt(vm2(i))

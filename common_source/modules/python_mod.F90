@@ -224,7 +224,6 @@
             character(kind=c_char), dimension(name_len), intent(in) :: name
             real(kind=c_double), dimension(3), intent(in) :: val
           end subroutine python_update_active_node_values
-          ! call python_set_node_ids(n,nodes%itab(n))
           subroutine python_set_active_node_ids(id, uid) bind(c, name="cpp_python_update_active_node_ids")
             use, intrinsic :: iso_c_binding
             integer(kind=c_int), value, intent(in) :: id
@@ -448,7 +447,6 @@
             buffer_size = buffer_size + python%functs(i)%len_name + python%functs(i)%len_code
           end do
           elsize = 0
-          !elsize = element_get_size(python%elements%global)
           buffer_size = buffer_size + elsize
 ! allocate the buffer
 
@@ -479,7 +477,6 @@
               pos = pos + python%functs(i)%len_code
             end do
           end if
-!         call element_serialize(python%elements%global,buffer(pos:pos+elsize-1),elsize)
         end subroutine python_serialize
 
 !! \brief deserialize python_function (for I/O)
@@ -533,7 +530,6 @@
                 pos = pos + python%functs(i)%len_code
               end if
             end do
-!           call element_deserialize(python%elements%global,buffer(pos:))
           end if
 
         end subroutine python_deserialize
@@ -994,7 +990,6 @@
           call python_call_function(py2%functs(1)%name, 2, argin, 1, argout)
 ! Check the result
           if (argout(1) /= 6.0) then
-            !                write(*,*) "Error: python_funct_test failed"
             !top
           end if
 ! Finalize python

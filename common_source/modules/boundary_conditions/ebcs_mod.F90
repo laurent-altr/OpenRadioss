@@ -167,7 +167,6 @@
           procedure, pass :: ebcs_destroy
         end type t_ebcs
 
-!     type = 1 /EBCS/PRES
 !     -------------------
         type, public, extends(t_ebcs) :: t_ebcs_pres
           integer :: ipres = 0, irho = 0, iener = 0, ivx = 0, ivy = 0, ivz = 0
@@ -180,7 +179,6 @@
           procedure, pass :: read_data => read_data_pres
         end type t_ebcs_pres
 
-!     type = 2 /EBCS/VALVIN
 !     ---------------------
         type, public, extends(t_ebcs) :: t_ebcs_valvin
           integer :: ipres = 0, irho = 0, iener = 0
@@ -193,7 +191,6 @@
           procedure, pass :: read_data => read_data_valvin
         end type t_ebcs_valvin
 
-!     type = 3 /EBCS/VALVOUT
 !     ----------------------
         type, public, extends(t_ebcs) :: t_ebcs_valvout
           integer :: ipres = 0, irho = 0, iener = 0
@@ -206,7 +203,6 @@
           procedure, pass :: read_data => read_data_valvout
         end type t_ebcs_valvout
 
-!     type = 0 /EBCS/GRADP0
 !     ---------------------
         type, public, extends(t_ebcs) :: t_ebcs_gradp0
           integer :: ipres = 0, irho = 0, iener = 0
@@ -219,7 +215,6 @@
           procedure, pass :: read_data => read_data_gradp0
         end type t_ebcs_gradp0
 
-!     type = 4 /EBCS/VEL
 !     ------------------
         type, public, extends(t_ebcs) :: t_ebcs_vel
           integer :: ivx = 0, ivy = 0, ivz = 0, irho = 0, iener = 0
@@ -232,7 +227,6 @@
           procedure, pass :: read_data => read_data_vel
         end type t_ebcs_vel
 
-!     type = 5 /EBCS/NORMV
 !     --------------------
         type, public, extends(t_ebcs) :: t_ebcs_normv
           integer :: ivimp = 0, irho = 0, iener = 0
@@ -245,7 +239,6 @@
           procedure, pass :: read_data => read_data_normv
         end type t_ebcs_normv
 
-!     type = 6 /EBCS/INIP
 !     -------------------
         type, public, extends(t_ebcs) :: t_ebcs_inip
           real(kind=WP) :: rho = 0, c = 0, lcar = 0
@@ -256,7 +249,6 @@
           procedure, pass :: read_data => read_data_inip
         end type t_ebcs_inip
 
-!     type = 7 /EBCS/INIV
 !     -------------------
         type, public, extends(t_ebcs) :: t_ebcs_iniv
           real(kind=WP) :: rho = 0, c = 0, lcar = 0
@@ -267,7 +259,6 @@
           procedure, pass :: read_data => read_data_iniv
         end type t_ebcs_iniv
 
-!     type = 100 /EBCS/MONVOL
 !     -----------------------
         type, public, extends(t_ebcs) :: t_ebcs_monvol
           integer :: sensor_id = 0, monvol_id = 0
@@ -278,7 +269,6 @@
           procedure, pass :: read_data => read_data_monvol
         end type t_ebcs_monvol
 
-!     type = 8 /EBCS/INLET
 !     --------------------
         type, public, extends(t_ebcs) :: t_ebcs_inlet
           type(fvm_inlet_data_struct) :: fvm_inlet_data
@@ -290,7 +280,6 @@
           procedure, pass :: read_data => read_data_inlet
         end type t_ebcs_inlet
 
-!     type = 9 /EBCS/FLUXOUT
 !     ----------------------
         type, public, extends(t_ebcs) :: t_ebcs_fluxout
           type(fvm_inlet_data_struct) :: fvm_inlet_data
@@ -301,7 +290,6 @@
           procedure, pass :: read_data => read_data_fluxout
         end type t_ebcs_fluxout
 
-!     type = 10 /EBCS/NRF
 !     ----------------------
         type, public, extends(t_ebcs) :: t_ebcs_nrf
           integer :: nbmat=21
@@ -315,7 +303,6 @@
           procedure, pass :: read_data => read_data_nrf
         end type t_ebcs_nrf
 
-!     type = 11 /EBCS/PROPELLANT
 !     ----------------------
         type, public, extends(t_ebcs) :: t_ebcs_propellant
           integer :: sensor_id=0, submat_id=1, ienthalpy=1
@@ -479,8 +466,6 @@
 
           if (allocated(this%tab)) then
 ! this is not useful and it causes a bug with Intel OneAPI 2023
-!        do ii = 1, this%nebcs
-!           call this%tab(ii)%poly%ebcs_destroy()
 !        enddo
 ! All allocatable subobjects are deallocated here:
             deallocate(this%tab)
@@ -1694,8 +1679,6 @@
           real_data(2) = this%tcar_vf
           call write_db_array(real_data, 2)
           lenr = lenr + 2
-          !call write_db(this%phase_alpha, this%nbmat*this%nb_elem)
-          !lenr = lenr + this%nbmat*this%nb_elem
           if(this%is_multifluid)then
             call write_i_c(this%fvm_inlet_data%vector_velocity, 1)
             leni = leni + 1
@@ -1734,9 +1717,6 @@
 
           call read_db(this%tcar_p, 1)
           call read_db(this%tcar_vf, 1)
-          !if(this%nbmat > 0)then
-          !  allocate(this%phase_alpha(this%nbmat,this%nb_elem))
-          !  call read_db(this%phase_alpha, this%nbmat*this%nb_elem)
           !endif
           if(this%is_multifluid)then
             call read_i_c(this%fvm_inlet_data%vector_velocity, 1)

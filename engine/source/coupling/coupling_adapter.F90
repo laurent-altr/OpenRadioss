@@ -407,7 +407,6 @@
             tmp(2) = surf%nodes(i,2)
             tmp(3) = surf%nodes(i,3)
             tmp(4) = surf%nodes(i,4)
-            !write(6,*) "surf%nodes", tmp(1), tmp(2), tmp(3), tmp(4)
             nb_unique_nodes = make_unique(tmp)
             connectIndex(i+1) = connectIndex(i+1) + nb_unique_nodes
             do j = 1, nb_unique_nodes

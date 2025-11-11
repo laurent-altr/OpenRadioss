@@ -97,8 +97,6 @@
           double precision, parameter :: pi38  = 1.178097245d0
           double precision, parameter :: spi8  = 0.3826834324d0
           double precision, parameter :: spi38 = 0.9238795325d0
-!c=======================================================================
-!c=======================================================================
           ! C USER VARIABLES
           !c! User variable # 1, to store the previous damage value
           !c! User variable # 2, to store the previous stress or strain value (for EMA filtering)
@@ -111,7 +109,6 @@
           !c! User variable # 3, to store the previous total value of epsxx
           !c! User variable # 4, to store the previous total value of epsxy
           !c! User variable # 5, to store the previous total value of epsxz
-!c===============================================================================================
 
           type_max  = int(uparam(1))  !< Strain or stress for the damage calculation
           c_min     = uparam(2)       !< Lower limit for stress or strain
@@ -159,7 +156,6 @@
                 i1 = eps11         !i1 = eps11+eps22+eps33
                 i2 = -eps12*eps12-eps13*eps13 !i2 = eps11*eps22+eps22*eps33+eps33*eps11-eps12*eps12-eps13*eps13-eps23*eps23
 
-                !i3 = eps11*eps22*eps33-eps11*eps23*eps23-eps22*eps13*eps13-eps33*eps12*eps12+two*eps12*eps13*eps23 = 0
 
                 q  = (three*i2 - i1*i1)/9.0
                 r  = (two*i1*i1*i1-9.0*i1*i2)/54.0        ! (2*i3^3-9*i1*i2+27*i3)/54

@@ -67,7 +67,6 @@
 !                                                   Body
 ! ----------------------------------------------------------------------------------------------------------------------
 
-          ! NWALE=7 => /ALE/GRID/FLOW-TRACKING
           !   when starting from a restart file we need to read these value to get thet state from previous cycle
           if(ale%grid%nwale == 7)then
             call read_db(rtmp,16)

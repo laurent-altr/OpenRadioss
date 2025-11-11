@@ -148,7 +148,6 @@
             sigv_old(6) = uvar(i,6)
             ! total viscous stress
             !  time integration using mid-point rule scheme for integral of convolution
-            ! sigv = aa*sigv_old + bb*deps *
             ! we resolve d(sigv)/dt + beta*sigv = E2*epsp
             sigv(1)  = aa(i)*sigv_old(1) + bb(i)*depsxx(i)
             sigv(2)  = aa(i)*sigv_old(2) + bb(i)*depsyy(i)

@@ -63,7 +63,6 @@
           do i = 1, size
             count = 0
             do j = 1, 4
-!                if(segment(j) == elements%shell%nodes(j,list(i))) then
 !               if the jth node is found at any position in the segment
               if(any(segment == elements%shell%nodes(j,list(i)))) then
                 count = count + 1
@@ -188,7 +187,6 @@
                   call extend_array(interf%intbuf_tab(i)%gap_sl,nsn,nsn+1)
                   interf%intbuf_tab(i)%gap_sl(nsn+1) = interf%intbuf_tab(i)%gap_sl(old_secondary_node)
                 END IF
-!                 if(ipari(index_intfric) > 0) then
 !                      not supported yet
 !                 endif
                 IPARI(INDEX_NSN,i) = nsn + 1
@@ -508,8 +506,6 @@
 !                                                   Body
 ! ----------------------------------------------------------------------------------------------------------------------
            write(6,*) "detach_node",node_id,nodes%itab(node_id),"from:",shell_list(1:list_size)
-          !call flush(6)
-!         new_uid = nodes%max_uid + 1
 !         nodes%max_uid = new_uid
           old_uid = nodes%itab(node_id)
           numnod = nodes%numnod
@@ -753,7 +749,6 @@
           nb_detached_nodes_global = 0
           nb_detached_nodes(1:nspmd) = 0
           nb_detached_nodes(ispmd+1) = numnod - numnod0
-          ! call mpi_allreduce
           if(nspmd > 1) then
             call spmd_allreduce(nb_detached_nodes,nb_detached_nodes_global,nspmd,SPMD_SUM)
           else
@@ -762,7 +757,6 @@
 
           total_new_nodes = sum(nb_detached_nodes_global(1:nspmd))
           if(total_new_nodes > 0) new_crack = total_new_nodes
-          !allocate(detached_nodes_local(nb_detached_nodes_global(ispmd+1)))
           allocate(detached_nodes(total_new_nodes))
           if(nb_detached_nodes_global(ispmd+1) /= nb_detached_nodes_local) then
           end if
@@ -785,16 +779,12 @@
             call spmd_allreduce(numnodg0,p,1,SPMD_MAX)
             numnodg0 = p
           end if
-!          old_max_uid = nodes%max_uid
           if(nspmd > 1) then
             call spmd_allreduce(nodes%max_uid,old_max_uid,1,SPMD_MAX)
           else
             old_max_uid = nodes%max_uid
           end if
 
-          !write(6,*) "numnodg0",numnodg0
-!         if(total_new_nodes >0) write(6,*) "MASS nb_detached_nodes_global",nb_detached_nodes_global(1:nspmd)
-!         if(total_new_nodes >0) write(6,*) "MASS detached_nodes",detached_nodes(1:total_new_nodes)
           !Not finalized: new nodes may be boundary nodes (i.e. new node attached to two shells from different processors)
 
           k = sum(nb_detached_nodes_global(1:nspmd))
@@ -834,7 +824,6 @@
               nodes%itabm1(numnod0 + j) = old_max_uid
               nodes%itabm1(2*(numnod0 + j)) = numnod0 + j
               nodes%nodglob(numnod0 + j) = numnodg0
-              !write(6,*) old_max_uid,"detached node ",nodes%itab(numnod0 + j),"form",nodes%itab(nodes%parent_node(numnod0+j))
             end if
             j = get_local_node_id(nodes,detached_nodes(i))
             if(j > 0) then
@@ -845,8 +834,6 @@
             end if
           end do
 
-!         if(old_max_uid /= nodes%max_uid) then
-!           write(6,*) "old_max_uid",old_max_uid,"nodes%max_uid",nodes%max_uid
 !         endif
           nodes%max_uid = old_max_uid
           deallocate(permutation)
@@ -862,8 +849,6 @@
           if (allocated(detach_shell)) deallocate(detach_shell)
           if (allocated(shell_list)) deallocate(shell_list)
           if (allocated(nodal_damage)) deallocate(nodal_damage)
-          ! if (allocated(ghostShellCoordinates)) deallocate(ghostShellCoordinates)
-          ! if (allocated(shellCoordinates)) deallocate(shellCoordinates)
 
         end subroutine test_jc_shell_detach
 

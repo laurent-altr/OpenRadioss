@@ -935,7 +935,6 @@
           !< Crossing if difference changes sign (or is within epsy)
           if ( (dl1*dl2 <= zero) .and. (abs(dl1) > epsy .or. abs(dl2) > epsy) ) then
             !< Solve yl(x) = yh(x) with linear interpolation on [x1,x2]
-            !  yl = yl1 + a*(yl2-yl1); yh = yh1 + a*(yh2-yh1)
             denom = (yh2 - yh1) - (yl2 - yl1)
             if (abs(denom) > max(1.d-300, ten*epsilon(denom)) ) then
               a = (yl1 - yh1) / denom

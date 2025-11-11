@@ -283,12 +283,10 @@
           !default initial temperature
           if(pm(79)==zero)pm(79)=three100
 
-      ! P0=P(rho0)
       xvec1(1:1,1) = rhoi
       call table_mat_vinterp(eos_struct%table(1),1,1,vartmp(1,1),xvec1,yy,slope)
       P0 = yy(1)
       bulk = slope(1)
-      ! SSP0 = Cunload(rho_0)
       call table_mat_vinterp(eos_struct%table(2),1,1,vartmp(1,2),xvec1,yy,slope)
       SSP0 = yy(1)
 

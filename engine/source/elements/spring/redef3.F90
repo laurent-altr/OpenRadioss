@@ -453,7 +453,6 @@
 !-------------------------------------
 !        elasto plastic (tension compression decoupled)
 !         (d/r)nonlinear reloading
-!         dpx = maximum displacement (and not plastic)
 !-------------------------------------
           if(jecrou(5)>0)then
             do i=1,nel
@@ -838,7 +837,6 @@
 !-------------------------------------
 !        elasto plastic (tension compression decoupled)
 !         (d/r)nonlinear reloading
-!         dpx = maximum displacement (and not plastic)
 !-------------------------------------
           if(jecrou(5)>0)then
             do i=1,nel
@@ -851,7 +849,6 @@
                   if(dx(i)>dperm(i).and.yy3(i)/=zero)then
                     fmax(i)=yy3(i)/lscale(i)
                     dperm(i)=min(dperm(i),dpx(i)- fmax(i) / xk(i))
-!              y = a (x-x1)^b
                     b1 = (dpx(i)-dperm(i))*xk(i)/fmax(i)
                     fmin(i) = fmax(i) *&
                     &( (dx(i)-dperm(i))/(dpx(i)-dperm(i)) )**b1
@@ -871,7 +868,6 @@
                   if(dx(i)<dperm(i).and.yy3(i)/=zero)then
                     fmax(i)=yy3(i)/lscale(i)
                     dperm(i)=max(dperm(i),dpx2(i)- fmax(i) / xk(i))
-!              y = a (x-x1)^b
                     b1 = (dpx2(i)-dperm(i))*xk(i)/fmax(i)
                     fmin(i) = fmax(i)*&
                     &( (-dx(i)+dperm(i))/(-dpx2(i)+dperm(i)) )**b1

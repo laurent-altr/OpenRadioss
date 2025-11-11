@@ -187,7 +187,6 @@
               end do
             end if
           end if
-!    if (l/=nrtm) print *,'error dimensionning: l,nrtm',l,nrtm
 ! nsn
           allocate(itagn(numnod))
           itagn = 0
@@ -284,8 +283,6 @@
             st(2,i)=nine
             dmin(i)=ep20
           end do
-!    if (nsn/=ns) print *,'***error dimensionning: nsn,ns',nsn,ns
-!    if (nsn/=nmn) print *,'***error dimensionning: nsn,nmn',nsn,nmn
           msr(1:nsn) = nsv(1:nsn)
           deallocate(itags1)
           deallocate(itags2)

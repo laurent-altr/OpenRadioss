@@ -79,15 +79,7 @@
           numelc = size(elements%shell%nodes, 2)
 
           !=================== debug ===================
-          ! imin_fsky = elements%pon%iadc(1,1)
-          ! imax_fsky = elements%pon%iadc(1,1)
-          ! do i = 1, numelc
-          !   do j = 1, 4
-          !     if(elements%pon%iadc(j,i) < imin_fsky) then
-          !       imin_fsky = elements%pon%iadc(j,i)
           !     endif
-          !     if(elements%pon%iadc(j,i) > imax_fsky) then
-          !       imax_fsky = elements%pon%iadc(j,i)
           !     endif
           !   enddo
           ! enddo
@@ -112,7 +104,6 @@
 
           new_adsky(new_numnod + 1) = new_adsky(new_numnod) + contributions_count
           offset = contributions_count
-!           write(6,*) 'offset', offset
 
           call move_alloc(new_adsky,elements%pon%adsky)
           elements%pon%sadsky = new_numnod + 1
@@ -124,7 +115,6 @@
             do j = 1, 4
               if(elements%shell%nodes(j, shell_id) == new_id) then
                 elements%pon%iadc(j,shell_id) = elements%pon%adsky(new_numnod) + contributions_count
-                ! write(6,*) "IADC(", shell_id, ",", j, ") = ", elements%pon%iadc(j,shell_id)
                 contributions_count = contributions_count + 1
               end if
             end do
@@ -134,7 +124,6 @@
           !        subroutine extend_array_double_2d(a, oldsize1, oldsize2, newsize1, newsize2, msg, stat)
           i = size(elements%pon%fsky, 2) + contributions_count
           call extend_array(elements%pon%fsky, 8,elements%pon%sfsky/8, 8, i)
-!         write(6,*) "old id=", old_id, "new id=", new_id
           elements%pon%sfsky = i * 8
           elements%pon%fsky(1:8, 1:i) = 0
 

@@ -147,9 +147,6 @@
       if (icc == 0) icc = 1
 !
       if (vp == 0) vp = 2 
-      ! vp = 1   => plastic strain rate 
-      ! vp = 2   => total strain rate (default)
-      ! vp = 3   => total deviatoric strain rate  (shells)
 !
       israte = 1                                                             
       if (cc == zero) then                                                     

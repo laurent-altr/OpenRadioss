@@ -322,7 +322,6 @@
                   uvar(i,tabn+3) = one
                 end do
                 shift = 9 +1  +1
-                ! 9 = nombre de termes dans matrices fp
                 !+1 = dgamma
                 !+1 = tbnorm
               else if (flag_visc(n) == 2 ) then !sinh
@@ -332,7 +331,6 @@
                   uvar(i,tabn+3) = one
                 end do
                 shift = 9 +1  +1
-                ! 9 = nombre de termes dans matrices fp
                 !+1 = dgamma
                 !+1 = tbnorm
               else if (flag_visc(n) == 3 ) then !power
@@ -343,7 +341,6 @@
                   uvar(i,tabn+10)= em20 !equivalent strain old
                 end do
                 shift = 10 +1 +1
-                ! 9 = nombre de termes dans matrices fp
                 !+1 = gamma
                 !+1 = dgamma
                 !+1 = tbnorm
@@ -381,7 +378,6 @@
 
 
           !remove thermal strain from total strain
-          !fth = i + alpha dt
           if(iexpan > 0)then
             do i=1,nel
               fth(i,1,1)  = one + epsth(i)
@@ -581,7 +577,6 @@
           !====================================
           flag_mul   =  0
           do i=1,nel
-            !print*, ' jdet', jdet(i)
             signxx(i) = siga(i,1,1)
             signyy(i) = siga(i,2,2)
             signzz(i) = siga(i,3,3)
@@ -617,8 +612,6 @@
               call rottoloc (nel,fpo,&
               &r1x, r1y, r1z, r2x, r2y, r2z, r3x, r3y, r3z)
             end if
-            !fe ={f}{fp_old}^(-1) then  matb = fe fe^(t) (elastic part)
-            !call calcmatb (nel, f, fpo, matb)
             call kmatinv3 (fpo , invfpo, nel)      !invfpo = inverse (fp)
             call prodmat  (f   , invfpo, fe, nel)  ! fe = f * invfpo
             call prodaat  (fe  , matb  , nel)      ! matb = fe fe^(t)
@@ -729,7 +722,6 @@
             call prodmat (lb ,    fe, fedp, nel) !  fedp   = lb * fe
             call prodmat(invfe ,fedp, dfp , nel) !  dfp    = invfe  * lb * fe
 
-            !call prodmat(dfp ,dfp, dfp2 , nel) ! if order 2
             do i=1,nel
               ! fp_n+1 = exp(dfp) * fp_old = (i+dfp) * fp_old
               sn(i,1,1) = one + dfp(i,1,1) !+ half * dfp2(i,1,1)

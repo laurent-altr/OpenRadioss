@@ -180,12 +180,9 @@
       nbmat = ebcs%nbmat
       iform = ebcs%fvm_inlet_data%formulation  ! 1:VP  2:VE
       vel_flag = ebcs%fvm_inlet_data%vector_velocity  ! 0:Vn  1:Vxyz
-      !   VEL_FLAG = 0 : normal velocity    : vx.'n'
       !              1 : vectorial velocity : vx.'x' + vy.'y' + vz.'z'
       !
-      !      iVx   =0  : Vx = fscale_Vx
       !      iVx   >0  : Vx = fscale_Vx * fvel(iVx)
-      !      iVx = -1  : nothing to do : managed with momentum advection
       ! ------------------------------------------------------------------------!
       !                        0. RETRIVE USER VELOCITY                         !
       ! ------------------------------------------------------------------------!
@@ -194,8 +191,6 @@
         IFUNC = EBCS%FVM_INLET_DATA%FUNC_VEL(1)
         IF (IFUNC  >  0) THEN
            VN = VN * FUNC_VALUE(IFUNC)
-           ! IFUNC == 0  : do nothing
-           ! IFUNC == -1 : do nothing
         ENDIF
       ELSE
         VX = EBCS%FVM_INLET_DATA%VAL_VEL(1)
@@ -526,7 +521,6 @@
              ENDDO
 
          ELSE
-           !IFORM = 1 : VP formulation
            !   NBMAT is 1 for mono-material law
              DO IMAT = 1, nbmat
                 PHASE_PJJ(IMAT) = EBCS%FVM_INLET_DATA%VAL_PRES(IMAT)
@@ -659,29 +653,12 @@
       !                 5. IMPOSED VELOCITY  (PENALITY)                         !
       !                       (alternative for subsonic flows)                  !
       ! ------------------------------------------------------------------------!
-      !IF(VEL_FLAG == 0)THEN
-      !  DO I=1,NOD
-      !    N=LISTE(I)
-      !    S=ONE/SQRT(LA(1,I)**2+LA(2,I)**2+LA(3,I)**2)
-      !    DVX=V(1,N)-VN*LA(1,I)/S
-      !    DVY=V(2,N)-VN*LA(2,I)/S
-      !    DVZ=V(3,N)-VN*LA(3,I)/S
-      !    ROC = NODAL_AREA(I) / NODAL_ROC(I) !averaged impedence at node I
-      !    P=ROC*(DVX*LA(1,I)+DVY*LA(2,I)+DVZ*LA(3,I))/S
       !    A(1,N)=A(1,N)-P*LA(1,I)
       !    A(2,N)=A(2,N)-P*LA(2,I)
       !    A(3,N)=A(3,N)-P*LA(3,I)
       !    STIFN(N)=STIFN(N)+(TWO*(S*ROC)**2)/MS(N)
       !  ENDDO
       !ELSE
-      !  DO I=1,NOD
-      !    N=LISTE(I)
-      !    DVX=V(1,N)-VX
-      !    DVY=V(2,N)-VY
-      !    DVZ=V(3,N)-VZ
-      !    S=ONE/SQRT(LA(1,I)**2+LA(2,I)**2+LA(3,I)**2)
-      !    ROC = NODAL_AREA(I) / NODAL_ROC(I) !averaged impedence at node I
-      !    P=ROC*(DVX*LA(1,I)+DVY*LA(2,I)+DVZ*LA(3,I))/S
       !    A(1,N)=A(1,N)-P*LA(1,I)
       !    A(2,N)=A(2,N)-P*LA(2,I)
       !    A(3,N)=A(3,N)-P*LA(3,I)

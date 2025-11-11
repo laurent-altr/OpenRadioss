@@ -155,7 +155,6 @@
           f_sti(1:nel)=one
           if (nu>0.48999) qh = zep5*qh
           stif = 0.3*qh*lamg     ! factor=8*1/8/3;
-!      fvl = fourth*dn*zep00666666667
           fvl = fourth*dn*em01   ! 1/10 of isolid=5
 ! special case for stiffing
           select case (mtn)

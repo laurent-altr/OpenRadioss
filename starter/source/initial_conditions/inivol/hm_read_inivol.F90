@@ -231,9 +231,6 @@
               ! vfrac \in [0,1] is optional. no value means that isubmat is filling 100% inside the surface.
               if(vfrac == zero)vfrac=one
 
-              ! icumu = 1 : additive filling
-              ! icumu = 0 : erase existing filling
-              ! icumu =-1 : subtractive filling (substract the excess from the previous filling
               if(icumu < -1 .or. icumu > 1)then
                 icumu = 0
               end if
@@ -281,25 +278,11 @@
               if (isu > 0) then
                 if(surf_type == 101 .or. surf_type == 200) then
                   !   IGRSURF(IGS)%TYPE      ::  OPEN / CLOSED surface flag
-                  !                           SURF_TYPE = 0         : SEGMENTS
-                  !                           SURF_TYPE = 100       : HYPER-ELLIPSOIDE MADYMO.
-                  !                           SURF_TYPE = 101       : HYPER-ELLIPSOIDE RADIOSS.
-                  !                           SURF_TYPE = 200       : INFINITE PLANE
                   nb_compat_surf = nb_compat_surf + 1
                 else
                   do j=1,nseg
                     ityp=igrsurf(isu)%eltyp(j)
                     !   IGRSURF(IGS)%ELTYP(J)   :: type of element attached to the segment of the surface
-                    !                           ITYP = 0  - surf of segments
-                    !                           ITYP = 1  - surf of solids
-                    !                           ITYP = 2  - surf of quads
-                    !                           ITYP = 3  - surf of SH4N
-                    !                           ITYP = 4  - line of trusses
-                    !                           ITYP = 5  - line of beams
-                    !                           ITYP = 6  - line of springs
-                    !                           ITYP = 7  - surf of SH3N
-                    !                           ITYP = 8  - line of XELEM (nstrand element)
-                    !                           ITYP = 101 - ISOGEOMETRIQUE
                     if(ityp == 0)then; nb_compat_surf = nb_compat_surf + 1; exit; end if
                     if(n2d == 0 .and. (ityp == 0 .or. ityp==3 .or. ityp==7))then; nb_compat_surf = nb_compat_surf + 1; exit; end if
                     if(n2d > 0 .and. (ityp==0))then; nb_compat_surf = nb_compat_surf + 1; exit; end if

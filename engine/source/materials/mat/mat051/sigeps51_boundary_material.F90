@@ -81,7 +81,6 @@
 !          UVAR(2) = PLAS  !post
 !          UVAR(3) = BFRAC !post
 ! phase k  dim=M51_NVPHAS
-!          IAD = M51_N0PHAS+(k-1)*M51_NVPHAS
 !          UVAR(1 + IAD) = AVk                 (EV(NB10) +12k)
 !          UVAR(2 + IAD) = SIGxk
 !          UVAR(3 + IAD) = SIGyk
@@ -150,7 +149,6 @@
           INTEGER :: NPF(*), NFUNC, IFUNC(NFUNC)
           real(kind=WP) :: FINTER ,TF(*)
           EXTERNAL FINTER
-!        Y = FINTER(IFUNC(J),X,NPF,TF,DYDX)
 !        Y       : y = f(x)
 !        X       : x
 !        DYDX    : f'(x) = dy/dx
@@ -644,7 +642,6 @@
                 SIGNXX(I) = BBB * SIGOXX(I) + AAA
                 SIGNYY(I) = BBB * SIGOYY(I) + AAA
                 SIGNZZ(I) = BBB * SIGOZZ(I) + AAA
-                !IF(IOPT==0)BBB=ZERO
                 SIGNXY(I) = BBB * SIGOXY(I)
                 SIGNYZ(I) = BBB * SIGOYZ(I)
                 SIGNZX(I) = BBB * SIGOZX(I)

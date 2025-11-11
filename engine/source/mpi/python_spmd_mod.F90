@@ -129,22 +129,11 @@
           call spmd_allreduce(processor, element%global%processor, element%global%n, SPMD_MAX)
           deallocate(processor)
 
-!         if(rank == 0) then
-!           write(6,*) "Python element initialization"
-!           do i = 1, element%global%n
-!             write(6,*) "Element ", element%global%user_ids(i), " is on processor ", element%global%processor(i)
-!             write(6,*) "Keywords:", element%global%keyword(i)%h3d, element%global%keyword(i)%name
 !           enddo
 !         endif
 
-!          write(6,*) "Processor ", rank, " has ", element%local%n, " elements"
-!          do i = 1, element%global%n
-!            if(element%global%processor(i) == rank) then
-!              write(6,*) "Element ", element%global%user_ids(i), " is on processor ", rank
-!              write(6,*) "Keywords:", element%global%keyword(i)%h3d, element%global%keyword(i)%name
 !            endif
 !          enddo
-!         call flush(6)
         end subroutine python_element_init
 !! \brief synchronize python elemental variables found in the python function
 !||====================================================================

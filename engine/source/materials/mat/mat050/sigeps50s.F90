@@ -209,12 +209,7 @@
 ! ----------------------------------------------------------------------------------------------------------------------
           ! strain rate definition
 ! ----------------------------------------------------------------------------------------------------------------------
-!      if (iflag1 == 0 .and. iflag2 == 0) then   ! common volumetric strain rate
 !                                                ! not used by d2rad, not tested
-!        do i=1,nel
-!          muold = uvar(i,1)
-!          dmudt = abs((amu(i)-muold)) / max(timestep,em20)
-!          epsd  = asrate*dmudt + (one-asrate)*uvar(i,2)
 !          dep1(i)   = epsd
 !          dep2(i)   = epsd
 !          dep3(i)   = epsd
@@ -376,7 +371,6 @@
           if (icomp == 1) then
             do ii = 1,nindxc
               i = indxc(ii)
-              ! gcomp = 2G in compacted state
               depsv= (depsxx(i) + depsyy(i) + depszz(i)) * third
               pres = (sigoxx(i) + sigoyy(i) + sigozz(i)) * third
               stxx = sigoxx(i) + gcomp * (depsxx(i) - depsv) - pres

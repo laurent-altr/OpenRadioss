@@ -134,8 +134,6 @@
                   r1 = ( r1 - one ) * ( r2 - one ) * ( s - one )
                 else
                   ! linear interpolation secant
-                  ! p = 2 * 1/2 * (c-b) * f(b)/f(a)
-                  ! q = 1 - f(b)/f(a)
                   r3 = two * length * s
                   r1 = one - s
                 end if
