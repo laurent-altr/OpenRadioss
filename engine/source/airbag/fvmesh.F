@@ -176,7 +176,7 @@ C    - RFVNOD(2,NNS) : Local coordinates of the node in the triangle
 C
 C    - Ifvtri (6, NNTR): Connectivitis new triangles (1-> 3)
 C                       Reference element if supported on surface (4)
-C                       Polyhedres connectes si interne (5->6)
+C                       Polyhedra connected if internal (5->6)
 C
 C    - IFVPOLY(NNTR)    : Triangle-polygon assignment
 C    - IFVTADR(NPOLY+1) : Addresses in the previous table
@@ -4016,7 +4016,7 @@ C polygon j is a hole in polygon i
                   ENDDO
                ENDIF
                LENPOLY(I)=LENPOLY(I)+LENPOLY(J)
-C Polygone interior j.
+C Interior polygon j.
                VX1=QUAD(1,2)-QUAD(1,1)
                VY1=QUAD(2,2)-QUAD(2,1)
                VZ1=QUAD(3,2)-QUAD(3,1)
@@ -5284,7 +5284,7 @@ C polygon j is a hole in polygon i
      .                                   RPOLY(4+3*(K-1)+3,J)
                ENDDO
                LENPOLY(I)=LENPOLY(I)+LENPOLY(J)
-C Polygone interior j.
+C Interior polygon j.
                VX1=RPOLY(5,J)-RPOLY(8,J)
                VY1=RPOLY(6,J)-RPOLY(9,J)
                VZ1=RPOLY(7,J)-RPOLY(10,J)
