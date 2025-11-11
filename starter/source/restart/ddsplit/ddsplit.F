@@ -750,7 +750,7 @@ c SPH inlet spmd structure
       INTEGER :: LEN_TMP_NAME
       CHARACTER(len=4096) :: TMP_NAME
 C-----------------------------------------------
-C structure de fichier v44 a modifier
+C v44 file structure to be modified
 C-----------------------------------------------
       INTEGER LHEADER,LVARINT,LVARREA,LMXVINT,LMXVREA,LEN_G,LEN_M,
      .        LEN_S,LEN_ADM,LEN_IG,LEN_PM
@@ -2330,7 +2330,7 @@ C--------------------------------------
      .  CALL WRITE_I_C(IACTIV,LACTIV*NACTIV)
       LEN_IA = LEN_IA + LACTIV*NACTIV
 C--------------------------------------
-C MPC (entier)
+C MPC (integer)
 C--------------------------------------
       IF (NUMMPC>0.AND.P==1)THEN
         CALL W_IBMPC(IBMPC,NUMMPC,LMPC,NODLOCAL,LAG_SEC,LEN_IA)
@@ -2470,7 +2470,7 @@ C--------------------------------------------
         LEN_IA = LEN_IA + LAG_NHF+3*LAG_NCF+2
       END IF
 C--------------------------------------
-C     ECRITURE ICNDS10 Itet=2 of S10
+C     WRITE ICNDS10 Itet=2 of S10
 C--------------------------------------
       IF (NS10E_L > 0) THEN
         IF(NBDDCNDM > 0) THEN
@@ -2629,7 +2629,7 @@ c       stop CPU timer for W_FI
          CALL W_FSPH()
       ENDIF
 C--------------------------------------
-C structure int21 (integer part)
+C int21 structure (integer part)
 C--------------------------------------
       IF(NINTSTAMP /= 0)THEN
         CALL INTSTAMP_WRESTI(INTSTAMP, LINTSTAMP, NODLOCAL)
@@ -3211,7 +3211,7 @@ C
         CALL W_RNLOC(INCND,NODGLOB,NUMNOD_L,LEN_AM)
       END IF
 C--------------------------------------
-C structure int21
+C int21 structure
 C--------------------------------------
       IF(NINTSTAMP /= 0)THEN
         CALL INTSTAMP_WRESTR(INTSTAMP,LINTSTAMP)
