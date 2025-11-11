@@ -274,7 +274,7 @@ C
        ! -----------------
 
         IF((IDDLEVEL==0).AND. (DECTYP>=3.AND.DECTYP<=6))THEN
-C Appe routine poids noeuds interfaces
+C Appe routine weights nodes interfaces
           CALL I20WCONTDD(INTBUF_TAB%NSV,INTBUF_TAB%MSR,NSN,NMN,IWCONT,NSNT,NMNT)
         END IF
 
@@ -382,13 +382,13 @@ C
          IF(IWPENEDGE/=0.AND.INACTI==3.OR.INACTI==4) IWRN = 1
         ENDDO
         IF(((IDDLEVEL==0)).AND.(DECTYP>=3.AND.DECTYP<=6))THEN
-C Appel routine poids noeuds interfaces
+C Call routine for interface node weights
           CALL I20WCONTDD(INTBUF_TAB%NSVL,INTBUF_TAB%MSRL,NSNE,NMNE,IWCONT,
      .                NSNET,NMNET)
         END IF
       END IF
 C------------------------------------------------------
-C     2-NOEUDS FACETTES
+C     2-NODES FACETTES
 C------------------------------------------------------
       IF(IGAP /= 0)CALL I20GAP1(
      1 NRTM         ,NSN          ,NLN,  INTBUF_TAB%GAP_M,INTBUF_TAB%GAP_SH,
@@ -446,9 +446,9 @@ C
       ENDDO
 
 C------------------------------------------------------
-C     RE-CALCUL LES PENETRATIONS INITIALES 
+C     RE-CALCULATION LES PENETRATIONS INITIALES 
 C     AFTER CORRECTING THE POSITION OF ANCHOR POINTS
-C     1-NOEUDS FACETTES
+C     1-NODES FACETTES
 C------------------------------------------------------
  
       NGROUS=1+(I_STOK-1)/NVSIZ
@@ -532,7 +532,7 @@ C
          IF(IWPENEDGE/=0.AND.INACTI==3.OR.INACTI==4) IWRN = 1
         ENDDO
         IF(((IDDLEVEL==0)).AND.(DECTYP>=3.AND.DECTYP<=6))THEN
-C Appel routine poids noeuds interfaces
+C Call routine for interface node weights
           CALL I20WCONTDD(INTBUF_TAB%NSVL,INTBUF_TAB%MSRL,NSNE,NMNE,IWCONT,
      .                NSNET,NMNET)
         END IF

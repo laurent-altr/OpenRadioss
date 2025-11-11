@@ -86,7 +86,7 @@ C
       DGAPLOADP = INTBUF_TAB%VARIABLES(46)
       NRTS   =IPARI(3,NIN)
 C-----------------------------------------------------------
-C     Filtrage des candidats a l'impact
+C     Filtrage des CANDIDATES a l'impact
 C     (si candidat retenu, cand_n(i) = - cand_n(i))
 C-----------------------------------------------------------
       CALL I11OPTCD(

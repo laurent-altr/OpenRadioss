@@ -50,7 +50,7 @@ C-------------------------------------------------------------------------------
 C     NOM    DIMENSION               DESCRIPTION                       E/S
 C-------------------------------------------------------------------------------
 C
-C    NIN    1                        NUMERO INTERFACE                   E
+C    NIN    1                        INTERFACE NUMBER                   E
 C                  
 C   IPARI   NPARI,NINTER             PARAMETRES D'INTERFACE             E
 C                  
@@ -115,7 +115,7 @@ C -------------------------------------------------------------
 C=======================================================================
 C      Test to know whether to retriate + initialization
 C=======================================================================
-C       SIZE_T(NIN)=ZERO init dans inttri
+C       SIZE_T(NIN)=ZERO init in inttri
        CALL I17CRIT(
      1   X     ,AZERO       ,AZERO     ,IGRBRIC(IGE)%ENTITY ,EMINX        ,
      2   NME   ,ITASK       ,INTBUF_TAB%XSAV,IXS    ,IXS16        ,
@@ -172,7 +172,7 @@ C-------------------------------------------------------------------------------
 C     NOM    DIMENSION               DESCRIPTION                       E/S
 C-------------------------------------------------------------------------------
 C
-C    NIN    1                        NUMERO INTERFACE                   E
+C    NIN    1                        INTERFACE NUMBER                   E
 C                  
 C   IPARI   NPARI,NINTER             PARAMETRES D'INTERFACE             E
 C                  
@@ -278,7 +278,7 @@ C=======================================================================
 C BARRIER INIT BMINMA
          CALL MY_BARRIER
 C -------------------------------------------------------------
-C     CALCUL BORNE DOMAINE REMONTE DANS I17XSAVE
+C     CALCULATION BORNE DOMAINE REMONTE IN I17XSAVE
 C -------------------------------------------------------------
            CALL I17XSAVE(
      1       X     ,V    ,AZERO  ,IXS       ,IXS16,
@@ -387,7 +387,7 @@ C-------------------------------------------------------------------------------
 C     NOM    DIMENSION               DESCRIPTION                       E/S
 C-------------------------------------------------------------------------------
 C
-C    NIN    1                        NUMERO INTERFACE                   E
+C    NIN    1                        INTERFACE NUMBER                   E
 C                  
 C   IPARI   NPARI,NINTER             PARAMETRES D'INTERFACE             E
 C                  

@@ -297,9 +297,9 @@ C
         DOUBLE PRECISION,INTENT(INOUT) :: WFEXT, WFEXT_MD
 C
 C---D_IMP: dUn+1,i,DD : ddU,i+1
-C---R_IMP[1:R02,2:RRR(R_OLD),3:RU0,4:E02,5:DE_OLD,6:EIMP,7,8,9:pour line-search]
+C---R_IMP[1:R02,2:RRR(R_OLD),3:RU0,4:E02,5:DE_OLD,6:EIMP,7,8,9:for line-search]
 C---R_IMP[10: BFAC,DTFAC,11:U2,12:RFAC,13:|FEXT|;14,16:new line-search;17:actual R02;18:GAP;19:TSTART;
-C---R_IMP[21:rel res disp.,22:rel res force,23:rel res energy,24:cumul arc length]
+C---R_IMP[21:rel res disp.,22:relative residual \1,23:relative residual \1,24:cumulative arc length]
 C---------20-25:libre
 C---I_IMP[1:IT(TOTAL),2:ITC,3:IT0(IT_OLD),4:IWAIT,5:IDIV,6:NDDLI0,7:1ercontact(used only w/ IREFI=4),
 C---8:num. of diverging, 9:ICONT_OLD 10:Isign (Riks);11: Ichang(solver);12: IDIV_OLD;13: NDDLI(SMP) or NDDLI_G(SPMD)
@@ -1477,7 +1477,7 @@ citask0          IF (ITASK == 0) THEN
               R_IMP(1) = MIN(R_IMP(1),RF_MAX*RF_MAX)
               IF (INCONV==1) I_IMP(12)=1
             END IF
-C--------case of converge with 0 iteration-------
+C--------case of converge with 0 iterations-------
             IF (ISMDISP>0) THEN
               CALL CP_REAL_HP(NNDL,X_A,X_C)
             ELSE
@@ -4707,7 +4707,7 @@ C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
         INTEGER N,I,J,K,ND
         INTEGER, DIMENSION(:) ,POINTER     :: IDDL,NDOF,IKC
-C-------------mis  zero Fint des noeuds dependants------------
+C-------------mis  zero Fint des nodes dependants------------
         IDDL => IMPBUF_TAB%IDDL
         NDOF => IMPBUF_TAB%NDOF
         IKC => IMPBUF_TAB%IKC
@@ -5010,7 +5010,7 @@ C---------------lin_solv--------
           IF(ALLOCATED(IE_BC4)) DEALLOCATE(IE_BC4)
           IF(ALLOCATED(IE_BC3)) DEALLOCATE(IE_BC3)
         END IF
-C------    faire---
+C------    to perform---
 c      IF (NINTER>0) THEN
 c       IF(ALLOCATED(INTBUF_TAB_CP)) DEALLOCATE(INTBUF_TAB_CP)
 c       IF(ALLOCATED(INTBUF_TAB_IMP)) DEALLOCATE(INTBUF_TAB_IMP)
@@ -7133,7 +7133,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   S o u r c e  L i n e s
 C-----------------------------------------------
-C-----Calcul NCONT0, Communication is necessary
+C-----Calculation NCONT0, Communication is necessary
         IF (TT == ZERO.AND.INCONV==1) THEN
           DO N = 1,NINTER
             ITY   =IPARI(7,N)
@@ -7273,7 +7273,7 @@ C-------int2,RBE3,rby speciale (Fext seulement)----------
      1                     NDOF  ,IDDL   ,B    )
           ENDDO
         ENDIF
-C-------int2,rby speciale (elems deleted)----------
+C-------int2,rby speciale (elements deleted)----------
         DO I=1,NINT2
           N=IINT2(I)
           CALL I2_IMPR2(IPARI(1,N),INTBUF_TAB(N) ,AC    ,ACR  ,
@@ -7549,8 +7549,7 @@ C----- put N1,N2,N3 (sys_id) in E_REF(1:3),  E_REF(4)=E_REF(3)
             END DO
           END DO
           IF (ILSKEW >0)  LSKEW_G=1
-C--- ending routine
-          RETURN
+C--- ending routine RETURN
         END IF
         NBC = 0
         DO I =1,NUMNOD
