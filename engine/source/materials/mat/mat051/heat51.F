@@ -54,7 +54,7 @@ C     REAL
      .   XK1,XK2,XK3,AL1,AL2,AL3,AL12,AL22,AL32,AA
 C-----------------------------------------------
 C
-C     Rigidity (or thermal conductibility) Equivalent 
+C     Rigidity (or thermal conductivity) Equivalent 
 C
 C
 C   hypothesis of phase 1 distribution over the volume
