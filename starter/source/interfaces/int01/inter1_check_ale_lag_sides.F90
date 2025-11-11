@@ -192,6 +192,7 @@
                 call ancmsg(msgid=945,msgtype=msgerror,anmode=aninfo, i1=inter_uid,c1=title, i2=1, i3=surf_uid1, &
                   i4=node_uid(1),i5=node_uid(2),i6=node_uid(3),i7=node_uid(4), &
                   c2="ALE")
+                deallocate(norm1, norm2, key1, key2)
                 return
               end if
               if(nale_sum == 0)then
@@ -240,6 +241,7 @@
               call ancmsg(msgid=945,msgtype=msgerror,anmode=aninfo, i1=inter_uid,c1=title, i2=1, i3=surf_uid1, &
                 i4=node_uid(1),i5=node_uid(2),i6=node_uid(3),i7=node_uid(4), &
                 c2="LAGRANGIAN")
+              deallocate(norm1, norm2, key1, key2)
               return
             end if
             if(nale_sum /= 0)then
@@ -254,6 +256,9 @@
               i4=node_uid(1),i5=node_uid(2),i6=node_uid(3),i7=node_uid(4), &
               c2=expected_type,c3=expected_type)
           end if
+
+          ! Deallocate temporary arrays
+          deallocate(norm1, norm2, key1, key2)
 
 ! ----------------------------------------------------------------------------------------------------------------------
         end subroutine inter1_check_ale_lag_sides
