@@ -108,7 +108,7 @@ def extract_reference(ref):
 # Input:
 #   ref       : ref : name of reference file (ref_extract) 
 # Output :
-#   word : dictionary of all Keyworks in Red_extract
+#   word : dictionary of all Keywords in Red_extract
 #   results: dictionany Keyword,result
 # ----------------------------------------------------------------
 # Read the Ref_extract file 

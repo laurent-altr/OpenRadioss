@@ -288,7 +288,7 @@ if __name__ == "__main__":
 #                   continue
 #               if "format" == normalized_callee or "format" == normalized_fname:
 #                   continue
-#               if "lenghth" == normalized_callee or "length" == normalized_fname:
+#               if "length" == normalized_callee or "length" == normalized_fname:
 #                   continue
 #               if "end" == normalized_callee or "end" == normalized_fname:
 #                   continue
@@ -342,7 +342,7 @@ if __name__ == "__main__":
                         if callinfo["ArgTypes"] == call_data[callee_name]["ArgTypes"]:
                             logging.info(f"Call {normalized_callee} from {normalized_fname} : OK")
                         elif len(callinfo["ArgTypes"]) != len(call_data[callee_name]["ArgTypes"]):
-                            logging.critical(f"NNUMBER OF ARGUMENTS DO NOT MATCH {normalized_fname}->{callnum}:{normalized_callee} {len(callinfo['ArgTypes'])} != {len(call_data[callee_name]['ArgTypes'])}")
+                            logging.critical(f"NUMBER OF ARGUMENTS DO NOT MATCH {normalized_fname}->{callnum}:{normalized_callee} {len(callinfo['ArgTypes'])} != {len(call_data[callee_name]['ArgTypes'])}")
                         else:
                             for i, (arg1, arg2) in enumerate(zip(callinfo["ArgTypes"], call_data[callee_name]["ArgTypes"])):
                                 arg1s = arg1 
@@ -381,7 +381,7 @@ if __name__ == "__main__":
     #open static_analysis.log and static_analysis.supp simultaneously
 
     list_of_hashes = []
-    # dictionnary "hash" : "message"
+    # dictionary "hash" : "message"
     new_errors = {}
     #if file exists
     if Path(fname).exists():

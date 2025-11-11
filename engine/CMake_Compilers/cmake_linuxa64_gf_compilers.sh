@@ -1,4 +1,4 @@
-# Fixe compilers linux64 Gfortran binary
+# Fixed compilers linux64 Gfortran binary
 Fortran_comp=gfortran
 C_comp=gcc
 CXX_comp=g++
