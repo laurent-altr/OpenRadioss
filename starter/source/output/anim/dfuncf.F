@@ -78,7 +78,7 @@ C     REAL
 C
       TYPE(G_BUFEL_)  ,POINTER :: GBUF
 C-----------------------------------------------
-C La routine ne fonctionne que pour les IFUNC 3,7,14-19 (stress)
+C This routine only works for IFUNC 3,7,14-19 (stress)
 C-----------------------------------------------                        
 C                                                                       
       NN1 = 1                                                           
@@ -252,7 +252,7 @@ C
           ENDIF
         ENDIF ! IF (ITY)
 C-----------------------------------------------                        
-C       FIN DE BOUCLE SUR LES OFFSET
+C       END OF LOOP OVER OFFSETS
 C-----------------------------------------------                        
        ENDDO ! DO OFFSET = 0,NEL-1,NVSIZ
       ENDDO !       DO NG=1,NGROUP

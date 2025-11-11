@@ -69,7 +69,7 @@ C     REAL
       TYPE(G_BUFEL_)  ,POINTER :: GBUF     
       REAL R4
 C-----------------------------------------------                        
-C La routine ne fonctionne que pour les IFUNC 3,6,7,14-19 (stress)
+C This routine only works for IFUNC 3,6,7,14-19 (stress)
       NN1 = 1                                                           
       NN3 = 1                                                           
       NN4 = NN3 + NUMELQ                                                
@@ -214,7 +214,7 @@ C
           CONTINUE                                                        
         ENDIF                                                           
 C-----------------------------------------------                        
-C       FIN DE BOUCLE SUR LES OFFSET
+C       END OF LOOP OVER OFFSETS
 C-----------------------------------------------                        
        END DO                                                           
  900  CONTINUE                                                          
