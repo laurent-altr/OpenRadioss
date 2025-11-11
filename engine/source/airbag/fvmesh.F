@@ -143,7 +143,7 @@ C
      .           3,5,6,
      .           6,5,1,
      .           1,3,6/
-C liste chainee polygones
+C linked list of polygons
       TYPE POLYGONE
          INTEGER IZ(3), NNSP
          INTEGER, DIMENSION(:), POINTER :: IPOLY, IELNOD
@@ -168,7 +168,7 @@ C
 C Finished volume meshing data structure
 C    - NNS: Number of new nodes (= IVolu (46))
 C    - NNTR: Number of new triangles (= IVolu (47))
-C    - NPOLY : Nombre de polygones ( = IVOLU(48) )
+C    - NPOLY : Number of polygons ( = IVOLU(48) )
 C    - NPOLH: Number of polyhedres (finished volumes) (= IVolu (49))
 C
 C    - IFVNOD(NNS)   : Reference airbag triangle for the new node
@@ -178,10 +178,10 @@ C    - Ifvtri (6, NNTR): Connectivitis new triangles (1-> 3)
 C                       Reference element if supported on surface (4)
 C                       Polyhedres connectes si interne (5->6)
 C
-C    - IFVPOLY(NNTR)    : Attribution triangles-polygones
+C    - IFVPOLY(NNTR)    : Triangle-polygon assignment
 C    - IFVTADR(NPOLY+1) : Addresses in the previous table
 C
-C    - IFVPOLH(NPOLY)   : Attribution polygones-polyhedres
+C    - IFVPOLH(NPOLY)   : Polygon-polyhedron assignment
 C    - IFVPADR(NPOLH+1) : Addresses in the previous table
 C
       IFV=IVOLU(45)
@@ -327,7 +327,7 @@ C 1. Airbag facets cuts
      . ' ** MONITORED VOLUME ID: ',IVOLU(1),' - BUILDING POLYGONS **'
       ENDIF
 C
-C nullify sinon test sur associated vrai second appel fvmesh1
+C nullify otherwise test on associated is true in second call to fvmesh1
       NULLIFY(FIRST2)
       DO I=1,NBRIC
 C        IF (ILVOUT<0) CALL PROGBAR_C(I,NBRIC)
