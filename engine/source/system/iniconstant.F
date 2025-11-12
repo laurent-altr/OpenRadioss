@@ -52,11 +52,11 @@ C--------------------------------------
        THIRTY        = 30.
        THIRTY2       = 32.
        THIRTY6       = 36.
-       FOURTY      = 40.
-       FOURTY5     = 45.
-       FOURTY8     = 48.
-       FIFTY     = 50.
-       CINQUANTE4     = 54.
+       FORTY       = 40.
+       FORTY5      = 45.
+       FORTY8      = 48.
+       FIFTY       = 50.
+       FIFTY4      = 54.
        SIXTY4     = 64.
        EIGHTY   = 80.
        EIGHTY16 = 96.
@@ -211,11 +211,11 @@ C--------------------------------------
        TWO_THIRD    = TWO/THREE      
        THREE_HALF     = THREE/TWO      
        THREE_OVER_4    = THREE/FOUR    
-       TRHEE_OVER_14 = THREE/FOURTEEN  
-       TSEIZE    = THREE/SIXTEEN
+       THREE_OVER_14 = THREE/FOURTEEN  
+       THREE_OVER_16 = THREE/SIXTEEN
        FOUR_OVER_3    = FOUR/THREE    
        FOUR_OVER_5     = FOUR/FIVE     
-       QNEUF     = FOUR/NINE
+       FOUR_OVER_9 = FOUR/NINE
        FIVE_OVER_3    = FIVE/THREE      
        FIVE_OVER_4   = FIVE/FOUR     
        FIVE_OVER_6      = FIVE/SIX        
@@ -224,7 +224,7 @@ C--------------------------------------
        SEVEN_OVER_5     = SEVEN/FIVE       
        SEVEN_OVER_9    = SEVEN/NINE       
        NINE_OVER_2  = NINE/TWO       
-       NSEIZE    = NINE/SIXTEEN
+       NINE_OVER_16 = NINE/SIXTEEN
        NINE_OVER_20    = NINE/TWENTY      
 C--------------------------------------
 C      0.xxxx
@@ -294,10 +294,10 @@ C
 c
        ZEP015    = ZEP15 / TEN
        ZEP015625 = ONE / SIXTY4
-       ZEP025    = ONE / FOURTY
+       ZEP025    = ONE / FORTY
        ZEP037    = ZEP03 + SEVENEM3                                          
        ZEP072169 = ZEP07 + TWOEM3 + EM04 + SIXEM5 + NINEEM6
-       ZEP075    = THREE / FOURTY
+       ZEP075    = THREE / FORTY
 C
        ONEP01    = ONE + ZEP01
        ONEP001   = ONE + EM03
@@ -459,7 +459,7 @@ C
        NINEP793 = NINE + ZEP7 + ZEP09 + THREEEM3
 
        ELEVENP5     = ELEVEN     + ZEP5
-       ONZEP225   = ELEVEN  + ZEP2 + ZEP02+FIVEEM3
+       ELEVEN_P225 = ELEVEN  + ZEP2 + ZEP02+FIVEEM3
        TWELVEP6    = TWELVE    + ZEP6
        FOURTEENP2 = FOURTEEN + ZEP2
        SIXTEENP5    = SIXTEEN    + ZEP5 
@@ -490,7 +490,7 @@ C--------------------------------------
 C      Fractions
 C--------------------------------------
        ZEP426667 = HUNDRED28 / THREE100
-       ZEP222    = TEN / FOURTY5
+       ZEP222    = TEN / FORTY5
        ZEP00666666667 = TWO / THREE100
        ZEP01666666667 = FIVE / THREE100
        ZEP444    = HUNDRED / TWOHUNDRED25
