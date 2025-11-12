@@ -662,7 +662,7 @@ c
               ENDIF ! ICAS_OLD
               IF (OUTYY_FMT == 2) THEN
                 WRITE(IUGEO,'(6I8)') NPT,ISOLNOD,KHBE,NPTR,NPTS,NPTT 
-C               Writing on 2 lines CF SMP!
+C              Writing on 2 lines for SMP compatibility
                 DO I = 1, NPT
                   WRITE(IUGEO,'(1P6E12.5)')(WAP0(J-1+K),K=1,6)
                   J = J + 6
@@ -671,7 +671,7 @@ C               Writing on 2 lines CF SMP!
                 ENDDO
               ELSE
                 WRITE(IUGEO,'(6I10)')NPT,ISOLNOD,KHBE,NPTR,NPTS,NPTT 
-C               Writing on 2 lines CF SMP!
+C              Writing on 2 lines for SMP compatibility
                 DO I = 1, NPT
                   WRITE(IUGEO,'(1P6E20.13)')(WAP0(J-1+K),K=1,6)
                   J = J + 6
@@ -699,7 +699,7 @@ c
              ENDIF
              IF (OUTYY_FMT == 2) THEN
                WRITE(IUGEO,'(3I8)') NPT, ISOLNOD, KHBE
-C              Writing on 2 lines CF SMP!
+C              Writing on 2 lines for SMP compatibility
                DO I = 1, NPT
                  WRITE(IUGEO,'(1P6E12.5)')(WAP0(J-1+K),K=1,6)
                  J = J + 6
@@ -708,7 +708,7 @@ C              Writing on 2 lines CF SMP!
                ENDDO
              ELSE
                WRITE(IUGEO,'(3I10)') NPT, ISOLNOD, KHBE
-C              Writing on 2 lines CF SMP!
+C              Writing on 2 lines for SMP compatibility
                DO I = 1, NPT
                  WRITE(IUGEO,'(1P6E20.13)')(WAP0(J-1+K),K=1,6)
                  J = J + 6
@@ -720,7 +720,7 @@ C              Writing on 2 lines CF SMP!
 c          solid properties
            ELSEIF (ISOLNOD == 8 .AND. NPT == 8 .AND.
      .         KHBE /= 14 .AND. KHBE /= 15 .AND. KHBE/=17) THEN
-C            Predent case test and format writing if necessary
+C            Precedent case test and format writing if necessary
              IF (ICAS_OLD /= 4) THEN
                ICAS_OLD = 4
                IF (OUTYY_FMT == 2) THEN
@@ -743,7 +743,7 @@ C            Predent case test and format writing if necessary
                WRITE(IUGEO,'(2I8)')NPT,ISOLNOD 
                WRITE(IUGEO,'(1P2E12.5)')(WAP0(J-1+K),K=1,2)
                J=J+2
-C              Writing on 2 lines CF SMP!
+C              Writing on 2 lines for SMP compatibility
                DO I = 1, NPT
                  WRITE(IUGEO,'(1P6E12.5)')(WAP0(J-1+K),K=1,6)
                  J = J + 6
@@ -754,7 +754,7 @@ C              Writing on 2 lines CF SMP!
                WRITE(IUGEO,'(2I10)')NPT,ISOLNOD 
                WRITE(IUGEO,'(1P2E20.13)')(WAP0(J-1+K),K=1,2)
                J=J+2
-C              Writing on 2 lines CF SMP!
+C              Writing on 2 lines for SMP compatibility
                DO I = 1, NPT
                  WRITE(IUGEO,'(1P6E20.13)')(WAP0(J-1+K),K=1,6)
                  J = J + 6
@@ -785,7 +785,7 @@ c
 c
              IF (OUTYY_FMT == 2) THEN
                WRITE(IUGEO,'(6I8)') NPT,ISOLNOD,KHBE,NPTR,NPTS,NPTT 
-C              Writing on 2 lines CF SMP!
+C              Writing on 2 lines for SMP compatibility
                DO I = 1, NPT
                  WRITE(IUGEO,'(1P6E12.5)')(WAP0(J-1+K),K=1,6)
                  J = J + 6
@@ -794,7 +794,7 @@ C              Writing on 2 lines CF SMP!
                ENDDO
              ELSE
                WRITE(IUGEO,'(6I10)')NPT,ISOLNOD,KHBE,NPTR,NPTS,NPTT 
-C              Writing on 2 lines CF SMP!
+C              Writing on 2 lines for SMP compatibility
                DO I = 1, NPT
                  WRITE(IUGEO,'(1P6E20.13)')(WAP0(J-1+K),K=1,6)
                  J = J + 6
@@ -822,7 +822,7 @@ c
              ENDIF
              IF (OUTYY_FMT == 2) THEN
                WRITE(IUGEO,'(5I8)')NPT,ISOLNOD,NPTR,NPTS,NPTT 
-C              Writing on 2 lines CF SMP!
+C              Writing on 2 lines for SMP compatibility
                DO I = 1, NPT
                  WRITE(IUGEO,'(1P6E12.5)')(WAP0(J-1+K),K=1,6)
                  J = J + 6
@@ -831,7 +831,7 @@ C              Writing on 2 lines CF SMP!
                ENDDO
              ELSE
                WRITE(IUGEO,'(5I10)')NPT,ISOLNOD,NPTR,NPTS,NPTT 
-C              Writing on 2 lines CF SMP!
+C              Writing on 2 lines for SMP compatibility
                DO I = 1, NPT
                  WRITE(IUGEO,'(1P6E20.13)')(WAP0(J-1+K),K=1,6)
                  J = J + 6
@@ -898,7 +898,7 @@ c
              ENDIF
              IF (OUTYY_FMT == 2) THEN
                WRITE(IUGEO,'(2I8)')NPT,ISOLNOD
-C              Writing on 2 lines CF SMP!
+C              Writing on 2 lines for SMP compatibility
                DO I = 1, NPT
                  WRITE(IUGEO,'(1P6E12.5)')(WAP0(J-1+K),K=1,6)
                  J = J + 6
@@ -907,7 +907,7 @@ C              Writing on 2 lines CF SMP!
                ENDDO
              ELSE
                WRITE(IUGEO,'(2I10)')NPT,ISOLNOD
-C              Writing on 2 lines CF SMP!
+C              Writing on 2 lines for SMP compatibility
                DO I = 1, NPT
                  WRITE(IUGEO,'(1P6E20.13)')(WAP0(J-1+K),K=1,6)
                  J = J + 6
@@ -934,7 +934,7 @@ C              Writing on 2 lines CF SMP!
              ENDIF
              IF (OUTYY_FMT == 2) THEN
                WRITE(IUGEO,'(3I8)') NPT, ISOLNOD, KHBE
-C              Writing on 2 lines CF SMP!
+C              Writing on 2 lines for SMP compatibility
                DO I = 1, NPT
                  WRITE(IUGEO,'(1P6E12.5)')(WAP0(J-1+K),K=1,6)
                  J = J + 6
@@ -943,7 +943,7 @@ C              Writing on 2 lines CF SMP!
                ENDDO
              ELSE
                WRITE(IUGEO,'(3I10)') NPT, ISOLNOD, KHBE
-C              Writing on 2 lines CF SMP!
+C              Writing on 2 lines for SMP compatibility
                DO I = 1, NPT
                  WRITE(IUGEO,'(1P6E20.13)')(WAP0(J-1+K),K=1,6)
                  J = J + 6

@@ -116,7 +116,7 @@ C-------------------------------------------------------------
          END IF  
 C
 C-----------------------------------------------
-C         CALCUL DISTANCE ENTRE LE NOEUD SECOND. 
+C         CALCULATION DISTANCE ENTRE LE NODE SECOND. 
 C              and the surface (nodal surface)
 C-----------------------------------------------
          DIST = (SX2*SX1+SY2*SY1+SZ2*SZ1) / MAX(EM15,NORM)
@@ -235,7 +235,7 @@ C-------------------------------------------------------------
          END IF  
 C
 C-----------------------------------------------
-C         CALCUL DISTANCE ENTRE LE NOEUD SECOND. 
+C         CALCULATION DISTANCE ENTRE LE NODE SECOND. 
 C              and the surface (nodal surface)
 C-----------------------------------------------
          DIST = (SX2*SX1+SY2*SY1+SZ2*SZ1) / MAX(EM15,NORM)
