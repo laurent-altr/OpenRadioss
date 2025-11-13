@@ -1,0 +1,2460 @@
+================================================================================
+FRENCH COMMENTS REVIEW - OpenRadioss
+================================================================================
+
+Total files with French comments: 275
+Total French comments: 348
+
+
+================================================================================
+Directory: engine/source/ale/alefvm
+================================================================================
+
+
+File: engine/source/ale/alefvm/alefvm_stress.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line   115: ALEMAIN>SFORC3() pour chaque groupe.
+
+
+File: engine/source/ale/alefvm/alefvm_stress_int22.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line   118: ALEMAIN>SFORC3() pour chaque groupe.
+
+
+================================================================================
+Directory: engine/source/ams
+================================================================================
+
+
+File: engine/source/ams/sms_fsa_inv.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line   106: [K]:matrice de masse complete
+
+
+================================================================================
+Directory: engine/source/boundary_conditions/ebcs
+================================================================================
+
+
+File: engine/source/boundary_conditions/ebcs/ebcs6_inip.F
+French comments: 2
+--------------------------------------------------------------------------------
+  Line    53: Pression arret initiale imposee avec impedance
+  Line   181: calcul pression initiale nodale
+
+
+================================================================================
+Directory: engine/source/constraints/general/rbody
+================================================================================
+
+
+File: engine/source/constraints/general/rbody/rgbodfp.F
+French comments: 4
+--------------------------------------------------------------------------------
+  Line   334: matrice d'inertie en repere global
+  Line   652: MATRICE d'inertie -> repere globale
+  Line   688: MATRICE d'inertie -> repere globale
+  Line   724: MATRICE d'inertie -> repere globale
+
+
+File: engine/source/constraints/general/rbody/inepri.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    34: CALCUL INERTIES ET REPERE PRINCIPAL
+
+
+File: engine/source/constraints/general/rbody/rbyact.F
+French comments: 3
+--------------------------------------------------------------------------------
+  Line   252: MATRICE d'inertie -> repere globale
+  Line   333: MATRICE d'inertie -> repere globale
+  Line   429: CALCUL DU REPERE D'INERTIE PRINCIPALE
+
+
+File: engine/source/constraints/general/rbody/rbyfor.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line   193: Traitement rigid bodies (sans packet), avec scheduling dynamique
+
+
+================================================================================
+Directory: engine/source/elements/shell/coqueba
+================================================================================
+
+
+File: engine/source/elements/shell/coqueba/cmatc3.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    98: I   THK ,THKE         - element updated and initial thickness
+
+
+File: engine/source/elements/shell/coqueba/cbacoor.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line   117: O  NPLAT,IPLAT(NEL)    - num. of plat element and indice
+
+
+File: engine/source/elements/shell/coqueba/cbacoork.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    94: O  NPLAT,IPLAT(NEL)    - num. of plat element and indice
+
+
+================================================================================
+Directory: engine/source/elements/solid/solide
+================================================================================
+
+
+File: engine/source/elements/solid/solide/vfluid.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    69: CALCUL DES CONTRAINTES SUIVANT LOIS CONSTITUTIVES
+
+
+File: engine/source/elements/solid/solide/sfint_reg.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line   306: Initial element characteristic length
+
+
+================================================================================
+Directory: engine/source/elements/solid/solide10
+================================================================================
+
+
+File: engine/source/elements/solid/solide10/s10forc3.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line   623: CALCUL DES CONTRAINTES SUIVANT LOIS CONSTITUTIVES
+
+
+================================================================================
+Directory: engine/source/elements/solid/solide20
+================================================================================
+
+
+File: engine/source/elements/solid/solide20/s20forc3.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line   428: CALCUL DES CONTRAINTES SUIVANT LOIS CONSTITUTIVES
+
+
+================================================================================
+Directory: engine/source/elements/solid/solide4
+================================================================================
+
+
+File: engine/source/elements/solid/solide4/s4fint_reg.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line   206: Initial element characteristic length
+
+
+File: engine/source/elements/solid/solide4/s4forc3.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line   589: CALCUL DES CONTRAINTES SUIVANT LOIS CONSTITUTIVES
+
+
+================================================================================
+Directory: engine/source/elements/solid/solide8
+================================================================================
+
+
+File: engine/source/elements/solid/solide8/s8forc3.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line   220: CALCUL DES CONTRAINTES SUIVANT LOIS CONSTITUTIVES
+
+
+================================================================================
+Directory: engine/source/elements/solid/solide8e
+================================================================================
+
+
+File: engine/source/elements/solid/solide8e/s8eforc3.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line  1532: CALCUL DES CONTRAINTES SUIVANT LOIS CONSTITUTIVES
+
+
+================================================================================
+Directory: engine/source/elements/solid/solide8s
+================================================================================
+
+
+File: engine/source/elements/solid/solide8s/s8sforc3.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line   834: CALCUL DES CONTRAINTES SUIVANT LOIS CONSTITUTIVES
+
+
+File: engine/source/elements/solid/solide8s/srcoor3_imp.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line   370: print*,'REPERE Pour Fint: ',I
+
+
+================================================================================
+Directory: engine/source/elements/solid/solide8z
+================================================================================
+
+
+File: engine/source/elements/solid/solide8z/s8zfint_reg.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line   461: Initial element characteristic length
+
+
+File: engine/source/elements/solid/solide8z/s8zforc3.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line  1181: CALCUL DES CONTRAINTES SUIVANT LOIS CONSTITUTIVES
+
+
+================================================================================
+Directory: engine/source/elements/solid/solidez
+================================================================================
+
+
+File: engine/source/elements/solid/solidez/mmodul24c.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line   117: NON DAMAGED ELEMENT GROUP => initial Hook matrix
+
+
+================================================================================
+Directory: engine/source/elements/sph
+================================================================================
+
+
+File: engine/source/elements/sph/spstres.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line   245: CALCUL DES CONTRAINTES SUIVANT LOIS CONSTITUTIVES
+
+
+================================================================================
+Directory: engine/source/elements/thickshell/solide16
+================================================================================
+
+
+File: engine/source/elements/thickshell/solide16/s16forc3.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line   612: CALCUL DES CONTRAINTES SUIVANT LOIS CONSTITUTIVES
+
+
+================================================================================
+Directory: engine/source/elements/thickshell/solide6c
+================================================================================
+
+
+File: engine/source/elements/thickshell/solide6c/s6cfint_reg.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line   501: Initial element characteristic length
+
+
+================================================================================
+Directory: engine/source/elements/thickshell/solide8c
+================================================================================
+
+
+File: engine/source/elements/thickshell/solide8c/s8cfint_reg.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line   716: Initial element characteristic length
+
+
+File: engine/source/elements/thickshell/solide8c/s8cforc3.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line   979: CALCUL DES CONTRAINTES SUIVANT LOIS CONSTITUTIVES
+
+
+================================================================================
+Directory: engine/source/elements/thickshell/solidec
+================================================================================
+
+
+File: engine/source/elements/thickshell/solidec/scfint_reg.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line   498: Initial element characteristic length
+
+
+================================================================================
+Directory: engine/source/elements/xelem
+================================================================================
+
+
+File: engine/source/elements/xelem/xanim28.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    65: MASSELE  |  1      | F | R | ELEMENT (INITIAL) MASS
+
+
+================================================================================
+Directory: engine/source/fluid
+================================================================================
+
+
+File: engine/source/fluid/lecflsw.F
+French comments: 2
+--------------------------------------------------------------------------------
+  Line    99: IE               :  NUMERO EXTERNE DE L'ELEMENT
+  Line   101: IB2=NNFLSW(7,IL) :  ADRESSE DE LA PRESSION (ECRASE NUMERO EXTERNE)
+
+
+File: engine/source/fluid/flow0.F
+French comments: 2
+--------------------------------------------------------------------------------
+  Line    85: II7  -> IBUFR   : indice ligne noeud local (0 si pas sur ce proc)
+  Line    86: II8  -> IBUFC   : indice colonne noeud local (0 si pas sur ce proc)
+
+
+================================================================================
+Directory: engine/source/general_controls/computation
+================================================================================
+
+
+File: engine/source/general_controls/computation/noise.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    91: NE : NOMBRE D'ECHANTILLON ENTRE CHAQUE SORTIE
+
+
+File: engine/source/general_controls/computation/initnoise.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    62: STOCKE DANS NOIADD(K) LE NOMBRE d'ELEMENTS CONNECTES AU NOEUD K-1
+
+
+================================================================================
+Directory: engine/source/implicit
+================================================================================
+
+
+File: engine/source/implicit/imp_dyna.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line  1270: matrice d'inertie en repere global
+
+
+================================================================================
+Directory: engine/source/interfaces/int07
+================================================================================
+
+
+File: engine/source/interfaces/int07/i7main_lmult.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    66: EMINX  6*NME<6*NUMELS           MIN MAX DE CHAQUE ELEMENT        TMP_GLOBAL
+
+
+File: engine/source/interfaces/int07/i7therm.F
+French comments: 2
+--------------------------------------------------------------------------------
+  Line   119: CALCUL DISTANCE ENTRE LE NOEUD SECOND.
+  Line   238: CALCUL DISTANCE ENTRE LE NOEUD SECOND.
+
+
+File: engine/source/interfaces/int07/i7lagm.F
+French comments: 2
+--------------------------------------------------------------------------------
+  Line   134: IK : numero de noeud local a un contact (1,NK)
+  Line   135: I  : numero global du noeud (1,NUMNOD)
+
+
+================================================================================
+Directory: engine/source/interfaces/int14
+================================================================================
+
+
+File: engine/source/interfaces/int14/i14wfs.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    73: J11+8 : Sauve DE pour calcul Travail des Forces Secnds.
+
+
+================================================================================
+Directory: engine/source/interfaces/int16
+================================================================================
+
+
+File: engine/source/interfaces/int16/i16lagm.F
+French comments: 2
+--------------------------------------------------------------------------------
+  Line   101: IK : numero de noeud local a un contact (1,NK)
+  Line   102: I  : numero global du noeud (1,NUMNOD)
+
+
+File: engine/source/interfaces/int16/i8lagm.F
+French comments: 2
+--------------------------------------------------------------------------------
+  Line   101: IK : numero de noeud local a un contact (1,NK)
+  Line   102: I  : numero global du noeud (1,NUMNOD)
+
+
+File: engine/source/interfaces/int16/i20lagm.F
+French comments: 2
+--------------------------------------------------------------------------------
+  Line   101: IK : numero de noeud local a un contact (1,NK)
+  Line   102: I  : numero global du noeud (1,NUMNOD)
+
+
+File: engine/source/interfaces/int16/i10lagm.F
+French comments: 2
+--------------------------------------------------------------------------------
+  Line   101: IK : numero de noeud local a un contact (1,NK)
+  Line   102: I  : numero global du noeud (1,NUMNOD)
+
+
+File: engine/source/interfaces/int16/i16main.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    65: EMINX  6*NME<6*NUMELS           MIN MAX DE CHAQUE ELEMENT        TMP_GLOBAL
+
+
+================================================================================
+Directory: engine/source/interfaces/int17
+================================================================================
+
+
+File: engine/source/interfaces/int17/i21lagm.F
+French comments: 2
+--------------------------------------------------------------------------------
+  Line   101: IK : numero de noeud local a un contact (1,NK)
+  Line   102: I  : numero global du noeud (1,NUMNOD)
+
+
+File: engine/source/interfaces/int17/i17for3.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line   413: calcul de SI_S=s(relatif element main)
+
+
+File: engine/source/interfaces/int17/i17lagm.F
+French comments: 3
+--------------------------------------------------------------------------------
+  Line   106: IK : numero de noeud local a un contact (1,NK)
+  Line   107: I  : numero global du noeud (1,NUMNOD)
+  Line   355: calcul de SI_S=s(relatif element main)
+
+
+File: engine/source/interfaces/int17/i17main_pena.F
+French comments: 4
+--------------------------------------------------------------------------------
+  Line    61: EMINX  6*(NME+NMES)           MIN MAX DE CHAQUE ELEMENT        TMP_GLOBAL
+  Line   183: EMINX  6*NME<6*NUMELS           MIN MAX DE CHAQUE ELEMENT        TMP_GLOBAL
+  Line   281: CALCUL BORNE DOMAINE REMONTE DANS I17XSAVE
+  Line   398: EMINX  6*NME<6*NUMELS           MIN MAX DE CHAQUE ELEMENT        TMP_GLOBAL
+
+
+File: engine/source/interfaces/int17/i17main.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    63: EMINX  6*NME<6*NUMELS           MIN MAX DE CHAQUE ELEMENT        TMP_GLOBAL
+
+
+================================================================================
+Directory: engine/source/interfaces/int18
+================================================================================
+
+
+File: engine/source/interfaces/int18/i18main_kine.F
+French comments: 4
+--------------------------------------------------------------------------------
+  Line   539: EMINX  6*NME<6*NUMELS           MIN MAX DE CHAQUE ELEMENT        TMP_GLOBAL
+  Line   767: EMINX  6*NME<6*NUMELS           MIN MAX DE CHAQUE ELEMENT        TMP_GLOBAL
+  Line   997: EMINX  6*NME<6*NUMELS           MIN MAX DE CHAQUE ELEMENT        TMP_GLOBAL
+  Line  1142: EMINX  6*NME<6*NUMELS           MIN MAX DE CHAQUE ELEMENT        TMP_GLOBAL
+
+
+================================================================================
+Directory: engine/source/interfaces/int21
+================================================================================
+
+
+File: engine/source/interfaces/int21/i21therm.F
+French comments: 2
+--------------------------------------------------------------------------------
+  Line   118: DISTANCE ENTRE LE NOEUD SECOND.
+  Line   214: DISTANCE ENTRE LE NOEUD SECOND.
+
+
+================================================================================
+Directory: engine/source/interfaces/int22
+================================================================================
+
+
+File: engine/source/interfaces/int22/sigeps37_single_cell.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    96: APPEL SIGEPS37 POUR EQUILIBRE PRESSION
+
+
+File: engine/source/interfaces/int22/sinit22_fvm.F
+French comments: 4
+--------------------------------------------------------------------------------
+  Line  2090: APPEL SIGEPS37 POUR EQUILIBRE PRESSION
+  Line  2727: APPEL SIGEPS37 POUR EQUILIBRE PRESSION
+  Line  2782: APPEL SIGEPS37 POUR EQUILIBRE PRESSION
+  Line  3280: APPEL SIGEPS37 POUR EQUILIBRE PRESSION
+
+
+================================================================================
+Directory: engine/source/interfaces/interf
+================================================================================
+
+
+File: engine/source/interfaces/interf/in12r.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    75: RETOUR REPERE SECOND
+
+
+File: engine/source/interfaces/interf/int2rupt.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line   254: Reset initial main & secnd masse /inertia
+
+
+File: engine/source/interfaces/interf/i12s2m.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line   116: CALCUL PARTICULIER SI IL EXISTE ONE SEGMENT SANS NOEUD SECOND. DETECTE
+
+
+File: engine/source/interfaces/interf/intti12.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line   168: CALCUL COORDONNEES ISOPARAMETRIQUES S & T NOEUD SECONDARY   !
+
+
+================================================================================
+Directory: engine/source/interfaces/intsort
+================================================================================
+
+
+File: engine/source/interfaces/intsort/i10trc.F
+French comments: 2
+--------------------------------------------------------------------------------
+  Line    83: CAND_A : DENOMBREMENT DE CHAQUE NOEUD
+  Line    91: CAND_A : ADRESSE DE CHAQUE NOEUD
+
+
+File: engine/source/interfaces/intsort/i25trc_edg.F
+French comments: 2
+--------------------------------------------------------------------------------
+  Line    93: CAND_A : DENOMBREMENT DE CHAQUE NOEUD
+  Line   102: CAND_A : ADRESSE DE CHAQUE NOEUD
+
+
+File: engine/source/interfaces/intsort/i20main_tri.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line   250: CALCUL BORNE DOMAINE REMONTE DANS I7XSAVE
+
+
+File: engine/source/interfaces/intsort/i23main_tri.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line   200: CALCUL BORNE DOMAINE REMONTE DANS I7XSAVE
+
+
+File: engine/source/interfaces/intsort/i11main_tri.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line   203: CALCUL BORNE DOMAINE REMONTE DANS I7XSAVE
+
+
+File: engine/source/interfaces/intsort/i10tri.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line   118: PROV_E       CAND_E provisoire (variable static dans i7tri)
+
+
+File: engine/source/interfaces/intsort/i21tri.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line   113: PROV_E       CAND_E provisoire (variable static dans i7tri)
+
+
+File: engine/source/interfaces/intsort/i7tri.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line   121: PROV_E       CAND_E provisoire (variable static dans i7tri)
+
+
+File: engine/source/interfaces/intsort/i20tri.F
+French comments: 3
+--------------------------------------------------------------------------------
+  Line   118: PROV_E       CAND_E provisoire (variable static dans i20tri)
+  Line   750: PROV_M       CAND_M provisoire (variable static dans i7tri)
+  Line   842: INTERFACE AVEC 1 SEGMENT ET 1 NOEUD + INITIALISATION DX DY DZ
+
+
+File: engine/source/interfaces/intsort/i25trc_e2s.F
+French comments: 2
+--------------------------------------------------------------------------------
+  Line   109: CAND_A : DENOMBREMENT DE CHAQUE NOEUD
+  Line   118: CAND_A : ADRESSE DE CHAQUE NOEUD
+
+
+File: engine/source/interfaces/intsort/i25trivox.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    94: PROV_E       CAND_E provisoire (variable static dans i7tri)
+
+
+File: engine/source/interfaces/intsort/i7trc.F
+French comments: 4
+--------------------------------------------------------------------------------
+  Line   258: CAND_A : DENOMBREMENT DE CHAQUE NOEUD
+  Line   266: CAND_A : ADRESSE DE CHAQUE NOEUD
+  Line   728: CAND_A : DENOMBREMENT DE CHAQUE NOEUD
+  Line   737: CAND_A : ADRESSE DE CHAQUE NOEUD
+
+
+File: engine/source/interfaces/intsort/i23trc.F
+French comments: 2
+--------------------------------------------------------------------------------
+  Line    67: CAND_A : DENOMBREMENT DE CHAQUE NOEUD
+  Line    75: CAND_A : ADRESSE DE CHAQUE NOEUD
+
+
+File: engine/source/interfaces/intsort/i24main_tri.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line   218: CALCUL BORNE DOMAINE REMONTE DANS I7XSAVE
+
+
+File: engine/source/interfaces/intsort/i23trivox.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    92: PROV_E       CAND_E provisoire (variable static dans i7tri)
+
+
+File: engine/source/interfaces/intsort/i24trivox.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    95: PROV_E       CAND_E provisoire (variable static dans i7tri)
+
+
+File: engine/source/interfaces/intsort/i11tri.F
+French comments: 2
+--------------------------------------------------------------------------------
+  Line   110: PROV_M       CAND_M provisoire (variable static dans i7tri)
+  Line   199: INTERFACE AVEC 1 SEGMENT ET 1 NOEUD + INITIALISATION DX DY DZ
+
+
+File: engine/source/interfaces/intsort/i10main_tri.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line   172: CALCUL BORNE DOMAINE REMONTE DANS I7XSAVE
+
+
+================================================================================
+Directory: engine/source/materials/fail
+================================================================================
+
+
+File: engine/source/materials/fail/fail_setoff_wind_frwave.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    92: TFAIL(NEL) : global element variable - start of relaxation time before element suppression
+
+
+================================================================================
+Directory: engine/source/materials/fail/alter
+================================================================================
+
+
+File: engine/source/materials/fail/alter/fail_wind_frwave.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    63: UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY
+
+
+File: engine/source/materials/fail/alter/fail_wind_xfem.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    58: UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY
+
+
+================================================================================
+Directory: engine/source/materials/fail/biquad
+================================================================================
+
+
+File: engine/source/materials/fail/biquad/fail_biquad_ib.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line   106: At initial time, compute the element size regularization factor
+
+
+File: engine/source/materials/fail/biquad/fail_biquad_s.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    94: At initial time, compute the element size regularization factor
+
+
+File: engine/source/materials/fail/biquad/fail_biquad_c.F
+French comments: 2
+--------------------------------------------------------------------------------
+  Line    72: UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY
+  Line   125: ! UVAR3 (if perturbation is not used) or UVAR9 (if used) = initial element length and then scale factor
+
+
+================================================================================
+Directory: engine/source/materials/fail/changchang
+================================================================================
+
+
+File: engine/source/materials/fail/changchang/fail_changchang_c.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    53: UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY
+
+
+================================================================================
+Directory: engine/source/materials/fail/cockroft_latham
+================================================================================
+
+
+File: engine/source/materials/fail/cockroft_latham/fail_cockroft_s.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    72: UVAR |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY
+
+
+File: engine/source/materials/fail/cockroft_latham/fail_cockroft_c.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    74: UVAR    |NEL*NUVAR| F|R/W| USER ELEMENT VARIABLE ARRAY
+
+
+================================================================================
+Directory: engine/source/materials/fail/connect
+================================================================================
+
+
+File: engine/source/materials/fail/connect/fail_connect.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    62: UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY
+
+
+================================================================================
+Directory: engine/source/materials/fail/emc
+================================================================================
+
+
+File: engine/source/materials/fail/emc/fail_emc.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    61: UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY
+
+
+================================================================================
+Directory: engine/source/materials/fail/energy
+================================================================================
+
+
+File: engine/source/materials/fail/energy/fail_energy_c.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    57: UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY
+
+
+File: engine/source/materials/fail/energy/fail_energy_s.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    65: UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY
+
+
+================================================================================
+Directory: engine/source/materials/fail/fabric
+================================================================================
+
+
+File: engine/source/materials/fail/fabric/fail_fabric_c.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    50: UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY
+
+
+================================================================================
+Directory: engine/source/materials/fail/fld
+================================================================================
+
+
+File: engine/source/materials/fail/fld/fail_fld_tsh.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    55: UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY
+
+
+File: engine/source/materials/fail/fld/fail_fld_xfem.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    62: UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY
+
+
+================================================================================
+Directory: engine/source/materials/fail/gene1
+================================================================================
+
+
+File: engine/source/materials/fail/gene1/fail_gene1_c.F
+French comments: 2
+--------------------------------------------------------------------------------
+  Line   177: At initial time, compute the element size regularization factor
+  Line   194: Checking element failure and recovering user variable
+
+
+File: engine/source/materials/fail/gene1/fail_gene1_s.F
+French comments: 2
+--------------------------------------------------------------------------------
+  Line   189: At initial time, compute the element size regularization factor
+  Line   204: Checking element failure and recovering user variable
+
+
+================================================================================
+Directory: engine/source/materials/fail/hashin
+================================================================================
+
+
+File: engine/source/materials/fail/hashin/fail_hashin_c.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    54: UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY
+
+
+File: engine/source/materials/fail/hashin/fail_hashin_s.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    75: UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY
+
+
+================================================================================
+Directory: engine/source/materials/fail/hc_dsse
+================================================================================
+
+
+File: engine/source/materials/fail/hc_dsse/fail_hc_dsse_c.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    81: ! UVAR    |NEL*NUVAR| F|R/W| USER ELEMENT VARIABLE ARRAY
+
+
+================================================================================
+Directory: engine/source/materials/fail/inievo
+================================================================================
+
+
+File: engine/source/materials/fail/inievo/fail_inievo_c.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line   432: Checking element failure and recovering user variable
+
+
+File: engine/source/materials/fail/inievo/fail_inievo_s.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line   458: Checking element failure and recovering user variable
+
+
+================================================================================
+Directory: engine/source/materials/fail/johnson_cook
+================================================================================
+
+
+File: engine/source/materials/fail/johnson_cook/fail_johnson.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    60: UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY
+
+
+File: engine/source/materials/fail/johnson_cook/fail_johnson_xfem.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    73: UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY
+
+
+File: engine/source/materials/fail/johnson_cook/fail_johnson_c.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    60: UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY
+
+
+================================================================================
+Directory: engine/source/materials/fail/ladeveze
+================================================================================
+
+
+File: engine/source/materials/fail/ladeveze/fail_ladeveze.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    75: UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY
+
+
+================================================================================
+Directory: engine/source/materials/fail/mullins_or
+================================================================================
+
+
+File: engine/source/materials/fail/mullins_or/fail_mullins_OR_s.F
+French comments: 2
+--------------------------------------------------------------------------------
+  Line    60: UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY
+  Line   153: UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY
+
+
+================================================================================
+Directory: engine/source/materials/fail/nxt
+================================================================================
+
+
+File: engine/source/materials/fail/nxt/fail_nxt_c.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    55: UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY
+
+
+================================================================================
+Directory: engine/source/materials/fail/orthbiquad
+================================================================================
+
+
+File: engine/source/materials/fail/orthbiquad/fail_orthbiquad_c.F
+French comments: 2
+--------------------------------------------------------------------------------
+  Line    68: UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY
+  Line   180: At initial time, compute the element size regularization factor
+
+
+File: engine/source/materials/fail/orthbiquad/fail_orthbiquad_s.F
+French comments: 3
+--------------------------------------------------------------------------------
+  Line    65: ! UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY
+  Line   164: At initial time, compute the element size regularization factor
+  Line   173: Checking element failure and recovering user variable
+
+
+================================================================================
+Directory: engine/source/materials/fail/orthenerg
+================================================================================
+
+
+File: engine/source/materials/fail/orthenerg/fail_orthenerg_c.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line   101: Save initial element length
+
+
+File: engine/source/materials/fail/orthenerg/fail_orthenerg_s.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line   120: Save initial element length
+
+
+================================================================================
+Directory: engine/source/materials/fail/orthstrain
+================================================================================
+
+
+File: engine/source/materials/fail/orthstrain/fail_orthstrain_s.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    79: UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY
+
+
+File: engine/source/materials/fail/orthstrain/fail_orthstrain_c.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    58: UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY
+
+
+================================================================================
+Directory: engine/source/materials/fail/puck
+================================================================================
+
+
+File: engine/source/materials/fail/puck/fail_puck_c.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    54: UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY
+
+
+File: engine/source/materials/fail/puck/fail_puck_s.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    72: UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY
+
+
+================================================================================
+Directory: engine/source/materials/fail/rtcl
+================================================================================
+
+
+File: engine/source/materials/fail/rtcl/fail_rtcl_s.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    64: Checking element failure and recovering user variable
+
+
+File: engine/source/materials/fail/rtcl/fail_rtcl_c.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    64: Store initial element size
+
+
+================================================================================
+Directory: engine/source/materials/fail/sahraei
+================================================================================
+
+
+File: engine/source/materials/fail/sahraei/fail_sahraei_s.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    67: UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY
+
+
+================================================================================
+Directory: engine/source/materials/fail/snconnect
+================================================================================
+
+
+File: engine/source/materials/fail/snconnect/fail_snconnect.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    58: UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY
+
+
+================================================================================
+Directory: engine/source/materials/fail/syazwan
+================================================================================
+
+
+File: engine/source/materials/fail/syazwan/fail_syazwan_c.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line   130: Checking element failure and recovering user variable
+
+
+================================================================================
+Directory: engine/source/materials/fail/tabulated
+================================================================================
+
+
+File: engine/source/materials/fail/tabulated/fail_tab_xfem.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    86: UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY
+
+
+File: engine/source/materials/fail/tabulated/fail_tab2_c.F
+French comments: 2
+--------------------------------------------------------------------------------
+  Line   134: Checking element failure and recovering user variable
+  Line   172: At initial time, save the element size
+
+
+File: engine/source/materials/fail/tabulated/fail_tab_s.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    72: UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY
+
+
+File: engine/source/materials/fail/tabulated/fail_tab2_s.F
+French comments: 2
+--------------------------------------------------------------------------------
+  Line   135: Checking element failure and recovering user variable
+  Line   177: At initial time, save the element size
+
+
+File: engine/source/materials/fail/tabulated/fail_tab_c.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    69: UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY
+
+
+File: engine/source/materials/fail/tabulated/fail_tab_old_c.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    92: UVAR(3) = IPOS variable for element length scale function interpolation
+
+
+================================================================================
+Directory: engine/source/materials/fail/tensstrain
+================================================================================
+
+
+File: engine/source/materials/fail/tensstrain/fail_tensstrain_s.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    69: UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY
+
+
+File: engine/source/materials/fail/tensstrain/fail_tensstrain_c.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    56: UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY
+
+
+================================================================================
+Directory: engine/source/materials/fail/tuler_butcher
+================================================================================
+
+
+File: engine/source/materials/fail/tuler_butcher/fail_tbutcher_c.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    52: UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY
+
+
+File: engine/source/materials/fail/tuler_butcher/fail_tbutcher_xfem.F
+French comments: 2
+--------------------------------------------------------------------------------
+  Line    55: UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY
+  Line    64: UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY
+
+
+File: engine/source/materials/fail/tuler_butcher/fail_tbutcher_s.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    77: UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY
+
+
+================================================================================
+Directory: engine/source/materials/fail/visual
+================================================================================
+
+
+File: engine/source/materials/fail/visual/fail_visual_c.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    59: UVAR |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY
+
+
+File: engine/source/materials/fail/visual/fail_visual_s.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    60: UVAR |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY
+
+
+================================================================================
+Directory: engine/source/materials/fail/wierzbicki
+================================================================================
+
+
+File: engine/source/materials/fail/wierzbicki/fail_wierzbicki_c.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    52: UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY
+
+
+File: engine/source/materials/fail/wierzbicki/fail_wierzbicki_s.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    60: UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY
+
+
+================================================================================
+Directory: engine/source/materials/fail/wilkins
+================================================================================
+
+
+File: engine/source/materials/fail/wilkins/fail_wilkins_c.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    52: UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY
+
+
+File: engine/source/materials/fail/wilkins/fail_wilkins_s.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    75: UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY
+
+
+================================================================================
+Directory: engine/source/materials/mat/mat013
+================================================================================
+
+
+File: engine/source/materials/mat/mat013/rmatpon.F
+French comments: 2
+--------------------------------------------------------------------------------
+  Line   157: matrice d'inertie en repere global
+  Line   285: MATRICE d'inertie -> repere globale
+
+
+================================================================================
+Directory: engine/source/materials/mat/mat024
+================================================================================
+
+
+File: engine/source/materials/mat/mat024/conc24.F
+French comments: 2
+--------------------------------------------------------------------------------
+  Line   127: GAMA = repere  d'armature
+  Line   302: RETOUR REPERE ARMATURE
+
+
+File: engine/source/materials/mat/mat024/elas24.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line   179: NON DAMAGED ELEMENT GROUP => initial Hook matrix
+
+
+================================================================================
+Directory: engine/source/materials/mat/mat025
+================================================================================
+
+
+File: engine/source/materials/mat/mat025/prony25c.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    64: UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY
+
+
+================================================================================
+Directory: engine/source/materials/mat/mat028
+================================================================================
+
+
+File: engine/source/materials/mat/mat028/sigeps28.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    91: UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY
+
+
+================================================================================
+Directory: engine/source/materials/mat/mat036
+================================================================================
+
+
+File: engine/source/materials/mat/mat036/sigeps36pi.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    63: UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY
+
+
+File: engine/source/materials/mat/mat036/sigeps36c.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    95: UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY
+
+
+File: engine/source/materials/mat/mat036/sigeps36.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    88: UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY
+
+
+================================================================================
+Directory: engine/source/materials/mat/mat037
+================================================================================
+
+
+File: engine/source/materials/mat/mat037/sigeps37.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line   104: ! UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY
+
+
+================================================================================
+Directory: engine/source/materials/mat/mat040
+================================================================================
+
+
+File: engine/source/materials/mat/mat040/sigeps40.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    91: UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY
+
+
+================================================================================
+Directory: engine/source/materials/mat/mat041
+================================================================================
+
+
+File: engine/source/materials/mat/mat041/sigeps41.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line   127: UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY
+
+
+================================================================================
+Directory: engine/source/materials/mat/mat044
+================================================================================
+
+
+File: engine/source/materials/mat/mat044/sigeps44.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    97: UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY
+
+
+File: engine/source/materials/mat/mat044/sigeps44c.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    85: UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY
+
+
+================================================================================
+Directory: engine/source/materials/mat/mat045
+================================================================================
+
+
+File: engine/source/materials/mat/mat045/sigeps45.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    93: UVAR    |NEL0*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY
+
+
+File: engine/source/materials/mat/mat045/sigeps45c.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    97: UVAR    |NEL0*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY
+
+
+================================================================================
+Directory: engine/source/materials/mat/mat048
+================================================================================
+
+
+File: engine/source/materials/mat/mat048/sigeps48c.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    97: UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY
+
+
+File: engine/source/materials/mat/mat048/sigeps48.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    93: UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY
+
+
+================================================================================
+Directory: engine/source/materials/mat/mat052
+================================================================================
+
+
+File: engine/source/materials/mat/mat052/sigeps52c.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line   106: UVAR    |NEL0*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY
+
+
+File: engine/source/materials/mat/mat052/sigeps52.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line   101: UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY
+
+
+================================================================================
+Directory: engine/source/materials/mat/mat053
+================================================================================
+
+
+File: engine/source/materials/mat/mat053/sigeps53.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line   101: UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY
+
+
+================================================================================
+Directory: engine/source/materials/mat/mat055
+================================================================================
+
+
+File: engine/source/materials/mat/mat055/sigeps55c.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    99: UVAR    |NEL0*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY
+
+
+================================================================================
+Directory: engine/source/materials/mat/mat056
+================================================================================
+
+
+File: engine/source/materials/mat/mat056/sigeps56c.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    99: UVAR    |NEL0*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY
+
+
+File: engine/source/materials/mat/mat056/sigeps56.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    97: UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY
+
+
+================================================================================
+Directory: engine/source/materials/mat/mat058
+================================================================================
+
+
+File: engine/source/materials/mat/mat058/sigeps58c.F
+French comments: 2
+--------------------------------------------------------------------------------
+  Line   104: UVAR    |NEL0*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY
+  Line   208: UVAR(14) = ALDT             ! initial characteristic length of the element
+
+
+================================================================================
+Directory: engine/source/materials/mat/mat059
+================================================================================
+
+
+File: engine/source/materials/mat/mat059/sigeps59.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    76: UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY
+
+
+================================================================================
+Directory: engine/source/materials/mat/mat060
+================================================================================
+
+
+File: engine/source/materials/mat/mat060/sigeps60.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    98: UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY
+
+
+File: engine/source/materials/mat/mat060/sigeps60c.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line   101: UVAR    |NEL0*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY
+
+
+================================================================================
+Directory: engine/source/materials/mat/mat063
+================================================================================
+
+
+File: engine/source/materials/mat/mat063/sigeps63c.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line   102: UVAR    |NEL0*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY
+
+
+================================================================================
+Directory: engine/source/materials/mat/mat064
+================================================================================
+
+
+File: engine/source/materials/mat/mat064/sigeps64c.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line   103: UVAR    |NEL0*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY
+
+
+================================================================================
+Directory: engine/source/materials/mat/mat065
+================================================================================
+
+
+File: engine/source/materials/mat/mat065/sigeps65c.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    96: UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY
+
+
+File: engine/source/materials/mat/mat065/sigeps65.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    96: UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY
+
+
+================================================================================
+Directory: engine/source/materials/mat/mat066
+================================================================================
+
+
+File: engine/source/materials/mat/mat066/sigeps66.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    93: UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY
+
+
+File: engine/source/materials/mat/mat066/sigeps66c.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line   103: UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY
+
+
+================================================================================
+Directory: engine/source/materials/mat/mat068
+================================================================================
+
+
+File: engine/source/materials/mat/mat068/sigeps68.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    93: UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY
+
+
+================================================================================
+Directory: engine/source/materials/mat/mat070
+================================================================================
+
+
+File: engine/source/materials/mat/mat070/sigeps70.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    99: UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY
+
+
+================================================================================
+Directory: engine/source/materials/mat/mat071
+================================================================================
+
+
+File: engine/source/materials/mat/mat071/sigeps71.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    90: UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY
+
+
+File: engine/source/materials/mat/mat071/sigeps71c.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line   102: UVAR    |NEL0*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY
+
+
+================================================================================
+Directory: engine/source/materials/mat/mat074
+================================================================================
+
+
+File: engine/source/materials/mat/mat074/sigeps74.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line   102: UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY
+
+
+================================================================================
+Directory: engine/source/materials/mat/mat075
+================================================================================
+
+
+File: engine/source/materials/mat/mat075/sigeps75.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    94: UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY
+
+
+================================================================================
+Directory: engine/source/materials/mat/mat077
+================================================================================
+
+
+File: engine/source/materials/mat/mat077/sigeps77.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    92: UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY
+
+
+================================================================================
+Directory: engine/source/materials/mat/mat080
+================================================================================
+
+
+File: engine/source/materials/mat/mat080/sigeps80.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line   106: UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY
+
+
+File: engine/source/materials/mat/mat080/sigeps80c.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line   110: UVAR    |NEL0*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY
+
+
+================================================================================
+Directory: engine/source/materials/mat/mat083
+================================================================================
+
+
+File: engine/source/materials/mat/mat083/sigeps83.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    71: UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY
+
+
+================================================================================
+Directory: engine/source/materials/mat/mat084
+================================================================================
+
+
+File: engine/source/materials/mat/mat084/sigeps84.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    88: UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY
+
+
+================================================================================
+Directory: engine/source/materials/mat/mat085
+================================================================================
+
+
+File: engine/source/materials/mat/mat085/sigeps85c_void.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    98: UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY
+
+
+================================================================================
+Directory: engine/source/materials/mat/mat086
+================================================================================
+
+
+File: engine/source/materials/mat/mat086/sigeps86c.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    99: UVAR    |NEL0*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY
+
+
+================================================================================
+Directory: engine/source/materials/mat/mat090
+================================================================================
+
+
+File: engine/source/materials/mat/mat090/sigeps90.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    90: UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY
+
+
+================================================================================
+Directory: engine/source/materials/mat/mat096
+================================================================================
+
+
+File: engine/source/materials/mat/mat096/sigeps96.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    50: UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY
+
+
+================================================================================
+Directory: engine/source/materials/mat/mat103
+================================================================================
+
+
+File: engine/source/materials/mat/mat103/sigeps103.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    41: UVAR    USER ELEMENT VARIABLE ARRAY
+
+
+================================================================================
+Directory: engine/source/materials/mat/mat110
+================================================================================
+
+
+File: engine/source/materials/mat/mat110/sigeps110c_newton.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line   207: Initial variable
+
+
+File: engine/source/materials/mat/mat110/sigeps110c_nice.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line   207: Initial variable
+
+
+File: engine/source/materials/mat/mat110/sigeps110c_lite_newton.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line   200: Initial variable
+
+
+File: engine/source/materials/mat/mat110/sigeps110c_lite_nice.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line   200: Initial variable
+
+
+================================================================================
+Directory: engine/source/materials/mat/mat158
+================================================================================
+
+
+File: engine/source/materials/mat/mat158/sigeps158c.F
+French comments: 2
+--------------------------------------------------------------------------------
+  Line    88: UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY
+  Line   154: UVAR(14) = ALDT             ! initial characteristic length of the element
+
+
+================================================================================
+Directory: engine/source/materials/mat/mat187
+================================================================================
+
+
+File: engine/source/materials/mat/mat187/sigeps187.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line   100: UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY
+
+
+================================================================================
+Directory: engine/source/materials/mat/mat190
+================================================================================
+
+
+File: engine/source/materials/mat/mat190/sigeps190.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    94: UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY
+
+
+================================================================================
+Directory: engine/source/materials/visc
+================================================================================
+
+
+File: engine/source/materials/visc/prony_modelc.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    62: UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY
+
+
+File: engine/source/materials/visc/visc_prony_lstrain.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    61: UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY
+
+
+================================================================================
+Directory: engine/source/mpi/forces
+================================================================================
+
+
+File: engine/source/mpi/forces/spmd_exch2_a_pon.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line   419: tri suivant no noeud
+
+
+================================================================================
+Directory: engine/source/mpi/interfaces
+================================================================================
+
+
+File: engine/source/mpi/interfaces/spmd_i25slide.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line   476: Pour l'instant on garde l'iteration P = LOC_PROC
+
+
+File: engine/source/mpi/interfaces/spmd_i7tool.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line  3322: Tempo RBY a remonter dans starter conversion no noeud vers no rigid body
+
+
+================================================================================
+Directory: engine/source/multifluid
+================================================================================
+
+
+File: engine/source/multifluid/multi_muscl_fluxes_computation.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line   272: Conserved variable current element
+
+
+File: engine/source/multifluid/multi_fluxes_computation.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line   230: Conserved variable current element
+
+
+================================================================================
+Directory: engine/source/output
+================================================================================
+
+
+File: engine/source/output/ecrit.F
+French comments: 2
+--------------------------------------------------------------------------------
+  Line   663: calcul temps restant
+  Line   687: calcul temps restant
+
+
+================================================================================
+Directory: engine/source/output/anim/generate
+================================================================================
+
+
+File: engine/source/output/anim/generate/xanim29.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    61: MASSELE  |  1      | F | R | ELEMENT (INITIAL) MASS
+
+
+File: engine/source/output/anim/generate/xanim31.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    61: MASSELE  |  1      | F | R | ELEMENT (INITIAL) MASS
+
+
+File: engine/source/output/anim/generate/xanim30.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    61: MASSELE  |  1      | F | R | ELEMENT (INITIAL) MASS
+
+
+================================================================================
+Directory: engine/source/properties/composite_options/stack
+================================================================================
+
+
+File: engine/source/properties/composite_options/stack/delm24law.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    75: UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY
+
+
+File: engine/source/properties/composite_options/stack/delm02law.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    81: UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY
+
+
+File: engine/source/properties/composite_options/stack/delm01law.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    74: UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY
+
+
+================================================================================
+Directory: engine/source/system
+================================================================================
+
+
+File: engine/source/system/timer.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line  2461: reset timer elapsed time et calcul tu temps elapsed courant
+
+
+================================================================================
+Directory: engine/source/tools/lagmul
+================================================================================
+
+
+File: engine/source/tools/lagmul/lag_mpc.F
+French comments: 2
+--------------------------------------------------------------------------------
+  Line    62: I  : numero global du noeud (1,NUMNOD)
+  Line   225: I  : numero global du noeud (1,NUMNOD)
+
+
+File: engine/source/tools/lagmul/lag_rby.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    62: I  : numero global du noeud (1,NUMNOD)
+
+
+File: engine/source/tools/lagmul/gjnt_diff.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    57: I  : numero global du noeud (1,NUMNOD)
+
+
+File: engine/source/tools/lagmul/lag_rwall.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    68: I  : numero global du noeud (1,NUMNOD)
+
+
+File: engine/source/tools/lagmul/lag_bcs.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    70: I  : numero global du noeud (1,NUMNOD)
+
+
+File: engine/source/tools/lagmul/lag_mult_solv.F
+French comments: 3
+--------------------------------------------------------------------------------
+  Line   113: I  : numero global du noeud (1,NUMNOD)
+  Line   494: I  : numero global du noeud (1,NUMNOD)
+  Line   879: I  : numero global du noeud (1,NUMNOD)
+
+
+File: engine/source/tools/lagmul/gjnt_gear.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    52: I  : numero global du noeud (1,NUMNOD)
+
+
+File: engine/source/tools/lagmul/lag_fxv.F
+French comments: 2
+--------------------------------------------------------------------------------
+  Line    76: I  : numero global du noeud (1,NUMNOD)
+  Line   214: I  : numero global du noeud (1,NUMNOD)
+
+
+File: engine/source/tools/lagmul/gjnt_rack.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    52: I  : numero global du noeud (1,NUMNOD)
+
+
+================================================================================
+Directory: engine/source/tools/sect
+================================================================================
+
+
+File: engine/source/tools/sect/section_skewp.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    64: CALCUL DES MOMEMTS/REPERE N1 N2 N3
+
+
+================================================================================
+Directory: starter/source/airbag
+================================================================================
+
+
+File: starter/source/airbag/fvmesh0.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line   255: Tag element interne pour l'option /TH/SURF mass flow
+
+
+================================================================================
+Directory: starter/source/boundary_conditions/ebcs
+================================================================================
+
+
+File: starter/source/boundary_conditions/ebcs/iniebcsp.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line   114: Calcul pression initiale nodale
+
+
+================================================================================
+Directory: starter/source/constraints/general/rbe3
+================================================================================
+
+
+File: starter/source/constraints/general/rbe3/hm_read_rbe3.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line   122: IRBE3(10,I) :  Numero interne du IRBE3 (necessaire pour Modif/SPMD)
+
+
+================================================================================
+Directory: starter/source/constraints/general/rbody
+================================================================================
+
+
+File: starter/source/constraints/general/rbody/inirby.F
+French comments: 5
+--------------------------------------------------------------------------------
+  Line   718: CALCUL DU REPERE D'INERTIE PRINCIPALE
+  Line   886: MATRICE d'inertie -> repere global
+  Line   940: MATRICE d'inertie -> repere global
+  Line   982: MATRICE d'inertie -> repere global
+  Line  1601: CALCUL DU REPERE D'INERTIE PRINCIPALE
+
+
+================================================================================
+Directory: starter/source/elements/beam
+================================================================================
+
+
+File: starter/source/elements/beam/pmass.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line   135: MASSE ELEMENT /2
+
+
+File: starter/source/elements/beam/pgrhead.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    47: EADD(NUMELP)      TABLEAU DES ADRESSES DANS IDAM CHGT DAMIER   S
+
+
+File: starter/source/elements/beam/pgrtails.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    61: EADD(NUMELP)       TABLEAU DES ADRESEES DANS IDAM CHGT DAMIER E
+
+
+================================================================================
+Directory: starter/source/elements/ige3d
+================================================================================
+
+
+File: starter/source/elements/ige3d/ig3dgrhead.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    48: EADD(NUMELIG3D)      TABLEAU DES ADRESSES DANS IDAM CHGT DAMIER   S
+
+
+File: starter/source/elements/ige3d/comput_coinknot.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line   153: FIRST STEP : ON PART DE L'ELEMENT INITIAL A RAFFINER
+
+
+File: starter/source/elements/ige3d/comput_mesh_neighbour.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line   157: (TESTONS SANS POUR L'INSTANT CAR ON TESTE TOUTES LES MESHSURFS
+
+
+File: starter/source/elements/ige3d/prerafig3d.F
+French comments: 2
+--------------------------------------------------------------------------------
+  Line   103: PUIS AUX TAILLES EXACTES NECESSAIRES DANS ONE SECOND TEMPS
+  Line   173: NB : OPTIMISER CES STRUCTURES PAR PATCH POUR KNOTLOCP SANS CASES VIDES
+
+
+File: starter/source/elements/ige3d/meshsurfig3d_mod.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    91: storage of the initial number of refinements for each element
+
+
+================================================================================
+Directory: starter/source/elements/sh3n/coque3n
+================================================================================
+
+
+File: starter/source/elements/sh3n/coque3n/c3grtails.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    70: EADD(NUMELTG)      TABLEAU DES ADRESSES DANS IDAM CHGT DAMIER E
+
+
+File: starter/source/elements/sh3n/coque3n/c3grhead.F
+French comments: 2
+--------------------------------------------------------------------------------
+  Line    66: ISEL(NSELTG)        TABLEAU DES TRI CHOISIES POUR TH          E/S
+  Line    68: EADD(NUMELTG)      TABLEAU DES ADRESSES DANS IDAM CHGT DAMIER   S
+
+
+================================================================================
+Directory: starter/source/elements/solid/solide4
+================================================================================
+
+
+File: starter/source/elements/solid/solide4/s4repiso3.F
+French comments: 2
+--------------------------------------------------------------------------------
+  Line    59: Repere isoparametrique element tetra 4 nodes
+  Line   120: Repere isoparametrique element tetra 4 nodes
+
+
+File: starter/source/elements/solid/solide4/s4refsta3.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line   304: deformation : reference -> initial
+
+
+================================================================================
+Directory: starter/source/elements/solid_2d/quad
+================================================================================
+
+
+File: starter/source/elements/solid_2d/quad/qgrtails.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    60: EADD(NUMELQ)       TABLEAU DES ADRESEES DANS IDAM CHGT DAMIER E
+
+
+File: starter/source/elements/solid_2d/quad/qgrhead.F
+French comments: 2
+--------------------------------------------------------------------------------
+  Line    52: ISEL(NSELQ)       TABLEAU DES SOLIDES 4N CHOISIS POUR TH     E/S
+  Line    54: EADD(NUMELQ)      TABLEAU DES ADRESEES DANS IDAM CHGT DAMIER   S
+
+
+================================================================================
+Directory: starter/source/elements/solid_2d/tria
+================================================================================
+
+
+File: starter/source/elements/solid_2d/tria/t3grhead.F
+French comments: 2
+--------------------------------------------------------------------------------
+  Line    65: ISEL(NSELTG)        TABLEAU DES TRI CHOISIES POUR TH          E/S
+  Line    67: EADD(NUMELTG)      TABLEAU DES ADRESSES DANS IDAM CHGT DAMIER   S
+
+
+================================================================================
+Directory: starter/source/elements/spring
+================================================================================
+
+
+File: starter/source/elements/spring/rinit3.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line  1891: MASSE ELEMENT /2
+
+
+File: starter/source/elements/spring/rgrhead.F
+French comments: 2
+--------------------------------------------------------------------------------
+  Line    50: ISEL(NSELR)       TABLEAU DES RESSORTS CHOISIS POUR TH       E/S
+  Line    52: EADD(NUMELR)      TABLEAU DES ADRESSES DANS IDAM CHGT DAMIER   S
+
+
+File: starter/source/elements/spring/rgrtails.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    56: EADD(NUMELR)       TABLEAU DES ADRESEES DANS IDAM CHGT DAMIER E
+
+
+File: starter/source/elements/spring/rmas12.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    63: MASSE ELEMENT /2
+
+
+File: starter/source/elements/spring/rmass.F
+French comments: 2
+--------------------------------------------------------------------------------
+  Line    60: MASSE ELEMENT /2
+  Line   154: MASSE ELEMENT /2
+
+
+================================================================================
+Directory: starter/source/elements/thickshell/solidec
+================================================================================
+
+
+File: starter/source/elements/thickshell/solidec/scmorth3.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line   107: Repere orthotrope pour thick shells-------
+
+
+================================================================================
+Directory: starter/source/elements/truss
+================================================================================
+
+
+File: starter/source/elements/truss/tgrhead.F
+French comments: 2
+--------------------------------------------------------------------------------
+  Line    46: ISEL(NSELT)       TABLEAU DESPOUTRES CHOISIS POUR TH         E/S
+  Line    48: EADD(NUMELT)      TABLEAU DES ADRESSES DANS IDAM CHGT DAMIER   S
+
+
+File: starter/source/elements/truss/tmass.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    76: MASSE ELEMENT /2
+
+
+File: starter/source/elements/truss/tgrtails.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    52: EADD(NUMELT)       TABLEAU DES ADRESEES DANS IDAM CHGT DAMIER E
+
+
+================================================================================
+Directory: starter/source/elements/xelem
+================================================================================
+
+
+File: starter/source/elements/xelem/xgrtails.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    51: EADD(NUMELX)       TABLEAU DES ADRESEES DANS IDAM CHGT DAMIER E
+
+
+File: starter/source/elements/xelem/xgrhead.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    49: EADD(NUMELX)      TABLEAU DES ADRESSES DANS IDAM CHGT DAMIER   S
+
+
+================================================================================
+Directory: starter/source/general_controls/computation
+================================================================================
+
+
+File: starter/source/general_controls/computation/unit_code.F
+French comments: 2
+--------------------------------------------------------------------------------
+  Line    58: La valeur entree est un reel
+  Line    60: La valeur entree est un code (ou une erreur)
+
+
+================================================================================
+Directory: starter/source/groups
+================================================================================
+
+
+File: starter/source/groups/hm_submodgr.F
+French comments: 2
+--------------------------------------------------------------------------------
+  Line   226: IELT = ELEMENT TYPE (0 POUR NOEUDS, 1 BRIC, 2 QUAD, 3 SHELL,
+  Line   286: IELT = ELEMENT TYPE (0 POUR NOEUDS, 1 BRIC, 2 QUAD, 3 SHELL,
+
+
+================================================================================
+Directory: starter/source/interfaces/inter3d1
+================================================================================
+
+
+File: starter/source/interfaces/inter3d1/i24buc1.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line   222: TAILLE ZINF = .1*TAILLE MOYENNE ELEMENT DE CHAQUE COTE
+
+
+File: starter/source/interfaces/inter3d1/i11buc1.F
+French comments: 2
+--------------------------------------------------------------------------------
+  Line   192: TAILLE ZINF = .1*TAILLE MOYENNE ELEMENT DE CHAQUE COTE
+  Line   474: TAILLE ZINF = .1*TAILLE MOYENNE ELEMENT DE CHAQUE COTE
+
+
+File: starter/source/interfaces/inter3d1/i25buc_vox1.F
+French comments: 2
+--------------------------------------------------------------------------------
+  Line   178: TAILLE ZINF = .1*TAILLE MOYENNE ELEMENT DE CHAQUE COTE
+  Line   334: looks for solid element supporting the segment (cf initial penetrations vs solids)
+
+
+File: starter/source/interfaces/inter3d1/i7buc1.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line   163: TAILLE ZINF = .1*TAILLE MOYENNE ELEMENT DE CHAQUE COTE
+
+
+File: starter/source/interfaces/inter3d1/i23buc3.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line   156: TAILLE ZINF = .1*TAILLE MOYENNE ELEMENT DE CHAQUE COTE
+
+
+File: starter/source/interfaces/inter3d1/i20dst3.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line   826: ici NVS donne encore le noeud global, NSV sera modifie dans I20NLG
+
+
+File: starter/source/interfaces/inter3d1/i7trivox1.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line   100: PROV_E       CAND_E provisoire (variable static dans i7tri)
+
+
+File: starter/source/interfaces/inter3d1/i25trivox1.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    91: PROV_E       CAND_E provisoire (variable static dans i7tri)
+
+
+File: starter/source/interfaces/inter3d1/i21buc3.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line   154: TAILLE ZINF = .1*TAILLE MOYENNE ELEMENT DE CHAQUE COTE
+
+
+================================================================================
+Directory: starter/source/materials/fail/biquad
+================================================================================
+
+
+File: starter/source/materials/fail/biquad/hm_read_fail_biquad.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    49: UVAR3   (if perturbation is not used) or UVAR9 (if used) = initial element length
+
+
+================================================================================
+Directory: starter/source/materials/mat/mat019
+================================================================================
+
+
+File: starter/source/materials/mat/mat019/inepri.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    35: CALCUL INERTIES ET REPERE PRINCIPAL
+
+
+File: starter/source/materials/mat/mat019/rigid_mat.F
+French comments: 2
+--------------------------------------------------------------------------------
+  Line   154: CALCUL DU REPERE D'INERTIE PRINCIPALE
+  Line   236: MATRICE d'inertie -> repere global
+
+
+================================================================================
+Directory: starter/source/materials/mat/mat027
+================================================================================
+
+
+File: starter/source/materials/mat/mat027/hm_read_mat27.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line   199: Element buffer : internal variable allocation
+
+
+================================================================================
+Directory: starter/source/materials/mat/mat038
+================================================================================
+
+
+File: starter/source/materials/mat/mat038/m38init.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    55: UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY
+
+
+================================================================================
+Directory: starter/source/materials/mat/mat044
+================================================================================
+
+
+File: starter/source/materials/mat/mat044/hm_read_mat44.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line   265: Element buffer variable allocation
+
+
+================================================================================
+Directory: starter/source/materials/mat/mat051
+================================================================================
+
+
+File: starter/source/materials/mat/mat051/m51init.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line   110: need to initialize element buffer with initial density for this specific case.
+
+
+================================================================================
+Directory: starter/source/materials/mat/mat065
+================================================================================
+
+
+File: starter/source/materials/mat/mat065/hm_read_mat65.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line   210: Element buffer variable allocation
+
+
+================================================================================
+Directory: starter/source/materials/mat/mat070
+================================================================================
+
+
+File: starter/source/materials/mat/mat070/m70init.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    42: UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY
+
+
+File: starter/source/materials/mat/mat070/sigeps70.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    96: UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY
+
+
+================================================================================
+Directory: starter/source/materials/mat/mat075
+================================================================================
+
+
+File: starter/source/materials/mat/mat075/m75init.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    63: UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY
+
+
+================================================================================
+Directory: starter/source/materials/mat/mat077
+================================================================================
+
+
+File: starter/source/materials/mat/mat077/m77init.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    54: UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY
+
+
+================================================================================
+Directory: starter/source/materials/mat/mat090
+================================================================================
+
+
+File: starter/source/materials/mat/mat090/sigeps90.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    90: UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY
+
+
+================================================================================
+Directory: starter/source/materials/mat/mat120
+================================================================================
+
+
+File: starter/source/materials/mat/mat120/hm_read_mat120.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line   247: Element buffer variable allocation
+
+
+================================================================================
+Directory: starter/source/output/qaprint
+================================================================================
+
+
+File: starter/source/output/qaprint/st_qaprint_materials.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line    71: Le Titr du MAT sert de nom de la variable dans le ref.extract , suivi de l'ID du MAT
+
+
+================================================================================
+Directory: starter/source/restart/ddsplit
+================================================================================
+
+
+File: starter/source/restart/ddsplit/w_front.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line   856: tag DD_RBY(3) a negatif pour reperage des r material sans echange.
+
+
+File: starter/source/restart/ddsplit/ipari_l_ini.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line   158: calcul IMAXIMP_L suivant interface
+
+
+================================================================================
+Directory: starter/source/system
+================================================================================
+
+
+File: starter/source/system/timer.F
+French comments: 1
+--------------------------------------------------------------------------------
+  Line   366: reset timer elapsed time et calcul du temps elapsed courant
+

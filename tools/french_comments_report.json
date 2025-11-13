@@ -1,0 +1,5071 @@
+{
+  "summary": {
+    "total_files_scanned": 5128,
+    "files_with_french": 275,
+    "total_french_comments": 348
+  },
+  "files": [
+    {
+      "file": "engine/source/system/timer.F",
+      "abs_path": "engine/source/system/timer.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 2461,
+          "text": "reset timer elapsed time et calcul tu temps elapsed courant",
+          "full_line": "C     reset timer elapsed time et calcul tu temps elapsed courant",
+          "french_words": [
+            "calcul",
+            "temps"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/implicit/imp_dyna.F",
+      "abs_path": "engine/source/implicit/imp_dyna.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 1270,
+          "text": "matrice d'inertie en repere global",
+          "full_line": "C       matrice d'inertie en repere global",
+          "french_words": [
+            "repere",
+            "matrice"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/materials/fail/fail_setoff_wind_frwave.F",
+      "abs_path": "engine/source/materials/fail/fail_setoff_wind_frwave.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 92,
+          "text": "TFAIL(NEL) : global element variable - start of relaxation time before element suppression",
+          "full_line": "c     TFAIL(NEL) : global element variable - start of relaxation time before element suppression",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/materials/fail/sahraei/fail_sahraei_s.F",
+      "abs_path": "engine/source/materials/fail/sahraei/fail_sahraei_s.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 67,
+          "text": "UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "full_line": "C UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/materials/fail/emc/fail_emc.F",
+      "abs_path": "engine/source/materials/fail/emc/fail_emc.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 61,
+          "text": "UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "full_line": "C UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/materials/fail/changchang/fail_changchang_c.F",
+      "abs_path": "engine/source/materials/fail/changchang/fail_changchang_c.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 53,
+          "text": "UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "full_line": "C UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/materials/fail/nxt/fail_nxt_c.F",
+      "abs_path": "engine/source/materials/fail/nxt/fail_nxt_c.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 55,
+          "text": "UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "full_line": "C UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/materials/fail/johnson_cook/fail_johnson.F",
+      "abs_path": "engine/source/materials/fail/johnson_cook/fail_johnson.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 60,
+          "text": "UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "full_line": "C UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/materials/fail/johnson_cook/fail_johnson_xfem.F",
+      "abs_path": "engine/source/materials/fail/johnson_cook/fail_johnson_xfem.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 73,
+          "text": "UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "full_line": "C UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/materials/fail/johnson_cook/fail_johnson_c.F",
+      "abs_path": "engine/source/materials/fail/johnson_cook/fail_johnson_c.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 60,
+          "text": "UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "full_line": "C UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/materials/fail/connect/fail_connect.F",
+      "abs_path": "engine/source/materials/fail/connect/fail_connect.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 62,
+          "text": "UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "full_line": "C UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/materials/fail/biquad/fail_biquad_ib.F",
+      "abs_path": "engine/source/materials/fail/biquad/fail_biquad_ib.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 106,
+          "text": "At initial time, compute the element size regularization factor",
+          "full_line": "      ! At initial time, compute the element size regularization factor",
+          "french_words": [
+            "element",
+            "initial"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/materials/fail/biquad/fail_biquad_s.F",
+      "abs_path": "engine/source/materials/fail/biquad/fail_biquad_s.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 94,
+          "text": "At initial time, compute the element size regularization factor",
+          "full_line": "      ! At initial time, compute the element size regularization factor",
+          "french_words": [
+            "element",
+            "initial"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/materials/fail/biquad/fail_biquad_c.F",
+      "abs_path": "engine/source/materials/fail/biquad/fail_biquad_c.F",
+      "comment_count": 2,
+      "comments": [
+        {
+          "line": 72,
+          "text": "UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "full_line": "C UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        },
+        {
+          "line": 125,
+          "text": "! UVAR3 (if perturbation is not used) or UVAR9 (if used) = initial element length and then scale factor",
+          "full_line": "c! UVAR3 (if perturbation is not used) or UVAR9 (if used) = initial element length and then scale factor",
+          "french_words": [
+            "element",
+            "initial"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/materials/fail/orthenerg/fail_orthenerg_c.F",
+      "abs_path": "engine/source/materials/fail/orthenerg/fail_orthenerg_c.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 101,
+          "text": "Save initial element length",
+          "full_line": "      ! Save initial element length",
+          "french_words": [
+            "element",
+            "initial"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/materials/fail/orthenerg/fail_orthenerg_s.F",
+      "abs_path": "engine/source/materials/fail/orthenerg/fail_orthenerg_s.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 120,
+          "text": "Save initial element length",
+          "full_line": "      ! Save initial element length",
+          "french_words": [
+            "element",
+            "initial"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/materials/fail/alter/fail_wind_frwave.F",
+      "abs_path": "engine/source/materials/fail/alter/fail_wind_frwave.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 63,
+          "text": "UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "full_line": "C UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/materials/fail/alter/fail_wind_xfem.F",
+      "abs_path": "engine/source/materials/fail/alter/fail_wind_xfem.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 58,
+          "text": "UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "full_line": "C UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/materials/fail/gene1/fail_gene1_c.F",
+      "abs_path": "engine/source/materials/fail/gene1/fail_gene1_c.F",
+      "comment_count": 2,
+      "comments": [
+        {
+          "line": 177,
+          "text": "At initial time, compute the element size regularization factor",
+          "full_line": "      ! At initial time, compute the element size regularization factor",
+          "french_words": [
+            "element",
+            "initial"
+          ]
+        },
+        {
+          "line": 194,
+          "text": "Checking element failure and recovering user variable",
+          "full_line": "      ! Checking element failure and recovering user variable",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/materials/fail/gene1/fail_gene1_s.F",
+      "abs_path": "engine/source/materials/fail/gene1/fail_gene1_s.F",
+      "comment_count": 2,
+      "comments": [
+        {
+          "line": 189,
+          "text": "At initial time, compute the element size regularization factor",
+          "full_line": "      ! At initial time, compute the element size regularization factor",
+          "french_words": [
+            "element",
+            "initial"
+          ]
+        },
+        {
+          "line": 204,
+          "text": "Checking element failure and recovering user variable",
+          "full_line": "      ! Checking element failure and recovering user variable",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/materials/fail/hc_dsse/fail_hc_dsse_c.F",
+      "abs_path": "engine/source/materials/fail/hc_dsse/fail_hc_dsse_c.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 81,
+          "text": "! UVAR    |NEL*NUVAR| F|R/W| USER ELEMENT VARIABLE ARRAY",
+          "full_line": "C! UVAR    |NEL*NUVAR| F|R/W| USER ELEMENT VARIABLE ARRAY",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/materials/fail/fabric/fail_fabric_c.F",
+      "abs_path": "engine/source/materials/fail/fabric/fail_fabric_c.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 50,
+          "text": "UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "full_line": "C UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/materials/fail/rtcl/fail_rtcl_s.F",
+      "abs_path": "engine/source/materials/fail/rtcl/fail_rtcl_s.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 64,
+          "text": "Checking element failure and recovering user variable",
+          "full_line": "      ! Checking element failure and recovering user variable",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/materials/fail/rtcl/fail_rtcl_c.F",
+      "abs_path": "engine/source/materials/fail/rtcl/fail_rtcl_c.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 64,
+          "text": "Store initial element size",
+          "full_line": "      ! Store initial element size",
+          "french_words": [
+            "element",
+            "initial"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/materials/fail/orthbiquad/fail_orthbiquad_c.F",
+      "abs_path": "engine/source/materials/fail/orthbiquad/fail_orthbiquad_c.F",
+      "comment_count": 2,
+      "comments": [
+        {
+          "line": 68,
+          "text": "UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "full_line": "C UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        },
+        {
+          "line": 180,
+          "text": "At initial time, compute the element size regularization factor",
+          "full_line": "      ! At initial time, compute the element size regularization factor",
+          "french_words": [
+            "element",
+            "initial"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/materials/fail/orthbiquad/fail_orthbiquad_s.F",
+      "abs_path": "engine/source/materials/fail/orthbiquad/fail_orthbiquad_s.F",
+      "comment_count": 3,
+      "comments": [
+        {
+          "line": 65,
+          "text": "! UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "full_line": "C! UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        },
+        {
+          "line": 164,
+          "text": "At initial time, compute the element size regularization factor",
+          "full_line": "      ! At initial time, compute the element size regularization factor",
+          "french_words": [
+            "element",
+            "initial"
+          ]
+        },
+        {
+          "line": 173,
+          "text": "Checking element failure and recovering user variable",
+          "full_line": "      ! Checking element failure and recovering user variable",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/materials/fail/syazwan/fail_syazwan_c.F",
+      "abs_path": "engine/source/materials/fail/syazwan/fail_syazwan_c.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 130,
+          "text": "Checking element failure and recovering user variable",
+          "full_line": "      ! Checking element failure and recovering user variable",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/materials/fail/mullins_or/fail_mullins_OR_s.F",
+      "abs_path": "engine/source/materials/fail/mullins_or/fail_mullins_OR_s.F",
+      "comment_count": 2,
+      "comments": [
+        {
+          "line": 60,
+          "text": "UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "full_line": "C UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        },
+        {
+          "line": 153,
+          "text": "UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "full_line": "C UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/materials/fail/ladeveze/fail_ladeveze.F",
+      "abs_path": "engine/source/materials/fail/ladeveze/fail_ladeveze.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 75,
+          "text": "UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "full_line": "C UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/materials/fail/snconnect/fail_snconnect.F",
+      "abs_path": "engine/source/materials/fail/snconnect/fail_snconnect.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 58,
+          "text": "UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "full_line": "C UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/materials/fail/visual/fail_visual_c.F",
+      "abs_path": "engine/source/materials/fail/visual/fail_visual_c.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 59,
+          "text": "UVAR |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "full_line": "C UVAR |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/materials/fail/visual/fail_visual_s.F",
+      "abs_path": "engine/source/materials/fail/visual/fail_visual_s.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 60,
+          "text": "UVAR |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "full_line": "C UVAR |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/materials/fail/energy/fail_energy_c.F",
+      "abs_path": "engine/source/materials/fail/energy/fail_energy_c.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 57,
+          "text": "UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "full_line": "C UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/materials/fail/energy/fail_energy_s.F",
+      "abs_path": "engine/source/materials/fail/energy/fail_energy_s.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 65,
+          "text": "UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "full_line": "C UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/materials/fail/tabulated/fail_tab_xfem.F",
+      "abs_path": "engine/source/materials/fail/tabulated/fail_tab_xfem.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 86,
+          "text": "UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "full_line": "C UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/materials/fail/tabulated/fail_tab2_c.F",
+      "abs_path": "engine/source/materials/fail/tabulated/fail_tab2_c.F",
+      "comment_count": 2,
+      "comments": [
+        {
+          "line": 134,
+          "text": "Checking element failure and recovering user variable",
+          "full_line": "      ! Checking element failure and recovering user variable",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        },
+        {
+          "line": 172,
+          "text": "At initial time, save the element size",
+          "full_line": "      ! At initial time, save the element size",
+          "french_words": [
+            "element",
+            "initial"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/materials/fail/tabulated/fail_tab_s.F",
+      "abs_path": "engine/source/materials/fail/tabulated/fail_tab_s.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 72,
+          "text": "UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "full_line": "C UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/materials/fail/tabulated/fail_tab2_s.F",
+      "abs_path": "engine/source/materials/fail/tabulated/fail_tab2_s.F",
+      "comment_count": 2,
+      "comments": [
+        {
+          "line": 135,
+          "text": "Checking element failure and recovering user variable",
+          "full_line": "      ! Checking element failure and recovering user variable",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        },
+        {
+          "line": 177,
+          "text": "At initial time, save the element size",
+          "full_line": "      ! At initial time, save the element size",
+          "french_words": [
+            "element",
+            "initial"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/materials/fail/tabulated/fail_tab_c.F",
+      "abs_path": "engine/source/materials/fail/tabulated/fail_tab_c.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 69,
+          "text": "UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "full_line": "C UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/materials/fail/tabulated/fail_tab_old_c.F",
+      "abs_path": "engine/source/materials/fail/tabulated/fail_tab_old_c.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 92,
+          "text": "UVAR(3) = IPOS variable for element length scale function interpolation",
+          "full_line": "C UVAR(3) = IPOS variable for element length scale function interpolation",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/materials/fail/wilkins/fail_wilkins_c.F",
+      "abs_path": "engine/source/materials/fail/wilkins/fail_wilkins_c.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 52,
+          "text": "UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "full_line": "C UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/materials/fail/wilkins/fail_wilkins_s.F",
+      "abs_path": "engine/source/materials/fail/wilkins/fail_wilkins_s.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 75,
+          "text": "UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "full_line": "C UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/materials/fail/fld/fail_fld_tsh.F",
+      "abs_path": "engine/source/materials/fail/fld/fail_fld_tsh.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 55,
+          "text": "UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "full_line": "C UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/materials/fail/fld/fail_fld_xfem.F",
+      "abs_path": "engine/source/materials/fail/fld/fail_fld_xfem.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 62,
+          "text": "UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "full_line": "C UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/materials/fail/orthstrain/fail_orthstrain_s.F",
+      "abs_path": "engine/source/materials/fail/orthstrain/fail_orthstrain_s.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 79,
+          "text": "UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "full_line": "C UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/materials/fail/orthstrain/fail_orthstrain_c.F",
+      "abs_path": "engine/source/materials/fail/orthstrain/fail_orthstrain_c.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 58,
+          "text": "UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "full_line": "C UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/materials/fail/puck/fail_puck_c.F",
+      "abs_path": "engine/source/materials/fail/puck/fail_puck_c.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 54,
+          "text": "UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "full_line": "C UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/materials/fail/puck/fail_puck_s.F",
+      "abs_path": "engine/source/materials/fail/puck/fail_puck_s.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 72,
+          "text": "UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "full_line": "C UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/materials/fail/tensstrain/fail_tensstrain_s.F",
+      "abs_path": "engine/source/materials/fail/tensstrain/fail_tensstrain_s.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 69,
+          "text": "UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "full_line": "C UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/materials/fail/tensstrain/fail_tensstrain_c.F",
+      "abs_path": "engine/source/materials/fail/tensstrain/fail_tensstrain_c.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 56,
+          "text": "UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "full_line": "C UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/materials/fail/tuler_butcher/fail_tbutcher_c.F",
+      "abs_path": "engine/source/materials/fail/tuler_butcher/fail_tbutcher_c.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 52,
+          "text": "UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "full_line": "C UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/materials/fail/tuler_butcher/fail_tbutcher_xfem.F",
+      "abs_path": "engine/source/materials/fail/tuler_butcher/fail_tbutcher_xfem.F",
+      "comment_count": 2,
+      "comments": [
+        {
+          "line": 55,
+          "text": "UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "full_line": "C UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        },
+        {
+          "line": 64,
+          "text": "UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "full_line": "C UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/materials/fail/tuler_butcher/fail_tbutcher_s.F",
+      "abs_path": "engine/source/materials/fail/tuler_butcher/fail_tbutcher_s.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 77,
+          "text": "UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "full_line": "C UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/materials/fail/cockroft_latham/fail_cockroft_s.F",
+      "abs_path": "engine/source/materials/fail/cockroft_latham/fail_cockroft_s.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 72,
+          "text": "UVAR |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "full_line": "C UVAR |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/materials/fail/cockroft_latham/fail_cockroft_c.F",
+      "abs_path": "engine/source/materials/fail/cockroft_latham/fail_cockroft_c.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 74,
+          "text": "UVAR    |NEL*NUVAR| F|R/W| USER ELEMENT VARIABLE ARRAY",
+          "full_line": "C UVAR    |NEL*NUVAR| F|R/W| USER ELEMENT VARIABLE ARRAY",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/materials/fail/hashin/fail_hashin_c.F",
+      "abs_path": "engine/source/materials/fail/hashin/fail_hashin_c.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 54,
+          "text": "UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "full_line": "C UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/materials/fail/hashin/fail_hashin_s.F",
+      "abs_path": "engine/source/materials/fail/hashin/fail_hashin_s.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 75,
+          "text": "UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "full_line": "C UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/materials/fail/inievo/fail_inievo_c.F",
+      "abs_path": "engine/source/materials/fail/inievo/fail_inievo_c.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 432,
+          "text": "Checking element failure and recovering user variable",
+          "full_line": "        ! Checking element failure and recovering user variable",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/materials/fail/inievo/fail_inievo_s.F",
+      "abs_path": "engine/source/materials/fail/inievo/fail_inievo_s.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 458,
+          "text": "Checking element failure and recovering user variable",
+          "full_line": "        ! Checking element failure and recovering user variable",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/materials/fail/wierzbicki/fail_wierzbicki_c.F",
+      "abs_path": "engine/source/materials/fail/wierzbicki/fail_wierzbicki_c.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 52,
+          "text": "UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "full_line": "C UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/materials/fail/wierzbicki/fail_wierzbicki_s.F",
+      "abs_path": "engine/source/materials/fail/wierzbicki/fail_wierzbicki_s.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 60,
+          "text": "UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "full_line": "C UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/materials/mat/mat048/sigeps48c.F",
+      "abs_path": "engine/source/materials/mat/mat048/sigeps48c.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 97,
+          "text": "UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "full_line": "C UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/materials/mat/mat048/sigeps48.F",
+      "abs_path": "engine/source/materials/mat/mat048/sigeps48.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 93,
+          "text": "UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "full_line": "C UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/materials/mat/mat071/sigeps71.F",
+      "abs_path": "engine/source/materials/mat/mat071/sigeps71.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 90,
+          "text": "UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "full_line": "C UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/materials/mat/mat071/sigeps71c.F",
+      "abs_path": "engine/source/materials/mat/mat071/sigeps71c.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 102,
+          "text": "UVAR    |NEL0*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "full_line": "C UVAR    |NEL0*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/materials/mat/mat158/sigeps158c.F",
+      "abs_path": "engine/source/materials/mat/mat158/sigeps158c.F",
+      "comment_count": 2,
+      "comments": [
+        {
+          "line": 88,
+          "text": "UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "full_line": "C UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        },
+        {
+          "line": 154,
+          "text": "UVAR(14) = ALDT             ! initial characteristic length of the element",
+          "full_line": "c     UVAR(14) = ALDT             ! initial characteristic length of the element",
+          "french_words": [
+            "element",
+            "initial"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/materials/mat/mat053/sigeps53.F",
+      "abs_path": "engine/source/materials/mat/mat053/sigeps53.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 101,
+          "text": "UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "full_line": "C UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/materials/mat/mat077/sigeps77.F",
+      "abs_path": "engine/source/materials/mat/mat077/sigeps77.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 92,
+          "text": "UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "full_line": "C UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/materials/mat/mat187/sigeps187.F",
+      "abs_path": "engine/source/materials/mat/mat187/sigeps187.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 100,
+          "text": "UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "full_line": "C UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/materials/mat/mat080/sigeps80.F",
+      "abs_path": "engine/source/materials/mat/mat080/sigeps80.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 106,
+          "text": "UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "full_line": "C UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/materials/mat/mat080/sigeps80c.F",
+      "abs_path": "engine/source/materials/mat/mat080/sigeps80c.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 110,
+          "text": "UVAR    |NEL0*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "full_line": "C UVAR    |NEL0*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/materials/mat/mat036/sigeps36pi.F",
+      "abs_path": "engine/source/materials/mat/mat036/sigeps36pi.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 63,
+          "text": "UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "full_line": "C UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/materials/mat/mat036/sigeps36c.F",
+      "abs_path": "engine/source/materials/mat/mat036/sigeps36c.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 95,
+          "text": "UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "full_line": "C UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/materials/mat/mat036/sigeps36.F",
+      "abs_path": "engine/source/materials/mat/mat036/sigeps36.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 88,
+          "text": "UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "full_line": "C UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/materials/mat/mat085/sigeps85c_void.F",
+      "abs_path": "engine/source/materials/mat/mat085/sigeps85c_void.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 98,
+          "text": "UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "full_line": "C UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/materials/mat/mat059/sigeps59.F",
+      "abs_path": "engine/source/materials/mat/mat059/sigeps59.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 76,
+          "text": "UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "full_line": "C UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/materials/mat/mat040/sigeps40.F",
+      "abs_path": "engine/source/materials/mat/mat040/sigeps40.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 91,
+          "text": "UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "full_line": "C UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/materials/mat/mat086/sigeps86c.F",
+      "abs_path": "engine/source/materials/mat/mat086/sigeps86c.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 99,
+          "text": "UVAR    |NEL0*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "full_line": "C UVAR    |NEL0*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/materials/mat/mat066/sigeps66.F",
+      "abs_path": "engine/source/materials/mat/mat066/sigeps66.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 93,
+          "text": "UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "full_line": "C UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/materials/mat/mat066/sigeps66c.F",
+      "abs_path": "engine/source/materials/mat/mat066/sigeps66c.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 103,
+          "text": "UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "full_line": "C UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/materials/mat/mat068/sigeps68.F",
+      "abs_path": "engine/source/materials/mat/mat068/sigeps68.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 93,
+          "text": "UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "full_line": "C UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/materials/mat/mat065/sigeps65c.F",
+      "abs_path": "engine/source/materials/mat/mat065/sigeps65c.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 96,
+          "text": "UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "full_line": "C UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/materials/mat/mat065/sigeps65.F",
+      "abs_path": "engine/source/materials/mat/mat065/sigeps65.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 96,
+          "text": "UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "full_line": "C UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/materials/mat/mat083/sigeps83.F",
+      "abs_path": "engine/source/materials/mat/mat083/sigeps83.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 71,
+          "text": "UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "full_line": "C UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/materials/mat/mat060/sigeps60.F",
+      "abs_path": "engine/source/materials/mat/mat060/sigeps60.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 98,
+          "text": "UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "full_line": "C UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/materials/mat/mat060/sigeps60c.F",
+      "abs_path": "engine/source/materials/mat/mat060/sigeps60c.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 101,
+          "text": "UVAR    |NEL0*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "full_line": "C UVAR    |NEL0*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/materials/mat/mat041/sigeps41.F",
+      "abs_path": "engine/source/materials/mat/mat041/sigeps41.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 127,
+          "text": "UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "full_line": "C UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/materials/mat/mat055/sigeps55c.F",
+      "abs_path": "engine/source/materials/mat/mat055/sigeps55c.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 99,
+          "text": "UVAR    |NEL0*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "full_line": "C UVAR    |NEL0*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/materials/mat/mat070/sigeps70.F",
+      "abs_path": "engine/source/materials/mat/mat070/sigeps70.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 99,
+          "text": "UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "full_line": "C UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/materials/mat/mat075/sigeps75.F",
+      "abs_path": "engine/source/materials/mat/mat075/sigeps75.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 94,
+          "text": "UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "full_line": "C UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/materials/mat/mat063/sigeps63c.F",
+      "abs_path": "engine/source/materials/mat/mat063/sigeps63c.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 102,
+          "text": "UVAR    |NEL0*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "full_line": "C UVAR    |NEL0*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/materials/mat/mat190/sigeps190.F",
+      "abs_path": "engine/source/materials/mat/mat190/sigeps190.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 94,
+          "text": "UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "full_line": "C UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/materials/mat/mat044/sigeps44.F",
+      "abs_path": "engine/source/materials/mat/mat044/sigeps44.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 97,
+          "text": "UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "full_line": "C UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/materials/mat/mat044/sigeps44c.F",
+      "abs_path": "engine/source/materials/mat/mat044/sigeps44c.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 85,
+          "text": "UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "full_line": "C UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/materials/mat/mat064/sigeps64c.F",
+      "abs_path": "engine/source/materials/mat/mat064/sigeps64c.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 103,
+          "text": "UVAR    |NEL0*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "full_line": "C UVAR    |NEL0*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/materials/mat/mat056/sigeps56c.F",
+      "abs_path": "engine/source/materials/mat/mat056/sigeps56c.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 99,
+          "text": "UVAR    |NEL0*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "full_line": "C UVAR    |NEL0*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/materials/mat/mat056/sigeps56.F",
+      "abs_path": "engine/source/materials/mat/mat056/sigeps56.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 97,
+          "text": "UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "full_line": "C UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/materials/mat/mat045/sigeps45.F",
+      "abs_path": "engine/source/materials/mat/mat045/sigeps45.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 93,
+          "text": "UVAR    |NEL0*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "full_line": "C UVAR    |NEL0*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/materials/mat/mat045/sigeps45c.F",
+      "abs_path": "engine/source/materials/mat/mat045/sigeps45c.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 97,
+          "text": "UVAR    |NEL0*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "full_line": "C UVAR    |NEL0*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/materials/mat/mat090/sigeps90.F",
+      "abs_path": "engine/source/materials/mat/mat090/sigeps90.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 90,
+          "text": "UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "full_line": "C UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/materials/mat/mat084/sigeps84.F",
+      "abs_path": "engine/source/materials/mat/mat084/sigeps84.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 88,
+          "text": "UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "full_line": "C UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/materials/mat/mat096/sigeps96.F",
+      "abs_path": "engine/source/materials/mat/mat096/sigeps96.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 50,
+          "text": "UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "full_line": "C UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/materials/mat/mat037/sigeps37.F",
+      "abs_path": "engine/source/materials/mat/mat037/sigeps37.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 104,
+          "text": "! UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "full_line": "C        ! UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/materials/mat/mat052/sigeps52c.F",
+      "abs_path": "engine/source/materials/mat/mat052/sigeps52c.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 106,
+          "text": "UVAR    |NEL0*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "full_line": "C UVAR    |NEL0*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/materials/mat/mat052/sigeps52.F",
+      "abs_path": "engine/source/materials/mat/mat052/sigeps52.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 101,
+          "text": "UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "full_line": "C UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/materials/mat/mat025/prony25c.F",
+      "abs_path": "engine/source/materials/mat/mat025/prony25c.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 64,
+          "text": "UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "full_line": "C UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/materials/mat/mat028/sigeps28.F",
+      "abs_path": "engine/source/materials/mat/mat028/sigeps28.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 91,
+          "text": "UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "full_line": "C UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/materials/mat/mat074/sigeps74.F",
+      "abs_path": "engine/source/materials/mat/mat074/sigeps74.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 102,
+          "text": "UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "full_line": "C UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/materials/mat/mat103/sigeps103.F",
+      "abs_path": "engine/source/materials/mat/mat103/sigeps103.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 41,
+          "text": "UVAR    USER ELEMENT VARIABLE ARRAY",
+          "full_line": "C UVAR    USER ELEMENT VARIABLE ARRAY",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/materials/mat/mat024/conc24.F",
+      "abs_path": "engine/source/materials/mat/mat024/conc24.F",
+      "comment_count": 2,
+      "comments": [
+        {
+          "line": 127,
+          "text": "GAMA = repere  d'armature",
+          "full_line": "c     GAMA = repere  d'armature",
+          "french_words": [
+            "repere",
+            "armature"
+          ]
+        },
+        {
+          "line": 302,
+          "text": "RETOUR REPERE ARMATURE",
+          "full_line": "c     RETOUR REPERE ARMATURE",
+          "french_words": [
+            "repere",
+            "armature",
+            "retour"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/materials/mat/mat024/elas24.F",
+      "abs_path": "engine/source/materials/mat/mat024/elas24.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 179,
+          "text": "NON DAMAGED ELEMENT GROUP => initial Hook matrix",
+          "full_line": "c     NON DAMAGED ELEMENT GROUP => initial Hook matrix",
+          "french_words": [
+            "element",
+            "initial"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/materials/mat/mat110/sigeps110c_newton.F",
+      "abs_path": "engine/source/materials/mat/mat110/sigeps110c_newton.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 207,
+          "text": "Initial variable",
+          "full_line": "      ! Initial variable",
+          "french_words": [
+            "initial",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/materials/mat/mat110/sigeps110c_nice.F",
+      "abs_path": "engine/source/materials/mat/mat110/sigeps110c_nice.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 207,
+          "text": "Initial variable",
+          "full_line": "      ! Initial variable",
+          "french_words": [
+            "initial",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/materials/mat/mat110/sigeps110c_lite_newton.F",
+      "abs_path": "engine/source/materials/mat/mat110/sigeps110c_lite_newton.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 200,
+          "text": "Initial variable",
+          "full_line": "      ! Initial variable",
+          "french_words": [
+            "initial",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/materials/mat/mat110/sigeps110c_lite_nice.F",
+      "abs_path": "engine/source/materials/mat/mat110/sigeps110c_lite_nice.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 200,
+          "text": "Initial variable",
+          "full_line": "      ! Initial variable",
+          "french_words": [
+            "initial",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/materials/mat/mat013/rmatpon.F",
+      "abs_path": "engine/source/materials/mat/mat013/rmatpon.F",
+      "comment_count": 2,
+      "comments": [
+        {
+          "line": 157,
+          "text": "matrice d'inertie en repere global",
+          "full_line": "C           matrice d'inertie en repere global",
+          "french_words": [
+            "repere",
+            "matrice"
+          ]
+        },
+        {
+          "line": 285,
+          "text": "MATRICE d'inertie -> repere globale",
+          "full_line": "C MATRICE d'inertie -> repere globale",
+          "french_words": [
+            "repere",
+            "matrice"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/materials/mat/mat058/sigeps58c.F",
+      "abs_path": "engine/source/materials/mat/mat058/sigeps58c.F",
+      "comment_count": 2,
+      "comments": [
+        {
+          "line": 104,
+          "text": "UVAR    |NEL0*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "full_line": "C UVAR    |NEL0*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        },
+        {
+          "line": 208,
+          "text": "UVAR(14) = ALDT             ! initial characteristic length of the element",
+          "full_line": "c     UVAR(14) = ALDT             ! initial characteristic length of the element",
+          "french_words": [
+            "element",
+            "initial"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/materials/visc/prony_modelc.F",
+      "abs_path": "engine/source/materials/visc/prony_modelc.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 62,
+          "text": "UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "full_line": "C UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/materials/visc/visc_prony_lstrain.F",
+      "abs_path": "engine/source/materials/visc/visc_prony_lstrain.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 61,
+          "text": "UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "full_line": "C UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/ams/sms_fsa_inv.F",
+      "abs_path": "engine/source/ams/sms_fsa_inv.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 106,
+          "text": "[K]:matrice de masse complete",
+          "full_line": "C     [K]:matrice de masse complete",
+          "french_words": [
+            "masse",
+            "matrice"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/fluid/lecflsw.F",
+      "abs_path": "engine/source/fluid/lecflsw.F",
+      "comment_count": 2,
+      "comments": [
+        {
+          "line": 99,
+          "text": "IE               :  NUMERO EXTERNE DE L'ELEMENT",
+          "full_line": "C       IE               :  NUMERO EXTERNE DE L'ELEMENT",
+          "french_words": [
+            "element",
+            "numero"
+          ]
+        },
+        {
+          "line": 101,
+          "text": "IB2=NNFLSW(7,IL) :  ADRESSE DE LA PRESSION (ECRASE NUMERO EXTERNE)",
+          "full_line": "C       IB2=NNFLSW(7,IL) :  ADRESSE DE LA PRESSION (ECRASE NUMERO EXTERNE)",
+          "french_words": [
+            "pression",
+            "numero"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/fluid/flow0.F",
+      "abs_path": "engine/source/fluid/flow0.F",
+      "comment_count": 2,
+      "comments": [
+        {
+          "line": 85,
+          "text": "II7  -> IBUFR   : indice ligne noeud local (0 si pas sur ce proc)",
+          "full_line": "C     II7  -> IBUFR   : indice ligne noeud local (0 si pas sur ce proc)",
+          "french_words": [
+            "noeud",
+            "indice"
+          ]
+        },
+        {
+          "line": 86,
+          "text": "II8  -> IBUFC   : indice colonne noeud local (0 si pas sur ce proc)",
+          "full_line": "C     II8  -> IBUFC   : indice colonne noeud local (0 si pas sur ce proc)",
+          "french_words": [
+            "noeud",
+            "indice"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/properties/composite_options/stack/delm24law.F",
+      "abs_path": "engine/source/properties/composite_options/stack/delm24law.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 75,
+          "text": "UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "full_line": "C UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/properties/composite_options/stack/delm02law.F",
+      "abs_path": "engine/source/properties/composite_options/stack/delm02law.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 81,
+          "text": "UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "full_line": "C UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/properties/composite_options/stack/delm01law.F",
+      "abs_path": "engine/source/properties/composite_options/stack/delm01law.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 74,
+          "text": "UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "full_line": "C UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/elements/shell/coqueba/cmatc3.F",
+      "abs_path": "engine/source/elements/shell/coqueba/cmatc3.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 98,
+          "text": "I   THK ,THKE         - element updated and initial thickness",
+          "full_line": "c  I   THK ,THKE         - element updated and initial thickness",
+          "french_words": [
+            "element",
+            "initial"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/elements/shell/coqueba/cbacoor.F",
+      "abs_path": "engine/source/elements/shell/coqueba/cbacoor.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 117,
+          "text": "O  NPLAT,IPLAT(NEL)    - num. of plat element and indice",
+          "full_line": "c  O  NPLAT,IPLAT(NEL)    - num. of plat element and indice",
+          "french_words": [
+            "element",
+            "indice"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/elements/shell/coqueba/cbacoork.F",
+      "abs_path": "engine/source/elements/shell/coqueba/cbacoork.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 94,
+          "text": "O  NPLAT,IPLAT(NEL)    - num. of plat element and indice",
+          "full_line": "c  O  NPLAT,IPLAT(NEL)    - num. of plat element and indice",
+          "french_words": [
+            "element",
+            "indice"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/elements/thickshell/solidec/scfint_reg.F",
+      "abs_path": "engine/source/elements/thickshell/solidec/scfint_reg.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 498,
+          "text": "Initial element characteristic length",
+          "full_line": "            ! Initial element characteristic length",
+          "french_words": [
+            "element",
+            "initial"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/elements/thickshell/solide8c/s8cfint_reg.F",
+      "abs_path": "engine/source/elements/thickshell/solide8c/s8cfint_reg.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 716,
+          "text": "Initial element characteristic length",
+          "full_line": "            ! Initial element characteristic length",
+          "french_words": [
+            "element",
+            "initial"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/elements/thickshell/solide8c/s8cforc3.F",
+      "abs_path": "engine/source/elements/thickshell/solide8c/s8cforc3.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 979,
+          "text": "CALCUL DES CONTRAINTES SUIVANT LOIS CONSTITUTIVES",
+          "full_line": "C     CALCUL DES CONTRAINTES SUIVANT LOIS CONSTITUTIVES",
+          "french_words": [
+            "calcul",
+            "suivant"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/elements/thickshell/solide6c/s6cfint_reg.F",
+      "abs_path": "engine/source/elements/thickshell/solide6c/s6cfint_reg.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 501,
+          "text": "Initial element characteristic length",
+          "full_line": "            ! Initial element characteristic length",
+          "french_words": [
+            "element",
+            "initial"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/elements/thickshell/solide16/s16forc3.F",
+      "abs_path": "engine/source/elements/thickshell/solide16/s16forc3.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 612,
+          "text": "CALCUL DES CONTRAINTES SUIVANT LOIS CONSTITUTIVES",
+          "full_line": "      !     CALCUL DES CONTRAINTES SUIVANT LOIS CONSTITUTIVES",
+          "french_words": [
+            "calcul",
+            "suivant"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/elements/solid/solide8/s8forc3.F",
+      "abs_path": "engine/source/elements/solid/solide8/s8forc3.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 220,
+          "text": "CALCUL DES CONTRAINTES SUIVANT LOIS CONSTITUTIVES",
+          "full_line": "C     CALCUL DES CONTRAINTES SUIVANT LOIS CONSTITUTIVES",
+          "french_words": [
+            "calcul",
+            "suivant"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/elements/solid/solide10/s10forc3.F",
+      "abs_path": "engine/source/elements/solid/solide10/s10forc3.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 623,
+          "text": "CALCUL DES CONTRAINTES SUIVANT LOIS CONSTITUTIVES",
+          "full_line": "C     CALCUL DES CONTRAINTES SUIVANT LOIS CONSTITUTIVES",
+          "french_words": [
+            "calcul",
+            "suivant"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/elements/solid/solidez/mmodul24c.F",
+      "abs_path": "engine/source/elements/solid/solidez/mmodul24c.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 117,
+          "text": "NON DAMAGED ELEMENT GROUP => initial Hook matrix",
+          "full_line": "c     NON DAMAGED ELEMENT GROUP => initial Hook matrix",
+          "french_words": [
+            "element",
+            "initial"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/elements/solid/solide4/s4fint_reg.F",
+      "abs_path": "engine/source/elements/solid/solide4/s4fint_reg.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 206,
+          "text": "Initial element characteristic length",
+          "full_line": "          ! Initial element characteristic length",
+          "french_words": [
+            "element",
+            "initial"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/elements/solid/solide4/s4forc3.F",
+      "abs_path": "engine/source/elements/solid/solide4/s4forc3.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 589,
+          "text": "CALCUL DES CONTRAINTES SUIVANT LOIS CONSTITUTIVES",
+          "full_line": "C     CALCUL DES CONTRAINTES SUIVANT LOIS CONSTITUTIVES",
+          "french_words": [
+            "calcul",
+            "suivant"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/elements/solid/solide8e/s8eforc3.F",
+      "abs_path": "engine/source/elements/solid/solide8e/s8eforc3.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 1532,
+          "text": "CALCUL DES CONTRAINTES SUIVANT LOIS CONSTITUTIVES",
+          "full_line": "C     CALCUL DES CONTRAINTES SUIVANT LOIS CONSTITUTIVES",
+          "french_words": [
+            "calcul",
+            "suivant"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/elements/solid/solide8z/s8zfint_reg.F",
+      "abs_path": "engine/source/elements/solid/solide8z/s8zfint_reg.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 461,
+          "text": "Initial element characteristic length",
+          "full_line": "          ! Initial element characteristic length",
+          "french_words": [
+            "element",
+            "initial"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/elements/solid/solide8z/s8zforc3.F",
+      "abs_path": "engine/source/elements/solid/solide8z/s8zforc3.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 1181,
+          "text": "CALCUL DES CONTRAINTES SUIVANT LOIS CONSTITUTIVES",
+          "full_line": "C     CALCUL DES CONTRAINTES SUIVANT LOIS CONSTITUTIVES",
+          "french_words": [
+            "calcul",
+            "suivant"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/elements/solid/solide20/s20forc3.F",
+      "abs_path": "engine/source/elements/solid/solide20/s20forc3.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 428,
+          "text": "CALCUL DES CONTRAINTES SUIVANT LOIS CONSTITUTIVES",
+          "full_line": "C         CALCUL DES CONTRAINTES SUIVANT LOIS CONSTITUTIVES",
+          "french_words": [
+            "calcul",
+            "suivant"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/elements/solid/solide/vfluid.F",
+      "abs_path": "engine/source/elements/solid/solide/vfluid.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 69,
+          "text": "CALCUL DES CONTRAINTES SUIVANT LOIS CONSTITUTIVES",
+          "full_line": "C     CALCUL DES CONTRAINTES SUIVANT LOIS CONSTITUTIVES",
+          "french_words": [
+            "calcul",
+            "suivant"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/elements/solid/solide/sfint_reg.F",
+      "abs_path": "engine/source/elements/solid/solide/sfint_reg.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 306,
+          "text": "Initial element characteristic length",
+          "full_line": "          ! Initial element characteristic length",
+          "french_words": [
+            "element",
+            "initial"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/elements/solid/solide8s/s8sforc3.F",
+      "abs_path": "engine/source/elements/solid/solide8s/s8sforc3.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 834,
+          "text": "CALCUL DES CONTRAINTES SUIVANT LOIS CONSTITUTIVES",
+          "full_line": "C     CALCUL DES CONTRAINTES SUIVANT LOIS CONSTITUTIVES",
+          "french_words": [
+            "calcul",
+            "suivant"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/elements/solid/solide8s/srcoor3_imp.F",
+      "abs_path": "engine/source/elements/solid/solide8s/srcoor3_imp.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 370,
+          "text": "print*,'REPERE Pour Fint: ',I",
+          "full_line": "!        print*,'REPERE Pour Fint: ',I",
+          "french_words": [
+            "pour",
+            "repere"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/elements/xelem/xanim28.F",
+      "abs_path": "engine/source/elements/xelem/xanim28.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 65,
+          "text": "MASSELE  |  1      | F | R | ELEMENT (INITIAL) MASS",
+          "full_line": "C MASSELE  |  1      | F | R | ELEMENT (INITIAL) MASS",
+          "french_words": [
+            "element",
+            "initial"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/elements/sph/spstres.F",
+      "abs_path": "engine/source/elements/sph/spstres.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 245,
+          "text": "CALCUL DES CONTRAINTES SUIVANT LOIS CONSTITUTIVES",
+          "full_line": "C     CALCUL DES CONTRAINTES SUIVANT LOIS CONSTITUTIVES",
+          "french_words": [
+            "calcul",
+            "suivant"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/mpi/interfaces/spmd_i25slide.F",
+      "abs_path": "engine/source/mpi/interfaces/spmd_i25slide.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 476,
+          "text": "Pour l'instant on garde l'iteration P = LOC_PROC",
+          "full_line": "      ! Pour l'instant on garde l'iteration P = LOC_PROC",
+          "french_words": [
+            "pour",
+            "iteration"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/mpi/interfaces/spmd_i7tool.F",
+      "abs_path": "engine/source/mpi/interfaces/spmd_i7tool.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 3322,
+          "text": "Tempo RBY a remonter dans starter conversion no noeud vers no rigid body",
+          "full_line": "C Tempo RBY a remonter dans starter conversion no noeud vers no rigid body",
+          "french_words": [
+            "dans",
+            "noeud"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/mpi/forces/spmd_exch2_a_pon.F",
+      "abs_path": "engine/source/mpi/forces/spmd_exch2_a_pon.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 419,
+          "text": "tri suivant no noeud",
+          "full_line": "C tri suivant no noeud",
+          "french_words": [
+            "noeud",
+            "suivant"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/tools/lagmul/lag_mpc.F",
+      "abs_path": "engine/source/tools/lagmul/lag_mpc.F",
+      "comment_count": 2,
+      "comments": [
+        {
+          "line": 62,
+          "text": "I  : numero global du noeud (1,NUMNOD)",
+          "full_line": "C        I  : numero global du noeud (1,NUMNOD)",
+          "french_words": [
+            "noeud",
+            "numero"
+          ]
+        },
+        {
+          "line": 225,
+          "text": "I  : numero global du noeud (1,NUMNOD)",
+          "full_line": "C        I  : numero global du noeud (1,NUMNOD)",
+          "french_words": [
+            "noeud",
+            "numero"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/tools/lagmul/lag_rby.F",
+      "abs_path": "engine/source/tools/lagmul/lag_rby.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 62,
+          "text": "I  : numero global du noeud (1,NUMNOD)",
+          "full_line": "C        I  : numero global du noeud (1,NUMNOD)",
+          "french_words": [
+            "noeud",
+            "numero"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/tools/lagmul/gjnt_diff.F",
+      "abs_path": "engine/source/tools/lagmul/gjnt_diff.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 57,
+          "text": "I  : numero global du noeud (1,NUMNOD)",
+          "full_line": "C        I  : numero global du noeud (1,NUMNOD)",
+          "french_words": [
+            "noeud",
+            "numero"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/tools/lagmul/lag_rwall.F",
+      "abs_path": "engine/source/tools/lagmul/lag_rwall.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 68,
+          "text": "I  : numero global du noeud (1,NUMNOD)",
+          "full_line": "C        I  : numero global du noeud (1,NUMNOD)",
+          "french_words": [
+            "noeud",
+            "numero"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/tools/lagmul/lag_bcs.F",
+      "abs_path": "engine/source/tools/lagmul/lag_bcs.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 70,
+          "text": "I  : numero global du noeud (1,NUMNOD)",
+          "full_line": "C        I  : numero global du noeud (1,NUMNOD)",
+          "french_words": [
+            "noeud",
+            "numero"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/tools/lagmul/lag_mult_solv.F",
+      "abs_path": "engine/source/tools/lagmul/lag_mult_solv.F",
+      "comment_count": 3,
+      "comments": [
+        {
+          "line": 113,
+          "text": "I  : numero global du noeud (1,NUMNOD)",
+          "full_line": "C        I  : numero global du noeud (1,NUMNOD)",
+          "french_words": [
+            "noeud",
+            "numero"
+          ]
+        },
+        {
+          "line": 494,
+          "text": "I  : numero global du noeud (1,NUMNOD)",
+          "full_line": "C        I  : numero global du noeud (1,NUMNOD)",
+          "french_words": [
+            "noeud",
+            "numero"
+          ]
+        },
+        {
+          "line": 879,
+          "text": "I  : numero global du noeud (1,NUMNOD)",
+          "full_line": "C        I  : numero global du noeud (1,NUMNOD)",
+          "french_words": [
+            "noeud",
+            "numero"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/tools/lagmul/gjnt_gear.F",
+      "abs_path": "engine/source/tools/lagmul/gjnt_gear.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 52,
+          "text": "I  : numero global du noeud (1,NUMNOD)",
+          "full_line": "C        I  : numero global du noeud (1,NUMNOD)",
+          "french_words": [
+            "noeud",
+            "numero"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/tools/lagmul/lag_fxv.F",
+      "abs_path": "engine/source/tools/lagmul/lag_fxv.F",
+      "comment_count": 2,
+      "comments": [
+        {
+          "line": 76,
+          "text": "I  : numero global du noeud (1,NUMNOD)",
+          "full_line": "C        I  : numero global du noeud (1,NUMNOD)",
+          "french_words": [
+            "noeud",
+            "numero"
+          ]
+        },
+        {
+          "line": 214,
+          "text": "I  : numero global du noeud (1,NUMNOD)",
+          "full_line": "C        I  : numero global du noeud (1,NUMNOD)",
+          "french_words": [
+            "noeud",
+            "numero"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/tools/lagmul/gjnt_rack.F",
+      "abs_path": "engine/source/tools/lagmul/gjnt_rack.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 52,
+          "text": "I  : numero global du noeud (1,NUMNOD)",
+          "full_line": "C        I  : numero global du noeud (1,NUMNOD)",
+          "french_words": [
+            "noeud",
+            "numero"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/tools/sect/section_skewp.F",
+      "abs_path": "engine/source/tools/sect/section_skewp.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 64,
+          "text": "CALCUL DES MOMEMTS/REPERE N1 N2 N3",
+          "full_line": "C      CALCUL DES MOMEMTS/REPERE N1 N2 N3",
+          "french_words": [
+            "calcul",
+            "repere"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/constraints/general/rbody/rgbodfp.F",
+      "abs_path": "engine/source/constraints/general/rbody/rgbodfp.F",
+      "comment_count": 4,
+      "comments": [
+        {
+          "line": 334,
+          "text": "matrice d'inertie en repere global",
+          "full_line": "C      matrice d'inertie en repere global",
+          "french_words": [
+            "repere",
+            "matrice"
+          ]
+        },
+        {
+          "line": 652,
+          "text": "MATRICE d'inertie -> repere globale",
+          "full_line": "C MATRICE d'inertie -> repere globale",
+          "french_words": [
+            "repere",
+            "matrice"
+          ]
+        },
+        {
+          "line": 688,
+          "text": "MATRICE d'inertie -> repere globale",
+          "full_line": "C MATRICE d'inertie -> repere globale",
+          "french_words": [
+            "repere",
+            "matrice"
+          ]
+        },
+        {
+          "line": 724,
+          "text": "MATRICE d'inertie -> repere globale",
+          "full_line": "C MATRICE d'inertie -> repere globale",
+          "french_words": [
+            "repere",
+            "matrice"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/constraints/general/rbody/inepri.F",
+      "abs_path": "engine/source/constraints/general/rbody/inepri.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 34,
+          "text": "CALCUL INERTIES ET REPERE PRINCIPAL",
+          "full_line": "C     CALCUL INERTIES ET REPERE PRINCIPAL",
+          "french_words": [
+            "calcul",
+            "repere"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/constraints/general/rbody/rbyact.F",
+      "abs_path": "engine/source/constraints/general/rbody/rbyact.F",
+      "comment_count": 3,
+      "comments": [
+        {
+          "line": 252,
+          "text": "MATRICE d'inertie -> repere globale",
+          "full_line": "C MATRICE d'inertie -> repere globale",
+          "french_words": [
+            "repere",
+            "matrice"
+          ]
+        },
+        {
+          "line": 333,
+          "text": "MATRICE d'inertie -> repere globale",
+          "full_line": "C MATRICE d'inertie -> repere globale",
+          "french_words": [
+            "repere",
+            "matrice"
+          ]
+        },
+        {
+          "line": 429,
+          "text": "CALCUL DU REPERE D'INERTIE PRINCIPALE",
+          "full_line": "C     CALCUL DU REPERE D'INERTIE PRINCIPALE",
+          "french_words": [
+            "calcul",
+            "repere"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/constraints/general/rbody/rbyfor.F",
+      "abs_path": "engine/source/constraints/general/rbody/rbyfor.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 193,
+          "text": "Traitement rigid bodies (sans packet), avec scheduling dynamique",
+          "full_line": "C Traitement rigid bodies (sans packet), avec scheduling dynamique",
+          "french_words": [
+            "avec",
+            "sans"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/ale/alefvm/alefvm_stress.F",
+      "abs_path": "engine/source/ale/alefvm/alefvm_stress.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 115,
+          "text": "ALEMAIN>SFORC3() pour chaque groupe.",
+          "full_line": "      ! ALEMAIN>SFORC3() pour chaque groupe.",
+          "french_words": [
+            "pour",
+            "chaque"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/ale/alefvm/alefvm_stress_int22.F",
+      "abs_path": "engine/source/ale/alefvm/alefvm_stress_int22.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 118,
+          "text": "ALEMAIN>SFORC3() pour chaque groupe.",
+          "full_line": "      ! ALEMAIN>SFORC3() pour chaque groupe.",
+          "french_words": [
+            "pour",
+            "chaque"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/multifluid/multi_muscl_fluxes_computation.F",
+      "abs_path": "engine/source/multifluid/multi_muscl_fluxes_computation.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 272,
+          "text": "Conserved variable current element",
+          "full_line": "!     Conserved variable current element",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/multifluid/multi_fluxes_computation.F",
+      "abs_path": "engine/source/multifluid/multi_fluxes_computation.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 230,
+          "text": "Conserved variable current element",
+          "full_line": "!     Conserved variable current element",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/interfaces/int16/i16lagm.F",
+      "abs_path": "engine/source/interfaces/int16/i16lagm.F",
+      "comment_count": 2,
+      "comments": [
+        {
+          "line": 101,
+          "text": "IK : numero de noeud local a un contact (1,NK)",
+          "full_line": "C        IK : numero de noeud local a un contact (1,NK)",
+          "french_words": [
+            "noeud",
+            "numero"
+          ]
+        },
+        {
+          "line": 102,
+          "text": "I  : numero global du noeud (1,NUMNOD)",
+          "full_line": "C        I  : numero global du noeud (1,NUMNOD)",
+          "french_words": [
+            "noeud",
+            "numero"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/interfaces/int16/i8lagm.F",
+      "abs_path": "engine/source/interfaces/int16/i8lagm.F",
+      "comment_count": 2,
+      "comments": [
+        {
+          "line": 101,
+          "text": "IK : numero de noeud local a un contact (1,NK)",
+          "full_line": "C        IK : numero de noeud local a un contact (1,NK)",
+          "french_words": [
+            "noeud",
+            "numero"
+          ]
+        },
+        {
+          "line": 102,
+          "text": "I  : numero global du noeud (1,NUMNOD)",
+          "full_line": "C        I  : numero global du noeud (1,NUMNOD)",
+          "french_words": [
+            "noeud",
+            "numero"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/interfaces/int16/i20lagm.F",
+      "abs_path": "engine/source/interfaces/int16/i20lagm.F",
+      "comment_count": 2,
+      "comments": [
+        {
+          "line": 101,
+          "text": "IK : numero de noeud local a un contact (1,NK)",
+          "full_line": "C        IK : numero de noeud local a un contact (1,NK)",
+          "french_words": [
+            "noeud",
+            "numero"
+          ]
+        },
+        {
+          "line": 102,
+          "text": "I  : numero global du noeud (1,NUMNOD)",
+          "full_line": "C        I  : numero global du noeud (1,NUMNOD)",
+          "french_words": [
+            "noeud",
+            "numero"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/interfaces/int16/i10lagm.F",
+      "abs_path": "engine/source/interfaces/int16/i10lagm.F",
+      "comment_count": 2,
+      "comments": [
+        {
+          "line": 101,
+          "text": "IK : numero de noeud local a un contact (1,NK)",
+          "full_line": "C        IK : numero de noeud local a un contact (1,NK)",
+          "french_words": [
+            "noeud",
+            "numero"
+          ]
+        },
+        {
+          "line": 102,
+          "text": "I  : numero global du noeud (1,NUMNOD)",
+          "full_line": "C        I  : numero global du noeud (1,NUMNOD)",
+          "french_words": [
+            "noeud",
+            "numero"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/interfaces/int16/i16main.F",
+      "abs_path": "engine/source/interfaces/int16/i16main.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 65,
+          "text": "EMINX  6*NME<6*NUMELS           MIN MAX DE CHAQUE ELEMENT        TMP_GLOBAL",
+          "full_line": "C    EMINX  6*NME<6*NUMELS           MIN MAX DE CHAQUE ELEMENT        TMP_GLOBAL",
+          "french_words": [
+            "element",
+            "chaque"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/interfaces/intsort/i10trc.F",
+      "abs_path": "engine/source/interfaces/intsort/i10trc.F",
+      "comment_count": 2,
+      "comments": [
+        {
+          "line": 83,
+          "text": "CAND_A : DENOMBREMENT DE CHAQUE NOEUD",
+          "full_line": "C     CAND_A : DENOMBREMENT DE CHAQUE NOEUD",
+          "french_words": [
+            "noeud",
+            "chaque"
+          ]
+        },
+        {
+          "line": 91,
+          "text": "CAND_A : ADRESSE DE CHAQUE NOEUD",
+          "full_line": "C     CAND_A : ADRESSE DE CHAQUE NOEUD",
+          "french_words": [
+            "noeud",
+            "chaque"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/interfaces/intsort/i25trc_edg.F",
+      "abs_path": "engine/source/interfaces/intsort/i25trc_edg.F",
+      "comment_count": 2,
+      "comments": [
+        {
+          "line": 93,
+          "text": "CAND_A : DENOMBREMENT DE CHAQUE NOEUD",
+          "full_line": "C     CAND_A : DENOMBREMENT DE CHAQUE NOEUD",
+          "french_words": [
+            "noeud",
+            "chaque"
+          ]
+        },
+        {
+          "line": 102,
+          "text": "CAND_A : ADRESSE DE CHAQUE NOEUD",
+          "full_line": "C     CAND_A : ADRESSE DE CHAQUE NOEUD",
+          "french_words": [
+            "noeud",
+            "chaque"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/interfaces/intsort/i20main_tri.F",
+      "abs_path": "engine/source/interfaces/intsort/i20main_tri.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 250,
+          "text": "CALCUL BORNE DOMAINE REMONTE DANS I7XSAVE",
+          "full_line": "C     CALCUL BORNE DOMAINE REMONTE DANS I7XSAVE",
+          "french_words": [
+            "calcul",
+            "dans"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/interfaces/intsort/i23main_tri.F",
+      "abs_path": "engine/source/interfaces/intsort/i23main_tri.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 200,
+          "text": "CALCUL BORNE DOMAINE REMONTE DANS I7XSAVE",
+          "full_line": "C     CALCUL BORNE DOMAINE REMONTE DANS I7XSAVE",
+          "french_words": [
+            "calcul",
+            "dans"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/interfaces/intsort/i11main_tri.F",
+      "abs_path": "engine/source/interfaces/intsort/i11main_tri.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 203,
+          "text": "CALCUL BORNE DOMAINE REMONTE DANS I7XSAVE",
+          "full_line": "C     CALCUL BORNE DOMAINE REMONTE DANS I7XSAVE",
+          "french_words": [
+            "calcul",
+            "dans"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/interfaces/intsort/i10tri.F",
+      "abs_path": "engine/source/interfaces/intsort/i10tri.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 118,
+          "text": "PROV_E       CAND_E provisoire (variable static dans i7tri)",
+          "full_line": "C     PROV_E       CAND_E provisoire (variable static dans i7tri)",
+          "french_words": [
+            "dans",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/interfaces/intsort/i21tri.F",
+      "abs_path": "engine/source/interfaces/intsort/i21tri.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 113,
+          "text": "PROV_E       CAND_E provisoire (variable static dans i7tri)",
+          "full_line": "C     PROV_E       CAND_E provisoire (variable static dans i7tri)",
+          "french_words": [
+            "dans",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/interfaces/intsort/i7tri.F",
+      "abs_path": "engine/source/interfaces/intsort/i7tri.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 121,
+          "text": "PROV_E       CAND_E provisoire (variable static dans i7tri)",
+          "full_line": "C     PROV_E       CAND_E provisoire (variable static dans i7tri)",
+          "french_words": [
+            "dans",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/interfaces/intsort/i20tri.F",
+      "abs_path": "engine/source/interfaces/intsort/i20tri.F",
+      "comment_count": 3,
+      "comments": [
+        {
+          "line": 118,
+          "text": "PROV_E       CAND_E provisoire (variable static dans i20tri)",
+          "full_line": "C     PROV_E       CAND_E provisoire (variable static dans i20tri)",
+          "french_words": [
+            "dans",
+            "variable"
+          ]
+        },
+        {
+          "line": 750,
+          "text": "PROV_M       CAND_M provisoire (variable static dans i7tri)",
+          "full_line": "C     PROV_M       CAND_M provisoire (variable static dans i7tri)",
+          "french_words": [
+            "dans",
+            "variable"
+          ]
+        },
+        {
+          "line": 842,
+          "text": "INTERFACE AVEC 1 SEGMENT ET 1 NOEUD + INITIALISATION DX DY DZ",
+          "full_line": "C     INTERFACE AVEC 1 SEGMENT ET 1 NOEUD + INITIALISATION DX DY DZ",
+          "french_words": [
+            "avec",
+            "noeud"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/interfaces/intsort/i25trc_e2s.F",
+      "abs_path": "engine/source/interfaces/intsort/i25trc_e2s.F",
+      "comment_count": 2,
+      "comments": [
+        {
+          "line": 109,
+          "text": "CAND_A : DENOMBREMENT DE CHAQUE NOEUD",
+          "full_line": "C     CAND_A : DENOMBREMENT DE CHAQUE NOEUD",
+          "french_words": [
+            "noeud",
+            "chaque"
+          ]
+        },
+        {
+          "line": 118,
+          "text": "CAND_A : ADRESSE DE CHAQUE NOEUD",
+          "full_line": "C     CAND_A : ADRESSE DE CHAQUE NOEUD",
+          "french_words": [
+            "noeud",
+            "chaque"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/interfaces/intsort/i25trivox.F",
+      "abs_path": "engine/source/interfaces/intsort/i25trivox.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 94,
+          "text": "PROV_E       CAND_E provisoire (variable static dans i7tri)",
+          "full_line": "C     PROV_E       CAND_E provisoire (variable static dans i7tri)",
+          "french_words": [
+            "dans",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/interfaces/intsort/i7trc.F",
+      "abs_path": "engine/source/interfaces/intsort/i7trc.F",
+      "comment_count": 4,
+      "comments": [
+        {
+          "line": 258,
+          "text": "CAND_A : DENOMBREMENT DE CHAQUE NOEUD",
+          "full_line": "C     CAND_A : DENOMBREMENT DE CHAQUE NOEUD",
+          "french_words": [
+            "noeud",
+            "chaque"
+          ]
+        },
+        {
+          "line": 266,
+          "text": "CAND_A : ADRESSE DE CHAQUE NOEUD",
+          "full_line": "C     CAND_A : ADRESSE DE CHAQUE NOEUD",
+          "french_words": [
+            "noeud",
+            "chaque"
+          ]
+        },
+        {
+          "line": 728,
+          "text": "CAND_A : DENOMBREMENT DE CHAQUE NOEUD",
+          "full_line": "C     CAND_A : DENOMBREMENT DE CHAQUE NOEUD",
+          "french_words": [
+            "noeud",
+            "chaque"
+          ]
+        },
+        {
+          "line": 737,
+          "text": "CAND_A : ADRESSE DE CHAQUE NOEUD",
+          "full_line": "C     CAND_A : ADRESSE DE CHAQUE NOEUD",
+          "french_words": [
+            "noeud",
+            "chaque"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/interfaces/intsort/i23trc.F",
+      "abs_path": "engine/source/interfaces/intsort/i23trc.F",
+      "comment_count": 2,
+      "comments": [
+        {
+          "line": 67,
+          "text": "CAND_A : DENOMBREMENT DE CHAQUE NOEUD",
+          "full_line": "C     CAND_A : DENOMBREMENT DE CHAQUE NOEUD",
+          "french_words": [
+            "noeud",
+            "chaque"
+          ]
+        },
+        {
+          "line": 75,
+          "text": "CAND_A : ADRESSE DE CHAQUE NOEUD",
+          "full_line": "C     CAND_A : ADRESSE DE CHAQUE NOEUD",
+          "french_words": [
+            "noeud",
+            "chaque"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/interfaces/intsort/i24main_tri.F",
+      "abs_path": "engine/source/interfaces/intsort/i24main_tri.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 218,
+          "text": "CALCUL BORNE DOMAINE REMONTE DANS I7XSAVE",
+          "full_line": "C     CALCUL BORNE DOMAINE REMONTE DANS I7XSAVE",
+          "french_words": [
+            "calcul",
+            "dans"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/interfaces/intsort/i23trivox.F",
+      "abs_path": "engine/source/interfaces/intsort/i23trivox.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 92,
+          "text": "PROV_E       CAND_E provisoire (variable static dans i7tri)",
+          "full_line": "C     PROV_E       CAND_E provisoire (variable static dans i7tri)",
+          "french_words": [
+            "dans",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/interfaces/intsort/i24trivox.F",
+      "abs_path": "engine/source/interfaces/intsort/i24trivox.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 95,
+          "text": "PROV_E       CAND_E provisoire (variable static dans i7tri)",
+          "full_line": "C     PROV_E       CAND_E provisoire (variable static dans i7tri)",
+          "french_words": [
+            "dans",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/interfaces/intsort/i11tri.F",
+      "abs_path": "engine/source/interfaces/intsort/i11tri.F",
+      "comment_count": 2,
+      "comments": [
+        {
+          "line": 110,
+          "text": "PROV_M       CAND_M provisoire (variable static dans i7tri)",
+          "full_line": "C     PROV_M       CAND_M provisoire (variable static dans i7tri)",
+          "french_words": [
+            "dans",
+            "variable"
+          ]
+        },
+        {
+          "line": 199,
+          "text": "INTERFACE AVEC 1 SEGMENT ET 1 NOEUD + INITIALISATION DX DY DZ",
+          "full_line": "C     INTERFACE AVEC 1 SEGMENT ET 1 NOEUD + INITIALISATION DX DY DZ",
+          "french_words": [
+            "avec",
+            "noeud"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/interfaces/intsort/i10main_tri.F",
+      "abs_path": "engine/source/interfaces/intsort/i10main_tri.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 172,
+          "text": "CALCUL BORNE DOMAINE REMONTE DANS I7XSAVE",
+          "full_line": "C     CALCUL BORNE DOMAINE REMONTE DANS I7XSAVE",
+          "french_words": [
+            "calcul",
+            "dans"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/interfaces/int22/sigeps37_single_cell.F",
+      "abs_path": "engine/source/interfaces/int22/sigeps37_single_cell.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 96,
+          "text": "APPEL SIGEPS37 POUR EQUILIBRE PRESSION",
+          "full_line": "          !APPEL SIGEPS37 POUR EQUILIBRE PRESSION",
+          "french_words": [
+            "pour",
+            "pression"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/interfaces/int22/sinit22_fvm.F",
+      "abs_path": "engine/source/interfaces/int22/sinit22_fvm.F",
+      "comment_count": 4,
+      "comments": [
+        {
+          "line": 2090,
+          "text": "APPEL SIGEPS37 POUR EQUILIBRE PRESSION",
+          "full_line": "          !APPEL SIGEPS37 POUR EQUILIBRE PRESSION",
+          "french_words": [
+            "pour",
+            "pression"
+          ]
+        },
+        {
+          "line": 2727,
+          "text": "APPEL SIGEPS37 POUR EQUILIBRE PRESSION",
+          "full_line": "        !APPEL SIGEPS37 POUR EQUILIBRE PRESSION",
+          "french_words": [
+            "pour",
+            "pression"
+          ]
+        },
+        {
+          "line": 2782,
+          "text": "APPEL SIGEPS37 POUR EQUILIBRE PRESSION",
+          "full_line": "            !APPEL SIGEPS37 POUR EQUILIBRE PRESSION",
+          "french_words": [
+            "pour",
+            "pression"
+          ]
+        },
+        {
+          "line": 3280,
+          "text": "APPEL SIGEPS37 POUR EQUILIBRE PRESSION",
+          "full_line": "               !APPEL SIGEPS37 POUR EQUILIBRE PRESSION",
+          "french_words": [
+            "pour",
+            "pression"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/interfaces/interf/in12r.F",
+      "abs_path": "engine/source/interfaces/interf/in12r.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 75,
+          "text": "RETOUR REPERE SECOND",
+          "full_line": "C RETOUR REPERE SECOND",
+          "french_words": [
+            "repere",
+            "retour"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/interfaces/interf/int2rupt.F",
+      "abs_path": "engine/source/interfaces/interf/int2rupt.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 254,
+          "text": "Reset initial main & secnd masse /inertia",
+          "full_line": "C     Reset initial main & secnd masse /inertia",
+          "french_words": [
+            "masse",
+            "initial"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/interfaces/interf/i12s2m.F",
+      "abs_path": "engine/source/interfaces/interf/i12s2m.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 116,
+          "text": "CALCUL PARTICULIER SI IL EXISTE ONE SEGMENT SANS NOEUD SECOND. DETECTE",
+          "full_line": "      !CALCUL PARTICULIER SI IL EXISTE ONE SEGMENT SANS NOEUD SECOND. DETECTE",
+          "french_words": [
+            "calcul",
+            "sans",
+            "noeud"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/interfaces/interf/intti12.F",
+      "abs_path": "engine/source/interfaces/interf/intti12.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 168,
+          "text": "CALCUL COORDONNEES ISOPARAMETRIQUES S & T NOEUD SECONDARY   !",
+          "full_line": "          !   CALCUL COORDONNEES ISOPARAMETRIQUES S & T NOEUD SECONDARY   !",
+          "french_words": [
+            "calcul",
+            "noeud"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/interfaces/int17/i21lagm.F",
+      "abs_path": "engine/source/interfaces/int17/i21lagm.F",
+      "comment_count": 2,
+      "comments": [
+        {
+          "line": 101,
+          "text": "IK : numero de noeud local a un contact (1,NK)",
+          "full_line": "C        IK : numero de noeud local a un contact (1,NK)",
+          "french_words": [
+            "noeud",
+            "numero"
+          ]
+        },
+        {
+          "line": 102,
+          "text": "I  : numero global du noeud (1,NUMNOD)",
+          "full_line": "C        I  : numero global du noeud (1,NUMNOD)",
+          "french_words": [
+            "noeud",
+            "numero"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/interfaces/int17/i17for3.F",
+      "abs_path": "engine/source/interfaces/int17/i17for3.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 413,
+          "text": "calcul de SI_S=s(relatif element main)",
+          "full_line": "C      calcul de SI_S=s(relatif element main)",
+          "french_words": [
+            "calcul",
+            "element"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/interfaces/int17/i17lagm.F",
+      "abs_path": "engine/source/interfaces/int17/i17lagm.F",
+      "comment_count": 3,
+      "comments": [
+        {
+          "line": 106,
+          "text": "IK : numero de noeud local a un contact (1,NK)",
+          "full_line": "C        IK : numero de noeud local a un contact (1,NK)",
+          "french_words": [
+            "noeud",
+            "numero"
+          ]
+        },
+        {
+          "line": 107,
+          "text": "I  : numero global du noeud (1,NUMNOD)",
+          "full_line": "C        I  : numero global du noeud (1,NUMNOD)",
+          "french_words": [
+            "noeud",
+            "numero"
+          ]
+        },
+        {
+          "line": 355,
+          "text": "calcul de SI_S=s(relatif element main)",
+          "full_line": "C      calcul de SI_S=s(relatif element main)",
+          "french_words": [
+            "calcul",
+            "element"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/interfaces/int17/i17main_pena.F",
+      "abs_path": "engine/source/interfaces/int17/i17main_pena.F",
+      "comment_count": 4,
+      "comments": [
+        {
+          "line": 61,
+          "text": "EMINX  6*(NME+NMES)           MIN MAX DE CHAQUE ELEMENT        TMP_GLOBAL",
+          "full_line": "C    EMINX  6*(NME+NMES)           MIN MAX DE CHAQUE ELEMENT        TMP_GLOBAL",
+          "french_words": [
+            "element",
+            "chaque"
+          ]
+        },
+        {
+          "line": 183,
+          "text": "EMINX  6*NME<6*NUMELS           MIN MAX DE CHAQUE ELEMENT        TMP_GLOBAL",
+          "full_line": "C    EMINX  6*NME<6*NUMELS           MIN MAX DE CHAQUE ELEMENT        TMP_GLOBAL",
+          "french_words": [
+            "element",
+            "chaque"
+          ]
+        },
+        {
+          "line": 281,
+          "text": "CALCUL BORNE DOMAINE REMONTE DANS I17XSAVE",
+          "full_line": "C     CALCUL BORNE DOMAINE REMONTE DANS I17XSAVE",
+          "french_words": [
+            "calcul",
+            "dans"
+          ]
+        },
+        {
+          "line": 398,
+          "text": "EMINX  6*NME<6*NUMELS           MIN MAX DE CHAQUE ELEMENT        TMP_GLOBAL",
+          "full_line": "C    EMINX  6*NME<6*NUMELS           MIN MAX DE CHAQUE ELEMENT        TMP_GLOBAL",
+          "french_words": [
+            "element",
+            "chaque"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/interfaces/int17/i17main.F",
+      "abs_path": "engine/source/interfaces/int17/i17main.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 63,
+          "text": "EMINX  6*NME<6*NUMELS           MIN MAX DE CHAQUE ELEMENT        TMP_GLOBAL",
+          "full_line": "C    EMINX  6*NME<6*NUMELS           MIN MAX DE CHAQUE ELEMENT        TMP_GLOBAL",
+          "french_words": [
+            "element",
+            "chaque"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/interfaces/int18/i18main_kine.F",
+      "abs_path": "engine/source/interfaces/int18/i18main_kine.F",
+      "comment_count": 4,
+      "comments": [
+        {
+          "line": 539,
+          "text": "EMINX  6*NME<6*NUMELS           MIN MAX DE CHAQUE ELEMENT        TMP_GLOBAL",
+          "full_line": "C    EMINX  6*NME<6*NUMELS           MIN MAX DE CHAQUE ELEMENT        TMP_GLOBAL",
+          "french_words": [
+            "element",
+            "chaque"
+          ]
+        },
+        {
+          "line": 767,
+          "text": "EMINX  6*NME<6*NUMELS           MIN MAX DE CHAQUE ELEMENT        TMP_GLOBAL",
+          "full_line": "C    EMINX  6*NME<6*NUMELS           MIN MAX DE CHAQUE ELEMENT        TMP_GLOBAL",
+          "french_words": [
+            "element",
+            "chaque"
+          ]
+        },
+        {
+          "line": 997,
+          "text": "EMINX  6*NME<6*NUMELS           MIN MAX DE CHAQUE ELEMENT        TMP_GLOBAL",
+          "full_line": "C    EMINX  6*NME<6*NUMELS           MIN MAX DE CHAQUE ELEMENT        TMP_GLOBAL",
+          "french_words": [
+            "element",
+            "chaque"
+          ]
+        },
+        {
+          "line": 1142,
+          "text": "EMINX  6*NME<6*NUMELS           MIN MAX DE CHAQUE ELEMENT        TMP_GLOBAL",
+          "full_line": "C    EMINX  6*NME<6*NUMELS           MIN MAX DE CHAQUE ELEMENT        TMP_GLOBAL",
+          "french_words": [
+            "element",
+            "chaque"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/interfaces/int07/i7main_lmult.F",
+      "abs_path": "engine/source/interfaces/int07/i7main_lmult.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 66,
+          "text": "EMINX  6*NME<6*NUMELS           MIN MAX DE CHAQUE ELEMENT        TMP_GLOBAL",
+          "full_line": "C    EMINX  6*NME<6*NUMELS           MIN MAX DE CHAQUE ELEMENT        TMP_GLOBAL",
+          "french_words": [
+            "element",
+            "chaque"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/interfaces/int07/i7therm.F",
+      "abs_path": "engine/source/interfaces/int07/i7therm.F",
+      "comment_count": 2,
+      "comments": [
+        {
+          "line": 119,
+          "text": "CALCUL DISTANCE ENTRE LE NOEUD SECOND.",
+          "full_line": "C         CALCUL DISTANCE ENTRE LE NOEUD SECOND.",
+          "french_words": [
+            "calcul",
+            "noeud",
+            "entre"
+          ]
+        },
+        {
+          "line": 238,
+          "text": "CALCUL DISTANCE ENTRE LE NOEUD SECOND.",
+          "full_line": "C         CALCUL DISTANCE ENTRE LE NOEUD SECOND.",
+          "french_words": [
+            "calcul",
+            "noeud",
+            "entre"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/interfaces/int07/i7lagm.F",
+      "abs_path": "engine/source/interfaces/int07/i7lagm.F",
+      "comment_count": 2,
+      "comments": [
+        {
+          "line": 134,
+          "text": "IK : numero de noeud local a un contact (1,NK)",
+          "full_line": "C        IK : numero de noeud local a un contact (1,NK)",
+          "french_words": [
+            "noeud",
+            "numero"
+          ]
+        },
+        {
+          "line": 135,
+          "text": "I  : numero global du noeud (1,NUMNOD)",
+          "full_line": "C        I  : numero global du noeud (1,NUMNOD)",
+          "french_words": [
+            "noeud",
+            "numero"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/interfaces/int14/i14wfs.F",
+      "abs_path": "engine/source/interfaces/int14/i14wfs.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 73,
+          "text": "J11+8 : Sauve DE pour calcul Travail des Forces Secnds.",
+          "full_line": "C        J11+8 : Sauve DE pour calcul Travail des Forces Secnds.",
+          "french_words": [
+            "calcul",
+            "pour"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/interfaces/int21/i21therm.F",
+      "abs_path": "engine/source/interfaces/int21/i21therm.F",
+      "comment_count": 2,
+      "comments": [
+        {
+          "line": 118,
+          "text": "DISTANCE ENTRE LE NOEUD SECOND.",
+          "full_line": "C         DISTANCE ENTRE LE NOEUD SECOND.",
+          "french_words": [
+            "noeud",
+            "entre"
+          ]
+        },
+        {
+          "line": 214,
+          "text": "DISTANCE ENTRE LE NOEUD SECOND.",
+          "full_line": "C         DISTANCE ENTRE LE NOEUD SECOND.",
+          "french_words": [
+            "noeud",
+            "entre"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/output/ecrit.F",
+      "abs_path": "engine/source/output/ecrit.F",
+      "comment_count": 2,
+      "comments": [
+        {
+          "line": 663,
+          "text": "calcul temps restant",
+          "full_line": "C calcul temps restant",
+          "french_words": [
+            "calcul",
+            "temps"
+          ]
+        },
+        {
+          "line": 687,
+          "text": "calcul temps restant",
+          "full_line": "C calcul temps restant",
+          "french_words": [
+            "calcul",
+            "temps"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/output/anim/generate/xanim29.F",
+      "abs_path": "engine/source/output/anim/generate/xanim29.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 61,
+          "text": "MASSELE  |  1      | F | R | ELEMENT (INITIAL) MASS",
+          "full_line": "C MASSELE  |  1      | F | R | ELEMENT (INITIAL) MASS",
+          "french_words": [
+            "element",
+            "initial"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/output/anim/generate/xanim31.F",
+      "abs_path": "engine/source/output/anim/generate/xanim31.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 61,
+          "text": "MASSELE  |  1      | F | R | ELEMENT (INITIAL) MASS",
+          "full_line": "C MASSELE  |  1      | F | R | ELEMENT (INITIAL) MASS",
+          "french_words": [
+            "element",
+            "initial"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/output/anim/generate/xanim30.F",
+      "abs_path": "engine/source/output/anim/generate/xanim30.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 61,
+          "text": "MASSELE  |  1      | F | R | ELEMENT (INITIAL) MASS",
+          "full_line": "C MASSELE  |  1      | F | R | ELEMENT (INITIAL) MASS",
+          "french_words": [
+            "element",
+            "initial"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/general_controls/computation/noise.F",
+      "abs_path": "engine/source/general_controls/computation/noise.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 91,
+          "text": "NE : NOMBRE D'ECHANTILLON ENTRE CHAQUE SORTIE",
+          "full_line": "C NE : NOMBRE D'ECHANTILLON ENTRE CHAQUE SORTIE",
+          "french_words": [
+            "entre",
+            "chaque",
+            "sortie"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/general_controls/computation/initnoise.F",
+      "abs_path": "engine/source/general_controls/computation/initnoise.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 62,
+          "text": "STOCKE DANS NOIADD(K) LE NOMBRE d'ELEMENTS CONNECTES AU NOEUD K-1",
+          "full_line": "C STOCKE DANS NOIADD(K) LE NOMBRE d'ELEMENTS CONNECTES AU NOEUD K-1",
+          "french_words": [
+            "dans",
+            "noeud"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "engine/source/boundary_conditions/ebcs/ebcs6_inip.F",
+      "abs_path": "engine/source/boundary_conditions/ebcs/ebcs6_inip.F",
+      "comment_count": 2,
+      "comments": [
+        {
+          "line": 53,
+          "text": "Pression arret initiale imposee avec impedance",
+          "full_line": "C Pression arret initiale imposee avec impedance",
+          "french_words": [
+            "avec",
+            "pression"
+          ]
+        },
+        {
+          "line": 181,
+          "text": "calcul pression initiale nodale",
+          "full_line": "C calcul pression initiale nodale",
+          "french_words": [
+            "calcul",
+            "pression"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "starter/source/system/timer.F",
+      "abs_path": "starter/source/system/timer.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 366,
+          "text": "reset timer elapsed time et calcul du temps elapsed courant",
+          "full_line": "C       reset timer elapsed time et calcul du temps elapsed courant",
+          "french_words": [
+            "calcul",
+            "temps"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "starter/source/materials/fail/biquad/hm_read_fail_biquad.F",
+      "abs_path": "starter/source/materials/fail/biquad/hm_read_fail_biquad.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 49,
+          "text": "UVAR3   (if perturbation is not used) or UVAR9 (if used) = initial element length",
+          "full_line": "c     UVAR3   (if perturbation is not used) or UVAR9 (if used) = initial element length",
+          "french_words": [
+            "element",
+            "initial"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "starter/source/materials/mat/mat077/m77init.F",
+      "abs_path": "starter/source/materials/mat/mat077/m77init.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 54,
+          "text": "UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "full_line": "C UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "starter/source/materials/mat/mat065/hm_read_mat65.F",
+      "abs_path": "starter/source/materials/mat/mat065/hm_read_mat65.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 210,
+          "text": "Element buffer variable allocation",
+          "full_line": "c     Element buffer variable allocation",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "starter/source/materials/mat/mat019/inepri.F",
+      "abs_path": "starter/source/materials/mat/mat019/inepri.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 35,
+          "text": "CALCUL INERTIES ET REPERE PRINCIPAL",
+          "full_line": "C     CALCUL INERTIES ET REPERE PRINCIPAL",
+          "french_words": [
+            "calcul",
+            "repere"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "starter/source/materials/mat/mat019/rigid_mat.F",
+      "abs_path": "starter/source/materials/mat/mat019/rigid_mat.F",
+      "comment_count": 2,
+      "comments": [
+        {
+          "line": 154,
+          "text": "CALCUL DU REPERE D'INERTIE PRINCIPALE",
+          "full_line": "C     CALCUL DU REPERE D'INERTIE PRINCIPALE",
+          "french_words": [
+            "calcul",
+            "repere"
+          ]
+        },
+        {
+          "line": 236,
+          "text": "MATRICE d'inertie -> repere global",
+          "full_line": "C MATRICE d'inertie -> repere global",
+          "french_words": [
+            "repere",
+            "matrice"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "starter/source/materials/mat/mat070/m70init.F",
+      "abs_path": "starter/source/materials/mat/mat070/m70init.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 42,
+          "text": "UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "full_line": "C UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "starter/source/materials/mat/mat070/sigeps70.F",
+      "abs_path": "starter/source/materials/mat/mat070/sigeps70.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 96,
+          "text": "UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "full_line": "C UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "starter/source/materials/mat/mat075/m75init.F",
+      "abs_path": "starter/source/materials/mat/mat075/m75init.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 63,
+          "text": "UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "full_line": "C UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "starter/source/materials/mat/mat120/hm_read_mat120.F",
+      "abs_path": "starter/source/materials/mat/mat120/hm_read_mat120.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 247,
+          "text": "Element buffer variable allocation",
+          "full_line": "c     Element buffer variable allocation",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "starter/source/materials/mat/mat044/hm_read_mat44.F",
+      "abs_path": "starter/source/materials/mat/mat044/hm_read_mat44.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 265,
+          "text": "Element buffer variable allocation",
+          "full_line": "c     Element buffer variable allocation",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "starter/source/materials/mat/mat027/hm_read_mat27.F",
+      "abs_path": "starter/source/materials/mat/mat027/hm_read_mat27.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 199,
+          "text": "Element buffer : internal variable allocation",
+          "full_line": "c     Element buffer : internal variable allocation",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "starter/source/materials/mat/mat090/sigeps90.F",
+      "abs_path": "starter/source/materials/mat/mat090/sigeps90.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 90,
+          "text": "UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "full_line": "C UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "starter/source/materials/mat/mat051/m51init.F",
+      "abs_path": "starter/source/materials/mat/mat051/m51init.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 110,
+          "text": "need to initialize element buffer with initial density for this specific case.",
+          "full_line": "      !need to initialize element buffer with initial density for this specific case.",
+          "french_words": [
+            "element",
+            "initial"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "starter/source/materials/mat/mat038/m38init.F",
+      "abs_path": "starter/source/materials/mat/mat038/m38init.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 55,
+          "text": "UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "full_line": "C UVAR    |NEL*NUVAR| F |R/W| USER ELEMENT VARIABLE ARRAY",
+          "french_words": [
+            "element",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "starter/source/elements/solid_2d/tria/t3grhead.F",
+      "abs_path": "starter/source/elements/solid_2d/tria/t3grhead.F",
+      "comment_count": 2,
+      "comments": [
+        {
+          "line": 65,
+          "text": "ISEL(NSELTG)        TABLEAU DES TRI CHOISIES POUR TH          E/S",
+          "full_line": "C     ISEL(NSELTG)        TABLEAU DES TRI CHOISIES POUR TH          E/S",
+          "french_words": [
+            "pour",
+            "tableau"
+          ]
+        },
+        {
+          "line": 67,
+          "text": "EADD(NUMELTG)      TABLEAU DES ADRESSES DANS IDAM CHGT DAMIER   S",
+          "full_line": "C     EADD(NUMELTG)      TABLEAU DES ADRESSES DANS IDAM CHGT DAMIER   S",
+          "french_words": [
+            "dans",
+            "tableau"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "starter/source/elements/solid_2d/quad/qgrtails.F",
+      "abs_path": "starter/source/elements/solid_2d/quad/qgrtails.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 60,
+          "text": "EADD(NUMELQ)       TABLEAU DES ADRESEES DANS IDAM CHGT DAMIER E",
+          "full_line": "C     EADD(NUMELQ)       TABLEAU DES ADRESEES DANS IDAM CHGT DAMIER E",
+          "french_words": [
+            "dans",
+            "tableau"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "starter/source/elements/solid_2d/quad/qgrhead.F",
+      "abs_path": "starter/source/elements/solid_2d/quad/qgrhead.F",
+      "comment_count": 2,
+      "comments": [
+        {
+          "line": 52,
+          "text": "ISEL(NSELQ)       TABLEAU DES SOLIDES 4N CHOISIS POUR TH     E/S",
+          "full_line": "C     ISEL(NSELQ)       TABLEAU DES SOLIDES 4N CHOISIS POUR TH     E/S",
+          "french_words": [
+            "pour",
+            "tableau"
+          ]
+        },
+        {
+          "line": 54,
+          "text": "EADD(NUMELQ)      TABLEAU DES ADRESEES DANS IDAM CHGT DAMIER   S",
+          "full_line": "C     EADD(NUMELQ)      TABLEAU DES ADRESEES DANS IDAM CHGT DAMIER   S",
+          "french_words": [
+            "dans",
+            "tableau"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "starter/source/elements/truss/tgrhead.F",
+      "abs_path": "starter/source/elements/truss/tgrhead.F",
+      "comment_count": 2,
+      "comments": [
+        {
+          "line": 46,
+          "text": "ISEL(NSELT)       TABLEAU DESPOUTRES CHOISIS POUR TH         E/S",
+          "full_line": "C     ISEL(NSELT)       TABLEAU DESPOUTRES CHOISIS POUR TH         E/S",
+          "french_words": [
+            "pour",
+            "tableau"
+          ]
+        },
+        {
+          "line": 48,
+          "text": "EADD(NUMELT)      TABLEAU DES ADRESSES DANS IDAM CHGT DAMIER   S",
+          "full_line": "C     EADD(NUMELT)      TABLEAU DES ADRESSES DANS IDAM CHGT DAMIER   S",
+          "french_words": [
+            "dans",
+            "tableau"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "starter/source/elements/truss/tmass.F",
+      "abs_path": "starter/source/elements/truss/tmass.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 76,
+          "text": "MASSE ELEMENT /2",
+          "full_line": "C     MASSE ELEMENT /2",
+          "french_words": [
+            "element",
+            "masse"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "starter/source/elements/truss/tgrtails.F",
+      "abs_path": "starter/source/elements/truss/tgrtails.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 52,
+          "text": "EADD(NUMELT)       TABLEAU DES ADRESEES DANS IDAM CHGT DAMIER E",
+          "full_line": "C     EADD(NUMELT)       TABLEAU DES ADRESEES DANS IDAM CHGT DAMIER E",
+          "french_words": [
+            "dans",
+            "tableau"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "starter/source/elements/thickshell/solidec/scmorth3.F",
+      "abs_path": "starter/source/elements/thickshell/solidec/scmorth3.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 107,
+          "text": "Repere orthotrope pour thick shells-------",
+          "full_line": "C     Repere orthotrope pour thick shells-------",
+          "french_words": [
+            "pour",
+            "repere"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "starter/source/elements/solid/solide4/s4repiso3.F",
+      "abs_path": "starter/source/elements/solid/solide4/s4repiso3.F",
+      "comment_count": 2,
+      "comments": [
+        {
+          "line": 59,
+          "text": "Repere isoparametrique element tetra 4 nodes",
+          "full_line": "C     Repere isoparametrique element tetra 4 nodes",
+          "french_words": [
+            "repere",
+            "element"
+          ]
+        },
+        {
+          "line": 120,
+          "text": "Repere isoparametrique element tetra 4 nodes",
+          "full_line": "C     Repere isoparametrique element tetra 4 nodes",
+          "french_words": [
+            "repere",
+            "element"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "starter/source/elements/solid/solide4/s4refsta3.F",
+      "abs_path": "starter/source/elements/solid/solide4/s4refsta3.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 304,
+          "text": "deformation : reference -> initial",
+          "full_line": "C       deformation : reference -> initial",
+          "french_words": [
+            "deformation",
+            "initial"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "starter/source/elements/xelem/xgrtails.F",
+      "abs_path": "starter/source/elements/xelem/xgrtails.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 51,
+          "text": "EADD(NUMELX)       TABLEAU DES ADRESEES DANS IDAM CHGT DAMIER E",
+          "full_line": "C     EADD(NUMELX)       TABLEAU DES ADRESEES DANS IDAM CHGT DAMIER E",
+          "french_words": [
+            "dans",
+            "tableau"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "starter/source/elements/xelem/xgrhead.F",
+      "abs_path": "starter/source/elements/xelem/xgrhead.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 49,
+          "text": "EADD(NUMELX)      TABLEAU DES ADRESSES DANS IDAM CHGT DAMIER   S",
+          "full_line": "C     EADD(NUMELX)      TABLEAU DES ADRESSES DANS IDAM CHGT DAMIER   S",
+          "french_words": [
+            "dans",
+            "tableau"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "starter/source/elements/beam/pmass.F",
+      "abs_path": "starter/source/elements/beam/pmass.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 135,
+          "text": "MASSE ELEMENT /2",
+          "full_line": "C     MASSE ELEMENT /2",
+          "french_words": [
+            "element",
+            "masse"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "starter/source/elements/beam/pgrhead.F",
+      "abs_path": "starter/source/elements/beam/pgrhead.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 47,
+          "text": "EADD(NUMELP)      TABLEAU DES ADRESSES DANS IDAM CHGT DAMIER   S",
+          "full_line": "C     EADD(NUMELP)      TABLEAU DES ADRESSES DANS IDAM CHGT DAMIER   S",
+          "french_words": [
+            "dans",
+            "tableau"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "starter/source/elements/beam/pgrtails.F",
+      "abs_path": "starter/source/elements/beam/pgrtails.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 61,
+          "text": "EADD(NUMELP)       TABLEAU DES ADRESEES DANS IDAM CHGT DAMIER E",
+          "full_line": "C     EADD(NUMELP)       TABLEAU DES ADRESEES DANS IDAM CHGT DAMIER E",
+          "french_words": [
+            "dans",
+            "tableau"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "starter/source/elements/sh3n/coque3n/c3grtails.F",
+      "abs_path": "starter/source/elements/sh3n/coque3n/c3grtails.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 70,
+          "text": "EADD(NUMELTG)      TABLEAU DES ADRESSES DANS IDAM CHGT DAMIER E",
+          "full_line": "C     EADD(NUMELTG)      TABLEAU DES ADRESSES DANS IDAM CHGT DAMIER E",
+          "french_words": [
+            "dans",
+            "tableau"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "starter/source/elements/sh3n/coque3n/c3grhead.F",
+      "abs_path": "starter/source/elements/sh3n/coque3n/c3grhead.F",
+      "comment_count": 2,
+      "comments": [
+        {
+          "line": 66,
+          "text": "ISEL(NSELTG)        TABLEAU DES TRI CHOISIES POUR TH          E/S",
+          "full_line": "C     ISEL(NSELTG)        TABLEAU DES TRI CHOISIES POUR TH          E/S",
+          "french_words": [
+            "pour",
+            "tableau"
+          ]
+        },
+        {
+          "line": 68,
+          "text": "EADD(NUMELTG)      TABLEAU DES ADRESSES DANS IDAM CHGT DAMIER   S",
+          "full_line": "C     EADD(NUMELTG)      TABLEAU DES ADRESSES DANS IDAM CHGT DAMIER   S",
+          "french_words": [
+            "dans",
+            "tableau"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "starter/source/elements/ige3d/ig3dgrhead.F",
+      "abs_path": "starter/source/elements/ige3d/ig3dgrhead.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 48,
+          "text": "EADD(NUMELIG3D)      TABLEAU DES ADRESSES DANS IDAM CHGT DAMIER   S",
+          "full_line": "C     EADD(NUMELIG3D)      TABLEAU DES ADRESSES DANS IDAM CHGT DAMIER   S",
+          "french_words": [
+            "dans",
+            "tableau"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "starter/source/elements/ige3d/comput_coinknot.F",
+      "abs_path": "starter/source/elements/ige3d/comput_coinknot.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 153,
+          "text": "FIRST STEP : ON PART DE L'ELEMENT INITIAL A RAFFINER",
+          "full_line": "C     FIRST STEP : ON PART DE L'ELEMENT INITIAL A RAFFINER",
+          "french_words": [
+            "element",
+            "initial"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "starter/source/elements/ige3d/comput_mesh_neighbour.F",
+      "abs_path": "starter/source/elements/ige3d/comput_mesh_neighbour.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 157,
+          "text": "(TESTONS SANS POUR L'INSTANT CAR ON TESTE TOUTES LES MESHSURFS",
+          "full_line": "C   (TESTONS SANS POUR L'INSTANT CAR ON TESTE TOUTES LES MESHSURFS",
+          "french_words": [
+            "pour",
+            "sans"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "starter/source/elements/ige3d/prerafig3d.F",
+      "abs_path": "starter/source/elements/ige3d/prerafig3d.F",
+      "comment_count": 2,
+      "comments": [
+        {
+          "line": 103,
+          "text": "PUIS AUX TAILLES EXACTES NECESSAIRES DANS ONE SECOND TEMPS",
+          "full_line": "C  PUIS AUX TAILLES EXACTES NECESSAIRES DANS ONE SECOND TEMPS",
+          "french_words": [
+            "dans",
+            "temps"
+          ]
+        },
+        {
+          "line": 173,
+          "text": "NB : OPTIMISER CES STRUCTURES PAR PATCH POUR KNOTLOCP SANS CASES VIDES",
+          "full_line": "C NB : OPTIMISER CES STRUCTURES PAR PATCH POUR KNOTLOCP SANS CASES VIDES",
+          "french_words": [
+            "pour",
+            "sans"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "starter/source/elements/ige3d/meshsurfig3d_mod.F",
+      "abs_path": "starter/source/elements/ige3d/meshsurfig3d_mod.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 91,
+          "text": "storage of the initial number of refinements for each element",
+          "full_line": "C storage of the initial number of refinements for each element",
+          "french_words": [
+            "element",
+            "initial"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "starter/source/elements/spring/rinit3.F",
+      "abs_path": "starter/source/elements/spring/rinit3.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 1891,
+          "text": "MASSE ELEMENT /2",
+          "full_line": "C     MASSE ELEMENT /2",
+          "french_words": [
+            "element",
+            "masse"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "starter/source/elements/spring/rgrhead.F",
+      "abs_path": "starter/source/elements/spring/rgrhead.F",
+      "comment_count": 2,
+      "comments": [
+        {
+          "line": 50,
+          "text": "ISEL(NSELR)       TABLEAU DES RESSORTS CHOISIS POUR TH       E/S",
+          "full_line": "C     ISEL(NSELR)       TABLEAU DES RESSORTS CHOISIS POUR TH       E/S",
+          "french_words": [
+            "pour",
+            "tableau"
+          ]
+        },
+        {
+          "line": 52,
+          "text": "EADD(NUMELR)      TABLEAU DES ADRESSES DANS IDAM CHGT DAMIER   S",
+          "full_line": "C     EADD(NUMELR)      TABLEAU DES ADRESSES DANS IDAM CHGT DAMIER   S",
+          "french_words": [
+            "dans",
+            "tableau"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "starter/source/elements/spring/rgrtails.F",
+      "abs_path": "starter/source/elements/spring/rgrtails.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 56,
+          "text": "EADD(NUMELR)       TABLEAU DES ADRESEES DANS IDAM CHGT DAMIER E",
+          "full_line": "C     EADD(NUMELR)       TABLEAU DES ADRESEES DANS IDAM CHGT DAMIER E",
+          "french_words": [
+            "dans",
+            "tableau"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "starter/source/elements/spring/rmas12.F",
+      "abs_path": "starter/source/elements/spring/rmas12.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 63,
+          "text": "MASSE ELEMENT /2",
+          "full_line": "C     MASSE ELEMENT /2",
+          "french_words": [
+            "element",
+            "masse"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "starter/source/elements/spring/rmass.F",
+      "abs_path": "starter/source/elements/spring/rmass.F",
+      "comment_count": 2,
+      "comments": [
+        {
+          "line": 60,
+          "text": "MASSE ELEMENT /2",
+          "full_line": "C     MASSE ELEMENT /2",
+          "french_words": [
+            "element",
+            "masse"
+          ]
+        },
+        {
+          "line": 154,
+          "text": "MASSE ELEMENT /2",
+          "full_line": "C     MASSE ELEMENT /2",
+          "french_words": [
+            "element",
+            "masse"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "starter/source/groups/hm_submodgr.F",
+      "abs_path": "starter/source/groups/hm_submodgr.F",
+      "comment_count": 2,
+      "comments": [
+        {
+          "line": 226,
+          "text": "IELT = ELEMENT TYPE (0 POUR NOEUDS, 1 BRIC, 2 QUAD, 3 SHELL,",
+          "full_line": "C     IELT = ELEMENT TYPE (0 POUR NOEUDS, 1 BRIC, 2 QUAD, 3 SHELL,",
+          "french_words": [
+            "pour",
+            "element"
+          ]
+        },
+        {
+          "line": 286,
+          "text": "IELT = ELEMENT TYPE (0 POUR NOEUDS, 1 BRIC, 2 QUAD, 3 SHELL,",
+          "full_line": "C     IELT = ELEMENT TYPE (0 POUR NOEUDS, 1 BRIC, 2 QUAD, 3 SHELL,",
+          "french_words": [
+            "pour",
+            "element"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "starter/source/airbag/fvmesh0.F",
+      "abs_path": "starter/source/airbag/fvmesh0.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 255,
+          "text": "Tag element interne pour l'option /TH/SURF mass flow",
+          "full_line": "C  Tag element interne pour l'option /TH/SURF mass flow",
+          "french_words": [
+            "pour",
+            "element"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "starter/source/constraints/general/rbody/inirby.F",
+      "abs_path": "starter/source/constraints/general/rbody/inirby.F",
+      "comment_count": 5,
+      "comments": [
+        {
+          "line": 718,
+          "text": "CALCUL DU REPERE D'INERTIE PRINCIPALE",
+          "full_line": "C     CALCUL DU REPERE D'INERTIE PRINCIPALE",
+          "french_words": [
+            "calcul",
+            "repere"
+          ]
+        },
+        {
+          "line": 886,
+          "text": "MATRICE d'inertie -> repere global",
+          "full_line": "C MATRICE d'inertie -> repere global",
+          "french_words": [
+            "repere",
+            "matrice"
+          ]
+        },
+        {
+          "line": 940,
+          "text": "MATRICE d'inertie -> repere global",
+          "full_line": "C MATRICE d'inertie -> repere global",
+          "french_words": [
+            "repere",
+            "matrice"
+          ]
+        },
+        {
+          "line": 982,
+          "text": "MATRICE d'inertie -> repere global",
+          "full_line": "C MATRICE d'inertie -> repere global",
+          "french_words": [
+            "repere",
+            "matrice"
+          ]
+        },
+        {
+          "line": 1601,
+          "text": "CALCUL DU REPERE D'INERTIE PRINCIPALE",
+          "full_line": "C     CALCUL DU REPERE D'INERTIE PRINCIPALE",
+          "french_words": [
+            "calcul",
+            "repere"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "starter/source/constraints/general/rbe3/hm_read_rbe3.F",
+      "abs_path": "starter/source/constraints/general/rbe3/hm_read_rbe3.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 122,
+          "text": "IRBE3(10,I) :  Numero interne du IRBE3 (necessaire pour Modif/SPMD)",
+          "full_line": "C     IRBE3(10,I) :  Numero interne du IRBE3 (necessaire pour Modif/SPMD)",
+          "french_words": [
+            "pour",
+            "numero"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "starter/source/interfaces/inter3d1/i24buc1.F",
+      "abs_path": "starter/source/interfaces/inter3d1/i24buc1.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 222,
+          "text": "TAILLE ZINF = .1*TAILLE MOYENNE ELEMENT DE CHAQUE COTE",
+          "full_line": "C     TAILLE ZINF = .1*TAILLE MOYENNE ELEMENT DE CHAQUE COTE",
+          "french_words": [
+            "element",
+            "chaque"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "starter/source/interfaces/inter3d1/i11buc1.F",
+      "abs_path": "starter/source/interfaces/inter3d1/i11buc1.F",
+      "comment_count": 2,
+      "comments": [
+        {
+          "line": 192,
+          "text": "TAILLE ZINF = .1*TAILLE MOYENNE ELEMENT DE CHAQUE COTE",
+          "full_line": "C     TAILLE ZINF = .1*TAILLE MOYENNE ELEMENT DE CHAQUE COTE",
+          "french_words": [
+            "element",
+            "chaque"
+          ]
+        },
+        {
+          "line": 474,
+          "text": "TAILLE ZINF = .1*TAILLE MOYENNE ELEMENT DE CHAQUE COTE",
+          "full_line": "C     TAILLE ZINF = .1*TAILLE MOYENNE ELEMENT DE CHAQUE COTE",
+          "french_words": [
+            "element",
+            "chaque"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "starter/source/interfaces/inter3d1/i25buc_vox1.F",
+      "abs_path": "starter/source/interfaces/inter3d1/i25buc_vox1.F",
+      "comment_count": 2,
+      "comments": [
+        {
+          "line": 178,
+          "text": "TAILLE ZINF = .1*TAILLE MOYENNE ELEMENT DE CHAQUE COTE",
+          "full_line": "C     TAILLE ZINF = .1*TAILLE MOYENNE ELEMENT DE CHAQUE COTE",
+          "french_words": [
+            "element",
+            "chaque"
+          ]
+        },
+        {
+          "line": 334,
+          "text": "looks for solid element supporting the segment (cf initial penetrations vs solids)",
+          "full_line": "           ! looks for solid element supporting the segment (cf initial penetrations vs solids)",
+          "french_words": [
+            "element",
+            "initial"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "starter/source/interfaces/inter3d1/i7buc1.F",
+      "abs_path": "starter/source/interfaces/inter3d1/i7buc1.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 163,
+          "text": "TAILLE ZINF = .1*TAILLE MOYENNE ELEMENT DE CHAQUE COTE",
+          "full_line": "C     TAILLE ZINF = .1*TAILLE MOYENNE ELEMENT DE CHAQUE COTE",
+          "french_words": [
+            "element",
+            "chaque"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "starter/source/interfaces/inter3d1/i23buc3.F",
+      "abs_path": "starter/source/interfaces/inter3d1/i23buc3.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 156,
+          "text": "TAILLE ZINF = .1*TAILLE MOYENNE ELEMENT DE CHAQUE COTE",
+          "full_line": "C     TAILLE ZINF = .1*TAILLE MOYENNE ELEMENT DE CHAQUE COTE",
+          "french_words": [
+            "element",
+            "chaque"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "starter/source/interfaces/inter3d1/i20dst3.F",
+      "abs_path": "starter/source/interfaces/inter3d1/i20dst3.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 826,
+          "text": "ici NVS donne encore le noeud global, NSV sera modifie dans I20NLG",
+          "full_line": "c ici NVS donne encore le noeud global, NSV sera modifie dans I20NLG",
+          "french_words": [
+            "dans",
+            "noeud"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "starter/source/interfaces/inter3d1/i7trivox1.F",
+      "abs_path": "starter/source/interfaces/inter3d1/i7trivox1.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 100,
+          "text": "PROV_E       CAND_E provisoire (variable static dans i7tri)",
+          "full_line": "C     PROV_E       CAND_E provisoire (variable static dans i7tri)",
+          "french_words": [
+            "dans",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "starter/source/interfaces/inter3d1/i25trivox1.F",
+      "abs_path": "starter/source/interfaces/inter3d1/i25trivox1.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 91,
+          "text": "PROV_E       CAND_E provisoire (variable static dans i7tri)",
+          "full_line": "C     PROV_E       CAND_E provisoire (variable static dans i7tri)",
+          "french_words": [
+            "dans",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "starter/source/interfaces/inter3d1/i21buc3.F",
+      "abs_path": "starter/source/interfaces/inter3d1/i21buc3.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 154,
+          "text": "TAILLE ZINF = .1*TAILLE MOYENNE ELEMENT DE CHAQUE COTE",
+          "full_line": "C     TAILLE ZINF = .1*TAILLE MOYENNE ELEMENT DE CHAQUE COTE",
+          "french_words": [
+            "element",
+            "chaque"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "starter/source/restart/ddsplit/w_front.F",
+      "abs_path": "starter/source/restart/ddsplit/w_front.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 856,
+          "text": "tag DD_RBY(3) a negatif pour reperage des r material sans echange.",
+          "full_line": "C   tag DD_RBY(3) a negatif pour reperage des r material sans echange.",
+          "french_words": [
+            "pour",
+            "sans"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "starter/source/restart/ddsplit/ipari_l_ini.F",
+      "abs_path": "starter/source/restart/ddsplit/ipari_l_ini.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 158,
+          "text": "calcul IMAXIMP_L suivant interface",
+          "full_line": "C calcul IMAXIMP_L suivant interface",
+          "french_words": [
+            "calcul",
+            "suivant"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "starter/source/output/qaprint/st_qaprint_materials.F",
+      "abs_path": "starter/source/output/qaprint/st_qaprint_materials.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 71,
+          "text": "Le Titr du MAT sert de nom de la variable dans le ref.extract , suivi de l'ID du MAT",
+          "full_line": "C         Le Titr du MAT sert de nom de la variable dans le ref.extract , suivi de l'ID du MAT",
+          "french_words": [
+            "dans",
+            "variable"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "starter/source/general_controls/computation/unit_code.F",
+      "abs_path": "starter/source/general_controls/computation/unit_code.F",
+      "comment_count": 2,
+      "comments": [
+        {
+          "line": 58,
+          "text": "La valeur entree est un reel",
+          "full_line": "* La valeur entree est un reel",
+          "french_words": [
+            "entree",
+            "valeur"
+          ]
+        },
+        {
+          "line": 60,
+          "text": "La valeur entree est un code (ou une erreur)",
+          "full_line": "* La valeur entree est un code (ou une erreur)",
+          "french_words": [
+            "entree",
+            "valeur"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "starter/source/boundary_conditions/ebcs/iniebcsp.F",
+      "abs_path": "starter/source/boundary_conditions/ebcs/iniebcsp.F",
+      "comment_count": 1,
+      "comments": [
+        {
+          "line": 114,
+          "text": "Calcul pression initiale nodale",
+          "full_line": "C Calcul pression initiale nodale",
+          "french_words": [
+            "calcul",
+            "pression"
+          ]
+        }
+      ]
+    }
+  ]
+}
