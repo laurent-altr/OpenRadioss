@@ -100,7 +100,7 @@
           integer, dimension(:), allocatable :: listseg,listsegtmp,listsegtotal,itagseg
           integer, dimension(:), allocatable :: id_nod,noddel,nod2expand,tagnod
           real(kind=WP), dimension(:), allocatable :: dist1,gapv
-          real(kind=WP) :: mindist,dmax
+          real(kind=WP) :: mindist,dmax,treshold
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   external functions
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -161,7 +161,8 @@
             listseg(1)=seg
 
             ! ----------------------------------
-            do while( (mindist + minseg) <= dmax .and. nbseg /= 0)
+            treshold = (dmax - minseg)**2
+            do while( mindist <= treshold .and. nbseg /= 0)
               level   = level + 1
               mindist = ep30
               cpt     = 0
@@ -194,11 +195,11 @@
                         if(tagsecnd(node_id_seg1)== 0 .or.tagnod(node_id_seg1) == 2)cycle   ! the node irect(l,seg1) is also a node of the segment "seg"
                         ! compute the distance between the node irect(l,seg1) & irect(j,seg)
                         dist1(node_id_seg1)=min(dist1(node_id_seg1),dist1(node_id)+  &
-                          sqrt((x(1,node_id_seg1) - x(1,node_id))**2 +             &
+                          ((x(1,node_id_seg1) - x(1,node_id))**2 +             &
                           (x(2,node_id_seg1) - x(2,node_id))**2 +             &
                           (x(3,node_id_seg1) - x(3,node_id))**2 ))
                         mindist=min(mindist,dist1(node_id_seg1))
-                        if(tagnod(node_id_seg1) == 0) then ! node "irect(l,seg1)" was not already treated
+                        if(tagnod(node_id_seg1) == 0 .and. dist1(node_id_seg1) <= treshold) then ! node "irect(l,seg1)" was not already treated
                           cptoper = cptoper + 1
                           tagnod(node_id_seg1) = 1 ! tag the node "irect(l,seg1)"
                           id_nod(cptoper)=node_id_seg1 ! save the node id
@@ -264,14 +265,14 @@
               cpt1 = 0
               if(igap==0)then
                 do l=1,cptoper
-                  if(dist1(id_nod(l)) <= dmax)then ! check if the distance to the node id_nod(l) is < to dmax
+                  if(sqrt(dist1(id_nod(l))) <= dmax)then ! check if the distance to the node id_nod(l) is < to dmax
                     cpt1 = cpt1 + 1
                     noddel(cpt1) = id_nod(l) ! save the node
                   end if
                 end do
               else
                 do l=1,cptoper
-                  if(dist1(id_nod(l)) <= sqrt(two)*gapv(id_nod(l)))then
+                  if(sqrt(dist1(id_nod(l))) <= sqrt(two)*gapv(id_nod(l)))then
                     cpt1 = cpt1 + 1
                     noddel(cpt1) = id_nod(l)
                   end if
