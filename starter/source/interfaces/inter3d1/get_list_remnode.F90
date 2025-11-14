@@ -100,7 +100,7 @@
           integer, dimension(:), allocatable :: listseg,listsegtmp,listsegtotal,itagseg
           integer, dimension(:), allocatable :: id_nod,noddel,nod2expand,tagnod
           real(kind=WP), dimension(:), allocatable :: dist1,gapv
-          real(kind=WP) :: mindist,dmax,treshold
+          real(kind=WP) :: mindist,dmax
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   external functions
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -161,8 +161,7 @@
             listseg(1)=seg
 
             ! ----------------------------------
-            treshold = (dmax - minseg)**2
-            do while( mindist <= treshold .and. nbseg /= 0)
+            do while( (sqrt(mindist) + minseg) <= dmax .and. nbseg /= 0)
               level   = level + 1
               mindist = ep30
               cpt     = 0
@@ -199,7 +198,7 @@
                           (x(2,node_id_seg1) - x(2,node_id))**2 +             &
                           (x(3,node_id_seg1) - x(3,node_id))**2 ))
                         mindist=min(mindist,dist1(node_id_seg1))
-                        if(tagnod(node_id_seg1) == 0 .and. dist1(node_id_seg1) <= treshold) then ! node "irect(l,seg1)" was not already treated
+                        if(tagnod(node_id_seg1) == 0) then ! node "irect(l,seg1)" was not already treated
                           cptoper = cptoper + 1
                           tagnod(node_id_seg1) = 1 ! tag the node "irect(l,seg1)"
                           id_nod(cptoper)=node_id_seg1 ! save the node id
