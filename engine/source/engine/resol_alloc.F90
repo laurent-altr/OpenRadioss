@@ -143,4 +143,141 @@ subroutine resol_alloc_thermal(glob_therm, numnod, ninter, lsky, lskyi, iparit, 
 ! ----------------------------------------------------------------------------------------------------------------------
 end subroutine resol_alloc_thermal
 
+!! \brief Allocate working arrays for ALE (Arbitrary Lagrangian Eulerian) formulation
+!! \details This subroutine handles allocation of ALE-related arrays including:
+!!          - AFLOW: ALE flow acceleration
+!!          - FFSKY, IFOAM, IFOAM_CONT: ALE force and foam arrays
+subroutine resol_alloc_ale(ialelag, iparit, numnod, nthread, lsky, &
+                            aflow, ffsky, ifoam, ifoam_cont, vflow, dflow, wflow)
+! ----------------------------------------------------------------------------------------------------------------------
+!                                                   MODULES
+! ----------------------------------------------------------------------------------------------------------------------
+  use precision_mod, only : wp
+  
+! ----------------------------------------------------------------------------------------------------------------------
+!                                                   IMPLICIT NONE
+! ----------------------------------------------------------------------------------------------------------------------
+  implicit none
+  
+! ----------------------------------------------------------------------------------------------------------------------
+!                                                   ARGUMENTS
+! ----------------------------------------------------------------------------------------------------------------------
+  integer, intent(in) :: ialelag                            !< ALE flag
+  integer, intent(in) :: iparit                             !< Parallel flag
+  integer, intent(in) :: numnod                             !< Number of nodes
+  integer, intent(in) :: nthread                            !< Number of threads
+  integer, intent(in) :: lsky                               !< Skyline length
+  real(kind=wp), allocatable, intent(inout) :: aflow(:)    !< ALE flow acceleration
+  real(kind=wp), allocatable, intent(inout) :: ffsky(:)    !< ALE force skyline
+  integer, allocatable, intent(inout) :: ifoam(:)          !< Foam indicator
+  integer, allocatable, intent(inout) :: ifoam_cont(:)     !< Foam contact indicator
+  real(kind=wp), allocatable, intent(inout) :: vflow(:)    !< Flow velocity
+  real(kind=wp), allocatable, intent(inout) :: dflow(:)    !< Flow displacement
+  real(kind=wp), allocatable, intent(inout) :: wflow(:)    !< Flow work
+
+! ----------------------------------------------------------------------------------------------------------------------
+!                                                   BODY
+! ----------------------------------------------------------------------------------------------------------------------
+  
+  if (ialelag > 0) then
+    if (iparit == 0) then
+      allocate (aflow(3*numnod*nthread))
+      allocate(ffsky(0))
+      allocate(ifoam(numnod*nthread))
+      allocate(ifoam_cont(numnod*nthread))
+    else
+      allocate (aflow(3*numnod))
+      allocate(ffsky(3*lsky))
+      allocate(ifoam(numnod))
+      allocate(ifoam_cont(numnod))
+      ffsky = 0.0_wp
+    endif
+    aflow = 0.0_wp
+    ifoam = 0
+    ifoam_cont = 0
+  else
+    allocate(aflow(0), vflow(0), dflow(0), wflow(0), ffsky(0), ifoam(0), ifoam_cont(0))
+  endif
+
+! ----------------------------------------------------------------------------------------------------------------------
+end subroutine resol_alloc_ale
+
+!! \brief Allocate working arrays for adaptive meshing (ADMESH)
+!! \details This subroutine handles allocation of ADMESH-related arrays
+subroutine resol_alloc_admesh(nadmesh, numelc, numeltg, levelmax, iparit, numnod, &
+                                lsh4act, lsh4kin, psh4act, psh4kin,                 &
+                                lsh3act, lsh3kin, psh3act, psh3kin,                 &
+                                msh4sky, msh3sky, ilevnod)
+! ----------------------------------------------------------------------------------------------------------------------
+!                                                   MODULES
+! ----------------------------------------------------------------------------------------------------------------------
+  use message_mod
+  
+! ----------------------------------------------------------------------------------------------------------------------
+!                                                   IMPLICIT NONE
+! ----------------------------------------------------------------------------------------------------------------------
+  implicit none
+  
+! ----------------------------------------------------------------------------------------------------------------------
+!                                                   ARGUMENTS
+! ----------------------------------------------------------------------------------------------------------------------
+  integer, intent(in) :: nadmesh                            !< Adaptive mesh flag
+  integer, intent(in) :: numelc                             !< Number of shell elements
+  integer, intent(in) :: numeltg                            !< Number of triangular elements
+  integer, intent(in) :: levelmax                           !< Maximum refinement level
+  integer, intent(in) :: iparit                             !< Parallel flag
+  integer, intent(in) :: numnod                             !< Number of nodes
+  integer, allocatable, intent(inout) :: lsh4act(:)        !< Shell4 active list
+  integer, allocatable, intent(inout) :: lsh4kin(:)        !< Shell4 kinematic list
+  integer, allocatable, intent(inout) :: psh4act(:)        !< Shell4 active pointer
+  integer, allocatable, intent(inout) :: psh4kin(:)        !< Shell4 kinematic pointer
+  integer, allocatable, intent(inout) :: lsh3act(:)        !< Shell3 active list
+  integer, allocatable, intent(inout) :: lsh3kin(:)        !< Shell3 kinematic list
+  integer, allocatable, intent(inout) :: psh3act(:)        !< Shell3 active pointer
+  integer, allocatable, intent(inout) :: psh3kin(:)        !< Shell3 kinematic pointer
+  real, allocatable, intent(inout) :: msh4sky(:)           !< Shell4 mass skyline
+  real, allocatable, intent(inout) :: msh3sky(:)           !< Shell3 mass skyline
+  integer, allocatable, intent(inout) :: ilevnod(:)        !< Node refinement level
+
+! ----------------------------------------------------------------------------------------------------------------------
+!                                                   LOCAL VARIABLES
+! ----------------------------------------------------------------------------------------------------------------------
+  integer :: ierror, ierr
+
+! ----------------------------------------------------------------------------------------------------------------------
+!                                                   BODY
+! ----------------------------------------------------------------------------------------------------------------------
+  
+  if (nadmesh /= 0) then
+    allocate(lsh4act(numelc), lsh4kin(numelc),                              &
+             psh4act(0:levelmax+1), psh4kin(0:levelmax+1),                  &
+             lsh3act(numeltg), lsh3kin(numeltg),                            &
+             psh3act(0:levelmax+1), psh3kin(0:levelmax+1),                  &
+             stat=ierror)
+    
+    if (ierror /= 0) then
+      call ancmsg(msgid=153, anmode=aninfo, i1=ierror)
+      call arret(2)
+    end if
+    
+    if (iparit /= 0) then
+      allocate(msh4sky(numelc), msh3sky(numeltg), stat=ierror)
+      if (ierror /= 0) then
+        call ancmsg(msgid=153, anmode=aninfo, i1=ierror)
+        call arret(2)
+      end if
+    else
+      allocate(msh4sky(0), msh3sky(0))
+    end if
+    
+    allocate(ilevnod(0:numnod), stat=ierr)
+    if (ierr /= 0) then
+      call ancmsg(msgid=20, anmode=aninfo)
+      call arret(2)
+    end if
+  end if
+
+! ----------------------------------------------------------------------------------------------------------------------
+end subroutine resol_alloc_admesh
+
 end module resol_alloc_mod

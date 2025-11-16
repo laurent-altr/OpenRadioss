@@ -1694,64 +1694,21 @@ C
               ENDIF
 
 C ----------------------------------------------
-C    SIMPLIFIED ALE FORMULATION
+C    SIMPLIFIED ALE FORMULATION - using helper subroutine
 C ----------------------------------------------
+              CALL resol_alloc_ale(IALELAG, IPARIT, NUMNOD, NTHREAD, LSKY,
+     .                             AFLOW, FFSKY, IFOAM, IFOAM_CONT, VFLOW, DFLOW, WFLOW)
               IF( IALELAG > 0) THEN
-                IF(IPARIT == 0) THEN
-                  ALLOCATE (AFLOW(3*NUMNOD*NTHREAD))
-                  ALLOCATE(FFSKY(0))
-                  ALLOCATE(IFOAM(NUMNOD*NTHREAD))
-                  ALLOCATE(IFOAM_CONT(NUMNOD*NTHREAD))
-                ELSE
-                  ALLOCATE (AFLOW(3*NUMNOD))
-                  ALLOCATE(FFSKY(3*LSKY))
-                  ALLOCATE(IFOAM(NUMNOD))
-                  ALLOCATE(IFOAM_CONT(NUMNOD))
-                  FFSKY = ZERO
-                ENDIF
-                AFLOW = ZERO
-                IFOAM = 0
-                IFOAM_CONT =0
                 DO I=1,NUMNOD
                   MSF(I) =  MSNF(I)
                 ENDDO
-              ELSE
-                ALLOCATE(AFLOW(0),VFLOW(0),
-     .                        DFLOW(0),WFLOW(0),
-     .                        FFSKY(0),IFOAM(0),
-     .                        IFOAM_CONT(0) )
               ENDIF
 C
-              IF(NADMESH/=0)THEN
-                ALLOCATE(LSH4ACT(NUMELC),LSH4KIN(NUMELC),
-     .                   PSH4ACT(0:LEVELMAX+1),PSH4KIN(0:LEVELMAX+1),
-     .                   LSH3ACT(NUMELTG),LSH3KIN(NUMELTG),
-     .                   PSH3ACT(0:LEVELMAX+1),PSH3KIN(0:LEVELMAX+1),
-     .                   STAT=IERROR)
-C
-                IF(IERROR/=0) THEN
-                  CALL ANCMSG(MSGID=153,ANMODE=ANINFO,
-     .                I1=IERROR)
-                  CALL ARRET(2)
-                END IF
-
-                IF (IPARIT/=0) THEN
-                  ALLOCATE(MSH4SKY(NUMELC),MSH3SKY(NUMELTG),
-     .                   STAT=IERROR)
-                  IF(IERROR/=0) THEN
-                    CALL ANCMSG(MSGID=153,ANMODE=ANINFO,
-     .                I1=IERROR)
-                    CALL ARRET(2)
-                  END IF
-                ELSE
-                  ALLOCATE(MSH4SKY(0),MSH3SKY(0))
-                END IF
-                ALLOCATE(ILEVNOD(0:NUMNOD),STAT=IERR)
-                IF(IERR/=0) THEN
-                  CALL ANCMSG(MSGID=20,ANMODE=ANINFO)
-                  CALL ARRET(2)
-                END IF
-              END IF
+C    ADAPTIVE MESHING - using helper subroutine
+              CALL resol_alloc_admesh(NADMESH, NUMELC, NUMELTG, LEVELMAX, IPARIT, NUMNOD,
+     .                                LSH4ACT, LSH4KIN, PSH4ACT, PSH4KIN,
+     .                                LSH3ACT, LSH3KIN, PSH3ACT, PSH3KIN,
+     .                                MSH4SKY, MSH3SKY, ILEVNOD)
 C
               IF(ISTATCND /= 0)THEN
                 ALLOCATE(LSH4UPL(NUMELC),LSH3UPL(NUMELTG),
