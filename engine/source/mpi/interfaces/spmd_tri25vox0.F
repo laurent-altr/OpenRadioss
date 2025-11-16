@@ -105,6 +105,8 @@ C=======================================================================
       XMINB = BMINMAL(4)
       YMINB = BMINMAL(5)
       ZMINB = BMINMAL(6)
+C     Pre-compute reciprocals to avoid division in tight loop
+      RATIO = ONE/(XMAXB-XMINB)
 
       DO NE=1,NRTM
 C We do not retain the Destruit facets
@@ -158,18 +160,18 @@ c     in 2 (4,3,6,9 ...) if the facet is large in front of AAA and inclinee
          ENDIF
 
 c        index of voxels occupied by the facet
-
-         IX1=INT(NBX*(XMINE-AAA-XMINB)/(XMAXB-XMINB))
-         IY1=INT(NBY*(YMINE-AAA-YMINB)/(YMAXB-YMINB))
-         IZ1=INT(NBZ*(ZMINE-AAA-ZMINB)/(ZMAXB-ZMINB))
+C        Use pre-computed RATIO for x-dimension (assuming cubic voxels)
+         IX1=INT(NBX*(XMINE-AAA-XMINB)*RATIO)
+         IY1=INT(NBY*(YMINE-AAA-YMINB)*RATIO)
+         IZ1=INT(NBZ*(ZMINE-AAA-ZMINB)*RATIO)
 
          IX1=MAX(0,MIN(NBX,IX1))
          IY1=MAX(0,MIN(NBY,IY1))
          IZ1=MAX(0,MIN(NBZ,IZ1))
 
-         IX2=INT(NBX*(XMAXE+AAA-XMINB)/(XMAXB-XMINB))
-         IY2=INT(NBY*(YMAXE+AAA-YMINB)/(YMAXB-YMINB))
-         IZ2=INT(NBZ*(ZMAXE+AAA-ZMINB)/(ZMAXB-ZMINB))
+         IX2=INT(NBX*(XMAXE+AAA-XMINB)*RATIO)
+         IY2=INT(NBY*(YMAXE+AAA-YMINB)*RATIO)
+         IZ2=INT(NBZ*(ZMAXE+AAA-ZMINB)*RATIO)
 
          IX2=MAX(0,MIN(NBX,IX2))
          IY2=MAX(0,MIN(NBY,IY2))
@@ -274,8 +276,12 @@ C=======================================================================
       XMINB = BMINMAL(4)
       YMINB = BMINMAL(5)
       ZMINB = BMINMAL(6)
+C     Pre-compute reciprocals to avoid division in tight loop
+      DX=ONE/(XMAXB-XMINB)
+      DY=ONE/(YMAXB-YMINB)
+      DZ=ONE/(ZMAXB-ZMINB)
 
-!$OMP DO
+!$OMP DO SCHEDULE(STATIC)
       DO IE = 1, NEDGE
 C check with :
         IF(STFE(IE) <= ZERO ) CYCLE
@@ -314,17 +320,18 @@ C       END IF
        !-------------------------------------------!
        !Voxel_lower_left_bound for this element---+
 
-        IX1=INT(NBX*(XMINE-AAA-XMINB)/(XMAXB-XMINB))
-        IY1=INT(NBY*(YMINE-AAA-YMINB)/(YMAXB-YMINB))
-        IZ1=INT(NBZ*(ZMINE-AAA-ZMINB)/(ZMAXB-ZMINB))
+C       Use pre-computed reciprocals for better performance
+        IX1=INT(NBX*(XMINE-AAA-XMINB)*DX)
+        IY1=INT(NBY*(YMINE-AAA-YMINB)*DY)
+        IZ1=INT(NBZ*(ZMINE-AAA-ZMINB)*DZ)
 
         IX1=MAX(0,MIN(NBX,IX1))
         IY1=MAX(0,MIN(NBY,IY1))
         IZ1=MAX(0,MIN(NBZ,IZ1))
 
-        IX2=INT(NBX*(XMAXE+AAA-XMINB)/(XMAXB-XMINB))
-        IY2=INT(NBY*(YMAXE+AAA-YMINB)/(YMAXB-YMINB))
-        IZ2=INT(NBZ*(ZMAXE+AAA-ZMINB)/(ZMAXB-ZMINB))
+        IX2=INT(NBX*(XMAXE+AAA-XMINB)*DX)
+        IY2=INT(NBY*(YMAXE+AAA-YMINB)*DY)
+        IZ2=INT(NBZ*(ZMAXE+AAA-ZMINB)*DZ)
 
         IX2=MAX(0,MIN(NBX,IX2))
         IY2=MAX(0,MIN(NBY,IY2))
