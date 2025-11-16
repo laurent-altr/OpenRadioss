@@ -26,14 +26,15 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    imp_sol_init          ../engine/source/implicit/imp_sol_init.F
 !||--- calls      -----------------------------------------------------
 !||    my_exit               ../engine/source/system/my_exit.c
+!||    spmd_barrier          ../engine/source/mpi/spmd_mod.F90
 !||--- uses       -----------------------------------------------------
-!||    spmd_comm_world_mod   ../engine/source/mpi/spmd_comm_world.F90
+!||    spmd_mod              ../engine/source/mpi/spmd_mod.F90
 !||====================================================================
       SUBROUTINE SPMD_MSTOP()
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
-        USE SPMD_COMM_WORLD_MOD, ONLY : SPMD_COMM_WORLD
+        USE SPMD_MOD
 #include      "implicit_f.inc"
 C-----------------------------------------------------------------
 C   M e s s a g e   P a s s i n g
@@ -51,7 +52,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   S o u r c e  L i n e s
 C-----------------------------------------------
-      call MPI_BARRIER(SPMD_COMM_WORLD,ierror)
+      call spmd_barrier(SPMD_COMM_WORLD)
       CALL MPI_FINALIZE(ierror)
       IF(ISPMD/=0)THEN
         CALL MY_EXIT(0)
