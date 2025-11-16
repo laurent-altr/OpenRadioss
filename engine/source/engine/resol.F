@@ -749,6 +749,8 @@ C-----------------------------------------------
               use damping_funct_ini_mod    , only : damping_funct_ini
               USE VIPER_MOD
               USE BCS_NRF_MOD , ONLY : BCS_NRF
+              USE resol_alloc_mod
+              USE resol_dealloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -1628,60 +1630,10 @@ C
               ALLOCATE(MCP_OFF(NUMNOD))
               MCP_OFF(1:NUMNOD) = 1.0
 
-              IFTHE  = 1
-              ICONDN = 1
-              IF(GLOB_THERM%ITHERM_FE > 0 ) THEN
-                IF(IPARIT == 3 ) THEN
-                  IFTHE = NUMNOD+3*NUMNOD*NTHREAD
-                  ALLOCATE(FTHE(IFTHE), FTHESKY(LSKY))
-                ELSEIF(IPARIT /= 0 ) THEN
-                  IFTHE = NUMNOD
-                  ALLOCATE(FTHE(IFTHE), FTHESKY(LSKY))
-                ELSE
-                  IFTHE = NUMNOD*NTHREAD
-                  ALLOCATE(FTHE(IFTHE), FTHESKY(0))
-                ENDIF
-                ALLOCATE(QFRICINT(NINTER))
-                QFRICINT(1:NINTER) = ZERO
-                IF (GLOB_THERM%NODADT_THERM == 1) THEN
-                  IF(IPARIT == 0 ) THEN
-                    ICONDN = NUMNOD*NTHREAD
-                    ALLOCATE (CONDN(ICONDN), CONDNSKY(0))
-                  ELSE
-                    ICONDN = NUMNOD
-                    ALLOCATE (CONDN(ICONDN),STAT=IERR)
-                    ALLOCATE (CONDNSKY(LSKY),STAT=IERR)
-                  ENDIF
-                ENDIF
-              ELSE
-                IFTHE  = 1
-                ICONDN = 1
-                ALLOCATE(FTHE(IFTHE), FTHESKY(0))
-                ALLOCATE(QFRICINT(NINTER))
-                QFRICINT(1:NINTER) = ZERO
-                ALLOCATE(CONDN(ICONDN),CONDNSKY(0))
-              ENDIF
-C
-              IF (GLOB_THERM%INTHEAT > 0  ) THEN
-                IF(IPARIT /= 0 )THEN
-                  ALLOCATE(FTHESKYI(LSKYI))
-                  FTHESKYI(1:LSKYI) = 0
-                ELSE
-                  ALLOCATE(FTHESKYI(0))
-                ENDIF
-                IF (GLOB_THERM%NODADT_THERM == 1) THEN
-                  IF(IPARIT /= 0 )THEN
-                    ALLOCATE(CONDNSKYI(LSKYI))
-                  ELSE
-                    ALLOCATE(CONDNSKYI(0))
-                  ENDIF
-                ELSE
-                  ALLOCATE(CONDNSKYI(0))
-                ENDIF
-              ELSE
-                ALLOCATE(FTHESKYI(0))
-                ALLOCATE(CONDNSKYI(0))
-              ENDIF
+C   Working arrays for thermal analysis - using helper subroutine
+              CALL resol_alloc_thermal(GLOB_THERM, NUMNOD, NINTER, LSKY, LSKYI, IPARIT, NTHREAD,
+     .                                 IFTHE, ICONDN, FTHE, FTHESKY, CONDN, CONDNSKY,
+     .                                 FTHESKYI, CONDNSKYI, QFRICINT)
 C
 C  ply xfem for composite shell
 C
@@ -1742,64 +1694,21 @@ C
               ENDIF
 
 C ----------------------------------------------
-C    SIMPLIFIED ALE FORMULATION
+C    SIMPLIFIED ALE FORMULATION - using helper subroutine
 C ----------------------------------------------
+              CALL resol_alloc_ale(IALELAG, IPARIT, NUMNOD, NTHREAD, LSKY,
+     .                             AFLOW, FFSKY, IFOAM, IFOAM_CONT, VFLOW, DFLOW, WFLOW)
               IF( IALELAG > 0) THEN
-                IF(IPARIT == 0) THEN
-                  ALLOCATE (AFLOW(3*NUMNOD*NTHREAD))
-                  ALLOCATE(FFSKY(0))
-                  ALLOCATE(IFOAM(NUMNOD*NTHREAD))
-                  ALLOCATE(IFOAM_CONT(NUMNOD*NTHREAD))
-                ELSE
-                  ALLOCATE (AFLOW(3*NUMNOD))
-                  ALLOCATE(FFSKY(3*LSKY))
-                  ALLOCATE(IFOAM(NUMNOD))
-                  ALLOCATE(IFOAM_CONT(NUMNOD))
-                  FFSKY = ZERO
-                ENDIF
-                AFLOW = ZERO
-                IFOAM = 0
-                IFOAM_CONT =0
                 DO I=1,NUMNOD
                   MSF(I) =  MSNF(I)
                 ENDDO
-              ELSE
-                ALLOCATE(AFLOW(0),VFLOW(0),
-     .                        DFLOW(0),WFLOW(0),
-     .                        FFSKY(0),IFOAM(0),
-     .                        IFOAM_CONT(0) )
               ENDIF
 C
-              IF(NADMESH/=0)THEN
-                ALLOCATE(LSH4ACT(NUMELC),LSH4KIN(NUMELC),
-     .                   PSH4ACT(0:LEVELMAX+1),PSH4KIN(0:LEVELMAX+1),
-     .                   LSH3ACT(NUMELTG),LSH3KIN(NUMELTG),
-     .                   PSH3ACT(0:LEVELMAX+1),PSH3KIN(0:LEVELMAX+1),
-     .                   STAT=IERROR)
-C
-                IF(IERROR/=0) THEN
-                  CALL ANCMSG(MSGID=153,ANMODE=ANINFO,
-     .                I1=IERROR)
-                  CALL ARRET(2)
-                END IF
-
-                IF (IPARIT/=0) THEN
-                  ALLOCATE(MSH4SKY(NUMELC),MSH3SKY(NUMELTG),
-     .                   STAT=IERROR)
-                  IF(IERROR/=0) THEN
-                    CALL ANCMSG(MSGID=153,ANMODE=ANINFO,
-     .                I1=IERROR)
-                    CALL ARRET(2)
-                  END IF
-                ELSE
-                  ALLOCATE(MSH4SKY(0),MSH3SKY(0))
-                END IF
-                ALLOCATE(ILEVNOD(0:NUMNOD),STAT=IERR)
-                IF(IERR/=0) THEN
-                  CALL ANCMSG(MSGID=20,ANMODE=ANINFO)
-                  CALL ARRET(2)
-                END IF
-              END IF
+C    ADAPTIVE MESHING - using helper subroutine
+              CALL resol_alloc_admesh(NADMESH, NUMELC, NUMELTG, LEVELMAX, IPARIT, NUMNOD,
+     .                                LSH4ACT, LSH4KIN, PSH4ACT, PSH4KIN,
+     .                                LSH3ACT, LSH3KIN, PSH3ACT, PSH3KIN,
+     .                                MSH4SKY, MSH3SKY, ILEVNOD)
 C
               IF(ISTATCND /= 0)THEN
                 ALLOCATE(LSH4UPL(NUMELC),LSH3UPL(NUMELTG),
@@ -10265,23 +10174,13 @@ C
                 IF (GLOB_THERM%ITHERM_FE > 0 ) CALL THERMBILAN(GLOB_THERM)
                 CALL TRACE_OUT(3)
 
-                DEALLOCATE(WIBEM, WRBEM)
-                IF(GLOB_THERM%ITHERM_FE > 0  ) DEALLOCATE(FTHE,FTHESKY)
-                IF(GLOB_THERM%INTHEAT > 0  )   DEALLOCATE(FTHESKYI)
-                IF(GLOB_THERM%NODADT_THERM > 0  ) DEALLOCATE(CONDN,CONDNSKY)
-                IF(GLOB_THERM%NODADT_THERM > 0.AND.GLOB_THERM%INTHEAT > 0) DEALLOCATE(CONDNSKYI)
+C   Deallocate thermal arrays using helper subroutine
+                CALL resol_dealloc_thermal(GLOB_THERM, WIBEM, WRBEM, FTHE, FTHESKY,
+     .                                     FTHESKYI, CONDN, CONDNSKY, CONDNSKYI)
 !
                 DEALLOCATE(VRBYM,VRRBYM,ARBYM,ARRBYM)
-                IF(IPLYXFEM > 0) THEN
-                  DO I=1,NPLYMAX
-                    DEALLOCATE(PLY(I)%A)
-                    DEALLOCATE(PLY(I)%V)
-                    DEALLOCATE(PLY(I)%U)
-                    DEALLOCATE(PLYSKY(I)%FSKY)
-                  ENDDO
-                ENDIF
-                IF(INTPLYXFEM > 0)DEALLOCATE(PLYSKYI%FSKYI)
-                DEALLOCATE(PLY, PLYSKY)
+C   Deallocate XFEM ply arrays using helper subroutine
+                CALL resol_dealloc_plyxfem(IPLYXFEM, INTPLYXFEM, NPLYMAX, PLY, PLYSKY, PLYSKYI)
                 IF(ALLOCATED(NODA_FEXT))DEALLOCATE(NODA_FEXT)
                 CALL OUTPUT_DEALLOCATE_NODA_PEXT(OUTPUT%DATA)
                 DEALLOCATE(NPCONT2)
