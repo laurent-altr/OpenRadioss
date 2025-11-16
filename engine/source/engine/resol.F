@@ -749,6 +749,8 @@ C-----------------------------------------------
               use damping_funct_ini_mod    , only : damping_funct_ini
               USE VIPER_MOD
               USE BCS_NRF_MOD , ONLY : BCS_NRF
+              USE resol_alloc_mod
+              USE resol_dealloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -1628,60 +1630,10 @@ C
               ALLOCATE(MCP_OFF(NUMNOD))
               MCP_OFF(1:NUMNOD) = 1.0
 
-              IFTHE  = 1
-              ICONDN = 1
-              IF(GLOB_THERM%ITHERM_FE > 0 ) THEN
-                IF(IPARIT == 3 ) THEN
-                  IFTHE = NUMNOD+3*NUMNOD*NTHREAD
-                  ALLOCATE(FTHE(IFTHE), FTHESKY(LSKY))
-                ELSEIF(IPARIT /= 0 ) THEN
-                  IFTHE = NUMNOD
-                  ALLOCATE(FTHE(IFTHE), FTHESKY(LSKY))
-                ELSE
-                  IFTHE = NUMNOD*NTHREAD
-                  ALLOCATE(FTHE(IFTHE), FTHESKY(0))
-                ENDIF
-                ALLOCATE(QFRICINT(NINTER))
-                QFRICINT(1:NINTER) = ZERO
-                IF (GLOB_THERM%NODADT_THERM == 1) THEN
-                  IF(IPARIT == 0 ) THEN
-                    ICONDN = NUMNOD*NTHREAD
-                    ALLOCATE (CONDN(ICONDN), CONDNSKY(0))
-                  ELSE
-                    ICONDN = NUMNOD
-                    ALLOCATE (CONDN(ICONDN),STAT=IERR)
-                    ALLOCATE (CONDNSKY(LSKY),STAT=IERR)
-                  ENDIF
-                ENDIF
-              ELSE
-                IFTHE  = 1
-                ICONDN = 1
-                ALLOCATE(FTHE(IFTHE), FTHESKY(0))
-                ALLOCATE(QFRICINT(NINTER))
-                QFRICINT(1:NINTER) = ZERO
-                ALLOCATE(CONDN(ICONDN),CONDNSKY(0))
-              ENDIF
-C
-              IF (GLOB_THERM%INTHEAT > 0  ) THEN
-                IF(IPARIT /= 0 )THEN
-                  ALLOCATE(FTHESKYI(LSKYI))
-                  FTHESKYI(1:LSKYI) = 0
-                ELSE
-                  ALLOCATE(FTHESKYI(0))
-                ENDIF
-                IF (GLOB_THERM%NODADT_THERM == 1) THEN
-                  IF(IPARIT /= 0 )THEN
-                    ALLOCATE(CONDNSKYI(LSKYI))
-                  ELSE
-                    ALLOCATE(CONDNSKYI(0))
-                  ENDIF
-                ELSE
-                  ALLOCATE(CONDNSKYI(0))
-                ENDIF
-              ELSE
-                ALLOCATE(FTHESKYI(0))
-                ALLOCATE(CONDNSKYI(0))
-              ENDIF
+C   Working arrays for thermal analysis - using helper subroutine
+              CALL resol_alloc_thermal(GLOB_THERM, NUMNOD, NINTER, LSKY, LSKYI, IPARIT, NTHREAD,
+     .                                 IFTHE, ICONDN, FTHE, FTHESKY, CONDN, CONDNSKY,
+     .                                 FTHESKYI, CONDNSKYI, QFRICINT)
 C
 C  ply xfem for composite shell
 C
@@ -10265,23 +10217,13 @@ C
                 IF (GLOB_THERM%ITHERM_FE > 0 ) CALL THERMBILAN(GLOB_THERM)
                 CALL TRACE_OUT(3)
 
-                DEALLOCATE(WIBEM, WRBEM)
-                IF(GLOB_THERM%ITHERM_FE > 0  ) DEALLOCATE(FTHE,FTHESKY)
-                IF(GLOB_THERM%INTHEAT > 0  )   DEALLOCATE(FTHESKYI)
-                IF(GLOB_THERM%NODADT_THERM > 0  ) DEALLOCATE(CONDN,CONDNSKY)
-                IF(GLOB_THERM%NODADT_THERM > 0.AND.GLOB_THERM%INTHEAT > 0) DEALLOCATE(CONDNSKYI)
+C   Deallocate thermal arrays using helper subroutine
+                CALL resol_dealloc_thermal(GLOB_THERM, WIBEM, WRBEM, FTHE, FTHESKY,
+     .                                     FTHESKYI, CONDN, CONDNSKY, CONDNSKYI)
 !
                 DEALLOCATE(VRBYM,VRRBYM,ARBYM,ARRBYM)
-                IF(IPLYXFEM > 0) THEN
-                  DO I=1,NPLYMAX
-                    DEALLOCATE(PLY(I)%A)
-                    DEALLOCATE(PLY(I)%V)
-                    DEALLOCATE(PLY(I)%U)
-                    DEALLOCATE(PLYSKY(I)%FSKY)
-                  ENDDO
-                ENDIF
-                IF(INTPLYXFEM > 0)DEALLOCATE(PLYSKYI%FSKYI)
-                DEALLOCATE(PLY, PLYSKY)
+C   Deallocate XFEM ply arrays using helper subroutine
+                CALL resol_dealloc_plyxfem(IPLYXFEM, INTPLYXFEM, NPLYMAX, PLY, PLYSKY, PLYSKYI)
                 IF(ALLOCATED(NODA_FEXT))DEALLOCATE(NODA_FEXT)
                 CALL OUTPUT_DEALLOCATE_NODA_PEXT(OUTPUT%DATA)
                 DEALLOCATE(NPCONT2)
