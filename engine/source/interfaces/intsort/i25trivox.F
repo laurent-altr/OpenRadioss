@@ -135,7 +135,8 @@ c
       INTEGER,  DIMENSION(:),ALLOCATABLE :: IIX,IIY,IIZ
       my_real
      .   XMINB,YMINB,ZMINB,XMAXB,YMAXB,ZMAXB,
-     .   XMINE,YMINE,ZMINE,XMAXE,YMAXE,ZMAXE,AAA
+     .   XMINE,YMINE,ZMINE,XMAXE,YMAXE,ZMAXE,AAA,
+     .   INV_XBOX, INV_YBOX, INV_ZBOX
       INTEGER FIRST,NEW,LAST
       SAVE IIX,IIY,IIZ
       INTEGER, DIMENSION(:),ALLOCATABLE :: TAG
@@ -167,6 +168,11 @@ c     Dev Future: xminb larger than Xmin ...
       YMAXB = YMAX
       ZMAXB = ZMAX
 
+c     Pre-compute inverse box dimensions for faster calculations
+      INV_XBOX = NBX / (XMAXB - XMINB)
+      INV_YBOX = NBY / (YMAXB - YMINB)
+      INV_ZBOX = NBZ / (ZMAXB - ZMINB)
+
 C=======================================================================
 C 1   placing nodes into boxes
 C=======================================================================
@@ -186,9 +192,9 @@ C processor elements
           IF(X(3,J) < ZMIN)  CYCLE
           IF(X(3,J) > ZMAX)  CYCLE
 
-          IIX(I)=INT(NBX*(X(1,J)-XMINB)/(XMAXB-XMINB))
-          IIY(I)=INT(NBY*(X(2,J)-YMINB)/(YMAXB-YMINB))
-          IIZ(I)=INT(NBZ*(X(3,J)-ZMINB)/(ZMAXB-ZMINB))
+          IIX(I)=INT(INV_XBOX*(X(1,J)-XMINB))
+          IIY(I)=INT(INV_YBOX*(X(2,J)-YMINB))
+          IIZ(I)=INT(INV_ZBOX*(X(3,J)-ZMINB))
 
           IIX(I)=MAX(1,2+MIN(NBX,IIX(I)))
           IIY(I)=MAX(1,2+MIN(NBY,IIY(I)))
@@ -220,9 +226,9 @@ C 2   placing nodes into boxes
 C     non -local candidates in SPMD
 C=======================================================================
         DO J = 1, NSNR
-          IIX(NSN+J)=INT(NBX*(XREM(1,J)-XMINB)/(XMAXB-XMINB))
-          IIY(NSN+J)=INT(NBY*(XREM(2,J)-YMINB)/(YMAXB-YMINB))
-          IIZ(NSN+J)=INT(NBZ*(XREM(3,J)-ZMINB)/(ZMAXB-ZMINB))
+          IIX(NSN+J)=INT(INV_XBOX*(XREM(1,J)-XMINB))
+          IIY(NSN+J)=INT(INV_YBOX*(XREM(2,J)-YMINB))
+          IIZ(NSN+J)=INT(INV_ZBOX*(XREM(3,J)-ZMINB))
           IIX(NSN+J)=MAX(1,2+MIN(NBX,IIX(NSN+J)))
           IIY(NSN+J)=MAX(1,2+MIN(NBY,IIY(NSN+J)))
           IIZ(NSN+J)=MAX(1,2+MIN(NBZ,IIZ(NSN+J)))
@@ -319,17 +325,17 @@ c        surface calculation (for future elimination of candidates)
 
 c        index of voxels occupied by the facet
 
-          IX1=INT(NBX*(XMINE-AAA_BASE-XMINB)/(XMAXB-XMINB))
-          IY1=INT(NBY*(YMINE-AAA_BASE-YMINB)/(YMAXB-YMINB))
-          IZ1=INT(NBZ*(ZMINE-AAA_BASE-ZMINB)/(ZMAXB-ZMINB))
+          IX1=INT(INV_XBOX*(XMINE-AAA_BASE-XMINB))
+          IY1=INT(INV_YBOX*(YMINE-AAA_BASE-YMINB))
+          IZ1=INT(INV_ZBOX*(ZMINE-AAA_BASE-ZMINB))
 
           IX1=MAX(1,2+MIN(NBX,IX1))
           IY1=MAX(1,2+MIN(NBY,IY1))
           IZ1=MAX(1,2+MIN(NBZ,IZ1))
 
-          IX2=INT(NBX*(XMAXE+AAA_BASE-XMINB)/(XMAXB-XMINB))
-          IY2=INT(NBY*(YMAXE+AAA_BASE-YMINB)/(YMAXB-YMINB))
-          IZ2=INT(NBZ*(ZMAXE+AAA_BASE-ZMINB)/(ZMAXB-ZMINB))
+          IX2=INT(INV_XBOX*(XMAXE+AAA_BASE-XMINB))
+          IY2=INT(INV_YBOX*(YMAXE+AAA_BASE-YMINB))
+          IZ2=INT(INV_ZBOX*(ZMAXE+AAA_BASE-ZMINB))
 
           IX2=MAX(1,2+MIN(NBX,IX2))
           IY2=MAX(1,2+MIN(NBY,IY2))
@@ -514,17 +520,17 @@ c        surface calculation (for future elimination of candidates)
 
 c        index of voxels occupied by the facet
 
-          IX1=INT(NBX*(XMINE-AAA_BASE-XMINB)/(XMAXB-XMINB))
-          IY1=INT(NBY*(YMINE-AAA_BASE-YMINB)/(YMAXB-YMINB))
-          IZ1=INT(NBZ*(ZMINE-AAA_BASE-ZMINB)/(ZMAXB-ZMINB))
+          IX1=INT(INV_XBOX*(XMINE-AAA_BASE-XMINB))
+          IY1=INT(INV_YBOX*(YMINE-AAA_BASE-YMINB))
+          IZ1=INT(INV_ZBOX*(ZMINE-AAA_BASE-ZMINB))
 
           IX1=MAX(1,2+MIN(NBX,IX1))
           IY1=MAX(1,2+MIN(NBY,IY1))
           IZ1=MAX(1,2+MIN(NBZ,IZ1))
 
-          IX2=INT(NBX*(XMAXE+AAA_BASE-XMINB)/(XMAXB-XMINB))
-          IY2=INT(NBY*(YMAXE+AAA_BASE-YMINB)/(YMAXB-YMINB))
-          IZ2=INT(NBZ*(ZMAXE+AAA_BASE-ZMINB)/(ZMAXB-ZMINB))
+          IX2=INT(INV_XBOX*(XMAXE+AAA_BASE-XMINB))
+          IY2=INT(INV_YBOX*(YMAXE+AAA_BASE-YMINB))
+          IZ2=INT(INV_ZBOX*(ZMAXE+AAA_BASE-ZMINB))
 
           IX2=MAX(1,2+MIN(NBX,IX2))
           IY2=MAX(1,2+MIN(NBY,IY2))
