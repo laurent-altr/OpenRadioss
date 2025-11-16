@@ -1168,29 +1168,17 @@ C--------------------------------------------
      +  CALL C_MAD(IEXMAD,NMADSH4_L,NMADSH3_L,NMADSOL_L,NMADNOD_L,
      +             MADCL_NMADNOD_L,CEP      ,P-1      )
 C--------------------------------------------
-C Count nodes rby
+C Count rigid body and constraint elements
 C--------------------------------------------
-      NSLARB_L = 0
-      NSKYRBK_L = 0
-      IF(NRBYKIN>0)
-     +  CALL C_RBYK(NPBY,LPBY,P-1,NSLARB_L,NSKYRBK_L)
-C--------------------------------------------
-C count Rigid material nodes
-C--------------------------------------------
-      NSLARBM_L = 0
-      NSKYRBMK_L = 0
-      IF(NRBYM > 0)
-     +  CALL C_RBYMK(IRBYM,LCRBYM,P-1,NSLARBM_L,NSKYRBMK_L)
-C--------------------------------------------
-C count Sections
-C--------------------------------------------
-      NSTRF_L = 0
-      LSECBUF_L = 0
-      NNODT_L = 0
-      NNODL_L = 0
-      IF(NSECT>0)
-     +  CALL C_SECTIO(NSTRF    ,CEP    ,P-1,NSTRF_L,
-     +                LSECBUF_L,NNODT_L,NNODL_L)
+      CALL DDSPLIT_COUNT_CONSTRAINTS(
+     1   P           ,NRBYKIN     ,NPBY        ,LPBY        ,
+     2   NRBYM       ,IRBYM       ,LCRBYM      ,NSECT       ,
+     3   CEP         ,NRBE2       ,IRBE2       ,LRBE2       ,
+     4   NRBE3       ,IRBE3       ,LRBE3       ,NSLARB_L    ,
+     5   NSKYRBK_L   ,NSLARBM_L   ,NSKYRBMK_L  ,NSTRF_L     ,
+     6   LSECBUF_L   ,NNODT_L     ,NNODL_L     ,NRBE2_L     ,
+     7   LLRBE2_L    ,NBDDRBE2    ,NRBE3_L     ,LLRBE3_L    ,
+     8   NBDDRBE3M   ,NSKYRBE3_L  ,NRBE3PEN_L  )
 C--------------------------------------------
 C Count cylindrical joints: Already Done
 C--------------------------------------------
@@ -1263,26 +1251,6 @@ C--------------------------------------
      5   IBVEL       ,LBVEL       ,NCONLD_L    ,NFXVEL_L    ,
      6   NLLINK_L    ,NSKYLL_L    ,LLGRAV_L    ,LLBVEL_L    ,
      7   NSKYRBM_L   )
-C--------------------------------------
-C counts RBE2
-C--------------------------------------
-      NRBE2_L=0
-      LLRBE2_L=0
-      NBDDRBE2 = 0
-      IF (NRBE2>0)
-     .   CALL C_IRBE2(IRBE2,LRBE2,P-1   ,NRBE2_L,
-     .                LLRBE2_L ,NBDDRBE2)
-C--------------------------------------
-C counts RBE3
-C--------------------------------------
-      NRBE3_L=0
-      LLRBE3_L=0
-      NBDDRBE3M = 0
-      NSKYRBE3_L = 0
-      NRBE3PEN_L=0
-      IF (NRBE3>0)
-     .   CALL C_IRBE3(IRBE3,LRBE3,NSKYRBE3_L,P-1,
-     .                NRBE3_L,LLRBE3_L ,NBDDRBE3M,NRBE3PEN_L)
 C--------------------------------------
 C counts MPC
 C--------------------------------------
