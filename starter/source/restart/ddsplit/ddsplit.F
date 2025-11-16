@@ -1253,37 +1253,16 @@ C
         PM1SPH =  PM1SPH + 4*NUMSPH_L
       ENDIF
 C--------------------------------------
-C counts IBCL
+C counts boundary conditions and loads
 C--------------------------------------
-      NCONLD_L = 0
-      IF (NCONLD>0)
-     .  CALL C_IBCL(IBCL,CEP,P-1,NCONLD_L)
-C--------------------------------------
-C counts Fixvel
-C--------------------------------------
-      NFXVEL_L = 0
-      IF (NFXVEL>0)
-     .  CALL C_IBFV(IBFV,NFXVEL,NFXVEL_L,P-1,DD_LAGF)
-C--------------------------------------
-C counts LLINK
-C--------------------------------------
-      NLLINK_L=0
-      NSKYLL_L=0
-      IF (NLINK>0)
-     .  CALL C_LLINK(NNLINK,LLLINK,P-1,NLLINK_L,NSKYLL_L)
-C--------------------------------------
-C counts LLGRAV
-C--------------------------------------
-      LLGRAV_L=0
-      IF (NGRAV>0)
-     .  CALL C_IGRAV(IGRAV,LGRAV,LLGRAV_L,P-1,NODLOCAL,NUMNOD_L)
-C--------------------------------------
-C counts IBVEL
-C--------------------------------------
-      LLBVEL_L=0
-      NSKYRBM_L = 0
-      IF (NIBVEL>0)
-     .  CALL C_IBVEL(IBVEL,LBVEL,LLBVEL_L,NSKYRBM_L,P-1)
+      CALL DDSPLIT_COUNT_BC_LOADS(
+     1   P           ,NCONLD      ,IBCL        ,CEP         ,
+     2   NFXVEL      ,IBFV        ,DD_LAGF     ,NLINK       ,
+     3   NNLINK      ,LLLINK      ,NGRAV       ,IGRAV       ,
+     4   LGRAV       ,NODLOCAL    ,NUMNOD_L    ,NIBVEL      ,
+     5   IBVEL       ,LBVEL       ,NCONLD_L    ,NFXVEL_L    ,
+     6   NLLINK_L    ,NSKYLL_L    ,LLGRAV_L    ,LLBVEL_L    ,
+     7   NSKYRBM_L   )
 C--------------------------------------
 C counts RBE2
 C--------------------------------------
@@ -1474,29 +1453,12 @@ C--------------------------------------------
         CALL C_SEGQUADFR(SEGQUADFR, CEP, P-1, CEL, NSEGQUADFR_L)
       ENDIF
 C--------------------------------------
-C Convec flow courses
+C Thermal boundary conditions
 C--------------------------------------
-      NCONV_L = 0
-      IF (GLOB_THERM%NUMCONV > 0)
-     .    CALL C_ICONV(IBCV,CEP,P-1,NCONV_L,GLOB_THERM%NUMCONV,GLOB_THERM%NICONV)
-C--------------------------------------
-C counts radiative fluxes
-C--------------------------------------
-      NRADIA_L = 0
-      IF (GLOB_THERM%NUMRADIA > 0) CALL C_IRADIA(IBCR,CEP,P-1,NRADIA_L,
-     .           GLOB_THERM%NUMRADIA,GLOB_THERM%NUMCONV,GLOB_THERM%NIRADIA)
-C--------------------------------------
-C counts imposed fluxes
-C--------------------------------------
-      NFXFLUX_L = 0
-      IF (GLOB_THERM%NFXFLUX > 0) CALL C_ITHFLUX(IBFFLUX,CEP,P-1,NFXFLUX_L,
-     .           GLOB_THERM%NUMCONV,GLOB_THERM%NUMRADIA,GLOB_THERM%NFXFLUX,GLOB_THERM%NITFLUX)
-C--------------------------------------
-c counts Fixtemp
-C--------------------------------------
-      NFXTEMP_L = 0
-      IF (GLOB_THERM%NFXTEMP > 0)
-     .  CALL C_IBFT(IBFT,GLOB_THERM%NFXTEMP,NFXTEMP_L,P-1,DD_LAGF,GLOB_THERM%NIFT)
+      CALL DDSPLIT_COUNT_THERMAL(
+     1   P           ,CEP         ,GLOB_THERM  ,IBCV        ,
+     2   IBCR        ,IBFFLUX     ,IBFT        ,DD_LAGF     ,
+     3   NCONV_L     ,NRADIA_L    ,NFXFLUX_L   ,NFXTEMP_L   )
 C--------------------------------------
 C Count Lagrange Multiply
 C--------------------------------------
