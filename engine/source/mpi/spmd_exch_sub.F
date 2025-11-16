@@ -26,17 +26,17 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    resol_init            ../engine/source/engine/resol_init.F
 !||--- uses       -----------------------------------------------------
 !||    nlocal_reg_mod        ../common_source/modules/nlocal_reg_mod.F
-!||    spmd_comm_world_mod   ../engine/source/mpi/spmd_comm_world.F90
+!||    spmd_mod              ../engine/source/mpi/spmd_mod.F90
 !||====================================================================
       SUBROUTINE SPMD_SUB_BOUNDARIES(NLOC_DMG,IAD_ELEM,FR_ELEM)
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
       USE NLOCAL_REG_MOD
+      USE SPMD_MOD
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
-        USE SPMD_COMM_WORLD_MOD, ONLY : SPMD_COMM_WORLD
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
@@ -232,15 +232,11 @@ C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
       USE NLOCAL_REG_MOD
+      USE SPMD_MOD
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
-        USE SPMD_COMM_WORLD_MOD, ONLY : SPMD_COMM_WORLD
 #include      "implicit_f.inc"
-C-----------------------------------------------
-C   M e s s a g e   P a s s i n g
-C-----------------------------------------------
-#include "spmd.inc"
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
 C-----------------------------------------------
@@ -261,8 +257,6 @@ C-----------------------------------------------
 C MPI  VARIABLES
 
       INTEGER MSGTYP,NOD,LOC_PROC, SIZ,NB_NOD,NB,MAXLEV,VALUE
-
-      INTEGER STATUS(MPI_STATUS_SIZE),IERROR
 
       INTEGER MSGOFF1
       INTEGER IAD_SEND(NSPMD+1),IAD_RECV(NSPMD+1)
@@ -293,8 +287,8 @@ c--------------------------------------------------------------------
         SIZ = NLOC_DMG%IAD_SIZE(I+1)-NLOC_DMG%IAD_SIZE(I)
         IF (SIZ > 0)THEN
           MSGTYP = MSGOFF1
-          CALL MPI_IRECV( RECV_BUF(L),SIZ,REAL,IT_SPMD(I),MSGTYP,
-     G                    SPMD_COMM_WORLD,REQ_R(I),IERROR)
+          CALL spmd_irecv( RECV_BUF(L),SIZ,IT_SPMD(I),MSGTYP,
+     G                    SPMD_COMM_WORLD,REQ_R(I))
           L = L + SIZ
         ENDIF
         IAD_RECV(I+1) = L
@@ -329,9 +323,9 @@ c--------------------------------------------------------------------
           IF (SIZ > 0)THEN
             L = IAD_SEND(I)
             MSGTYP = MSGOFF1
-            CALL MPI_ISEND(
-     S        SEND_BUF(L),SIZ,REAL,IT_SPMD(I),MSGTYP,
-     G        SPMD_COMM_WORLD,REQ_S(I),IERROR)
+            CALL spmd_isend(
+     S        SEND_BUF(L),SIZ,IT_SPMD(I),MSGTYP,
+     G        SPMD_COMM_WORLD,REQ_S(I))
           ENDIF
       ENDDO
 c--------------------------------------------------------------------
@@ -341,7 +335,7 @@ c-------------------------------------------------------------------
       DO I = 1, NSPMD
         SIZ = NLOC_DMG%IAD_SIZE(I+1)-NLOC_DMG%IAD_SIZE(I)
         IF (SIZ > 0)THEN
-          CALL MPI_WAIT(REQ_R(I),STATUS,IERROR)
+          CALL spmd_wait(REQ_R(I))
 
           K = IAD_RECV(I)
 
@@ -370,7 +364,7 @@ c-------------------------------------------------------------------
       DO I = 1, NSPMD
         SIZ = IAD_SEND(I+1)-IAD_SEND(I)
         IF (SIZ > 0)THEN
-          CALL MPI_WAIT(REQ_S(I),STATUS,IERROR)
+          CALL spmd_wait(REQ_S(I))
         ENDIF
       ENDDO
 
@@ -406,15 +400,11 @@ C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
       USE NLOCAL_REG_MOD
+      USE SPMD_MOD
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
-        USE SPMD_COMM_WORLD_MOD, ONLY : SPMD_COMM_WORLD
 #include      "implicit_f.inc"
-C-----------------------------------------------------------------
-C   M e s s a g e   P a s s i n g
-C-----------------------------------------------
-#include "spmd.inc"
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
 C-----------------------------------------------
@@ -435,8 +425,6 @@ C-----------------------------------------------
 C MPI  VARIABLES
 
       INTEGER MSGTYP,NOD,LOC_PROC, SIZ,NB_NOD,NB,MAXLEV,VALUE
-
-      INTEGER STATUS(MPI_STATUS_SIZE),IERROR
 
       INTEGER MSGOFF1
       INTEGER IAD_SEND(NSPMD+1),IAD_RECV(NSPMD+1)
@@ -472,8 +460,8 @@ c--------------------------------------------------------------------
         SIZ = NLOC_DMG%FR_NBCC(2,I)
         IF (SIZ > 0)THEN
           MSGTYP = MSGOFF1
-          CALL MPI_IRECV( RECV_BUF(L),SIZ,REAL,IT_SPMD(I),MSGTYP,
-     G                    SPMD_COMM_WORLD,REQ_R(I),IERROR)
+          CALL spmd_irecv( RECV_BUF(L),SIZ,IT_SPMD(I),MSGTYP,
+     G                    SPMD_COMM_WORLD,REQ_R(I))
           L = L + SIZ
         ENDIF
         IAD_RECV(I+1) = L
@@ -510,9 +498,9 @@ c--------------------------------------------------------------------
           IF (SIZ > 0)THEN
             L = IAD_SEND(I)
             MSGTYP = MSGOFF1
-            CALL MPI_ISEND(
-     S        SEND_BUF(L),SIZ,REAL,IT_SPMD(I),MSGTYP,
-     G        SPMD_COMM_WORLD,REQ_S(I),IERROR)
+            CALL spmd_isend(
+     S        SEND_BUF(L),SIZ,IT_SPMD(I),MSGTYP,
+     G        SPMD_COMM_WORLD,REQ_S(I))
           ENDIF
       ENDDO
 c--------------------------------------------------------------------
@@ -522,7 +510,7 @@ c-------------------------------------------------------------------
       DO I = 1, NSPMD
         SIZ = NLOC_DMG%FR_NBCC(2,I)
         IF (SIZ > 0)THEN
-          CALL MPI_WAIT(REQ_R(I),STATUS,IERROR)
+          CALL spmd_wait(REQ_R(I))
 
           K = IAD_RECV(I)
           DO J=NLOC_DMG%IADRCP(I),NLOC_DMG%IADRCP(I+1)-1
@@ -549,7 +537,7 @@ c-------------------------------------------------------------------
       DO I = 1, NSPMD
         SIZ = NLOC_DMG%FR_NBCC(1,I)
         IF (SIZ > 0)THEN
-          CALL MPI_WAIT(REQ_S(I),STATUS,IERROR)
+          CALL spmd_wait(REQ_S(I))
         ENDIF
       ENDDO
 

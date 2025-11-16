@@ -25,8 +25,9 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||--- called by ------------------------------------------------------
 !||    scanor                ../engine/source/output/anim/generate/scanor.F
 !||--- calls      -----------------------------------------------------
+!||    spmd_allreduce        ../engine/source/mpi/spmd_mod.F90
 !||--- uses       -----------------------------------------------------
-!||    spmd_comm_world_mod   ../engine/source/mpi/spmd_comm_world.F90
+!||    spmd_mod              ../engine/source/mpi/spmd_mod.F90
 !||====================================================================
       SUBROUTINE SPMD_MIN_MAX(X1,Y1,Z1,X2,Y2,Z2)
 C spmd_min_max calculates the minimum of the real numbers X1, Y1, Z1 and the
@@ -34,12 +35,8 @@ C maximum of the real numbers X2, Y2, Z2 on p0
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
-        USE SPMD_COMM_WORLD_MOD, ONLY : SPMD_COMM_WORLD
+        USE SPMD_MOD
 #include      "implicit_f.inc"
-C-----------------------------------------------
-C   M e s s a g e   P a s s i n g
-C-----------------------------------------------
-#include "spmd.inc"
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
 C-----------------------------------------------
@@ -59,7 +56,6 @@ C  REAL*4 ou REAL*8
       my_real
      .  TMP(6)
 
-      INTEGER STATUS(MPI_STATUS_SIZE),IERROR
 C  REAL*4 ou REAL*8
       my_real
      .  TMP1(3),TMPO(3)
@@ -69,9 +65,7 @@ C-----------------------------------------------
       TMP1(1) = X1
       TMP1(2) = Y1
       TMP1(3) = Z1
-      call MPI_ALLREDUCE(TMP1,TMPO,3,REAL,
-     .                   MPI_MIN,
-     .                   SPMD_COMM_WORLD,ierror)
+      call spmd_allreduce(TMP1,TMPO,3,SPMD_MIN,SPMD_COMM_WORLD)
       X1 = TMPO(1)
       Y1 = TMPO(2)
       Z1 = TMPO(3)
@@ -79,9 +73,7 @@ C
       TMP1(1)=X2
       TMP1(2)=Y2
       TMP1(3)=Z2
-      call MPI_ALLREDUCE(TMP1,TMPO,3,REAL,
-     .                   MPI_MAX,
-     .                   SPMD_COMM_WORLD,ierror)
+      call spmd_allreduce(TMP1,TMPO,3,SPMD_MAX,SPMD_COMM_WORLD)
       X2 = TMPO(1)
       Y2 = TMPO(2)
       Z2 = TMPO(3)

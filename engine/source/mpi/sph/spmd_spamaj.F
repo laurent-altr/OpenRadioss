@@ -25,24 +25,21 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||--- called by ------------------------------------------------------
 !||    sphprep               ../engine/source/elements/sph/sphprep.F
 !||--- calls      -----------------------------------------------------
+!||    spmd_allreduce        ../engine/source/mpi/spmd_mod.F90
 !||--- uses       -----------------------------------------------------
 !||    sphbox                ../engine/share/modules/sphbox.F
-!||    spmd_comm_world_mod   ../engine/source/mpi/spmd_comm_world.F90
+!||    spmd_mod              ../engine/source/mpi/spmd_mod.F90
 !||====================================================================
       SUBROUTINE SPMD_SPAMAJ(IREDUCE, SPAGLOB)
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
       USE SPHBOX
+      USE SPMD_MOD
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
-        USE SPMD_COMM_WORLD_MOD, ONLY : SPMD_COMM_WORLD
 #include      "implicit_f.inc"
-C-----------------------------------------------
-C   M e s s a g e   P a s s i n g
-C-----------------------------------------------
-#include "spmd.inc"
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
 C-----------------------------------------------
@@ -57,8 +54,8 @@ C-----------------------------------------------
 C   L o c a l  V a r i a b l e s
 C-----------------------------------------------
 #ifdef MPI
-      INTEGER P, I, MSGTYP, LOC_PROC, IERROR,
-     .        STATUS(MPI_STATUS_SIZE),MSGOFF
+      INTEGER P, I, MSGTYP, LOC_PROC,
+     .        MSGOFF
       INTEGER :: type_reduc,myop,I_LEN
 
        my_real, DIMENSION(2) :: SBUF,RBUF
@@ -75,8 +72,7 @@ C-----------------------------------------------
 
 !      -----------------------
 !      allreduce with MIN and MAX operation
-       call MPI_AllReduce(SBUF, RBUF, 2, REAL , MPI_MAX,
-     &                    SPMD_COMM_WORLD, ierror)
+       call spmd_allreduce(SBUF, RBUF, 2, SPMD_MAX, SPMD_COMM_WORLD)
 !      -----------------------
 
        IREDUCE = nint(RBUF(1))
