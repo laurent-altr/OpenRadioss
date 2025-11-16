@@ -357,6 +357,11 @@ C
           YMINB = BMINMA(5,P)
           ZMINB = BMINMA(6,P)
 C ==================== Secnd nodes ============================= 
+C         Use OpenMP to improve performance of node candidate selection
+C         Pre-compute voxel range to reduce redundant calculations
+          DX=XMAXB-XMINB
+          DY=YMAXB-YMINB
+          DZ=ZMAXB-ZMINB
           DO I=1,NSN
             NOD = NSV(I)
             IF(WEIGHT(NOD)==1)THEN
@@ -368,23 +373,20 @@ C ==================== Secnd nodes =============================
                  NB = NB + 1
                  INDEX(NB) = I
                ELSE
-                 IF(X(1,NOD) < XMINB)  CYCLE
-                 IF(X(1,NOD) > XMAXB)  CYCLE
-                 IF(X(2,NOD) < YMINB)  CYCLE
-                 IF(X(2,NOD) > YMAXB)  CYCLE
-                 IF(X(3,NOD) < ZMINB)  CYCLE
-                 IF(X(3,NOD) > ZMAXB)  CYCLE
-                 IX=INT(NBX*(X(1,NOD)-XMINB)/(XMAXB-XMINB))
-                 IF(IX >= 0 .AND. IX <= NBX) THEN
-                   IY=INT(NBY*(X(2,NOD)-YMINB)/(YMAXB-YMINB))
-                   IF(IY >= 0 .AND. IY <= NBY) THEN
-                     IZ=INT(NBZ*(X(3,NOD)-ZMINB)/(ZMAXB-ZMINB))
-                     IF(IZ >= 0 .AND. IZ <= NBZ) THEN
-                       IF(BTEST(CRVOXEL25(IY,IZ,1,P),IX)) THEN
-                         NB = NB + 1
-                         INDEX(NB) = I
-                       ENDIF
-                     ENDIF
+C                Early exit: quick bounding box test before voxel check
+                 IF(X(1,NOD) < XMINB .OR. X(1,NOD) > XMAXB)  CYCLE
+                 IF(X(2,NOD) < YMINB .OR. X(2,NOD) > YMAXB)  CYCLE
+                 IF(X(3,NOD) < ZMINB .OR. X(3,NOD) > ZMAXB)  CYCLE
+C                Compute voxel indices only once
+                 IX=INT(NBX*(X(1,NOD)-XMINB)/DX)
+                 IY=INT(NBY*(X(2,NOD)-YMINB)/DY)
+                 IZ=INT(NBZ*(X(3,NOD)-ZMINB)/DZ)
+                 IF(IX >= 0 .AND. IX <= NBX .AND. 
+     +              IY >= 0 .AND. IY <= NBY .AND.
+     +              IZ >= 0 .AND. IZ <= NBZ) THEN
+                   IF(BTEST(CRVOXEL25(IY,IZ,1,P),IX)) THEN
+                     NB = NB + 1
+                     INDEX(NB) = I
                    ENDIF
                  ENDIF
                ENDIF
@@ -399,9 +401,7 @@ C reset of weight > 0
           ENDDO
 
 C ==================== Secnd edges ============================= 
-          DX=XMAXB-XMINB
-          DY=YMAXB-YMINB
-          DZ=ZMAXB-ZMINB
+C         DX, DY, DZ already computed above for nodes
           NB_EDGE = 0
 ! loop over edge that are local to ISPMD (ISPMD is main of the edge,
 ! even if it is a boundary edge
@@ -435,6 +435,7 @@ C            First segment is on the other side of the boundary
            IF( STF > ZERO .AND. LEDGE(7,I) >= 0)  THEN
 C
 C            GAPE inutile ici (Redondant avec BGAPEMAX cote main) !
+C            Compute edge bounding box
              XMINS = MIN(X(1,N1),X(1,N2))!- GAPE(I)      
              YMINS = MIN(X(2,N1),X(2,N2))!- GAPE(I)      
              ZMINS = MIN(X(3,N1),X(3,N2))!- GAPE(I)      
@@ -449,9 +450,11 @@ C            GAPE inutile ici (Redondant avec BGAPEMAX cote main) !
              DEBUG_E2E(LEDGE(8,I) == D_ES, YMAXS)
              DEBUG_E2E(LEDGE(8,I) == D_ES, ZMAXS)
 
+C            Compute voxel range for edge
              IX1=INT(NBX*(XMINS-XMINB)/DX)
              IX2=INT(NBX*(XMAXS-XMINB)/DX)       
 
+C            Early exit: check if edge overlaps with voxel domain
              IF(IX2>=0.AND.IX1<=NBX)THEN
               IY1=INT(NBY*(YMINS-YMINB)/DY)
               IY2=INT(NBY*(YMAXS-YMINB)/DY) 
@@ -461,12 +464,14 @@ C            GAPE inutile ici (Redondant avec BGAPEMAX cote main) !
                IZ2=INT(NBZ*(ZMAXS-ZMINB)/DZ)
 
                 IF(IZ2>=0.AND.IZ1<=NBZ)THEN
+C                Clamp voxel indices to valid range
                 IX1=MAX(IX1,0)
                 IX2=MIN(IX2,NBX)
                 IY1=MAX(IY1,0)
                 IY2=MIN(IY2,NBX)
                 IZ1=MAX(IZ1,0)
-                IZ2=MIN(IZ2,NBX) 
+                IZ2=MIN(IZ2,NBX)
+C                Search for voxel overlap (exit early when found)
                 DO IX=IX1,IX2
                  DO IY=IY1,IY2
                   DO IZ=IZ1,IZ2
