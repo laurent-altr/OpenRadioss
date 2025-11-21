@@ -53,6 +53,50 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    r2r_mod                         ../starter/share/modules1/r2r_mod.F
 !||    reorder_mod                     ../starter/share/modules1/reorder_mod.F
 !||====================================================================
+!||
+!|| PURPOSE:
+!|| --------
+!|| Performs domain decomposition for parallel computing using METIS graph partitioning.
+!|| This is the main routine for decomposing the finite element mesh into subdomains
+!|| that will be distributed across parallel processors.
+!||
+!|| MAJOR ALGORITHM SECTIONS:
+!|| -------------------------
+!|| 1. NEDGE COUNTING (lines ~260-360):
+!||    - Counts element connectivity to build skyline addressing (ADSKY)
+!||    - Processes all element types: solids, shells, beams, springs, etc.
+!||
+!|| 2. ELEMENT DELETION OPTIMIZATION (lines ~361-560):
+!||    - Reads _0001.rad file for element deletion flags
+!||    - Optimizes domain decomposition for RBYON deactivated elements
+!||    - Marks deleted elements with low weight (0.0001)
+!||
+!|| 3. CNE CONNECTIVITY CALCULATION (lines ~601-750):
+!||    - Builds element-to-node connectivity arrays (CNE)
+!||    - Tags elements by type for proper handling
+!||
+!|| 4. WEIGHT CALCULATION (lines ~753-1200):
+!||    - Computes element weights based on connectivity
+!||    - Handles special cases: interfaces, kinematic conditions, ALE/FSI
+!||    - Applies load balancing criteria
+!||
+!|| 5. GRAPH CONSTRUCTION (lines ~1200-2000):
+!||    - Builds dual graph of element connectivity
+!||    - Creates adjacency lists (XADJ, ADJNCY)
+!||    - Adds edges for contact interfaces
+!||
+!|| 6. METIS PARTITIONING (lines ~2000-2400):
+!||    - Calls METIS library for graph partitioning
+!||    - Handles multi-criteria optimization
+!||    - Assigns elements to processors (CEP array)
+!||
+!|| 7. POST-PROCESSING (lines ~2400-2600):
+!||    - Computes domain decomposition statistics
+!||    - Writes output messages and diagnostics
+!||
+!|| NOTE: This routine is 2555 lines and should be refactored in future to improve 
+!||       maintainability by extracting logical sections into separate subroutines.
+!||====================================================================
       SUBROUTINE DOMETIS(
      1  IXS    ,IXQ    ,IXC    ,IXT     ,IXP     ,
      2  IXR    ,IXTG   ,CEP     ,GEO     ,
@@ -239,6 +283,12 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   S o u r c e  L i n e s
 C-----------------------------------------------
+C
+C=======================================================================
+C SECTION 1: INITIALIZATION
+C=======================================================================
+C Purpose: Initialize variables and arrays
+C----------------------------------------------------------------------
       ALLOCATE(IWKIN(NUMNOD))
       number_of_added_edges = 0
       refused_numg = 0
@@ -256,7 +306,13 @@ C-----------------------------------------------
       WD_MAX = 0.0D0
       WD_MAX0= 0.0D0
       NNODE = NSPMD
-
+C
+C=======================================================================
+C SECTION 2: NEDGE COUNTING AND SKYLINE ADDRESSING
+C=======================================================================
+C Purpose: Count the number of elements connected to each node
+C         Build skyline addressing array (ADSKY) for graph construction
+C----------------------------------------------------------------------
 C----------------------------------
 C global NEDGE counting
 C----------------------------------
@@ -358,6 +414,12 @@ C
      .                         C1='DOMDEC')
       END IF
 C
+C=======================================================================
+C SECTION 3: ELEMENT DELETION OPTIMIZATION
+C=======================================================================
+C Purpose: Read deleted elements from _0001.rad and optimize decomposition
+C         Mark deleted elements with low weight for load balancing
+C----------------------------------------------------------------------
 C-----------------------------------------------
 C Optimization on deleted elements from _0001.rad
 C-----------------------------------------------
@@ -474,7 +536,13 @@ C message on D01 not read (delete not optimized)
      .   ' RADIOSS ENGINE INPUT FILE'
          ENDIF
       ENDIF
-
+C
+C=======================================================================
+C SECTION 4: RBYON ELEMENT OPTIMIZATION
+C=======================================================================
+C Purpose: Optimize domain decomposition for RBYON deactivated elements
+C         Handle special cases like barrier elements
+C----------------------------------------------------------------------
 C-----------------------------------------------
 C Optimization on RBYON from _0000.rad
 C-----------------------------------------------
@@ -598,6 +666,13 @@ C-----------------------------------------------
         WRITE(IOUT,'(A)')
      .  ' ADDITIONAL OPTIMIZATION OF DOMAIN DECOMPOSITION FOR AMS (DOMDEC=7)'
       END IF
+C
+C=======================================================================
+C SECTION 5: CNE CONNECTIVITY CALCULATION
+C=======================================================================
+C Purpose: Calculate element-to-node connectivity arrays (CNE)
+C         Tag elements by type for proper graph construction
+C----------------------------------------------------------------------
 C-----------------------------------------------
 C   CNE CALCULATION
 C-----------------------------------------------
@@ -750,6 +825,14 @@ C     reset addresses to beginning
       END DO
 
       ADSKY(1) = 1
+C
+C=======================================================================
+C SECTION 6: WEIGHT CALCULATION AND LOAD BALANCING CRITERIA
+C=======================================================================
+C Purpose: Calculate element weights based on connectivity and constraints
+C         Set up load balancing criteria for domain decomposition
+C         Handle special cases: interfaces, kinematic conditions, ALE/FSI
+C----------------------------------------------------------------------
 C Weight calculation taking into account connectivity ratio
 
       ICELEM=1
