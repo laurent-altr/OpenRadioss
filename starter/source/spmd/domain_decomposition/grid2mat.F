@@ -101,8 +101,8 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    - Checks load balance quality
 !||    - Writes output messages and diagnostics
 !||
-!|| NOTE: This routine exceeds recommended length (>1000 lines) and should be  
-!||       refactored in future to improve maintainability by extracting logical  
+!|| NOTE: This routine exceeds recommended length (>1000 lines) and should be
+!||       refactored in future to improve maintainability by extracting logical
 !||       sections into separate subroutines. See section markers below for
 !||       natural refactoring boundaries.
 !||====================================================================
