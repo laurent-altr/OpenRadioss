@@ -708,6 +708,8 @@ C-----------------------------------------------
               USE ALE_MOD
               USE OUTPUT_MOD
               USE INTERFACES_MOD
+              USE RESOL_BUFFERS_INIT_MOD
+              USE RESOL_TIMESTEP_MOD
               USE DEBUG_CHKSM_MOD ,  ONLY : SPMD_FLUSH_ACCEL
               USE DT_MOD
               USE PYTHON_FUNCT_MOD
@@ -3399,21 +3401,7 @@ C Init var parallel SMP
 C========================================================================================
 C                                     NON PARALLEL SECTION (SMP)
 C========================================================================================
-              IF(ALLOCATED(OUTPUT%DATA%FOPT)) THEN
-                OUTPUT%DATA%FOPT = ZERO
-              ENDIF
-              IF(ALLOCATED(OUTPUT%DATA%VECT_CONT2)) THEN
-                OUTPUT%DATA%VECT_CONT2 = ZERO
-              ENDIF
-              IF(H3D_DATA%N_VECT_CONT2M==1)THEN
-                DO I=1,NUMNOD
-                  MCONT2(1,I) = ZERO
-                  MCONT2(2,I) = ZERO
-                  MCONT2(3,I) = ZERO
-                ENDDO
-              ENDIF
-              NGDONE = 1
-              NSGDONE = 1
+              CALL RESOL_BUFFERS_INIT(OUTPUT, H3D_DATA, MCONT2, NUMNOD, NGDONE, NSGDONE)
 C------------------------
 C       INTERFACES 14 & 15 :
 C         Initialisation buffers: forces, moments, stifness of surfaces.
@@ -3456,15 +3444,7 @@ C
               IF (IMON>0) CALL STARTIME(TIMERS,6)
               IF (IMONM > 0) CALL STARTIME(TIMERS,49)
 C----------------------------
-              IF(NUMGEO>0.AND.NODADT==0)THEN
-                DO I=1,NUMGEO
-                  IF(GEO(5,I)>ZERO.AND.DTFAC1(3)*GEO(5,I)<DT2T)THEN
-                    DT2T= DTFAC1(3)*GEO(5,I)
-                    NELTST = 0
-                    ITYPTST= 3
-                  ENDIF
-                ENDDO
-              ENDIF
+              CALL RESOL_CALC_GEO_TIMESTEP(NUMGEO,NODADT,GEO,DTFAC1,DT2T,NELTST,ITYPTST)
 C------------------------
 C       USER WINDOW
 C------------------------
