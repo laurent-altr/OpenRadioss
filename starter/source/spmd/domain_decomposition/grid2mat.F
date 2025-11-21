@@ -62,36 +62,43 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||
 !|| MAJOR ALGORITHM SECTIONS:
 !|| -------------------------
-!|| 1. NEDGE COUNTING:
+!|| 1. INITIALIZATION:
+!||    - Initialize variables and arrays
+!||
+!|| 2. NEDGE COUNTING AND SKYLINE ADDRESSING:
 !||    - Counts element connectivity to build skyline addressing (ADSKY)
 !||    - Processes all element types: solids, shells, beams, springs, etc.
 !||
-!|| 2. ELEMENT DELETION OPTIMIZATION:
+!|| 3. ELEMENT DELETION OPTIMIZATION:
 !||    - Reads _0001.rad file for element deletion flags
-!||    - Optimizes domain decomposition for RBYON deactivated elements
-!||    - Marks deleted elements with low weight (0.0001)
+!||    - Marks deleted elements with low weight for load balancing
 !||
-!|| 3. CNE CONNECTIVITY CALCULATION:
+!|| 4. RBYON ELEMENT OPTIMIZATION:
+!||    - Optimizes domain decomposition for RBYON deactivated elements
+!||    - Handles special cases like barrier elements
+!||
+!|| 5. CNE CONNECTIVITY CALCULATION:
 !||    - Builds element-to-node connectivity arrays (CNE)
 !||    - Tags elements by type for proper handling
 !||
-!|| 4. WEIGHT CALCULATION:
+!|| 6. WEIGHT CALCULATION AND LOAD BALANCING:
 !||    - Computes element weights based on connectivity
 !||    - Handles special cases: interfaces, kinematic conditions, ALE/FSI
 !||    - Applies load balancing criteria
 !||
-!|| 5. GRAPH CONSTRUCTION:
+!|| 7. DUAL GRAPH CONSTRUCTION:
 !||    - Builds dual graph of element connectivity
-!||    - Creates adjacency lists (XADJ, ADJNCY)
+!||    - Creates adjacency lists (XADJ, ADJNCY) for METIS
 !||    - Adds edges for contact interfaces
 !||
-!|| 6. METIS PARTITIONING:
+!|| 8. METIS GRAPH PARTITIONING:
 !||    - Calls METIS library for graph partitioning
 !||    - Handles multi-criteria optimization
 !||    - Assigns elements to processors (CEP array)
 !||
-!|| 7. POST-PROCESSING:
+!|| 9. POST-PROCESSING AND STATISTICS:
 !||    - Computes domain decomposition statistics
+!||    - Checks load balance quality
 !||    - Writes output messages and diagnostics
 !||
 !|| NOTE: This routine exceeds recommended length (>1000 lines) and should be  
