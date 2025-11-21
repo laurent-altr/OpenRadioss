@@ -62,40 +62,42 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||
 !|| MAJOR ALGORITHM SECTIONS:
 !|| -------------------------
-!|| 1. NEDGE COUNTING (lines ~260-360):
+!|| 1. NEDGE COUNTING:
 !||    - Counts element connectivity to build skyline addressing (ADSKY)
 !||    - Processes all element types: solids, shells, beams, springs, etc.
 !||
-!|| 2. ELEMENT DELETION OPTIMIZATION (lines ~361-560):
+!|| 2. ELEMENT DELETION OPTIMIZATION:
 !||    - Reads _0001.rad file for element deletion flags
 !||    - Optimizes domain decomposition for RBYON deactivated elements
 !||    - Marks deleted elements with low weight (0.0001)
 !||
-!|| 3. CNE CONNECTIVITY CALCULATION (lines ~601-750):
+!|| 3. CNE CONNECTIVITY CALCULATION:
 !||    - Builds element-to-node connectivity arrays (CNE)
 !||    - Tags elements by type for proper handling
 !||
-!|| 4. WEIGHT CALCULATION (lines ~753-1200):
+!|| 4. WEIGHT CALCULATION:
 !||    - Computes element weights based on connectivity
 !||    - Handles special cases: interfaces, kinematic conditions, ALE/FSI
 !||    - Applies load balancing criteria
 !||
-!|| 5. GRAPH CONSTRUCTION (lines ~1200-2000):
+!|| 5. GRAPH CONSTRUCTION:
 !||    - Builds dual graph of element connectivity
 !||    - Creates adjacency lists (XADJ, ADJNCY)
 !||    - Adds edges for contact interfaces
 !||
-!|| 6. METIS PARTITIONING (lines ~2000-2400):
+!|| 6. METIS PARTITIONING:
 !||    - Calls METIS library for graph partitioning
 !||    - Handles multi-criteria optimization
 !||    - Assigns elements to processors (CEP array)
 !||
-!|| 7. POST-PROCESSING (lines ~2400-2600):
+!|| 7. POST-PROCESSING:
 !||    - Computes domain decomposition statistics
 !||    - Writes output messages and diagnostics
 !||
-!|| NOTE: This routine is 2555 lines and should be refactored in future to improve 
-!||       maintainability by extracting logical sections into separate subroutines.
+!|| NOTE: This routine exceeds recommended length (>1000 lines) and should be  
+!||       refactored in future to improve maintainability by extracting logical  
+!||       sections into separate subroutines. See section markers below for
+!||       natural refactoring boundaries.
 !||====================================================================
       SUBROUTINE DOMETIS(
      1  IXS    ,IXQ    ,IXC    ,IXT     ,IXP     ,
