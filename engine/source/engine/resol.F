@@ -710,6 +710,7 @@ C-----------------------------------------------
               USE INTERFACES_MOD
               USE RESOL_BUFFERS_INIT_MOD
               USE RESOL_TIMESTEP_MOD
+              USE RESOL_PART_INDICES_MOD
               USE DEBUG_CHKSM_MOD ,  ONLY : SPMD_FLUSH_ACCEL
               USE DT_MOD
               USE PYTHON_FUNCT_MOD
@@ -2157,15 +2158,9 @@ C save the Python functions into the Python interpreter dictionarry
 
 
 
-              K1=1+LIPART1*(NPART+NTHPART)+2*9*(NPART+NTHPART)
-              K2=K1+NUMELS
-              K3=K2+NUMELQ
-              K4=K3+NUMELC
-              K5=K4+NUMELT
-              K6=K5+NUMELP
-              K7=K6+NUMELR
-              K8=K7
-              K9=K8+NUMELTG
+              CALL RESOL_CALC_PART_INDICES(LIPART1,NPART,NTHPART,NUMELS,NUMELQ,NUMELC,
+     .                                     NUMELT,NUMELP,NUMELR,NUMELTG,NUMELX,NUMSPH,NUMELIG3D,
+     .                                     K1,K2,K3,K4,K5,K6,K7,K8,K9,K10,K11,K12)
               CALL python_dummy_active_node(PYTHON)
               CALL FUNCT_PYTHON_UPDATE_ELEMENTS(PYTHON, ISPMD,
      .                 N2D,  NGROUP,  NIXC, NIXTG, NIXS,NIXQ,
@@ -2189,18 +2184,9 @@ C Initialize SENSORS & communication buffers.
 C Play Time & Logical sensors.
 C Reinitialise sensor variables defined in /SENS/RESET
 
-              K1=1+LIPART1*(NPART+NTHPART)+2*9*(NPART+NTHPART)
-              K2=K1+NUMELS
-              K3=K2+NUMELQ
-              K4=K3+NUMELC
-              K5=K4+NUMELT
-              K6=K5+NUMELP
-              K7=K6+NUMELR
-              K8=K7
-              K9=K8+NUMELTG
-              K10=K9+NUMELX
-              K11=K10+NUMSPH
-              K12=K11+NUMELIG3D
+              CALL RESOL_CALC_PART_INDICES(LIPART1,NPART,NTHPART,NUMELS,NUMELQ,NUMELC,
+     .                                     NUMELT,NUMELP,NUMELR,NUMELTG,NUMELX,NUMSPH,NUMELIG3D,
+     .                                     K1,K2,K3,K4,K5,K6,K7,K8,K9,K10,K11,K12)
               CALL SENSOR_INIT(SUBSETS,IPARG,NGROUC,
      .                         IPART(K3),IPART(K8),IPART(K1),IPART(K2),IPART(K4),
      .                         IPART(K5) ,IPART(K6),SENSORS,TT ,DT2 ,IOUT, PYTHON ,NTHREAD)
@@ -3421,18 +3407,9 @@ C===============================================================================
 C--------------------------------------------------------
               DT2T    = DT2
 C--------------------------------------------------------
-              K1=1+LIPART1*(NPART+NTHPART)+2*9*(NPART+NTHPART)
-              K2=K1+NUMELS
-              K3=K2+NUMELQ
-              K4=K3+NUMELC
-              K5=K4+NUMELT
-              K6=K5+NUMELP
-              K7=K6+NUMELR
-              K8=K7
-              K9=K8+NUMELTG
-              K10=K9+NUMELX
-              K11=K10+NUMSPH
-              K12=K11+NUMELIG3D
+              CALL RESOL_CALC_PART_INDICES(LIPART1,NPART,NTHPART,NUMELS,NUMELQ,NUMELC,
+     .                                     NUMELT,NUMELP,NUMELR,NUMELTG,NUMELX,NUMSPH,NUMELIG3D,
+     .                                     K1,K2,K3,K4,K5,K6,K7,K8,K9,K10,K11,K12)
 C-----------------------------------------------
 C      pressure gauges, position calculation
 C-----------------------------------------------
@@ -7023,17 +7000,9 @@ C===============================================================================
               IDUM1=0
               RDUM1=ZERO
 C
-              K1=1+LIPART1*(NPART+NTHPART)+2*9*(NPART+NTHPART)
-              K2=K1+NUMELS
-              K3=K2+NUMELQ
-              K4=K3+NUMELC
-              K5=K4+NUMELT
-              K6=K5+NUMELP
-              K7=K6+NUMELR
-              K8=K7
-              K9=K8+NUMELTG
-              K10=K9+NUMELX
-              K11=K10+NUMSPH
+              CALL RESOL_CALC_PART_INDICES(LIPART1,NPART,NTHPART,NUMELS,NUMELQ,NUMELC,
+     .                                     NUMELT,NUMELP,NUMELR,NUMELTG,NUMELX,NUMSPH,NUMELIG3D,
+     .                                     K1,K2,K3,K4,K5,K6,K7,K8,K9,K10,K11,K12)
 
 C-----------------------------------------------------------------
 C     IMPLICIT  SYNCHRONIZATION (FORCES), FV(FUNC) AND SKEW(MOVING)
@@ -8666,15 +8635,9 @@ C===============================================================================
                 CALL PYTHON_END_OPENMP(PYTHON)
               END IF
 
-              K1=1+LIPART1*(NPART+NTHPART)+2*9*(NPART+NTHPART)
-              K2=K1+NUMELS
-              K3=K2+NUMELQ
-              K4=K3+NUMELC
-              K5=K4+NUMELT
-              K6=K5+NUMELP
-              K7=K6+NUMELR
-              K8=K7
-              K9=K8+NUMELTG
+              CALL RESOL_CALC_PART_INDICES(LIPART1,NPART,NTHPART,NUMELS,NUMELQ,NUMELC,
+     .                                     NUMELT,NUMELP,NUMELR,NUMELTG,NUMELX,NUMSPH,NUMELIG3D,
+     .                                     K1,K2,K3,K4,K5,K6,K7,K8,K9,K10,K11,K12)
               CALL FUNCT_PYTHON_UPDATE_ELEMENTS(PYTHON, ISPMD,
      .                 N2D,  NGROUP,  NIXC, NIXTG, NIXS,NIXQ,
      .                 NUMGEO, NUMELC, NUMELTG, NUMELS, NUMELQ, NUMMAT, NUMNOD,
