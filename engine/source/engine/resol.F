@@ -743,6 +743,7 @@ C-----------------------------------------------
               USE TH_SURF_MOD , ONLY : TH_SURF_NUM_CHANNEL
               USE ams_work_mod
               USE UPDATE_PON_MOD
+              USE resol_alloc_loadp_mod, only : resol_alloc_loadp
               USE DEBUG_MOD
               use inter_init_component_mod , only : inter_init_component
               use damping_vref_compute_dampa_mod
@@ -1506,80 +1507,21 @@ C
               ALLOCATE(IRECVP_CRK(MIN(LIRECVP_CRK,1):LIRECVP_CRK))
               ALLOCATE(FR_NBCC1  (2,NSPMD+1))
 C----------------------------------------------------------
+C----------------------------------------------------------
 C      Allocation of tables for /LOAD/PRESSURE
 C-----------------------------------------------------------
-              NLOADP_HYD_INTER = 0
-              IERROR = 0
-              IF(NINTLOADP > 0 ) THEN
-                ALLOCATE(LOADP_HYD_INTER(NLOADP_HYD),STAT=IERROR2)
-                IERROR = IERROR + IERROR2
-                DO K=1,NLOADP_HYD
-                  IF(ILOADP(SIZLOADP*(K-1)+5) > 0 ) THEN
-                    NLOADP_HYD_INTER = NLOADP_HYD_INTER + 1
-                    LOADP_HYD_INTER(K) = NLOADP_HYD_INTER
-                  ENDIF
-                ENDDO
-              ENDIF
-
-              IF(NLOADP_HYD_INTER > 0) THEN
-                ALLOCATE(TAGNCONT(NLOADP_HYD_INTER,NUMNOD),STAT=IERROR2)
-                IERROR = IERROR + IERROR2
-                IF(IERROR/=0)THEN
-                  CALL ANCMSG(MSGID=158,ANMODE=ANINFO,
-     .                I1=IERROR)
-                  CALL ARRET(2)
-                END IF
-                TAGNCONT = 0
-              ELSE
-                ALLOCATE(TAGNCONT(0,0))
-              ENDIF
-C
-              S_LOADPINTER = NINTER*NLOADP_HYD
-C
-              NPRESLOAD = 0
-              IF(NLOADP_HYD > 0 ) THEN
-                DO  K=1,NLOADP_HYD
-                  NPRESLOAD = NPRESLOAD + ILOADP(SIZLOADP*(K-1)+1)/4
-                ENDDO
-                ALLOCATE(LOADP_TAGDEL(NPRESLOAD),STAT=IERROR2)
-                LOADP_TAGDEL(1:NPRESLOAD) =0
-              ELSE
-                ALLOCATE(LOADP_TAGDEL(0))
-              ENDIF
+              CALL RESOL_ALLOC_LOADP(
+     .          NLOADP_HYD, NINTLOADP, NLOADP_F, NLOADP, NINTER,
+     .          NUMNOD, NSURF, SIZLOADP, ILOADP, NLOADP_HYD_INTER,
+     .          IERROR, S_LOADPINTER, NPRESLOAD, TH_SURF_NUM_CHANNEL,
+     .          LOADP_HYD_INTER, TAGNCONT, LOADP_TAGDEL, 
+     .          INTERFACES%PARAMETERS%INTCAREA,
+     .          INTERFACES%PARAMETERS%INTAREAN,
+     .          OUTPUT%TH%TH_SURF%CHANNELS, OUTPUT%TH%TH_SURF%IOK,
+     .          OUTPUT%TH%TH_SURF%LOADP_FLAG, OUTPUT%TH%TH_SURF%NSEGLOADPF,
+     .          OUTPUT%TH%TH_SURF%NSEGLOADPB, OUTPUT%TH%TH_SURF%NSEGLOADP,
+     .          PBLAST%NLOADP_B)
 C----------------------------------------------------------
-              IF(INTERFACES%PARAMETERS%INTCAREA>0) THEN
-                ALLOCATE(INTERFACES%PARAMETERS%INTAREAN(NUMNOD))
-              ELSE
-                ALLOCATE(INTERFACES%PARAMETERS%INTAREAN(0))
-              ENDIF
-C
-C       ! /TH/SURF output
-
-              IF(NSURF > 0) THEN
-                ALLOCATE(OUTPUT%TH%TH_SURF%CHANNELS(TH_SURF_NUM_CHANNEL,NSURF))
-                OUTPUT%TH%TH_SURF%CHANNELS(1:TH_SURF_NUM_CHANNEL,1:NSURF)=ZERO
-              ELSE
-                ALLOCATE(OUTPUT%TH%TH_SURF%CHANNELS(0,0))
-              ENDIF
-C
-              IF(OUTPUT%TH%TH_SURF%IOK > 0 ) THEN
-                IF(OUTPUT%TH%TH_SURF%LOADP_FLAG > 0 ) THEN
-                  OUTPUT%TH%TH_SURF%NSEGLOADPF = 0
-                  DO K=1,NLOADP_F
-                    OUTPUT%TH%TH_SURF%NSEGLOADPF = OUTPUT%TH%TH_SURF%NSEGLOADPF + ILOADP(SIZLOADP*(K-1)+1)/4
-                  ENDDO
-                  OUTPUT%TH%TH_SURF%NSEGLOADPB = 0
-                  DO K=NLOADP_F+1,PBLAST%NLOADP_B
-                    OUTPUT%TH%TH_SURF%NSEGLOADPB = OUTPUT%TH%TH_SURF%NSEGLOADPB + ILOADP(SIZLOADP*(K-1)+1)/4
-                  ENDDO
-                  OUTPUT%TH%TH_SURF%NSEGLOADP = 0
-                  DO K=NLOADP_F+PBLAST%NLOADP_B+1,NLOADP
-                    OUTPUT%TH%TH_SURF%NSEGLOADP = OUTPUT%TH%TH_SURF%NSEGLOADP + ILOADP(SIZLOADP*(K-1)+1)/4
-                  ENDDO
-                ENDIF
-              ENDIF
-
-C
               IF((IDEL7NG>0).OR.(IRAD2R/=0).OR.(ALEMUSCL_Param%IALEMUSCL>0).OR.(PDEL>0))THEN
                 SIZE_ADDCNEL = NUMNOD+1
                 SIZE_CNEL = LCNEL
