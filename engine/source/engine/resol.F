@@ -744,6 +744,7 @@ C-----------------------------------------------
               USE ams_work_mod
               USE UPDATE_PON_MOD
               USE resol_alloc_loadp_mod, only : resol_alloc_loadp
+              USE resol_alloc_thermal_mod, only : resol_alloc_thermal
               USE DEBUG_MOD
               use inter_init_component_mod , only : inter_init_component
               use damping_vref_compute_dampa_mod
@@ -1557,75 +1558,12 @@ C Allocation of inverse connectivity array
 C
 C   Working arrays for thermal analysis
 C
-              GLOB_THERM%NODADT_THERM = 0
-              IF(GLOB_THERM%IDT_THERM == 1) THEN
-                IF(NINTER>0.OR.NODADT>0) GLOB_THERM%NODADT_THERM = 1 ! Flag for nodal thermal time step
-              ENDIF
-              IF(GLOB_THERM%IDT_THERM == 1) THEN
-                ALLOCATE(ICODT0(NUMNOD)) ! Tabs for storing initial kinimatic when thermal time step
-                ALLOCATE(ICODR0(NUMNOD))
-              ELSE
-                ALLOCATE(ICODT0(0))
-                ALLOCATE(ICODR0(0))
-              ENDIF
-
-              ALLOCATE(MCP_OFF(NUMNOD))
-              MCP_OFF(1:NUMNOD) = 1.0
-
-              IFTHE  = 1
-              ICONDN = 1
-              IF(GLOB_THERM%ITHERM_FE > 0 ) THEN
-                IF(IPARIT == 3 ) THEN
-                  IFTHE = NUMNOD+3*NUMNOD*NTHREAD
-                  ALLOCATE(FTHE(IFTHE), FTHESKY(LSKY))
-                ELSEIF(IPARIT /= 0 ) THEN
-                  IFTHE = NUMNOD
-                  ALLOCATE(FTHE(IFTHE), FTHESKY(LSKY))
-                ELSE
-                  IFTHE = NUMNOD*NTHREAD
-                  ALLOCATE(FTHE(IFTHE), FTHESKY(0))
-                ENDIF
-                ALLOCATE(QFRICINT(NINTER))
-                QFRICINT(1:NINTER) = ZERO
-                IF (GLOB_THERM%NODADT_THERM == 1) THEN
-                  IF(IPARIT == 0 ) THEN
-                    ICONDN = NUMNOD*NTHREAD
-                    ALLOCATE (CONDN(ICONDN), CONDNSKY(0))
-                  ELSE
-                    ICONDN = NUMNOD
-                    ALLOCATE (CONDN(ICONDN),STAT=IERR)
-                    ALLOCATE (CONDNSKY(LSKY),STAT=IERR)
-                  ENDIF
-                ENDIF
-              ELSE
-                IFTHE  = 1
-                ICONDN = 1
-                ALLOCATE(FTHE(IFTHE), FTHESKY(0))
-                ALLOCATE(QFRICINT(NINTER))
-                QFRICINT(1:NINTER) = ZERO
-                ALLOCATE(CONDN(ICONDN),CONDNSKY(0))
-              ENDIF
-C
-              IF (GLOB_THERM%INTHEAT > 0  ) THEN
-                IF(IPARIT /= 0 )THEN
-                  ALLOCATE(FTHESKYI(LSKYI))
-                  FTHESKYI(1:LSKYI) = 0
-                ELSE
-                  ALLOCATE(FTHESKYI(0))
-                ENDIF
-                IF (GLOB_THERM%NODADT_THERM == 1) THEN
-                  IF(IPARIT /= 0 )THEN
-                    ALLOCATE(CONDNSKYI(LSKYI))
-                  ELSE
-                    ALLOCATE(CONDNSKYI(0))
-                  ENDIF
-                ELSE
-                  ALLOCATE(CONDNSKYI(0))
-                ENDIF
-              ELSE
-                ALLOCATE(FTHESKYI(0))
-                ALLOCATE(CONDNSKYI(0))
-              ENDIF
+              CALL RESOL_ALLOC_THERMAL(
+     .          NUMNOD, NINTER, NODADT, GLOB_THERM%ITHERM_FE, 
+     .          GLOB_THERM%IDT_THERM, GLOB_THERM%INTHEAT, IPARIT, 
+     .          NTHREAD, LSKY, LSKYI, GLOB_THERM%NODADT_THERM, IFTHE, 
+     .          ICONDN, ICODT0, ICODR0, MCP_OFF, FTHE, FTHESKY, QFRICINT, 
+     .          CONDN, CONDNSKY, FTHESKYI, CONDNSKYI)
 C
 C  ply xfem for composite shell
 C
