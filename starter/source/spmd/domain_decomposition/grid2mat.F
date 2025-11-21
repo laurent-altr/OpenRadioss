@@ -1400,7 +1400,14 @@ c     .    IWD(NCOND*(I-1)+ICNOD)= NINT(RWD(NCOND*(I-1)+ICNOD)*10)
       END DO
 
       DEALLOCATE(RWD)
-
+C
+C=======================================================================
+C SECTION 7: DUAL GRAPH CONSTRUCTION
+C=======================================================================
+C Purpose: Build the dual graph of element connectivity
+C         Create edge pairs (Ei, Ej) for elements connected by nodes
+C         Construct adjacency lists (XADJ, ADJNCY) for METIS
+C----------------------------------------------------------------------
 C.....construction of Ei Ej pairs connected by a point
 
       NEDGES = 0
@@ -2089,6 +2096,15 @@ C 2) recompute connexity to verify it is ok now
           END IF
         END IF
         DEALLOCATE(COLORS,ROOTS)
+C
+C=======================================================================
+C SECTION 8: METIS GRAPH PARTITIONING
+C=======================================================================
+C Purpose: Call METIS library to partition the dual graph
+C         Set METIS options and parameters
+C         Assign elements to processors (CEP array)
+C         Handle multi-criteria optimization
+C----------------------------------------------------------------------
 
         WRITE(IOUT,*)' '
         WRITE(IOUT,FMT=FMW_A_I)
@@ -2260,6 +2276,15 @@ C RSB METIS
      2      IWD,NNODE,
      3      UBVEC,OPTIONS,NEC,CEP)
         END IF
+C
+C=======================================================================
+C SECTION 9: POST-PROCESSING AND STATISTICS
+C=======================================================================
+C Purpose: Compute domain decomposition statistics
+C         Check load balance quality
+C         Write output messages and diagnostics
+C         Handle unbalanced partitions with iterative refinement
+C----------------------------------------------------------------------
             CALL STAT_DOMDEC(
      1           WIS      ,WI2     ,WFSI      ,WDEL      ,WDDL     ,
      2           WCAND    ,WSOL    ,WR2R      ,WKIN      ,IWD      ,
