@@ -745,6 +745,7 @@ C-----------------------------------------------
               USE UPDATE_PON_MOD
               USE resol_alloc_loadp_mod, only : resol_alloc_loadp
               USE resol_alloc_thermal_mod, only : resol_alloc_thermal
+              USE resol_alloc_connectivity_mod, only : resol_alloc_connectivity
               USE DEBUG_MOD
               use inter_init_component_mod , only : inter_init_component
               use damping_vref_compute_dampa_mod
@@ -1523,38 +1524,14 @@ C-----------------------------------------------------------
      .          OUTPUT%TH%TH_SURF%NSEGLOADPB, OUTPUT%TH%TH_SURF%NSEGLOADP,
      .          PBLAST%NLOADP_B)
 C----------------------------------------------------------
-              IF((IDEL7NG>0).OR.(IRAD2R/=0).OR.(ALEMUSCL_Param%IALEMUSCL>0).OR.(PDEL>0))THEN
-                SIZE_ADDCNEL = NUMNOD+1
-                SIZE_CNEL = LCNEL
-                NELEML = NUMELS+NUMELQ+NUMELC+NUMELT+NUMELP+
-     .                   NUMELR+NUMELTG
-                S_ELEM_STATE = NELEML
-              ELSE
-                SIZE_ADDCNEL = 0
-                SIZE_CNEL = 0
-                S_ELEM_STATE = 0
-              ENDIF
-              IERROR = 0
-              ALLOCATE(CNEL(0:SIZE_CNEL))
-              ALLOCATE(ADDCNEL(0:SIZE_ADDCNEL))
-              IF((IDEL7NG>0).OR.(IRAD2R/=0).OR.(ALEMUSCL_Param%IALEMUSCL>0).OR.(PDEL>0))THEN
-C Allocation of inverse connectivity array
-                ALLOCATE(ADDTMPL(0:NUMNOD+1))
-                IERROR = IERROR + IERROR2
-                NELEML = NUMELS+NUMELQ+NUMELC+NUMELT+NUMELP+
-     .                   NUMELR+NUMELTG
-                ALLOCATE(TAGEL(1:NELEML))
-                TAGEL(:) = 0
-                ALEMUSCL_Buffer%pCNEL => CNEL
-                ALEMUSCL_Buffer%pADDCNEL => ADDCNEL
-                ALEMUSCL_Buffer%pADDTMPL => ADDTMPL
-              ELSE
-                ALLOCATE(ADDTMPL(0),TAGEL(0))
-              END IF
-              ALLOCATE(IPARTL(NPART))
-              ALLOCATE(PARTSAV2(2,NPART))
-              ALLOCATE( ELEM_STATE(S_ELEM_STATE) )
-              ELEM_STATE(1:S_ELEM_STATE) = .TRUE.
+C----------------------------------------------------------
+              CALL RESOL_ALLOC_CONNECTIVITY(
+     .          IDEL7NG, IRAD2R, ALEMUSCL_Param%IALEMUSCL, PDEL, NUMNOD, LCNEL,
+     .          NUMELS, NUMELQ, NUMELC, NUMELT, NUMELP, NUMELR, NUMELTG, NPART,
+     .          SIZE_ADDCNEL, SIZE_CNEL, NELEML, S_ELEM_STATE, IERROR,
+     .          CNEL, ADDCNEL, ADDTMPL, TAGEL, IPARTL, PARTSAV2, ELEM_STATE,
+     .          ALEMUSCL_Buffer%pCNEL, ALEMUSCL_Buffer%pADDCNEL, 
+     .          ALEMUSCL_Buffer%pADDTMPL)
 C
 C   Working arrays for thermal analysis
 C
