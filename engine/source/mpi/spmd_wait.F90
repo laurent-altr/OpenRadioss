@@ -99,7 +99,7 @@
           use spmd_error_mod, only: spmd_in, spmd_out
           implicit none
 #include "spmd.inc"
-          integer, intent(in) :: request
+          integer, intent(inout) :: request
           integer, dimension(MPI_STATUS_SIZE), optional, intent(inout) :: status
 #ifdef MPI
           integer :: ierr
