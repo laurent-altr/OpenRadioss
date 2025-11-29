@@ -126,7 +126,8 @@ C     REAL
      .   DX,DY,DZ,XS,YS,ZS,XX,SX,SY,SZ,S2,
      .   XMIN, XMAX,YMIN, YMAX,ZMIN, ZMAX, TZ, GAPSMX, GAPL,
      .   XX1,XX2,XX3,XX4,YY1,YY2,YY3,YY4,ZZ1,ZZ2,ZZ3,ZZ4,
-     .   D1X,D1Y,D1Z,D2X,D2Y,D2Z,DD1,DD2,D2,A2,GS
+     .   D1X,D1Y,D1Z,D2X,D2Y,D2Z,DD1,DD2,D2,A2,GS,
+     .   AAA_BASE, CURV_MAX_NE, GAP_M_NE, MARGE_CURV
 c 
       INTEGER  IX,IY,IZ,NEXT,M1,M2,M3,M4,
      .         IX1,IY1,IZ1,IX2,IY2,IZ2
@@ -134,7 +135,8 @@ c
       INTEGER,  DIMENSION(:),ALLOCATABLE :: IIX,IIY,IIZ
       my_real
      .   XMINB,YMINB,ZMINB,XMAXB,YMAXB,ZMAXB,
-     .   XMINE,YMINE,ZMINE,XMAXE,YMAXE,ZMAXE,AAA
+     .   XMINE,YMINE,ZMINE,XMAXE,YMAXE,ZMAXE,AAA,
+     .   INV_XBOX, INV_YBOX, INV_ZBOX
       INTEGER FIRST,NEW,LAST
       SAVE IIX,IIY,IIZ
       INTEGER, DIMENSION(:),ALLOCATABLE :: TAG
@@ -166,6 +168,11 @@ c     Dev Future: xminb larger than Xmin ...
       YMAXB = YMAX
       ZMAXB = ZMAX
 
+c     Pre-compute inverse box dimensions for faster calculations
+      INV_XBOX = NBX / (XMAXB - XMINB)
+      INV_YBOX = NBY / (YMAXB - YMINB)
+      INV_ZBOX = NBZ / (ZMAXB - ZMINB)
+
 C=======================================================================
 C 1   placing nodes into boxes
 C=======================================================================
@@ -185,9 +192,9 @@ C processor elements
           IF(X(3,J) < ZMIN)  CYCLE
           IF(X(3,J) > ZMAX)  CYCLE
 
-          IIX(I)=INT(NBX*(X(1,J)-XMINB)/(XMAXB-XMINB))
-          IIY(I)=INT(NBY*(X(2,J)-YMINB)/(YMAXB-YMINB))
-          IIZ(I)=INT(NBZ*(X(3,J)-ZMINB)/(ZMAXB-ZMINB))
+          IIX(I)=INT(INV_XBOX*(X(1,J)-XMINB))
+          IIY(I)=INT(INV_YBOX*(X(2,J)-YMINB))
+          IIZ(I)=INT(INV_ZBOX*(X(3,J)-ZMINB))
 
           IIX(I)=MAX(1,2+MIN(NBX,IIX(I)))
           IIY(I)=MAX(1,2+MIN(NBY,IIY(I)))
@@ -219,9 +226,9 @@ C 2   placing nodes into boxes
 C     non -local candidates in SPMD
 C=======================================================================
         DO J = 1, NSNR
-          IIX(NSN+J)=INT(NBX*(XREM(1,J)-XMINB)/(XMAXB-XMINB))
-          IIY(NSN+J)=INT(NBY*(XREM(2,J)-YMINB)/(YMAXB-YMINB))
-          IIZ(NSN+J)=INT(NBZ*(XREM(3,J)-ZMINB)/(ZMAXB-ZMINB))
+          IIX(NSN+J)=INT(INV_XBOX*(XREM(1,J)-XMINB))
+          IIY(NSN+J)=INT(INV_YBOX*(XREM(2,J)-YMINB))
+          IIZ(NSN+J)=INT(INV_ZBOX*(XREM(3,J)-ZMINB))
           IIX(NSN+J)=MAX(1,2+MIN(NBX,IIX(NSN+J)))
           IIY(NSN+J)=MAX(1,2+MIN(NBY,IIY(NSN+J)))
           IIZ(NSN+J)=MAX(1,2+MIN(NBZ,IIZ(NSN+J)))
@@ -270,8 +277,13 @@ C don't keep deleted segments
             TAG(REMNOD(I)) = 1
           ENDDO
 c
-          AAA = MARGE+CURV_MAX(NE)+MAX(MAX(BGAPSMX+GAP_M(NE),PMAX_GAP)+DGAPLOAD,DRAD)+VMAXDT
-     +
+c         Hoist element-specific calculations out of inner loops
+          CURV_MAX_NE = CURV_MAX(NE)
+          GAP_M_NE = GAP_M(NE)
+          MARGE_CURV = MARGE + CURV_MAX_NE
+          AAA_BASE = MARGE_CURV + 
+     +               MAX(MAX(BGAPSMX+GAP_M_NE,PMAX_GAP)+DGAPLOAD,DRAD)
+     +               + VMAXDT
 
 
 c     It is possible to improve the algo by cutting the facet
@@ -313,17 +325,17 @@ c        surface calculation (for future elimination of candidates)
 
 c        index of voxels occupied by the facet
 
-          IX1=INT(NBX*(XMINE-AAA-XMINB)/(XMAXB-XMINB))
-          IY1=INT(NBY*(YMINE-AAA-YMINB)/(YMAXB-YMINB))
-          IZ1=INT(NBZ*(ZMINE-AAA-ZMINB)/(ZMAXB-ZMINB))
+          IX1=INT(INV_XBOX*(XMINE-AAA_BASE-XMINB))
+          IY1=INT(INV_YBOX*(YMINE-AAA_BASE-YMINB))
+          IZ1=INT(INV_ZBOX*(ZMINE-AAA_BASE-ZMINB))
 
           IX1=MAX(1,2+MIN(NBX,IX1))
           IY1=MAX(1,2+MIN(NBY,IY1))
           IZ1=MAX(1,2+MIN(NBZ,IZ1))
 
-          IX2=INT(NBX*(XMAXE+AAA-XMINB)/(XMAXB-XMINB))
-          IY2=INT(NBY*(YMAXE+AAA-YMINB)/(YMAXB-YMINB))
-          IZ2=INT(NBZ*(ZMAXE+AAA-ZMINB)/(ZMAXB-ZMINB))
+          IX2=INT(INV_XBOX*(XMAXE+AAA_BASE-XMINB))
+          IY2=INT(INV_YBOX*(YMAXE+AAA_BASE-YMINB))
+          IZ2=INT(INV_ZBOX*(ZMAXE+AAA_BASE-ZMINB))
 
           IX2=MAX(1,2+MIN(NBX,IX2))
           IY2=MAX(1,2+MIN(NBY,IY2))
@@ -361,8 +373,8 @@ c NEED to communicate in SPMD
 c VMAXDT is a local overestimate of relative incremental displacement
 c NO need to communicate in SPMD
 
-                    AAA = MARGE + CURV_MAX(NE)
-     +                  + MAX(GAP_S(JJ)+GAP_M(NE)+DGAPLOAD,DRAD)
+                    AAA = MARGE_CURV
+     +                  + MAX(GAP_S(JJ)+GAP_M_NE+DGAPLOAD,DRAD)
      +                       +VMAXDT
                   ELSE
                     J=JJ-NSN
@@ -382,11 +394,11 @@ c NO need to communicate in SPMD
                     XS = XREM(1,J)
                     YS = XREM(2,J)
                     ZS = XREM(3,J)
-                    AAA = MARGE+CURV_MAX(NE)
+                    AAA = MARGE_CURV
 c!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 c                                      +EDGE_L2(JJ) remote
 c!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-     +              + MAX(XREM(IGAPXREMP,J)+GAP_M(NE)+DGAPLOAD,DRAD)
+     +              + MAX(XREM(IGAPXREMP,J)+GAP_M_NE+DGAPLOAD,DRAD)
      +              + VMAXDT
                   ENDIF
 
@@ -460,8 +472,13 @@ cc             nnr0pelg = nnr0pelg + nnr0pelem
 C don't keep deleted segments
           IF(STF(NE) <= ZERO)CYCLE
 c
-          AAA = MARGE+CURV_MAX(NE)+MAX(MAX(BGAPSMX+GAP_M(NE),PMAX_GAP)+DGAPLOAD,DRAD)+VMAXDT
-     +
+c         Hoist element-specific calculations out of inner loops
+          CURV_MAX_NE = CURV_MAX(NE)
+          GAP_M_NE = GAP_M(NE)
+          MARGE_CURV = MARGE + CURV_MAX_NE
+          AAA_BASE = MARGE_CURV + 
+     +               MAX(MAX(BGAPSMX+GAP_M_NE,PMAX_GAP)+DGAPLOAD,DRAD)
+     +               + VMAXDT
 
 
 c     It is possible to improve the algo by cutting the facet
@@ -503,17 +520,17 @@ c        surface calculation (for future elimination of candidates)
 
 c        index of voxels occupied by the facet
 
-          IX1=INT(NBX*(XMINE-AAA-XMINB)/(XMAXB-XMINB))
-          IY1=INT(NBY*(YMINE-AAA-YMINB)/(YMAXB-YMINB))
-          IZ1=INT(NBZ*(ZMINE-AAA-ZMINB)/(ZMAXB-ZMINB))
+          IX1=INT(INV_XBOX*(XMINE-AAA_BASE-XMINB))
+          IY1=INT(INV_YBOX*(YMINE-AAA_BASE-YMINB))
+          IZ1=INT(INV_ZBOX*(ZMINE-AAA_BASE-ZMINB))
 
           IX1=MAX(1,2+MIN(NBX,IX1))
           IY1=MAX(1,2+MIN(NBY,IY1))
           IZ1=MAX(1,2+MIN(NBZ,IZ1))
 
-          IX2=INT(NBX*(XMAXE+AAA-XMINB)/(XMAXB-XMINB))
-          IY2=INT(NBY*(YMAXE+AAA-YMINB)/(YMAXB-YMINB))
-          IZ2=INT(NBZ*(ZMAXE+AAA-ZMINB)/(ZMAXB-ZMINB))
+          IX2=INT(INV_XBOX*(XMAXE+AAA_BASE-XMINB))
+          IY2=INT(INV_YBOX*(YMAXE+AAA_BASE-YMINB))
+          IZ2=INT(INV_ZBOX*(ZMAXE+AAA_BASE-ZMINB))
 
           IX2=MAX(1,2+MIN(NBX,IX2))
           IY2=MAX(1,2+MIN(NBY,IY2))
@@ -550,8 +567,8 @@ c NEED to communicate in SPMD
 c VMAXDT is a local overestimate of relative incremental displacement
 c NO need to communicate in SPMD
 
-                    AAA = MARGE + CURV_MAX(NE)
-     +                  + MAX(GAP_S(JJ)+GAP_M(NE)+DGAPLOAD,DRAD)
+                    AAA = MARGE_CURV
+     +                  + MAX(GAP_S(JJ)+GAP_M_NE+DGAPLOAD,DRAD)
      +                       +VMAXDT
                   ELSE
                     J=JJ-NSN
@@ -559,11 +576,11 @@ c NO need to communicate in SPMD
                     XS = XREM(1,J)
                     YS = XREM(2,J)
                     ZS = XREM(3,J)
-                    AAA = MARGE+CURV_MAX(NE)
+                    AAA = MARGE_CURV
 c!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 c                                      +EDGE_L2(JJ) remote
 c!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-     +              + MAX(XREM(IGAPXREMP,J)+GAP_M(NE)+DGAPLOAD,DRAD)
+     +              + MAX(XREM(IGAPXREMP,J)+GAP_M_NE+DGAPLOAD,DRAD)
      +              + VMAXDT
                   ENDIF
 
