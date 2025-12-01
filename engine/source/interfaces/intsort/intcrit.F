@@ -132,7 +132,8 @@ C
            STOPT = INTBUF_TAB(I)%VARIABLES(11)
            IF (STARTT<=TT.AND.TT<=STOPT) INTERACT = 1
         ENDIF
-C
+
+
         IF(INTERACT/=0.OR.(NTY==25 .AND. TT <= STOPT)) THEN
            NBNEW = NBNEW + 1
            LISTNEW(NBNEW) = I
