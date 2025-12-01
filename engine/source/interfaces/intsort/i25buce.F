@@ -30,7 +30,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    message_mod   ../engine/share/message_module/message_mod.F
 !||    tri7box       ../engine/share/modules/tri7box.F
 !||====================================================================
-       SUBROUTINE I25BUCE(
+       SUBROUTINE I25BUCE(DT1,VMSR_LOCAL,VSLV_LOCAL,
      1   X        ,V       ,IRECT   ,NSV      ,STFN     , 
      2   NMN      ,NRTM    ,NSN     ,CAND_E   ,CAND_N   ,
      3   GAP      ,NOINT   ,II_STOK ,MULNSN   ,BMINMA   ,
@@ -59,6 +59,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
+      my_real :: DT1, VMSR_LOCAL, VSLV_LOCAL
       INTEGER NMN, NRTM, NSN, NOINT, NIN, NSNR
       INTEGER IRECT(4,*),NSV(*),ITASK,ILEV, IGAP
       INTEGER CAND_E(*),CAND_N(*),MSEGTYP(*)
@@ -167,7 +168,7 @@ C=============================================================================
       ! wait not necessary, because there is a barrier at the start of I25TRIVOX
 !$OMP END SINGLE NOWAIT
 
-      CALL I25TRIVOX(
+      CALL I25TRIVOX(DT1,VMSR_LOCAL,VSLV_LOCAL,
      1   NSN     ,NSNR     ,ISZNSNR  ,I_MEM   ,VMAXDT   ,
      2   IRECT   ,X        ,STF      ,STFN    ,XYZM     ,
      3   NSV     ,II_STOK  ,CAND_N   ,ESHIFT  ,CAND_E   ,

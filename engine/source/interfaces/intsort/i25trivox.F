@@ -31,7 +31,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    my_alloc_mod   ../common_source/tools/memory/my_alloc.F90
 !||    tri7box        ../engine/share/modules/tri7box.F
 !||====================================================================
-      SUBROUTINE I25TRIVOX(
+      SUBROUTINE I25TRIVOX(DT1, VMSR_LOCAL,VSLV_LOCAL,
      1      NSN    ,NSNR    ,ISZNSNR ,I_MEM   ,VMAXDT   ,
      2      IRECT  ,X       ,STF     ,STFN    ,XYZM     ,
      3      NSV    ,II_STOK ,CAND_N  ,ESHIFT  ,CAND_E   ,
@@ -101,6 +101,7 @@ C                       node at the last
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
+      my_real :: DT1, VMSR_LOCAL(6), VSLV_LOCAL(6)
       INTEGER I_MEM,ESHIFT,NSN,ISZNSNR,NRTM,NIN,ITASK,IGAP,
      .        MULNSN,NOINT,NSNR,NBX,NBY,NBZ,
      .        NSV(*),CAND_N(*),CAND_E(*),
@@ -137,6 +138,7 @@ c
       INTEGER FIRST,LAST
       SAVE IIX,IIY,IIZ
       INTEGER, DIMENSION(:),ALLOCATABLE :: TAG
+      my_real :: vmaxdt_local,vx,vy,vz,vv
 C-----------------------------------------------
       CALL MY_ALLOC(TAG,NUMNOD)
       CALL MY_ALLOC(LAST_NOD,NSN+NSNR)
@@ -221,6 +223,13 @@ C=======================================================================
           IIX(NSN+J)=INT(NBX*(XREM(1,J)-XMINB)/(XMAXB-XMINB))
           IIY(NSN+J)=INT(NBY*(XREM(2,J)-YMINB)/(YMAXB-YMINB))
           IIZ(NSN+J)=INT(NBZ*(XREM(3,J)-ZMINB)/(ZMAXB-ZMINB))
+          VSLV_LOCAL(1)=MAX(VSLV_LOCAL(1),XREM(3+1,J))
+          VSLV_LOCAL(2)=MAX(VSLV_LOCAL(2),XREM(3+2,J))
+          VSLV_LOCAL(3)=MAX(VSLV_LOCAL(3),XREM(3+3,J))
+          VSLV_LOCAL(4)=MIN(VSLV_LOCAL(4),XREM(3+1,J))
+          VSLV_LOCAL(5)=MIN(VSLV_LOCAL(5),XREM(3+2,J))
+          VSLV_LOCAL(6)=MIN(VSLV_LOCAL(6),XREM(3+3,J))
+C
           IIX(NSN+J)=MAX(1,2+MIN(NBX,IIX(NSN+J)))
           IIY(NSN+J)=MAX(1,2+MIN(NBY,IIY(NSN+J)))
           IIZ(NSN+J)=MAX(1,2+MIN(NBZ,IIZ(NSN+J)))
@@ -249,6 +258,14 @@ c         jump to the last node of the cell
       END IF
 C Barrier to wait task0 treatment
       CALL MY_BARRIER
+
+         VX = MAX(VSLV_LOCAL(1)-VMSR_LOCAL(4),VMSR_LOCAL(1)-VSLV_LOCAL(4),ZERO)
+         VY = MAX(VSLV_LOCAL(2)-VMSR_LOCAL(5),VMSR_LOCAL(2)-VSLV_LOCAL(5),ZERO)
+         VZ = MAX(VSLV_LOCAL(3)-VMSR_LOCAL(6),VMSR_LOCAL(3)-VSLV_LOCAL(6),ZERO)
+         VV = SQRT(VX**2+VY**2+VZ**2)
+         vmaxdt_local = ONEP01*VV*DT1
+         write(6,*) "VMAXDT, VMAXDT_LOCAL ", VMAXDT, vmaxdt_local
+   
 C=======================================================================
 C 3 Searching boxes concerning each facet
 C     and creation of candidates

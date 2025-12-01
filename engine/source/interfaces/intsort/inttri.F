@@ -263,6 +263,7 @@ C-----------------------------------------------
       INTEGER :: NB_INTER_SORTED        !   number of interfaces that need to be sorted
       INTEGER, DIMENSION(NBINTC) :: LIST_INTER_SORTED   !   list of interfaces that need to be sorted
       INTEGER :: NTY
+      my_real :: VMSR_LOCAL(6,NINTER), VSLV_LOCAL(6,NINTER)
 C-----------------------------------------------
       NSENSOR = SENSORS%NSENSOR
 C Single region
@@ -648,6 +649,17 @@ C
        ENDIF 
 C
 C communication sorting criterion
+      IF(NINTER25 > 0) THEN
+        DO KK=1,NBINTC
+          N = INTLIST(KK)
+          NTY   =IPARI(7,N)
+          IF (NTY == 25) THEN
+            VSLV_LOCAL(1:6,N) = VSLV(1:6,N)
+            VMSR_LOCAL(1:6,N) = VMSR(1:6,N)
+          ENDIF
+        ENDDO
+      ENDIF
+
 C
       CALL INTCRIT(TIMERS,
      1    ERRORS, IPARI   ,NEWFRONT ,ISENDTO  ,NSENSOR  , 
@@ -989,7 +1001,7 @@ c-----------------------------------------------------------------------
           SSHIFT = ITASK*NRTM_T
           IF(ITASK==NTHREAD-1)NRTM_T=(IPARI(4,N)-IPARI(42,N))
      +                                -(NTHREAD-1)*NRTM_T
-          CALL I25MAIN_TRI(TIMERS,
+          CALL I25MAIN_TRI(TIMERS,VMSR_LOCAL(1:6,N),VSLV_LOCAL(1:6,N),
      1      IPARI   ,X       ,V   ,INTBUF_TAB(N),
      2      MS      ,N            ,ITASK        ,WEIGHT  ,
      3      ISENDTO ,IRECVFROM    ,RETRI        ,IAD_ELEM,FR_ELEM ,
@@ -1125,7 +1137,7 @@ c-----------------------------------------------------------------------
           IF(ITASK==NTHREAD-1)NRTM_T=(IPARI(4,N)-IPARI(42,N))
      +                                -(NTHREAD-1)*NRTM_T
 C-------  KINET,MS used for commu remot second, for the moment no need.   
-          CALL I25MAIN_TRI(TIMERS,
+          CALL I25MAIN_TRI(TIMERS,VMSR_LOCAL(1:6,N),VSLV_LOCAL(1:6,N),
      1      IPARI   ,X       ,V       ,INTBUF_TAB(N),
      2      MS      ,N            ,ITASK        ,WEIGHT  ,
      3      ISENDTO ,IRECVFROM    ,RETRI        ,IAD_ELEM,FR_ELEM ,

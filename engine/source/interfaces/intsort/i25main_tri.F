@@ -58,7 +58,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    tri25ebox                    ../engine/share/modules/tri25ebox.F
 !||    tri7box                      ../engine/share/modules/tri7box.F
 !||====================================================================
-      SUBROUTINE I25MAIN_TRI(TIMERS,
+      SUBROUTINE I25MAIN_TRI(TIMERS,VMSR_LOCAL,VSLV_LOCAL,
      1                  IPARI   ,X       ,V       ,INTBUF_TAB,
      2                  MS      ,NIN     ,ITASK   ,WEIGHT  ,
      3                  ISENDTO ,IRCVFROM,RETRI   ,IAD_ELEM,FR_ELEM ,
@@ -100,6 +100,7 @@ C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
       TYPE(TIMER_) :: TIMERS
+      my_real :: VMSR_LOCAL(6), VSLV_LOCAL(6)
       INTEGER NIN ,ITASK, RETRI, NEDGE_T, NRTM_T, SSHIFT, ESHIFT,
      .        NUM_IMP ,IND_IMP(*),
      .        ITAB(*), KINET(*),
@@ -411,7 +412,7 @@ C
 C     NCONT additional candidates (if all secondary nodes are already impacted, cf i25optcd)
       MULTIMP = IPARI(23,NIN)
       MULNSN  = INTBUF_TAB%S_CAND_N - NCONT
-      CALL I25BUCE(
+      CALL I25BUCE(DT1, VMSR_LOCAL,VSLV_LOCAL,
      1 X      ,V           ,INTBUF_TAB%IRECTM(1+4*SSHIFT),INTBUF_TAB%NSV,
      +                                                 INTBUF_TAB%STFNS,
      2 NMN    ,NRTM_T      ,NSN            ,INTBUF_TAB%CAND_E,INTBUF_TAB%CAND_N,
