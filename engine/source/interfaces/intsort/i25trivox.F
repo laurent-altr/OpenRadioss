@@ -264,7 +264,7 @@ C Barrier to wait task0 treatment
          VZ = MAX(VSLV_LOCAL(3)-VMSR_LOCAL(6),VMSR_LOCAL(3)-VSLV_LOCAL(6),ZERO)
          VV = SQRT(VX**2+VY**2+VZ**2)
          vmaxdt_local = ONEP01*VV*DT1
-         write(6,*) "VMAXDT, VMAXDT_LOCAL ", VMAXDT, vmaxdt_local
+         if(vmaxdt > marge/10.0D0) write(6,*) "V,VLOC,MARGE ", VMAXDT, vmaxdt_local,MARGE
    
 C=======================================================================
 C 3 Searching boxes concerning each facet
@@ -286,8 +286,7 @@ C don't keep deleted segments
             TAG(REMNOD(I)) = 1
           ENDDO
 c
-          AAA = MARGE+CURV_MAX(NE)+MAX(MAX(BGAPSMX+GAP_M(NE),PMAX_GAP)+DGAPLOAD,DRAD)+VMAXDT
-     +
+          AAA = MARGE+CURV_MAX(NE)+MAX(MAX(BGAPSMX+GAP_M(NE),PMAX_GAP)+DGAPLOAD,DRAD)+VMAXDT_local
 
 
 c     It is possible to improve the algo by cutting the facet
@@ -379,7 +378,7 @@ c NO need to communicate in SPMD
 
                     AAA = MARGE + CURV_MAX(NE)
      +                  + MAX(GAP_S(JJ)+GAP_M(NE)+DGAPLOAD,DRAD)
-     +                       +VMAXDT
+     +                       +VMAXDT_local
                   ELSE
                     J=JJ-NSN
 
@@ -403,7 +402,7 @@ c!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 c                                      +EDGE_L2(JJ) remote
 c!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
      +              + MAX(XREM(IGAPXREMP,J)+GAP_M(NE)+DGAPLOAD,DRAD)
-     +              + VMAXDT
+     +              + VMAXDT_local
                   ENDIF
 
                   IF(XS<=XMINE-AAA)GOTO 200
@@ -476,7 +475,7 @@ cc             nnr0pelg = nnr0pelg + nnr0pelem
 C don't keep deleted segments
           IF(STF(NE) <= ZERO)CYCLE
 c
-          AAA = MARGE+CURV_MAX(NE)+MAX(MAX(BGAPSMX+GAP_M(NE),PMAX_GAP)+DGAPLOAD,DRAD)+VMAXDT
+          AAA = MARGE+CURV_MAX(NE)+MAX(MAX(BGAPSMX+GAP_M(NE),PMAX_GAP)+DGAPLOAD,DRAD)+VMAXDT_local
      +
 
 
@@ -568,7 +567,7 @@ c NO need to communicate in SPMD
 
                     AAA = MARGE + CURV_MAX(NE)
      +                  + MAX(GAP_S(JJ)+GAP_M(NE)+DGAPLOAD,DRAD)
-     +                       +VMAXDT
+     +                       +VMAXDT_local
                   ELSE
                     J=JJ-NSN
 
@@ -580,7 +579,7 @@ c!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 c                                      +EDGE_L2(JJ) remote
 c!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
      +              + MAX(XREM(IGAPXREMP,J)+GAP_M(NE)+DGAPLOAD,DRAD)
-     +              + VMAXDT
+     +              + VMAXDT_local
                   ENDIF
 
                   IF(XS<=XMINE-AAA)GOTO 300
