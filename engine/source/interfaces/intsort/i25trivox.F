@@ -264,8 +264,7 @@ C Barrier to wait task0 treatment
          VZ = MAX(VSLV_LOCAL(3)-VMSR_LOCAL(6),VMSR_LOCAL(3)-VSLV_LOCAL(6),ZERO)
          VV = SQRT(VX**2+VY**2+VZ**2)
          vmaxdt_local = ONEP01*VV*DT1
-         if(vmaxdt > marge/10.0D0) write(6,*) "V,VLOC,MARGE ", VMAXDT, vmaxdt_local,MARGE
-   
+C        if(vmaxdt > marge/10.0D0) write(6,*) "V,VLOC,MARGE ", VMAXDT, vmaxdt_local,MARGE
 C=======================================================================
 C 3 Searching boxes concerning each facet
 C     and creation of candidates
@@ -308,6 +307,7 @@ c     in 2 (4,3,6,9 ...) if the facet is large in front of AAA and inclinee
           YY2=X(2,M2)
           YY3=X(2,M3)
           YY4=X(2,M4)
+        
           YMAXE=MAX(YY1,YY2,YY3,YY4)
           YMINE=MIN(YY1,YY2,YY3,YY4)
 
@@ -318,6 +318,36 @@ c     in 2 (4,3,6,9 ...) if the facet is large in front of AAA and inclinee
           ZMAXE=MAX(ZZ1,ZZ2,ZZ3,ZZ4)
           ZMINE=MIN(ZZ1,ZZ2,ZZ3,ZZ4)
 
+          VMSR_LOCAL(1) = V(1,M1)
+          VMSR_LOCAL(1) = MAX(VMSR_LOCAL(1),V(1,M2))
+          VMSR_LOCAL(1) = MAX(VMSR_LOCAL(1),V(1,M3))
+          VMSR_LOCAL(1) = MAX(VMSR_LOCAL(1),V(1,M4))
+          VMSR_LOCAL(2) = V(2,M1)
+          VMSR_LOCAL(2) = MAX(VMSR_LOCAL(2),V(2,M2))
+          VMSR_LOCAL(2) = MAX(VMSR_LOCAL(2),V(2,M3))
+          VMSR_LOCAL(2) = MAX(VMSR_LOCAL(2),V(2,M4))
+          VMSR_LOCAL(3) = V(3,M1)
+          VMSR_LOCAL(3) = MAX(VMSR_LOCAL(3),V(3,M2))  
+          VMSR_LOCAL(3) = MAX(VMSR_LOCAL(3),V(3,M3))
+          VMSR_LOCAL(3) = MAX(VMSR_LOCAL(3),V(3,M4))
+          VMSR_LOCAL(4) = V(1,M1) 
+          VMSR_LOCAL(4) = MIN(VMSR_LOCAL(4),V(1,M2))
+          VMSR_LOCAL(4) = MIN(VMSR_LOCAL(4),V(1,M3))
+          VMSR_LOCAL(4) = MIN(VMSR_LOCAL(4),V(1,M4))
+          VMSR_LOCAL(5) = V(2,M1)
+          VMSR_LOCAL(5) = MIN(VMSR_LOCAL(5),V(2,M2))
+          VMSR_LOCAL(5) = MIN(VMSR_LOCAL(5),V(2,M3))
+          VMSR_LOCAL(5) = MIN(VMSR_LOCAL(5),V(2,M4))
+          VMSR_LOCAL(6) = V(3,M1) 
+          VMSR_LOCAL(6) = MIN(VMSR_LOCAL(6),V(3,M2))
+          VMSR_LOCAL(6) = MIN(VMSR_LOCAL(6),V(3,M3))
+          VMSR_LOCAL(6) = MIN(VMSR_LOCAL(6),V(3,M4))
+          VX = MAX(VSLV_LOCAL(1)-VMSR_LOCAL(4),VMSR_LOCAL(1)-VSLV_LOCAL(4),ZERO)
+          VY = MAX(VSLV_LOCAL(2)-VMSR_LOCAL(5),VMSR_LOCAL(2)-VSLV_LOCAL(5),ZERO)
+          VZ = MAX(VSLV_LOCAL(3)-VMSR_LOCAL(6),VMSR_LOCAL(3)-VSLV_LOCAL(6),ZERO)
+          VV = SQRT(VX**2+VY**2+VZ**2)
+          VMAXDT_LOCAL = ONEP01*VV*DT1
+          AAA = MARGE+CURV_MAX(NE)+MAX(MAX(BGAPSMX+GAP_M(NE),PMAX_GAP)+DGAPLOAD,DRAD)+VMAXDT_LOCAL
 
 c        surface calculation (for future elimination of candidates)
 
@@ -476,7 +506,6 @@ C don't keep deleted segments
           IF(STF(NE) <= ZERO)CYCLE
 c
           AAA = MARGE+CURV_MAX(NE)+MAX(MAX(BGAPSMX+GAP_M(NE),PMAX_GAP)+DGAPLOAD,DRAD)+VMAXDT_local
-     +
 
 
 c     It is possible to improve the algo by cutting the facet
@@ -508,6 +537,36 @@ c     in 2 (4,3,6,9 ...) if the facet is large in front of AAA and inclinee
           ZMAXE=MAX(ZZ1,ZZ2,ZZ3,ZZ4)
           ZMINE=MIN(ZZ1,ZZ2,ZZ3,ZZ4)
 
+          VMSR_LOCAL(1) = V(1,M1)
+          VMSR_LOCAL(1) = MAX(VMSR_LOCAL(1),V(1,M2))
+          VMSR_LOCAL(1) = MAX(VMSR_LOCAL(1),V(1,M3))
+          VMSR_LOCAL(1) = MAX(VMSR_LOCAL(1),V(1,M4))
+          VMSR_LOCAL(2) = V(2,M1)
+          VMSR_LOCAL(2) = MAX(VMSR_LOCAL(2),V(2,M2))
+          VMSR_LOCAL(2) = MAX(VMSR_LOCAL(2),V(2,M3))
+          VMSR_LOCAL(2) = MAX(VMSR_LOCAL(2),V(2,M4))
+          VMSR_LOCAL(3) = V(3,M1)
+          VMSR_LOCAL(3) = MAX(VMSR_LOCAL(3),V(3,M2))  
+          VMSR_LOCAL(3) = MAX(VMSR_LOCAL(3),V(3,M3))
+          VMSR_LOCAL(3) = MAX(VMSR_LOCAL(3),V(3,M4))
+          VMSR_LOCAL(4) = V(1,M1) 
+          VMSR_LOCAL(4) = MIN(VMSR_LOCAL(4),V(1,M2))
+          VMSR_LOCAL(4) = MIN(VMSR_LOCAL(4),V(1,M3))
+          VMSR_LOCAL(4) = MIN(VMSR_LOCAL(4),V(1,M4))
+          VMSR_LOCAL(5) = V(2,M1)
+          VMSR_LOCAL(5) = MIN(VMSR_LOCAL(5),V(2,M2))
+          VMSR_LOCAL(5) = MIN(VMSR_LOCAL(5),V(2,M3))
+          VMSR_LOCAL(5) = MIN(VMSR_LOCAL(5),V(2,M4))
+          VMSR_LOCAL(6) = V(3,M1) 
+          VMSR_LOCAL(6) = MIN(VMSR_LOCAL(6),V(3,M2))
+          VMSR_LOCAL(6) = MIN(VMSR_LOCAL(6),V(3,M3))
+          VMSR_LOCAL(6) = MIN(VMSR_LOCAL(6),V(3,M4))
+          VX = MAX(VSLV_LOCAL(1)-VMSR_LOCAL(4),VMSR_LOCAL(1)-VSLV_LOCAL(4),ZERO)
+          VY = MAX(VSLV_LOCAL(2)-VMSR_LOCAL(5),VMSR_LOCAL(2)-VSLV_LOCAL(5),ZERO)
+          VZ = MAX(VSLV_LOCAL(3)-VMSR_LOCAL(6),VMSR_LOCAL(3)-VSLV_LOCAL(6),ZERO)
+          VV = SQRT(VX**2+VY**2+VZ**2)
+          VMAXDT_LOCAL = ONEP01*VV*DT1
+          AAA = MARGE+CURV_MAX(NE)+MAX(MAX(BGAPSMX+GAP_M(NE),PMAX_GAP)+DGAPLOAD,DRAD)+VMAXDT_LOCAL
 
 c        surface calculation (for future elimination of candidates)
 
