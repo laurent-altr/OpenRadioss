@@ -170,10 +170,12 @@ C=======================================================================
 C 1   placing nodes into boxes
 C=======================================================================
       IF(ITASK == 0)THEN
+C       Initialize index arrays using array operations
+C       Arrays allocated with size NSN+NSNR (NSN local + NSNR remote nodes)
+        IIX(1:NSN+NSNR) = 0
+        IIY(1:NSN+NSNR) = 0
+        IIZ(1:NSN+NSNR) = 0
         DO I=1,NSN
-          IIX(I)=0
-          IIY(I)=0
-          IIZ(I)=0
           IF(STFN(I) <= ZERO)CYCLE
           J=NSV(I)
 C optimization // search for nodes within xmin xmax of the
@@ -257,9 +259,8 @@ C=======================================================================
       J_STOK = 0
 C
       IF(FLAGREMNODE == 2)THEN
-        DO I=1,NUMNOD
-          TAG(I) = 0
-        ENDDO
+C       Initialize TAG array using array operation
+        TAG(1:NUMNOD) = 0
 
         DO NE=1,NRTM
 C don't keep deleted segments
