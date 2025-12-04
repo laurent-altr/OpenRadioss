@@ -94,18 +94,18 @@ C
        E3Y = TZ * RX - TX * RZ 
        E3Z = TX * RY - TY * RX 
 C
-       DET = SQRT(E3X*E3X + E3Y*E3Y + E3Z*E3Z)
+       DET = HYPOT(HYPOT(E3X, E3Y), E3Z)
        IF ( DET/=ZERO) DET = ONE / DET
        E3X = E3X * DET
        E3Y = E3Y * DET
        E3Z = E3Z * DET
 C
-       C1=SQRT(TX*TX+TY*TY+TZ*TZ)
-       C2=SQRT(RX*RX+RY*RY+RZ*RZ)
+       C1=HYPOT(HYPOT(TX, TY), TZ)
+       C2=HYPOT(HYPOT(RX, RY), RZ)
        E1X=TX*C2 +(RY * E3Z - RZ * E3Y)*C1  
        E1Y=TY*C2 +(RZ * E3X - RX * E3Z)*C1  
        E1Z=TZ*C2 +(RX * E3Y - RY * E3X)*C1
-       DET = SQRT(E1X*E1X + E1Y*E1Y + E1Z*E1Z)
+       DET = HYPOT(HYPOT(E1X, E1Y), E1Z)
        IF ( DET/=ZERO) DET = ONE / DET
        E1X = E1X*DET
        E1Y = E1Y*DET
