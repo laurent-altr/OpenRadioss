@@ -171,9 +171,9 @@ C 1   placing nodes into boxes
 C=======================================================================
       IF(ITASK == 0)THEN
 c       Initialize index arrays using array operations
-        IIX(1:NSN) = 0
-        IIY(1:NSN) = 0
-        IIZ(1:NSN) = 0
+        IIX(1:NSN+NSNR) = 0
+        IIY(1:NSN+NSNR) = 0
+        IIZ(1:NSN+NSNR) = 0
         DO I=1,NSN
           IF(STFN(I) <= ZERO)CYCLE
           J=NSV(I)
@@ -259,7 +259,7 @@ C=======================================================================
 C
       IF(FLAGREMNODE == 2)THEN
 c       Initialize TAG array using array operation
-        TAG(:) = 0
+        TAG(1:NUMNOD) = 0
 
         DO NE=1,NRTM
 C don't keep deleted segments
