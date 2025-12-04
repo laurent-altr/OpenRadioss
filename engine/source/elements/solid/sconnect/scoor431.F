@@ -74,7 +74,7 @@ C
       E3X = RY * SZ - RZ * SY                 
       E3Y = RZ * SX - RX * SZ                 
       E3Z = RX * SY - RY * SX                 
-      CC  = ONE / MAX(EM20,SQRT(E3X*E3X + E3Y*E3Y + E3Z*E3Z))                      
+      CC  = ONE / MAX(EM20,HYPOT(HYPOT(E3X, E3Y), E3Z))                      
       E3X = E3X * CC                          
       E3Y = E3Y * CC                          
       E3Z = E3Z * CC                          
@@ -93,7 +93,7 @@ C
         E1Z = RZ+(SX*E3Y-SY*E3X)*CC           
       END IF                                  
 C
-      CC = SQRT(E1X*E1X + E1Y*E1Y + E1Z*E1Z)  
+      CC = HYPOT(HYPOT(E1X, E1Y), E1Z)  
       IF (CC /= ZERO) CC = ONE / CC            
       E1X = E1X*CC                            
       E1Y = E1Y*CC                            

@@ -107,18 +107,18 @@ C
        E3Y(I) = TZ(I) * RX(I) - TX(I) * RZ(I) 
        E3Z(I) = TX(I) * RY(I) - TY(I) * RX(I) 
 C
-       DET = SQRT(E3X(I)*E3X(I) + E3Y(I)*E3Y(I) + E3Z(I)*E3Z(I))
+       DET = HYPOT(HYPOT(E3X(I), E3Y(I)), E3Z(I))
        IF ( DET/=ZERO) DET = ONE / DET
        E3X(I) = E3X(I) * DET
        E3Y(I) = E3Y(I) * DET
        E3Z(I) = E3Z(I) * DET
 C
-       C1=SQRT(TX(I)*TX(I)+TY(I)*TY(I)+TZ(I)*TZ(I))
-       C2=SQRT(RX(I)*RX(I)+RY(I)*RY(I)+RZ(I)*RZ(I))
+       C1=HYPOT(HYPOT(TX(I), TY(I)), TZ(I))
+       C2=HYPOT(HYPOT(RX(I), RY(I)), RZ(I))
        E1X(I)=TX(I)*C2 +(RY(I) * E3Z(I) - RZ(I) * E3Y(I))*C1  
        E1Y(I)=TY(I)*C2 +(RZ(I) * E3X(I) - RX(I) * E3Z(I))*C1  
        E1Z(I)=TZ(I)*C2 +(RX(I) * E3Y(I) - RY(I) * E3X(I))*C1
-       DET = SQRT(E1X(I)*E1X(I) + E1Y(I)*E1Y(I) + E1Z(I)*E1Z(I))
+       DET = HYPOT(HYPOT(E1X(I), E1Y(I)), E1Z(I))
        IF ( DET/=ZERO) DET = ONE / DET
        E1X(I) = E1X(I)*DET
        E1Y(I) = E1Y(I)*DET

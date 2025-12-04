@@ -137,7 +137,7 @@ C----------------------------
         N1X(I) = a1Y(I) * b1Z(I) - a1Z(I) * b1Y(I) 
         N1Y(I) = a1Z(I) * b1X(I) - a1X(I) * b1Z(I) 
         N1Z(I) = a1X(I) * b1Y(I) - a1Y(I) * b1X(I) 
-        NORME(I) = SQRT(N1X(I)*N1X(I) + N1Y(I)*N1Y(I) + N1Z(I)*N1Z(I))
+        NORME(I) = HYPOT(HYPOT(N1X(I), N1Y(I)), N1Z(I))
         NORME(I)=MAX(EM20,NORME(I))
         CC = ONE / NORME(I)
         N1X(I) = N1X(I) * CC 
@@ -154,7 +154,7 @@ C----------------------------
         N2X(I) = a2Y(I) * b2Z(I) - a2Z(I) * b2Y(I) 
         N2Y(I) = a2Z(I) * b2X(I) - a2X(I) * b2Z(I) 
         N2Z(I) = a2X(I) * b2Y(I) - a2Y(I) * b2X(I) 
-        NORME(I) = SQRT(N2X(I)*N2X(I) + N2Y(I)*N2Y(I) + N2Z(I)*N2Z(I))
+        NORME(I) = HYPOT(HYPOT(N2X(I), N2Y(I)), N2Z(I))
         NORME(I)=MAX(EM20,NORME(I))
         CC = ONE / NORME(I)
         N2X(I) = N2X(I) * CC 
