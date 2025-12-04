@@ -120,19 +120,17 @@ C-----------------------------------------------
         z3 = zero
         z4 = zero                 
         m_exp = mat_param%uparam(10)
-        DO I=1,NEL
-          TSTAR(I) = MAX( ZERO, (TEMPEL(I)-TREF)/(TMELT-TREF) )
-        ENDDO
+        ! Use array operations
+        TSTAR(1:NEL) = MAX( ZERO, (TEMPEL(1:NEL)-TREF)/(TMELT-TREF) )
       END IF             
 !
       ! Specific strain rate computation
       ! -> Plastic strain rate
       ! Old filtered value already stored in EPSD
 !
-      IF (VP == 1) THEN 
-        DO I=1,NEL
-          EPSDOT(I) = EPSD(I)*DT1 
-        ENDDO
+      IF (VP == 1) THEN
+        ! Use array operations  
+        EPSDOT(1:NEL) = EPSD(1:NEL)*DT1
       ! -> Total strain rate
       ELSEIF (VP == 2) THEN
         DO I=1,NEL  
@@ -183,9 +181,8 @@ C-----------------------------------------------
         ENDDO
       ENDIF
 !--------------------------------------------
-      DO I=1,NEL
-        SIGY(I) = SIGY(I) + YLD(I)/NPTT
-      ENDDO
+      ! Use array operations
+      SIGY(1:NEL) = SIGY(1:NEL) + YLD(1:NEL)/NPTT
 !----------------------------
 ! Ductile rupture test
 !----------------------------

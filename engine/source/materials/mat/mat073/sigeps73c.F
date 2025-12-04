@@ -143,13 +143,12 @@ C-----------------------------------------------
 c--------Two options with or without young evolution with 
 c--------plastic strain
       IF (OPTE==1.OR. CE > ZERO)THEN
-      DO I=1,NEL
-        E1(I)   = UPARAM(2)
-        A11(I)  = UPARAM(3)
-        A21(I)  = UPARAM(4)
-        G1(I)   = UPARAM(5)
-        G31(I)  = UPARAM(17)
-      ENDDO
+      ! Use array operations for parameter initialization
+      E1(1:NEL)   = UPARAM(2)
+      A11(1:NEL)  = UPARAM(3)
+      A21(1:NEL)  = UPARAM(4)
+      G1(1:NEL)   = UPARAM(5)
+      G31(1:NEL)  = UPARAM(17)
       NU      = UPARAM(6)
       A01     = UPARAM(7)
       A02     = UPARAM(8)
@@ -209,9 +208,8 @@ C-----------------------------------------------
 C  calculation of the temperature (conduction or adiabatic)
 C--------------------    
         IF(JTHE > 0 ) THEN
-         DO I=1,NEL     
-           TEMP(I) = TEMPEL(I)
-         ENDDO
+         ! Use array operations
+         TEMP(1:NEL) = TEMPEL(1:NEL)
         ELSE
          RHOCP=UPARAM(21)
          DO I=1,NEL
@@ -221,16 +219,16 @@ C--------------------
          ENDDO
         ENDIF
 C
-      DO I=1,NEL
-        SIGNXX(I)=SIGOXX(I) - UVAR(I,2) +A11(I)*DEPSXX(I)+A21(I)*DEPSYY(I) !
-        SIGNYY(I)=SIGOYY(I) - UVAR(I,3) +A21(I)*DEPSXX(I)+A11(I)*DEPSYY(I)!
-        SIGNXY(I)=SIGOXY(I) - UVAR(I,4) +G1(I) *DEPSXY(I)!
-        SIGNYZ(I)=SIGOYZ(I)+GS(I)*DEPSYZ(I)
-        SIGNZX(I)=SIGOZX(I)+GS(I)*DEPSZX(I)
+      ! Use array operations for stress calculation
+      SIGNXX(1:NEL)=SIGOXX(1:NEL) - UVAR(1:NEL,2) +A11(1:NEL)*DEPSXX(1:NEL)+A21(1:NEL)*DEPSYY(1:NEL)
+      SIGNYY(1:NEL)=SIGOYY(1:NEL) - UVAR(1:NEL,3) +A21(1:NEL)*DEPSXX(1:NEL)+A11(1:NEL)*DEPSYY(1:NEL)
+      SIGNXY(1:NEL)=SIGOXY(1:NEL) - UVAR(1:NEL,4) +G1(1:NEL) *DEPSXY(1:NEL)
+      SIGNYZ(1:NEL)=SIGOYZ(1:NEL)+GS(1:NEL)*DEPSYZ(1:NEL)
+      SIGNZX(1:NEL)=SIGOZX(1:NEL)+GS(1:NEL)*DEPSZX(1:NEL)
 C
-        SOUNDSP(I) = SQRT(A11(I)/RHO0(I))!
-        VISCMAX(I) = ZERO
-        ETSE(I) = ONE
+      SOUNDSP(1:NEL) = SQRT(A11(1:NEL)/RHO0(1:NEL))
+      VISCMAX(1:NEL) = ZERO
+      ETSE(1:NEL) = ONE
 C-------------------
 C     STRAIN RATE
 C-------------------

@@ -216,13 +216,12 @@ c-----------------------------
        EINF1 = UPARAM(IADBUF+2*NRATE1 + 19) 
        CE1 = UPARAM(IADBUF+2*NRATE1 + 20) 
 c-----------------------------
-       DO I=1,NEL0
-        E(I) =  E1   
-        A1(I) = A11                                                      
-        A2(I) = A21                                                      
-        G(I) =  G1                                                       
-        G3(I) = G31  
-       ENDDO
+       ! Use array operations for constant initialization
+       E(1:NEL0) =  E1
+       A1(1:NEL0) = A11
+       A2(1:NEL0) = A21
+       G(1:NEL0) =  G1
+       G3(1:NEL0) = G31
        IF (OPTE1 == 1)THEN     
         IFUNCE = UPARAM(IADBUF+2*NRATE1 + 17)                                                    
         DO I=1,NEL0                                                            
@@ -275,16 +274,13 @@ C
 C
        IF (ISIGI==0) THEN
        IF(TIME==ZERO)THEN
-         DO I=1,NEL0
-           UVAR(I,1)=ZERO
-           UVAR(I,2)=ZERO
-           UVAR(I,3)=ZERO
-           UVAR(I,4)=ZERO
-         ENDDO
+         ! Use array operations for zero initialization
+         UVAR(1:NEL0,1) = ZERO
+         UVAR(1:NEL0,2) = ZERO
+         UVAR(1:NEL0,3) = ZERO
+         UVAR(1:NEL0,4) = ZERO
          DO J=1,NRATE1
-          DO I=1,NEL0
-             UVAR(I,J+4)=0
-          ENDDO
+          UVAR(1:NEL0,J+4) = ZERO
          ENDDO
        ENDIF
        ENDIF
@@ -298,16 +294,15 @@ C------------------------------------------
        ENDDO
 C-----------------------------------------------
 C
-       DO I=1,NEL0
-C
-         SIGNXX(I)=SIGOXX(I) - UVAR(I,2) +A1(I)*DEPSXX(I)+A2(I)*DEPSYY(I)
-         SIGNYY(I)=SIGOYY(I) - UVAR(I,3) +A2(I)*DEPSXX(I)+A1(I)*DEPSYY(I)
-         SIGNXY(I)=SIGOXY(I) - UVAR(I,4) +G(I) *DEPSXY(I)
-         SIGNYZ(I)=SIGOYZ(I)+GS(I) *DEPSYZ(I)
-         SIGNZX(I)=SIGOZX(I)+GS(I) *DEPSZX(I)
-         SIGEXX(I) = SIGNXX(I)
-         SIGEYY(I) = SIGNYY(I)
-         SIGEXY(I) = SIGNXY(I)
+       ! Use array operations for stress calculation
+       SIGNXX(1:NEL0)=SIGOXX(1:NEL0) - UVAR(1:NEL0,2) +A1(1:NEL0)*DEPSXX(1:NEL0)+A2(1:NEL0)*DEPSYY(1:NEL0)
+       SIGNYY(1:NEL0)=SIGOYY(1:NEL0) - UVAR(1:NEL0,3) +A2(1:NEL0)*DEPSXX(1:NEL0)+A1(1:NEL0)*DEPSYY(1:NEL0)
+       SIGNXY(1:NEL0)=SIGOXY(1:NEL0) - UVAR(1:NEL0,4) +G(1:NEL0) *DEPSXY(1:NEL0)
+       SIGNYZ(1:NEL0)=SIGOYZ(1:NEL0)+GS(1:NEL0) *DEPSYZ(1:NEL0)
+       SIGNZX(1:NEL0)=SIGOZX(1:NEL0)+GS(1:NEL0) *DEPSZX(1:NEL0)
+       SIGEXX(1:NEL0) = SIGNXX(1:NEL0)
+       SIGEYY(1:NEL0) = SIGNYY(1:NEL0)
+       SIGEXY(1:NEL0) = SIGNXY(1:NEL0)
 C
          SOUNDSP(I) = SQRT(A1(I)/RHO0(I))
          VISCMAX(I) = ZERO
@@ -336,9 +331,8 @@ C
 C-------------------
 C     CRITERE
 C-------------------
-       DO I=1,NEL0
-         JJ(I) = 1
-       ENDDO
+       ! Initialize JJ array
+       JJ(1:NEL0) = 1
        IADBUF = IPM(7,MAT(1)) - 1
 C   inversion boucles
        DO J=2,NRATE1-1

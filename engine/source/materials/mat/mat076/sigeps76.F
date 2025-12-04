@@ -97,10 +97,13 @@ c
                                !   = 0 associated (with quadratic yield criterion only)
                                !   = 1 not associated          
       YFAC2 = UPARAM(29)       ! Damage function scale factor
-      DO I = 1,NEL
-        IF (OFF(I) < EM01) OFF(I) = ZERO
-        IF (OFF(I) <  ONE) OFF(I) = OFF(I)*FOUR_OVER_5  
-      ENDDO
+      ! Use WHERE construct for conditional array operations
+      WHERE (OFF(1:NEL) < EM01)
+        OFF(1:NEL) = ZERO
+      END WHERE
+      WHERE (OFF(1:NEL) < ONE)
+        OFF(1:NEL) = OFF(1:NEL)*FOUR_OVER_5
+      END WHERE
 c
       ! Table parameters
       NUMTABL =  MATPARAM%NTABLE
@@ -109,14 +112,13 @@ c
       !====================================================================
       ! - COMPUTE INITIAL UNDAMAGED STRESSES
       !====================================================================
-      DO I = 1,NEL 
-        SIG0XX(I) = SIGOXX(I)/MAX(ONE-DMG(I),EM20)
-        SIG0YY(I) = SIGOYY(I)/MAX(ONE-DMG(I),EM20)
-        SIG0ZZ(I) = SIGOZZ(I)/MAX(ONE-DMG(I),EM20)
-        SIG0XY(I) = SIGOXY(I)/MAX(ONE-DMG(I),EM20)
-        SIG0YZ(I) = SIGOYZ(I)/MAX(ONE-DMG(I),EM20)
-        SIG0ZX(I) = SIGOZX(I)/MAX(ONE-DMG(I),EM20)
-      ENDDO
+      ! Use array operations for division
+      SIG0XX(1:NEL) = SIGOXX(1:NEL)/MAX(ONE-DMG(1:NEL),EM20)
+      SIG0YY(1:NEL) = SIGOYY(1:NEL)/MAX(ONE-DMG(1:NEL),EM20)
+      SIG0ZZ(1:NEL) = SIGOZZ(1:NEL)/MAX(ONE-DMG(1:NEL),EM20)
+      SIG0XY(1:NEL) = SIGOXY(1:NEL)/MAX(ONE-DMG(1:NEL),EM20)
+      SIG0YZ(1:NEL) = SIGOYZ(1:NEL)/MAX(ONE-DMG(1:NEL),EM20)
+      SIG0ZX(1:NEL) = SIGOZX(1:NEL)/MAX(ONE-DMG(1:NEL),EM20)
 c
       !====================================================================
       ! - ELASTO-PLASTIC BEHAVIOR
@@ -190,14 +192,13 @@ c
       !====================================================================
       ! - COMPUTE DAMAGED STRESSES
       !====================================================================
-      DO I = 1,NEL 
-        SIGNXX(I) = SIGNXX(I)*(ONE-DMG(I))
-        SIGNYY(I) = SIGNYY(I)*(ONE-DMG(I))
-        SIGNZZ(I) = SIGNZZ(I)*(ONE-DMG(I))
-        SIGNXY(I) = SIGNXY(I)*(ONE-DMG(I))
-        SIGNYZ(I) = SIGNYZ(I)*(ONE-DMG(I))
-        SIGNZX(I) = SIGNZX(I)*(ONE-DMG(I))
-      ENDDO
+      ! Use array operations for scaling by damage
+      SIGNXX(1:NEL) = SIGNXX(1:NEL)*(ONE-DMG(1:NEL))
+      SIGNYY(1:NEL) = SIGNYY(1:NEL)*(ONE-DMG(1:NEL))
+      SIGNZZ(1:NEL) = SIGNZZ(1:NEL)*(ONE-DMG(1:NEL))
+      SIGNXY(1:NEL) = SIGNXY(1:NEL)*(ONE-DMG(1:NEL))
+      SIGNYZ(1:NEL) = SIGNYZ(1:NEL)*(ONE-DMG(1:NEL))
+      SIGNZX(1:NEL) = SIGNZX(1:NEL)*(ONE-DMG(1:NEL))
 c  
       !====================================================================
       ! - PRINTOUT ELEMENT DELETION

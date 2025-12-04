@@ -190,13 +190,12 @@ C
 C-----------------------------------------------
 C     EPST_SPERIQUE
 C-------------------
-      DO I=1,NEL
-        EPST(I) = EPSXX(I)**2 + EPSYY(I)**2 + EPSZZ(I)**2
-     .          + HALF*(EPSXY(I)**2+EPSYZ(I)**2+EPSZX(I)**2)
-        EPST(I) = SQRT(EPST(I)) 
-        EPS0(I) = UVAR(I,1)
-        SIG0(I) = UVAR(I,2)
-      ENDDO            
+      ! Calculate EPST using array operations
+      EPST(1:NEL) = EPSXX(1:NEL)**2 + EPSYY(1:NEL)**2 + EPSZZ(1:NEL)**2
+     .            + HALF*(EPSXY(1:NEL)**2+EPSYZ(1:NEL)**2+EPSZX(1:NEL)**2)
+      EPST(1:NEL) = SQRT(EPST(1:NEL))
+      EPS0(1:NEL) = UVAR(1:NEL,1)
+      SIG0(1:NEL) = UVAR(1:NEL,2)            
 C-------------------
 c     Criterion
 C-------------------
@@ -204,12 +203,10 @@ C-------------------
       NINDEX_EPSSM = 0
 c
 c     static yield at epssmax
-      DO I=1,NEL
-        IPOS(I,1) = VARTMP(I,1)
-        IPOS(I,2) = 1  
-        XVEC(I,1) = EPST(I)
-        XVEC(I,2) = EPSP0
-      ENDDO
+      IPOS(1:NEL,1) = VARTMP(1:NEL,1)
+      IPOS(1:NEL,2) = 1
+      XVEC(1:NEL,1) = EPST(1:NEL)
+      XVEC(1:NEL,2) = EPSP0
 c
       CALL TABLE_MAT_VINTERP(MATPARAM%TABLE(1),NEL,NEL,IPOS,XVEC,YLD,DFC)
       VARTMP(1:NEL,1)=IPOS(1:NEL,1)
@@ -315,15 +312,14 @@ c=======================================================================
 c     end loading / unloading
 c=======================================================================
       IF (ITENS > 0) THEN
-        DO I=1,NEL
-          ALPHA = ONE/MAX(EM20,UVAR(I,10))
-          SIG0XX(I) = ALPHA*SIG0XX(I)
-          SIG0YY(I) = ALPHA*SIG0YY(I)
-          SIG0ZZ(I) = ALPHA*SIG0ZZ(I)
-          SIG0XY(I) = ALPHA*SIG0XY(I)
-          SIG0ZX(I) = ALPHA*SIG0ZX(I)
-          SIG0YZ(I) = ALPHA*SIG0YZ(I)
-        ENDDO 
+        ! Use array operations for scaling stresses
+        ALPHA_1(1:NEL) = ONE/MAX(EM20,UVAR(1:NEL,10))
+        SIG0XX(1:NEL) = ALPHA_1(1:NEL)*SIG0XX(1:NEL)
+        SIG0YY(1:NEL) = ALPHA_1(1:NEL)*SIG0YY(1:NEL)
+        SIG0ZZ(1:NEL) = ALPHA_1(1:NEL)*SIG0ZZ(1:NEL)
+        SIG0XY(1:NEL) = ALPHA_1(1:NEL)*SIG0XY(1:NEL)
+        SIG0ZX(1:NEL) = ALPHA_1(1:NEL)*SIG0ZX(1:NEL)
+        SIG0YZ(1:NEL) = ALPHA_1(1:NEL)*SIG0YZ(1:NEL)
       ENDIF
 C =====================================================
       DO I = 1,NEL      
@@ -690,22 +686,20 @@ C
          ENDDO
         ENDIF
 C
-        DO I=1,NEL
-          SIGNXX(I) = ALPHA_1(I)*SIGNXX(I)
-          SIGNYY(I) = ALPHA_1(I)*SIGNYY(I)
-          SIGNZZ(I) = ALPHA_1(I)*SIGNZZ(I)
-          SIGNXY(I) = ALPHA_1(I)*SIGNXY(I)
-          SIGNZX(I) = ALPHA_1(I)*SIGNZX(I)
-          SIGNYZ(I) = ALPHA_1(I)*SIGNYZ(I)
-          UVAR(I,10) = ALPHA_1(I)
-          ET(I) = ALPHA_1(I)*ET(I)
-        ENDDO     
+        ! Use array operations for stress scaling
+        SIGNXX(1:NEL) = ALPHA_1(1:NEL)*SIGNXX(1:NEL)
+        SIGNYY(1:NEL) = ALPHA_1(1:NEL)*SIGNYY(1:NEL)
+        SIGNZZ(1:NEL) = ALPHA_1(1:NEL)*SIGNZZ(1:NEL)
+        SIGNXY(1:NEL) = ALPHA_1(1:NEL)*SIGNXY(1:NEL)
+        SIGNZX(1:NEL) = ALPHA_1(1:NEL)*SIGNZX(1:NEL)
+        SIGNYZ(1:NEL) = ALPHA_1(1:NEL)*SIGNYZ(1:NEL)
+        UVAR(1:NEL,10) = ALPHA_1(1:NEL)
+        ET(1:NEL) = ALPHA_1(1:NEL)*ET(1:NEL)     
       ENDIF  ! ITENS > 0
 C-----------------------------------------------------
-      IF (IMPL_S > 0 .OR. IHET > 1) THEN       
-         DO I=1,NEL
-            ET(I) = MIN(ONE , ET(I))
-         ENDDO
+      IF (IMPL_S > 0 .OR. IHET > 1) THEN
+         ! Use array intrinsic for MIN operation
+         ET(1:NEL) = MIN(ONE, ET(1:NEL))
       ENDIF 
 C------------------------------------ 
       RETURN
