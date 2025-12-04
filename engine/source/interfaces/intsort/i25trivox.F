@@ -170,7 +170,7 @@ C=======================================================================
 C 1   placing nodes into boxes
 C=======================================================================
       IF(ITASK == 0)THEN
-c       Initialize index arrays using array operations
+C       Initialize index arrays using array operations
         IIX(1:NSN+NSNR) = 0
         IIY(1:NSN+NSNR) = 0
         IIZ(1:NSN+NSNR) = 0
@@ -258,7 +258,7 @@ C=======================================================================
       J_STOK = 0
 C
       IF(FLAGREMNODE == 2)THEN
-c       Initialize TAG array using array operation
+C       Initialize TAG array using array operation
         TAG(1:NUMNOD) = 0
 
         DO NE=1,NRTM
