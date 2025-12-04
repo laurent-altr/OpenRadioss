@@ -189,12 +189,12 @@ c else, keep only candidates wrt non impacted nodes
             VZ2=V(3,IX2(IS))
             VZ3=V(3,IX3(IS))
             VZ4=V(3,IX4(IS))
-            VZ=MAX(MAX(VZ1,VZ2,VZ3,VZ4)-VZI,VZI-MIN(VZ1,VZ2,VZ3,VZ4))
+            VZ=MAX(MAXVAL([VZ1,VZ2,VZ3,VZ4])-VZI,VZI-MINVAL([VZ1,VZ2,VZ3,VZ4]))
 C
             TZINF = MAX(MAX(GAPV(IS)+DGAPLOAD,DRAD),ONEP01*VZ*DT1)
             TZINF = MAX(PREC,TZINF)
-            ZMIN = MIN(Z1,Z2,Z3,Z4)-TZINF
-            ZMAX = MAX(Z1,Z2,Z3,Z4)+TZINF
+            ZMIN = MINVAL([Z1,Z2,Z3,Z4])-TZINF
+            ZMAX = MAXVAL([Z1,Z2,Z3,Z4])+TZINF
             IF (ZMIN<=ZI.AND.ZMAX>=ZI) THEN
              NLS=NLS+1
              LIST(NLS)=IS
@@ -217,12 +217,12 @@ C
           VY2=V(2,IX2(IS))
           VY3=V(2,IX3(IS))
           VY4=V(2,IX4(IS))
-          VY=MAX(MAX(VY1,VY2,VY3,VY4)-VYI,VYI-MIN(VY1,VY2,VY3,VY4))
+          VY=MAX(MAXVAL([VY1,VY2,VY3,VY4])-VYI,VYI-MINVAL([VY1,VY2,VY3,VY4]))
 C
           TZINF = MAX(MAX(GAPV(IS)+DGAPLOAD,DRAD),ONEP01*VY*DT1)
           TZINF = MAX(PREC,TZINF)
-          YMIN = MIN(Y1,Y2,Y3,Y4)-TZINF
-          YMAX = MAX(Y1,Y2,Y3,Y4)+TZINF
+          YMIN = MINVAL([Y1,Y2,Y3,Y4])-TZINF
+          YMAX = MAXVAL([Y1,Y2,Y3,Y4])+TZINF
           IF (YMIN<=YI.AND.YMAX>=YI) THEN
             NLS=NLS+1
             LIST(NLS)=IS
@@ -243,12 +243,12 @@ C
           VX2=V(1,IX2(IS))
           VX3=V(1,IX3(IS))
           VX4=V(1,IX4(IS))
-          VX=MAX(MAX(VX1,VX2,VX3,VX4)-VXI,VXI-MIN(VX1,VX2,VX3,VX4))
+          VX=MAX(MAXVAL([VX1,VX2,VX3,VX4])-VXI,VXI-MINVAL([VX1,VX2,VX3,VX4]))
 C
           TZINF = MAX(MAX(GAPV(IS)+DGAPLOAD,DRAD),ONEP01*VX*DT1)
           TZINF = MAX(PREC,TZINF)
-          XMIN = MIN(X1,X2,X3,X4)-TZINF
-          XMAX = MAX(X1,X2,X3,X4)+TZINF
+          XMIN = MINVAL([X1,X2,X3,X4])-TZINF
+          XMAX = MAXVAL([X1,X2,X3,X4])+TZINF
           IF (XMIN<=XI.AND.XMAX>=XI) THEN
             CAND_N(I) = -CAND_N(I)
           ENDIF
@@ -290,12 +290,12 @@ C---------
               VZ2=V(3,IX2(IS))                                          
               VZ3=V(3,IX3(IS))                                          
               VZ4=V(3,IX4(IS))                                          
-              VZ=MAX(MAX(VZ1,VZ2,VZ3,VZ4)-VZI,VZI-MIN(VZ1,VZ2,VZ3,VZ4)) 
+              VZ=MAX(MAXVAL([VZ1,VZ2,VZ3,VZ4])-VZI,VZI-MINVAL([VZ1,VZ2,VZ3,VZ4])) 
 C
               TZINF = MAX(MAX(GAPV(IS)+DGAPLOAD,DRAD),ONEP01*VZ*DT1)
               TZINF = MAX(PREC,TZINF)
-              ZMIN = MIN(Z1,Z2,Z3,Z4)-TZINF                             
-              ZMAX = MAX(Z1,Z2,Z3,Z4)+TZINF                             
+              ZMIN = MINVAL([Z1,Z2,Z3,Z4])-TZINF                             
+              ZMAX = MAXVAL([Z1,Z2,Z3,Z4])+TZINF                             
               IF (ZMIN<=ZI.AND.ZMAX>=ZI) THEN                       
                 NLS=NLS+1                                               
                 LIST(NLS)=IS                                            
@@ -320,12 +320,12 @@ C
             VY2=V(2,IX2(IS))
             VY3=V(2,IX3(IS))
             VY4=V(2,IX4(IS))
-            VY=MAX(MAX(VY1,VY2,VY3,VY4)-VYI,VYI-MIN(VY1,VY2,VY3,VY4))
+            VY=MAX(MAXVAL([VY1,VY2,VY3,VY4])-VYI,VYI-MINVAL([VY1,VY2,VY3,VY4]))
 C
             TZINF = MAX(MAX(GAPV(IS)+DGAPLOAD,DRAD),ONEP01*VY*DT1)
             TZINF = MAX(PREC,TZINF)
-            YMIN = MIN(Y1,Y2,Y3,Y4)-TZINF
-            YMAX = MAX(Y1,Y2,Y3,Y4)+TZINF
+            YMIN = MINVAL([Y1,Y2,Y3,Y4])-TZINF
+            YMAX = MAXVAL([Y1,Y2,Y3,Y4])+TZINF
             IF (YMIN<=YI.AND.YMAX>=YI) THEN
               NLS=NLS+1
               LIST(NLS)=IS
@@ -347,12 +347,12 @@ C
             VX2=V(1,IX2(IS))
             VX3=V(1,IX3(IS))
             VX4=V(1,IX4(IS))
-            VX=MAX(MAX(VX1,VX2,VX3,VX4)-VXI,VXI-MIN(VX1,VX2,VX3,VX4))
+            VX=MAX(MAXVAL([VX1,VX2,VX3,VX4])-VXI,VXI-MINVAL([VX1,VX2,VX3,VX4]))
 C
             TZINF = MAX(MAX(GAPV(IS)+DGAPLOAD,DRAD),ONEP01*VX*DT1)
             TZINF = MAX(PREC,TZINF)
-            XMIN = MIN(X1,X2,X3,X4)-TZINF
-            XMAX = MAX(X1,X2,X3,X4)+TZINF
+            XMIN = MINVAL([X1,X2,X3,X4])-TZINF
+            XMAX = MAXVAL([X1,X2,X3,X4])+TZINF
             IF (XMIN<=XI.AND.XMAX>=XI) THEN
               CAND_N(I) = -CAND_N(I)
             ENDIF
