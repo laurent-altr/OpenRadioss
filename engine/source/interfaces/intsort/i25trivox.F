@@ -171,6 +171,7 @@ C 1   placing nodes into boxes
 C=======================================================================
       IF(ITASK == 0)THEN
 C       Initialize index arrays using array operations
+C       Arrays allocated with size NSN+NSNR (NSN local + NSNR remote nodes)
         IIX(1:NSN+NSNR) = 0
         IIY(1:NSN+NSNR) = 0
         IIZ(1:NSN+NSNR) = 0
