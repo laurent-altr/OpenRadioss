@@ -71,20 +71,18 @@ C-----------------------------------------------
       A1 = PM(24,IMAT)
       A2 = PM(25,IMAT)
 !
-      DO I=JFT,JLT
-        SIGNXX(I)=SIGOXX(I)
-        SIGNYY(I)=SIGOYY(I)
-        SIGNXY(I)=SIGOXY(I)
-        SIGNYZ(I)=SIGOYZ(I)
-        SIGNZX(I)=SIGOZX(I)
-      ENDDO
+      ! Use array operations for initialization
+      SIGNXX(JFT:JLT)=SIGOXX(JFT:JLT)
+      SIGNYY(JFT:JLT)=SIGOYY(JFT:JLT)
+      SIGNXY(JFT:JLT)=SIGOXY(JFT:JLT)
+      SIGNYZ(JFT:JLT)=SIGOYZ(JFT:JLT)
+      SIGNZX(JFT:JLT)=SIGOZX(JFT:JLT)
 !---
       IF (ISMSTR == 10) THEN
-        DO I=JFT,JLT
-          EPSXX(I) = EPSXX(I) + ONE
-          EPSYY(I) = EPSYY(I) + ONE
-          EPSXY(I) = HALF * EPSXY(I)
-        ENDDO
+        ! Use array operations
+        EPSXX(JFT:JLT) = EPSXX(JFT:JLT) + ONE
+        EPSYY(JFT:JLT) = EPSYY(JFT:JLT) + ONE
+        EPSXY(JFT:JLT) = HALF * EPSXY(JFT:JLT)
 C     principal stretch (def gradient eigenvalues)
         DO I=JFT,JLT
           TRAV(I)  = EPSXX(I)+EPSYY(I)
@@ -121,13 +119,12 @@ C     rot matrix (eigenvectors), ROOTV= 2R
 !     CONTRAINTES ELASTIQUES
 !---------------------------
       IF (ISMSTR /= 10) THEN
-        DO I=JFT,JLT
-          SIGNXX(I) = SIGNXX(I)+A1*DEPSXX(I)+A2*DEPSYY(I)
-          SIGNYY(I) = SIGNYY(I)+A2*DEPSXX(I)+A1*DEPSYY(I)
-          SIGNXY(I) = SIGNXY(I)+ G*DEPSXY(I)
-          SIGNYZ(I) = SIGNYZ(I)+GS(I)*DEPSYZ(I)
-          SIGNZX(I) = SIGNZX(I)+GS(I)*DEPSZX(I)
-        ENDDO
+        ! Use array operations
+        SIGNXX(JFT:JLT) = SIGNXX(JFT:JLT)+A1*DEPSXX(JFT:JLT)+A2*DEPSYY(JFT:JLT)
+        SIGNYY(JFT:JLT) = SIGNYY(JFT:JLT)+A2*DEPSXX(JFT:JLT)+A1*DEPSYY(JFT:JLT)
+        SIGNXY(JFT:JLT) = SIGNXY(JFT:JLT)+ G*DEPSXY(JFT:JLT)
+        SIGNYZ(JFT:JLT) = SIGNYZ(JFT:JLT)+GS(JFT:JLT)*DEPSYZ(JFT:JLT)
+        SIGNZX(JFT:JLT) = SIGNZX(JFT:JLT)+GS(JFT:JLT)*DEPSZX(JFT:JLT)
       ELSE  !  ISMSTR = 10
         DO I=JFT,JLT
           SIGNXX(I) = EIGV(I,1,1)*FOR1(I) + EIGV(I,1,2)*FOR2(I)
@@ -138,10 +135,9 @@ C     rot matrix (eigenvectors), ROOTV= 2R
         ENDDO
       ENDIF ! IF (ISMSTR /= 10)
 !---
-      DO I=JFT,JLT
-        EZZ(I) = -NU * (DEPSXX(I) + DEPSYY(I)) / (ONE-NU)
-        THK(I) = THK(I) + EZZ(I) * THKLYL(I)*OFF(I)
-      ENDDO
+      ! Use array operations
+      EZZ(JFT:JLT) = -NU * (DEPSXX(JFT:JLT) + DEPSYY(JFT:JLT)) / (ONE-NU)
+      THK(JFT:JLT) = THK(JFT:JLT) + EZZ(JFT:JLT) * THKLYL(JFT:JLT)*OFF(JFT:JLT)
 !---
       RETURN
       END
