@@ -71,13 +71,11 @@ C-----------------------------------------------
 C=======================================================================
 C     connectivities and shell id
 C----------------------------
-      DO I=LFT,LLT
-        IX1(I)=IXC(2,I)
-        IX2(I)=IXC(3,I)
-        IX3(I)=IXC(4,I)
-        IX4(I)=IXC(5,I)
-        NGL(I)=IXC(NIXC,I)
-      ENDDO 
+      IX1(LFT:LLT)=IXC(2,LFT:LLT)
+      IX2(LFT:LLT)=IXC(3,LFT:LLT)
+      IX3(LFT:LLT)=IXC(4,LFT:LLT)
+      IX4(LFT:LLT)=IXC(5,LFT:LLT)
+      NGL(LFT:LLT)=IXC(NIXC,LFT:LLT) 
 C----------------------------
 C     COORDONNEES           
 C----------------------------
@@ -128,7 +126,7 @@ c
         E3X=Y31*Z42-Z31*Y42
         E3Y=Z31*X42-X31*Z42
         E3Z=X31*Y42-Y31*X42
-        SURF=SQRT(E3X*E3X+E3Y*E3Y+E3Z*E3Z)
+        SURF=HYPOT(HYPOT(E3X,E3Y),E3Z)
 C
         TEST0=0
         TEST1=0
