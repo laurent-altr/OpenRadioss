@@ -112,11 +112,11 @@ C----------------------------
       ENDIF
 c
       DO I=LFT,LLT
-        XN14=HYPOT(HYPOT(X1(I)-X4(I),Y1(I)-Y4(I)),Z1(I)-Z4(I))**2
-        XN13=HYPOT(HYPOT(X1(I)-X3(I),Y1(I)-Y3(I)),Z1(I)-Z3(I))**2
-        XN24=HYPOT(HYPOT(X2(I)-X4(I),Y2(I)-Y4(I)),Z2(I)-Z4(I))**2
-        XN23=HYPOT(HYPOT(X2(I)-X3(I),Y2(I)-Y3(I)),Z2(I)-Z3(I))**2
-        XN12=HYPOT(HYPOT(X1(I)-X2(I),Y1(I)-Y2(I)),Z1(I)-Z2(I))**2
+        XN14=(X1(I)-X4(I))**2+(Y1(I)-Y4(I))**2+(Z1(I)-Z4(I))**2
+        XN13=(X1(I)-X3(I))**2+(Y1(I)-Y3(I))**2+(Z1(I)-Z3(I))**2
+        XN24=(X2(I)-X4(I))**2+(Y2(I)-Y4(I))**2+(Z2(I)-Z4(I))**2
+        XN23=(X2(I)-X3(I))**2+(Y2(I)-Y3(I))**2+(Z2(I)-Z3(I))**2
+        XN12=(X1(I)-X2(I))**2+(Y1(I)-Y2(I))**2+(Z1(I)-Z2(I))**2
         X31=X3(I)-X1(I)
         Y31=Y3(I)-Y1(I)
         Z31=Z3(I)-Z1(I)

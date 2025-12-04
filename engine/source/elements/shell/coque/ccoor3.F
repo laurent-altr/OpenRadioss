@@ -69,12 +69,6 @@ C-----------------------------------------------
       MAT_1 = IXC(1,1)
       MAT(JFT:JLT)= MAT_1
 c
-      DO I=JFT,JLT      
-        IXCTMP2=IXC(2,I)
-        IXCTMP3=IXC(3,I)
-        IXCTMP4=IXC(4,I)
-        IXCTMP5=IXC(5,I)
-      ENDDO
       NGL(JFT:JLT)=IXC(7,JFT:JLT)
       PID(JFT:JLT)=IXC(6,JFT:JLT)
       THK0(JFT:JLT) = THKE(JFT:JLT)
