@@ -186,8 +186,9 @@ C
         XN(I,1) = Y0N(I,1)*Z0N(I,2) - Z0N(I,1)*Y0N(I,2)
         YN(I,1) = Z0N(I,1)*X0N(I,2) - X0N(I,1)*Z0N(I,2)
         ZN(I,1) = X0N(I,1)*Y0N(I,2) - Y0N(I,1)*X0N(I,2)
-        NN = ONE/
-     .       MAX(EM30,SQRT(XN(I,1)*XN(I,1)+ YN(I,1)*YN(I,1)+ ZN(I,1)*ZN(I,1)))
+C       Normalize with precomputed inverse norm
+        NN = XN(I,1)*XN(I,1)+ YN(I,1)*YN(I,1)+ ZN(I,1)*ZN(I,1)
+        NN = ONE/MAX(EM30,SQRT(NN))
         XN(I,1)=XN(I,1)*NN
         YN(I,1)=YN(I,1)*NN
         ZN(I,1)=ZN(I,1)*NN
@@ -201,8 +202,9 @@ C
         XN(I,2) = Y0N(I,2)*Z0N(I,3) - Z0N(I,2)*Y0N(I,3)
         YN(I,2) = Z0N(I,2)*X0N(I,3) - X0N(I,2)*Z0N(I,3)
         ZN(I,2) = X0N(I,2)*Y0N(I,3) - Y0N(I,2)*X0N(I,3)
-        NN = ONE/
-     .       MAX(EM30,SQRT(XN(I,2)*XN(I,2)+ YN(I,2)*YN(I,2)+ ZN(I,2)*ZN(I,2)))
+C       Normalize with precomputed inverse norm
+        NN = XN(I,2)*XN(I,2)+ YN(I,2)*YN(I,2)+ ZN(I,2)*ZN(I,2)
+        NN = ONE/MAX(EM30,SQRT(NN))
         XN(I,2)=XN(I,2)*NN
         YN(I,2)=YN(I,2)*NN
         ZN(I,2)=ZN(I,2)*NN
@@ -216,8 +218,9 @@ C
         XN(I,3) = Y0N(I,3)*Z0N(I,4) - Z0N(I,3)*Y0N(I,4)
         YN(I,3) = Z0N(I,3)*X0N(I,4) - X0N(I,3)*Z0N(I,4)
         ZN(I,3) = X0N(I,3)*Y0N(I,4) - Y0N(I,3)*X0N(I,4)
-        NN = ONE/
-     .       MAX(EM30,SQRT(XN(I,3)*XN(I,3)+ YN(I,3)*YN(I,3)+ ZN(I,3)*ZN(I,3)))
+C       Normalize with precomputed inverse norm
+        NN = XN(I,3)*XN(I,3)+ YN(I,3)*YN(I,3)+ ZN(I,3)*ZN(I,3)
+        NN = ONE/MAX(EM30,SQRT(NN))
         XN(I,3)=XN(I,3)*NN
         YN(I,3)=YN(I,3)*NN
         ZN(I,3)=ZN(I,3)*NN
@@ -227,8 +230,9 @@ C
         XN(I,4) = Y0N(I,4)*Z0N(I,1) - Z0N(I,4)*Y0N(I,1)
         YN(I,4) = Z0N(I,4)*X0N(I,1) - X0N(I,4)*Z0N(I,1)
         ZN(I,4) = X0N(I,4)*Y0N(I,1) - Y0N(I,4)*X0N(I,1)
-        NN = ONE/
-     .       MAX(EM30,SQRT(XN(I,4)*XN(I,4)+ YN(I,4)*YN(I,4)+ ZN(I,4)*ZN(I,4)))
+C       Normalize with precomputed inverse norm
+        NN = XN(I,4)*XN(I,4)+ YN(I,4)*YN(I,4)+ ZN(I,4)*ZN(I,4)
+        NN = ONE/MAX(EM30,SQRT(NN))
         XN(I,4)=XN(I,4)*NN
         YN(I,4)=YN(I,4)*NN
         ZN(I,4)=ZN(I,4)*NN

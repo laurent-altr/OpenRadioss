@@ -556,33 +556,33 @@ C
         SX4 = YI0V(I)*ZIJ(I,4) - ZI0V(I)*YIJ(I,4)
         SY4 = ZI0V(I)*XIJ(I,4) - XI0V(I)*ZIJ(I,4)
         SZ4 = XI0V(I)*YIJ(I,4) - YI0V(I)*XIJ(I,4)
-C
-        NN = ONE/
-     .       MAX(EM30,SQRT(XN(I,1)*XN(I,1)+ YN(I,1)*YN(I,1)+ ZN(I,1)*ZN(I,1)))
+C       Normalize with precomputed inverse norm
+        NN = XN(I,1)*XN(I,1)+ YN(I,1)*YN(I,1)+ ZN(I,1)*ZN(I,1)
+        NN = ONE/MAX(EM30,SQRT(NN))
         XN(I,1)=XN(I,1)*NN
         YN(I,1)=YN(I,1)*NN
         ZN(I,1)=ZN(I,1)*NN
         LB(I,1) = -(XN(I,1)*SX2 + YN(I,1)*SY2 + ZN(I,1)*SZ2)*NN
         LC(I,1) =  (XN(I,1)*SX1 + YN(I,1)*SY1 + ZN(I,1)*SZ1)*NN
-C
-        NN = ONE/
-     .       MAX(EM30,SQRT(XN(I,2)*XN(I,2)+ YN(I,2)*YN(I,2)+ ZN(I,2)*ZN(I,2)))
+C       Normalize with precomputed inverse norm
+        NN = XN(I,2)*XN(I,2)+ YN(I,2)*YN(I,2)+ ZN(I,2)*ZN(I,2)
+        NN = ONE/MAX(EM30,SQRT(NN))
         XN(I,2)=XN(I,2)*NN
         YN(I,2)=YN(I,2)*NN
         ZN(I,2)=ZN(I,2)*NN
         LB(I,2) = -(XN(I,2)*SX3 + YN(I,2)*SY3 + ZN(I,2)*SZ3)*NN
         LC(I,2) =  (XN(I,2)*SX2 + YN(I,2)*SY2 + ZN(I,2)*SZ2)*NN
-C
-        NN = ONE/
-     .       MAX(EM30,SQRT(XN(I,3)*XN(I,3)+ YN(I,3)*YN(I,3)+ ZN(I,3)*ZN(I,3)))
+C       Normalize with precomputed inverse norm
+        NN = XN(I,3)*XN(I,3)+ YN(I,3)*YN(I,3)+ ZN(I,3)*ZN(I,3)
+        NN = ONE/MAX(EM30,SQRT(NN))
         XN(I,3)=XN(I,3)*NN
         YN(I,3)=YN(I,3)*NN
         ZN(I,3)=ZN(I,3)*NN
         LB(I,3) = -(XN(I,3)*SX4 + YN(I,3)*SY4 + ZN(I,3)*SZ4)*NN
         LC(I,3) =  (XN(I,3)*SX3 + YN(I,3)*SY3 + ZN(I,3)*SZ3)*NN
-C
-        NN = ONE/
-     .       MAX(EM30,SQRT(XN(I,4)*XN(I,4)+ YN(I,4)*YN(I,4)+ ZN(I,4)*ZN(I,4)))
+C       Normalize with precomputed inverse norm
+        NN = XN(I,4)*XN(I,4)+ YN(I,4)*YN(I,4)+ ZN(I,4)*ZN(I,4)
+        NN = ONE/MAX(EM30,SQRT(NN))
         XN(I,4)=XN(I,4)*NN
         YN(I,4)=YN(I,4)*NN
         ZN(I,4)=ZN(I,4)*NN
