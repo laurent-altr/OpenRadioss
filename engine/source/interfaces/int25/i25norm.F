@@ -625,22 +625,22 @@ C
             ZN4(I) = X04*Y01 - Y04*X01
 C           
 C           
-            AAA=RUN/MAX(REM30,SQRT(XN1(I)*XN1(I)+YN1(I)*YN1(I)+ZN1(I)*ZN1(I)))
+            AAA=RUN/MAX(REM30,NORM2([XN1(I),YN1(I),ZN1(I)]))
             XN1(I) = XN1(I)*AAA
             YN1(I) = YN1(I)*AAA
             ZN1(I) = ZN1(I)*AAA
 C           
-            AAA=RUN/MAX(REM30,SQRT(XN2(I)*XN2(I)+YN2(I)*YN2(I)+ZN2(I)*ZN2(I)))
+            AAA=RUN/MAX(REM30,NORM2([XN2(I),YN2(I),ZN2(I)]))
             XN2(I) = XN2(I)*AAA
             YN2(I) = YN2(I)*AAA
             ZN2(I) = ZN2(I)*AAA
 C           
-            AAA=RUN/MAX(REM30,SQRT(XN3(I)*XN3(I)+YN3(I)*YN3(I)+ZN3(I)*ZN3(I)))
+            AAA=RUN/MAX(REM30,NORM2([XN3(I),YN3(I),ZN3(I)]))
             XN3(I) = XN3(I)*AAA
             YN3(I) = YN3(I)*AAA
             ZN3(I) = ZN3(I)*AAA
 C           
-            AAA=RUN/MAX(REM30,SQRT(XN4(I)*XN4(I)+YN4(I)*YN4(I)+ZN4(I)*ZN4(I)))
+            AAA=RUN/MAX(REM30,NORM2([XN4(I),YN4(I),ZN4(I)]))
             XN4(I) = XN4(I)*AAA
             YN4(I) = YN4(I)*AAA
             ZN4(I) = ZN4(I)*AAA
@@ -918,7 +918,7 @@ C
         VY=Z12*NX-X12*NZ
         VZ=X12*NY-Y12*NX
 
-        AAA=RUN/MAX(REM30,SQRT(VX*VX+VY*VY+VZ*VZ))
+        AAA=RUN/MAX(REM30,NORM2([VX,VY,VZ]))
         VX=VX*AAA
         VY=VY*AAA
         VZ=VZ*AAA
@@ -1076,7 +1076,7 @@ C broken
               NX=NOD_NORMAL(1,J,IRM)+WNOD_NORMAL(1,J,IRM)
               NY=NOD_NORMAL(2,J,IRM)+WNOD_NORMAL(2,J,IRM)
               NZ=NOD_NORMAL(3,J,IRM)+WNOD_NORMAL(3,J,IRM)
-              AAA=RUN/MAX(REM30,SQRT(NX*NX+NY*NY+NZ*NZ))
+              AAA=RUN/MAX(REM30,NORM2([NX,NY,NZ]))
               NOD_NORMAL(1,J,IRM)=NX*AAA
               NOD_NORMAL(2,J,IRM)=NY*AAA
               NOD_NORMAL(3,J,IRM)=NZ*AAA
@@ -1166,9 +1166,7 @@ C
           NOD_NORMAL(1:3,I) = NOD_NORMAL(1:3,I) + FSKYT(1:3,CC)
         END DO
           
-        AAA=RUN/MAX(REM30,SQRT(NOD_NORMAL(1,I)*NOD_NORMAL(1,I)+
-     .                        NOD_NORMAL(2,I)*NOD_NORMAL(2,I)+
-     .                        NOD_NORMAL(3,I)*NOD_NORMAL(3,I)))
+        AAA=RUN/MAX(REM30,NORM2(NOD_NORMAL(1:3,I)))
         NOD_NORMAL(1,I)=NOD_NORMAL(1,I)*AAA
         NOD_NORMAL(2,I)=NOD_NORMAL(2,I)*AAA
         NOD_NORMAL(3,I)=NOD_NORMAL(3,I)*AAA
