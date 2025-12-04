@@ -167,20 +167,20 @@ C-----------------------------------------------
             Y4=X(2,IRECT(4,L))
             Z4=X(3,IRECT(4,L))
 
-            XMINM = MIN(X1,X2,X3,X4)
-            XMAXM = MAX(X1,X2,X3,X4)
+            XMINM = MINVAL([X1,X2,X3,X4])
+            XMAXM = MAXVAL([X1,X2,X3,X4])
             DXM   = EM02*(XMAXM-XMINM)
             XMINM = XMINM-DXM
             XMAXM = XMAXM+DXM
 
-            YMINM = MIN(Y1,Y2,Y3,Y4)
-            YMAXM = MAX(Y1,Y2,Y3,Y4)
+            YMINM = MINVAL([Y1,Y2,Y3,Y4])
+            YMAXM = MAXVAL([Y1,Y2,Y3,Y4])
             DYM   = EM02*(YMAXM-YMINM)
             YMINM = YMINM-DYM
             YMAXM = YMAXM+DYM
 
-            ZMINM = MIN(Z1,Z2,Z3,Z4)
-            ZMAXM = MAX(Z1,Z2,Z3,Z4)
+            ZMINM = MINVAL([Z1,Z2,Z3,Z4])
+            ZMAXM = MAXVAL([Z1,Z2,Z3,Z4])
             DZM   = EM02*(ZMAXM-ZMINM)
             ZMINM = ZMINM-DZM
             ZMAXM = ZMAXM+DZM
@@ -586,9 +586,7 @@ C ================ REMOTE TRIM 3
             CAND_FZ(1:4,I) = ZERO
           ENDIF
         ENDDO
-        DO I=FIRST,LAST
-          IFPEN(I) = 0
-        ENDDO
+        IFPEN(FIRST:LAST) = 0
       ENDIF
 C
 #include "lockon.inc"
