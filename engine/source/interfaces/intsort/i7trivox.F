@@ -385,24 +385,24 @@ C=======================================================================
           IX1=MAX(1,MIN(NBX+2,2+INT(NBX*(XMINE-AAA-XMINB)/(XMAXB-XMINB))))
           IX2=MAX(1,MIN(NBX+2,2+INT(NBX*(XMAXE+AAA-XMINB)/(XMAXB-XMINB))))
         ELSE
-          IX1=2
-          IX2=2
+          IX1=1
+          IX2=NBX+2
         ENDIF
 
         IF(NBY>1) THEN
           IY1=MAX(1,MIN(NBY+2,2+INT(NBY*(YMINE-AAA-YMINB)/(YMAXB-YMINB))))
           IY2=MAX(1,MIN(NBY+2,2+INT(NBY*(YMAXE+AAA-YMINB)/(YMAXB-YMINB))))
         ELSE
-          IY1=2
-          IY2=2
+          IY1=1
+          IY2=NBY+2
         ENDIF
 
         IF(NBZ>1) THEN
           IZ1=MAX(1,MIN(NBZ+2,2+INT(NBZ*(ZMINE-AAA-ZMINB)/(ZMAXB-ZMINB))))
           IZ2=MAX(1,MIN(NBZ+2,2+INT(NBZ*(ZMAXE+AAA-ZMINB)/(ZMAXB-ZMINB))))
         ELSE
-          IZ1=2
-          IZ2=2
+          IZ1=1
+          IZ2=NBZ+2
         ENDIF
 
         !nbpelem = 0
