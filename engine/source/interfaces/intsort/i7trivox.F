@@ -214,10 +214,10 @@ C=======================================================================
       IF(ITASK==0.AND.TOTAL_NB_NRTM>0)THEN
         !==========LAGRANGIAN and STAGGERED ALE==========!
         TEST_V0 = FIRST_TEST(NIN)
+        IIX(1:NSN) = 0
+        IIY(1:NSN) = 0
+        IIZ(1:NSN) = 0
         DO I=1,NSN
-          IIX(I)=0
-          IIY(I)=0
-          IIZ(I)=0
           IF(STFN(I) == ZERO)CYCLE
           J=NSV(I)
           !C Optimization // search for nodes within xmin xmax of
@@ -228,17 +228,14 @@ C=======================================================================
           IF(X(2,J) > YMAX)  CYCLE
           IF(X(3,J) < ZMIN)  CYCLE
           IF(X(3,J) > ZMAX)  CYCLE
-          IIX(I)=INT(NBX*(X(1,J)-XMINB)/(XMAXB-XMINB))
-          IIY(I)=INT(NBY*(X(2,J)-YMINB)/(YMAXB-YMINB))
-          IIZ(I)=INT(NBZ*(X(3,J)-ZMINB)/(ZMAXB-ZMINB))
-          IIX(I)=MAX(1,2+MIN(NBX,IIX(I)))
-          IIY(I)=MAX(1,2+MIN(NBY,IIY(I)))
-          IIZ(I)=MAX(1,2+MIN(NBZ,IIZ(I)))
+          IIX(I)=MAX(1,MIN(NBX+2,2+INT(NBX*(X(1,J)-XMINB)/(XMAXB-XMINB))))
+          IIY(I)=MAX(1,MIN(NBY+2,2+INT(NBY*(X(2,J)-YMINB)/(YMAXB-YMINB))))
+          IIZ(I)=MAX(1,MIN(NBZ+2,2+INT(NBZ*(X(3,J)-ZMINB)/(ZMAXB-ZMINB))))
           FIRST = VOXEL(IIX(I),IIY(I),IIZ(I))
           IF(TEST_V0) THEN
 ! count the number of SECONDARY nodes outiside the reduced box
-            IF(IIX(I) ==  1    .OR.  IIY(I) ==  1    .OR. IIZ(I) == 1 .AND.
-     .         IIX(I) ==  NBX+2 .OR. IIY(I) == NBY+2 .OR. IIZ(I) == NBZ+2) THEN
+            IF(IIX(I)==1 .OR. IIY(I)==1 .OR. IIZ(I)==1 .OR.
+     .         IIX(I)==NBX+2 .OR. IIY(I)==NBY+2 .OR. IIZ(I)==NBZ+2) THEN
               CPT_VOX0 = CPT_VOX0 +1
             ENDIF
           ENDIF
@@ -277,18 +274,15 @@ C=======================================================================
 
           REMOTE_S_NODE = REMOTE_S_NODE + 1
           LIST_REMOTE_S_NODE( REMOTE_S_NODE ) = J
-          IIX(NSN+J)=INT(NBX*(XREM(1,J)-XMINB)/(XMAXB-XMINB))
-          IIY(NSN+J)=INT(NBY*(XREM(2,J)-YMINB)/(YMAXB-YMINB))
-          IIZ(NSN+J)=INT(NBZ*(XREM(3,J)-ZMINB)/(ZMAXB-ZMINB))
-          IIX(NSN+J)=MAX(1,2+MIN(NBX,IIX(NSN+J)))
-          IIY(NSN+J)=MAX(1,2+MIN(NBY,IIY(NSN+J)))
-          IIZ(NSN+J)=MAX(1,2+MIN(NBZ,IIZ(NSN+J)))
+          IIX(NSN+J)=MAX(1,MIN(NBX+2,2+INT(NBX*(XREM(1,J)-XMINB)/(XMAXB-XMINB))))
+          IIY(NSN+J)=MAX(1,MIN(NBY+2,2+INT(NBY*(XREM(2,J)-YMINB)/(YMAXB-YMINB))))
+          IIZ(NSN+J)=MAX(1,MIN(NBZ+2,2+INT(NBZ*(XREM(3,J)-ZMINB)/(ZMAXB-ZMINB))))
 
           FIRST = VOXEL(IIX(NSN+J),IIY(NSN+J),IIZ(NSN+J))
           IF(TEST_V0) THEN
 ! count the number of SECONDARY nodes outiside the reduced box
-            IF(IIX(J+NSN) ==  1     .OR. IIY(J+NSN) ==  1     .OR. IIZ(J+NSN) == 1 .AND.
-     .         IIX(J+NSN) ==  NBX+2 .OR. IIY(J+NSN) ==  NBY+2 .OR. IIZ(J+NSN) == NBZ+2) THEN
+            IF(IIX(J+NSN)==1 .OR. IIY(J+NSN)==1 .OR. IIZ(J+NSN)==1 .OR.
+     .         IIX(J+NSN)==NBX+2 .OR. IIY(J+NSN)==NBY+2 .OR. IIZ(J+NSN)==NBZ+2) THEN
               CPT_VOX0 = CPT_VOX0 +1
             ENDIF
           ENDIF
@@ -359,24 +353,24 @@ C=======================================================================
         M3 = IRECT(3,NE)
         M4 = IRECT(4,NE)
 
+        ! Extract coordinates and compute bounds using intrinsic functions
         XX1=X(1,M1)
         XX2=X(1,M2)
         XX3=X(1,M3)
         XX4=X(1,M4)
-        XMAXE=MAX(XX1,XX2,XX3,XX4)
-        XMINE=MIN(XX1,XX2,XX3,XX4)
-
         YY1=X(2,M1)
         YY2=X(2,M2)
         YY3=X(2,M3)
         YY4=X(2,M4)
-        YMAXE=MAX(YY1,YY2,YY3,YY4)
-        YMINE=MIN(YY1,YY2,YY3,YY4)
-
         ZZ1=X(3,M1)
         ZZ2=X(3,M2)
         ZZ3=X(3,M3)
         ZZ4=X(3,M4)
+        
+        XMAXE=MAX(XX1,XX2,XX3,XX4)
+        XMINE=MIN(XX1,XX2,XX3,XX4)
+        YMAXE=MAX(YY1,YY2,YY3,YY4)
+        YMINE=MIN(YY1,YY2,YY3,YY4)
         ZMAXE=MAX(ZZ1,ZZ2,ZZ3,ZZ4)
         ZMINE=MIN(ZZ1,ZZ2,ZZ3,ZZ4)
 
@@ -388,36 +382,28 @@ C=======================================================================
 
         !index of voxels occupied by the facet
         IF(NBX>1) THEN
-          IX1=INT(NBX*(XMINE-AAA-XMINB)/(XMAXB-XMINB))
-          IX2=INT(NBX*(XMAXE+AAA-XMINB)/(XMAXB-XMINB))
+          IX1=MAX(1,MIN(NBX+2,2+INT(NBX*(XMINE-AAA-XMINB)/(XMAXB-XMINB))))
+          IX2=MAX(1,MIN(NBX+2,2+INT(NBX*(XMAXE+AAA-XMINB)/(XMAXB-XMINB))))
         ELSE
-          IX1=-2
-          IX2=1
+          IX1=1
+          IX2=NBX+2
         ENDIF
 
         IF(NBY>1) THEN
-          IY1=INT(NBY*(YMINE-AAA-YMINB)/(YMAXB-YMINB))
-          IY2=INT(NBY*(YMAXE+AAA-YMINB)/(YMAXB-YMINB))
+          IY1=MAX(1,MIN(NBY+2,2+INT(NBY*(YMINE-AAA-YMINB)/(YMAXB-YMINB))))
+          IY2=MAX(1,MIN(NBY+2,2+INT(NBY*(YMAXE+AAA-YMINB)/(YMAXB-YMINB))))
         ELSE
-          IY1=-2
-          IY2=1
+          IY1=1
+          IY2=NBY+2
         ENDIF
 
         IF(NBZ>1) THEN
-          IZ1=INT(NBZ*(ZMINE-AAA-ZMINB)/(ZMAXB-ZMINB))
-          IZ2=INT(NBZ*(ZMAXE+AAA-ZMINB)/(ZMAXB-ZMINB))
+          IZ1=MAX(1,MIN(NBZ+2,2+INT(NBZ*(ZMINE-AAA-ZMINB)/(ZMAXB-ZMINB))))
+          IZ2=MAX(1,MIN(NBZ+2,2+INT(NBZ*(ZMAXE+AAA-ZMINB)/(ZMAXB-ZMINB))))
         ELSE
-          IZ1=-2
-          IZ2=1
+          IZ1=1
+          IZ2=NBZ+2
         ENDIF
-
-        IX1=MAX(1,2+MIN(NBX,IX1))
-        IY1=MAX(1,2+MIN(NBY,IY1))
-        IZ1=MAX(1,2+MIN(NBZ,IZ1))
-
-        IX2=MAX(1,2+MIN(NBX,IX2))
-        IY2=MAX(1,2+MIN(NBY,IY2))
-        IZ2=MAX(1,2+MIN(NBZ,IZ2))
 
         !nbpelem = 0
         !nnpelem = 0
