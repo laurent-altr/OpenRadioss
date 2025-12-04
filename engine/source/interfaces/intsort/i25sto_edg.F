@@ -121,12 +121,7 @@ C               WRITE(6,*) "PENE SET TO 0 FOR OLD CAND",J,CAND_M(J),LEDGE(8,NE)
         ENDDO
 C     ENDIF
 C-----------------------------------------------
-      K_STOK = 0
-      DO I=1,J_STOK
-          IF(PENE(I)/=ZERO) THEN
-            K_STOK = K_STOK + 1
-          END IF 
-      ENDDO
+      K_STOK = COUNT(PENE(1:J_STOK)/=ZERO)
       IF(K_STOK==0)RETURN
 C
 #include "lockon.inc"
@@ -139,10 +134,11 @@ C
       II_STOK   = I_STOK + K_STOK
 #include "lockoff.inc"
 C     IF(INACTI==5)THEN
+        J = 0
         DO I=1,J_STOK
           IF(PENE(I)/=ZERO)THEN
 
-            I_STOK = I_STOK + 1
+            J = J + 1
             ASSERT(PROV_S(I) > 0)
             ASSERT(PROV_S(I) <= NEDGE + NEDGE_REMOTE)
 C#ifdef D_EM
@@ -157,15 +153,15 @@ C              WRITE(6,*) "Saved",LEDGE(8,PROV_M(I)),EID
 C              ENDIF
 C            ENDIF
 C#endif
-            CAND_S(I_STOK) = PROV_S(I)
-            CAND_M(I_STOK) = PROV_M(I)
-            CAND_P(I_STOK) = ZERO
+            CAND_S(I_STOK+J) = PROV_S(I)
+            CAND_M(I_STOK+J) = PROV_M(I)
+            CAND_P(I_STOK+J) = ZERO
 
             IF(IFQ > 0) THEN
-               CAND_FX(I_STOK) = ZERO
-               CAND_FY(I_STOK) = ZERO
-               CAND_FZ(I_STOK) = ZERO
-               IFPEN(I_STOK) = 0
+               CAND_FX(I_STOK+J) = ZERO
+               CAND_FY(I_STOK+J) = ZERO
+               CAND_FZ(I_STOK+J) = ZERO
+               IFPEN(I_STOK+J) = 0
             ENDIF
           ENDIF
         ENDDO

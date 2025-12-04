@@ -106,12 +106,7 @@ C           END IF
         ENDDO
       ENDIF
 C-----------------------------------------------
-      K_STOK = 0
-      DO I=1,J_STOK
-          IF(PENE(I)/=ZERO) THEN
-            K_STOK = K_STOK + 1
-          END IF 
-      ENDDO
+      K_STOK = COUNT(PENE(1:J_STOK)/=ZERO)
       IF(K_STOK==0)RETURN
 C
 
@@ -124,22 +119,18 @@ C
       II_STOK   = I_STOK + K_STOK
 
       IF(INACTI==5)THEN
-        DO I=1,J_STOK
-          IF(PENE(I)/=ZERO)THEN
-            I_STOK = I_STOK + 1
-            CAND_S(I_STOK) = PROV_S(I)
-            CAND_M(I_STOK) = PROV_M(I)
-            CAND_P(1:4,I_STOK) = ZERO
-          ENDIF
+        CAND_S(I_STOK+1:I_STOK+K_STOK) =
+     .    PACK(PROV_S(1:J_STOK), PENE(1:J_STOK)/=ZERO)
+        CAND_M(I_STOK+1:I_STOK+K_STOK) =
+     .    PACK(PROV_M(1:J_STOK), PENE(1:J_STOK)/=ZERO)
+        DO I=1,K_STOK
+          CAND_P(1:4,I_STOK+I) = ZERO
         ENDDO
       ELSE
-        DO I=1,J_STOK
-          IF(PENE(I)/=ZERO)THEN
-            I_STOK = I_STOK + 1
-            CAND_S(I_STOK) = PROV_S(I)
-            CAND_M(I_STOK) = PROV_M(I)
-          ENDIF
-        ENDDO
+        CAND_S(I_STOK+1:I_STOK+K_STOK) =
+     .    PACK(PROV_S(1:J_STOK), PENE(1:J_STOK)/=ZERO)
+        CAND_M(I_STOK+1:I_STOK+K_STOK) =
+     .    PACK(PROV_M(1:J_STOK), PENE(1:J_STOK)/=ZERO)
       END IF
 C-----------------------------------------------
       RETURN
