@@ -206,40 +206,37 @@ void exit_with_message(const char *message)
     exit(1);
 }
 
-void check_error(int line_number)
+// Helper function to print Python error details
+void print_python_error(PyObject *pType, PyObject *pValue, PyObject *pTraceback)
 {
-            if (MyErr_Occurred())
-            {
-                //std::cout<<"Error at line: "<<line_number<<std::endl;
-                // Fetch the error
-                PyObject *pType = nullptr, *pValue = nullptr, *pTraceback = nullptr;
-                MyErr_Fetch(&pType, &pValue, &pTraceback);
-                if (pType)
-                    std::cout<<"[PYTHON]"<< MyUnicode_AsUTF8(MyObject_Str(pType)) << std::endl;
-                if (pValue)
-                    std::cout<<"[PYTHON]"<< MyUnicode_AsUTF8(MyObject_Str(pValue)) << std::endl;
-                if (pTraceback)
-                    std::cout<<"[PYTHON]"<< MyUnicode_AsUTF8(MyObject_Str(pTraceback)) << std::endl;
-
-                // Print the error
-                //MyErr_Display(pType, pValue, pTraceback);
-                // Decrement reference counts for the error objects
-                My_DecRef(pType);
-                My_DecRef(pValue);
-                My_DecRef(pTraceback);
-                exit_with_message("ERROR: Python function failed");
-            }
+    if (pType)
+        std::cout << "[PYTHON] " << MyUnicode_AsUTF8(MyObject_Str(pType)) << std::endl;
+    if (pValue)
+        std::cout << "[PYTHON] " << MyUnicode_AsUTF8(MyObject_Str(pValue)) << std::endl;
+    if (pTraceback)
+        std::cout << "[PYTHON] " << MyUnicode_AsUTF8(MyObject_Str(pTraceback)) << std::endl;
 }
 
-void python_signal_handler(int signum) {
+void check_error(int line_number)
+{
+    if (MyErr_Occurred())
+    {
+        PyObject *pType = nullptr, *pValue = nullptr, *pTraceback = nullptr;
+        MyErr_Fetch(&pType, &pValue, &pTraceback);
+        print_python_error(pType, pValue, pTraceback);
+        My_DecRef(pType);
+        My_DecRef(pValue);
+        My_DecRef(pTraceback);
+        exit_with_message("ERROR: Python function failed");
+    }
+}
+
+void python_signal_handler(int signum)
+{
     std::cout << "[PYTHON] Caught signal " << signum << std::endl;
     std::cerr << "[PYTHON] Caught signal " << signum << std::endl;
-    //How to flush the output buffers before exiting
-    std::cout << std::flush;
-    std::cerr << std::flush;
-    std::cerr.flush();
     std::cout.flush();
-    //My_Finalize();
+    std::cerr.flush();
     std::exit(signum);
 }
 
@@ -249,7 +246,7 @@ PyObject *call_python_function_with_state(const char *func_name)
 {
     PyObject *pFunc, *pValue;
     activate_signal_handling(python_signal_handler);
-    // Retrieve the Python function from the module dictionary
+    
     pFunc = static_cast<PyObject *>(MyDict_GetItemString(pDict, func_name));
     if (MyCallable_Check(pFunc))
     {
@@ -262,50 +259,28 @@ PyObject *call_python_function_with_state(const char *func_name)
                 std::cout << "ERROR: Failed to create persistent dictionary." << std::endl;
                 return nullptr;
             }
-            // Create a tuple to hold the single dictionary argument
-            persistent_arg = static_cast<PyObject *>(MyTuple_New(1)); // Only 1 argument: the dictionary
+            persistent_arg = static_cast<PyObject *>(MyTuple_New(1));
             if (!persistent_arg)
             {
                 std::cout << "ERROR: Failed to create argument tuple." << std::endl;
                 return nullptr;
             }
-
-            MyTuple_SetItem(persistent_arg, 0, persistent_dict); // Borrowed reference to persistent_dict Is this the problem????
+            MyTuple_SetItem(persistent_arg, 0, persistent_dict);
         }
 
-        // Set the dictionary in the tuple
+        pValue = static_cast<PyObject *>(MyObject_CallObject(pFunc, persistent_arg));
 
-        // Call the Python function
-        pValue = static_cast<PyObject *>(MyObject_CallObject(pFunc, persistent_arg)); // segmentation fault here
-
-        if (pValue != nullptr)
+        if (pValue == nullptr)
         {
-            // Function executed successfully
-            // Optionally handle the result (if required)
-        }
-        else
-        {
-            // Handle Python exception
             std::string func_name_str(func_name);
             std::cout << "ERROR in Python function " << func_name_str << ": function execution failed" << std::endl;
             if (MyErr_Occurred())
             {
-                // Fetch the error details
-                PyObject *pType, *pValue, *pTraceback;
-                MyErr_Fetch(&pType, &pValue, &pTraceback);
-                if (pType)
-                    std::cout << "[PYTHON] " << MyUnicode_AsUTF8(MyObject_Str(pType)) << std::endl;
-                if (pValue)
-                    std::cout << "[PYTHON] " << MyUnicode_AsUTF8(MyObject_Str(pValue)) << std::endl;
-                if (pTraceback)
-                    std::cout << "[PYTHON]: " << MyUnicode_AsUTF8(MyObject_Str(pTraceback)) << std::endl;
-
-                // Print the error
-                //MyErr_Display(pType, pValue, pTraceback);
-
-                // Decrement reference counts for error objects
+                PyObject *pType, *pValue_err, *pTraceback;
+                MyErr_Fetch(&pType, &pValue_err, &pTraceback);
+                print_python_error(pType, pValue_err, pTraceback);
                 My_DecRef(pType);
-                My_DecRef(pValue);
+                My_DecRef(pValue_err);
                 My_DecRef(pTraceback);
                 exit_with_message("ERROR: Python function failed");
             }
@@ -336,32 +311,17 @@ PyObject *call_python_function(const char *func_name, double *args, int num_args
         pValue = static_cast<PyObject *>(MyObject_CallObject(pFunc, pArgs));
         check_error(__LINE__);
         My_DecRef(pArgs);
-        if (pValue != nullptr)
+        if (pValue == nullptr)
         {
-            // Function executed successfully
-        }
-        else
-        {
-            //  convert func_name to a string
             std::string func_name_str(func_name);
             std::cout << "ERROR in Python function " << func_name_str << ": function execution failed" << std::endl;
             if (MyErr_Occurred())
             {
-                // Fetch the error
-                PyObject *pType = nullptr, *pValue = nullptr, *pTraceback = nullptr;
-                MyErr_Fetch(&pType, &pValue, &pTraceback);
-                if (pType)
-                    std::cout<<"[PYTHON]"<< MyUnicode_AsUTF8(MyObject_Str(pType)) << std::endl;
-                if (pValue)
-                    std::cout<<"[PYTHON]"<< MyUnicode_AsUTF8(MyObject_Str(pValue)) << std::endl;
-                if (pTraceback)
-                    std::cout<<"[PYTHON]"<< MyUnicode_AsUTF8(MyObject_Str(pTraceback)) << std::endl;
-
-                // Print the error
-                //MyErr_Display(pType, pValue, pTraceback);
-                // Decrement reference counts for the error objects
+                PyObject *pType = nullptr, *pValue_err = nullptr, *pTraceback = nullptr;
+                MyErr_Fetch(&pType, &pValue_err, &pTraceback);
+                print_python_error(pType, pValue_err, pTraceback);
                 My_DecRef(pType);
-                My_DecRef(pValue);
+                My_DecRef(pValue_err);
                 My_DecRef(pTraceback);
                 exit_with_message("ERROR: Python function failed");
             }
