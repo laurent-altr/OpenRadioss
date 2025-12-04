@@ -103,33 +103,17 @@ C--------------
 C  VELOCITIES :
 C--------------
 C  node 1:
-          VL1(I,1)  = CRKAVX(ILEV)%V(1,IADC1)
-          VL1(I,2)  = CRKAVX(ILEV)%V(2,IADC1)
-          VL1(I,3)  = CRKAVX(ILEV)%V(3,IADC1)
-          VRL1(I,1) = CRKAVX(ILEV)%VR(1,IADC1)
-          VRL1(I,2) = CRKAVX(ILEV)%VR(2,IADC1)
-          VRL1(I,3) = CRKAVX(ILEV)%VR(3,IADC1)
+          VL1(I,1:3)  = CRKAVX(ILEV)%V(1:3,IADC1)
+          VRL1(I,1:3) = CRKAVX(ILEV)%VR(1:3,IADC1)
 C  node 2:
-          VL2(I,1)  = CRKAVX(ILEV)%V(1,IADC2)
-          VL2(I,2)  = CRKAVX(ILEV)%V(2,IADC2)
-          VL2(I,3)  = CRKAVX(ILEV)%V(3,IADC2)
-          VRL2(I,1) = CRKAVX(ILEV)%VR(1,IADC2)
-          VRL2(I,2) = CRKAVX(ILEV)%VR(2,IADC2)
-          VRL2(I,3) = CRKAVX(ILEV)%VR(3,IADC2)
+          VL2(I,1:3)  = CRKAVX(ILEV)%V(1:3,IADC2)
+          VRL2(I,1:3) = CRKAVX(ILEV)%VR(1:3,IADC2)
 C  node 3:
-          VL3(I,1)  = CRKAVX(ILEV)%V(1,IADC3)
-          VL3(I,2)  = CRKAVX(ILEV)%V(2,IADC3)
-          VL3(I,3)  = CRKAVX(ILEV)%V(3,IADC3)
-          VRL3(I,1) = CRKAVX(ILEV)%VR(1,IADC3)
-          VRL3(I,2) = CRKAVX(ILEV)%VR(2,IADC3)
-          VRL3(I,3) = CRKAVX(ILEV)%VR(3,IADC3)
+          VL3(I,1:3)  = CRKAVX(ILEV)%V(1:3,IADC3)
+          VRL3(I,1:3) = CRKAVX(ILEV)%VR(1:3,IADC3)
 C  node 4:
-          VL4(I,1)  = CRKAVX(ILEV)%V(1,IADC4)
-          VL4(I,2)  = CRKAVX(ILEV)%V(2,IADC4)
-          VL4(I,3)  = CRKAVX(ILEV)%V(3,IADC4)
-          VRL4(I,1) = CRKAVX(ILEV)%VR(1,IADC4)
-          VRL4(I,2) = CRKAVX(ILEV)%VR(2,IADC4)
-          VRL4(I,3) = CRKAVX(ILEV)%VR(3,IADC4)
+          VL4(I,1:3)  = CRKAVX(ILEV)%V(1:3,IADC4)
+          VRL4(I,1:3) = CRKAVX(ILEV)%VR(1:3,IADC4)
         END DO
 C----------------------------------
         OFF_L = ZERO
@@ -140,30 +124,14 @@ C----------------------------------
         IF (OFF_L < ZERO) THEN
           DO I=JFT,JLT
            IF (OFFG(I) < ZERO) THEN
-             VL1(I,1)=ZERO
-             VL1(I,2)=ZERO
-             VL1(I,3)=ZERO
-             VL2(I,1)=ZERO
-             VL2(I,2)=ZERO
-             VL2(I,3)=ZERO
-             VL3(I,1)=ZERO
-             VL3(I,2)=ZERO
-             VL3(I,3)=ZERO
-             VL4(I,1)=ZERO
-             VL4(I,2)=ZERO
-             VL4(I,3)=ZERO
-             VRL1(I,1)=ZERO
-             VRL1(I,2)=ZERO
-             VRL1(I,3)=ZERO
-             VRL2(I,1)=ZERO
-             VRL2(I,2)=ZERO
-             VRL2(I,3)=ZERO
-             VRL3(I,1)=ZERO
-             VRL3(I,2)=ZERO
-             VRL3(I,3)=ZERO
-             VRL4(I,1)=ZERO
-             VRL4(I,2)=ZERO
-             VRL4(I,3)=ZERO
+             VL1(I,1:3)=ZERO
+             VL2(I,1:3)=ZERO
+             VL3(I,1:3)=ZERO
+             VL4(I,1:3)=ZERO
+             VRL1(I,1:3)=ZERO
+             VRL2(I,1:3)=ZERO
+             VRL3(I,1:3)=ZERO
+             VRL4(I,1:3)=ZERO
            ENDIF
           ENDDO
         ENDIF

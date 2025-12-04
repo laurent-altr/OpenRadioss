@@ -71,13 +71,11 @@ C-----------------------------------------------
 C=======================================================================
 C     connectivities and shell id
 C----------------------------
-      DO I=LFT,LLT
-        IX1(I)=IXC(2,I)
-        IX2(I)=IXC(3,I)
-        IX3(I)=IXC(4,I)
-        IX4(I)=IXC(5,I)
-        NGL(I)=IXC(NIXC,I)
-      ENDDO 
+      IX1(LFT:LLT)=IXC(2,LFT:LLT)
+      IX2(LFT:LLT)=IXC(3,LFT:LLT)
+      IX3(LFT:LLT)=IXC(4,LFT:LLT)
+      IX4(LFT:LLT)=IXC(5,LFT:LLT)
+      NGL(LFT:LLT)=IXC(NIXC,LFT:LLT) 
 C----------------------------
 C     COORDONNEES           
 C----------------------------
@@ -114,11 +112,11 @@ C----------------------------
       ENDIF
 c
       DO I=LFT,LLT
-        XN14=(X1(I)-X4(I))**2+(Y1(I)-Y4(I))**2+(Z1(I)-Z4(I))**2
-        XN13=(X1(I)-X3(I))**2+(Y1(I)-Y3(I))**2+(Z1(I)-Z3(I))**2
-        XN24=(X2(I)-X4(I))**2+(Y2(I)-Y4(I))**2+(Z2(I)-Z4(I))**2
-        XN23=(X2(I)-X3(I))**2+(Y2(I)-Y3(I))**2+(Z2(I)-Z3(I))**2
-        XN12=(X1(I)-X2(I))**2+(Y1(I)-Y2(I))**2+(Z1(I)-Z2(I))**2
+        XN14=HYPOT(HYPOT(X1(I)-X4(I),Y1(I)-Y4(I)),Z1(I)-Z4(I))**2
+        XN13=HYPOT(HYPOT(X1(I)-X3(I),Y1(I)-Y3(I)),Z1(I)-Z3(I))**2
+        XN24=HYPOT(HYPOT(X2(I)-X4(I),Y2(I)-Y4(I)),Z2(I)-Z4(I))**2
+        XN23=HYPOT(HYPOT(X2(I)-X3(I),Y2(I)-Y3(I)),Z2(I)-Z3(I))**2
+        XN12=HYPOT(HYPOT(X1(I)-X2(I),Y1(I)-Y2(I)),Z1(I)-Z2(I))**2
         X31=X3(I)-X1(I)
         Y31=Y3(I)-Y1(I)
         Z31=Z3(I)-Z1(I)
@@ -128,7 +126,7 @@ c
         E3X=Y31*Z42-Z31*Y42
         E3Y=Z31*X42-X31*Z42
         E3Z=X31*Y42-Y31*X42
-        SURF=SQRT(E3X*E3X+E3Y*E3Y+E3Z*E3Z)
+        SURF=HYPOT(HYPOT(E3X,E3Y),E3Z)
 C
         TEST0=0
         TEST1=0

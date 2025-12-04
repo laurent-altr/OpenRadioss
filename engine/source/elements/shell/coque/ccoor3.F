@@ -74,12 +74,18 @@ c
         IXCTMP3=IXC(3,I)
         IXCTMP4=IXC(4,I)
         IXCTMP5=IXC(5,I)
-        NGL(I)=IXC(7,I)
-        PID(I)=IXC(6,I)
-        THK0(I) = THKE(I)
+      ENDDO
+      NGL(JFT:JLT)=IXC(7,JFT:JLT)
+      PID(JFT:JLT)=IXC(6,JFT:JLT)
+      THK0(JFT:JLT) = THKE(JFT:JLT)
 C----------------------------
 C     COORDONNEES
 C----------------------------
+      DO I=JFT,JLT   
+        IXCTMP2=IXC(2,I)
+        IXCTMP3=IXC(3,I)
+        IXCTMP4=IXC(4,I)
+        IXCTMP5=IXC(5,I)
         X1(I)=X(1,IXCTMP2)
         Y1(I)=X(2,IXCTMP2)
         Z1(I)=X(3,IXCTMP2)
@@ -92,66 +98,34 @@ C----------------------------
         X4(I)=X(1,IXCTMP5)
         Y4(I)=X(2,IXCTMP5)
         Z4(I)=X(3,IXCTMP5)
-        VL1(I,1)=V(1,IXCTMP2)
-        VL1(I,2)=V(2,IXCTMP2)
-        VL1(I,3)=V(3,IXCTMP2)
-        VL2(I,1)=V(1,IXCTMP3)
-        VL2(I,2)=V(2,IXCTMP3)
-        VL2(I,3)=V(3,IXCTMP3)
-        VL3(I,1)=V(1,IXCTMP4)
-        VL3(I,2)=V(2,IXCTMP4)
-        VL3(I,3)=V(3,IXCTMP4)
-        VL4(I,1)=V(1,IXCTMP5)
-        VL4(I,2)=V(2,IXCTMP5)
-        VL4(I,3)=V(3,IXCTMP5)
-        VRL1(I,1)=VR(1,IXCTMP2)
-        VRL1(I,2)=VR(2,IXCTMP2)
-        VRL1(I,3)=VR(3,IXCTMP2)
-        VRL2(I,1)=VR(1,IXCTMP3)
-        VRL2(I,2)=VR(2,IXCTMP3)
-        VRL2(I,3)=VR(3,IXCTMP3)
-        VRL3(I,1)=VR(1,IXCTMP4)
-        VRL3(I,2)=VR(2,IXCTMP4)
-        VRL3(I,3)=VR(3,IXCTMP4)
-        VRL4(I,1)=VR(1,IXCTMP5)
-        VRL4(I,2)=VR(2,IXCTMP5)
-        VRL4(I,3)=VR(3,IXCTMP5)
+        VL1(I,1:3)=V(1:3,IXCTMP2)
+        VL2(I,1:3)=V(1:3,IXCTMP3)
+        VL3(I,1:3)=V(1:3,IXCTMP4)
+        VL4(I,1:3)=V(1:3,IXCTMP5)
+        VRL1(I,1:3)=VR(1:3,IXCTMP2)
+        VRL2(I,1:3)=VR(1:3,IXCTMP3)
+        VRL3(I,1:3)=VR(1:3,IXCTMP4)
+        VRL4(I,1:3)=VR(1:3,IXCTMP5)
       END DO
 C
       OFF_L = ZERO
+      DT1C(JFT:JLT) = DT1
+      OFF(JFT:JLT) = MIN(ONE,ABS(OFFG(JFT:JLT)))
+      SIGY(JFT:JLT) = EP30
       DO I=JFT,JLT
-        DT1C(I) = DT1
-        OFF(I) = MIN(ONE,ABS(OFFG(I)))
         OFF_L  = MIN(OFF_L,OFFG(I))
-        SIGY(I) = EP30
       ENDDO
       IF(OFF_L<0.)THEN
         DO I=JFT,JLT
          IF(OFFG(I)<0.)THEN
-           VL1(I,1)=ZERO
-           VL1(I,2)=ZERO
-           VL1(I,3)=ZERO
-           VL2(I,1)=ZERO
-           VL2(I,2)=ZERO
-           VL2(I,3)=ZERO
-           VL3(I,1)=ZERO
-           VL3(I,2)=ZERO
-           VL3(I,3)=ZERO
-           VL4(I,1)=ZERO
-           VL4(I,2)=ZERO
-           VL4(I,3)=ZERO
-           VRL1(I,1)=ZERO
-           VRL1(I,2)=ZERO
-           VRL1(I,3)=ZERO
-           VRL2(I,1)=ZERO
-           VRL2(I,2)=ZERO
-           VRL2(I,3)=ZERO
-           VRL3(I,1)=ZERO
-           VRL3(I,2)=ZERO
-           VRL3(I,3)=ZERO
-           VRL4(I,1)=ZERO
-           VRL4(I,2)=ZERO
-           VRL4(I,3)=ZERO
+           VL1(I,1:3)=ZERO
+           VL2(I,1:3)=ZERO
+           VL3(I,1:3)=ZERO
+           VL4(I,1:3)=ZERO
+           VRL1(I,1:3)=ZERO
+           VRL2(I,1:3)=ZERO
+           VRL3(I,1:3)=ZERO
+           VRL4(I,1:3)=ZERO
          ENDIF
         ENDDO
       ENDIF
