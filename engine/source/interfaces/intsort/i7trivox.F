@@ -234,8 +234,8 @@ C=======================================================================
           FIRST = VOXEL(IIX(I),IIY(I),IIZ(I))
           IF(TEST_V0) THEN
 ! count the number of SECONDARY nodes outiside the reduced box
-            IF((IIX(I)==1 .OR. IIY(I)==1 .OR. IIZ(I)==1) .AND.
-     .         (IIX(I)==NBX+2 .OR. IIY(I)==NBY+2 .OR. IIZ(I)==NBZ+2)) THEN
+            IF(IIX(I)==1 .OR. IIY(I)==1 .OR. IIZ(I)==1 .OR.
+     .         IIX(I)==NBX+2 .OR. IIY(I)==NBY+2 .OR. IIZ(I)==NBZ+2) THEN
               CPT_VOX0 = CPT_VOX0 +1
             ENDIF
           ENDIF
@@ -281,8 +281,8 @@ C=======================================================================
           FIRST = VOXEL(IIX(NSN+J),IIY(NSN+J),IIZ(NSN+J))
           IF(TEST_V0) THEN
 ! count the number of SECONDARY nodes outiside the reduced box
-            IF((IIX(J+NSN)==1 .OR. IIY(J+NSN)==1 .OR. IIZ(J+NSN)==1) .AND.
-     .         (IIX(J+NSN)==NBX+2 .OR. IIY(J+NSN)==NBY+2 .OR. IIZ(J+NSN)==NBZ+2)) THEN
+            IF(IIX(J+NSN)==1 .OR. IIY(J+NSN)==1 .OR. IIZ(J+NSN)==1 .OR.
+     .         IIX(J+NSN)==NBX+2 .OR. IIY(J+NSN)==NBY+2 .OR. IIZ(J+NSN)==NBZ+2) THEN
               CPT_VOX0 = CPT_VOX0 +1
             ENDIF
           ENDIF
