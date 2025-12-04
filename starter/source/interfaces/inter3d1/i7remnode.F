@@ -223,14 +223,14 @@ C
 C
       DO I=1,NRTM
         IF( IRECT(3,I) /= IRECT(4,I) ) THEN 
-         ! Quadrilateral: use DOT_PRODUCT for distance calculation
+         ! Quadrilateral: use SUM intrinsic for distance calculation
          MINSEG = MIN( MINSEG,
      .               SUM((X(1:3,IRECT(1,I))-X(1:3,IRECT(2,I)))**2),
      .               SUM((X(1:3,IRECT(2,I))-X(1:3,IRECT(3,I)))**2),
      .               SUM((X(1:3,IRECT(3,I))-X(1:3,IRECT(4,I)))**2),
      .               SUM((X(1:3,IRECT(4,I))-X(1:3,IRECT(1,I)))**2) )
         ELSEIF( IRECT(3,I) == IRECT(4,I) )THEN 
-         ! Triangle: use DOT_PRODUCT for distance calculation
+         ! Triangle: use SUM intrinsic for distance calculation
          MINSEG = MIN( MINSEG,
      .               SUM((X(1:3,IRECT(1,I))-X(1:3,IRECT(2,I)))**2),
      .               SUM((X(1:3,IRECT(2,I))-X(1:3,IRECT(3,I)))**2),
@@ -284,12 +284,12 @@ C-----------------------------------------------
 C  Searching Algorithm Connected nodes : D < SQRT(2.) * GAP
 C-----------------------------------------------
       IF(IGAP >= 1)THEN
-        ! Use array section syntax for scattered assignment via vector subscript
+        ! Use array syntax with indirect indexing for scatter assignment
         GAPSECND(NSV(1:NSN)) = GAP_S(1:NSN)
       ENDIF
 C-----------------------------------------------
       IF(IGAP==3)THEN
-        ! Use array section syntax for scattered assignment via vector subscript
+        ! Use array syntax with indirect indexing for scatter assignment
         GAP_S_L_TMP(NSV(1:NSN)) = GAP_S_L(1:NSN)
       END IF
 C-----------------------------------------------
