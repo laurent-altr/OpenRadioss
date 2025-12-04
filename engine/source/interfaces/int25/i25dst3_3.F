@@ -136,8 +136,9 @@ C
         NX(I) = Y0N(I,I1)*Z0N(I,I2) - Z0N(I,I1)*Y0N(I,I2)
         NY(I) = Z0N(I,I1)*X0N(I,I2) - X0N(I,I1)*Z0N(I,I2)
         NZ(I) = X0N(I,I1)*Y0N(I,I2) - Y0N(I,I1)*X0N(I,I2)
-C
-        NN=ONE/MAX(EM30,SQRT(NX(I)*NX(I)+ NY(I)*NY(I)+ NZ(I)*NZ(I)))
+C       Normalize with precomputed inverse norm
+        NN = NX(I)*NX(I)+ NY(I)*NY(I)+ NZ(I)*NZ(I)
+        NN = ONE/MAX(EM30,SQRT(NN))
         NX(I)=NX(I)*NN
         NY(I)=NY(I)*NN
         NZ(I)=NZ(I)*NN

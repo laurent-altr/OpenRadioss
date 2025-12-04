@@ -590,7 +590,9 @@ C
             SY2 = ZI0*XI2 - XI0*ZI2
             SZ2 = XI0*YI2 - YI0*XI2
 C
-            AAA=ONE/MAX(EM30,XNA(I,1)*XNA(I,1)+YNA(I,1)*YNA(I,1)+ZNA(I,1)*ZNA(I,1))
+C           Precompute normalization factor
+            AAA = XNA(I,1)*XNA(I,1)+YNA(I,1)*YNA(I,1)+ZNA(I,1)*ZNA(I,1)
+            AAA = ONE/MAX(EM30,AAA)
             LBA(I,1) = -(-(XNA(I,1)*SX2 + YNA(I,1)*SY2 + ZNA(I,1)*SZ2))*AAA
             LCA(I,1) = -( (XNA(I,1)*SX1 + YNA(I,1)*SY1 + ZNA(I,1)*SZ1))*AAA
 C
@@ -636,7 +638,9 @@ C
             SY2 = ZI0*XI2 - XI0*ZI2
             SZ2 = XI0*YI2 - YI0*XI2
 C
-            AAA=ONE/MAX(EM30,XNA(I,2)*XNA(I,2)+YNA(I,2)*YNA(I,2)+ZNA(I,2)*ZNA(I,2))
+C           Precompute normalization factor
+            AAA = XNA(I,2)*XNA(I,2)+YNA(I,2)*YNA(I,2)+ZNA(I,2)*ZNA(I,2)
+            AAA = ONE/MAX(EM30,AAA)
             LBA(I,2) = -(-(XNA(I,2)*SX2 + YNA(I,2)*SY2 + ZNA(I,2)*SZ2))*AAA
             LCA(I,2) = -( (XNA(I,2)*SX1 + YNA(I,2)*SY1 + ZNA(I,2)*SZ1))*AAA
 C
@@ -682,7 +686,9 @@ C
             SY2 = ZI0*XI2 - XI0*ZI2
             SZ2 = XI0*YI2 - YI0*XI2
 C
-            AAA=ONE/MAX(EM30,XNA(I,3)*XNA(I,3)+YNA(I,3)*YNA(I,3)+ZNA(I,3)*ZNA(I,3))
+C           Precompute normalization factor
+            AAA = XNA(I,3)*XNA(I,3)+YNA(I,3)*YNA(I,3)+ZNA(I,3)*ZNA(I,3)
+            AAA = ONE/MAX(EM30,AAA)
             LBA(I,3) = -(-(XNA(I,3)*SX2 + YNA(I,3)*SY2 + ZNA(I,3)*SZ2))*AAA
             LCA(I,3) = -( (XNA(I,3)*SX1 + YNA(I,3)*SY1 + ZNA(I,3)*SZ1))*AAA
 C
@@ -728,7 +734,9 @@ C
             SY2 = ZI0*XI2 - XI0*ZI2
             SZ2 = XI0*YI2 - YI0*XI2
 C
-            AAA=ONE/MAX(EM30,XNA(I,4)*XNA(I,4)+YNA(I,4)*YNA(I,4)+ZNA(I,4)*ZNA(I,4))
+C           Precompute normalization factor
+            AAA = XNA(I,4)*XNA(I,4)+YNA(I,4)*YNA(I,4)+ZNA(I,4)*ZNA(I,4)
+            AAA = ONE/MAX(EM30,AAA)
             LBA(I,4) = -(-(XNA(I,4)*SX2 + YNA(I,4)*SY2 + ZNA(I,4)*SZ2))*AAA
             LCA(I,4) = -( (XNA(I,4)*SX1 + YNA(I,4)*SY1 + ZNA(I,4)*SZ1))*AAA
 C
