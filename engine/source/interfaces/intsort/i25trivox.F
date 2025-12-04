@@ -286,23 +286,22 @@ c     in 2 (4,3,6,9 ...) if the facet is large in front of AAA and inclinee
           XX2=X(1,M2)
           XX3=X(1,M3)
           XX4=X(1,M4)
-c         Use MAXVAL/MINVAL intrinsics with array constructor
-          XMAXE=MAXVAL([XX1,XX2,XX3,XX4])
-          XMINE=MINVAL([XX1,XX2,XX3,XX4])
+          XMAXE=MAX(XX1,XX2,XX3,XX4)
+          XMINE=MIN(XX1,XX2,XX3,XX4)
 
           YY1=X(2,M1)
           YY2=X(2,M2)
           YY3=X(2,M3)
           YY4=X(2,M4)
-          YMAXE=MAXVAL([YY1,YY2,YY3,YY4])
-          YMINE=MINVAL([YY1,YY2,YY3,YY4])
+          YMAXE=MAX(YY1,YY2,YY3,YY4)
+          YMINE=MIN(YY1,YY2,YY3,YY4)
 
           ZZ1=X(3,M1)
           ZZ2=X(3,M2)
           ZZ3=X(3,M3)
           ZZ4=X(3,M4)
-          ZMAXE=MAXVAL([ZZ1,ZZ2,ZZ3,ZZ4])
-          ZMINE=MINVAL([ZZ1,ZZ2,ZZ3,ZZ4])
+          ZMAXE=MAX(ZZ1,ZZ2,ZZ3,ZZ4)
+          ZMINE=MIN(ZZ1,ZZ2,ZZ3,ZZ4)
 
 
 c        surface calculation (for future elimination of candidates)
@@ -477,23 +476,22 @@ c     in 2 (4,3,6,9 ...) if the facet is large in front of AAA and inclinee
           XX2=X(1,M2)
           XX3=X(1,M3)
           XX4=X(1,M4)
-c         Use MAXVAL/MINVAL intrinsics with array constructor
-          XMAXE=MAXVAL([XX1,XX2,XX3,XX4])
-          XMINE=MINVAL([XX1,XX2,XX3,XX4])
+          XMAXE=MAX(XX1,XX2,XX3,XX4)
+          XMINE=MIN(XX1,XX2,XX3,XX4)
 
           YY1=X(2,M1)
           YY2=X(2,M2)
           YY3=X(2,M3)
           YY4=X(2,M4)
-          YMAXE=MAXVAL([YY1,YY2,YY3,YY4])
-          YMINE=MINVAL([YY1,YY2,YY3,YY4])
+          YMAXE=MAX(YY1,YY2,YY3,YY4)
+          YMINE=MIN(YY1,YY2,YY3,YY4)
 
           ZZ1=X(3,M1)
           ZZ2=X(3,M2)
           ZZ3=X(3,M3)
           ZZ4=X(3,M4)
-          ZMAXE=MAXVAL([ZZ1,ZZ2,ZZ3,ZZ4])
-          ZMINE=MINVAL([ZZ1,ZZ2,ZZ3,ZZ4])
+          ZMAXE=MAX(ZZ1,ZZ2,ZZ3,ZZ4)
+          ZMINE=MIN(ZZ1,ZZ2,ZZ3,ZZ4)
 
 
 c        surface calculation (for future elimination of candidates)
