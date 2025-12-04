@@ -101,12 +101,7 @@ C-----------------------------------------------
      .  CALL I25S1S2(J_STOK,NSN,ESHIFT,PROV_N,PROV_E,
      .               NBINFLG,MBINFLG,PENE)
 C-----------------------------------------------
-      K_STOK = 0
-      DO I=1,J_STOK
-          IF(PENE(I)/=ZERO) THEN
-            K_STOK = K_STOK + 1
-          END IF 
-      ENDDO
+      K_STOK = COUNT(PENE(1:J_STOK)/=ZERO)
       IF(K_STOK==0)RETURN
 C
 #include "lockon.inc"
@@ -118,13 +113,10 @@ C
       ENDIF
       II_STOK   = I_STOK + K_STOK
 #include "lockoff.inc"
-      DO I=1,J_STOK
-        IF(PENE(I)/=ZERO)THEN
-          I_STOK = I_STOK + 1
-          CAND_N(I_STOK) = PROV_N(I)
-          CAND_E(I_STOK) = PROV_E(I)+ESHIFT
-        ENDIF
-      ENDDO
+      CAND_N(I_STOK+1:I_STOK+K_STOK) = 
+     .  PACK(PROV_N(1:J_STOK), PENE(1:J_STOK)/=ZERO)
+      CAND_E(I_STOK+1:I_STOK+K_STOK) = 
+     .  PACK(PROV_E(1:J_STOK)+ESHIFT, PENE(1:J_STOK)/=ZERO)
 C-----------------------------------------------
       RETURN
       END

@@ -105,12 +105,7 @@ C-----------------------------------------------
       IF (ILEV==2) 
      .  CALL I25S1S2(J_STOK,PROV_N,PROV_E,NBINFLG,MBINFLG,PENE)
 C-----------------------------------------------
-      K_STOK = 0
-      DO I=1,J_STOK
-          IF(PENE(I)/=ZERO) THEN
-            K_STOK = K_STOK + 1
-          END IF 
-      ENDDO
+      K_STOK = COUNT(PENE(1:J_STOK)/=ZERO)
       IF(K_STOK==0)RETURN
 C
       if(local_i_stok+k_stok>local_cand_n%size_int_array_1d) then
@@ -127,13 +122,11 @@ C
         local_cand_n%size_int_array_1d = my_size
         local_cand_e%size_int_array_1d = my_size
       endif
-      DO I=1,J_STOK
-         IF(PENE(I)/=ZERO)THEN
-           local_i_stok = local_i_stok + 1
-           local_cand_n%int_array_1d(local_i_stok) = PROV_N(I)
-           local_cand_e%int_array_1d(local_i_stok) = PROV_E(I)+ESHIFT
-         ENDIF
-       ENDDO
+      local_cand_n%int_array_1d(local_i_stok+1:local_i_stok+k_stok) = 
+     .  PACK(PROV_N(1:J_STOK), PENE(1:J_STOK)/=ZERO)
+      local_cand_e%int_array_1d(local_i_stok+1:local_i_stok+k_stok) = 
+     .  PACK(PROV_E(1:J_STOK)+ESHIFT, PENE(1:J_STOK)/=ZERO)
+      local_i_stok = local_i_stok + k_stok
 C-----------------------------------------------
       RETURN
       END

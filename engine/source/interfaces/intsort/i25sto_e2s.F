@@ -135,12 +135,7 @@ C           DEBUG_E2E(PROV_IDS(2,I)==D_ES.AND.PROV_IDS(1,I)==D_EM, PENE(I))
         ENDDO
 C     ENDIF
 C-----------------------------------------------
-      K_STOK = 0
-      DO I=1,J_STOK
-          IF(PENE(I)/=ZERO) THEN
-            K_STOK = K_STOK + 1
-          END IF 
-      ENDDO
+      K_STOK = COUNT(PENE(1:J_STOK)/=ZERO)
       IF(K_STOK==0)RETURN
 C
 #include "lockon.inc"
@@ -153,27 +148,32 @@ C
       II_STOK   = I_STOK + K_STOK
 #include "lockoff.inc"
 C     IF(INACTI==5)THEN
+        J = 0
         DO I=1,J_STOK
           DEBUG_E2E(PROV_IDS(2,I)==D_ES.AND.PROV_IDS(1,I)==D_EM,PENE(I))
           IF(PENE(I)/=ZERO)THEN
             ASSERT(PROV_S(I) > 0)
             ASSERT(PROV_S(I) <= NEDGE + NEDGE_REMOTE)
 C           DEBUG_E2E(PROV_IDS(2,I)==D_ES.AND.PROV_IDS(1,I)==D_EM, I_STOK)
-            I_STOK = I_STOK + 1
-            CAND_S(I_STOK) = PROV_S(I)
-            CAND_M(I_STOK) = PROV_M(I)
-            CAND_P(1:4,I_STOK) = ZERO
+            J = J + 1
+            CAND_S(I_STOK+J) = PROV_S(I)
+            CAND_M(I_STOK+J) = PROV_M(I)
+            CAND_P(1:4,I_STOK+J) = ZERO
             IF(IFQ > 0) THEN
-               CAND_FX(1:4,I_STOK) = ZERO
-               CAND_FY(1:4,I_STOK) = ZERO
-               CAND_FZ(1:4,I_STOK) = ZERO
-               IFPEN(I_STOK) = 0
+               CAND_FX(1:4,I_STOK+J) = ZERO
+               CAND_FY(1:4,I_STOK+J) = ZERO
+               CAND_FZ(1:4,I_STOK+J) = ZERO
+               IFPEN(I_STOK+J) = 0
             ENDIF
+            DEBUG_E2E(PROV_IDS(2,I)==D_ES.AND.PROV_IDS(1,I)==D_EM,
+     .                CAND_P(1,I_STOK+J))
+            DEBUG_E2E(PROV_IDS(2,I)==D_ES.AND.PROV_IDS(1,I)==D_EM,
+     .                CAND_P(2,I_STOK+J))
+            DEBUG_E2E(PROV_IDS(2,I)==D_ES.AND.PROV_IDS(1,I)==D_EM,
+     .                CAND_P(3,I_STOK+J))
+            DEBUG_E2E(PROV_IDS(2,I)==D_ES.AND.PROV_IDS(1,I)==D_EM,
+     .                CAND_P(4,I_STOK+J))
           ENDIF
-          DEBUG_E2E(PROV_IDS(2,I)==D_ES.AND.PROV_IDS(1,I)==D_EM,CAND_P(1,I_STOK))
-          DEBUG_E2E(PROV_IDS(2,I)==D_ES.AND.PROV_IDS(1,I)==D_EM,CAND_P(2,I_STOK))
-          DEBUG_E2E(PROV_IDS(2,I)==D_ES.AND.PROV_IDS(1,I)==D_EM,CAND_P(3,I_STOK))
-          DEBUG_E2E(PROV_IDS(2,I)==D_ES.AND.PROV_IDS(1,I)==D_EM,CAND_P(4,I_STOK))
         ENDDO
 C     ELSE
 C       DO I=1,J_STOK
