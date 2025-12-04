@@ -192,12 +192,12 @@ C
 C
       ISELF_IMPACTANT = 0
       IF(NTY /= 25 .OR. (NTY == 25 .AND. ILEV /=2))THEN
+        ! Check if any IRECT node is tagged in TAGSECND
         DO I=1,NRTM
-          DO J=1,4
-            IF( TAGSECND(IRECT(J,I))  /= 0 ) THEN
-              ISELF_IMPACTANT = 1
-            END IF
-          ENDDO
+          IF( ANY(TAGSECND(IRECT(1:4,I)) /= 0) ) THEN
+            ISELF_IMPACTANT = 1
+            EXIT
+          END IF
         END DO
       ELSE ! NTY == 25 and S1-S2
         DO I=1,NRTM
@@ -211,9 +211,11 @@ C
               IF(((IMS1 == 1 .and. ISS2==1).or.
      .            (IMS2 == 1 .and. ISS1==1)))THEN
                 ISELF_IMPACTANT = 1
+                EXIT
               END IF
             END IF
           ENDDO
+          IF(ISELF_IMPACTANT == 1) EXIT
         END DO
       END IF
 C
@@ -221,45 +223,28 @@ C
 C
       DO I=1,NRTM
         IF( IRECT(3,I) /= IRECT(4,I) ) THEN 
-
+         ! Quadrilateral: use DOT_PRODUCT for distance calculation
          MINSEG = MIN( MINSEG,
-     .               (X(1,IRECT(1,I))-X(1,IRECT(2,I)))**2 + 
-     .               (X(2,IRECT(1,I))-X(2,IRECT(2,I)))**2 +
-     .               (X(3,IRECT(1,I))-X(3,IRECT(2,I)))**2 ,
-     .               (X(1,IRECT(2,I))-X(1,IRECT(3,I)))**2 + 
-     .               (X(2,IRECT(2,I))-X(2,IRECT(3,I)))**2 +
-     .               (X(3,IRECT(2,I))-X(3,IRECT(3,I)))**2 ,
-     .               (X(1,IRECT(3,I))-X(1,IRECT(4,I)))**2 + 
-     .               (X(2,IRECT(3,I))-X(2,IRECT(4,I)))**2 +
-     .               (X(3,IRECT(3,I))-X(3,IRECT(4,I)))**2 ,
-     .               (X(1,IRECT(4,I))-X(1,IRECT(1,I)))**2 + 
-     .               (X(2,IRECT(4,I))-X(2,IRECT(1,I)))**2 +
-     .               (X(3,IRECT(4,I))-X(3,IRECT(1,I)))**2 )
+     .               SUM((X(1:3,IRECT(1,I))-X(1:3,IRECT(2,I)))**2),
+     .               SUM((X(1:3,IRECT(2,I))-X(1:3,IRECT(3,I)))**2),
+     .               SUM((X(1:3,IRECT(3,I))-X(1:3,IRECT(4,I)))**2),
+     .               SUM((X(1:3,IRECT(4,I))-X(1:3,IRECT(1,I)))**2) )
         ELSEIF( IRECT(3,I) == IRECT(4,I) )THEN 
-
+         ! Triangle: use DOT_PRODUCT for distance calculation
          MINSEG = MIN( MINSEG,
-     .               (X(1,IRECT(1,I))-X(1,IRECT(2,I)))**2 + 
-     .               (X(2,IRECT(1,I))-X(2,IRECT(2,I)))**2 +
-     .               (X(3,IRECT(1,I))-X(3,IRECT(2,I)))**2 ,
-     .               (X(1,IRECT(2,I))-X(1,IRECT(3,I)))**2 + 
-     .               (X(2,IRECT(2,I))-X(2,IRECT(3,I)))**2 +
-     .               (X(3,IRECT(2,I))-X(3,IRECT(3,I)))**2 ,
-     .               (X(1,IRECT(3,I))-X(1,IRECT(1,I)))**2 + 
-     .               (X(2,IRECT(3,I))-X(2,IRECT(1,I)))**2 +
-     .               (X(3,IRECT(3,I))-X(3,IRECT(1,I)))**2 )
-
+     .               SUM((X(1:3,IRECT(1,I))-X(1:3,IRECT(2,I)))**2),
+     .               SUM((X(1:3,IRECT(2,I))-X(1:3,IRECT(3,I)))**2),
+     .               SUM((X(1:3,IRECT(3,I))-X(1:3,IRECT(1,I)))**2) )
         ENDIF
       ENDDO
       MINSEG  = SQRT(MINSEG)
 C
       DO I=1,NRTM
-        CPT  = 0
         KMAX = 4
         IF(IRECT(KMAX,I) == 0   .OR. 
      .    IRECT(3,I) == IRECT(4,I) ) KMAX = 3
-        DO K=1,KMAX
-          IF(TAGSECND(IRECT(K,I))  /= 0) CPT = CPT + 1
-        END DO
+        ! Use COUNT intrinsic to count non-zero elements
+        CPT = COUNT(TAGSECND(IRECT(1:KMAX,I)) /= 0)
         IF (CPT /= 0 ) THEN
           DO K=1,KMAX
             N = IRECT(K,I)
@@ -268,23 +253,21 @@ C
         ENDIF
       END DO
 C
+      ! Compute cumulative sum (prefix sum)
       DO I=1,NUMNOD
         KNOD2SEG(I+1) = KNOD2SEG(I+1) + KNOD2SEG(I)
       END DO
 C
-      DO N=NUMNOD,1,-1
-        KNOD2SEG(N+1)=KNOD2SEG(N)
-      END DO
+      ! Shift array right by one position using array operation
+      KNOD2SEG(2:NUMNOD+1) = KNOD2SEG(1:NUMNOD)
       KNOD2SEG(1)=0
 C
       DO I=1,NRTM
         KMAX = 4
-        CPT = 0
         IF(IRECT(KMAX,I) == 0   .OR. 
      .      IRECT(3,I) == IRECT(4,I) ) KMAX = 3
-        DO K=1,KMAX
-          IF(TAGSECND(IRECT(K,I))  /= 0) CPT = CPT + 1
-        END DO
+        ! Use COUNT intrinsic to count non-zero elements
+        CPT = COUNT(TAGSECND(IRECT(1:KMAX,I)) /= 0)
         IF (CPT /= 0) THEN
           DO K=1,KMAX
             N = IRECT(K,I)
@@ -294,23 +277,20 @@ C
         ENDIF
       END DO
 C
-      DO N=NUMNOD,1,-1
-        KNOD2SEG(N+1)=KNOD2SEG(N)
-      END DO
+      ! Shift array right by one position using array operation
+      KNOD2SEG(2:NUMNOD+1) = KNOD2SEG(1:NUMNOD)
       KNOD2SEG(1)=0
 C-----------------------------------------------
 C  Searching Algorithm Connected nodes : D < SQRT(2.) * GAP
 C-----------------------------------------------
       IF(IGAP >= 1)THEN
-        DO I=1,NSN
-          GAPSECND(NSV(I)) = GAP_S(I)
-        ENDDO
+        ! Use array section syntax for scattered assignment via vector subscript
+        GAPSECND(NSV(1:NSN)) = GAP_S(1:NSN)
       ENDIF
 C-----------------------------------------------
       IF(IGAP==3)THEN
-        DO I=1,NSN
-          GAP_S_L_TMP(NSV(I)) = GAP_S_L(I)
-        ENDDO
+        ! Use array section syntax for scattered assignment via vector subscript
+        GAP_S_L_TMP(NSV(1:NSN)) = GAP_S_L(1:NSN)
       END IF
 C-----------------------------------------------
       RETURN
@@ -351,13 +331,13 @@ C
         ENDDO
       ENDDO
 C
+      ! Compute cumulative sum (prefix sum)
       DO N=1,NSN
          KREMNOR(N+1) = KREMNOR(N+1) + KREMNOR(N)
       END DO
 C
-      DO N=NSN,1,-1
-         KREMNOR(N+1)=KREMNOR(N)
-      END DO
+      ! Shift array right by one position using array operation
+      KREMNOR(2:NSN+1) = KREMNOR(1:NSN)
       KREMNOR(1)=0
 C
       DO I=1,NRTM
@@ -370,19 +350,13 @@ C
         ENDDO
       ENDDO
 C
-      DO N=NSN,1,-1
-        KREMNOR(N+1)=KREMNOR(N)
-      END DO
+      ! Shift array right by one position using array operation
+      KREMNOR(2:NSN+1) = KREMNOR(1:NSN)
       KREMNOR(1)=0
 C
 C----- Compute maximum number of MAIN segments banned for all SECONDARY nodes---
-      LREMNORMAX = 0
-      DO N=1,NSN
-         L = KREMNOR(N+1)-KREMNOR(N)
-         IF( L>LREMNORMAX) THEN
-           LREMNORMAX = L
-         ENDIF
-      ENDDO
+      ! Use MAXVAL intrinsic to find maximum difference
+      LREMNORMAX = MAXVAL(KREMNOR(2:NSN+1) - KREMNOR(1:NSN))
       IPARI(82) = LREMNORMAX
 
       RETURN
@@ -1148,13 +1122,13 @@ C-----    Inverse table of REMNODE for sliding in int25 : SECONDARY node -> MAIN
                                 ENDDO
                             ENDDO
 C
+                            ! Compute cumulative sum (prefix sum)
                             DO NS=1,NSN
                                 INTBUF_TAB(N)%KREMNOR(NS+1) = INTBUF_TAB(N)%KREMNOR(NS+1) + INTBUF_TAB(N)%KREMNOR(NS)
                             END DO
 C
-                            DO NS=NSN,1,-1
-                                INTBUF_TAB(N)%KREMNOR(NS+1)=INTBUF_TAB(N)%KREMNOR(NS)
-                            END DO
+                            ! Shift array right by one position using array operation
+                            INTBUF_TAB(N)%KREMNOR(2:NSN+1) = INTBUF_TAB(N)%KREMNOR(1:NSN)
                             INTBUF_TAB(N)%KREMNOR(1)=0
 C
                             DO I=1,NRTM
@@ -1167,19 +1141,13 @@ C
                                 ENDDO
                             ENDDO
 C
-                            DO NS=NSN,1,-1
-                                INTBUF_TAB(N)%KREMNOR(NS+1)=INTBUF_TAB(N)%KREMNOR(NS)
-                            END DO
+                            ! Shift array right by one position using array operation
+                            INTBUF_TAB(N)%KREMNOR(2:NSN+1) = INTBUF_TAB(N)%KREMNOR(1:NSN)
                             INTBUF_TAB(N)%KREMNOR(1)=0
 C
 C-------  Compute maximum number of MAIN segments banned for all SECONDARY nodes---
-                            LREMNORMAX = 0
-                            DO NS=1,NSN
-                                L = INTBUF_TAB(N)%KREMNOR(NS+1)-INTBUF_TAB(N)%KREMNOR(NS)
-                                IF( L>LREMNORMAX) THEN
-                                    LREMNORMAX = L
-                                ENDIF
-                            ENDDO
+                            ! Use MAXVAL intrinsic to find maximum difference
+                            LREMNORMAX = MAXVAL(INTBUF_TAB(N)%KREMNOR(2:NSN+1) - INTBUF_TAB(N)%KREMNOR(1:NSN))
                             IPARI(82,N) = LREMNORMAX
 C
 C-------  Reset IRTLM & PENE_OLD (cf INACTI)
