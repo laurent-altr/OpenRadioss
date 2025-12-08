@@ -139,6 +139,9 @@ c
       SAVE IIX,IIY,IIZ
       INTEGER, DIMENSION(:),ALLOCATABLE :: TAG
       my_real :: vmaxdt_local,vx,vy,vz,vv
+      ! Thread-private arrays
+      REAL :: VMAX_PRIV(3), VMIN_PRIV(3)
+
 C-----------------------------------------------
       CALL MY_ALLOC(TAG,NUMNOD)
       CALL MY_ALLOC(LAST_NOD,NSN+NSNR)
@@ -247,7 +250,6 @@ c         add as next node
             LAST_NOD(FIRST) = NSN+J  ! last
             NEXT_NOD(NSN+J)  = 0     ! last one
           ELSE
-c
 c         jump to the last node of the cell
             LAST = LAST_NOD(FIRST)  ! last node in this voxel
             NEXT_NOD(LAST)  = NSN+J ! next
@@ -256,15 +258,33 @@ c         jump to the last node of the cell
           ENDIF
         ENDDO
       END IF
+
+
+!$OMP DO SCHEDULE(DYNAMIC)
+      DO J = 1, NSNR
+          VMAX_PRIV(1) = MAX(VMAX_PRIV(1), XREM(4,J))
+          VMAX_PRIV(2) = MAX(VMAX_PRIV(2), XREM(5,J))
+          VMAX_PRIV(3) = MAX(VMAX_PRIV(3), XREM(6,J))
+          VMIN_PRIV(1) = MIN(VMIN_PRIV(1), XREM(4,J))
+          VMIN_PRIV(2) = MIN(VMIN_PRIV(2), XREM(5,J))
+          VMIN_PRIV(3) = MIN(VMIN_PRIV(3), XREM(6,J))
+      END DO
+!$OMP END DO
+
+!$OMP CRITICAL
+      VSLV_LOCAL(1:3) = MAX(VSLV_LOCAL(1:3), VMAX_PRIV(1:3))
+      VSLV_LOCAL(4:6) = MIN(VSLV_LOCAL(4:6), VMIN_PRIV(1:3))
+!$OMP END CRITICAL
+
 C Barrier to wait task0 treatment
       CALL MY_BARRIER
 
-         VX = MAX(VSLV_LOCAL(1)-VMSR_LOCAL(4),VMSR_LOCAL(1)-VSLV_LOCAL(4),ZERO)
-         VY = MAX(VSLV_LOCAL(2)-VMSR_LOCAL(5),VMSR_LOCAL(2)-VSLV_LOCAL(5),ZERO)
-         VZ = MAX(VSLV_LOCAL(3)-VMSR_LOCAL(6),VMSR_LOCAL(3)-VSLV_LOCAL(6),ZERO)
-         VV = SQRT(VX**2+VY**2+VZ**2)
-         vmaxdt_local = ONEP01*VV*DT1
-C        if(vmaxdt > marge/10.0D0) write(6,*) "V,VLOC,MARGE ", VMAXDT, vmaxdt_local,MARGE
+      VX = MAX(VSLV_LOCAL(1)-VMSR_LOCAL(4),VMSR_LOCAL(1)-VSLV_LOCAL(4),ZERO)
+      VY = MAX(VSLV_LOCAL(2)-VMSR_LOCAL(5),VMSR_LOCAL(2)-VSLV_LOCAL(5),ZERO)
+      VZ = MAX(VSLV_LOCAL(3)-VMSR_LOCAL(6),VMSR_LOCAL(3)-VSLV_LOCAL(6),ZERO)
+      VV = SQRT(VX**2+VY**2+VZ**2)
+      vmaxdt_local = ONEP01*VV*DT1
+      if(vmaxdt > marge/10.0D0) write(6,*) "V,VLOC,MARGE ", VMAXDT, vmaxdt_local,MARGE
 C=======================================================================
 C 3 Searching boxes concerning each facet
 C     and creation of candidates
@@ -286,7 +306,6 @@ C don't keep deleted segments
           ENDDO
 c
           AAA = MARGE+CURV_MAX(NE)+MAX(MAX(BGAPSMX+GAP_M(NE),PMAX_GAP)+DGAPLOAD,DRAD)+VMAXDT_local
-
 
 c     It is possible to improve the algo by cutting the facet
 c     in 2 (4,3,6,9 ...) if the facet is large in front of AAA and inclinee
@@ -388,9 +407,6 @@ cc             nbpelem = nbpelem + 1
                 JJ = VOXEL(IX,IY,IZ)
 
                 DO WHILE(JJ /= 0)
-                  DELNOD = 0
-cc             nnpelem = nnpelem + 1
-
                   IF(JJ<=NSN)THEN
                     NN=NSV(JJ)
                     IF(NN == M1)GOTO 200
@@ -405,19 +421,21 @@ c PMAX_GAP is a global overestimate penetration
 c NEED to communicate in SPMD
 c VMAXDT is a local overestimate of relative incremental displacement
 c NO need to communicate in SPMD
-
-                    AAA = MARGE + CURV_MAX(NE)
-     +                  + MAX(GAP_S(JJ)+GAP_M(NE)+DGAPLOAD,DRAD)
-     +                       +VMAXDT_local
+                    VX = MAX(V(1,NN)-VMSR_LOCAL(4),VMSR_LOCAL(1)-V(1,NN),ZERO)
+                    VY = MAX(V(2,NN)-VMSR_LOCAL(5),VMSR_LOCAL(2)-V(2,NN),ZERO)
+                    VZ = MAX(V(3,NN)-VMSR_LOCAL(6),VMSR_LOCAL(3)-V(3,NN),ZERO)
+                    VV = SQRT(VX**2+VY**2+VZ**2)
+                    VMAXDT_LOCAL = ONEP01*VV*DT1
+                    AAA = MARGE + CURV_MAX(NE) + MAX(GAP_S(JJ)+GAP_M(NE)+DGAPLOAD,DRAD) + VMAXDT_local
                   ELSE
                     J=JJ-NSN
 
                     K = KREMNOD(2*(NE-1)+2) + 1
                     L = KREMNOD(2*(NE-1)+3)
-
+                    DELNOD = 0
                     DO M=K,L
                       IF(REMNOD(M) == -IREM(2,J) ) THEN
-                        DELNOD = DELNOD + 1
+                        DELNOD = 1
                         EXIT
                       ENDIF
                     ENDDO
@@ -427,6 +445,13 @@ c NO need to communicate in SPMD
                     XS = XREM(1,J)
                     YS = XREM(2,J)
                     ZS = XREM(3,J)
+                    VX = MAX(XREM(3+1,J)-VMSR_LOCAL(4),VMSR_LOCAL(1)-XREM(3+1,J),ZERO)
+                    VY = MAX(XREM(3+2,J)-VMSR_LOCAL(5),VMSR_LOCAL(2)-XREM(3+2,J),ZERO)
+                    VZ = MAX(XREM(3+3,J)-VMSR_LOCAL(6),VMSR_LOCAL(3)-XREM(3+3,J),ZERO)
+                    VV = SQRT(VX**2+VY**2+VZ**2)
+                    VMAXDT_LOCAL = ONEP01*VV*DT1
+ 
+ 
                     AAA = MARGE+CURV_MAX(NE)
 c!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 c                                      +EDGE_L2(JJ) remote
@@ -623,6 +648,12 @@ c PMAX_GAP is a global overestimate penetration
 c NEED to communicate in SPMD
 c VMAXDT is a local overestimate of relative incremental displacement
 c NO need to communicate in SPMD
+                    VX = MAX(V(1,NN)-VMSR_LOCAL(4),VMSR_LOCAL(1)-V(1,NN),ZERO)
+                    VY = MAX(V(2,NN)-VMSR_LOCAL(5),VMSR_LOCAL(2)-V(2,NN),ZERO)
+                    VZ = MAX(V(3,NN)-VMSR_LOCAL(6),VMSR_LOCAL(3)-V(3,NN),ZERO)
+                    VV = SQRT(VX**2+VY**2+VZ**2)
+                    VMAXDT_LOCAL = ONEP01*VV*DT1
+ 
 
                     AAA = MARGE + CURV_MAX(NE)
      +                  + MAX(GAP_S(JJ)+GAP_M(NE)+DGAPLOAD,DRAD)
@@ -633,6 +664,12 @@ c NO need to communicate in SPMD
                     XS = XREM(1,J)
                     YS = XREM(2,J)
                     ZS = XREM(3,J)
+                    VX = MAX(XREM(3+1,J)-VMSR_LOCAL(4),VMSR_LOCAL(1)-XREM(3+1,J),ZERO)
+                    VY = MAX(XREM(3+2,J)-VMSR_LOCAL(5),VMSR_LOCAL(2)-XREM(3+2,J),ZERO)
+                    VZ = MAX(XREM(3+3,J)-VMSR_LOCAL(6),VMSR_LOCAL(3)-XREM(3+3,J),ZERO)
+                    VV = SQRT(VX**2+VY**2+VZ**2)
+                    VMAXDT_LOCAL = ONEP01*VV*DT1
+ 
                     AAA = MARGE+CURV_MAX(NE)
 c!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 c                                      +EDGE_L2(JJ) remote

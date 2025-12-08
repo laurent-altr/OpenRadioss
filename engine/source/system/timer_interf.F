@@ -221,6 +221,7 @@ C-----------------------------------------------
           SENDBUF(J + I_NSN          )=DBLE(INTBUF_TAB(N)%METRIC%NSN     )
           SENDBUF(J + I_NSNR         )=DBLE(INTBUF_TAB(N)%METRIC%NSNR    )
           SENDBUF(J + I_NCONT        )=DBLE(INTBUF_TAB(N)%METRIC%NCONT   )
+          SENDBUF(J + I_MAIN_TRI_EDGE)=INTBUF_TAB(N)%METRIC%TIME(I_MAIN_TRI_EDGE,1)
         ENDDO
         IF(NSPMD > 1) THEN
           CALL SPMD_DGATHER(SENDBUF,SIZE_METRIC*NBINTC,RECVBUF,0)
@@ -250,6 +251,7 @@ C ===========  SUM OVER PROCESSORS
               SUMMARY(I_MAIN_CRIT_TRI,1,I)= SUMMARY(I_MAIN_CRIT_TRI,1,I)+ RECVBUF(J + I_MAIN_CRIT_TRI,P)
               SUMMARY(I_MAIN_TRI,1,I)     = SUMMARY(I_MAIN_TRI,1,I)     + RECVBUF(J + I_MAIN_TRI,P)
               SUMMARY(I_MAIN_FORCES,1,I)     = SUMMARY(I_MAIN_FORCES,1,I)     + RECVBUF(J + I_MAIN_FORCES,P)
+              SUMMARY(I_MAIN_TRI_EDGE,1,I)    = SUMMARY(I_MAIN_TRI_EDGE,1,I)     + RECVBUF(J + I_MAIN_TRI_EDGE,P)
 
               SUMMARY(I_NSN,1,I) =   SUMMARY(I_NSN,1,I)     + RECVBUF(J + I_NSN,P)
               SUMMARY(I_NSNR,1,I) =  SUMMARY(I_NSNR,1,I)     + RECVBUF(J + I_NSNR,P)
@@ -265,6 +267,7 @@ C ===========  MAX OVER PROCESSORS
                 SUMMARY(I_MAIN_OPT_TRI,2,I) =  RECVBUF(J + I_MAIN_OPT_TRI,P)
                 SUMMARY(I_MAIN_CRIT_TRI,2,I)=  RECVBUF(J + I_MAIN_CRIT_TRI,P)
                 SUMMARY(I_MAIN_TRI,2,I)     =  RECVBUF(J + I_MAIN_TRI,P)
+                SUMMARY(I_MAIN_TRI_EDGE,2,I)     =  RECVBUF(J + I_MAIN_TRI_EDGE,P)
                 SUMMARY(I_MAIN_FORCES,2,I)  =  RECVBUF(J + I_MAIN_FORCES,P)
                 PMAX = TOTAL_TIME 
               ENDIF
@@ -287,6 +290,8 @@ C ===========  MAX OVER PROCESSORS
                 WRITE(IOUT,*) 'TIME (s)            MAX         AVG' 
                 WRITE(IOUT,'(A,2F12.2)')
      .       '   SORT.MAIN:',SUMMARY(I_MAIN_TRI,2,I),SUMMARY(I_MAIN_TRI,1,I)/NSPMD
+                WRITE(IOUT,'(A,2F12.2)')
+     .       '   SORT.EDGE:',SUMMARY(I_MAIN_TRI_EDGE,2,I),SUMMARY(I_MAIN_TRI_EDGE,1,I)/NSPMD
                 WRITE(IOUT,'(A,2F12.3)')
      .       '   SORT.CRIT:',SUMMARY(I_MAIN_CRIT_TRI,2,I),SUMMARY(I_MAIN_CRIT_TRI,1,I)/NSPMD
                 WRITE(IOUT,'(A,2F12.3)')

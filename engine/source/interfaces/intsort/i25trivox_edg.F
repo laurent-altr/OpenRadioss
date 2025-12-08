@@ -217,9 +217,9 @@ C=======================================================================
           IF(I <= NEDGE_LOCAL) THEN
             NE = LEDGE(1,I)
 C         PRINTIF((STFE(I) == 0 .AND.LEDGE(6,I) == D_ES),STFE(I))
-            IF(STFE(I)==ZERO) CYCLE   ! We do not retain the Destruit facets
+            IF(STFE(I)==ZERO) CYCLE   ! We do not retain the destroyed facets
 
-            IF(LEDGE(7,I) < 0) CYCLE   ! Larete is not a second and second
+            IF(LEDGE(7,I) < 0) CYCLE   !main edge: skip         
             N1 = LEDGE(5,I)
             N2 = LEDGE(6,I)
             EID = LEDGE(8,I)
@@ -780,7 +780,6 @@ C--- IREMGAP - tag of deactivated lines
               DO WHILE(CHAIN_ADD /= 0)          ! loop on edges of the current voxel
                 JJ = LCHAIN_ELEM(CHAIN_ADD)       ! numbers of edge_id swept in the current voxel
 
-
                 IF (JJ<=NEDGE)THEN
                   EID = LEDGE(8,JJ)
                 ELSE
@@ -816,8 +815,7 @@ C--- IREMGAP - tag of deactivated lines
                     ISS1 = BITGET(IREM_EDGE(E_EBINFLG,JJ-NEDGE),0)
                     ISS2 = BITGET(IREM_EDGE(E_EBINFLG,JJ-NEDGE),1)
                   ENDIF
-                  IF(.NOT.((IMS1 == 1 .and. ISS2==1).or.
-     .                     (IMS2 == 1 .and. ISS1==1)))THEN
+                  IF(.NOT.((IMS1 == 1 .and. ISS2==1).or.(IMS2 == 1 .and. ISS1==1)))THEN
                     CHAIN_ADD = LCHAIN_NEXT(CHAIN_ADD)
                     CYCLE
                   ENDIF

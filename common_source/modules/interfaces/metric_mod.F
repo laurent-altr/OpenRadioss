@@ -52,16 +52,18 @@ C  Flag 2 names
 C Indexes
         INTEGER, PARAMETER ::  I_MAIN_CRIT_TRI  = 1
         INTEGER, PARAMETER ::  I_MAIN_TRI       = 2
-        INTEGER, PARAMETER ::  I_MAIN_OPT_TRI   = 3
-        INTEGER, PARAMETER ::  I_MAIN_FORCES    = 4
-        INTEGER, PARAMETER ::  I_NOINT          = 5
-        INTEGER, PARAMETER ::  I_MULTIMP        = 6
-        INTEGER, PARAMETER ::  I_NSN            = 7
-        INTEGER, PARAMETER ::  I_NSNR           = 8
-        INTEGER, PARAMETER ::  I_NCONT          = 9
+        INTEGER, PARAMETER ::  I_MAIN_TRI_EDGE  = 3
+        INTEGER, PARAMETER ::  I_MAIN_OPT_TRI   = 4
+        INTEGER, PARAMETER ::  I_MAIN_FORCES    = 5
+        INTEGER, PARAMETER ::  I_NOINT          = 6
+        INTEGER, PARAMETER ::  I_MULTIMP        = 7
+        INTEGER, PARAMETER ::  I_NSN            = 8
+        INTEGER, PARAMETER ::  I_NSNR           = 9
+        INTEGER, PARAMETER ::  I_NCONT          = 10 
+
 C Sizes
-        INTEGER, PARAMETER ::  SIZE_TIMER       = 4
-        INTEGER, PARAMETER ::  SIZE_METRIC      = 9
+        INTEGER, PARAMETER ::  SIZE_TIMER       = 5
+        INTEGER, PARAMETER ::  SIZE_METRIC      = 10
 
 C Debug
         INTEGER, PARAMETER ::  FILE_ID= 4999
