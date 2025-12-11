@@ -53,6 +53,59 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    r2r_mod                         ../starter/share/modules1/r2r_mod.F
 !||    reorder_mod                     ../starter/share/modules1/reorder_mod.F
 !||====================================================================
+!||
+!|| PURPOSE:
+!|| --------
+!|| Performs domain decomposition for parallel computing using METIS graph partitioning.
+!|| This is the main routine for decomposing the finite element mesh into subdomains
+!|| that will be distributed across parallel processors.
+!||
+!|| MAJOR ALGORITHM SECTIONS:
+!|| -------------------------
+!|| 1. INITIALIZATION:
+!||    - Initialize variables and arrays
+!||
+!|| 2. NEDGE COUNTING AND SKYLINE ADDRESSING:
+!||    - Counts element connectivity to build skyline addressing (ADSKY)
+!||    - Processes all element types: solids, shells, beams, springs, etc.
+!||
+!|| 3. ELEMENT DELETION OPTIMIZATION:
+!||    - Reads _0001.rad file for element deletion flags
+!||    - Marks deleted elements with low weight for load balancing
+!||
+!|| 4. RBYON ELEMENT OPTIMIZATION:
+!||    - Optimizes domain decomposition for RBYON deactivated elements
+!||    - Handles special cases like barrier elements
+!||
+!|| 5. CNE CONNECTIVITY CALCULATION:
+!||    - Builds element-to-node connectivity arrays (CNE)
+!||    - Tags elements by type for proper handling
+!||
+!|| 6. WEIGHT CALCULATION AND LOAD BALANCING:
+!||    - Computes element weights based on connectivity
+!||    - Handles special cases: interfaces, kinematic conditions, ALE/FSI
+!||    - Applies load balancing criteria
+!||
+!|| 7. DUAL GRAPH CONSTRUCTION:
+!||    - Builds dual graph of element connectivity
+!||    - Creates adjacency lists (XADJ, ADJNCY) for METIS
+!||    - Adds edges for contact interfaces
+!||
+!|| 8. METIS GRAPH PARTITIONING:
+!||    - Calls METIS library for graph partitioning
+!||    - Handles multi-criteria optimization
+!||    - Assigns elements to processors (CEP array)
+!||
+!|| 9. POST-PROCESSING AND STATISTICS:
+!||    - Computes domain decomposition statistics
+!||    - Checks load balance quality
+!||    - Writes output messages and diagnostics
+!||
+!|| NOTE: This routine exceeds recommended length (>1000 lines) and should be
+!||       refactored in future to improve maintainability by extracting logical
+!||       sections into separate subroutines. See section markers below for
+!||       natural refactoring boundaries.
+!||====================================================================
       SUBROUTINE DOMETIS(
      1  IXS    ,IXQ    ,IXC    ,IXT     ,IXP     ,
      2  IXR    ,IXTG   ,CEP     ,GEO     ,
@@ -239,6 +292,12 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   S o u r c e  L i n e s
 C-----------------------------------------------
+C
+C=======================================================================
+C SECTION 1: INITIALIZATION
+C=======================================================================
+C Purpose: Initialize variables and arrays
+C----------------------------------------------------------------------
       ALLOCATE(IWKIN(NUMNOD))
       number_of_added_edges = 0
       refused_numg = 0
@@ -256,7 +315,13 @@ C-----------------------------------------------
       WD_MAX = 0.0D0
       WD_MAX0= 0.0D0
       NNODE = NSPMD
-
+C
+C=======================================================================
+C SECTION 2: NEDGE COUNTING AND SKYLINE ADDRESSING
+C=======================================================================
+C Purpose: Count the number of elements connected to each node
+C         Build skyline addressing array (ADSKY) for graph construction
+C----------------------------------------------------------------------
 C----------------------------------
 C global NEDGE counting
 C----------------------------------
@@ -358,6 +423,12 @@ C
      .                         C1='DOMDEC')
       END IF
 C
+C=======================================================================
+C SECTION 3: ELEMENT DELETION OPTIMIZATION
+C=======================================================================
+C Purpose: Read deleted elements from _0001.rad and optimize decomposition
+C         Mark deleted elements with low weight for load balancing
+C----------------------------------------------------------------------
 C-----------------------------------------------
 C Optimization on deleted elements from _0001.rad
 C-----------------------------------------------
@@ -474,7 +545,13 @@ C message on D01 not read (delete not optimized)
      .   ' RADIOSS ENGINE INPUT FILE'
          ENDIF
       ENDIF
-
+C
+C=======================================================================
+C SECTION 4: RBYON ELEMENT OPTIMIZATION
+C=======================================================================
+C Purpose: Optimize domain decomposition for RBYON deactivated elements
+C         Handle special cases like barrier elements
+C----------------------------------------------------------------------
 C-----------------------------------------------
 C Optimization on RBYON from _0000.rad
 C-----------------------------------------------
@@ -598,6 +675,13 @@ C-----------------------------------------------
         WRITE(IOUT,'(A)')
      .  ' ADDITIONAL OPTIMIZATION OF DOMAIN DECOMPOSITION FOR AMS (DOMDEC=7)'
       END IF
+C
+C=======================================================================
+C SECTION 5: CNE CONNECTIVITY CALCULATION
+C=======================================================================
+C Purpose: Calculate element-to-node connectivity arrays (CNE)
+C         Tag elements by type for proper graph construction
+C----------------------------------------------------------------------
 C-----------------------------------------------
 C   CNE CALCULATION
 C-----------------------------------------------
@@ -750,6 +834,14 @@ C     reset addresses to beginning
       END DO
 
       ADSKY(1) = 1
+C
+C=======================================================================
+C SECTION 6: WEIGHT CALCULATION AND LOAD BALANCING CRITERIA
+C=======================================================================
+C Purpose: Calculate element weights based on connectivity and constraints
+C         Set up load balancing criteria for domain decomposition
+C         Handle special cases: interfaces, kinematic conditions, ALE/FSI
+C----------------------------------------------------------------------
 C Weight calculation taking into account connectivity ratio
 
       ICELEM=1
@@ -1317,7 +1409,14 @@ c     .    IWD(NCOND*(I-1)+ICNOD)= NINT(RWD(NCOND*(I-1)+ICNOD)*10)
       END DO
 
       DEALLOCATE(RWD)
-
+C
+C=======================================================================
+C SECTION 7: DUAL GRAPH CONSTRUCTION
+C=======================================================================
+C Purpose: Build the dual graph of element connectivity
+C         Create edge pairs (Ei, Ej) for elements connected by nodes
+C         Construct adjacency lists (XADJ, ADJNCY) for METIS
+C----------------------------------------------------------------------
 C.....construction of Ei Ej pairs connected by a point
 
       NEDGES = 0
@@ -2009,6 +2108,15 @@ C 2) recompute connexity to verify it is ok now
           END IF
         END IF
         DEALLOCATE(COLORS,ROOTS)
+C
+C=======================================================================
+C SECTION 8: METIS GRAPH PARTITIONING
+C=======================================================================
+C Purpose: Call METIS library to partition the dual graph
+C         Set METIS options and parameters
+C         Assign elements to processors (CEP array)
+C         Handle multi-criteria optimization
+C----------------------------------------------------------------------
 
         WRITE(IOUT,*)' '
         WRITE(IOUT,FMT=FMW_A_I)
@@ -2180,6 +2288,15 @@ C RSB METIS
      2      IWD,NNODE,
      3      UBVEC,OPTIONS,NEC,CEP)
         END IF
+C
+C=======================================================================
+C SECTION 9: POST-PROCESSING AND STATISTICS
+C=======================================================================
+C Purpose: Compute domain decomposition statistics
+C         Check load balance quality
+C         Write output messages and diagnostics
+C         Handle unbalanced partitions with iterative refinement
+C----------------------------------------------------------------------
             CALL STAT_DOMDEC(
      1           WIS      ,WI2     ,WFSI      ,WDEL      ,WDDL     ,
      2           WCAND    ,WSOL    ,WR2R      ,WKIN      ,IWD      ,
