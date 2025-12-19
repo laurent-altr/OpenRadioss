@@ -42,7 +42,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
-        USE SPMD_COMM_WORLD_MOD, ONLY : SPMD_COMM_WORLD
+      USE SPMD_COMM_WORLD_MOD, ONLY : SPMD_COMM_WORLD
 #include      "implicit_f.inc"
 C-----------------------------------------------------------------
 C   M e s s a g e   P a s s i n g
@@ -70,7 +70,9 @@ C-----------------------------------------------
 #ifdef MPI
       INTEGER MSGTYP,I,NOD,LOC_PROC,IERROR,INDEX, M, E, IS,
      .        SIZ,J,L0,L,CC,II, MSGOFF,
-     .        STATUS(MPI_STATUS_SIZE)
+     .        STATUS(MPI_STATUS_SIZE),
+     .        STATUSES(MPI_STATUS_SIZE,NSPMD)
+      INTEGER IAD_SEND(NSPMD+1)
       REAL*4 RZERO
       DATA MSGOFF/6014/
 C-----------------------------------------------
@@ -82,34 +84,32 @@ C
 C
       IF(IFLAG==1)THEN
 C
+C ====== PHASE 1: POST ALL RECEIVES (master only, MPI calls) ======
+C
         NBIRECV = 0
         L = 1
         IAD_RECV(1) = 1
         DO I = 1, NSPMD
-
           IF(I/=LOC_PROC)THEN
-
             L0 = L
             L  = L+  SIZE*(IAD_FREDG(NI25,I+1)-IAD_FREDG(NI25,I))
      .            +2*SIZE*(IAD_FRNOR(NI25,I+1)-IAD_FRNOR(NI25,I))
      .            +       (IAD_FRNOR(NI25,I+1)-IAD_FRNOR(NI25,I))
 
-
-           IF(SOL_EDGE/=0)THEN
-            IF(IAD_FRNOR(NI25,I+1)-IAD_FRNOR(NI25,I)>0) THEN
-              DO J=IAD_FRNOR(NI25,I),IAD_FRNOR(NI25,I+1)-1
-                NOD = ISHIFT + FR_NOR(J)
-                DO CC = ADDCSRECT(NOD),ADDCSRECT(NOD+1)-1
-                  IF(PROCNOR(CC)==I) THEN
-                    L = L + SIZE
-                  ENDIF
+            IF(SOL_EDGE/=0)THEN
+              IF(IAD_FRNOR(NI25,I+1)-IAD_FRNOR(NI25,I)>0) THEN
+                DO J=IAD_FRNOR(NI25,I),IAD_FRNOR(NI25,I+1)-1
+                  NOD = ISHIFT + FR_NOR(J)
+                  DO CC = ADDCSRECT(NOD),ADDCSRECT(NOD+1)-1
+                    IF(PROCNOR(CC)==I) THEN
+                      L = L + SIZE
+                    ENDIF
+                  END DO
                 END DO
-              END DO
+              ENDIF
             ENDIF
-           ENDIF
 
             SIZ = L-L0
-c                  print *,'recoit siz',ispmd+1,i,ni25,siz
             IF(SIZ > 0)THEN
               MSGTYP = MSGOFF
               NBIRECV = NBIRECV + 1
@@ -122,166 +122,103 @@ c                  print *,'recoit siz',ispmd+1,i,ni25,siz
           IAD_RECV(I+1) = L
         ENDDO
 C
-        NBISEND = 0
+C ====== PHASE 2: COMPUTE SEND BUFFER ADDRESSES (serial) ======
+C
         L = 1
+        IAD_SEND(1) = 1
         DO I=1,NSPMD
-
           IF(I/=LOC_PROC)THEN
-            L0 = L
-            IF(IAD_FREDG(NI25,I+1)-IAD_FREDG(NI25,I)>0) THEN
-              DO J=IAD_FREDG(NI25,I),IAD_FREDG(NI25,I+1)-1
-                M = FR_EDG(1,J)
-                E=  FR_EDG(2,J)
-                SBUF(L)   = NOD_NORMAL(1,E,M)
-                SBUF(L+1) = NOD_NORMAL(2,E,M)
-                SBUF(L+2) = NOD_NORMAL(3,E,M)
-                L = L + SIZE
-C#ifdef D_ES
-C                IF(ISPMD == 0 .AND. I-1 == 1) THEN
-C                WRITE(6,"(2I10,A,I10,3Z20)") E,M," SEND TO",I-1,NOD_NORMAL(1,E,M),NOD_NORMAL(3,E,M),NOD_NORMAL(2,E,M)
-C                ENDIF
-C#endif 
-c                  print *,'envoi',ispmd+1,i,j-IAD_FREDG(NI25,I)+1,mseglo(m),mvoisin(e,m)
-c       if((ispmd==1.or.ispmd==3).and.(i==2.or.i==4).and.ni25==1)print *,'envoi',ispmd+1,NI25,i,j-IAD_FREDG(NI25,I)+1,mseglo(m),mvoisin(e,m)
-
-              ENDDO
-            ENDIF
-            IF(IAD_FRNOR(NI25,I+1)-IAD_FRNOR(NI25,I)>0) THEN
-              DO J=IAD_FRNOR(NI25,I),IAD_FRNOR(NI25,I+1)-1
-                IS = FR_NOR(J)
-                SBUF(L)   = VTX_BISECTOR(1,1,IS)
-                SBUF(L+1) = VTX_BISECTOR(2,1,IS)
-                SBUF(L+2) = VTX_BISECTOR(3,1,IS)
-                L = L + SIZE
-                SBUF(L)   = VTX_BISECTOR(1,2,IS)
-                SBUF(L+1) = VTX_BISECTOR(2,2,IS)
-                SBUF(L+2) = VTX_BISECTOR(3,2,IS)
-                L = L + SIZE
-                SBUF(L)   = LBOUND(IS)
-                L = L + 1
-              ENDDO
-            ENDIF
-
-           IF(SOL_EDGE/=0)THEN
-
-             IF(IAD_FRNOR(NI25,I+1)-IAD_FRNOR(NI25,I)>0) THEN
-              DO J=IAD_FRNOR(NI25,I),IAD_FRNOR(NI25,I+1)-1
-                NOD = ISHIFT + FR_NOR(J)
-                DO CC = ADDCSRECT(NOD),ADDCSRECT(NOD+1)-1
-                  IF(PROCNOR(CC)==LOC_PROC) THEN
-                    SBUF(L)   =  FSKYN(1,CC)
-                    SBUF(L+1) = FSKYN(2,CC)
-                    SBUF(L+2) = FSKYN(3,CC)
-                    L = L + SIZE
-                  ENDIF
+            L = L + SIZE*(IAD_FREDG(NI25,I+1)-IAD_FREDG(NI25,I))
+            L = L + 2*SIZE*(IAD_FRNOR(NI25,I+1)-IAD_FRNOR(NI25,I))
+            L = L + (IAD_FRNOR(NI25,I+1)-IAD_FRNOR(NI25,I))
+            IF(SOL_EDGE/=0)THEN
+              IF(IAD_FRNOR(NI25,I+1)-IAD_FRNOR(NI25,I)>0) THEN
+                DO J=IAD_FRNOR(NI25,I),IAD_FRNOR(NI25,I+1)-1
+                  NOD = ISHIFT + FR_NOR(J)
+                  DO CC = ADDCSRECT(NOD),ADDCSRECT(NOD+1)-1
+                    IF(PROCNOR(CC)==LOC_PROC) THEN
+                      L = L + SIZE
+                    ENDIF
+                  ENDDO
                 ENDDO
-              ENDDO
-             ENDIF
+              ENDIF
             ENDIF
-
-            SIZ = L-L0
-c                  print *,'envoi siz',ispmd+1,i,ni25,siz
-            IF(SIZ > 0)THEN
-              MSGTYP = MSGOFF
-              NBISEND = NBISEND + 1
-              ISINDEX(NBISEND)=I
-              CALL MPI_ISEND(
-     S        SBUF(L0),SIZ,MPI_REAL4,IT_SPMD(I),MSGTYP,
-     G        SPMD_COMM_WORLD,REQ_S(I),IERROR)
-            ENDIF
-          END IF
+          ENDIF
+          IAD_SEND(I+1) = L
         ENDDO
 C
-      ELSE ! IF(IFLAG==1)THEN
+C ====== PHASE 3: PACK SEND BUFFERS IN PARALLEL (OMP tasks) ======
 C
-C decompactage
+        NBISEND = 0
+        DO I=1,NSPMD
+          IF(I/=LOC_PROC)THEN
+            L0 = IAD_SEND(I)
+            SIZ = IAD_SEND(I+1) - L0
+            IF(SIZ > 0)THEN
+              NBISEND = NBISEND + 1
+              ISINDEX(NBISEND) = I
+C
+!$OMP TASK FIRSTPRIVATE(I,L0,NI25,SIZE,SOL_EDGE,LOC_PROC,ISHIFT)
+!$OMP&     SHARED(IAD_FREDG,FR_EDG,NOD_NORMAL,SBUF)
+!$OMP&     SHARED(IAD_FRNOR,FR_NOR,VTX_BISECTOR,LBOUND)
+!$OMP&     SHARED(ADDCSRECT,PROCNOR,FSKYN,NINTER25)
+!$OMP&     DEFAULT(NONE)
+              CALL SPMD_EXCH_NOR_PACK(
+     .             NI25,I,L0,SIZE,SOL_EDGE,LOC_PROC,ISHIFT,
+     .             IAD_FREDG,FR_EDG,NOD_NORMAL,SBUF,
+     .             IAD_FRNOR,FR_NOR,VTX_BISECTOR,LBOUND,
+     .             ADDCSRECT,PROCNOR,FSKYN,NINTER25)
+!$OMP END TASK
+            ENDIF
+          ENDIF
+        ENDDO
+C
+C ====== WAIT FOR ALL PACKING TO COMPLETE ======
+!$OMP TASKWAIT
+C
+C ====== PHASE 4: ISSUE ALL SENDS (master only, MPI calls) ======
+C
+        DO II=1,NBISEND
+          I = ISINDEX(II)
+          L0 = IAD_SEND(I)
+          SIZ = IAD_SEND(I+1) - L0
+          MSGTYP = MSGOFF
+          CALL MPI_ISEND(
+     S      SBUF(L0),SIZ,MPI_REAL4,IT_SPMD(I),MSGTYP,
+     G      SPMD_COMM_WORLD,REQ_S(I),IERROR)
+        ENDDO
+C
+      ELSE ! IFLAG /= 1
+C
+C ====== PHASE 1: WAIT FOR ALL RECEIVES (master only, MPI calls) ======
+C
+        IF(NBIRECV > 0) THEN
+          CALL MPI_WAITALL(NBIRECV,REQ_R,STATUSES,IERROR)
+        ENDIF
+C
+C ====== PHASE 2: UNPACK ALL BUFFERS IN PARALLEL (OMP tasks) ======
 C
         DO II=1,NBIRECV
-          CALL MPI_WAITANY(NBIRECV,REQ_R,INDEX,STATUS,IERROR)
-          I = IRINDEX(INDEX)
-          L = IAD_RECV(I)
-
-          DO J=IAD_FREDG(NI25,I),IAD_FREDG(NI25,I+1)-1
-            M= FR_EDG(1,J)
-            E= FR_EDG(2,J)
-            WNOD_NORMAL(1,E,M) = RBUF(L)
-            WNOD_NORMAL(2,E,M) = RBUF(L+1)
-            WNOD_NORMAL(3,E,M) = RBUF(L+2)
-            L = L + SIZE
-c                print *,'recoit',ispmd+1,i,j-IAD_FREDG(NI25,I)+1,mseglo(m),mvoisin(e,m)
-          ENDDO
-
-          DO J=IAD_FRNOR(NI25,I),IAD_FRNOR(NI25,I+1)-1
-            IS= FR_NOR(J)
-            IF(RBUF(L)/=RZERO.OR.RBUF(L+1)/=RZERO.OR.RBUF(L+2)/=RZERO)THEN
-              IF(VTX_BISECTOR(1,1,IS)==RZERO.AND.
-     .           VTX_BISECTOR(2,1,IS)==RZERO.AND.
-     .           VTX_BISECTOR(3,1,IS)==RZERO)THEN
-                VTX_BISECTOR(1,1,IS)=RBUF(L)
-                VTX_BISECTOR(2,1,IS)=RBUF(L+1)
-                VTX_BISECTOR(3,1,IS)=RBUF(L+2)
-              ELSEIF(VTX_BISECTOR(1,2,IS)==RZERO.AND.
-     .               VTX_BISECTOR(2,2,IS)==RZERO.AND.
-     .               VTX_BISECTOR(3,2,IS)==RZERO)THEN
-                VTX_BISECTOR(1,2,IS)=RBUF(L)
-                VTX_BISECTOR(2,2,IS)=RBUF(L+1)
-                VTX_BISECTOR(3,2,IS)=RBUF(L+2)
-              ELSE
-                VTX_BISECTOR(1,1,IS) = RZERO
-                VTX_BISECTOR(2,1,IS) = RZERO
-                VTX_BISECTOR(3,1,IS) = RZERO
-                VTX_BISECTOR(1,2,IS) = RZERO 
-                VTX_BISECTOR(2,2,IS) = RZERO
-                VTX_BISECTOR(3,2,IS) = RZERO
-              END IF    
-            END IF      
-            L = L + SIZE
-            IF(RBUF(L)/=RZERO.OR.RBUF(L+1)/=RZERO.OR.RBUF(L+2)/=RZERO)THEN
-              IF(VTX_BISECTOR(1,1,IS)==RZERO.AND.
-     .           VTX_BISECTOR(2,1,IS)==RZERO.AND.
-     .           VTX_BISECTOR(3,1,IS)==RZERO)THEN
-                VTX_BISECTOR(1,1,IS)=RBUF(L)
-                VTX_BISECTOR(2,1,IS)=RBUF(L+1)
-                VTX_BISECTOR(3,1,IS)=RBUF(L+2)
-              ELSEIF(VTX_BISECTOR(1,2,IS)==RZERO.AND.
-     .               VTX_BISECTOR(2,2,IS)==RZERO.AND.
-     .               VTX_BISECTOR(3,2,IS)==RZERO)THEN
-                VTX_BISECTOR(1,2,IS)=RBUF(L)
-                VTX_BISECTOR(2,2,IS)=RBUF(L+1)
-                VTX_BISECTOR(3,2,IS)=RBUF(L+2)
-              END IF    
-            END IF      
-            L = L + SIZE
-
-            LBOUND(IS) =  LBOUND(IS)+NINT(RBUF(L))
-            IF(LBOUND(IS) > 2) THEN
-              VTX_BISECTOR(1,1,IS) = RZERO
-              VTX_BISECTOR(2,1,IS) = RZERO
-              VTX_BISECTOR(3,1,IS) = RZERO
-              VTX_BISECTOR(1,2,IS) = RZERO
-              VTX_BISECTOR(2,2,IS) = RZERO
-              VTX_BISECTOR(3,2,IS) = RZERO
-            ENDIF
-
-            L = L + 1
-          ENDDO
-
-          IF(SOL_EDGE/=0)THEN
-           DO J=IAD_FRNOR(NI25,I),IAD_FRNOR(NI25,I+1)-1
-            NOD = ISHIFT + FR_NOR(J)
-            DO CC = ADDCSRECT(NOD),ADDCSRECT(NOD+1)-1
-              IF(PROCNOR(CC)==I) THEN
-                FSKYN(1,CC) = RBUF(L)
-                FSKYN(2,CC) = RBUF(L+1)
-                FSKYN(3,CC) = RBUF(L+2)
-                L = L + SIZE
-              END IF
-            END DO
-           ENDDO
-          ENDIF
-
-
+          I = IRINDEX(II)
+          L0 = IAD_RECV(I)
+C
+!$OMP TASK FIRSTPRIVATE(I,L0,NI25,SIZE,SOL_EDGE,ISHIFT)
+!$OMP&     SHARED(IAD_FREDG,FR_EDG,WNOD_NORMAL,RBUF)
+!$OMP&     SHARED(IAD_FRNOR,FR_NOR,VTX_BISECTOR,LBOUND)
+!$OMP&     SHARED(ADDCSRECT,PROCNOR,FSKYN,NINTER25)
+!$OMP&     DEFAULT(NONE)
+          CALL SPMD_EXCH_NOR_UNPACK(
+     .         NI25,I,L0,SIZE,SOL_EDGE,ISHIFT,
+     .         IAD_FREDG,FR_EDG,WNOD_NORMAL,RBUF,
+     .         IAD_FRNOR,FR_NOR,VTX_BISECTOR,LBOUND,
+     .         ADDCSRECT,PROCNOR,FSKYN,NINTER25)
+!$OMP END TASK
         ENDDO
+C
+C ====== WAIT FOR ALL UNPACKING TO COMPLETE ======
+!$OMP TASKWAIT
+C
+C ====== PHASE 3: COMPLETE SENDS (master only, MPI calls) ======
 C
         DO II=1,NBISEND
           I = ISINDEX(II)
@@ -294,3 +231,199 @@ C
       RETURN
       END
 
+C=======================================================================
+C     PACK subroutine - called as OMP task
+C     Each task writes to a disjoint region of SBUF - no conflicts
+C=======================================================================
+      SUBROUTINE SPMD_EXCH_NOR_PACK(
+     .   NI25,I,L0,SIZE,SOL_EDGE,LOC_PROC,ISHIFT,
+     .   IAD_FREDG,FR_EDG,NOD_NORMAL,SBUF,
+     .   IAD_FRNOR,FR_NOR,VTX_BISECTOR,LBOUND,
+     .   ADDCSRECT,PROCNOR,FSKYN,NINTER25)
+C-----------------------------------------------
+      IMPLICIT NONE
+C-----------------------------------------------
+      INTEGER, INTENT(IN) :: NI25,I,L0,SIZE,SOL_EDGE,LOC_PROC,ISHIFT,NINTER25
+      INTEGER, INTENT(IN) :: IAD_FREDG(NINTER25,*),FR_EDG(2,*)
+      INTEGER, INTENT(IN) :: IAD_FRNOR(NINTER25,*),FR_NOR(*)
+      INTEGER, INTENT(IN) :: LBOUND(*),ADDCSRECT(*),PROCNOR(*)
+      REAL*4, INTENT(IN)  :: NOD_NORMAL(3,4,*),VTX_BISECTOR(3,2,*),FSKYN(3,*)
+      REAL*4              :: SBUF(*)
+C-----------------------------------------------
+      INTEGER :: J,L,M,E,IS,NOD,CC
+C-----------------------------------------------
+      L = L0
+C
+C     Pack NOD_NORMAL data
+      DO J=IAD_FREDG(NI25,I),IAD_FREDG(NI25,I+1)-1
+        M = FR_EDG(1,J)
+        E = FR_EDG(2,J)
+        SBUF(L)   = NOD_NORMAL(1,E,M)
+        SBUF(L+1) = NOD_NORMAL(2,E,M)
+        SBUF(L+2) = NOD_NORMAL(3,E,M)
+        L = L + SIZE
+      ENDDO
+C
+C     Pack VTX_BISECTOR and LBOUND data
+      DO J=IAD_FRNOR(NI25,I),IAD_FRNOR(NI25,I+1)-1
+        IS = FR_NOR(J)
+        SBUF(L)   = VTX_BISECTOR(1,1,IS)
+        SBUF(L+1) = VTX_BISECTOR(2,1,IS)
+        SBUF(L+2) = VTX_BISECTOR(3,1,IS)
+        L = L + SIZE
+        SBUF(L)   = VTX_BISECTOR(1,2,IS)
+        SBUF(L+1) = VTX_BISECTOR(2,2,IS)
+        SBUF(L+2) = VTX_BISECTOR(3,2,IS)
+        L = L + SIZE
+        SBUF(L)   = REAL(LBOUND(IS))
+        L = L + 1
+      ENDDO
+C
+C     Pack FSKYN data (if SOL_EDGE)
+      IF(SOL_EDGE/=0)THEN
+        DO J=IAD_FRNOR(NI25,I),IAD_FRNOR(NI25,I+1)-1
+          NOD = ISHIFT + FR_NOR(J)
+          DO CC = ADDCSRECT(NOD),ADDCSRECT(NOD+1)-1
+            IF(PROCNOR(CC)==LOC_PROC) THEN
+              SBUF(L)   = FSKYN(1,CC)
+              SBUF(L+1) = FSKYN(2,CC)
+              SBUF(L+2) = FSKYN(3,CC)
+              L = L + SIZE
+            ENDIF
+          ENDDO
+        ENDDO
+      ENDIF
+C
+      RETURN
+      END
+
+C=======================================================================
+C     UNPACK subroutine - called as OMP task
+C     WNOD_NORMAL: each (E,M) pair is unique per source proc - no conflict
+C     VTX_BISECTOR/LBOUND: may have conflicts if same IS from multiple procs
+C     FSKYN: indexed by CC which is unique per source proc - no conflict
+C=======================================================================
+      SUBROUTINE SPMD_EXCH_NOR_UNPACK(
+     .   NI25,I,L0,SIZE,SOL_EDGE,ISHIFT,
+     .   IAD_FREDG,FR_EDG,WNOD_NORMAL,RBUF,
+     .   IAD_FRNOR,FR_NOR,VTX_BISECTOR,LBOUND,
+     .   ADDCSRECT,PROCNOR,FSKYN,NINTER25)
+C-----------------------------------------------
+      IMPLICIT NONE
+C-----------------------------------------------
+      INTEGER, INTENT(IN) :: NI25,I,L0,SIZE,SOL_EDGE,ISHIFT,NINTER25
+      INTEGER, INTENT(IN) :: IAD_FREDG(NINTER25,*),FR_EDG(2,*)
+      INTEGER, INTENT(IN) :: IAD_FRNOR(NINTER25,*),FR_NOR(*)
+      INTEGER, INTENT(IN) :: ADDCSRECT(*),PROCNOR(*)
+      INTEGER             :: LBOUND(*)
+      REAL*4, INTENT(IN)  :: RBUF(*)
+      REAL*4              :: WNOD_NORMAL(3,4,*),VTX_BISECTOR(3,2,*),FSKYN(3,*)
+C-----------------------------------------------
+      INTEGER :: J,L,M,E,IS,NOD,CC,LBVAL
+      REAL*4  :: RZERO
+      REAL*4  :: RX1,RY1,RZ1,RX2,RY2,RZ2
+C-----------------------------------------------
+      RZERO = 0.
+      L = L0
+C
+C     Unpack WNOD_NORMAL - no conflicts, each (E,M) unique per source
+      DO J=IAD_FREDG(NI25,I),IAD_FREDG(NI25,I+1)-1
+        M = FR_EDG(1,J)
+        E = FR_EDG(2,J)
+        WNOD_NORMAL(1,E,M) = RBUF(L)
+        WNOD_NORMAL(2,E,M) = RBUF(L+1)
+        WNOD_NORMAL(3,E,M) = RBUF(L+2)
+        L = L + SIZE
+      ENDDO
+C
+C     Unpack VTX_BISECTOR and LBOUND
+C     These may have conflicts if same IS appears from multiple procs
+      DO J=IAD_FRNOR(NI25,I),IAD_FRNOR(NI25,I+1)-1
+        IS = FR_NOR(J)
+C
+C       Read first bisector triplet
+        RX1 = RBUF(L)
+        RY1 = RBUF(L+1)
+        RZ1 = RBUF(L+2)
+        L = L + SIZE
+C
+C       Read second bisector triplet
+        RX2 = RBUF(L)
+        RY2 = RBUF(L+1)
+        RZ2 = RBUF(L+2)
+        L = L + SIZE
+C
+C       Read LBOUND increment
+        LBVAL = NINT(RBUF(L))
+        L = L + 1
+C
+C       Protected update of VTX_BISECTOR and LBOUND
+!$OMP CRITICAL(VTX_BISECTOR_UPDATE)
+        IF(RX1/=RZERO.OR.RY1/=RZERO.OR.RZ1/=RZERO)THEN
+          IF(VTX_BISECTOR(1,1,IS)==RZERO.AND.
+     .       VTX_BISECTOR(2,1,IS)==RZERO.AND.
+     .       VTX_BISECTOR(3,1,IS)==RZERO)THEN
+            VTX_BISECTOR(1,1,IS)=RX1
+            VTX_BISECTOR(2,1,IS)=RY1
+            VTX_BISECTOR(3,1,IS)=RZ1
+          ELSEIF(VTX_BISECTOR(1,2,IS)==RZERO.AND.
+     .           VTX_BISECTOR(2,2,IS)==RZERO.AND.
+     .           VTX_BISECTOR(3,2,IS)==RZERO)THEN
+            VTX_BISECTOR(1,2,IS)=RX1
+            VTX_BISECTOR(2,2,IS)=RY1
+            VTX_BISECTOR(3,2,IS)=RZ1
+          ELSE
+            VTX_BISECTOR(1,1,IS) = RZERO
+            VTX_BISECTOR(2,1,IS) = RZERO
+            VTX_BISECTOR(3,1,IS) = RZERO
+            VTX_BISECTOR(1,2,IS) = RZERO
+            VTX_BISECTOR(2,2,IS) = RZERO
+            VTX_BISECTOR(3,2,IS) = RZERO
+          END IF
+        END IF
+C
+        IF(RX2/=RZERO.OR.RY2/=RZERO.OR.RZ2/=RZERO)THEN
+          IF(VTX_BISECTOR(1,1,IS)==RZERO.AND.
+     .       VTX_BISECTOR(2,1,IS)==RZERO.AND.
+     .       VTX_BISECTOR(3,1,IS)==RZERO)THEN
+            VTX_BISECTOR(1,1,IS)=RX2
+            VTX_BISECTOR(2,1,IS)=RY2
+            VTX_BISECTOR(3,1,IS)=RZ2
+          ELSEIF(VTX_BISECTOR(1,2,IS)==RZERO.AND.
+     .           VTX_BISECTOR(2,2,IS)==RZERO.AND.
+     .           VTX_BISECTOR(3,2,IS)==RZERO)THEN
+            VTX_BISECTOR(1,2,IS)=RX2
+            VTX_BISECTOR(2,2,IS)=RY2
+            VTX_BISECTOR(3,2,IS)=RZ2
+          END IF
+        END IF
+C
+        LBOUND(IS) = LBOUND(IS) + LBVAL
+        IF(LBOUND(IS) > 2) THEN
+          VTX_BISECTOR(1,1,IS) = RZERO
+          VTX_BISECTOR(2,1,IS) = RZERO
+          VTX_BISECTOR(3,1,IS) = RZERO
+          VTX_BISECTOR(1,2,IS) = RZERO
+          VTX_BISECTOR(2,2,IS) = RZERO
+          VTX_BISECTOR(3,2,IS) = RZERO
+        ENDIF
+!$OMP END CRITICAL(VTX_BISECTOR_UPDATE)
+      ENDDO
+C
+C     Unpack FSKYN - no conflicts, CC is unique per source proc I
+      IF(SOL_EDGE/=0)THEN
+        DO J=IAD_FRNOR(NI25,I),IAD_FRNOR(NI25,I+1)-1
+          NOD = ISHIFT + FR_NOR(J)
+          DO CC = ADDCSRECT(NOD),ADDCSRECT(NOD+1)-1
+            IF(PROCNOR(CC)==I) THEN
+              FSKYN(1,CC) = RBUF(L)
+              FSKYN(2,CC) = RBUF(L+1)
+              FSKYN(3,CC) = RBUF(L+2)
+              L = L + SIZE
+            END IF
+          END DO
+        ENDDO
+      ENDIF
+C
+      RETURN
+      END
