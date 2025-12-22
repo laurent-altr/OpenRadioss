@@ -64,7 +64,7 @@
         INTEGER :: LENOUT_EDGE
         INTEGER :: IDEB2,IDEB3,IDEB_EDGE
         INTEGER :: NB_SUBINT
-        INTEGER:: REQ_S(NSPMD)
+        INTEGER:: REQ_S(NSPMD),REQ_EDGE_S(NSPMD)
 
         TYPE(int_pointer), DIMENSION(:), ALLOCATABLE :: MSGBUF_S, MSGBUF_R
 
@@ -82,6 +82,9 @@
       ALLOCATE(MSGBUF_S(NSPMD))
       ALLOCATE(MSGBUF_EDGE_R(NSPMD))
       ALLOCATE(MSGBUF_EDGE_S(NSPMD))
+      REQ_S = SPMD_REQUEST_NULL
+      REQ_EDGE_S = SPMD_REQUEST_NULL
+
 
       DO P = 1, NSPMD
         IF(IRCOM(P)>0) THEN
@@ -174,7 +177,7 @@
           DO II = 1, NBINTC
             NIN = INTLIST(II)
 ! interface stripped with sub-interfaces ?
-            IF(NEWFRONT(NIN)==2.AND.IPARI(36,NIN)>0.AND.IPARI(8,NIN)/=17) THEN
+            IF(NEWFRONT(NIN)==2.AND.IPARI(36,NIN)>0.AND.IPARI(7,NIN)/=17) THEN
 ! subtracting the number of nodes to find the length of sub-interfaces
               NB_SUBINT = ISUBTMP2(NIN,1,P) - NSNFI(NIN)%P(P)
               NISUBSFI(NIN)%P(P) = NB_SUBINT
@@ -193,12 +196,12 @@
           END DO
 ! Comm Save length in Iscom
           ISCOM(P) = LENOUT + LENOUT_EDGE
-          IF(LENOUT>0) THEN
+!         IF(LENOUT>0) THEN
             ALLOCATE(MSGBUF_R(P)%P(LENOUT))
-          END IF
-          IF(LENOUT_EDGE>0) THEN
+!         END IF
+!         IF(LENOUT_EDGE>0) THEN
               ALLOCATE(MSGBUF_EDGE_R(P)%P(LENOUT_EDGE))
-          END IF
+!         END IF
         ELSE
           ISCOM(P) = 0
         END IF
@@ -265,7 +268,7 @@
                     MSGBUF_EDGE_S(P)%P(I0_EDGE) = INTBUF_TAB(NIN)%INFLG_SUBE(J)
                   END DO
                 END DO
-                IBEGIN_EDGE(P) = I0
+                IBEGIN_EDGE(P) = I0_EDGE
                 IDEB_EDGE = IDEB_EDGE + LEN
               END IF ! LEN
             END DO
@@ -281,7 +284,7 @@
           I0 = SIZE(MSGBUF_S(P)%P)
           CALL SPMD_ISEND(MSGBUF_S(P)%P(1),I0,IT_SPMD(P),MSGTYP,REQ_S(P))
           I0_EDGE = SIZE(MSGBUF_EDGE_S(P)%P)
-          CALL SPMD_ISEND(MSGBUF_EDGE_S(P)%P(1),I0_EDGE,IT_SPMD(P),MSGTYP,REQ_S(P))
+          IF(I0_EDGE >0) CALL SPMD_ISEND(MSGBUF_EDGE_S(P)%P(1),I0_EDGE,IT_SPMD(P),MSGTYP,REQ_EDGE_S(P))
         END IF
       END DO
 !
@@ -294,14 +297,14 @@
           I0 = SIZE(MSGBUF_R(P)%P)
           CALL SPMD_RECV(MSGBUF_R(P)%P(1),I0,IT_SPMD(P),MSGTYP)
           I0_EDGE = SIZE(MSGBUF_EDGE_R(P)%P)
-          CALL SPMD_RECV(MSGBUF_EDGE_R(P)%P(1),I0_EDGE,IT_SPMD(P),MSGTYP)
+          IF(I0_EDGE >0) CALL SPMD_RECV(MSGBUF_EDGE_R(P)%P(1),I0_EDGE,IT_SPMD(P),MSGTYP)
         END IF
       END DO
 !
-! Maj structures sous interfaces
 !
       DO P = 1, NSPMD
         IBEGIN(P) = 0
+        IBEGIN_EDGE(P) = 0
       END DO
       DO II = 1, NBINTC
         NIN = INTLIST(II)
@@ -382,17 +385,17 @@
                   DO I = 1, NSNFIE(NIN)%P(P)
                     IDEB2 = IBEGIN_EDGE(P)
                     IDEB2 = IDEB2 + 1
-                    LEN = MSGBUF_R(P)%P(IDEB2)
+                    LEN = MSGBUF_EDGE_R(P)%P(IDEB2)
                     ADDSUBSFIE(NIN)%P(IDEB3+I+1) = ADDSUBSFIE(NIN)%P(IDEB3+I) + LEN
                     DO J = 1, LEN
-                      LISUBSFIE(NIN)%P(IDEB+J) = MSGBUF_R(P)%P(IDEB2+J)
+                      LISUBSFIE(NIN)%P(IDEB+J) = MSGBUF_EDGE_R(P)%P(IDEB2+J)
                     END DO
-                    IBEGIN(P) = IBEGIN(P) + LEN + 1
+                    IBEGIN_EDGE(P) = IBEGIN_EDGE(P) + LEN + 1
                     IDEB2 = IDEB2 + LEN
                     DO J = 1, LEN
-                      INFLG_SUBSFIE(NIN)%P(IDEB+J) = MSGBUF_R(P)%P(IDEB2+J)
+                      INFLG_SUBSFIE(NIN)%P(IDEB+J) = MSGBUF_EDGE_R(P)%P(IDEB2+J)
                     END DO
-                    IBEGIN(P) = IBEGIN(P) + LEN
+                    IBEGIN_EDGE(P) = IBEGIN_EDGE(P) + LEN
                     IDEB = IDEB + LEN
                   END DO
                   IDEB3 = IDEB3 + NSNFIE(NIN)%P(P)
@@ -406,13 +409,14 @@
       END DO
 !
       DO P = 1, NSPMD
-          CALL SPMD_WAIT(REQ_S(P))
+        CALL SPMD_WAIT(REQ_S(P))
+        CALL SPMD_WAIT(REQ_EDGE_S(P))
       END DO
 
       DEALLOCATE(MSGBUF_R)
       DEALLOCATE(MSGBUF_S)
-        DEALLOCATE(MSGBUF_EDGE_R)
-        DEALLOCATE(MSGBUF_EDGE_S)
+      DEALLOCATE(MSGBUF_EDGE_R)
+      DEALLOCATE(MSGBUF_EDGE_S)
     
 
 

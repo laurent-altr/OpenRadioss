@@ -187,7 +187,15 @@
         integer, parameter, public :: MPI_STATUS_SIZE = 1
         integer, parameter, public :: MPI_REQUEST_NULL = 0
         integer, parameter, public :: MPI_COMM_WORLD = 0
+#else
+#include "mpif.h"
 #endif
+
+        integer, parameter, public :: SPMD_STATUS_SIZE = MPI_STATUS_SIZE
+        integer, parameter, public :: SPMD_REQUEST_NULL = MPI_REQUEST_NULL
+
+
+ 
         ! \brief Interface for spmd_reduce, a wrapper for MPI_REDUCE
         interface spmd_reduce
           module procedure spmd_reduce_reals    !< Reduces real numbers across all processes
