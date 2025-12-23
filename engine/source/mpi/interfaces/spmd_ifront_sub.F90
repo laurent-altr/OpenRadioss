@@ -261,11 +261,11 @@
                   MSGBUF_EDGE_S(P)%P(I0_EDGE) = INTBUF_TAB(NIN)%ADDSUBE(NS+1)-INTBUF_TAB(NIN)%ADDSUBE(NS)
                   DO J = INTBUF_TAB(NIN)%ADDSUBE(NS),INTBUF_TAB(NIN)%ADDSUBE(NS+1)-1
                     I0_EDGE = I0_EDGE + 1
-                    MSGBUF_EDGE_S(P)%P(I0_EDGE) = INTBUF_TAB(NIN)%LISUBE(J)
+                    MSGBUF_EDGE_S(P)%P(I0_EDGE) = HUGE(I0_EDGE)/2 + INTBUF_TAB(NIN)%LISUBE(J)
                   END DO
                   DO J = INTBUF_TAB(NIN)%ADDSUBE(NS),INTBUF_TAB(NIN)%ADDSUBE(NS+1)-1
                     I0_EDGE = I0_EDGE + 1
-                    MSGBUF_EDGE_S(P)%P(I0_EDGE) = INTBUF_TAB(NIN)%INFLG_SUBE(J)
+                    MSGBUF_EDGE_S(P)%P(I0_EDGE) = HUGE(I0_EDGE)/2 +  INTBUF_TAB(NIN)%INFLG_SUBE(J)
                   END DO
                 END DO
                 IBEGIN_EDGE(P) = I0_EDGE
@@ -331,7 +331,7 @@
             IDEB3 = 0
             ADDSUBSFI(NIN)%P(1:LEN) = 1
             DO P = 1, NSPMD
-              IF(ISCOM(P)>0 .AND. LEN > 0) THEN
+              IF(ISCOM(P)>0) THEN
                 DO I = 1, NSNFI(NIN)%P(P)
                   IDEB2 = IBEGIN(P)
                   IDEB2 = IDEB2 + 1
@@ -388,12 +388,12 @@
                     LEN = MSGBUF_EDGE_R(P)%P(IDEB2)
                     ADDSUBSFIE(NIN)%P(IDEB3+I+1) = ADDSUBSFIE(NIN)%P(IDEB3+I) + LEN
                     DO J = 1, LEN
-                      LISUBSFIE(NIN)%P(IDEB+J) = MSGBUF_EDGE_R(P)%P(IDEB2+J)
+                      LISUBSFIE(NIN)%P(IDEB+J) = MSGBUF_EDGE_R(P)%P(IDEB2+J) -HUGE(I0_EDGE)/2
                     END DO
                     IBEGIN_EDGE(P) = IBEGIN_EDGE(P) + LEN + 1
                     IDEB2 = IDEB2 + LEN
                     DO J = 1, LEN
-                      INFLG_SUBSFIE(NIN)%P(IDEB+J) = MSGBUF_EDGE_R(P)%P(IDEB2+J)
+                      INFLG_SUBSFIE(NIN)%P(IDEB+J) = MSGBUF_EDGE_R(P)%P(IDEB2+J) -HUGE(I0_EDGE)/2
                     END DO
                     IBEGIN_EDGE(P) = IBEGIN_EDGE(P) + LEN
                     IDEB = IDEB + LEN
