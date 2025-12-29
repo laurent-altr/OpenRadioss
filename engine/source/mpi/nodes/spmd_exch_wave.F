@@ -20,7 +20,49 @@ Copyright>
 Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
-C
+      MODULE SPMD_EXCH_WAVE_MOD
+         ! types containing buffer and request for wave exchange
+         USE PRECISION_MOD, ONLY: WP
+         TYPE FR_WAVE_
+           REAL(KIND=WP), DIMENSION(:), allocatable :: RBUF 
+           REAL(KIND=WP), DIMENSION(:), allocatable :: SBUF
+           INTEGER, DIMENSION(:), allocatable :: IAD_SEND
+           INTEGER, DIMENSION(:), allocatable :: IAD_RECV
+           INTEGER, DIMENSION(:), allocatable :: REQ_R
+           INTEGER, DIMENSION(:), allocatable :: REQ_S 
+           integer :: SIZE
+           integer :: LENR
+         END TYPE FR_WAVE_
+
+         
+
+       contains
+       SUBROUTINE SPMD_EXCH_WAVE_INIT(FR_WAVE_BUF, SIZ, LENR, NSPMD)
+         implicit none
+          TYPE(FR_WAVE_), INTENT(INOUT) :: FR_WAVE_BUF
+          INTEGER, INTENT(IN) :: SIZ, LENR, NSPMD
+
+          !deallocate if size changed
+          IF(ALLOCATED(FR_WAVE_BUF%RBUF) .AND. size(FR_WAVE_BUF%RBUF)<SIZ*LENR) THEN
+            DEALLOCATE(FR_WAVE_BUF%RBUF)
+            DEALLOCATE(FR_WAVE_BUF%SBUF)
+          END IF
+
+          IF(.NOT.ALLOCATED(FR_WAVE_BUF%RBUF)) THEN
+            ALLOCATE(FR_WAVE_BUF%RBUF(SIZ*LENR))
+            ALLOCATE(FR_WAVE_BUF%SBUF(SIZ*LENR))
+          END IF
+
+          IF(.NOT.ALLOCATED(FR_WAVE_BUF%IAD_SEND)) THEN
+            ALLOCATE(FR_WAVE_BUF%IAD_SEND(NSPMD+1))
+            ALLOCATE(FR_WAVE_BUF%IAD_RECV(NSPMD+1))
+            ALLOCATE(FR_WAVE_BUF%REQ_R(NSPMD))
+            ALLOCATE(FR_WAVE_BUF%REQ_S(NSPMD))
+          END IF
+          FR_WAVE_BUF%SIZE = SIZ
+          FR_WAVE_BUF%LENR = LENR
+       RETURN
+      END SUBROUTINE SPMD_EXCH_WAVE_INIT
 !||====================================================================
 !||    spmd_exch_wave        ../engine/source/mpi/nodes/spmd_exch_wave.F
 !||--- called by ------------------------------------------------------
@@ -29,7 +71,7 @@ C
 !||--- uses       -----------------------------------------------------
 !||    spmd_comm_world_mod   ../engine/source/mpi/spmd_comm_world.F90
 !||====================================================================
-      SUBROUTINE SPMD_EXCH_WAVE(FR_WAVE,IAD_ELEM,FR_ELEM,SIZE,LENR)
+      SUBROUTINE SPMD_EXCH_WAVE(FR_WAVE,IAD_ELEM,FR_ELEM,FR_WAVE_BUF,MODE)
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -47,52 +89,51 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
-      INTEGER IAD_ELEM(2,*), FR_ELEM(*), SIZE, LENR
+      TYPE(FR_WAVE_), INTENT(INOUT) :: FR_WAVE_BUF  
+      INTEGER IAD_ELEM(2,*), FR_ELEM(*)
       my_real
      .        FR_WAVE(*)
+      INTEGER, INTENT(IN) :: MODE
 C-----------------------------------------------
 C   L o c a l  V a r i a b l e s
 C-----------------------------------------------
 #ifdef MPI
       INTEGER MSGTYP,I,NOD,LOC_PROC,IERROR, MSGOFF,
      .        SIZ,J,L,NB_NOD,
-     .        STATUS(MPI_STATUS_SIZE),
-     .        IAD_SEND(NSPMD+1),IAD_RECV(NSPMD+1),
-     .        REQ_R(NSPMD),REQ_S(NSPMD)
+     .        STATUS(MPI_STATUS_SIZE)
       DATA MSGOFF/128/
-      my_real
-     .        RBUF(SIZE*LENR), SBUF(SIZE*LENR)
 C-----------------------------------------------
 C   S o u r c e  L i n e s
 C-----------------------------------------------
       LOC_PROC = ISPMD + 1
       L = 1
-      IAD_RECV(1) = 1
+      FR_WAVE_BUF%IAD_RECV(1) = 1
+      IF(MODE == 1) THEN
       DO I=1,NSPMD
-        SIZ = SIZE*(IAD_ELEM(1,I+1)-IAD_ELEM(1,I))
+        SIZ = FR_WAVE_BUF%SIZE*(IAD_ELEM(1,I+1)-IAD_ELEM(1,I))
         IF(SIZ/=0)THEN
           MSGTYP = MSGOFF
           CALL MPI_IRECV(
-     S      RBUF(L),SIZ,REAL,IT_SPMD(I),MSGTYP,
-     G      SPMD_COMM_WORLD,REQ_R(I),IERROR)
+     S      FR_WAVE_BUF%RBUF(L),SIZ,REAL,IT_SPMD(I),MSGTYP,
+     G      SPMD_COMM_WORLD,FR_WAVE_BUF%REQ_R(I),IERROR)
           L = L + SIZ
         ENDIF
-        IAD_RECV(I+1) = L
+        FR_WAVE_BUF%IAD_RECV(I+1) = L
       END DO
       L = 1
-      IAD_SEND(1) = 1
+      FR_WAVE_BUF%IAD_SEND(1) = 1
       DO I=1,NSPMD
 #include      "vectorize.inc"
         DO J=IAD_ELEM(1,I),IAD_ELEM(1,I+1)-1
           NOD = FR_ELEM(J)
           IF(FR_WAVE(NOD)<0)THEN
-            SBUF(L  ) =  FR_WAVE(NOD)
+            FR_WAVE_BUF%SBUF(L  ) =  FR_WAVE(NOD)
           ELSE
-            SBUF(L) = ZERO
+            FR_WAVE_BUF%SBUF(L) = ZERO
           END IF
-          L = L + SIZE
+          L = L + FR_WAVE_BUF%SIZE
         END DO
-        IAD_SEND(I+1) = L
+        FR_WAVE_BUF%IAD_SEND(I+1) = L
       ENDDO
 C
 C   echange messages
@@ -101,37 +142,40 @@ C
 C--------------------------------------------------------------------
        IF(IAD_ELEM(1,I+1)-IAD_ELEM(1,I)>0)THEN
           MSGTYP = MSGOFF
-          SIZ = IAD_SEND(I+1)-IAD_SEND(I)
-          L = IAD_SEND(I)
+          SIZ = FR_WAVE_BUF%IAD_SEND(I+1)-FR_WAVE_BUF%IAD_SEND(I)
+          L = FR_WAVE_BUF%IAD_SEND(I)
           CALL MPI_ISEND(
-     S      SBUF(L),SIZ,REAL,IT_SPMD(I),MSGTYP,
-     G      SPMD_COMM_WORLD,REQ_S(I),IERROR)
+     S      FR_WAVE_BUF%SBUF(L),SIZ,REAL,IT_SPMD(I),MSGTYP,
+     G      SPMD_COMM_WORLD,FR_WAVE_BUF%REQ_S(I),IERROR)
        ENDIF
 C--------------------------------------------------------------------
       ENDDO
 C
+      ELSEIF(MODE == 2) THEN
       DO I = 1, NSPMD
         NB_NOD = IAD_ELEM(1,I+1)-IAD_ELEM(1,I)
         IF(NB_NOD>0)THEN
-          CALL MPI_WAIT(REQ_R(I),STATUS,IERROR)
-          L = IAD_RECV(I)
-#include      "vectorize.inc"
+          CALL MPI_WAIT(FR_WAVE_BUF%REQ_R(I),STATUS,IERROR)
+          L = FR_WAVE_BUF%IAD_RECV(I)
           DO J=IAD_ELEM(1,I),IAD_ELEM(1,I+1)-1
             NOD = FR_ELEM(J)
-            IF(RBUF(L)<ZERO) THEN
-              FR_WAVE(NOD) = RBUF(L)
+            IF(FR_WAVE_BUF%RBUF(L)<ZERO) THEN
+              FR_WAVE(NOD) = FR_WAVE_BUF%RBUF(L)
             END IF
-            L = L + SIZE
+            L = L + FR_WAVE_BUF%SIZE
           END DO
         ENDIF
       END DO
 C
       DO I = 1, NSPMD
         IF(IAD_ELEM(1,I+1)-IAD_ELEM(1,I)>0)THEN
-          CALL MPI_WAIT(REQ_S(I),STATUS,IERROR)
+          CALL MPI_WAIT(FR_WAVE_BUF%REQ_S(I),STATUS,IERROR)
         ENDIF
       ENDDO
+      ENDIF
 C
 #endif
       RETURN
       END
+
+      END MODULE SPMD_EXCH_WAVE_MOD
