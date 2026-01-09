@@ -2563,7 +2563,7 @@ C
                 ALLOCATE(NODES%FORCES(3,NUMNOD))
                 NODES%FORCES = ZERO
                 call coupling_set_interface(coupling, igrnod, ngrnod, igrsurf, nsurf,  nodes)
-                CALL COUPLING_INITIALIZE(coupling,NODES%X,NUMNOD,ISPMD,NSPMD)
+                CALL COUPLING_INITIALIZE(coupling,NODES,NUMNOD,ISPMD,NSPMD)
                 CALL COUPLING_ONGOING(coupling,ongoing)
               ENDIF
 
