@@ -655,7 +655,7 @@
               real(dt, c_double), coupling_displacements)
             ! Read positions
             call coupling_adapter_read_data(coupling%adapter_ptr, nodes%D, numnod, &
-              real(dt, c_double), coupling_positions, coupling_replace)
+              real(dt, c_double), coupling_displacements, coupling_replace)
           else if(name_id == coupling_forces) THEN
             ! Write forces
             NODES%FORCES(1:3,1:NUMNOD) = nodes%A(1:3,1:NUMNOD) - NODES%FORCES(1:3,1:NUMNOD)
@@ -680,7 +680,7 @@
               real(dt, c_double), coupling_displacements)
             ! Read positions
             call coupling_adapter_read_data(coupling%adapter_ptr, values, numnod, &
-              real(dt, c_double), coupling_positions, coupling_replace)
+              real(dt, c_double), coupling_displacements, coupling_replace)
             nodes%D(1:3,1:numnod) = real(values(1:3,1:numnod), WP)
           else if(name_id == coupling_forces) THEN
             ! Write forces

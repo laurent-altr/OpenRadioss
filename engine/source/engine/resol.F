@@ -8787,6 +8787,7 @@ C===============================================================================
                 DT2MAX_COUPLING = DT2 
                 ! Read and write coupling positions
                 CALL COUPLING_SYNC(coupling,DT2,NODES,COUPLING_POSITIONS)
+                CALL COUPLING_SYNC(coupling,DT2,NODES,COUPLING_DISPLACEMENTS)
               ENDIF
 
               IF (ViperCoupling) THEN
