@@ -711,8 +711,7 @@
 #else
           call arret(2) ! single precision not available yet
           ! Suppress unused variable warnings
-          if (name_id < -1) return
-          if (dt < 0.0_WP) return
+          if (.false.) print *, name_id, dt
 !          if(name_id == coupling_displacements) then
 !            ! Write displacements
 !            coupling%values(1:3,1:numnod) = real(nodes%D(1:3,1:numnod), c_double)
