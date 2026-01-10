@@ -715,10 +715,10 @@
 !          if(name_id == coupling_displacements) then
 !            ! Write displacements
 !            coupling%values(1:3,1:numnod) = real(nodes%D(1:3,1:numnod), c_double)
-!            call coupling_adapter_write_data(coupling%adapter_ptr, values, numnod, &
+!            call coupling_adapter_write_data(coupling%adapter_ptr, coupling%values, numnod, &
 !              real(dt, c_double), coupling_displacements)
 !            ! Read positions
-!            call coupling_adapter_read_data(coupling%adapter_ptr, values, numnod, &
+!            call coupling_adapter_read_data(coupling%adapter_ptr, coupling%values, numnod, &
 !              real(dt, c_double), coupling_displacements, coupling_replace)
 !            nodes%D(1:3,1:numnod) = real(coupling%values(1:3,1:numnod), WP)
 !          else if(name_id == coupling_forces) THEN
