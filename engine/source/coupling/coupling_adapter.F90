@@ -710,33 +710,36 @@
           end if
 #else
           call arret(2) ! single precision not available yet
-          if(name_id == coupling_displacements) then
-            ! Write displacements
-            coupling%values(1:3,1:numnod) = real(nodes%D(1:3,1:numnod), c_double)
-            call coupling_adapter_write_data(coupling%adapter_ptr, values, numnod, &
-              real(dt, c_double), coupling_displacements)
-            ! Read positions
-            call coupling_adapter_read_data(coupling%adapter_ptr, values, numnod, &
-              real(dt, c_double), coupling_displacements, coupling_replace)
-            nodes%D(1:3,1:numnod) = real(coupling%values(1:3,1:numnod), WP)
-          else if(name_id == coupling_forces) THEN
-            ! Write forces
-            coupling%values(1:3,1:numnod) = real(nodes%A(1:3,1:numnod) - nodes%FORCES(1:3,1:numnod), c_double)
-            call coupling_adapter_write_data(coupling%adapter_ptr, coupling%values, numnod, &
-              real(dt, c_double), coupling_forces)
-            ! Read forces
-            call coupling_adapter_read_data(coupling%adapter_ptr, coupling%values, numnod, &
-              real(dt, c_double), coupling_forces, coupling_add)
-            nodes%A(1:3,1:numnod) = real(coupling%values(1:3,1:numnod), WP)
-          else if(name_id == coupling_positions) then
-            ! Write positions
-            coupling%values(1:3,1:numnod) = real(nodes%X(1:3,1:numnod), c_double)
-            call coupling_adapter_write_data(coupling%adapter_ptr, coupling%values, numnod, &
-              real(dt, c_double), coupling_positions)
-            call coupling_adapter_read_data(coupling%adapter_ptr, coupling%values, numnod, &
-              real(dt, c_double), coupling_positions, coupling_replace)
-            nodes%X(1:3,1:numnod) = real(coupling%values(1:3,1:numnod), WP)
-          end if
+          ! Suppress unused variable warnings
+          if (name_id < -1) return
+          if (dt < 0.0_WP) return
+!          if(name_id == coupling_displacements) then
+!            ! Write displacements
+!            coupling%values(1:3,1:numnod) = real(nodes%D(1:3,1:numnod), c_double)
+!            call coupling_adapter_write_data(coupling%adapter_ptr, values, numnod, &
+!              real(dt, c_double), coupling_displacements)
+!            ! Read positions
+!            call coupling_adapter_read_data(coupling%adapter_ptr, values, numnod, &
+!              real(dt, c_double), coupling_displacements, coupling_replace)
+!            nodes%D(1:3,1:numnod) = real(coupling%values(1:3,1:numnod), WP)
+!          else if(name_id == coupling_forces) THEN
+!            ! Write forces
+!            coupling%values(1:3,1:numnod) = real(nodes%A(1:3,1:numnod) - nodes%FORCES(1:3,1:numnod), c_double)
+!            call coupling_adapter_write_data(coupling%adapter_ptr, coupling%values, numnod, &
+!              real(dt, c_double), coupling_forces)
+!            ! Read forces
+!            call coupling_adapter_read_data(coupling%adapter_ptr, coupling%values, numnod, &
+!              real(dt, c_double), coupling_forces, coupling_add)
+!            nodes%A(1:3,1:numnod) = real(coupling%values(1:3,1:numnod), WP)
+!          else if(name_id == coupling_positions) then
+!            ! Write positions
+!            coupling%values(1:3,1:numnod) = real(nodes%X(1:3,1:numnod), c_double)
+!            call coupling_adapter_write_data(coupling%adapter_ptr, coupling%values, numnod, &
+!              real(dt, c_double), coupling_positions)
+!            call coupling_adapter_read_data(coupling%adapter_ptr, coupling%values, numnod, &
+!              real(dt, c_double), coupling_positions, coupling_replace)
+!            nodes%X(1:3,1:numnod) = real(coupling%values(1:3,1:numnod), WP)
+!          end if
 #endif
 
         end subroutine coupling_sync
