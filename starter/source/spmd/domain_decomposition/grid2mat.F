@@ -88,6 +88,7 @@ C-----------------------------------------------
       USE MATPARAM_DEF_MOD
       USE FORMAT_MOD , ONLY : FMW_A_I
       use element_mod , only : nixs,nixq,nixc,nixp,nixt,nixr,nixtg
+      use zoltan_interface
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -236,6 +237,7 @@ C-----------------------------------------------
       EXTERNAL METIS_PartGraphKway, METIS_PartGraphRecursive,
      .         METIS_SetDefaultOptions,Wrap_METIS_PartGraphKway,
      .         WRAP_METIS_PARTGRAPHRECURSIVE
+      logical, parameter :: use_zoltan = .true.
 C-----------------------------------------------
 C   S o u r c e  L i n e s
 C-----------------------------------------------
@@ -571,19 +573,23 @@ C-----------------------------------------------
       ENDIF
       WRITE(ISTDO,'(A)')' .. DOMAIN DECOMPOSITION'
       WRITE(IOUT,'(A)')' '
-      IF(DECTYP==3)THEN
-        WRITE(IOUT,'(A)')
-     .  ' DOMAIN DECOMPOSITION USING MULTILEVEL KWAY'
-      ELSEIF(DECTYP==4)THEN
-        WRITE(IOUT,'(A)')
-     .  ' DOMAIN DECOMPOSITION USING MULTILEVEL RSB'
-      ELSEIF(DECTYP==5)THEN
-        WRITE(IOUT,'(A)')
-     .  ' DOMAIN DECOMPOSITION USING MULTILEVEL KWAY FOR IMPLICIT AND AMS'
-      ELSEIF(DECTYP==4)THEN
-        WRITE(IOUT,'(A)')
-     .  ' DOMAIN DECOMPOSITION USING MULTILEVEL RSB FOR IMPLICIT'
-      END IF
+      if(use_zoltan) then
+        WRITE(IOUT,'(A)') ' DOMAIN DECOMPOSITION USING ZOLTAN LIBRARY'
+      else
+        IF(DECTYP==3)THEN
+          WRITE(IOUT,'(A)')
+     .    ' DOMAIN DECOMPOSITION USING MULTILEVEL KWAY'
+        ELSEIF(DECTYP==4)THEN
+          WRITE(IOUT,'(A)')
+     .    ' DOMAIN DECOMPOSITION USING MULTILEVEL RSB'
+        ELSEIF(DECTYP==5)THEN
+          WRITE(IOUT,'(A)')
+     .    ' DOMAIN DECOMPOSITION USING MULTILEVEL KWAY FOR IMPLICIT AND AMS'
+        ELSEIF(DECTYP==4)THEN
+          WRITE(IOUT,'(A)')
+     .    ' DOMAIN DECOMPOSITION USING MULTILEVEL RSB FOR IMPLICIT'
+        END IF
+      ENDIF
       WRITE(IOUT,'(A)')
      .  ' ------------------------------------------'
       IF (IPARI0==1) THEN
@@ -2152,10 +2158,15 @@ c        print *,'estimate memory=',i,nelem,XADJ(NELEM+1)
          IF(DECTYP==3.OR.DECTYP==5)THEN
 C KWAY METIS
       
+          if (.not. use_zoltan) then
           IERR1 = Wrap_METIS_PartGraphKway(
      1      NELEM,NCOND,XADJ,ADJNCY,
      2      IWD,NNODE,
      3      UBVEC,OPTIONS,NEC,CEP)
+          ELSE
+          UBVEC(1) = 1.05
+          ierr = wrap_zoltan_partition_multiconstraint(nelem, ncond, xadj, adjncy, iwd, nnode, UBVEC(1), nec, cep)
+          END IF
           IDB_METIS = 0
 
           IF(IDB_METIS == 1) THEN
@@ -2175,10 +2186,15 @@ C weight only on vertices
           END IF     
          ELSEIF(DECTYP==4.OR.DECTYP==6)THEN
 C RSB METIS
+          if(.not. use_zoltan) then
           IERR1 = Wrap_METIS_PartGraphRecursive(
      1      NELEM,NCOND,XADJ,ADJNCY,
      2      IWD,NNODE,
      3      UBVEC,OPTIONS,NEC,CEP)
+          ELSE
+          UBVEC(1) = 1.05
+          ierr = wrap_zoltan_partition_multiconstraint(nelem, ncond, xadj, adjncy, iwd, nnode, UBVEC(1), nec, cep)
+          END IF
         END IF
             CALL STAT_DOMDEC(
      1           WIS      ,WI2     ,WFSI      ,WDEL      ,WDDL     ,
@@ -2325,7 +2341,7 @@ C      CHECK Quality of Domain Decomp on elements
 
 
 
-            WRITE(IOUT,'(A,I5)') 'RETRY KWAY WITH NCOND =',NCOND2
+            WRITE(IOUT,'(A,I5)') 'RETRY WITH NCOND =',NCOND2
 
             ALLOCATE(IWD2(NCOND2*NELEM))
             DO I= 1, NELEM
@@ -2334,10 +2350,15 @@ C      CHECK Quality of Domain Decomp on elements
               ENDDO
             ENDDO 
 C  KWAY METIS
+            if(.not. use_zoltan) then
             IERR1 = WRAP_METIS_PartGraphKway(
      1      NELEM,NCOND2,XADJ,ADJNCY,
      2      IWD2,NNODE,
      3      UBVEC,OPTIONS,NEC,CEP)    
+            ELSE
+            UBVEC(1) = 1.05
+            ierr = wrap_zoltan_partition_multiconstraint(nelem, ncond2, xadj, adjncy,iwd2, nnode, UBVEC(1), nec, cep)
+            END IF  
             CALL STAT_DOMDEC(
      1           WIS      ,WI2     ,WFSI      ,WDEL      ,WDDL     ,
      2           WCAND    ,WSOL    ,WR2R      ,WKIN      ,IWD      ,
@@ -2364,10 +2385,15 @@ C  KWAY METIS
 
 C  RSB METIS
 
+              if( .not. use_zoltan) then
               IERR1 = WRAP_METIS_PartGraphRecursive(
      1        NELEM,NCOND2,XADJ,ADJNCY,
      2        IWD2,NNODE,
      3        UBVEC,OPTIONS,NEC,CEP)
+              ELSE
+              UBVEC(1) = 1.05
+              ierr = wrap_zoltan_partition_multiconstraint(nelem, ncond2, xadj, adjncy, iwd2, nnode, UBVEC(1), nec, cep)
+              END IF
               CALL STAT_DOMDEC(
      1             WIS      ,WI2     ,WFSI      ,WDEL      ,WDDL     ,
      2             WCAND    ,WSOL    ,WR2R      ,WKIN      ,IWD      ,
