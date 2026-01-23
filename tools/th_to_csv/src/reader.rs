@@ -147,10 +147,6 @@ pub fn t01_pre_read(filename: &str) -> ConversionResult<Dimensions> {
     let _nglob = reader.read_integer()? as usize;
     reader.read_eor()?;
 
-    // Reopen file for detailed reading
-    let file = File::open(filename)?;
-    let mut reader = FortranReader::new(file);
-
     // Skip to hierarchy info again
     reader.read_eor()?;
     reader.read_integer()?; // thicode

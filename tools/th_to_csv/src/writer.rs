@@ -113,7 +113,8 @@ pub fn csv_file_write(
             let value = data.all_data[data_idx];
             
             // Check if this variable needs impulse-to-force conversion
-            let needs_conversion = var_idx < is_impulse.len() && is_impulse[var_idx];
+            // Subtract 1 because var_idx includes time column at index 0
+            let needs_conversion = var_idx - 1 < is_impulse.len() && is_impulse[var_idx - 1];
             
             if needs_conversion && dimensions.nb_time_step > 1 {
                 // Calculate force from impulse using central difference
