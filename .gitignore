@@ -36,3 +36,7 @@ extlib.zip
 *.cpp.json
 *.c.json
 .devcontainer/**
+# Rust
+target/
+Cargo.lock
+**/*.rs.bk
