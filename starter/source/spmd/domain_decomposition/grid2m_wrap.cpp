@@ -20,9 +20,6 @@
 //Copyright>    As an alternative to this open-source version, Altair also offers Altair Radioss
 //Copyright>    software under a commercial license.  Contact Altair to discuss further if the
 //Copyright>    commercial version may interest you: https://www.altair.com/radioss/.
-
-// C++ wrapper layer for METIS calls.
-// Exposes a single unmangled symbol per function so Fortran can bind via BIND(C, name="...").
 // C++ wrapper layer for METIS calls.
 // Exposes a single unmangled symbol per function so Fortran can bind via BIND(C, name="...").
 
@@ -104,6 +101,71 @@ static constexpr float MERGE_ALPHA = 0.5f; // Threshold factor for merging parts
 using metis_part_fn_t = int(*)(int*, int*, int*, int*, int*, int*, int*, int*, float*, float*, int*, int*, int*);
 
 /**
+ * Identify border vertices of a part (vertices with fewest intra-part edges).
+ * Returns a list of coarse vertex IDs sorted by number of intra-part edges (ascending).
+ * 
+ * Arguments:
+ *   part_coarse_vertices - list of coarse vertex IDs in this part
+ *   coarse_to_elements - mapping from coarse vertex to list of elements
+ *   part - original part assignment per element
+ *   target_part_id - the part ID we're analyzing
+ *   coarse_xadj, coarse_adjncy - adjacency structure of coarse graph (1-indexed)
+ */
+static std::vector<int> identify_border_vertices(
+    const std::vector<int>& part_coarse_vertices,
+    const std::vector<std::vector<int>>& coarse_to_elements,
+    const int* part,
+    int target_part_id,
+    const std::vector<int>& coarse_xadj,
+    const std::vector<int>& coarse_adjncy)
+{
+    // For each coarse vertex, count intra-part edges
+    std::vector<std::pair<int, int>> vertex_intra_edges;  // {coarse_vertex_id, intra_edge_count}
+    vertex_intra_edges.reserve(part_coarse_vertices.size());
+    
+    for (int cv : part_coarse_vertices) {
+        int intra_edge_count = 0;
+        
+        int adj_start = coarse_xadj[cv] - 1;  // Convert to 0-indexed
+        int adj_end = coarse_xadj[cv + 1] - 1;
+        
+        for (int idx = adj_start; idx < adj_end; ++idx) {
+            int neighbor_cv = coarse_adjncy[idx] - 1;  // Convert to 0-indexed
+            
+            // Check if neighbor is in the same part by checking its elements
+            bool same_part = false;
+            if (!coarse_to_elements[neighbor_cv].empty()) {
+                int neighbor_part = part[coarse_to_elements[neighbor_cv][0]];
+                if (neighbor_part == target_part_id) {
+                    same_part = true;
+                }
+            }
+            
+            if (same_part) {
+                intra_edge_count++;
+            }
+        }
+        
+        vertex_intra_edges.push_back({cv, intra_edge_count});
+    }
+    
+    // Sort by intra-edge count (ascending - fewest intra-edges first = border vertices)
+    std::sort(vertex_intra_edges.begin(), vertex_intra_edges.end(),
+              [](const std::pair<int,int>& a, const std::pair<int,int>& b) {
+                  return a.second < b.second;
+              });
+    
+    // Extract just the vertex IDs
+    std::vector<int> border_vertices;
+    border_vertices.reserve(vertex_intra_edges.size());
+    for (const auto& p : vertex_intra_edges) {
+        border_vertices.push_back(p.first);
+    }
+    
+    return border_vertices;
+}
+
+/**
  * Helper function to subdivide a large part into sub-partitions of ~128 elements each.
  * Uses METIS kway partitioning (unweighted).
  * 
@@ -179,6 +241,243 @@ static std::vector<int> subdivide_large_part(
     }
     
     return sub_partition;
+}
+
+/**
+ * Add fictive edges to improve connectivity for poorly-connected parts.
+ * 
+ * A part is considered poorly connected if it has fewer than threshold external edges,
+ * where threshold = 5% of the number of coarse vertices in the part.
+ * 
+ * Fictive edges (weight=1) are added between border vertices of poorly-connected parts
+ * and border vertices of the largest part.
+ * 
+ * Returns: number of fictive edges added
+ */
+static int add_fictive_edges_for_connectivity(
+    int n_coarse,
+    const std::vector<int>& elem_to_coarse,
+    const std::vector<int>& coarse_to_part,
+    const std::vector<std::vector<int>>& coarse_to_elements,
+    const int* part,
+    int nelem,
+    std::vector<int>& coarse_xadj,
+    std::vector<int>& coarse_adjncy,
+    std::vector<int>& coarse_adjwgt)
+{
+    // Step 1: Group coarse vertices by their original part
+    std::unordered_map<int, std::vector<int>> part_to_coarse_vertices;
+    
+    for (int cv = 0; cv < n_coarse; ++cv) {
+        const auto& elems = coarse_to_elements[cv];
+        if (elems.empty()) continue;
+        
+        // Determine which part this coarse vertex belongs to
+        // Take the part of the first element (all elements in a coarse vertex from
+        // merged small parts will have the same part ID)
+        int part_id = part[elems[0]];
+        
+        if (part_id >= 0) {
+            part_to_coarse_vertices[part_id].push_back(cv);
+        }
+    }
+    
+    if (part_to_coarse_vertices.empty()) {
+        std::fprintf(stdout, "[METIS fictive] No parts found, skipping fictive edge addition\n");
+        return 0;
+    }
+    
+    // Step 2: Find the largest part (by number of coarse vertices)
+    int largest_part_id = -1;
+    size_t largest_part_size = 0;
+    
+    for (const auto& kv : part_to_coarse_vertices) {
+        if (kv.second.size() > largest_part_size) {
+            largest_part_size = kv.second.size();
+            largest_part_id = kv.first;
+        }
+    }
+    
+    if (largest_part_id < 0) {
+        std::fprintf(stdout, "[METIS fictive] Could not identify largest part\n");
+        return 0;
+    }
+    
+    std::fprintf(stdout, "[METIS fictive] Largest part: ID=%d with %zu coarse vertices\n",
+                 largest_part_id, largest_part_size);
+    
+    // Step 3: For each part, count external edges
+    std::unordered_map<int, int> part_external_edges;
+    
+    for (const auto& kv : part_to_coarse_vertices) {
+        int pid = kv.first;
+        const auto& vertices = kv.second;
+        
+        int external_count = 0;
+        for (int cv : vertices) {
+            int adj_start = coarse_xadj[cv] - 1;
+            int adj_end = coarse_xadj[cv + 1] - 1;
+            
+            for (int idx = adj_start; idx < adj_end; ++idx) {
+                int neighbor_cv = coarse_adjncy[idx] - 1;
+                
+                // Check if neighbor belongs to a different part
+                if (!coarse_to_elements[neighbor_cv].empty()) {
+                    int neighbor_part = part[coarse_to_elements[neighbor_cv][0]];
+                    if (neighbor_part != pid) {
+                        external_count++;
+                    }
+                }
+            }
+        }
+        
+        part_external_edges[pid] = external_count;
+    }
+    
+    // Step 4: Identify poorly-connected parts (< 5% threshold)
+    std::vector<int> poorly_connected_parts;
+    const double threshold_ratio = 0.05;
+    
+    for (const auto& kv : part_to_coarse_vertices) {
+        int pid = kv.first;
+        if (pid == largest_part_id) continue;  // Skip the largest part
+        
+        size_t part_size = kv.second.size();
+        int external_edges = part_external_edges[pid];
+        int threshold = static_cast<int>(std::ceil(threshold_ratio * part_size));
+        
+        if (external_edges < threshold) {
+            poorly_connected_parts.push_back(pid);
+            std::fprintf(stdout, "[METIS fictive] Part %d is poorly connected: %d external edges < %d threshold (%.1f%% of %zu vertices)\n",
+                         pid, external_edges, threshold, threshold_ratio * 100, part_size);
+        }
+    }
+    
+    if (poorly_connected_parts.empty()) {
+        std::fprintf(stdout, "[METIS fictive] All parts are well-connected, no fictive edges needed\n");
+        return 0;
+    }
+    
+    // Step 5: Identify border vertices for largest part
+    std::vector<int> largest_part_border = identify_border_vertices(
+        part_to_coarse_vertices[largest_part_id],
+        coarse_to_elements,
+        part,
+        largest_part_id,
+        coarse_xadj,
+        coarse_adjncy
+    );
+    
+    if (largest_part_border.empty()) {
+        std::fprintf(stdout, "[METIS fictive] ERROR: Largest part has no border vertices\n");
+        return 0;
+    }
+    
+    std::fprintf(stdout, "[METIS fictive] Largest part has %zu border vertices\n", largest_part_border.size());
+    
+    // Step 6: Add fictive edges between poorly-connected parts and largest part
+    struct FictiveEdge {
+        int cv1;
+        int cv2;
+    };
+    std::vector<FictiveEdge> fictive_edges;
+    
+    for (int pid : poorly_connected_parts) {
+        const auto& part_vertices = part_to_coarse_vertices[pid];
+        
+        // Identify border vertices for this part
+        std::vector<int> part_border = identify_border_vertices(
+            part_vertices,
+            coarse_to_elements,
+            part,
+            pid,
+            coarse_xadj,
+            coarse_adjncy
+        );
+        
+        if (part_border.empty()) {
+            std::fprintf(stdout, "[METIS fictive] WARNING: Part %d has no border vertices, using all vertices\n", pid);
+            part_border = part_vertices;
+        }
+        
+        // Calculate number of fictive edges needed (5% of part size)
+        int n_fictive = static_cast<int>(std::ceil(threshold_ratio * part_vertices.size()));
+        
+        // Distribute edges across border vertices (scattered pattern)
+        int k_small = static_cast<int>(part_border.size());
+        int k_large = static_cast<int>(largest_part_border.size());
+        
+        for (int i = 0; i < n_fictive; ++i) {
+            int cv_small = part_border[i % k_small];
+            int cv_large = largest_part_border[i % k_large];
+            
+            fictive_edges.push_back({cv_small, cv_large});
+        }
+        
+        std::fprintf(stdout, "[METIS fictive] Adding %d fictive edges for part %d (distributed across %d x %d border vertices)\n",
+                     n_fictive, pid, k_small, k_large);
+    }
+    
+    // Step 7: Insert fictive edges into adjacency structure
+    // We need to rebuild the adjacency arrays with the new edges
+    
+    // Count new degree for each vertex
+    std::vector<int> added_degree(n_coarse, 0);
+    for (const auto& edge : fictive_edges) {
+        added_degree[edge.cv1]++;
+        added_degree[edge.cv2]++;
+    }
+    
+    // Build new XADJ
+    std::vector<int> new_xadj(n_coarse + 1);
+    new_xadj[0] = 1;  // 1-indexed
+    for (int cv = 0; cv < n_coarse; ++cv) {
+        int old_degree = coarse_xadj[cv + 1] - coarse_xadj[cv];
+        int new_degree = old_degree + added_degree[cv];
+        new_xadj[cv + 1] = new_xadj[cv] + new_degree;
+    }
+    
+    size_t new_edge_count = static_cast<size_t>(new_xadj[n_coarse] - 1);
+    std::vector<int> new_adjncy(new_edge_count);
+    std::vector<int> new_adjwgt(new_edge_count);
+    
+    // Copy existing edges
+    std::vector<int> write_pos(n_coarse);
+    for (int cv = 0; cv < n_coarse; ++cv) {
+        write_pos[cv] = new_xadj[cv] - 1;  // 0-indexed write position
+        
+        int old_start = coarse_xadj[cv] - 1;
+        int old_end = coarse_xadj[cv + 1] - 1;
+        
+        for (int idx = old_start; idx < old_end; ++idx) {
+            new_adjncy[write_pos[cv]] = coarse_adjncy[idx];
+            new_adjwgt[write_pos[cv]] = coarse_adjwgt[idx];
+            write_pos[cv]++;
+        }
+    }
+    
+    // Add fictive edges (both directions)
+    for (const auto& edge : fictive_edges) {
+        // Add edge cv1 -> cv2
+        new_adjncy[write_pos[edge.cv1]] = edge.cv2 + 1;  // 1-indexed
+        new_adjwgt[write_pos[edge.cv1]] = 1;  // Weight = 1
+        write_pos[edge.cv1]++;
+        
+        // Add edge cv2 -> cv1
+        new_adjncy[write_pos[edge.cv2]] = edge.cv1 + 1;  // 1-indexed
+        new_adjwgt[write_pos[edge.cv2]] = 1;  // Weight = 1
+        write_pos[edge.cv2]++;
+    }
+    
+    // Replace old arrays with new ones
+    coarse_xadj = std::move(new_xadj);
+    coarse_adjncy = std::move(new_adjncy);
+    coarse_adjwgt = std::move(new_adjwgt);
+    
+    int total_fictive = static_cast<int>(fictive_edges.size());
+    std::fprintf(stdout, "[METIS fictive] Added %d fictive edges (scattered pattern)\n", total_fictive);
+    
+    return total_fictive;
 }
 
 static int metis_partition_with_coarsening(
@@ -575,6 +874,22 @@ static int metis_partition_with_coarsening(
             coarse_vwgt[weight_idx] = static_cast<int>(w);
         }
     }
+
+    // =========================================================================
+    // Step 5.5: Add fictive edges for poorly-connected parts
+    // =========================================================================
+
+    int n_fictive = add_fictive_edges_for_connectivity(
+        n_coarse,
+        elem_to_coarse,
+        coarse_to_part,
+        coarse_to_elements,
+        part,
+        nelem,
+        coarse_xadj,
+        coarse_adjncy,
+        coarse_adjwgt
+    );
 
     // =========================================================================
     // Step 6: Call METIS on coarse graph

@@ -2373,6 +2373,8 @@ C  KWAY METIS
      .        ' DOMAINS:',NSPMD,'  MIN/MAX/AVERAGE:',
      .        NINT(DMIN(MAIN_TARGET)),NINT(DMAX(MAIN_TARGET)),NINT(AVERAGE(MAIN_TARGET))
 
+            WRITE(IOUT,'(A,I5)') 'RETRY KWAY WITH RSB =',NCOND2
+
 C  RSB METIS
 
               IERR1 = WRAP_METIS_PartGraphRecursive_part(
