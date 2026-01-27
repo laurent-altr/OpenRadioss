@@ -23,6 +23,8 @@
 
 // C++ wrapper layer for METIS calls.
 // Exposes a single unmangled symbol per function so Fortran can bind via BIND(C, name="...").
+// C++ wrapper layer for METIS calls.
+// Exposes a single unmangled symbol per function so Fortran can bind via BIND(C, name="...").
 
 #include <cstdlib>
 #include <cstdint>
@@ -32,6 +34,7 @@
 #include <numeric>
 #include <cstdio>
 #include <limits>
+#include <cmath>
 
 extern "C" {
 
@@ -100,6 +103,84 @@ static constexpr float MERGE_ALPHA = 0.5f; // Threshold factor for merging parts
 
 using metis_part_fn_t = int(*)(int*, int*, int*, int*, int*, int*, int*, int*, float*, float*, int*, int*, int*);
 
+/**
+ * Helper function to subdivide a large part into sub-partitions of ~128 elements each.
+ * Uses METIS kway partitioning (unweighted).
+ * 
+ * Returns a vector mapping each element in the part to its sub-partition ID (0-based).
+ */
+static std::vector<int> subdivide_large_part(
+    const std::vector<int>& elements,
+    int nelem,
+    const int* XADJ,
+    const int* ADJNCY,
+    int* OPTIONS)
+{
+    const int part_size = static_cast<int>(elements.size());
+    const int n_sub_parts = static_cast<int>(std::ceil(static_cast<double>(part_size) / VECTOR_GROUP_SIZE));
+    
+    // Build element index mapping
+    std::unordered_map<int, int> elem_to_local;
+    elem_to_local.reserve(part_size);
+    for (int i = 0; i < part_size; ++i) {
+        elem_to_local[elements[i]] = i;
+    }
+    
+    // Build subgraph adjacency structure (1-indexed for METIS)
+    std::vector<int> sub_xadj(part_size + 1);
+    sub_xadj[0] = 1;  // 1-indexed
+    
+    std::vector<int> sub_adjncy;
+    sub_adjncy.reserve(part_size * 8);  // Rough estimate
+    
+    for (int i = 0; i < part_size; ++i) {
+        int e = elements[i];
+        int adj_start = XADJ[e] - 1;      // Convert from 1-indexed
+        int adj_end = XADJ[e + 1] - 1;
+        
+        for (int idx = adj_start; idx < adj_end; ++idx) {
+            int neighbor = ADJNCY[idx] - 1;  // Convert from 1-indexed
+            
+            // Only include edges to elements within this part
+            auto it = elem_to_local.find(neighbor);
+            if (it != elem_to_local.end()) {
+                int local_neighbor = it->second;
+                sub_adjncy.push_back(local_neighbor + 1);  // 1-indexed
+            }
+        }
+        
+        sub_xadj[i + 1] = static_cast<int>(sub_adjncy.size()) + 1;  // 1-indexed
+    }
+    
+    // Call METIS kway (unweighted)
+    std::vector<int> sub_partition(part_size);
+    int sub_ncon = 1;  // No weights
+    int sub_edgecut = 0;
+    
+    int ierr = METIS_PartGraphKway(
+        const_cast<int*>(&part_size),
+        &sub_ncon,
+        sub_xadj.data(),
+        sub_adjncy.data(),
+        nullptr,      // No vertex weights
+        nullptr,      // No vsize
+        nullptr,      // No edge weights
+        const_cast<int*>(&n_sub_parts),
+        nullptr,      // No tpwgts
+        nullptr,      // No ubvec needed for unweighted
+        OPTIONS,
+        &sub_edgecut,
+        sub_partition.data()
+    );
+    
+    if (ierr != 1) {
+        std::fprintf(stdout, "[METIS subdivide] WARNING: METIS returned error %d for part with %d elements\n",
+                     ierr, part_size);
+    }
+    
+    return sub_partition;
+}
+
 static int metis_partition_with_coarsening(
     metis_part_fn_t part_fn,
     int *NELEM, int *NCOND, int *XADJ, int *ADJNCY,
@@ -125,13 +206,8 @@ static int metis_partition_with_coarsening(
 
     std::vector<double> total_weight(ncond, 0.0);
     for (int c = 0; c < ncond; ++c) {
-        size_t idx;
         for (int e = 0; e < nelem; ++e) {
-//!           if (!safe_array_index(e, c, nelem, idx)) {
-//!               std::fprintf(stdout, "[METIS coarse] ERROR: Array index overflow for element %d, constraint %d\n", e, c);
-//!               return -1;
-//!           }
-            idx = static_cast<size_t>(e) * ncond + static_cast<size_t>(c);
+            size_t idx = static_cast<size_t>(e) * ncond + static_cast<size_t>(c);
             total_weight[c] += IWD[idx];
         }
     }
@@ -147,10 +223,6 @@ static int metis_partition_with_coarsening(
         for (int e : elems) {
             for (int c = 0; c < ncond; ++c) {
                 size_t idx = static_cast<size_t>(e) * ncond + static_cast<size_t>(c);
-//!               if (!safe_array_index(e, c, nelem, idx)) {
-//!                   std::fprintf(stdout, "[METIS coarse] ERROR: Array index overflow for element %d, constraint %d\n", e, c);
-//!                   return -1;
-//!               }
                 w[c] += IWD[idx];
             }
         }
@@ -158,7 +230,7 @@ static int metis_partition_with_coarsening(
     }
 
     // =========================================================================
-    // Step 2: Decide which small parts can be merged
+    // Step 2: Classify parts as small, large, or mergeable
     // =========================================================================
 
     std::unordered_map<int, bool> part_merged;
@@ -166,18 +238,22 @@ static int metis_partition_with_coarsening(
     
     int n_small_parts = 0;
     int n_merged_parts = 0;
+    int n_large_parts = 0;
 
     for (const auto &kv : part_to_elements) {
         int pid = kv.first;
         size_t size = kv.second.size();
 
         if (size >= static_cast<size_t>(VECTOR_GROUP_SIZE)) {
+            // Large part - will be subdivided
             part_merged[pid] = false;
+            n_large_parts++;
             continue;
         }
 
         n_small_parts++;
 
+        // Check if small part can be merged
         bool can_merge = true;
         const auto &pw = part_weights[pid];
         for (int c = 0; c < ncond; ++c) {
@@ -200,9 +276,8 @@ static int metis_partition_with_coarsening(
     // Fallback: if no small parts exist, call METIS directly on original graph
     // =========================================================================
 
-    if (n_small_parts == 0) {
-        std::fprintf(stdout, "[METIS coarse] No small parts (< %d elements), using original graph\n",
-                     VECTOR_GROUP_SIZE);
+    if (n_small_parts == 0 && n_large_parts == 0) {
+        std::fprintf(stdout, "[METIS coarse] No parts found, using original graph\n");
 
         int *vsize = nullptr;
         int *ADJWGT2 = nullptr;
@@ -219,9 +294,10 @@ static int metis_partition_with_coarsening(
     }
     size_t elements_without_part = static_cast<size_t>(nelem) - total_elements_in_parts;
     
-    std::fprintf(stdout, "[METIS coarse] Parts: %zu total, %d small (< %d elements), %d merged, %d rejected (weight constraint)\n",
-                 part_to_elements.size(), n_small_parts, VECTOR_GROUP_SIZE, n_merged_parts,
-                 n_small_parts - n_merged_parts);
+    std::fprintf(stdout, "[METIS coarse] Parts: %zu total (%d large >= %d elements, %d small < %d elements)\n",
+                 part_to_elements.size(), n_large_parts, VECTOR_GROUP_SIZE, n_small_parts, VECTOR_GROUP_SIZE);
+    std::fprintf(stdout, "[METIS coarse] Small parts: %d merged, %d rejected (weight constraint)\n",
+                 n_merged_parts, n_small_parts - n_merged_parts);
     std::fprintf(stdout, "[METIS coarse] Elements: %zu in parts, %zu without part (negative ID)\n",
                  total_elements_in_parts, elements_without_part);
 
@@ -236,25 +312,62 @@ static int metis_partition_with_coarsening(
     std::vector<std::vector<int>> coarse_to_elements;
     
     // Reserve space to avoid reallocations
-    size_t estimated_coarse_vertices = part_to_elements.size() + elements_without_part;
+    size_t estimated_coarse_vertices = part_to_elements.size() * 2 + elements_without_part;
     coarse_to_part.reserve(estimated_coarse_vertices);
     coarse_to_elements.reserve(estimated_coarse_vertices);
 
-    // Process parts (merged and unmerged)
+    int total_subdivisions = 0;
+
+    // Process parts
     for (const auto &kv : part_to_elements) {
         int pid = kv.first;
         const auto &elems = kv.second;
+        size_t part_size = elems.size();
 
-        if (part_merged[pid]) {
-            // Merge all elements in this part into one coarse vertex
+        if (part_size >= static_cast<size_t>(VECTOR_GROUP_SIZE)) {
+            // Large part: subdivide into groups of ~128 elements
+            std::vector<int> sub_partition = subdivide_large_part(elems, nelem, XADJ, ADJNCY, OPTIONS);
+            
+            // Group elements by sub-partition
+            int n_sub_parts = *std::max_element(sub_partition.begin(), sub_partition.end()) + 1;
+            std::vector<std::vector<int>> sub_groups(n_sub_parts);
+            
+            for (size_t i = 0; i < elems.size(); ++i) {
+                int sub_pid = sub_partition[i] - 1;  // Convert from 1-indexed to 0-indexed
+                if (sub_pid < 0 || sub_pid >= n_sub_parts) {
+                    std::fprintf(stdout, "[METIS coarse] ERROR: Invalid sub-partition ID %d for element %d\n",
+                                 sub_pid, elems[i]);
+                    continue;
+                }
+                sub_groups[sub_pid].push_back(elems[i]);
+            }
+            
+            // Create coarse vertices for each sub-group
+            for (int sub_pid = 0; sub_pid < n_sub_parts; ++sub_pid) {
+                const auto& sub_elems = sub_groups[sub_pid];
+                if (sub_elems.empty()) continue;
+                
+                for (int e : sub_elems) {
+                    elem_to_coarse[e] = coarse_id;
+                }
+                coarse_to_part.push_back(-1);  // Sub-partitions don't have a single part ID
+                coarse_to_elements.push_back(sub_elems);
+                coarse_id++;
+            }
+            
+            total_subdivisions += n_sub_parts;
+            
+        } else if (part_merged[pid]) {
+            // Small part that can be merged: all elements into one coarse vertex
             for (int e : elems) {
                 elem_to_coarse[e] = coarse_id;
             }
             coarse_to_part.push_back(pid);
             coarse_to_elements.push_back(elems);
             coarse_id++;
+            
         } else {
-            // Each element becomes its own coarse vertex
+            // Small part that cannot be merged: each element becomes its own coarse vertex
             for (int e : elems) {
                 elem_to_coarse[e] = coarse_id;
                 coarse_to_part.push_back(-1);
@@ -264,7 +377,7 @@ static int metis_partition_with_coarsening(
         }
     }
 
-    // Process elements without part assignment
+    // Process elements without part assignment (keep as individual coarse vertices)
     for (int e = 0; e < nelem; ++e) {
         if (part[e] < 0) {
             elem_to_coarse[e] = coarse_id;
@@ -294,6 +407,7 @@ static int metis_partition_with_coarsening(
         return -1;
     }
 
+    std::fprintf(stdout, "[METIS coarse] Large parts subdivided into %d groups\n", total_subdivisions);
     std::fprintf(stdout, "[METIS coarse] Graph: %d -> %d vertices (%.1f%% reduction)\n",
                  nelem, n_coarse, 100.0 * (1.0 - static_cast<double>(n_coarse) / nelem));
 
@@ -341,8 +455,7 @@ static int metis_partition_with_coarsening(
                              neighbor, cv_n, n_coarse);
                 continue;
             }
-            if (cv_e < cv_n)
-            { // Only process one direction, skip self-loops automatically
+            if (cv_e < cv_n) { // Only process one direction, skip self-loops automatically
                 edge_list.push_back({cv_e, cv_n});
             }
         }
@@ -452,10 +565,6 @@ static int metis_partition_with_coarsening(
             int64_t w = 0;
             for (int e : elems) {
                 size_t idx = static_cast<size_t>(e) * ncond + static_cast<size_t>(c);
-//!               if (!safe_array_index(e, c, nelem, idx)) {
-//!                   std::fprintf(stdout, "[METIS coarse] ERROR: Array index overflow for element %d, constraint %d\n", e, c);
-//!                   return -1;
-//!               }
                 w += IWD[idx];
             }
             if (w > std::numeric_limits<int>::max() || w < std::numeric_limits<int>::min()) {
@@ -463,10 +572,6 @@ static int metis_partition_with_coarsening(
                 w = std::numeric_limits<int>::max();
             }
             size_t weight_idx = static_cast<size_t>(cv) * ncond + static_cast<size_t>(c);
-//            if (!safe_array_index(cv, c, n_coarse, weight_idx)) {
-//                std::fprintf(stdout, "[METIS coarse] ERROR: Weight array index overflow\n");
-//                return -1;
-//            }
             coarse_vwgt[weight_idx] = static_cast<int>(w);
         }
     }
@@ -512,7 +617,7 @@ static int metis_partition_with_coarsening(
 }
 
 /**
- * Build a coarse graph by merging small parts, then partition with METIS.
+ * Build a coarse graph by merging small parts and subdividing large parts, then partition with METIS.
  *
  * This function assumes Fortran calling convention with 1-based indexing.
  *
