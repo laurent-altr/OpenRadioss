@@ -115,10 +115,10 @@ C-----------------------------------------------------------------------
 C
 C initialisation (cf triangles)
       FAR(1:JLT,1:4)  = 0
-      PENT(1:JLT,1:4) = EP20
-      DD  (1:JLT,1:4) = EP20
-      DIST(1:JLT)= EP20
-      LD(1:JLT)  = EP20
+      PENT(1:JLT,1:4) = EP30
+      DD  (1:JLT,1:4) = EP30
+      DIST(1:JLT)= EP30
+      LD(1:JLT)  = EP30
 C
       DO I=1,JLT
 C
