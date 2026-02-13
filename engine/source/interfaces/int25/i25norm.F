@@ -119,141 +119,107 @@ c
         ALLOCATE(TAGMSR(NRTM))
         TAGMSR(1:NRTM) = 0
 c
-        DO N=NSNF,NSNL
+      ENDIF
+
+      DO N=NSNF,NSNL
+        IF(FLAGREMN == 2 ) THEN
           NOR1 = KREMNOR(N)+1
           NOR2 = KREMNOR(N+1)
           DO M=NOR1,NOR2
              TAGMSR(REMNOR(M)) = 1
           ENDDO
+        ENDIF
 c
-          IF(IRTLM(1,N) > 0)THEN
-             IF(STFNS(N)/=ZERO.AND.IRTLM(4,N) == ISPMD+1)THEN
-                L = IRTLM(3,N)
+        IF(IRTLM(1,N) > 0)THEN
+          IF(STFNS(N)/=ZERO.AND.IRTLM(4,N) == ISPMD+1)THEN
+            L = IRTLM(3,N)
+            ACTNOR(L)=1
 
-                ACTNOR(L)=1
-
-                DO J=1,4
-                  NOR=ADMSR(J,L)
+            DO J=1,4
+              NOR=ADMSR(J,L)
 C
 C             consider l and all neighboring segments (see sliding)
-                  DO NL=KNOR2MSR(NOR)+1,KNOR2MSR(NOR+1)
-                    LVOIS= NOR2MSR(NL)
-                    IF(TAGMSR(LVOIS)==0.AND.STFM(LVOIS) > ZERO) THEN
-                      ACTNOR(LVOIS)=1
-
-                      DO K=1,4
-                        NOD=IRECT(K,LVOIS)
-                        TAGNOD(NOD)=1
-                      END DO
-                    ENDIF
-                  END DO 
-                END DO
-             END IF
-          END IF
-          DO M=NOR1,NOR2
-              TAGMSR(REMNOR(M)) = 0
-           ENDDO
-        END DO
-      ELSE ! FLAGREMN
-        DO N=NSNF,NSNL
-          IF(IRTLM(1,N) > 0)THEN
-             IF(STFNS(N)/=ZERO.AND.IRTLM(4,N) == ISPMD+1)THEN
-C                                  IRTLM(4,N) is INTERCEP
-                L = IRTLM(3,N)
-                ACTNOR(L)=1
-                DO J=1,4
-                  NOR=ADMSR(J,L)
-C             consider l and all neighboring segments (see sliding)
-                  DO NL=KNOR2MSR(NOR)+1,KNOR2MSR(NOR+1)
-                    LVOIS= NOR2MSR(NL)
-                    IF(STFM(LVOIS) > ZERO) THEN
-                       ACTNOR(LVOIS)=1
-                       DO K=1,4
-                          NOD=IRECT(K,LVOIS)
-                          TAGNOD(NOD)=1
-                       END DO
-                    ENDIF
-                  END DO 
-                END DO
-             END IF
-          END IF
-        ENDDO
-      ENDIF
-      
-C
-      NSNRF = 1 + NSNR*(JTASK-1) / NTHREAD
-      NSNRL = NSNR*JTASK / NTHREAD
-
-      IF(FLAGREMN == 2 ) THEN
-
-        DO N=NSNRF,NSNRL
-           NOR1 = KREMNOR_FI(NIN)%P(N) +1
-           NOR2 = KREMNOR_FI(NIN)%P(N+1) 
-           DO M=NOR1,NOR2
-              TAGMSR(REMNOR_FI(NIN)%P(M)) = 1
-           ENDDO
-           IF(IRTLM_FI(NIN)%P(1,N) > 0)THEN
-            IF(STIFI(NIN)%P(N)/=ZERO.AND.IRTLM_FI(NIN)%P(4,N) == ISPMD+1)THEN
-              L = IRTLM_FI(NIN)%P(3,N)
-
-              ACTNOR(L)=1
-
-              DO J=1,4
-                NOR=ADMSR(J,L)
-C
-C             consider l and all neighboring segments (see sliding)
-                DO NL=KNOR2MSR(NOR)+1,KNOR2MSR(NOR+1)
-                  LVOIS= NOR2MSR(NL)
+              DO NL=KNOR2MSR(NOR)+1,KNOR2MSR(NOR+1)
+                LVOIS= NOR2MSR(NL)
+                IF(FLAGREMN == 2 ) THEN
                   IF(TAGMSR(LVOIS)==0.AND.STFM(LVOIS) > ZERO) THEN
                     ACTNOR(LVOIS)=1
-
                     DO K=1,4
                       NOD=IRECT(K,LVOIS)
                       TAGNOD(NOD)=1
                     END DO
                   ENDIF
-
-                END DO
-              END DO
-
-            END IF
+                ELSE
+                  IF(STFM(LVOIS) > ZERO) THEN
+                    ACTNOR(LVOIS)=1
+                    DO K=1,4
+                      NOD=IRECT(K,LVOIS)
+                      TAGNOD(NOD)=1
+                    END DO
+                  ENDIF
+                ENDIF
+              END DO 
+            END DO
           END IF
+        END IF
+        IF(FLAGREMN == 2 ) THEN
           DO M=NOR1,NOR2
-             TAGMSR(REMNOR_FI(NIN)%P(M)) = 0
+            TAGMSR(REMNOR(M)) = 0
           ENDDO
-        END DO
-      ELSE ! FLAGREMN
+        ENDIF
+      END DO
+      
+C
+      NSNRF = 1 + NSNR*(JTASK-1) / NTHREAD
+      NSNRL = NSNR*JTASK / NTHREAD
 
-        DO N=NSNRF,NSNRL
-           IF(IRTLM_FI(NIN)%P(1,N) > 0)THEN
-            IF(STIFI(NIN)%P(N)/=ZERO.AND.IRTLM_FI(NIN)%P(4,N) == ISPMD+1)THEN
-              L = IRTLM_FI(NIN)%P(3,N)
-C 
-              ACTNOR(L)=1
+      DO N=NSNRF,NSNRL
+        IF(FLAGREMN == 2 ) THEN
+          NOR1 = KREMNOR_FI(NIN)%P(N) +1
+          NOR2 = KREMNOR_FI(NIN)%P(N+1) 
+          DO M=NOR1,NOR2
+            TAGMSR(REMNOR_FI(NIN)%P(M)) = 1
+          ENDDO
+        ENDIF
+        IF(IRTLM_FI(NIN)%P(1,N) > 0)THEN
+          IF(STIFI(NIN)%P(N)/=ZERO.AND.IRTLM_FI(NIN)%P(4,N) == ISPMD+1)THEN
+            L = IRTLM_FI(NIN)%P(3,N)
+            ACTNOR(L)=1
 
-              DO J=1,4
-                NOR=ADMSR(J,L)
+            DO J=1,4
+              NOR=ADMSR(J,L)
 C
 C             consider l and all neighboring segments (see sliding)
-                DO NL=KNOR2MSR(NOR)+1,KNOR2MSR(NOR+1)
-                  LVOIS= NOR2MSR(NL)
-                  IF(STFM(LVOIS) > ZERO) THEN
-
-                     ACTNOR(LVOIS)=1
-
-                     DO K=1,4
-                        NOD=IRECT(K,LVOIS)
-                        TAGNOD(NOD)=1
-                     END DO
+              DO NL=KNOR2MSR(NOR)+1,KNOR2MSR(NOR+1)
+                LVOIS= NOR2MSR(NL)
+                IF(FLAGREMN == 2 ) THEN
+                  IF(TAGMSR(LVOIS)==0.AND.STFM(LVOIS) > ZERO) THEN
+                    ACTNOR(LVOIS)=1
+                    DO K=1,4
+                      NOD=IRECT(K,LVOIS)
+                      TAGNOD(NOD)=1
+                    END DO
                   ENDIF
-
-                END DO
+                ELSE
+                  IF(STFM(LVOIS) > ZERO) THEN
+                    ACTNOR(LVOIS)=1
+                    DO K=1,4
+                      NOD=IRECT(K,LVOIS)
+                      TAGNOD(NOD)=1
+                    END DO
+                  ENDIF
+                ENDIF
               END DO
+            END DO
 
-            END IF
           END IF
-        END DO
-      ENDIF
+        END IF
+        IF(FLAGREMN == 2 ) THEN
+          DO M=NOR1,NOR2
+            TAGMSR(REMNOR_FI(NIN)%P(M)) = 0
+          ENDDO
+        ENDIF
+      END DO
 C
 C     calculation of optimized candidates
       FIRST = I_STOK_RTLM + 1 + (I_STOK_GLO-I_STOK_RTLM)*(JTASK-1) / NTHREAD
@@ -313,6 +279,10 @@ C         Primary edges <=> only candidates retained for this cycle (optcd_e2s)
               TAGNOD(IRECT(2,IRM)) = 1
               TAGNOD(IRECT(3,IRM)) = 1
               TAGNOD(IRECT(4,IRM)) = 1
+              E2S_ACTNOR(ADMSR(1,IRM)) = 1
+              E2S_ACTNOR(ADMSR(2,IRM)) = 1
+              E2S_ACTNOR(ADMSR(3,IRM)) = 1
+              E2S_ACTNOR(ADMSR(4,IRM)) = 1
             END IF
           END DO
 C
@@ -346,30 +316,8 @@ C
               TAGNOD(IRECT(4,JRM)) = 1
             ENDIF
           ENDDO
-        ENDIF
-      ENDIF
 C
-      IF(IEDGE /= 0) THEN
-
-        SOL_EDGE =IEDGE/10 ! solids
-C
-        IF(SOL_EDGE/=0)THEN
-C
-C         Primary edges <=> only candidates retained for this cycle (optcd_e2s)    
-          FIRST = 1 + I_STOK_E2S*(JTASK-1) / NTHREAD
-          LAST  = I_STOK_E2S*JTASK / NTHREAD
-          DO I=FIRST,LAST
-            IF(CANDS_E2S(I)  < 0)THEN ! after optcd_e2s
-c              IF( LEDGE(LEDGE_TYPE,ABS(CANDS_E2S(I)))/=1)CYCLE
-              IRM=CANDM_E2S(I) 
-              IF(TAGNOD(IRECT(1,IRM))==1)E2S_ACTNOR(ADMSR(1,IRM)) = 1
-              IF(TAGNOD(IRECT(2,IRM))==1)E2S_ACTNOR(ADMSR(2,IRM)) = 1
-              IF(TAGNOD(IRECT(3,IRM))==1)E2S_ACTNOR(ADMSR(3,IRM)) = 1
-              IF(TAGNOD(IRECT(4,IRM))==1)E2S_ACTNOR(ADMSR(4,IRM)) = 1
-            END IF
-          END DO
-
-C         All secondary edges includes
+C         Process secondary edges for E2S_ACTNOR
           NEDGFT = 1 + (JTASK-1)*NUMBER_EDGE_TYPE1 / NTHREAD
           NEDGLT = JTASK*NUMBER_EDGE_TYPE1 / NTHREAD
           IF(JTASK==NTHREAD) NEDGLT =NUMBER_EDGE_TYPE1
@@ -623,22 +571,26 @@ C
             ZN4(I) = X04*Y01 - Y04*X01
 C           
 C           
-            AAA=RUN/MAX(REM30,SQRT(XN1(I)*XN1(I)+YN1(I)*YN1(I)+ZN1(I)*ZN1(I)))
+            AAA=XN1(I)*XN1(I)+YN1(I)*YN1(I)+ZN1(I)*ZN1(I)
+            AAA=RUN/MAX(REM30,SQRT(AAA))
             XN1(I) = XN1(I)*AAA
             YN1(I) = YN1(I)*AAA
             ZN1(I) = ZN1(I)*AAA
 C           
-            AAA=RUN/MAX(REM30,SQRT(XN2(I)*XN2(I)+YN2(I)*YN2(I)+ZN2(I)*ZN2(I)))
+            AAA=XN2(I)*XN2(I)+YN2(I)*YN2(I)+ZN2(I)*ZN2(I)
+            AAA=RUN/MAX(REM30,SQRT(AAA))
             XN2(I) = XN2(I)*AAA
             YN2(I) = YN2(I)*AAA
             ZN2(I) = ZN2(I)*AAA
 C           
-            AAA=RUN/MAX(REM30,SQRT(XN3(I)*XN3(I)+YN3(I)*YN3(I)+ZN3(I)*ZN3(I)))
+            AAA=XN3(I)*XN3(I)+YN3(I)*YN3(I)+ZN3(I)*ZN3(I)
+            AAA=RUN/MAX(REM30,SQRT(AAA))
             XN3(I) = XN3(I)*AAA
             YN3(I) = YN3(I)*AAA
             ZN3(I) = ZN3(I)*AAA
 C           
-            AAA=RUN/MAX(REM30,SQRT(XN4(I)*XN4(I)+YN4(I)*YN4(I)+ZN4(I)*ZN4(I)))
+            AAA=XN4(I)*XN4(I)+YN4(I)*YN4(I)+ZN4(I)*ZN4(I)
+            AAA=RUN/MAX(REM30,SQRT(AAA))
             XN4(I) = XN4(I)*AAA
             YN4(I) = YN4(I)*AAA
             ZN4(I) = ZN4(I)*AAA
@@ -916,7 +868,8 @@ C
         VY=Z12*NX-X12*NZ
         VZ=X12*NY-Y12*NX
 
-        AAA=RUN/MAX(REM30,SQRT(VX*VX+VY*VY+VZ*VZ))
+        AAA=VX*VX+VY*VY+VZ*VZ
+        AAA=RUN/MAX(REM30,SQRT(AAA))
         VX=VX*AAA
         VY=VY*AAA
         VZ=VZ*AAA
@@ -1074,7 +1027,8 @@ C broken
               NX=NOD_NORMAL(1,J,IRM)+WNOD_NORMAL(1,J,IRM)
               NY=NOD_NORMAL(2,J,IRM)+WNOD_NORMAL(2,J,IRM)
               NZ=NOD_NORMAL(3,J,IRM)+WNOD_NORMAL(3,J,IRM)
-              AAA=RUN/MAX(REM30,SQRT(NX*NX+NY*NY+NZ*NZ))
+              AAA=NX*NX+NY*NY+NZ*NZ
+              AAA=RUN/MAX(REM30,SQRT(AAA))
               NOD_NORMAL(1,J,IRM)=NX*AAA
               NOD_NORMAL(2,J,IRM)=NY*AAA
               NOD_NORMAL(3,J,IRM)=NZ*AAA
@@ -1164,9 +1118,10 @@ C
           NOD_NORMAL(1:3,I) = NOD_NORMAL(1:3,I) + FSKYT(1:3,CC)
         END DO
           
-        AAA=RUN/MAX(REM30,SQRT(NOD_NORMAL(1,I)*NOD_NORMAL(1,I)+
-     .                        NOD_NORMAL(2,I)*NOD_NORMAL(2,I)+
-     .                        NOD_NORMAL(3,I)*NOD_NORMAL(3,I)))
+        AAA=NOD_NORMAL(1,I)*NOD_NORMAL(1,I)+
+     .      NOD_NORMAL(2,I)*NOD_NORMAL(2,I)+
+     .      NOD_NORMAL(3,I)*NOD_NORMAL(3,I)
+        AAA=RUN/MAX(REM30,SQRT(AAA))
         NOD_NORMAL(1,I)=NOD_NORMAL(1,I)*AAA
         NOD_NORMAL(2,I)=NOD_NORMAL(2,I)*AAA
         NOD_NORMAL(3,I)=NOD_NORMAL(3,I)*AAA
