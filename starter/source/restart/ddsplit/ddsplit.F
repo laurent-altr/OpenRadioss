@@ -869,51 +869,21 @@ C--------------------------------------------
      2               IPARG,IXS   ,IXQ,IXC    ,IXTG    ,
      3               IXT  ,IXP   ,IXR,GEO    ,NUMNOD_L)
 C--------------------------------------
-C count local NGROUP 
+C count local NGROUP and elements
 C--------------------------------------
-      CALL C_NGROUP(IPARG,P-1,NUMLOCGROUP,NGROUP_L)
-C--------------------------------------------
-c count local elements 
-C--------------------------------------------
-      OFF = 0
-      CALL C_ELTLOC(CEP(MIN(OFF+1,LEN_CEP)),P-1,NUMELS8,NUMELS8_L)
-      OFF = OFF + NUMELS8
-      CALL C_ELTLOC(CEP(MIN(OFF+1,LEN_CEP)),P-1,NUMELS10,NUMELS10_L)
-      OFF = OFF + NUMELS10
-      CALL C_ELTLOC(CEP(MIN(OFF+1,LEN_CEP)),P-1,NUMELS20,NUMELS20_L)
-      OFF = OFF + NUMELS20
-      CALL C_ELTLOC(CEP(MIN(OFF+1,LEN_CEP)),P-1,NUMELS16,NUMELS16_L)
-      OFF = OFF + NUMELS16
-      NUMELS_L = NUMELS8_L + NUMELS10_L + NUMELS20_L + NUMELS16_L
-      CALL C_ELTLOC(CEP(MIN(OFF+1,LEN_CEP)),P-1,NUMELQ,NUMELQ_L)
-      OFF = OFF + NUMELQ
-      CALL C_ELTLOC(CEP(MIN(OFF+1,LEN_CEP)),P-1,NUMELC,NUMELC_L)
-      OFF = OFF + NUMELC
-      CALL C_ELTLOC(CEP(MIN(OFF+1,LEN_CEP)),P-1,NUMELT,NUMELT_L)
-      OFF = OFF + NUMELT
-      CALL C_ELTLOC(CEP(MIN(OFF+1,LEN_CEP)),P-1,NUMELP,NUMELP_L)
-      OFF = OFF + NUMELP
-      CALL C_ELTLOC(CEP(MIN(OFF+1,LEN_CEP)),P-1,NUMELR,NUMELR_L)
-      OFF = OFF + NUMELR
-      NUMELTG3=NUMELTG-NUMELTG6
-      CALL C_ELTLOC(CEP(MIN(OFF+1,LEN_CEP)),P-1,NUMELTG3,NUMELTG_L)
-      OFF = OFF + NUMELTG3
-      NUMELTG3_L = NUMELTG_L
-      CALL C_ELTLOC(CEP(MIN(OFF+1,LEN_CEP)),P-1,NUMELTG6,NUMELTG6_L)
-      OFF = OFF + NUMELTG6
-      NUMELTG_L = NUMELTG3_L+NUMELTG6_L
-      CALL C_ELTLOC(CEP(MIN(OFF+1,LEN_CEP)),P-1,NUMELX,NUMELX_L)
-      OFF = OFF + NUMELX
-      CALL C_ELTLOC(CEP(MIN(OFF+1,LEN_CEP)),P-1,NUMELIG3D,NUMELIG3D_L)
-      OFF = OFF + NUMELIG3D
-C
-      IF (P==1) THEN
-        NUM16SHIFT_L = 1
-        PM1SHF = 2*NUMELS16_L + 1
-      ELSE
-        NUM16SHIFT_L = PM1SHF
-        PM1SHF =  PM1SHF + 2*NUMELS16_L
-      ENDIF
+      CALL DDSPLIT_COUNT_ELEMENTS(
+     1   IPARG       ,CEP         ,P           ,LEN_CEP     ,
+     2   NUMELS8     ,NUMELS10    ,NUMELS20    ,NUMELS16    ,
+     3   NUMELQ      ,NUMELC      ,NUMELT      ,NUMELP      ,
+     4   NUMELR      ,NUMELTG     ,NUMELTG6    ,NUMELX      ,
+     5   NUMELIG3D   ,NUMLOCGROUP ,NGROUP_L    ,NUMELS8_L   ,
+     6   NUMELS10_L  ,NUMELS20_L  ,NUMELS16_L  ,NUMELS_L    ,
+     7   NUMELQ_L    ,NUMELC_L    ,NUMELT_L    ,NUMELP_L    ,
+     8   NUMELR_L    ,NUMELTG_L   ,NUMELTG6_L  ,NUMELTG3_L  ,
+     9   NUMELX_L    ,NUMELIG3D_L ,NUM16SHIFT_L,PM1SHF      )
+      OFF = NUMELS8 + NUMELS10 + NUMELS20 + NUMELS16 + NUMELQ +
+     +      NUMELC + NUMELT + NUMELP + NUMELR + 
+     +      NUMELTG - NUMELTG6 + NUMELTG6 + NUMELX + NUMELIG3D
 C--------------------------------------------
 C Counting local cluster
 C--------------------------------------------
@@ -1205,29 +1175,17 @@ C--------------------------------------------
      +  CALL C_MAD(IEXMAD,NMADSH4_L,NMADSH3_L,NMADSOL_L,NMADNOD_L,
      +             MADCL_NMADNOD_L,CEP      ,P-1      )
 C--------------------------------------------
-C Count nodes rby
+C Count rigid body and constraint elements
 C--------------------------------------------
-      NSLARB_L = 0
-      NSKYRBK_L = 0
-      IF(NRBYKIN>0)
-     +  CALL C_RBYK(NPBY,LPBY,P-1,NSLARB_L,NSKYRBK_L)
-C--------------------------------------------
-C count Rigid material nodes
-C--------------------------------------------
-      NSLARBM_L = 0
-      NSKYRBMK_L = 0
-      IF(NRBYM > 0)
-     +  CALL C_RBYMK(IRBYM,LCRBYM,P-1,NSLARBM_L,NSKYRBMK_L)
-C--------------------------------------------
-C count Sections
-C--------------------------------------------
-      NSTRF_L = 0
-      LSECBUF_L = 0
-      NNODT_L = 0
-      NNODL_L = 0
-      IF(NSECT>0)
-     +  CALL C_SECTIO(NSTRF    ,CEP    ,P-1,NSTRF_L,
-     +                LSECBUF_L,NNODT_L,NNODL_L)
+      CALL DDSPLIT_COUNT_CONSTRAINTS(
+     1   P           ,NRBYKIN     ,NPBY        ,LPBY        ,
+     2   NRBYM       ,IRBYM       ,LCRBYM      ,NSECT       ,
+     3   CEP         ,NRBE2       ,IRBE2       ,LRBE2       ,
+     4   NRBE3       ,IRBE3       ,LRBE3       ,NSLARB_L    ,
+     5   NSKYRBK_L   ,NSLARBM_L   ,NSKYRBMK_L  ,NSTRF_L     ,
+     6   LSECBUF_L   ,NNODT_L     ,NNODL_L     ,NRBE2_L     ,
+     7   LLRBE2_L    ,NBDDRBE2    ,NRBE3_L     ,LLRBE3_L    ,
+     8   NBDDRBE3M   ,NSKYRBE3_L  ,NRBE3PEN_L  )
 C--------------------------------------------
 C Count cylindrical joints: Already Done
 C--------------------------------------------
@@ -1290,57 +1248,16 @@ C
         PM1SPH =  PM1SPH + 4*NUMSPH_L
       ENDIF
 C--------------------------------------
-C counts IBCL
+C counts boundary conditions and loads
 C--------------------------------------
-      NCONLD_L = 0
-      IF (NCONLD>0)
-     .  CALL C_IBCL(IBCL,CEP,P-1,NCONLD_L)
-C--------------------------------------
-C counts Fixvel
-C--------------------------------------
-      NFXVEL_L = 0
-      IF (NFXVEL>0)
-     .  CALL C_IBFV(IBFV,NFXVEL,NFXVEL_L,P-1,DD_LAGF)
-C--------------------------------------
-C counts LLINK
-C--------------------------------------
-      NLLINK_L=0
-      NSKYLL_L=0
-      IF (NLINK>0)
-     .  CALL C_LLINK(NNLINK,LLLINK,P-1,NLLINK_L,NSKYLL_L)
-C--------------------------------------
-C counts LLGRAV
-C--------------------------------------
-      LLGRAV_L=0
-      IF (NGRAV>0)
-     .  CALL C_IGRAV(IGRAV,LGRAV,LLGRAV_L,P-1,NODLOCAL,NUMNOD_L)
-C--------------------------------------
-C counts IBVEL
-C--------------------------------------
-      LLBVEL_L=0
-      NSKYRBM_L = 0
-      IF (NIBVEL>0)
-     .  CALL C_IBVEL(IBVEL,LBVEL,LLBVEL_L,NSKYRBM_L,P-1)
-C--------------------------------------
-C counts RBE2
-C--------------------------------------
-      NRBE2_L=0
-      LLRBE2_L=0
-      NBDDRBE2 = 0
-      IF (NRBE2>0)
-     .   CALL C_IRBE2(IRBE2,LRBE2,P-1   ,NRBE2_L,
-     .                LLRBE2_L ,NBDDRBE2)
-C--------------------------------------
-C counts RBE3
-C--------------------------------------
-      NRBE3_L=0
-      LLRBE3_L=0
-      NBDDRBE3M = 0
-      NSKYRBE3_L = 0
-      NRBE3PEN_L=0
-      IF (NRBE3>0)
-     .   CALL C_IRBE3(IRBE3,LRBE3,NSKYRBE3_L,P-1,
-     .                NRBE3_L,LLRBE3_L ,NBDDRBE3M,NRBE3PEN_L)
+      CALL DDSPLIT_COUNT_BC_LOADS(
+     1   P           ,NCONLD      ,IBCL        ,CEP         ,
+     2   NFXVEL      ,IBFV        ,DD_LAGF     ,NLINK       ,
+     3   NNLINK      ,LLLINK      ,NGRAV       ,IGRAV       ,
+     4   LGRAV       ,NODLOCAL    ,NUMNOD_L    ,NIBVEL      ,
+     5   IBVEL       ,LBVEL       ,NCONLD_L    ,NFXVEL_L    ,
+     6   NLLINK_L    ,NSKYLL_L    ,LLGRAV_L    ,LLBVEL_L    ,
+     7   NSKYRBM_L   )
 C--------------------------------------
 C counts MPC
 C--------------------------------------
@@ -1511,29 +1428,12 @@ C--------------------------------------------
         CALL C_SEGQUADFR(SEGQUADFR, CEP, P-1, CEL, NSEGQUADFR_L)
       ENDIF
 C--------------------------------------
-C Convec flow courses
+C Thermal boundary conditions
 C--------------------------------------
-      NCONV_L = 0
-      IF (GLOB_THERM%NUMCONV > 0)
-     .    CALL C_ICONV(IBCV,CEP,P-1,NCONV_L,GLOB_THERM%NUMCONV,GLOB_THERM%NICONV)
-C--------------------------------------
-C counts radiative fluxes
-C--------------------------------------
-      NRADIA_L = 0
-      IF (GLOB_THERM%NUMRADIA > 0) CALL C_IRADIA(IBCR,CEP,P-1,NRADIA_L,
-     .           GLOB_THERM%NUMRADIA,GLOB_THERM%NUMCONV,GLOB_THERM%NIRADIA)
-C--------------------------------------
-C counts imposed fluxes
-C--------------------------------------
-      NFXFLUX_L = 0
-      IF (GLOB_THERM%NFXFLUX > 0) CALL C_ITHFLUX(IBFFLUX,CEP,P-1,NFXFLUX_L,
-     .           GLOB_THERM%NUMCONV,GLOB_THERM%NUMRADIA,GLOB_THERM%NFXFLUX,GLOB_THERM%NITFLUX)
-C--------------------------------------
-c counts Fixtemp
-C--------------------------------------
-      NFXTEMP_L = 0
-      IF (GLOB_THERM%NFXTEMP > 0)
-     .  CALL C_IBFT(IBFT,GLOB_THERM%NFXTEMP,NFXTEMP_L,P-1,DD_LAGF,GLOB_THERM%NIFT)
+      CALL DDSPLIT_COUNT_THERMAL(
+     1   P           ,CEP         ,GLOB_THERM  ,IBCV        ,
+     2   IBCR        ,IBFFLUX     ,IBFT        ,DD_LAGF     ,
+     3   NCONV_L     ,NRADIA_L    ,NFXFLUX_L   ,NFXTEMP_L   )
 C--------------------------------------
 C Count Lagrange Multiply
 C--------------------------------------
@@ -3643,89 +3543,23 @@ C Array Deallocation
 C--------------------------------------------
 C Stats Domain Decomp
 C--------------------------------------------
-C DDSTAT
-C 1 : NUMNOD Local
-C 2 : NELEM Local
-C 3 : NUMELS_L
-C 4 : NUMELQ_L
-C 5 : NUMELC_L
-C 6 : NUMELP_L
-C 7 : NUMELT_L
-C 8 : NUMELR_L
-C 9 : -
-C 10: NUMELTG_L
-C 11: NUMELX_L
-C 12: NBDDPROC :  nb of boundary proc 
-C 13: NBDDBOUN :  nb of boundary node 
-C 14: NBDDNOD :   size of comm:nb of nodes
-C 15: NBDDNRB :   size of comm: nb of nodes main of rby
-C 16: NRBYKIN_L : number of local rigid body main
-C 17: NUMSPH_L : number of particles SPH (local) 
-C 18: MEMI : size memory local int MA
-C 19: MEMR : size memory local float AM
-C 20: NSNT_L : number of nodes seconds (contact interface 7,10,11)
-C 21: NMNT_L : number of nodes main (contact interface 7,10,11)
-C 22: NSNT2_L : number of nodes seconds (interface type2)
-C 23: NMNT2_L : number of nodes main (interface type2)
-C 24: RESTSIZE : restart size in KB
-C 24: NSLARB_L : number of nodes second rigid body
-      DDSTAT(1) = NUMNOD_L
-      DDSTAT(2) = NUMEL_L
-      DDSTAT(3) = NUMELS_L
-      DDSTAT(4) = NUMELQ_L
-      DDSTAT(5) = NUMELC_L
-      DDSTAT(6) = NUMELP_L
-      DDSTAT(7) = NUMELT_L
-      DDSTAT(8) = NUMELR_L
-      DDSTAT(9) = 0
-      DDSTAT(10)= NUMELTG_L
-      DDSTAT(11)= NUMELX_L
-      DDSTAT(12)= NBDDPROC
-      DDSTAT(13)= NBDDBOUN
-      DDSTAT(14)= NBDDNOD
-      DDSTAT(15)= NBDDNRB
-      DDSTAT(16)= NRBYKIN_L
-      DDSTAT(17)= NUMSPH_L
-      DDSTAT(20)= NSNT_L
-      DDSTAT(21)= NMNT_L
-      DDSTAT(22)= NSNT2_L
-      DDSTAT(23)= NMNT2_L
-      DDSTAT(24)= NSLARB_L
+      CALL DDSPLIT_COMPUTE_STATS(
+     1   DDSTAT      ,NUMNOD_L    ,NUMEL_L     ,NUMELS_L    ,
+     2   NUMELQ_L    ,NUMELC_L    ,NUMELT_L    ,NUMELP_L    ,
+     3   NUMELR_L    ,NUMELTG_L   ,NUMELX_L    ,NBDDPROC    ,
+     4   NBDDBOUN    ,NBDDNOD     ,NBDDNRB     ,NRBYKIN_L   ,
+     5   NUMSPH_L    ,NSNT_L      ,NMNT_L      ,NSNT2_L     ,
+     6   NMNT2_L     ,NSLARB_L    ,LEN_IA      ,LEN_AM      ,
+     7   IPARI0      ,NISKY0_L    ,NCONV_L     ,NRADIA_L    ,
+     8   NFXFLUX_L   ,IALE        ,IEULER      ,IALELAG     ,
+     9   IRODDL      ,LENWA_L     ,NFUNCT      ,PROBINT     ,
+     A   IMAXIMP_L   ,NSKYI18_L   ,NPSAV       ,NPART       ,
+     B   LCNE_L      ,N2D         ,GLOB_THERM  ,LCNI2_L     ,
+     C   NSKYRW_L    ,NSKYRBK_L   ,NISKYI2_L   ,NNMV_L      ,
+     D   NNMVC_L     ,NSKYLL_L    ,NSKYRBM_L   ,NSKYRBE3_L  ,
+     E   IVECTOR     ,I2NSNT      ,LWASPH_L    ,NSECT       ,
+     F   ISECUT      ,NINTER      ,NIBVEL      )
 C
-C Estimating memory usage
-C
-      IF(IPARI0/=0)THEN
-        NISKY0_L=NISKY0_L+4*NCONV_L+4*NRADIA_L+4*NFXFLUX_L
-      END IF
-C
-      I_EVAL = NUMNOD_L+2*NUMNOD_L*MAX(IALE,IEULER,IALELAG)+NUMNOD_L*IRODDL
-      R_EVAL = LENWA_L+NFUNCT
-      IF(IPARI0/=0)THEN
-        LSKYI = NINT(5*MAX(4*NUMNOD_L,IMAXIMP_L)*PROBINT)+4*NUMSPH_L+NSKYI18_L
-        R_EVAL = R_EVAL+8*NUMNOD_L+NPSAV*NPART
-        R_EVAL = R_EVAL+8*LCNE_L
-        IF (N2D==0.AND.IALE+IEULER+GLOB_THERM%ITHERM+IALELAG > 0) R_EVAL = R_EVAL+ LCNE_L
-C NFSKYI = 5
-        R_EVAL = R_EVAL+5*LSKYI
-        I_EVAL = I_EVAL+LSKYI+NUMNOD_L+1+LCNI2_L
-     +         + NISKY0_L+NSKYRW_L+NSKYRBK_L+NISKYI2_L
-     +         + NNMV_L+NNMVC_L+NSKYLL_L+NSKYRBM_L+NSKYRBE3_L
-     +         + NNMV_L+NNMVC_L+NSKYLL_L+NSKYRBM_L
-        IF(IVECTOR==1)I_EVAL = I_EVAL+ NUMNOD_L
-        IF(I2NSNT>0)I_EVAL = I_EVAL+ NUMNOD_L+1
-        IF(I2NSNT>0.AND.IVECTOR==1)I_EVAL = I_EVAL+ NUMNOD_L
-      ELSE
-        R_EVAL = R_EVAL+7*NUMNOD_L+NUMNOD_L*IRODDL+NPSAV*NPART
-        R_EVAL = R_EVAL+2*MAX(IALE,GLOB_THERM%ITHERM,IEULER)*(NUMELS_L+NUMELQ_L)
-      END IF
-C      IF(KDTINT/=0)
-      R_EVAL = R_EVAL+NUMNOD_L
-      R_EVAL = R_EVAL+
-     +         LWASPH_L+7*NUMNOD_L*NSECT*ISECUT+5*NINTER+21*NIBVEL
-      I_EVAL = I_EVAL+NUMNOD_L
-      DDSTAT(18)= LEN_IA + I_EVAL
-      DDSTAT(19)= LEN_AM + R_EVAL
-
 C Size of Restart file:
 C        LEN_AM has a size of 2*4 bytes
 C        LEN_IA has a size of 4 bytes
