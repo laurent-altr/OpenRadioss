@@ -223,10 +223,10 @@ void check_error(int line_number)
 
                 // Print the error
                 //MyErr_Display(pType, pValue, pTraceback);
-                // Decrement reference counts for the error objects
-                My_DecRef(pType);
-                My_DecRef(pValue);
-                My_DecRef(pTraceback);
+                // Decrement reference counts for the error objects (use NULL check: Py_DecRef is not NULL-safe on Python <=3.9)
+                if (pType) My_DecRef(pType);
+                if (pValue) My_DecRef(pValue);
+                if (pTraceback) My_DecRef(pTraceback);
                 exit_with_message("ERROR: Python function failed");
             }
 }
@@ -291,7 +291,7 @@ PyObject *call_python_function_with_state(const char *func_name)
             if (MyErr_Occurred())
             {
                 // Fetch the error details
-                PyObject *pType, *pValue, *pTraceback;
+                PyObject *pType = nullptr, *pValue = nullptr, *pTraceback = nullptr;
                 MyErr_Fetch(&pType, &pValue, &pTraceback);
                 if (pType)
                     std::cout << "[PYTHON] " << MyUnicode_AsUTF8(MyObject_Str(pType)) << std::endl;
@@ -303,10 +303,10 @@ PyObject *call_python_function_with_state(const char *func_name)
                 // Print the error
                 //MyErr_Display(pType, pValue, pTraceback);
 
-                // Decrement reference counts for error objects
-                My_DecRef(pType);
-                My_DecRef(pValue);
-                My_DecRef(pTraceback);
+                // Decrement reference counts for error objects (use NULL check: Py_DecRef is not NULL-safe on Python <=3.9)
+                if (pType) My_DecRef(pType);
+                if (pValue) My_DecRef(pValue);
+                if (pTraceback) My_DecRef(pTraceback);
                 exit_with_message("ERROR: Python function failed");
             }
         }
@@ -359,10 +359,10 @@ PyObject *call_python_function(const char *func_name, double *args, int num_args
 
                 // Print the error
                 //MyErr_Display(pType, pValue, pTraceback);
-                // Decrement reference counts for the error objects
-                My_DecRef(pType);
-                My_DecRef(pValue);
-                My_DecRef(pTraceback);
+                // Decrement reference counts for the error objects (use NULL check: Py_DecRef is not NULL-safe on Python <=3.9)
+                if (pType) My_DecRef(pType);
+                if (pValue) My_DecRef(pValue);
+                if (pTraceback) My_DecRef(pTraceback);
                 exit_with_message("ERROR: Python function failed");
             }
         }
@@ -665,7 +665,7 @@ extern "C"
                 if (MyErr_Occurred())
                 {
                 // Fetch the error details
-                PyObject *pType, *pValue, *pTraceback;
+                PyObject *pType = nullptr, *pValue = nullptr, *pTraceback = nullptr;
                 MyErr_Fetch(&pType, &pValue, &pTraceback);
                 if (pType)
                     std::cout << "[PYTHON] " << MyUnicode_AsUTF8(MyObject_Str(pType)) << std::endl;
@@ -677,10 +677,10 @@ extern "C"
                 // Print the error
                 //MyErr_Display(pType, pValue, pTraceback);
 
-                // Decrement reference counts for error objects
-                My_DecRef(pType);
-                My_DecRef(pValue);
-                My_DecRef(pTraceback);
+                // Decrement reference counts for error objects (use NULL check: Py_DecRef is not NULL-safe on Python <=3.9)
+                if (pType) My_DecRef(pType);
+                if (pValue) My_DecRef(pValue);
+                if (pTraceback) My_DecRef(pTraceback);
                 exit_with_message("ERROR: Python function failed");
                 }
            }else
@@ -729,6 +729,7 @@ extern "C"
         if(!args)
         {
             std::cout << "ERROR: Failed to create Python tuple." << std::endl;
+            return;
         }
         My_IncRef(context);
         MyTuple_SetItem(args, 0, context);  // This steals the reference
@@ -737,18 +738,20 @@ extern "C"
         {
             std::cout << "ERROR: Python function not found: " << func_name << std::endl;
             My_DecRef(args);
+            return;
         }
 
         if (!MyCallable_Check(pFunc)) {
         std::cerr << "[PYTHON] Error: '" << func_name << "' is not callable" << std::endl;
         My_DecRef(args);
+        return;
         }
 
         PyObject* result = MyObject_CallObject(pFunc, args);
          if (MyErr_Occurred())
          {
              // Fetch the error details
-             PyObject *pType, *pValue, *pTraceback;
+             PyObject *pType = nullptr, *pValue = nullptr, *pTraceback = nullptr;
              MyErr_Fetch(&pType, &pValue, &pTraceback);
              if (pType)
                  std::cout << "[PYTHON] " << MyUnicode_AsUTF8(MyObject_Str(pType)) << std::endl;
@@ -757,10 +760,10 @@ extern "C"
              if (pTraceback)
                  std::cout << "[PYTHON]: " << MyUnicode_AsUTF8(MyObject_Str(pTraceback)) << std::endl;
 
-             // Decrement reference counts for error objects
-             My_DecRef(pType);
-             My_DecRef(pValue);
-             My_DecRef(pTraceback);
+             // Decrement reference counts for error objects (use NULL check: Py_DecRef is not NULL-safe on Python <=3.9)
+             if (pType) My_DecRef(pType);
+             if (pValue) My_DecRef(pValue);
+             if (pTraceback) My_DecRef(pTraceback);
              exit_with_message("ERROR: Python function failed");
          }
  
