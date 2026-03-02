@@ -206,6 +206,21 @@ void exit_with_message(const char *message)
     exit(1);
 }
 
+// Safely print a Python object's str() representation and release the temporary string reference.
+// PyObject_Str() can return NULL (e.g. MemoryError during error handling); calling
+// PyUnicode_AsUTF8(NULL) would dereference NULL and segfault.
+// Prints nothing (without error) if obj is NULL or if MyObject_Str() fails.
+static void print_python_object(const char *prefix, PyObject *obj)
+{
+    if (obj) {
+        PyObject *str = MyObject_Str(obj);
+        if (str) {
+            std::cout << prefix << MyUnicode_AsUTF8(str) << std::endl;
+            My_DecRef(str);
+        }
+    }
+}
+
 void check_error(int line_number)
 {
             if (MyErr_Occurred())
@@ -214,12 +229,9 @@ void check_error(int line_number)
                 // Fetch the error
                 PyObject *pType = nullptr, *pValue = nullptr, *pTraceback = nullptr;
                 MyErr_Fetch(&pType, &pValue, &pTraceback);
-                if (pType)
-                    std::cout<<"[PYTHON]"<< MyUnicode_AsUTF8(MyObject_Str(pType)) << std::endl;
-                if (pValue)
-                    std::cout<<"[PYTHON]"<< MyUnicode_AsUTF8(MyObject_Str(pValue)) << std::endl;
-                if (pTraceback)
-                    std::cout<<"[PYTHON]"<< MyUnicode_AsUTF8(MyObject_Str(pTraceback)) << std::endl;
+                print_python_object("[PYTHON] ", pType);
+                print_python_object("[PYTHON] ", pValue);
+                print_python_object("[PYTHON] ", pTraceback);
 
                 // Print the error
                 //MyErr_Display(pType, pValue, pTraceback);
@@ -293,12 +305,9 @@ PyObject *call_python_function_with_state(const char *func_name)
                 // Fetch the error details
                 PyObject *pType = nullptr, *pValue = nullptr, *pTraceback = nullptr;
                 MyErr_Fetch(&pType, &pValue, &pTraceback);
-                if (pType)
-                    std::cout << "[PYTHON] " << MyUnicode_AsUTF8(MyObject_Str(pType)) << std::endl;
-                if (pValue)
-                    std::cout << "[PYTHON] " << MyUnicode_AsUTF8(MyObject_Str(pValue)) << std::endl;
-                if (pTraceback)
-                    std::cout << "[PYTHON]: " << MyUnicode_AsUTF8(MyObject_Str(pTraceback)) << std::endl;
+                print_python_object("[PYTHON] ", pType);
+                print_python_object("[PYTHON] ", pValue);
+                print_python_object("[PYTHON] ", pTraceback);
 
                 // Print the error
                 //MyErr_Display(pType, pValue, pTraceback);
@@ -350,12 +359,9 @@ PyObject *call_python_function(const char *func_name, double *args, int num_args
                 // Fetch the error
                 PyObject *pType = nullptr, *pValue = nullptr, *pTraceback = nullptr;
                 MyErr_Fetch(&pType, &pValue, &pTraceback);
-                if (pType)
-                    std::cout<<"[PYTHON]"<< MyUnicode_AsUTF8(MyObject_Str(pType)) << std::endl;
-                if (pValue)
-                    std::cout<<"[PYTHON]"<< MyUnicode_AsUTF8(MyObject_Str(pValue)) << std::endl;
-                if (pTraceback)
-                    std::cout<<"[PYTHON]"<< MyUnicode_AsUTF8(MyObject_Str(pTraceback)) << std::endl;
+                print_python_object("[PYTHON] ", pType);
+                print_python_object("[PYTHON] ", pValue);
+                print_python_object("[PYTHON] ", pTraceback);
 
                 // Print the error
                 //MyErr_Display(pType, pValue, pTraceback);
@@ -667,12 +673,9 @@ extern "C"
                 // Fetch the error details
                 PyObject *pType = nullptr, *pValue = nullptr, *pTraceback = nullptr;
                 MyErr_Fetch(&pType, &pValue, &pTraceback);
-                if (pType)
-                    std::cout << "[PYTHON] " << MyUnicode_AsUTF8(MyObject_Str(pType)) << std::endl;
-                if (pValue)
-                    std::cout << "[PYTHON] " << MyUnicode_AsUTF8(MyObject_Str(pValue)) << std::endl;
-                if (pTraceback)
-                    std::cout << "[PYTHON]: " << MyUnicode_AsUTF8(MyObject_Str(pTraceback)) << std::endl;
+                print_python_object("[PYTHON] ", pType);
+                print_python_object("[PYTHON] ", pValue);
+                print_python_object("[PYTHON] ", pTraceback);
 
                 // Print the error
                 //MyErr_Display(pType, pValue, pTraceback);
@@ -753,12 +756,9 @@ extern "C"
              // Fetch the error details
              PyObject *pType = nullptr, *pValue = nullptr, *pTraceback = nullptr;
              MyErr_Fetch(&pType, &pValue, &pTraceback);
-             if (pType)
-                 std::cout << "[PYTHON] " << MyUnicode_AsUTF8(MyObject_Str(pType)) << std::endl;
-             if (pValue)
-                 std::cout << "[PYTHON] " << MyUnicode_AsUTF8(MyObject_Str(pValue)) << std::endl;
-             if (pTraceback)
-                 std::cout << "[PYTHON]: " << MyUnicode_AsUTF8(MyObject_Str(pTraceback)) << std::endl;
+             print_python_object("[PYTHON] ", pType);
+             print_python_object("[PYTHON] ", pValue);
+             print_python_object("[PYTHON] ", pTraceback);
 
              // Decrement reference counts for error objects (use NULL check: Py_DecRef is not NULL-safe on Python <=3.9)
              if (pType) My_DecRef(pType);
@@ -766,7 +766,8 @@ extern "C"
              if (pTraceback) My_DecRef(pTraceback);
              exit_with_message("ERROR: Python function failed");
          }
- 
+         if (result) My_DecRef(result);  // Decrement the return value reference to avoid leak
+
         My_DecRef(args);
         check_error(__LINE__);
 
@@ -925,7 +926,10 @@ extern "C"
         //GIL
         PyGILState_STATE gstate = MyGILState_Ensure();  
         check_error(__LINE__);
-        if (strcmp(name, "initialize_environment") == 0) return;
+        if (strcmp(name, "initialize_environment") == 0) {
+            MyGILState_Release(gstate);
+            return;
+        }
         PyObject *result = call_python_function(name, args, num_args);
         if (result)
         {
@@ -1472,8 +1476,8 @@ void* cpp_python_create_context() {
     if (!context) {
         return NULL;
     }
-    return context;
     check_error(__LINE__);
+    return context;
 }
 
 void cpp_python_free_context(void* context) {
