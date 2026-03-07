@@ -179,7 +179,7 @@ C-----------------------------------------------
            REG_FAC(1:NEL) = UVAR(1:NEL,9)
          ENDIF
        ENDIF
-       ! calculate triaxiality
+       ! Calculate triaxiality
          do i=1,nel
            pressure = (signxx(I)+ signyy(I)) * third
            svm      = sqrt((signxx(I)**2)+(signyy(I)**2)-(signxx(I)*signyy(I))+(THREE*SIGNXY(I)**2))
@@ -188,7 +188,7 @@ C-----------------------------------------------
          end do
 !
        IF (IREG > 1) THEN
-         ! calculate scaling factor on failure limits depending on triaxiality
+         ! Calculate scaling factor on failure limits depending on triaxiality
          ipos(1:nel,1) = 1
          call table_mat_vinterp(fail%table4d(1),nel,nel,ipos,eta,regf_eta,deri)
          reg_fac(1:nel) = (one - regf_eta(1:nel)) + regf_eta(1:nel)*reg_fac(1:nel)

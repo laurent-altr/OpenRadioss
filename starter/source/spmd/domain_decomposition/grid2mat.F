@@ -634,7 +634,7 @@ C We have to tag elements for know theirs number of nodes
             L = L + 1
             ELEM_COORDS(:,I) = ELEM_COORDS(:,I) + X(:,N)
           END IF
-          ! center of the element
+          ! Center of the element
           ELEM_COORDS(:,I) = ELEM_COORDS(:,I) / REAL(L)
         ENDDO 
       ENDDO
@@ -666,7 +666,7 @@ C
           ADSKY(N) = ADSKY(N) + 1
           ELEM_COORDS(:,I+OFF) = ELEM_COORDS(:,I+OFF) + X(:,N)
         ENDDO
-        ! center of the element
+        ! Center of the element
         ELEM_COORDS(:,I+OFF) = ELEM_COORDS(:,I+OFF) / 4.0
       ENDDO
 C
@@ -682,7 +682,7 @@ C
           ADSKY(N) = ADSKY(N) + 1
           ELEM_COORDS(:,I+OFF) = ELEM_COORDS(:,I+OFF) + X(:,N)
         ENDDO
-        ! center of the element
+        ! Center of the element
         ELEM_COORDS(:,I+OFF) = ELEM_COORDS(:,I+OFF) / 4.0
       ENDDO
 C     
@@ -699,7 +699,7 @@ C
           ADSKY(N) = ADSKY(N) + 1
           ELEM_COORDS(:,I+OFF) = ELEM_COORDS(:,I+OFF) + X(:,N)
         ENDDO
-        ! center of the element
+        ! Center of the element
         ELEM_COORDS(:,I+OFF) = ELEM_COORDS(:,I+OFF) / 2.0
        ENDDO
 C
@@ -715,7 +715,7 @@ C
           ADSKY(N) = ADSKY(N) + 1
           ELEM_COORDS(:,I+OFF) = ELEM_COORDS(:,I+OFF) + X(:,N)
         ENDDO
-        ! center of the element
+        ! Center of the element
         ELEM_COORDS(:,I+OFF) = ELEM_COORDS(:,I+OFF) / 2.0
       ENDDO
 C
@@ -731,7 +731,7 @@ C
           ADSKY(N) = ADSKY(N) + 1
           ELEM_COORDS(:,I+OFF) = ELEM_COORDS(:,I+OFF) + X(:,N)
         ENDDO
-        ! center of the element
+        ! Center of the element
         ELEM_COORDS(:,I+OFF) = ELEM_COORDS(:,I+OFF) / 2.0
         IF(NINT(GEO(12,IXR(1,I)))==12) THEN
           N = IXR(4,I)
@@ -752,7 +752,7 @@ C
           ADSKY(N) = ADSKY(N) + 1
           ELEM_COORDS(:,I+OFF) = ELEM_COORDS(:,I+OFF) + X(:,N)
         ENDDO
-        ! center of the element
+        ! Center of the element
         ELEM_COORDS(:,I+OFF) = ELEM_COORDS(:,I+OFF) / 3.0
       ENDDO
 C
@@ -773,7 +773,7 @@ C
           ADSKY(N) = ADSKY(N) + 1
           ELEM_COORDS(:,I+OFF) = ELEM_COORDS(:,I+OFF) + X(:,N)
         ENDDO
-        ! center of the element
+        ! Center of the element
         ELEM_COORDS(:,I+OFF) = ELEM_COORDS(:,I+OFF) / REAL(NELX)
       ENDDO
 C

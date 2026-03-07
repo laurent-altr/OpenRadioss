@@ -339,7 +339,6 @@ C-------------------------------------------
           ENDIF
         ENDIF
        DTELEM(NFT+I)=DTX(I)
-!        MSQ(NFT+I) = FOURTH * PM(89,MAT(I))*AREA(I) ! nodal mass (engine)
         STI = HALF * PM(89,MAT(I))*GBUF%VOL(I) / MAX(EM20,DTX(I)*DTX(I))
         MAS = PM(89,MAT(I))*AREA(I)
         IP = IPARTQ(NFT+I)

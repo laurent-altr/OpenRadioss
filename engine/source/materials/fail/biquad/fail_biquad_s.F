@@ -125,7 +125,7 @@ C===============================================================================
         ENDIF
       ENDIF
 !---------------------------------------------------------------------------------------------------
-       ! calculate triaxiality
+       ! Calculate triaxiality
        do i=1,nel
           pressure = (signxx(I) + signyy(I) + signzz(I)) * third
           sxx = signxx(I) - pressure
@@ -134,14 +134,14 @@ C===============================================================================
           svm = half*(sxx**2 + syy**2 + szz**2) + signxy(I)**2 + signzx(I)**2 + signyz(I)**2
           svm = sqrt(three*svm)
 !
-          ! Compressureute stress triaxiality
+          ! Compute stress triaxiality
           triax = pressure / max(em20,svm)
           triax = max(triax, -two_third)
           triax = min(triax,  two_third)
           eta(i,1) = triax
        end do
        IF (IREG > 1) THEN
-         ! calculate triaxiality dependent scaling factor on failure limits
+         ! Calculate triaxiality-dependent scaling factor on failure limits
          ipos(1:nel,1) = 1
          call table_mat_vinterp(fail%table4d(1),nel,nel,ipos,eta,regf_eta,deri)
          reg_fac(1:nel) = (one - regf_eta(1:nel)) + regf_eta(1:nel)*reg_fac(1:nel)

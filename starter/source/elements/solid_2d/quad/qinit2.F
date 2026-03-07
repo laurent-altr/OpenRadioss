@@ -195,7 +195,6 @@ c
           ENDIF
         ENDIF
         DTELEM(NFT+I)=DTX(I)
-!        MSQ(NFT+I) = FOURTH * PM(89,MAT(I))*AIRE(I) ! nodal mass in engine->fac=V/a
         STI = HALF * PM(89,MAT(I))*GBUF%VOL(I) / MAX(EM20,DTX(I)*DTX(I)) ! =fac*sti(engine)
         MAS = PM(89,MAT(I))*AIRE(I)
         IP = IPARTQ(NFT+I)

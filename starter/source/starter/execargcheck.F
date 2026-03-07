@@ -319,7 +319,7 @@ C------------------------------------------------
                 OUTPUT%CHECKSUM%ST_CHECKSUM_READ = 1
                 IF (PCHECKSUMI==0) PCHECKSUMI = I
             CASE ( '-METIS_SEED') 
-               ! nothing here, called again in grid2mat
+               ! No action here; argument is processed again in grid2mat
             CASE DEFAULT
             ! ------------------------------------------------
             ! unknown command line argument
