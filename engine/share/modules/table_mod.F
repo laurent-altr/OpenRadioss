@@ -170,6 +170,18 @@ C---------
 C---------
           TYPE(TTABLE_XY), DIMENSION(:), POINTER :: X
           TYPE(TTABLE_XY), POINTER :: Y
+C---------
+C         Uniform-spacing optimisation (computed by TABLE_CHECK_UNIFORM):
+C           IS_UNIFORM(K) = .TRUE. when X(K) is regularly spaced
+C           X0(K)         = X(K)%VALUES(1)  (first grid point)
+C           DX_INV(K)     = 1 / step        (reciprocal of the constant step)
+C         When IS_UNIFORM(K) is true, TABLE_VINTERP replaces the adaptive
+C         search with a single direct-access formula:
+C           IPOS = MAX(1, MIN(N-1, INT((XX - X0)*DX_INV) + 1))
+C---------
+          LOGICAL  :: IS_UNIFORM(4)
+          my_real  :: X0(4)
+          my_real  :: DX_INV(4)
       END TYPE TTABLE
 C-----------------------------------------------
       END MODULE TABLE_MOD

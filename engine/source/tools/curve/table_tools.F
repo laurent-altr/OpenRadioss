@@ -48,10 +48,13 @@ C-----------------------------------------------
       INTEGER  N
 C--------------------------------------
       DO N=1,NTABLE
-        TABLE(N)%NOTABLE  = 0
-        TABLE(N)%NDIM     = 0
+        TABLE(N)%NOTABLE     = 0
+        TABLE(N)%NDIM        = 0
         NULLIFY(TABLE(N)%X)
         NULLIFY(TABLE(N)%Y)
+        TABLE(N)%IS_UNIFORM  = .FALSE.
+        TABLE(N)%X0          = ZERO
+        TABLE(N)%DX_INV      = ZERO
       END DO
       RETURN
       END SUBROUTINE TABLE_ZERO
@@ -250,6 +253,8 @@ C--------------------------------------
         END DO
         LEN = SIZE( TABLE(N)%Y%VALUES )
         CALL READ_DB(TABLE(N)%Y%VALUES,LEN)
+C       Detect uniform spacing so TABLE_VINTERP can use direct access
+        CALL TABLE_CHECK_UNIFORM(TABLE(N))
       END DO
       RETURN
       END SUBROUTINE TABLE_RRESTR
@@ -641,6 +646,7 @@ C-----------------------------------------------
         INTEGER NDIM, K, NXK(4), I, IB(NEL,2,2,2,2), 
      .        IP,IN,IM,IL,P,N,M,L,N1,N12,N123
         my_real :: DX2,R(NEL,4),UNR(NEL,4),DX2_0(NEL)
+        my_real :: FPOS
         INTEGER :: J
         INTEGER :: NINDX_1,M_INDX1,NINDX_2,M_INDX2
         INTEGER, DIMENSION(NEL) :: INDX_1,INDX_2
@@ -658,56 +664,72 @@ C-----
         ENDDO
 
         DO K=1,NDIM
-            IPOS(1:NEL,K)=MAX(IPOS(1:NEL,K),1)
-            NINDX_1 = 0
-            M_INDX1 = 0
-            NINDX_2 = 0
-            M_INDX2 = NXK(K) + 1
+            IF (TABLE%IS_UNIFORM(K)) THEN
+C             -----------------------------------------------------------
+C             Uniformly-spaced X: compute interval index directly in O(1)
+C             FPOS = (XX - X0) / DX  (0-based floating-point position)
+C             IPOS = floor(FPOS) + 1, clamped to [1, NXK-1]
+C             -----------------------------------------------------------
 #include "vectorize.inc"
-            DO I=1,NEL
-                M = IPOS(I,K) 
-                DX2_0(I) = TABLE%X(K)%VALUES(M) - XX(I,K)
-                IF(DX2_0(I) >= ZERO)THEN
-                    NINDX_1 = NINDX_1 + 1
-                    INDX_1(NINDX_1) = I
-                    M_INDX1 = MAX(M_INDX1,M)
-                ELSE
-                    NINDX_2 = NINDX_2 + 1
-                    INDX_2(NINDX_2) = I
-                    M_INDX2 = MIN(M_INDX2,M)
-                ENDIF
-            ENDDO
+                DO I=1,NEL
+                    FPOS     = (XX(I,K) - TABLE%X0(K)) * TABLE%DX_INV(K)
+                    IPOS(I,K)= MAX(1, MIN(NXK(K)-1, INT(FPOS) + 1))
+                END DO
+            ELSE
+C             -----------------------------------------------------------
+C             Non-uniform X: use adaptive search with warm-start via IPOS
+C             -----------------------------------------------------------
+                IPOS(1:NEL,K)=MAX(IPOS(1:NEL,K),1)
+                NINDX_1 = 0
+                M_INDX1 = 0
+                NINDX_2 = 0
+                M_INDX2 = NXK(K) + 1
+#include "vectorize.inc"
+                DO I=1,NEL
+                    M = IPOS(I,K)
+                    DX2_0(I) = TABLE%X(K)%VALUES(M) - XX(I,K)
+                    IF(DX2_0(I) >= ZERO)THEN
+                        NINDX_1 = NINDX_1 + 1
+                        INDX_1(NINDX_1) = I
+                        M_INDX1 = MAX(M_INDX1,M)
+                    ELSE
+                        NINDX_2 = NINDX_2 + 1
+                        INDX_2(NINDX_2) = I
+                        M_INDX2 = MIN(M_INDX2,M)
+                    ENDIF
+                ENDDO
 
-            NEED_TO_COMPUTE(1:NINDX_1) = .TRUE.
-            DO N=M_INDX1,1,-1
+                NEED_TO_COMPUTE(1:NINDX_1) = .TRUE.
+                DO N=M_INDX1,1,-1
 #include "vectorize.inc"
-                DO J=1,NINDX_1
-                    IF(NEED_TO_COMPUTE(J)) THEN
-                        I = INDX_1(J)
-                        M = IPOS(I,K)
-                        DX2 = TABLE%X(K)%VALUES(N) - XX(I,K)
-                        IF(DX2<ZERO.OR.N <=1)THEN 
-                            IPOS(I,K)=MAX(N,1) !N 
-                            NEED_TO_COMPUTE(J) = .FALSE.
+                    DO J=1,NINDX_1
+                        IF(NEED_TO_COMPUTE(J)) THEN
+                            I = INDX_1(J)
+                            M = IPOS(I,K)
+                            DX2 = TABLE%X(K)%VALUES(N) - XX(I,K)
+                            IF(DX2<ZERO.OR.N <=1)THEN
+                                IPOS(I,K)=MAX(N,1) !N
+                                NEED_TO_COMPUTE(J) = .FALSE.
+                            ENDIF
                         ENDIF
-                    ENDIF
+                    ENDDO
                 ENDDO
-            ENDDO
-            NEED_TO_COMPUTE(1:NINDX_2) = .TRUE.
-            DO N=M_INDX2,NXK(K)
+                NEED_TO_COMPUTE(1:NINDX_2) = .TRUE.
+                DO N=M_INDX2,NXK(K)
 #include "vectorize.inc"
-                DO J=1,NINDX_2
-                    IF(NEED_TO_COMPUTE(J)) THEN
-                        I = INDX_2(J)
-                        M = IPOS(I,K) 
-                        DX2 = TABLE%X(K)%VALUES(N) - XX(I,K)
-                        IF(DX2>=ZERO.OR.N==NXK(K))THEN
-                            IPOS(I,K)=N-1
-                            NEED_TO_COMPUTE(J) = .FALSE.
+                    DO J=1,NINDX_2
+                        IF(NEED_TO_COMPUTE(J)) THEN
+                            I = INDX_2(J)
+                            M = IPOS(I,K)
+                            DX2 = TABLE%X(K)%VALUES(N) - XX(I,K)
+                            IF(DX2>=ZERO.OR.N==NXK(K))THEN
+                                IPOS(I,K)=N-1
+                                NEED_TO_COMPUTE(J) = .FALSE.
+                            ENDIF
                         ENDIF
-                    ENDIF
+                    ENDDO
                 ENDDO
-            ENDDO
+            END IF
        ENDDO
 
         DO K=1,NDIM
@@ -979,4 +1001,78 @@ C-----
       END SELECT
       RETURN
       END SUBROUTINE TABLE_INTERP_LAW76
+!||====================================================================
+!||    table_check_uniform   ../engine/source/tools/curve/table_tools.F
+!||--- called by ------------------------------------------------------
+!||    lecfun               ../engine/source/tools/curve/lecfun.F
+!||    table_rrestr         ../engine/source/tools/curve/table_tools.F
+!||    rdresb               ../engine/source/output/restart/rdresb.F
+!||--- uses       -----------------------------------------------------
+!||    table_mod            ../engine/share/modules/table_mod.F
+!||====================================================================
+!||  For each dimension K of TABLE, check whether the X grid is
+!||  uniformly spaced (all consecutive steps equal within REL_TOL).
+!||  When it is, record X0(K) = X(1) and DX_INV(K) = 1/step so that
+!||  TABLE_VINTERP can compute IPOS directly instead of searching.
+!||====================================================================
+      SUBROUTINE TABLE_CHECK_UNIFORM(TABLE)
+C-----------------------------------------------
+      USE TABLE_MOD
+C-----------------------------------------------
+C   I m p l i c i t   T y p e s
+C-----------------------------------------------
+#include      "implicit_f.inc"
+C-----------------------------------------------
+C   D u m m y   A r g u m e n t s
+C-----------------------------------------------
+      TYPE(TTABLE), INTENT(INOUT) :: TABLE
+C-----------------------------------------------
+C   L o c a l   V a r i a b l e s
+C-----------------------------------------------
+      INTEGER K, N, NXK
+      my_real :: DX_REF, DX_I, X0_K, XN_K
+C     Relative tolerance for "uniform" detection (1 ppm is very generous
+C     for any hand- or program-generated table, while safely excluding
+C     tables whose spacing genuinely varies by more than 0.0001 %)
+      my_real, PARAMETER :: REL_TOL = 1.E-6
+      LOGICAL :: IS_UNI
+C-----------------------------------------------
+      TABLE%IS_UNIFORM(1:4) = .FALSE.
+      TABLE%X0(1:4)         = ZERO
+      TABLE%DX_INV(1:4)     = ZERO
+
+      DO K = 1, TABLE%NDIM
+        NXK = SIZE(TABLE%X(K)%VALUES)
+
+C       Store the first point regardless (used as X0 even if not uniform)
+        TABLE%X0(K) = TABLE%X(K)%VALUES(1)
+
+C       Need at least 2 points to define a step
+        IF (NXK < 2) CYCLE
+
+        X0_K   = TABLE%X(K)%VALUES(1)
+        XN_K   = TABLE%X(K)%VALUES(NXK)
+        DX_REF = (XN_K - X0_K) / (NXK - 1)
+
+C       Degenerate table with zero span: skip
+        IF (ABS(DX_REF) <= ZERO) CYCLE
+
+C       Check every consecutive step against DX_REF
+        IS_UNI = .TRUE.
+        DO N = 2, NXK
+          DX_I = TABLE%X(K)%VALUES(N) - TABLE%X(K)%VALUES(N-1)
+          IF (ABS(DX_I - DX_REF) > REL_TOL * ABS(DX_REF)) THEN
+            IS_UNI = .FALSE.
+            EXIT
+          END IF
+        END DO
+
+        IF (IS_UNI) THEN
+          TABLE%IS_UNIFORM(K) = .TRUE.
+          TABLE%DX_INV(K)     = ONE / DX_REF
+        END IF
+      END DO
+
+      RETURN
+      END SUBROUTINE TABLE_CHECK_UNIFORM
 

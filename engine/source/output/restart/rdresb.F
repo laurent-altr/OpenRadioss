@@ -1530,6 +1530,8 @@ C
             ALLOCATE (RETRACTOR(I)%TABLE(J)%Y%VALUES(NPT))
             CALL READ_DB(RETRACTOR(I)%TABLE(J)%X(1)%VALUES(1:NPT),NPT)
             CALL READ_DB(RETRACTOR(I)%TABLE(J)%Y%VALUES(1:NPT),NPT)
+C           Detect uniform X spacing for direct-access optimisation
+            CALL TABLE_CHECK_UNIFORM(RETRACTOR(I)%TABLE(J))
           ENDIF
         ENDDO
       ENDDO

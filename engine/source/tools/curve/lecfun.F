@@ -143,6 +143,8 @@ C By Table Construction (L) == Function no L
               TABLE(L)%Y%VALUES(J)=PLD(I)
               I=I+1
             ENDDO
+C           Detect uniform X spacing for direct-access optimisation
+            CALL TABLE_CHECK_UNIFORM(TABLE(L))
           ELSE
             IERR=IERR+1
             IF(ISPMD==0)THEN
