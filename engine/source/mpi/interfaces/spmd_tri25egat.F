@@ -357,14 +357,14 @@ C
           IF(LSKYFI>0) THEN
             ALLOCATE(ISKYFIE(NIN)%P(LSKYFI))
             ISKYFIE(NIN)%P(1:LSKYFI) = 0
-c           IF(KDTINT==0) THEN
-c             ALLOCATE(FSKYFIE(NIN)%P(8,LSKYFI))
-c           ELSE
-              NFSKYIE = 8
+              IF(KDTINT==0) THEN
+                NFSKYIE = 8
+              ELSE
+                NFSKYIE = 10
+              ENDIF
 C             WRITE(6,*) "ALLOCATE FSKYFIE",NFSKYIE,LSKYFI
               ALLOCATE(FSKYFIE(NIN)%P(NFSKYIE,LSKYFI))
               FSKYFIE(NIN)%P(1:NFSKYIE,1:LSKYFI) = 0
-c           ENDIF
           ENDIF
 
       ENDIF

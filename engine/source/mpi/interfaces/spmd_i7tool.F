@@ -4655,7 +4655,7 @@ C
                   IF(KDTINT==0) THEN
                     ALLOCATE(FSKYFIE(I)%P(8,LSKYFI),STAT=IERROR1)
                   ELSE
-                    ALLOCATE(FSKYFIE(I)%P(8,LSKYFI),STAT=IERROR1)
+                    ALLOCATE(FSKYFIE(I)%P(10,LSKYFI),STAT=IERROR1)
                   END IF
                   IERROR = IERROR + IERROR1
                 ENDIF
@@ -7344,11 +7344,10 @@ C
           IF (ASSOCIATED(ISKYFIE(NI)%P)) DEALLOCATE(ISKYFIE(NI)%P)
           ALLOCATE(ISKYFIE(NI)%P(LSKYFI),STAT=IERROR1)
           IF(KDTINT==0) THEN
-C            ALLOCATE(FSKYFIE(NI)%P(8,LSKYFI),STAT=IERROR1)
              ALLOCATE(FSKYFIE(NI)%P(8,LSKYFI),STAT=IERROR1)
              IERROR = IERROR + IERROR1
           ELSE
-             ALLOCATE(FSKYFIE(NI)%P(8,LSKYFI),STAT=IERROR1)
+             ALLOCATE(FSKYFIE(NI)%P(10,LSKYFI),STAT=IERROR1)
              IERROR = IERROR + IERROR1
           END IF
         ENDIF
