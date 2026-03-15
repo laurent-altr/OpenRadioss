@@ -47,6 +47,7 @@ C   C o m m o n   B l o c k s
 C-----------------------------------------------
 #include      "com04_c.inc"
 #include      "param_c.inc"
+#include      "com08_c.inc"
 #include      "task_c.inc"
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
@@ -89,13 +90,15 @@ C-----------------------------------------------
             IF(INTBUF_TAB%STFNS(N)==ZERO)THEN
               ! Shooting Nodes
               INTBUF_TAB%IRTLM(4*N-3:4*N)=0
-            ELSEIF(INTBUF_TAB%IRTLM(4*(N-1)+4) == ISPMD+1)THEN
+            ELSEIF(INTBUF_TAB%IRTLM(4*(N-1)+4) == ISPMD+1 .OR.
+     .              (TT == ZERO .AND. ISPMD > 0 .AND.
+     .               INTBUF_TAB%IRTLM(4*(N-1)+4) == 1))THEN
               L = INTBUF_TAB%IRTLM(4*(N-1)+3)
               IF(INTBUF_TAB%STFM(L)==ZERO)THEN
                 ! Reset IRTLM when a Second node is in contact with a Main surface which was deleted.
                 INTBUF_TAB%IRTLM(4*(N-1)+1)=0
                 INTBUF_TAB%IRTLM(4*(N-1)+2)=0
-                ! The segment where the node was impacted has been deleted 
+                ! The segment where the node was impacted has been deleted
                 ! at the previous cycle => the node can not impact during THIS cycle, but the next cycle ONLY
                 INTBUF_TAB%IRTLM(4*(N-1)+3)  = -1
                 INTBUF_TAB%IRTLM(4*(N-1)+4)  =  0
@@ -107,6 +110,8 @@ C-----------------------------------------------
                 INTBUF_TAB%PENE_OLD(5*(N-1)+1:5*N)= ZERO
               ELSE
                 ! n impacts on my spmd domain, on segment n irtlm(3,n)
+                ! claim ownership: update process tag so future cycles use LOCAL branch
+                INTBUF_TAB%IRTLM(4*(N-1)+4) = ISPMD+1
                 local_i_stok(itask+1) = local_i_stok(itask+1) + 1
                 local_cand_opt_n(local_i_stok(itask+1)) = n
                 local_cand_opt_e(local_i_stok(itask+1)) = l
@@ -117,7 +122,7 @@ C-----------------------------------------------
                 INTBUF_TAB%SECND_FR(6*(N-1)+1:6*(N-1)+3)=ZERO
                 INTBUF_TAB%PENE_OLD(5*(N-1)+2) = INTBUF_TAB%PENE_OLD(5*(N-1)+1)
                 INTBUF_TAB%PENE_OLD(5*(N-1)+1) = ZERO
-                INTBUF_TAB%STIF_OLD(2*(N-1)+2) = INTBUF_TAB%STIF_OLD(2*(N-1)+1) 
+                INTBUF_TAB%STIF_OLD(2*(N-1)+2) = INTBUF_TAB%STIF_OLD(2*(N-1)+1)
                 INTBUF_TAB%STIF_OLD(2*(N-1)+1) = ZERO
                 ! prepares to leave the contact
                 INTBUF_TAB%TIME_S(2*(N-1)+1) = EP20
@@ -136,7 +141,7 @@ C-----------------------------------------------
               INTBUF_TAB%TIME_S(2*(N-1)+1) = EP20
               INTBUF_TAB%TIME_S(2*(N-1)+2) = EP20
             END IF
-          ELSE ! IF(INTBUF_TAB%IRTLM(4*(N-1)+1) > 0)THEN 
+          ELSE ! IF(INTBUF_TAB%IRTLM(4*(N-1)+1) > 0)THEN
             ! reset all for future impact
             INTBUF_TAB%PENE_OLD(5*(N-1)+3)  =ZERO
             INTBUF_TAB%PENE_OLD(5*(N-1)+4)  =ZERO
@@ -151,10 +156,12 @@ C-----------------------------------------------
 !$omp do schedule(guided) private(N,L)
         DO N=1,NSNR
           IF(IRTLM_FI(NIN)%P(1,N) > 0)THEN
-            IF(STIFI(NIN)%P(N)==ZERO)THEN  
+            IF(STIFI(NIN)%P(N)==ZERO)THEN
               ! Shooting Nodes
               IRTLM_FI(NIN)%P(1:4,N)=0
-            ELSEIF(IRTLM_FI(NIN)%P(4,N) == ISPMD+1)THEN
+            ELSEIF(IRTLM_FI(NIN)%P(4,N) == ISPMD+1 .OR.
+     .              (TT == ZERO .AND. ISPMD > 0 .AND.
+     .               IRTLM_FI(NIN)%P(4,N) == 1))THEN
               L = IRTLM_FI(NIN)%P(3,N)
               IF(INTBUF_TAB%STFM(L)==ZERO)THEN
                 ! Reset IRTLM when a Second node is in contact with a Main surface which was deleted.
@@ -171,7 +178,8 @@ C-----------------------------------------------
                 PENE_OLDFI(NIN)%P(1:5,N)=ZERO
                 STIF_OLDFI(NIN)%P(1:2,N)=ZERO
               ELSE
-
+                ! claim ownership: update process tag so future cycles use LOCAL branch
+                IRTLM_FI(NIN)%P(4,N) = ISPMD+1
                 local_i_stok(itask+1) = local_i_stok(itask+1) + 1
                 local_cand_opt_n(local_i_stok(itask+1)) = nsn + n
                 local_cand_opt_e(local_i_stok(itask+1)) = l
@@ -219,13 +227,15 @@ C-----------------------------------------------
             IF(INTBUF_TAB%STFNS(N)==ZERO)THEN
               ! Shooting Nodes
               INTBUF_TAB%IRTLM(4*N-3:4*N)=0
-            ELSEIF(INTBUF_TAB%IRTLM(4*(N-1)+4) == ISPMD+1)THEN
+            ELSEIF(INTBUF_TAB%IRTLM(4*(N-1)+4) == ISPMD+1 .OR.
+     .              (TT == ZERO .AND. ISPMD > 0 .AND.
+     .               INTBUF_TAB%IRTLM(4*(N-1)+4) == 1))THEN
               L = INTBUF_TAB%IRTLM(4*(N-1)+3)
               IF(INTBUF_TAB%STFM(L)==ZERO)THEN
                 ! Reset IRTLM when a Second node is in contact with a Main surface which was deleted.
                 INTBUF_TAB%IRTLM(4*(N-1)+1)=0
                 INTBUF_TAB%IRTLM(4*(N-1)+2)=0
-                ! The segment where the node was impacted has been deleted 
+                ! The segment where the node was impacted has been deleted
                 ! at the previous cycle => the node can not impact during THIS cycle, but the next cycle ONLY
                 INTBUF_TAB%IRTLM(4*(N-1)+3)  = -1
                 INTBUF_TAB%IRTLM(4*(N-1)+4)  =  0
@@ -235,9 +245,11 @@ C-----------------------------------------------
                 INTBUF_TAB%SECND_FR(6*(N-1)+1:6*N) = ZERO
                 INTBUF_TAB%STIF_OLD(2*(N-1)+1:2*N)= ZERO
                 INTBUF_TAB%PENE_OLD(5*(N-1)+1:5*N)= ZERO
-                INTBUF_TAB%IF_ADH(N) = 0    
+                INTBUF_TAB%IF_ADH(N) = 0
               ELSE
                 ! n impacts on my spmd domain, on segment n irtlm(3,n)
+                ! claim ownership: update process tag so future cycles use LOCAL branch
+                INTBUF_TAB%IRTLM(4*(N-1)+4) = ISPMD+1
                 local_i_stok(itask+1) = local_i_stok(itask+1) + 1
                 local_cand_opt_n(local_i_stok(itask+1)) = n
                 local_cand_opt_e(local_i_stok(itask+1)) = l
@@ -248,7 +260,7 @@ C-----------------------------------------------
                 INTBUF_TAB%SECND_FR(6*(N-1)+1:6*(N-1)+3)=ZERO
                 INTBUF_TAB%PENE_OLD(5*(N-1)+2) = INTBUF_TAB%PENE_OLD(5*(N-1)+1)
                 INTBUF_TAB%PENE_OLD(5*(N-1)+1) = ZERO
-                INTBUF_TAB%STIF_OLD(2*(N-1)+2) = INTBUF_TAB%STIF_OLD(2*(N-1)+1) 
+                INTBUF_TAB%STIF_OLD(2*(N-1)+2) = INTBUF_TAB%STIF_OLD(2*(N-1)+1)
                 INTBUF_TAB%STIF_OLD(2*(N-1)+1) = ZERO
                 ! prepares to leave the contact
                 INTBUF_TAB%TIME_S(2*(N-1)+1) = EP20
@@ -268,7 +280,7 @@ C-----------------------------------------------
               INTBUF_TAB%TIME_S(2*(N-1)+1) = EP20
               INTBUF_TAB%TIME_S(2*(N-1)+2) = EP20
             END IF
-          ELSE ! IF(INTBUF_TAB%IRTLM(4*(N-1)+1) > 0)THEN 
+          ELSE ! IF(INTBUF_TAB%IRTLM(4*(N-1)+1) > 0)THEN
             ! reset all for future impact
             INTBUF_TAB%TIME_S(2*(N-1)+1) = -EP20
             INTBUF_TAB%TIME_S(2*(N-1)+2) =  EP20
@@ -284,7 +296,9 @@ C-----------------------------------------------
             IF(STIFI(NIN)%P(N)==ZERO)THEN
               ! Shooting Nodes
               IRTLM_FI(NIN)%P(1:4,N)=0
-            ELSEIF(IRTLM_FI(NIN)%P(4,N) == ISPMD+1)THEN
+            ELSEIF(IRTLM_FI(NIN)%P(4,N) == ISPMD+1 .OR.
+     .              (TT == ZERO .AND. ISPMD > 0 .AND.
+     .               IRTLM_FI(NIN)%P(4,N) == 1))THEN
               L = IRTLM_FI(NIN)%P(3,N)
               IF(INTBUF_TAB%STFM(L)==ZERO)THEN
                 ! Reset IRTLM when a Second node is in contact with a Main surface which was deleted.
@@ -302,8 +316,10 @@ C-----------------------------------------------
                 STIF_OLDFI(NIN)%P(1:2,N)=ZERO
                 IF_ADHFI(NIN)%P(N) = 0
               ELSE
+                ! claim ownership: update process tag so future cycles use LOCAL branch
+                IRTLM_FI(NIN)%P(4,N) = ISPMD+1
                 local_i_stok(itask+1) = local_i_stok(itask+1) + 1
-                local_cand_opt_n(local_i_stok(itask+1)) = nsn+n 
+                local_cand_opt_n(local_i_stok(itask+1)) = nsn+n
                 local_cand_opt_e(local_i_stok(itask+1)) = l
 
                 ! copy old friction forces
