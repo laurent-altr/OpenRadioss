@@ -69,13 +69,17 @@ C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
       INTEGER I,N, IMT, IPMAT, IGTYP,IPPID,IADB,
      .        IGMAT,IPGMAT,IPOS,NIP,MLAWLY
+      INTEGER SORT_KEY(MVSIZ), SORT_PERM(2*MVSIZ), SORT_WORK(65537)
+      INTEGER SORT_IDX(MVSIZ)
+      INTEGER NEL_BLK, J2
       my_real
      .   SSP(MVSIZ), AL1(MVSIZ),AL(MVSIZ), ALMIN(MVSIZ),
      .   AL2(MVSIZ), AL3(MVSIZ), AL4(MVSIZ), AL5(MVSIZ), AL6(MVSIZ)
       my_real
-     .   VISCMX,A11,A11R,B1,B2,VV,STI,STIR,VISCDEF,DTDYN,RHO, 
+     .   VISCMX,A11,A11R,B1,B2,VV,STI,STIR,VISCDEF,DTDYN,RHO,
      .   YOUNG,NU,GMAX,FAC,Z0
        my_real, DIMENSION(MVSIZ) :: ZOFFSET
+       my_real, DIMENSION(MVSIZ) :: STIEL, STIREL
 C======================================================================|
       IGTYP = NINT(GEO(12,IPROP))
       IGMAT = IGEO(98,IPROP)
@@ -360,6 +364,7 @@ C----------------------------------------------------------
 C     DT NODAL
 C----------------------------------------------------------     
       IPGMAT = 700 
+      NEL_BLK = LLT - LFT + 1
       IF(NADMESH == 0)THEN
         IF (IGTYP == 11 .AND. IGMAT > 0) THEN
           DO I=LFT,LLT
@@ -369,62 +374,83 @@ C----------------------------------------------------------
                B2 = PX2(I)*PX2(I)+PY2(I)*PY2(I)
                VV = VISCMX * VISCMX
                FAC = MAX(B1,B2) / (AREA(I) * VV)
-               STI =  FAC * THK(I) * A11
-               STIR = FAC*A11R * THK(I)*(THK(I)**2 +  AREA(I))*ONE_OVER_12
-               STIFN(IXC(2,I))=STIFN(IXC(2,I))+STI
-               STIFN(IXC(3,I))=STIFN(IXC(3,I))+STI
-               STIFN(IXC(4,I))=STIFN(IXC(4,I))+STI
-               STIFN(IXC(5,I))=STIFN(IXC(5,I))+STI
-               STIFR(IXC(2,I))=STIFR(IXC(2,I))+STIR
-               STIFR(IXC(3,I))=STIFR(IXC(3,I))+STIR
-               STIFR(IXC(4,I))=STIFR(IXC(4,I))+STIR
-               STIFR(IXC(5,I))=STIFR(IXC(5,I))+STIR
-               STRC(I) = STIR
+               STIEL(I) =  FAC * THK(I) * A11
+               STIREL(I) = FAC*A11R * THK(I)*(THK(I)**2 +  AREA(I))
+     .                    *ONE_OVER_12
+               STRC(I) = STIREL(I)
+               SORT_KEY(I-LFT+1) = IXC(2,I)
             ENDDO
-       ELSEIF(IGTYP == 52 .OR. 
-     .      ((IGTYP == 17 .OR. IGTYP == 51) .AND. IGMAT > 0 )) THEN 
+C  Sort by first node for deterministic STIFN/STIFR accumulation order
+          CALL MY_ORDERS(0,SORT_WORK,SORT_KEY,SORT_PERM,NEL_BLK,1)
+          DO J2=1,NEL_BLK
+               I = LFT - 1 + SORT_PERM(J2)
+               STIFN(IXC(2,I))=STIFN(IXC(2,I))+STIEL(I)
+               STIFN(IXC(3,I))=STIFN(IXC(3,I))+STIEL(I)
+               STIFN(IXC(4,I))=STIFN(IXC(4,I))+STIEL(I)
+               STIFN(IXC(5,I))=STIFN(IXC(5,I))+STIEL(I)
+               STIFR(IXC(2,I))=STIFR(IXC(2,I))+STIREL(I)
+               STIFR(IXC(3,I))=STIFR(IXC(3,I))+STIREL(I)
+               STIFR(IXC(4,I))=STIFR(IXC(4,I))+STIREL(I)
+               STIFR(IXC(5,I))=STIFR(IXC(5,I))+STIREL(I)
+          ENDDO
+       ELSEIF(IGTYP == 52 .OR.
+     .      ((IGTYP == 17 .OR. IGTYP == 51) .AND. IGMAT > 0 )) THEN
          DO I=LFT,LLT
                A11  = PM_STACK(5 ,ISUBSTACK)
                A11R = PM_STACK(7 ,ISUBSTACK)
-                B1 = PX1(I)*PX1(I)+PY1(I)*PY1(I)
+               B1 = PX1(I)*PX1(I)+PY1(I)*PY1(I)
                B2 = PX2(I)*PX2(I)+PY2(I)*PY2(I)
                VV = VISCMX * VISCMX
                FAC = MAX(B1,B2) / (AREA(I) * VV)
-               STI =  FAC * THK(I) * A11
-               STIR = FAC*A11R * THK(I)*((THK(I)**2 +  AREA(I))*ONE_OVER_12 + 
-     .                                     ZOFFSET(I)*ZOFFSET(I) ) 
-               STIFN(IXC(2,I))=STIFN(IXC(2,I))+STI
-               STIFN(IXC(3,I))=STIFN(IXC(3,I))+STI
-               STIFN(IXC(4,I))=STIFN(IXC(4,I))+STI
-               STIFN(IXC(5,I))=STIFN(IXC(5,I))+STI
-               STIFR(IXC(2,I))=STIFR(IXC(2,I))+STIR
-               STIFR(IXC(3,I))=STIFR(IXC(3,I))+STIR
-               STIFR(IXC(4,I))=STIFR(IXC(4,I))+STIR
-               STIFR(IXC(5,I))=STIFR(IXC(5,I))+STIR
-               STRC(I) = STIR
+               STIEL(I) =  FAC * THK(I) * A11
+               STIREL(I) = FAC*A11R * THK(I)*
+     .                    ((THK(I)**2 +  AREA(I))*ONE_OVER_12 +
+     .                     ZOFFSET(I)*ZOFFSET(I) )
+               STRC(I) = STIREL(I)
+               SORT_KEY(I-LFT+1) = IXC(2,I)
            ENDDO
+C  Sort by first node for deterministic STIFN/STIFR accumulation order
+          CALL MY_ORDERS(0,SORT_WORK,SORT_KEY,SORT_PERM,NEL_BLK,1)
+          DO J2=1,NEL_BLK
+               I = LFT - 1 + SORT_PERM(J2)
+               STIFN(IXC(2,I))=STIFN(IXC(2,I))+STIEL(I)
+               STIFN(IXC(3,I))=STIFN(IXC(3,I))+STIEL(I)
+               STIFN(IXC(4,I))=STIFN(IXC(4,I))+STIEL(I)
+               STIFN(IXC(5,I))=STIFN(IXC(5,I))+STIEL(I)
+               STIFR(IXC(2,I))=STIFR(IXC(2,I))+STIREL(I)
+               STIFR(IXC(3,I))=STIFR(IXC(3,I))+STIREL(I)
+               STIFR(IXC(4,I))=STIFR(IXC(4,I))+STIREL(I)
+               STIFR(IXC(5,I))=STIFR(IXC(5,I))+STIREL(I)
+          ENDDO
        ELSE
          DO I=LFT,LLT
             A11 =PM(24,IMAT)
             B1 = PX1(I)*PX1(I)+PY1(I)*PY1(I)
             B2 = PX2(I)*PX2(I)+PY2(I)*PY2(I)
             VV = VISCMX * VISCMX
-            STI =  MAX(B1,B2)
+            STIEL(I) =  MAX(B1,B2)
      .           * THK(I) * A11 / (AREA(I) * VV)
-            STIR = STI * (THK(I)*THK(I) + AREA(I)) / 12.
-            STIFN(IXC(2,I))=STIFN(IXC(2,I))+STI
-            STIFN(IXC(3,I))=STIFN(IXC(3,I))+STI
-            STIFN(IXC(4,I))=STIFN(IXC(4,I))+STI
-            STIFN(IXC(5,I))=STIFN(IXC(5,I))+STI
-            STIFR(IXC(2,I))=STIFR(IXC(2,I))+STIR
-            STIFR(IXC(3,I))=STIFR(IXC(3,I))+STIR
-            STIFR(IXC(4,I))=STIFR(IXC(4,I))+STIR
-            STIFR(IXC(5,I))=STIFR(IXC(5,I))+STIR
-            STRC(I) = STIR
+            STIREL(I) = STIEL(I) * (THK(I)*THK(I) + AREA(I)) / 12.
+            STRC(I) = STIREL(I)
+            SORT_KEY(I-LFT+1) = IXC(2,I)
          ENDDO
+C  Sort by first node for deterministic STIFN/STIFR accumulation order
+          CALL MY_ORDERS(0,SORT_WORK,SORT_KEY,SORT_PERM,NEL_BLK,1)
+          DO J2=1,NEL_BLK
+               I = LFT - 1 + SORT_PERM(J2)
+               STIFN(IXC(2,I))=STIFN(IXC(2,I))+STIEL(I)
+               STIFN(IXC(3,I))=STIFN(IXC(3,I))+STIEL(I)
+               STIFN(IXC(4,I))=STIFN(IXC(4,I))+STIEL(I)
+               STIFN(IXC(5,I))=STIFN(IXC(5,I))+STIEL(I)
+               STIFR(IXC(2,I))=STIFR(IXC(2,I))+STIREL(I)
+               STIFR(IXC(3,I))=STIFR(IXC(3,I))+STIREL(I)
+               STIFR(IXC(4,I))=STIFR(IXC(4,I))+STIREL(I)
+               STIFR(IXC(5,I))=STIFR(IXC(5,I))+STIREL(I)
+          ENDDO
        ENDIF 
       ELSE
        IF(IGTYP == 11 .AND. IGMAT > 0) THEN
+          NEL_BLK = 0
           DO I=LFT,LLT
              N=NFT+I
              IF(SH4TREE(3,N) >= 0)THEN
@@ -434,21 +460,30 @@ C----------------------------------------------------------
                B2 = PX2(I)*PX2(I)+PY2(I)*PY2(I)
                VV = VISCMX * VISCMX
                FAC = MAX(B1,B2) / (AREA(I) * VV)
-               STI =  FAC * THK(I) * A11
-               STIR = FAC * A11R * THK(I)*(THK(I)**2 +  AREA(I))*ONE_OVER_12
-               STIFN(IXC(2,I))=STIFN(IXC(2,I))+STI
-               STIFN(IXC(3,I))=STIFN(IXC(3,I))+STI
-               STIFN(IXC(4,I))=STIFN(IXC(4,I))+STI
-               STIFN(IXC(5,I))=STIFN(IXC(5,I))+STI
-               STIFR(IXC(2,I))=STIFR(IXC(2,I))+STIR
-               STIFR(IXC(3,I))=STIFR(IXC(3,I))+STIR
-               STIFR(IXC(4,I))=STIFR(IXC(4,I))+STIR
-               STIFR(IXC(5,I))=STIFR(IXC(5,I))+STIR
-               STRC(I) = STIR
+               STIEL(I) =  FAC * THK(I) * A11
+               STIREL(I) = FAC * A11R * THK(I)*(THK(I)**2 +
+     .                    AREA(I))*ONE_OVER_12
+               STRC(I) = STIREL(I)
+               NEL_BLK = NEL_BLK + 1
+               SORT_KEY(NEL_BLK) = IXC(2,I)
+               SORT_IDX(NEL_BLK) = I
              END IF
             END DO
-         ELSEIF(IGTYP == 52 .OR. 
-     .         ((IGTYP == 17 .OR. IGTYP == 51) .AND. IGMAT > 0 )) THEN 
+          CALL MY_ORDERS(0,SORT_WORK,SORT_KEY,SORT_PERM,NEL_BLK,1)
+          DO J2=1,NEL_BLK
+               I = SORT_IDX(SORT_PERM(J2))
+               STIFN(IXC(2,I))=STIFN(IXC(2,I))+STIEL(I)
+               STIFN(IXC(3,I))=STIFN(IXC(3,I))+STIEL(I)
+               STIFN(IXC(4,I))=STIFN(IXC(4,I))+STIEL(I)
+               STIFN(IXC(5,I))=STIFN(IXC(5,I))+STIEL(I)
+               STIFR(IXC(2,I))=STIFR(IXC(2,I))+STIREL(I)
+               STIFR(IXC(3,I))=STIFR(IXC(3,I))+STIREL(I)
+               STIFR(IXC(4,I))=STIFR(IXC(4,I))+STIREL(I)
+               STIFR(IXC(5,I))=STIFR(IXC(5,I))+STIREL(I)
+          ENDDO
+         ELSEIF(IGTYP == 52 .OR.
+     .         ((IGTYP == 17 .OR. IGTYP == 51) .AND. IGMAT > 0 )) THEN
+           NEL_BLK = 0
            DO I=LFT,LLT
              N=NFT+I
              IF(SH4TREE(3,N) >= 0)THEN
@@ -458,22 +493,31 @@ C----------------------------------------------------------
                B2 = PX2(I)*PX2(I)+PY2(I)*PY2(I)
                VV = VISCMX * VISCMX
                FAC = MAX(B1,B2) / (AREA(I) * VV)
-               STI =  FAC * THK(I) * A11
-               STIR = FAC * A11R * THK(I)*((THK(I)**2 +  AREA(I))*ONE_OVER_12 + 
-     .                                     ZOFFSET(I)*ZOFFSET(I) ) 
-               STIFN(IXC(2,I))=STIFN(IXC(2,I))+STI
-               STIFN(IXC(3,I))=STIFN(IXC(3,I))+STI
-               STIFN(IXC(4,I))=STIFN(IXC(4,I))+STI
-               STIFN(IXC(5,I))=STIFN(IXC(5,I))+STI
-               STIFR(IXC(2,I))=STIFR(IXC(2,I))+STIR
-               STIFR(IXC(3,I))=STIFR(IXC(3,I))+STIR
-               STIFR(IXC(4,I))=STIFR(IXC(4,I))+STIR
-               STIFR(IXC(5,I))=STIFR(IXC(5,I))+STIR
-               STRC(I) = STIR
+               STIEL(I) =  FAC * THK(I) * A11
+               STIREL(I) = FAC * A11R * THK(I)*
+     .                    ((THK(I)**2 +  AREA(I))*ONE_OVER_12 +
+     .                     ZOFFSET(I)*ZOFFSET(I) )
+               STRC(I) = STIREL(I)
+               NEL_BLK = NEL_BLK + 1
+               SORT_KEY(NEL_BLK) = IXC(2,I)
+               SORT_IDX(NEL_BLK) = I
              END IF
            END DO
-            
+           CALL MY_ORDERS(0,SORT_WORK,SORT_KEY,SORT_PERM,NEL_BLK,1)
+           DO J2=1,NEL_BLK
+               I = SORT_IDX(SORT_PERM(J2))
+               STIFN(IXC(2,I))=STIFN(IXC(2,I))+STIEL(I)
+               STIFN(IXC(3,I))=STIFN(IXC(3,I))+STIEL(I)
+               STIFN(IXC(4,I))=STIFN(IXC(4,I))+STIEL(I)
+               STIFN(IXC(5,I))=STIFN(IXC(5,I))+STIEL(I)
+               STIFR(IXC(2,I))=STIFR(IXC(2,I))+STIREL(I)
+               STIFR(IXC(3,I))=STIFR(IXC(3,I))+STIREL(I)
+               STIFR(IXC(4,I))=STIFR(IXC(4,I))+STIREL(I)
+               STIFR(IXC(5,I))=STIFR(IXC(5,I))+STIREL(I)
+           ENDDO
+
          ELSE
+            NEL_BLK = 0
             DO I=LFT,LLT
              N=NFT+I
              IF(SH4TREE(3,N) >= 0)THEN
@@ -481,20 +525,27 @@ C----------------------------------------------------------
               B1 = PX1(I)*PX1(I)+PY1(I)*PY1(I)
               B2 = PX2(I)*PX2(I)+PY2(I)*PY2(I)
               VV = VISCMX * VISCMX
-              STI =  MAX(B1,B2)
+              STIEL(I) =  MAX(B1,B2)
      .             * THK(I) * A11 / (AREA(I) * VV)
-              STIR = STI * (THK(I)*THK(I) + AREA(I)) / 12.
-              STIFN(IXC(2,I))=STIFN(IXC(2,I))+STI
-              STIFN(IXC(3,I))=STIFN(IXC(3,I))+STI
-              STIFN(IXC(4,I))=STIFN(IXC(4,I))+STI
-              STIFN(IXC(5,I))=STIFN(IXC(5,I))+STI
-              STIFR(IXC(2,I))=STIFR(IXC(2,I))+STIR
-              STIFR(IXC(3,I))=STIFR(IXC(3,I))+STIR
-              STIFR(IXC(4,I))=STIFR(IXC(4,I))+STIR
-              STIFR(IXC(5,I))=STIFR(IXC(5,I))+STIR
-              STRC(I) = STIR
+              STIREL(I) = STIEL(I) * (THK(I)*THK(I) + AREA(I)) / 12.
+              STRC(I) = STIREL(I)
+              NEL_BLK = NEL_BLK + 1
+              SORT_KEY(NEL_BLK) = IXC(2,I)
+              SORT_IDX(NEL_BLK) = I
              END IF
             END DO
+            CALL MY_ORDERS(0,SORT_WORK,SORT_KEY,SORT_PERM,NEL_BLK,1)
+            DO J2=1,NEL_BLK
+               I = SORT_IDX(SORT_PERM(J2))
+               STIFN(IXC(2,I))=STIFN(IXC(2,I))+STIEL(I)
+               STIFN(IXC(3,I))=STIFN(IXC(3,I))+STIEL(I)
+               STIFN(IXC(4,I))=STIFN(IXC(4,I))+STIEL(I)
+               STIFN(IXC(5,I))=STIFN(IXC(5,I))+STIEL(I)
+               STIFR(IXC(2,I))=STIFR(IXC(2,I))+STIREL(I)
+               STIFR(IXC(3,I))=STIFR(IXC(3,I))+STIREL(I)
+               STIFR(IXC(4,I))=STIFR(IXC(4,I))+STIREL(I)
+               STIFR(IXC(5,I))=STIFR(IXC(5,I))+STIREL(I)
+            ENDDO
        ENDIF
       END IF
 C----------------------------------------------------------

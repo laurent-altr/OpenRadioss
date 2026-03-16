@@ -125,12 +125,16 @@ C-----------------------------------------------
       INTEGER MAT(MVSIZ), PID(MVSIZ), NGL(MVSIZ), IXT4(MVSIZ,4)
       INTEGER IX1(MVSIZ), IX2(MVSIZ), IX3(MVSIZ), IX4(MVSIZ)
       INTEGER NSPHDIR,NCELF,NCELL,IBOLTP
+      INTEGER SORT_KEY(MVSIZ), SORT_PERM(2*MVSIZ), SORT_WORK(65537)
+      INTEGER NEL_BLK, J2
       DOUBLE PRECISION
      .   X1(MVSIZ),X2(MVSIZ),X3(MVSIZ),X4(MVSIZ),Y1(MVSIZ),Y2(MVSIZ),
      .   Y3(MVSIZ),Y4(MVSIZ),Z1(MVSIZ),Z2(MVSIZ),Z3(MVSIZ),Z4(MVSIZ) 
       CHARACTER(LEN=NCHARTITLE)::TITR1
       my_real
      .   BID, FV, STI
+      my_real
+     .   STIEL(MVSIZ)
       my_real
      .   RX(MVSIZ),RY(MVSIZ),RZ(MVSIZ),
      .   SX(MVSIZ),SY(MVSIZ),SZ(MVSIZ),
@@ -330,6 +334,7 @@ c
      .     VOLU, DTX ,IGEO,IGTYP)
 C------------------------------------------
 c
+      NEL_BLK = LLT - LFT + 1
       DO 10 I=LFT,LLT
         IF(IXS(10,I+NFT)/=0) THEN
           IF(     IGTYP/=0 .AND.IGTYP/=6
@@ -346,13 +351,21 @@ c
         ENDIF
         DTELEM(NFT+I)=DTX(I)
 C       STI = 2 * (MASS/4) /dt^2
-        STI = HALF * GBUF%FILL(I)* GBUF%RHO(I) * VOLU(I) /
+        STIEL(I) = HALF * GBUF%FILL(I)* GBUF%RHO(I) * VOLU(I) /
      .        MAX(EM20,DTX(I)*DTX(I))
+        SORT_KEY(I-LFT+1) = IXS(2,I+NFT)
+  10  CONTINUE
+C  Sort elements by first node ID for deterministic STIFN accumulation order
+C  This ensures the same floating-point result regardless of NSPMD domain count
+      CALL MY_ORDERS(0,SORT_WORK,SORT_KEY,SORT_PERM,NEL_BLK,1)
+      DO J2=1,NEL_BLK
+        I = LFT - 1 + SORT_PERM(J2)
+        STI = STIEL(I)
         STIFN(IXS(2,I+NFT))=STIFN(IXS(2,I+NFT))+STI
         STIFN(IXS(4,I+NFT))=STIFN(IXS(4,I+NFT))+STI
         STIFN(IXS(6,I+NFT))=STIFN(IXS(6,I+NFT))+STI
         STIFN(IXS(7,I+NFT))=STIFN(IXS(7,I+NFT))+STI
-  10  CONTINUE
+      ENDDO
 C------------------------------------------
 C     SOLID TO SPH, COMPUTE INITIAL VOLUME & MASS OF PARTICLES
 C------------------------------------------

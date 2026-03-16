@@ -91,29 +91,46 @@ C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
       INTEGER I, J, K, N, IGTYP, WORK(70000),IP
 C
-      DO I = 1, NUMELS
-        ITRI(I) = IXS(11,I)
+C  2-key sort for 8-noded solids: primary key=material ID, secondary key=first node
+C  ensures deterministic MS accumulation order regardless of NSPMD domain decomposition
+      DO I = 1, NUMELS8
+        ITRI(2*I-1) = IXS(11,I)
+        ITRI(2*I)   = IXS(2,I)
       ENDDO
 C
-      CALL MY_ORDERS(0,WORK,ITRI,INDEX,NUMELS8,1)
+      CALL MY_ORDERS(0,WORK,ITRI,INDEX,NUMELS8,2)
 
-      IDEB=NUMELS8+1
-      CALL MY_ORDERS(0,WORK,ITRI(IDEB),INDEX(IDEB),NUMELS10,1)
+      IDEB=2*NUMELS8+1
+      DO I = 1, NUMELS10
+        ITRI(IDEB+I-1) = IXS(11,NUMELS8+I)
+      ENDDO
+      CALL MY_ORDERS(0,WORK,ITRI(IDEB),INDEX(NUMELS8+1),NUMELS10,1)
 
       DO J=1,NUMELS10
-           index(IDEB+J-1) = index(IDEB+J-1)+numels8
+           index(NUMELS8+J) = index(NUMELS8+J)+numels8
       ENDDO
 
       IDEB = IDEB + NUMELS10
-      CALL MY_ORDERS(0,WORK,ITRI(IDEB),INDEX(IDEB),NUMELS20,1)
+      DO I = 1, NUMELS20
+        ITRI(IDEB+I-1) = IXS(11,NUMELS8+NUMELS10+I)
+      ENDDO
+      CALL MY_ORDERS(0,WORK,ITRI(IDEB),INDEX(NUMELS8+NUMELS10+1),
+     .               NUMELS20,1)
        DO j = 1, NUMELS20
-           index(IDEB+J-1) = index(IDEB+J-1)+numels8+numels10
+           index(NUMELS8+NUMELS10+J) =
+     .         index(NUMELS8+NUMELS10+J)+numels8+numels10
        ENDDO
 
       IDEB = IDEB + NUMELS20
-      CALL MY_ORDERS(0,WORK,ITRI(IDEB),INDEX(IDEB),NUMELS16,1)
+      DO I = 1, NUMELS16
+        ITRI(IDEB+I-1) = IXS(11,NUMELS8+NUMELS10+NUMELS20+I)
+      ENDDO
+      CALL MY_ORDERS(0,WORK,ITRI(IDEB),
+     .               INDEX(NUMELS8+NUMELS10+NUMELS20+1),NUMELS16,1)
        DO j = 1, NUMELS16
-           index(IDEB+J-1) = index(IDEB+J-1)+numels8+numels10+numels20
+           index(NUMELS8+NUMELS10+NUMELS20+J) =
+     .         index(NUMELS8+NUMELS10+NUMELS20+J)
+     .         +numels8+numels10+numels20
        ENDDO
 C
       IF(ITHERM_FE == 0 ) THEN
@@ -303,10 +320,12 @@ C
         ENDIF
       ENDIF
 C
+C  2-key sort for quads: primary key=material ID, secondary key=first node
       DO I = 1, NUMELQ
-        ITRI(I) = IXQ(7,I)
+        ITRI(2*I-1) = IXQ(7,I)
+        ITRI(2*I)   = IXQ(2,I)
       ENDDO
-      CALL MY_ORDERS(0,WORK,ITRI,INDEX,NUMELQ,1)
+      CALL MY_ORDERS(0,WORK,ITRI,INDEX,NUMELQ,2)
        DO J=1,NUMELQ
         I = INDEX(J)
         DO K=1,4
@@ -315,11 +334,13 @@ C
         ENDDO
       ENDDO
 C
+C  2-key sort for shells: primary key=material ID, secondary key=first node
       DO I = 1, NUMELC
-        ITRI(I) = IXC(7,I)
+        ITRI(2*I-1) = IXC(7,I)
+        ITRI(2*I)   = IXC(2,I)
       ENDDO
-C      
-      CALL MY_ORDERS(0,WORK,ITRI,INDEX,NUMELC,1)
+C
+      CALL MY_ORDERS(0,WORK,ITRI,INDEX,NUMELC,2)
 C
       IF(ITHERM_FE == 0 ) THEN
        IF(NADMESH==0)THEN
