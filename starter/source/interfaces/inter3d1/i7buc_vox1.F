@@ -55,6 +55,8 @@ C-----------------------------------------------
       USE NAMES_AND_TITLES_MOD , ONLY : NCHARTITLE
       use intbufdef_mod 
       use margin_reduction_mod , only : margin_reduction
+      use cpp_i7trivox1_mod , only : cpp_i7trivox1, cpp_i7trivox1_free
+      use iso_c_binding , only : c_ptr, c_f_pointer
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -82,8 +84,9 @@ C-----------------------------------------------
       my_real
      .   STF(*),STFN(*),X(3,*),XYZM(6,2),GAP_S(*),GAP_M(*),
      .   DIST,BUMULT,GAP,TZINF,GAPMIN,GAPMAX,
-     .   GAP_S_L(*),GAP_M_L(*),BGAPSMX, DRAD
+     .   GAP_S_L(*),GAP_M_L(*),BGAPSMX
       my_real , INTENT(IN) :: DGAPLOAD
+      my_real :: drad
       INTEGER ID
       CHARACTER(LEN=NCHARTITLE) :: TITR
       TYPE(INTERSURFP) :: INTERCEP(3,NINTER)
@@ -102,7 +105,7 @@ C-----------------------------------------------
      .        N1, N2, N3, N4, NCONTACT,I_BID,I_STOK_OLD,
      .        IX1,IY1,IZ1,IX2,IY2,IZ2,IX,IY,IZ
       my_real
-     .         MARGE, AAA,TZINF_ST,MARGE_ST 
+     .         MARGE, AAA,TZINF_ST,MARGE_ST
       my_real
      .   DX1,DY1,DZ1,
      .   DX3,DY3,DZ3,
@@ -123,6 +126,10 @@ C-----------------------------------------------
      
       LOGICAL :: TYPE18
       INTEGER (KIND=8) :: IONE,IHUNDRED !< Integer constants in INTEGER 8 for comparisions
+      INTEGER :: NUM_CAND, NEW_MULTIMP
+      INTEGER :: IS_USED_151_INT
+      TYPE(C_PTR) :: CAND_N_CPTR, CAND_E_CPTR
+      INTEGER, POINTER :: CAND_N_FPTR(:), CAND_E_FPTR(:)
 C-----------------------------------------------
 C   S o u r c e   L i n e s
 C-----------------------------------------------
@@ -449,6 +456,7 @@ C     complete initialization of voxel
 C------------------
   200 CONTINUE
 C------------------
+      if(.false.) then
 !$OMP PARALLEL        
         CALL I7TRIVOX1(
      1   NSN      ,IRECT    ,X       ,STF     ,
@@ -464,7 +472,47 @@ C------------------
      2   iix,iiy,iiz,local_next_nod,nrtm,IS_USED_WITH_LAW151 )
 !$OMP END PARALLEL
 C------------------
-
+      else
+        IS_USED_151_INT = 0
+        IF (IS_USED_WITH_LAW151) IS_USED_151_INT = 1
+C
+        CALL CPP_I7TRIVOX1(
+     1   NSN      ,IRECT    ,X        ,STF      ,
+     2   STFN     ,XYZM     ,NSV      ,
+     3   TZINF_ST ,GAP_S_L  ,GAP_M_L  ,
+     4   VOXEL1   ,NBX      ,NBY      ,NBZ      ,NRTM_L   ,
+     5   IGAP     ,GAP      ,GAP_S    ,GAP_M    ,
+     6   GAPMIN   ,GAPMAX   ,MARGE_ST ,CURV_MAX ,BGAPSMX  ,
+     7   ISTF     ,I_STOK   ,
+     8   DRAD     ,INDEX    ,
+     9   IREMNODE ,FLAGREMNODE,KREMNODE ,REMNODE  ,
+     1   DGAPLOAD ,CRVOXEL  ,
+     2   IIX      ,IIY      ,IIZ      ,LOCAL_NEXT_NOD,
+     3   NRTM     ,NUMNOD   ,NUMFAKENODIGEO,NUMELS,
+     4   IS_USED_151_INT,
+     5   NUM_CAND ,CAND_N_CPTR,CAND_E_CPTR)
+C
+C       Copy C-allocated candidates into intbuf_tab arrays
+        IF (NUM_CAND > 0) THEN
+          CALL C_F_POINTER(CAND_N_CPTR, CAND_N_FPTR, [NUM_CAND])
+          CALL C_F_POINTER(CAND_E_CPTR, CAND_E_FPTR, [NUM_CAND])
+C         Ensure intbuf_tab has enough space
+          IF (I_STOK+NUM_CAND > SIZE(intbuf_tab%cand_n)) THEN
+            NEW_MULTIMP = (I_STOK+NUM_CAND)/MAX(NCONT,1) + 1
+            CALL UPGRADE_MULTIMP(NIN, NEW_MULTIMP, intbuf_tab)
+          ENDIF
+C         Copy candidates from C arrays into intbuf_tab
+          intbuf_tab%CAND_N(I_STOK+1:I_STOK+NUM_CAND) =
+     .      CAND_N_FPTR(1:NUM_CAND)
+          intbuf_tab%CAND_E(I_STOK+1:I_STOK+NUM_CAND) =
+     .      CAND_E_FPTR(1:NUM_CAND)
+C         Free the C-allocated arrays
+          CALL CPP_I7TRIVOX1_FREE(CAND_N_CPTR)
+          CALL CPP_I7TRIVOX1_FREE(CAND_E_CPTR)
+        ENDIF
+        I_STOK = I_STOK + NUM_CAND
+      endif
+C
         IF (I_MEM == 2)THEN
           RETURN
         ENDIF
@@ -488,6 +536,7 @@ C     I_MEM = 2 ==> PAS ASSEZ DE MEMOIRE CANDIDATES
         ENDIF
 C---------------------------------
       END DO ! end loop over NSPMD domains
+      write(6,*) NOINT,' NUMBER OF CONTACTS CANDIDATES:',I_STOK
       
       IF(.NOT.TYPE18)THEN
         IF(NSN/=0)THEN

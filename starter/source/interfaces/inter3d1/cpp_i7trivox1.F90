@@ -56,8 +56,8 @@
             nrtm ,                                                     &
             numnod , numfakenodigeo , numels ,                         &
             is_used_with_law151 ,                                      &
-            num_cand_out , cand_n_out , cand_e_out ,                   &
-            cand_out_maxsize) bind(C, name="cpp_i7trivox1")
+            num_cand_out , cand_n_ptr_out ,                            &
+            cand_e_ptr_out) bind(C, name="cpp_i7trivox1")
             use iso_c_binding
 #ifdef MYREAL8
             integer, parameter :: c_my_real = c_double
@@ -108,10 +108,14 @@
             integer(c_int),  intent(in)    :: numels                  !< number of solid elements
             integer(c_int),  intent(in)    :: is_used_with_law151     !< flag for law 151
             integer(c_int),  intent(out)   :: num_cand_out            !< number of candidates found
-            integer(c_int),  intent(out)   :: cand_n_out(*)           !< output secondary node indices
-            integer(c_int),  intent(out)   :: cand_e_out(*)           !< output segment indices
-            integer(c_int),  intent(in)    :: cand_out_maxsize        !< max size of output arrays
+            type(c_ptr),     intent(out)   :: cand_n_ptr_out          !< C pointer to malloc'd candidate nodes array
+            type(c_ptr),     intent(out)   :: cand_e_ptr_out          !< C pointer to malloc'd candidate segments array
           end subroutine cpp_i7trivox1
+
+          subroutine cpp_i7trivox1_free(ptr) bind(C, name="cpp_i7trivox1_free")
+            use iso_c_binding
+            type(c_ptr), value, intent(in) :: ptr                     !< C pointer to free
+          end subroutine cpp_i7trivox1_free
         end interface
 
       end module cpp_i7trivox1_mod

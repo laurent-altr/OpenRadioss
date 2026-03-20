@@ -29,6 +29,8 @@
 #include <vector>
 #include <numeric>
 #include <cstring>
+#include <cstdlib>
+#include <iostream>
 
 #ifdef MYREAL8
 typedef double my_real;
@@ -174,10 +176,9 @@ extern "C" {
 // Parameters matching the Fortran signature, all passed by reference.
 // Arrays use Fortran 1-based indexing conventions.
 //
-// \param[out] num_cand_out  number of candidates found (added to i_stok)
-// \param[out] cand_n_out    output slave node indices (size >= num_cand_out)
-// \param[out] cand_e_out    output segment indices (size >= num_cand_out)
-// \param[in]  cand_out_maxsize  max allocated size of cand_n_out/cand_e_out
+// \param[out] num_cand_out    number of candidates found
+// \param[out] cand_n_ptr_out  C pointer to malloc'd array of slave node indices (caller must free)
+// \param[out] cand_e_ptr_out  C pointer to malloc'd array of segment indices (caller must free)
 //
 void cpp_i7trivox1(
   const int*     nsn_ptr,
@@ -225,9 +226,8 @@ void cpp_i7trivox1(
   const int*     is_used_with_law151_ptr,
   // output
   int*           num_cand_out,
-  int*           cand_n_out,
-  int*           cand_e_out,
-  const int*     cand_out_maxsize_ptr)
+  int**          cand_n_ptr_out,
+  int**          cand_e_ptr_out)
 {
   // Unpack scalar arguments
   const int     nsn            = *nsn_ptr;
@@ -252,7 +252,6 @@ void cpp_i7trivox1(
   const int     numfakenodigeo = *numfakenodigeo_ptr;
   const int     numels         = *numels_ptr;
   const int     is_used_151    = *is_used_with_law151_ptr;
-  const int     cand_out_maxsize = *cand_out_maxsize_ptr;
 
   // Voxel grid dimensions (Fortran: VOXEL(NBX+2, NBY+2, NBZ+2))
   const int vdim_x = nbx + 2;
@@ -392,8 +391,8 @@ void cpp_i7trivox1(
   // Dynamic candidate storage
   std::vector<int> cand_n_vec;
   std::vector<int> cand_e_vec;
-  cand_n_vec.reserve(1024);
-  cand_e_vec.reserve(1024);
+  cand_n_vec.reserve(1024+25*nsn);
+  cand_e_vec.reserve(1024+25*nsn);
 
   int j_stok = 0;
 
@@ -609,15 +608,19 @@ void cpp_i7trivox1(
   }
 
   // ==================================================================================================================
-  // 5. Copy candidates to output arrays
+  // 5. Allocate output arrays and copy candidates (caller must free via cpp_i7trivox1_free)
   // ==================================================================================================================
   int n_cand = static_cast<int>(cand_n_vec.size());
-  int n_copy = std::min(n_cand, cand_out_maxsize);
-  for (int i = 0; i < n_copy; ++i) {
-    cand_n_out[i] = cand_n_vec[i];
-    cand_e_out[i] = cand_e_vec[i];
-  }
   *num_cand_out = n_cand;
+  if (n_cand > 0) {
+    *cand_n_ptr_out = static_cast<int*>(std::malloc(n_cand * sizeof(int)));
+    *cand_e_ptr_out = static_cast<int*>(std::malloc(n_cand * sizeof(int)));
+    std::memcpy(*cand_n_ptr_out, cand_n_vec.data(), n_cand * sizeof(int));
+    std::memcpy(*cand_e_ptr_out, cand_e_vec.data(), n_cand * sizeof(int));
+  } else {
+    *cand_n_ptr_out = nullptr;
+    *cand_e_ptr_out = nullptr;
+  }
 
   // ==================================================================================================================
   // 6. Cleanup voxel grid
@@ -630,6 +633,14 @@ void cpp_i7trivox1(
 
   #undef VOXEL_IDX
   #undef CRVOXEL_VAL
+}
+
+// ======================================================================================================================
+// Free a C array returned by cpp_i7trivox1
+// ======================================================================================================================
+void cpp_i7trivox1_free(int* ptr)
+{
+  std::free(ptr);
 }
 
 } // extern "C"
