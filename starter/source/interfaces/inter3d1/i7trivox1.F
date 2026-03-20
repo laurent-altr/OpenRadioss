@@ -34,14 +34,14 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    tri7box                    ../starter/share/modules1/tri7box.F
 !||====================================================================
       SUBROUTINE I7TRIVOX1(
-     1      NSN    ,I_MEM   ,IRECT    ,X       ,STF     ,
+     1      NSN    ,IRECT    ,X       ,STF     ,
      2      STFN   ,XYZM    ,NSV      ,
-     3      MULNSN ,NOINT   ,TZINF    ,GAP_S_L ,GAP_M_L ,
+     3      TZINF    ,GAP_S_L ,GAP_M_L ,
      4      VOXEL  ,NBX     ,NBY      ,NBZ     ,NRTM_L    ,
      5      IGAP   ,GAP     ,GAP_S    ,GAP_M   ,GAPMIN  ,
      6      GAPMAX ,MARGE   ,CURV_MAX ,BGAPSMX ,ISTF    ,
      7      I_STOK ,nin,
-     8      ID     ,TITR    ,DRAD     ,INDEX   ,
+     8      DRAD     ,INDEX   ,
      9      IREMNODE,FLAGREMNODE,KREMNODE,REMNODE,
      1      DGAPLOAD,ipari,intbuf_tab,
      2      iix,iiy,iiz,local_next_nod,nrtm,IS_USED_WITH_LAW151 )
@@ -52,7 +52,6 @@ C-----------------------------------------------
       USE TRI7BOX
       USE NAMES_AND_TITLES_MOD , ONLY : NCHARTITLE
       use inter_save_candidate_mod , only : inter_save_candidate
-      use array_mod 
       use intbufdef_mod 
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
@@ -111,8 +110,8 @@ C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
       integer, intent(in) :: nrtm !< number of segment
       integer, intent(in) :: nrtm_l !< number of segment on the current proc
-      INTEGER I_MEM,NSN,
-     .        MULNSN,NOINT,IGAP,NBX,NBY,NBZ,IREMNODE,FLAGREMNODE,
+      INTEGER NSN,
+     .        IGAP,NBX,NBY,NBZ,IREMNODE,FLAGREMNODE,
      .        NSV(NSN),
      .        IRECT(4,NRTM), VOXEL(NBX+2,NBY+2,NBZ+2),ISTF,
      .        I_STOK ,J_STOK,
@@ -122,7 +121,6 @@ C-----------------------------------------------
      .   TZINF,MARGE,GAP,GAPMIN,GAPMAX,BGAPSMX,DRAD,
      .   CURV_MAX(*),GAP_S_L(*),GAP_M_L(*)
       INTEGER ID
-      CHARACTER(LEN=NCHARTITLE)::TITR
       integer, intent(in) :: nin !< interface index
       integer, dimension(npari), intent(inout) :: ipari !< interface data
       type(intbuf_struct_), intent(inout) :: intbuf_tab !< interface data
@@ -140,7 +138,6 @@ C-----------------------------------------------
      .   XX1,XX2,XX3,XX4,YY1,YY2,YY3,YY4,ZZ1,ZZ2,ZZ3,ZZ4,
      .   D1X,D1Y,D1Z,D2X,D2Y,D2Z,DD1,DD2,D2,A2,GS,GAPV(MVSIZ)
       INTEGER  LAST_NOD(NSN)
-      INTEGER*8 meanjj8
       INTEGER  IX,IY,IZ,NEXT,M1,M2,M3,M4,
      .         IX1,IY1,IZ1,IX2,IY2,IZ2
       integer, dimension(mvsiz) :: prov_n,prov_e
@@ -176,8 +173,8 @@ C-----------------------------------------------
       integer, save :: i_stok_old
       integer, dimension(:), allocatable, save :: cand_n_size,cand_e_size
       integer, dimension(:), allocatable, save :: address_cand_n,address_cand_e
-      type(array_type_int_1d) :: local_cand_n
-      type(array_type_int_1d) :: local_cand_e
+      integer, dimension(:), allocatable :: local_cand_n
+      integer, dimension(:), allocatable :: local_cand_e
 
       integer :: my_size,mode
       integer, dimension(:), allocatable :: my_index
@@ -191,10 +188,8 @@ C-----------------------------------------------
       local_cand_n_size = size(intbuf_tab%cand_n) / nthreads
       local_cand_e_size = size(intbuf_tab%cand_e) / nthreads
       local_i_stok = 0
-      local_cand_n%size_int_array_1d = local_cand_n_size
-      local_cand_e%size_int_array_1d = local_cand_e_size
-      call alloc_1d_array(local_cand_n)
-      call alloc_1d_array(local_cand_e)
+      allocate(local_cand_n(local_cand_n_size))
+      allocate(local_cand_e(local_cand_e_size))
 
       XMIN = XYZM(1,1)
       YMIN = XYZM(2,1)
@@ -547,14 +542,14 @@ c    underestimation of the distance**2 for candidate elimination
 
       ! ------------
       my_address = i_stok_old + address_cand_n(itask+1) ! get the address for each thread
-      intbuf_tab%cand_n(my_address+1:my_address+local_i_stok) = local_cand_n%int_array_1d(1:local_i_stok) ! save the cand_n into the global array
+      intbuf_tab%cand_n(my_address+1:my_address+local_i_stok) = local_cand_n(1:local_i_stok) ! save the cand_n into the global array
       my_address = i_stok_old + address_cand_e(itask+1) ! get the address for each thread
-      intbuf_tab%cand_e(my_address+1:my_address+local_i_stok) = local_cand_e%int_array_1d(1:local_i_stok) ! save the cand_e into the global array
+      intbuf_tab%cand_e(my_address+1:my_address+local_i_stok) = local_cand_e(1:local_i_stok) ! save the cand_e into the global array
       ! ------------
 
 
-      call dealloc_1d_array(local_cand_n)
-      call dealloc_1d_array(local_cand_e)
+      deallocate(local_cand_n)
+      deallocate(local_cand_e)
 
 !$OMP BARRIER
 

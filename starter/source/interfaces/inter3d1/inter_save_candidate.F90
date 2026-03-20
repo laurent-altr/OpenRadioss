@@ -26,7 +26,7 @@
 !||    i7trivox1                  ../starter/source/interfaces/inter3d1/i7trivox1.F
 !||====================================================================
       module inter_save_candidate_mod
-      implicit none
+        implicit none
       contains
 ! ======================================================================================================================
 !                                                   procedures
@@ -46,7 +46,6 @@
 !                                                   Modules
 ! ----------------------------------------------------------------------------------------------------------------------
           use constant_mod
-          use array_mod
           use precision_mod, only : WP
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Implicit none
@@ -65,8 +64,8 @@
           integer, dimension(mvsiz), intent(in) :: prov_n !< list of potential S node
           integer, dimension(mvsiz), intent(in) :: prov_e !< list of potential segment
           real(kind=WP), dimension(mvsiz), intent(in) :: pene !< penetration
-          type(array_type_int_1d), intent(inout) :: local_cand_n !< list of S node (local to a !$omp thread)
-          type(array_type_int_1d), intent(inout) :: local_cand_e !< list of segment (local to a !$omp thread)
+          integer, dimension(:), allocatable, intent(inout) :: local_cand_n !< list of S node (local to a !$omp thread)
+          integer, dimension(:), allocatable, intent(inout) :: local_cand_e !< list of segment (local to a !$omp thread)
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Local variables
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -96,19 +95,17 @@
             ! ---------
             ! check if the size of the list of candidate is sufficient
             ! and increase the size if it is not the case
-            if(local_i_stok+k_stok>local_cand_n%size_int_array_1d) then
-              my_old_size = local_cand_n%size_int_array_1d
+            if(local_i_stok+k_stok>size(local_cand_n)) then
+              my_old_size = size(local_cand_n)
               my_size = nint((my_old_size+k_stok) * 1.25)
               allocate( tmp_array_1( my_size ) )
               allocate( tmp_array_2( my_size ) )
-              tmp_array_1(1:my_old_size) = local_cand_n%int_array_1d(1:my_old_size)
-              tmp_array_2(1:my_old_size) = local_cand_e%int_array_1d(1:my_old_size)
-              call dealloc_1d_array(local_cand_n)
-              call dealloc_1d_array(local_cand_e)
-              call move_alloc(tmp_array_1,local_cand_n%int_array_1d)
-              call move_alloc(tmp_array_2,local_cand_e%int_array_1d)
-              local_cand_n%size_int_array_1d = my_size
-              local_cand_e%size_int_array_1d = my_size
+              tmp_array_1(1:my_old_size) = local_cand_n(1:my_old_size)
+              tmp_array_2(1:my_old_size) = local_cand_e(1:my_old_size)
+              deallocate(local_cand_n)
+              deallocate(local_cand_e)
+              call move_alloc(tmp_array_1,local_cand_n)
+              call move_alloc(tmp_array_2,local_cand_e)
             end if
             ! ---------
 
@@ -117,8 +114,8 @@
             do i=1,j_stok
               if(pene(i)/=zero)THEN
                 local_i_stok = local_i_stok + 1
-                local_cand_n%int_array_1d(local_i_stok) = prov_n(I)
-                local_cand_e%int_array_1d(local_i_stok) = prov_e(I)
+                local_cand_n(local_i_stok) = prov_n(I)
+                local_cand_e(local_i_stok) = prov_e(I)
               end if
             end do
             ! ---------

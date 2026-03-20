@@ -451,14 +451,14 @@ C------------------
 C------------------
 !$OMP PARALLEL        
         CALL I7TRIVOX1(
-     1   NSN      ,I_MEM   ,IRECT    ,X       ,STF     ,
+     1   NSN      ,IRECT    ,X       ,STF     ,
      2   STFN     ,XYZM    ,NSV      ,
-     3   NCONTACT ,NOINT   ,TZINF_ST ,GAP_S_L ,GAP_M_L ,
+     3   TZINF_ST ,GAP_S_L ,GAP_M_L ,
      4   VOXEL1   ,NBX     ,NBY      ,NBZ     ,NRTM_L  ,
      5   IGAP     ,GAP     ,GAP_S    ,GAP_M   ,GAPMIN  ,
      6   GAPMAX   ,MARGE_ST,CURV_MAX ,BGAPSMX ,ISTF    ,
      7   I_STOK   ,NIN,
-     8   ID       ,TITR    ,DRAD     ,INDEX   ,
+     8   DRAD     ,INDEX   ,
      9   IREMNODE,FLAGREMNODE,KREMNODE,REMNODE,
      1   DGAPLOAD,ipari,intbuf_tab,
      2   iix,iiy,iiz,local_next_nod,nrtm,IS_USED_WITH_LAW151 )
