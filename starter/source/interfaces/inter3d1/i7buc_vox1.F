@@ -55,7 +55,7 @@ C-----------------------------------------------
       USE NAMES_AND_TITLES_MOD , ONLY : NCHARTITLE
       use intbufdef_mod 
       use margin_reduction_mod , only : margin_reduction
-      use cpp_i7trivox1_mod , only : cpp_i7trivox1, cpp_i7trivox1_free
+      use cpp_i7trivox1_mod !, only : cpp_i7trivox1, cpp_i7trivox1_free
       use iso_c_binding , only : c_ptr, c_f_pointer
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
@@ -476,7 +476,7 @@ C------------------
         IS_USED_151_INT = 0
         IF (IS_USED_WITH_LAW151) IS_USED_151_INT = 1
 C
-        CALL CPP_I7TRIVOX1(
+        CALL CPP_I7SAP(
      1   NSN      ,IRECT    ,X        ,STF      ,
      2   STFN     ,XYZM     ,NSV      ,
      3   TZINF_ST ,GAP_S_L  ,GAP_M_L  ,

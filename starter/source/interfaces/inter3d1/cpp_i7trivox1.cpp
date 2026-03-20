@@ -31,6 +31,7 @@
 #include <cstring>
 #include <cstdlib>
 #include <iostream>
+#include <chrono>
 
 #ifdef MYREAL8
 typedef double my_real;
@@ -289,6 +290,8 @@ void cpp_i7trivox1(
 
   // LAST_NOD: temporary, used during node placement
   std::vector<int> last_nod(nsn + 1, 0); // 1-based, index [1..nsn]
+
+  auto t_start = std::chrono::high_resolution_clock::now();
 
   // ==================================================================================================================
   // 1. Place slave nodes into voxel grid
@@ -631,9 +634,15 @@ void cpp_i7trivox1(
     }
   }
 
+  double t_total = std::chrono::duration<double>(std::chrono::high_resolution_clock::now() - t_start).count();
+  std::cout << "  [cpp_i7trivox1] total=" << t_total << " s  candidates=" << *num_cand_out << std::endl;
+
   #undef VOXEL_IDX
   #undef CRVOXEL_VAL
 }
+
+
+
 
 // ======================================================================================================================
 // Free a C array returned by cpp_i7trivox1
@@ -642,5 +651,571 @@ void cpp_i7trivox1_free(int* ptr)
 {
   std::free(ptr);
 }
+void cpp_i7SAP(
+  const int*     nsn_ptr,
+  const int*     irect,        // (4, nrtm), column-major
+  const my_real* x,            // (3, *), column-major
+  const my_real* stf,
+  const my_real* stfn,
+  const my_real* xyzm,         // (6, 2), column-major
+  const int*     nsv,
+  const my_real* tzinf_ptr,
+  const my_real* gap_s_l,
+  const my_real* gap_m_l,
+  int*           voxel,        // (nbx+2, nby+2, nbz+2), column-major
+  const int*     nbx_ptr,
+  const int*     nby_ptr,
+  const int*     nbz_ptr,
+  const int*     nrtm_l_ptr,
+  const int*     igap_ptr,
+  const my_real* gap_ptr,
+  const my_real* gap_s,
+  const my_real* gap_m,
+  const my_real* gapmin_ptr,
+  const my_real* gapmax_ptr,
+  const my_real* marge_ptr,
+  const my_real* curv_max,
+  const my_real* bgapsmx_ptr,
+  const int*     istf_ptr,
+  int*           i_stok_ptr,
+  const my_real* drad_ptr,
+  const int*     index,        // index of active segments
+  const int*     iremnode_ptr,
+  const int*     flagremnode_ptr,
+  const int*     kremnode,
+  const int*     remnode,
+  const my_real* dgapload_ptr,
+  const int*     crvoxel,      // (0:LRVOXEL, 0:LRVOXEL), row-major in Fortran
+  int*           iix,          // (nsn)
+  int*           iiy,          // (nsn)
+  int*           iiz,          // (nsn)
+  int*           local_next_nod, // (nsn)
+  const int*     nrtm_ptr,
+  const int*     numnod_ptr,
+  const int*     numfakenodigeo_ptr,
+  const int*     numels_ptr,
+  const int*     is_used_with_law151_ptr,
+  // output
+  int*           num_cand_out,
+  int**          cand_n_ptr_out,
+  int**          cand_e_ptr_out)
+{
+  // Unpack scalar arguments
+  const int     nsn            = *nsn_ptr;
+  const my_real tzinf          = *tzinf_ptr;
+  const int     nbx            = *nbx_ptr;
+  const int     nby            = *nby_ptr;
+  const int     nbz            = *nbz_ptr;
+  const int     nrtm_l         = *nrtm_l_ptr;
+  const int     igap           = *igap_ptr;
+  const my_real gap            = *gap_ptr;
+  const my_real gapmin         = *gapmin_ptr;
+  const my_real gapmax         = *gapmax_ptr;
+  const my_real marge          = *marge_ptr;
+  const my_real bgapsmx        = *bgapsmx_ptr;
+  const int     istf           = *istf_ptr;
+  const my_real drad           = *drad_ptr;
+  const int     iremnode       = *iremnode_ptr;
+  const int     flagremnode    = *flagremnode_ptr;
+  const my_real dgapload       = *dgapload_ptr;
+  const int     nrtm           = *nrtm_ptr;
+  const int     numnod         = *numnod_ptr;
+  const int     numfakenodigeo = *numfakenodigeo_ptr;
+  const int     numels         = *numels_ptr;
+  const int     is_used_151    = *is_used_with_law151_ptr;
+
+  auto t_start = std::chrono::high_resolution_clock::now();
+
+  // ================================================================================================================
+  // Helper: check if slave node nn is in the remnode list for segment ne
+  // ================================================================================================================
+  auto is_remnode = [&](int ne, int nn) -> bool {
+    if (flagremnode != 2 || iremnode != 2) return false;
+    int k_start = kremnode[ne - 1];
+    int k_end   = kremnode[ne];
+    for (int m = k_start; m < k_end; ++m) {
+      if (remnode[m] == nn) return true;
+    }
+    return false;
+  };
+
+  // ================================================================================================================
+  // 1. Build master segment info: AABB + geometry for each active segment
+  // ================================================================================================================
+  struct MasterInfo {
+    my_real lo[3], hi[3];                  // inflated AABB lower/upper per axis
+    my_real tight_lo[3], tight_hi[3];      // tight node bbox (uninflated) per axis
+    my_real xx1, yy1, zz1;                 // node 1 coords
+    my_real xx2, yy2, zz2;                 // node 2 coords
+    my_real sx, sy, sz, s2;                // surface normal & magnitude^2
+    my_real aaa;                           // conservative search distance
+    int ne;                                // 1-based segment index
+    int m1, m2, m3, m4;                    // 1-based node indices
+  };
+
+  std::vector<MasterInfo> masters;
+  masters.reserve(nrtm_l);
+
+  for (int kk = 0; kk < nrtm_l; ++kk) {
+    int ne = index[kk]; // Fortran 1-based segment index
+    if (stf[ne - 1] == ZERO) continue;
+
+    // Compute conservative search distance aaa
+    my_real aaa;
+    if (igap == 0) {
+      aaa = tzinf + curv_max[ne - 1];
+    } else {
+      aaa = marge + curv_max[ne - 1]
+          + std::max(std::min(gapmax, std::max(gapmin, bgapsmx + gap_m[ne - 1])) + dgapload, drad);
+    }
+
+    // Gather master segment node coords
+    int m1 = irect[4*(ne-1) + 0];
+    int m2 = irect[4*(ne-1) + 1];
+    int m3 = irect[4*(ne-1) + 2];
+    int m4 = irect[4*(ne-1) + 3];
+
+    my_real lxx1 = x[3*(m1-1) + 0], lyy1 = x[3*(m1-1) + 1], lzz1 = x[3*(m1-1) + 2];
+    my_real lxx2 = x[3*(m2-1) + 0], lyy2 = x[3*(m2-1) + 1], lzz2 = x[3*(m2-1) + 2];
+    my_real lxx3 = x[3*(m3-1) + 0], lyy3 = x[3*(m3-1) + 1], lzz3 = x[3*(m3-1) + 2];
+    my_real lxx4 = x[3*(m4-1) + 0], lyy4 = x[3*(m4-1) + 1], lzz4 = x[3*(m4-1) + 2];
+
+    my_real xmaxe = std::max({lxx1, lxx2, lxx3, lxx4});
+    my_real xmine = std::min({lxx1, lxx2, lxx3, lxx4});
+    my_real ymaxe = std::max({lyy1, lyy2, lyy3, lyy4});
+    my_real ymine = std::min({lyy1, lyy2, lyy3, lyy4});
+    my_real zmaxe = std::max({lzz1, lzz2, lzz3, lzz4});
+    my_real zmine = std::min({lzz1, lzz2, lzz3, lzz4});
+
+    // Surface normal (approximate) for candidate elimination
+    my_real sx = (lyy3 - lyy1) * (lzz4 - lzz2) - (lzz3 - lzz1) * (lyy4 - lyy2);
+    my_real sy = (lzz3 - lzz1) * (lxx4 - lxx2) - (lxx3 - lxx1) * (lzz4 - lzz2);
+    my_real sz = (lxx3 - lxx1) * (lyy4 - lyy2) - (lyy3 - lyy1) * (lxx4 - lxx2);
+    my_real s2 = sx * sx + sy * sy + sz * sz;
+
+    MasterInfo mi;
+    mi.lo[0] = xmine - aaa;  mi.lo[1] = ymine - aaa;  mi.lo[2] = zmine - aaa;
+    mi.hi[0] = xmaxe + aaa;  mi.hi[1] = ymaxe + aaa;  mi.hi[2] = zmaxe + aaa;
+    mi.tight_lo[0] = xmine;  mi.tight_lo[1] = ymine;  mi.tight_lo[2] = zmine;
+    mi.tight_hi[0] = xmaxe;  mi.tight_hi[1] = ymaxe;  mi.tight_hi[2] = zmaxe;
+    mi.xx1 = lxx1;  mi.yy1 = lyy1;  mi.zz1 = lzz1;
+    mi.xx2 = lxx2;  mi.yy2 = lyy2;  mi.zz2 = lzz2;
+    mi.sx = sx;  mi.sy = sy;  mi.sz = sz;  mi.s2 = s2;
+    mi.aaa = aaa;
+    mi.ne = ne;
+    mi.m1 = m1;  mi.m2 = m2;  mi.m3 = m3;  mi.m4 = m4;
+    masters.push_back(mi);
+  }
+
+  // ================================================================================================================
+  // 2. Build slave node info for active nodes
+  // ================================================================================================================
+  struct SlaveInfo {
+    my_real coord[3];     // node coordinates (X, Y, Z)
+    int jj;               // 1-based local slave index (into nsv, stfn, gap_s)
+    int nn;               // 1-based global node number
+  };
+
+  std::vector<SlaveInfo> slaves;
+  slaves.reserve(nsn);
+
+  for (int i = 0; i < nsn; ++i) {
+    if (stfn[i] == ZERO) continue;
+    int nn = nsv[i]; // 1-based global node number
+    SlaveInfo si;
+    si.coord[0] = x[3*(nn-1) + 0];
+    si.coord[1] = x[3*(nn-1) + 1];
+    si.coord[2] = x[3*(nn-1) + 2];
+    si.jj = i + 1; // 1-based
+    si.nn = nn;
+    slaves.push_back(si);
+  }
+
+  const int n_masters = static_cast<int>(masters.size());
+  const int n_slaves  = static_cast<int>(slaves.size());
+
+  // ================================================================================================================
+  // 3. Automatic axis selection: pick sweep axis (best separation) and bucket axis (second best)
+  // ================================================================================================================
+  // For each axis, compute: domain_span and avg_interval_width.
+  // The axis with the smallest avg_width/domain_span ratio gives the smallest active set.
+  // Sweep on that axis; bucket on the second-best axis.
+  const char* axis_names[3] = {"X", "Y", "Z"};
+  my_real domain_lo[3], domain_hi[3];
+
+  for (int ax = 0; ax < 3; ++ax) {
+    if (n_masters > 0) {
+      domain_lo[ax] = masters[0].lo[ax];
+      domain_hi[ax] = masters[0].hi[ax];
+    } else {
+      domain_lo[ax] = ZERO;
+      domain_hi[ax] = ONE;
+    }
+    for (int k = 0; k < n_masters; ++k) {
+      domain_lo[ax] = std::min(domain_lo[ax], masters[k].lo[ax]);
+      domain_hi[ax] = std::max(domain_hi[ax], masters[k].hi[ax]);
+    }
+    for (int k = 0; k < n_slaves; ++k) {
+      domain_lo[ax] = std::min(domain_lo[ax], slaves[k].coord[ax]);
+      domain_hi[ax] = std::max(domain_hi[ax], slaves[k].coord[ax]);
+    }
+  }
+
+  // Compute average interval width / domain span ratio for masters on each axis
+  my_real axis_score[3];
+  for (int ax = 0; ax < 3; ++ax) {
+    my_real span = domain_hi[ax] - domain_lo[ax];
+    if (span <= ZERO) {
+      axis_score[ax] = static_cast<my_real>(1e30); // degenerate axis, avoid
+      continue;
+    }
+    my_real sum_width = ZERO;
+    for (int k = 0; k < n_masters; ++k) {
+      sum_width += (masters[k].hi[ax] - masters[k].lo[ax]);
+    }
+    // avg_width / span = expected fraction of masters overlapping any point on this axis
+    axis_score[ax] = (n_masters > 0) ? (sum_width / n_masters) / span : ZERO;
+  }
+
+  // Sweep axis = smallest score (best separation), bucket axis = second smallest
+  int sweep_axis, bucket_axis, third_axis;
+  if (axis_score[0] <= axis_score[1] && axis_score[0] <= axis_score[2]) {
+    sweep_axis = 0;
+    bucket_axis = (axis_score[1] <= axis_score[2]) ? 1 : 2;
+  } else if (axis_score[1] <= axis_score[0] && axis_score[1] <= axis_score[2]) {
+    sweep_axis = 1;
+    bucket_axis = (axis_score[0] <= axis_score[2]) ? 0 : 2;
+  } else {
+    sweep_axis = 2;
+    bucket_axis = (axis_score[0] <= axis_score[1]) ? 0 : 1;
+  }
+  third_axis = 3 - sweep_axis - bucket_axis;
+
+  std::cout << "  [cpp_i7SAP] axis scores: X=" << axis_score[0]
+            << " Y=" << axis_score[1] << " Z=" << axis_score[2]
+            << "  => sweep=" << axis_names[sweep_axis]
+            << " bucket=" << axis_names[bucket_axis]
+            << " third=" << axis_names[third_axis] << std::endl;
+
+  // ================================================================================================================
+  // 4. Build sweep events on the chosen sweep axis and sort
+  // ================================================================================================================
+  struct SweepEvent {
+    my_real val;
+    int type;   // 0=MASTER_START, 1=SLAVE_POINT, 2=MASTER_END
+    int idx;    // index into masters[] or slaves[]
+  };
+
+  std::vector<SweepEvent> events;
+  events.reserve(2 * n_masters + n_slaves);
+
+  for (int k = 0; k < n_masters; ++k) {
+    events.push_back({masters[k].lo[sweep_axis], 0, k}); // MASTER_START
+    events.push_back({masters[k].hi[sweep_axis], 2, k}); // MASTER_END
+  }
+  for (int k = 0; k < n_slaves; ++k) {
+    events.push_back({slaves[k].coord[sweep_axis], 1, k}); // SLAVE_POINT
+  }
+
+  // Sort: by val, then by type (START < POINT < END) so a master is active
+  // when a slave lands exactly on its boundary
+  std::sort(events.begin(), events.end(), [](const SweepEvent& a, const SweepEvent& b) {
+    if (a.val != b.val) return a.val < b.val;
+    return a.type < b.type;
+  });
+
+  // ================================================================================================================
+  // 5. Sweep: maintain active master set, test each slave against active masters
+  // ================================================================================================================
+  // Scratch arrays for process_batch (same as voxel code)
+  int     prov_n[MVSIZ], prov_e[MVSIZ];
+  my_real gapv[MVSIZ];
+  int     ix11[MVSIZ], ix12[MVSIZ], ix13[MVSIZ], ix14[MVSIZ], nsvg[MVSIZ];
+  my_real arr_x1[MVSIZ], arr_x2[MVSIZ], arr_x3[MVSIZ], arr_x4[MVSIZ];
+  my_real arr_y1[MVSIZ], arr_y2[MVSIZ], arr_y3[MVSIZ], arr_y4[MVSIZ];
+  my_real arr_z1[MVSIZ], arr_z2[MVSIZ], arr_z3[MVSIZ], arr_z4[MVSIZ];
+  my_real arr_xi[MVSIZ], arr_yi[MVSIZ], arr_zi[MVSIZ];
+  my_real arr_x0[MVSIZ], arr_y0[MVSIZ], arr_z0[MVSIZ];
+  my_real arr_nx1[MVSIZ], arr_ny1[MVSIZ], arr_nz1[MVSIZ];
+  my_real arr_nx2[MVSIZ], arr_ny2[MVSIZ], arr_nz2[MVSIZ];
+  my_real arr_nx3[MVSIZ], arr_ny3[MVSIZ], arr_nz3[MVSIZ];
+  my_real arr_nx4[MVSIZ], arr_ny4[MVSIZ], arr_nz4[MVSIZ];
+  my_real arr_p1[MVSIZ], arr_p2[MVSIZ], arr_p3[MVSIZ], arr_p4[MVSIZ];
+  my_real arr_lb1[MVSIZ], arr_lb2[MVSIZ], arr_lb3[MVSIZ], arr_lb4[MVSIZ];
+  my_real arr_lc1[MVSIZ], arr_lc2[MVSIZ], arr_lc3[MVSIZ], arr_lc4[MVSIZ];
+  my_real arr_n11[MVSIZ], arr_n21[MVSIZ], arr_n31[MVSIZ];
+  my_real arr_stif[MVSIZ], arr_pene[MVSIZ];
+
+  // Dynamic candidate storage
+  std::vector<int> cand_n_vec;
+  std::vector<int> cand_e_vec;
+  cand_n_vec.reserve(10000);
+  cand_e_vec.reserve(10000);
+
+  int j_stok = 0;
+
+  // ================================================================================================================
+  // Bucket-axis partitioning: partition the active set into buckets on the
+  // chosen bucket_axis so each slave only tests masters whose interval on
+  // that axis overlaps its bucket, instead of scanning all active masters.
+  // ================================================================================================================
+  my_real bk_domain_lo = domain_lo[bucket_axis];
+  my_real bk_domain_hi = domain_hi[bucket_axis];
+  my_real bk_eps = static_cast<my_real>(1e-10) * (bk_domain_hi - bk_domain_lo + static_cast<my_real>(1e-30));
+  bk_domain_lo -= bk_eps;
+  bk_domain_hi += bk_eps;
+  my_real bk_domain_span = bk_domain_hi - bk_domain_lo;
+
+  const int N_BUCKETS = std::max(1, std::min(256, n_masters / 4));
+  my_real bk_inv = static_cast<my_real>(N_BUCKETS) / bk_domain_span;
+
+  // Each bucket holds indices into masters[]
+  std::vector<std::vector<int>> buckets(N_BUCKETS);
+  for (auto& b : buckets) b.reserve(32);
+
+  // Helper: map a coordinate on bucket_axis to bucket index (clamped)
+  auto coord_to_bucket = [&](my_real v) -> int {
+    int b = static_cast<int>((v - bk_domain_lo) * bk_inv);
+    return std::max(0, std::min(b, N_BUCKETS - 1));
+  };
+
+  // ================================================================================================================
+  // Pre-build node → parent master exclusion map.
+  // For self-contact interfaces, every master segment's nodes are also slave nodes.
+  // A slave node sitting on its own segment always passes AABB tests (it's inside by
+  // definition), so we want to skip these pairs as early as possible — before any
+  // floating-point overlap work.
+  // ================================================================================================================
+  // Map: global node nn → list of masters[] indices that contain this node
+  // Using a flat array indexed by node nn for O(1) lookup.
+  // Each node typically belongs to 4-6 segments, so we store small vectors.
+  struct SmallVec {
+    int data[8];   // most nodes belong to <=8 segments
+    int count = 0;
+    void push(int v) { if (count < 8) data[count++] = v; }
+    bool contains(int v) const {
+      for (int i = 0; i < count; ++i) { if (data[i] == v) return true; }
+      return false;
+    }
+  };
+
+  // Find max node ID to size the lookup array
+  int max_nn = 0;
+  for (int k = 0; k < n_masters; ++k) {
+    max_nn = std::max(max_nn, std::max({masters[k].m1, masters[k].m2, masters[k].m3, masters[k].m4}));
+  }
+  // Allocate and populate the exclusion map
+  std::vector<SmallVec> node_parent_masters(max_nn + 1);
+  for (int k = 0; k < n_masters; ++k) {
+    node_parent_masters[masters[k].m1].push(k);
+    node_parent_masters[masters[k].m2].push(k);
+    node_parent_masters[masters[k].m3].push(k);
+    node_parent_masters[masters[k].m4].push(k);
+  }
+
+  // Diagnostic counters
+  long long cnt_tests        = 0;
+  long long cnt_accepted     = 0;
+  long long cnt_bucket_sum   = 0;
+  long long cnt_self_skipped = 0;
+
+  for (const auto& ev : events) {
+    switch (ev.type) {
+
+    case 0: // MASTER_START — add to bucketed active set
+    {
+      int k = ev.idx;
+      int blo = coord_to_bucket(masters[k].lo[bucket_axis]);
+      int bhi = coord_to_bucket(masters[k].hi[bucket_axis]);
+      for (int b = blo; b <= bhi; ++b) {
+        buckets[b].push_back(k);
+      }
+    } break;
+
+    case 2: // MASTER_END — remove from bucketed active set (swap-erase)
+    {
+      int k = ev.idx;
+      int blo = coord_to_bucket(masters[k].lo[bucket_axis]);
+      int bhi = coord_to_bucket(masters[k].hi[bucket_axis]);
+      for (int b = blo; b <= bhi; ++b) {
+        auto& bucket = buckets[b];
+        int nb = static_cast<int>(bucket.size());
+        for (int i = 0; i < nb; ++i) {
+          if (bucket[i] == k) {
+            bucket[i] = bucket[nb - 1];
+            bucket.pop_back();
+            break;
+          }
+        }
+      }
+    } break;
+
+    case 1: // SLAVE_POINT — test against masters in the relevant bucket only
+    {
+      const SlaveInfo& sl = slaves[ev.idx];
+      int bk = coord_to_bucket(sl.coord[bucket_axis]);
+      const auto& bucket = buckets[bk];
+      cnt_bucket_sum += static_cast<int>(bucket.size());
+
+      // Get this slave's parent master exclusion list (O(1) lookup)
+      const SmallVec& exclude = (sl.nn <= max_nn) ? node_parent_masters[sl.nn] : node_parent_masters[0];
+
+      for (int a = 0; a < static_cast<int>(bucket.size()); ++a) {
+        int master_idx = bucket[a];
+
+        // EARLY self-contact exclusion: skip if this slave node belongs to this
+        // master segment. Checked BEFORE any floating-point work because these
+        // pairs always pass AABB tests (the node is on the segment by definition).
+        if (exclude.contains(master_idx)) { cnt_self_skipped++; continue; }
+
+        const MasterInfo& mi = masters[master_idx];
+        cnt_tests++;
+
+        // Exact overlap on bucket_axis (bucket boundary masters may not truly overlap)
+        if (sl.coord[bucket_axis] < mi.lo[bucket_axis] || sl.coord[bucket_axis] > mi.hi[bucket_axis]) continue;
+        // Overlap on third_axis
+        if (sl.coord[third_axis] < mi.lo[third_axis] || sl.coord[third_axis] > mi.hi[third_axis]) continue;
+
+        // Remnode exclusion
+        if (is_remnode(mi.ne, sl.nn)) continue;
+
+        // Tight AABB with per-node local_aaa (when igap != 0)
+        my_real local_aaa = mi.aaa;
+        if (igap != 0) {
+          local_aaa = marge + curv_max[mi.ne - 1]
+              + std::max(std::min(gapmax, std::max(gapmin, gap_s[sl.jj - 1] + gap_m[mi.ne - 1])) + dgapload, drad);
+        }
+
+        if (sl.coord[0] <= mi.tight_lo[0] - local_aaa || sl.coord[0] >= mi.tight_hi[0] + local_aaa ||
+            sl.coord[1] <= mi.tight_lo[1] - local_aaa || sl.coord[1] >= mi.tight_hi[1] + local_aaa ||
+            sl.coord[2] <= mi.tight_lo[2] - local_aaa || sl.coord[2] >= mi.tight_hi[2] + local_aaa) continue;
+
+        // Normal-distance underestimation test
+        my_real d1x = sl.coord[0] - mi.xx1;
+        my_real d1y = sl.coord[1] - mi.yy1;
+        my_real d1z = sl.coord[2] - mi.zz1;
+        my_real d2x = sl.coord[0] - mi.xx2;
+        my_real d2y = sl.coord[1] - mi.yy2;
+        my_real d2z = sl.coord[2] - mi.zz2;
+        my_real dd1 = d1x * mi.sx + d1y * mi.sy + d1z * mi.sz;
+        my_real dd2 = d2x * mi.sx + d2y * mi.sy + d2z * mi.sz;
+        if (dd1 * dd2 > ZERO) {
+          my_real d2_val = std::min(dd1 * dd1, dd2 * dd2);
+          my_real a2_val = local_aaa * local_aaa * mi.s2;
+          if (d2_val > a2_val) continue;
+        }
+
+        cnt_accepted++;
+
+        // Accept candidate
+        prov_n[j_stok] = sl.jj;
+        prov_e[j_stok] = mi.ne;
+        j_stok++;
+
+        if (j_stok == MVSIZ) {
+          process_batch(j_stok, x, irect, nsv, prov_e, prov_n,
+                        stf, stfn, gapv, &igap, &gap,
+                        gap_s, gap_m, &istf, &gapmin, &gapmax,
+                        gap_s_l, gap_m_l, &drad, &marge, &dgapload,
+                        ix11, ix12, ix13, ix14, nsvg,
+                        arr_x1, arr_x2, arr_x3, arr_x4,
+                        arr_y1, arr_y2, arr_y3, arr_y4,
+                        arr_z1, arr_z2, arr_z3, arr_z4,
+                        arr_xi, arr_yi, arr_zi,
+                        arr_x0, arr_y0, arr_z0,
+                        arr_nx1, arr_ny1, arr_nz1,
+                        arr_nx2, arr_ny2, arr_nz2,
+                        arr_nx3, arr_ny3, arr_nz3,
+                        arr_nx4, arr_ny4, arr_nz4,
+                        arr_p1, arr_p2, arr_p3, arr_p4,
+                        arr_lb1, arr_lb2, arr_lb3, arr_lb4,
+                        arr_lc1, arr_lc2, arr_lc3, arr_lc4,
+                        arr_n11, arr_n21, arr_n31,
+                        arr_pene, arr_stif,
+                        cand_n_vec, cand_e_vec);
+          j_stok = 0;
+        }
+      } // for masters in bucket
+    } break;
+
+    } // switch
+  } // for events
+
+  // ================================================================================================================
+  // 5. Process remaining candidates
+  // ================================================================================================================
+  if (j_stok > 0) {
+    process_batch(j_stok, x, irect, nsv, prov_e, prov_n,
+                  stf, stfn, gapv, &igap, &gap,
+                  gap_s, gap_m, &istf, &gapmin, &gapmax,
+                  gap_s_l, gap_m_l, &drad, &marge, &dgapload,
+                  ix11, ix12, ix13, ix14, nsvg,
+                  arr_x1, arr_x2, arr_x3, arr_x4,
+                  arr_y1, arr_y2, arr_y3, arr_y4,
+                  arr_z1, arr_z2, arr_z3, arr_z4,
+                  arr_xi, arr_yi, arr_zi,
+                  arr_x0, arr_y0, arr_z0,
+                  arr_nx1, arr_ny1, arr_nz1,
+                  arr_nx2, arr_ny2, arr_nz2,
+                  arr_nx3, arr_ny3, arr_nz3,
+                  arr_nx4, arr_ny4, arr_nz4,
+                  arr_p1, arr_p2, arr_p3, arr_p4,
+                  arr_lb1, arr_lb2, arr_lb3, arr_lb4,
+                  arr_lc1, arr_lc2, arr_lc3, arr_lc4,
+                  arr_n11, arr_n21, arr_n31,
+                  arr_pene, arr_stif,
+                  cand_n_vec, cand_e_vec);
+    j_stok = 0;
+  }
+
+  // ================================================================================================================
+  // 6. Sort candidates for reproducibility (sort by (cand_n, cand_e) pairs)
+  // ================================================================================================================
+  {
+    int n_cand = static_cast<int>(cand_n_vec.size());
+    if (n_cand > 0) {
+      std::vector<int> idx(n_cand);
+      std::iota(idx.begin(), idx.end(), 0);
+      std::sort(idx.begin(), idx.end(), [&](int a, int b) {
+        if (cand_n_vec[a] != cand_n_vec[b]) return cand_n_vec[a] < cand_n_vec[b];
+        return cand_e_vec[a] < cand_e_vec[b];
+      });
+
+      std::vector<int> sorted_n(n_cand), sorted_e(n_cand);
+      for (int i = 0; i < n_cand; ++i) {
+        sorted_n[i] = cand_n_vec[idx[i]];
+        sorted_e[i] = cand_e_vec[idx[i]];
+      }
+      cand_n_vec.swap(sorted_n);
+      cand_e_vec.swap(sorted_e);
+    }
+  }
+
+  // ================================================================================================================
+  // 7. Allocate output arrays and copy candidates (caller must free via cpp_i7trivox1_free)
+  // ================================================================================================================
+  int n_cand = static_cast<int>(cand_n_vec.size());
+  *num_cand_out = n_cand;
+  if (n_cand > 0) {
+    *cand_n_ptr_out = static_cast<int*>(std::malloc(n_cand * sizeof(int)));
+    *cand_e_ptr_out = static_cast<int*>(std::malloc(n_cand * sizeof(int)));
+    std::memcpy(*cand_n_ptr_out, cand_n_vec.data(), n_cand * sizeof(int));
+    std::memcpy(*cand_e_ptr_out, cand_e_vec.data(), n_cand * sizeof(int));
+  } else {
+    *cand_n_ptr_out = nullptr;
+    *cand_e_ptr_out = nullptr;
+  }
+
+  double t_total = std::chrono::duration<double>(std::chrono::high_resolution_clock::now() - t_start).count();
+  double avg_bucket = (n_slaves > 0) ? static_cast<double>(cnt_bucket_sum) / n_slaves : 0.0;
+  std::cout << "  [cpp_i7SAP] total=" << t_total << " s  candidates=" << *num_cand_out
+            << "  sweep=" << axis_names[sweep_axis]
+            << "  bucket=" << axis_names[bucket_axis] << "(" << N_BUCKETS << ")"
+            << "  avg_bucket_size=" << avg_bucket
+            << "  self_skipped=" << cnt_self_skipped
+            << "  tests=" << cnt_tests
+            << "  accepted=" << cnt_accepted << std::endl; 
+}
+
 
 } // extern "C"
