@@ -727,17 +727,12 @@ void cpp_i7SAP(
   auto t_start = std::chrono::high_resolution_clock::now();
 
   // ================================================================================================================
-  // Helper: check if slave node nn is in the remnode list for segment ne
+  // Inverted exclusion index: built after masters[] is populated (see below).
+  // Declared here so lambdas can capture it by reference.
+  // slave_excl[nn] = sorted list of masters[] indices that slave node nn must never pair with.
+  // Covers both corner-node self-contact and remnode adjacency in one O(log n) binary search.
   // ================================================================================================================
-  auto is_remnode = [&](int ne, int nn) -> bool {
-    if (flagremnode != 2 || iremnode != 2) return false;
-    int k_start = kremnode[ne - 1];
-    int k_end   = kremnode[ne];
-    for (int m = k_start; m < k_end; ++m) {
-      if (remnode[m] == nn) return true;
-    }
-    return false;
-  };
+  std::vector<std::vector<int>> slave_excl; // sized and filled after masters[] is built
 
   // ================================================================================================================
   // 1. Build master segment info: AABB + geometry for each active segment
@@ -980,38 +975,70 @@ void cpp_i7SAP(
   };
 
   // ================================================================================================================
-  // Pre-build node → parent master exclusion map.
-  // For self-contact interfaces, every master segment's nodes are also slave nodes.
-  // A slave node sitting on its own segment always passes AABB tests (it's inside by
-  // definition), so we want to skip these pairs as early as possible — before any
-  // floating-point overlap work.
+  // Pre-build inverted exclusion index.
+  //
+  // slave_excl[nn] = sorted list of masters[] indices that slave node nn must skip.
+  // This replaces two separate mechanisms that existed in the hot inner loop:
+  //
+  //   1. Corner-node self-exclusion (SmallVec): slave nn is one of masters[k].m1/m2/m3/m4.
+  //      The old SmallVec had a hard capacity of 8 — silently incorrect for high-connectivity
+  //      nodes (mesh corners, T-junctions), leading to false-positive pairs reaching process_batch.
+  //
+  //   2. Remnode adjacency exclusion (is_remnode): O(list_length) linear scan per pair.
+  //      In auto-impact, remnode lists can be hundreds of entries, making this the dominant
+  //      hot-loop cost.
+  //
+  // By inverting the remnode arrays once here (O(total_remnode_size)), the inner loop reduces
+  // both checks to a single std::binary_search — O(log n) with no capacity limit and no
+  // per-segment linear scan.
   // ================================================================================================================
-  // Map: global node nn → list of masters[] indices that contain this node
-  // Using a flat array indexed by node nn for O(1) lookup.
-  // Each node typically belongs to 4-6 segments, so we store small vectors.
-  struct SmallVec {
-    int data[8];   // most nodes belong to <=8 segments
-    int count = 0;
-    void push(int v) { if (count < 8) data[count++] = v; }
-    bool contains(int v) const {
-      for (int i = 0; i < count; ++i) { if (data[i] == v) return true; }
-      return false;
-    }
-  };
+  {
+    // Node IDs are 1-based and bounded by numnod.
+    slave_excl.assign(numnod + 1, std::vector<int>());
 
-  // Find max node ID to size the lookup array
-  int max_nn = 0;
-  for (int k = 0; k < n_masters; ++k) {
-    max_nn = std::max(max_nn, std::max({masters[k].m1, masters[k].m2, masters[k].m3, masters[k].m4}));
+    // 1. Corner-node self-exclusion: slave nn must skip master k if it is a corner of k.
+    for (int k = 0; k < n_masters; ++k) {
+      auto add = [&](int nn) {
+        if (nn > 0 && nn <= numnod) slave_excl[nn].push_back(k);
+      };
+      add(masters[k].m1);
+      add(masters[k].m2);
+      add(masters[k].m3);
+      add(masters[k].m4);
+    }
+
+    // 2. Remnode adjacency exclusion: invert the (ne → remnode list) mapping.
+    //    Original: kremnode/remnode[ne] = set of slave nodes to skip for segment ne.
+    //    Inverted: slave_excl[nn] += master index k  for each ne=masters[k].ne whose
+    //              remnode list contains nn.
+    if (flagremnode == 2 && iremnode == 2) {
+      for (int k = 0; k < n_masters; ++k) {
+        int ne      = masters[k].ne;
+        int k_start = kremnode[ne - 1];
+        int k_end   = kremnode[ne];
+        for (int m = k_start; m < k_end; ++m) {
+          int rem_nn = remnode[m];
+          if (rem_nn > 0 && rem_nn <= numnod) slave_excl[rem_nn].push_back(k);
+        }
+      }
+    }
+
+    // Sort and deduplicate each node's exclusion list.
+    // Lists are typically short (4-20 entries), so insertion-sort behaviour of std::sort is fast.
+    for (auto& v : slave_excl) {
+      if (v.size() > 1) {
+        std::sort(v.begin(), v.end());
+        v.erase(std::unique(v.begin(), v.end()), v.end());
+      }
+    }
   }
-  // Allocate and populate the exclusion map
-  std::vector<SmallVec> node_parent_masters(max_nn + 1);
-  for (int k = 0; k < n_masters; ++k) {
-    node_parent_masters[masters[k].m1].push(k);
-    node_parent_masters[masters[k].m2].push(k);
-    node_parent_masters[masters[k].m3].push(k);
-    node_parent_masters[masters[k].m4].push(k);
-  }
+
+  // O(log n) lookup used in the inner loop.
+  auto is_excluded = [&](int nn, int master_idx) -> bool {
+    if (nn <= 0 || nn > numnod) return false;
+    const auto& v = slave_excl[nn];
+    return !v.empty() && std::binary_search(v.begin(), v.end(), master_idx);
+  };
 
   // Diagnostic counters
   long long cnt_tests        = 0;
@@ -1057,16 +1084,15 @@ void cpp_i7SAP(
       const auto& bucket = buckets[bk];
       cnt_bucket_sum += static_cast<int>(bucket.size());
 
-      // Get this slave's parent master exclusion list (O(1) lookup)
-      const SmallVec& exclude = (sl.nn <= max_nn) ? node_parent_masters[sl.nn] : node_parent_masters[0];
-
       for (int a = 0; a < static_cast<int>(bucket.size()); ++a) {
         int master_idx = bucket[a];
 
-        // EARLY self-contact exclusion: skip if this slave node belongs to this
-        // master segment. Checked BEFORE any floating-point work because these
-        // pairs always pass AABB tests (the node is on the segment by definition).
-        if (exclude.contains(master_idx)) { cnt_self_skipped++; continue; }
+        // Combined exclusion: corner-node self-contact + remnode adjacency.
+        // Single O(log n) binary search into the pre-built inverted index,
+        // replacing the old O(8) SmallVec (capped, could miss exclusions) and
+        // the O(list_length) is_remnode linear scan. Checked before loading
+        // MasterInfo so excluded pairs cost only one cache-miss-free branch.
+        if (is_excluded(sl.nn, master_idx)) { cnt_self_skipped++; continue; }
 
         const MasterInfo& mi = masters[master_idx];
         cnt_tests++;
@@ -1075,9 +1101,6 @@ void cpp_i7SAP(
         if (sl.coord[bucket_axis] < mi.lo[bucket_axis] || sl.coord[bucket_axis] > mi.hi[bucket_axis]) continue;
         // Overlap on third_axis
         if (sl.coord[third_axis] < mi.lo[third_axis] || sl.coord[third_axis] > mi.hi[third_axis]) continue;
-
-        // Remnode exclusion
-        if (is_remnode(mi.ne, sl.nn)) continue;
 
         // Tight AABB with per-node local_aaa (when igap != 0)
         my_real local_aaa = mi.aaa;
