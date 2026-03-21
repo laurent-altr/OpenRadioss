@@ -727,12 +727,20 @@ void cpp_i7SAP(
   auto t_start = std::chrono::high_resolution_clock::now();
 
   // ================================================================================================================
-  // Inverted exclusion index: built after masters[] is populated (see below).
-  // Declared here so lambdas can capture it by reference.
-  // slave_excl[nn] = sorted list of masters[] indices that slave node nn must never pair with.
-  // Covers both corner-node self-contact and remnode adjacency in one O(log n) binary search.
+  // Two-level exclusion strategy (declarations; both are filled after masters[] is built):
+  //
+  //  node_remnode_excl[nn]  — pre-built inverted remnode index (binary search, O(log n)).
+  //                           Only populated when flagremnode==2 && iremnode==2.
+  //
+  //  node_active_masters[nn] — DYNAMIC per-node list of masters currently active in the
+  //                            sweep that have nn as a corner node. Maintained in O(4) per
+  //                            MASTER_START / MASTER_END event. At query time the list has
+  //                            O(degree) ≈ 4-6 entries — a linear scan beats binary search
+  //                            because the list is always in L1 cache. For separate master/
+  //                            slave surfaces it is always empty → O(1) corner check.
   // ================================================================================================================
-  std::vector<std::vector<int>> slave_excl; // sized and filled after masters[] is built
+  std::vector<std::vector<int>> node_remnode_excl;   // remnode adjacency exclusion
+  std::vector<std::vector<int>> node_active_masters; // corner-node exclusion (dynamic)
 
   // ================================================================================================================
   // 1. Build master segment info: AABB + geometry for each active segment
@@ -975,70 +983,45 @@ void cpp_i7SAP(
   };
 
   // ================================================================================================================
-  // Pre-build inverted exclusion index.
-  //
-  // slave_excl[nn] = sorted list of masters[] indices that slave node nn must skip.
-  // This replaces two separate mechanisms that existed in the hot inner loop:
-  //
-  //   1. Corner-node self-exclusion (SmallVec): slave nn is one of masters[k].m1/m2/m3/m4.
-  //      The old SmallVec had a hard capacity of 8 — silently incorrect for high-connectivity
-  //      nodes (mesh corners, T-junctions), leading to false-positive pairs reaching process_batch.
-  //
-  //   2. Remnode adjacency exclusion (is_remnode): O(list_length) linear scan per pair.
-  //      In auto-impact, remnode lists can be hundreds of entries, making this the dominant
-  //      hot-loop cost.
-  //
-  // By inverting the remnode arrays once here (O(total_remnode_size)), the inner loop reduces
-  // both checks to a single std::binary_search — O(log n) with no capacity limit and no
-  // per-segment linear scan.
+  // Build inverted remnode index (node_remnode_excl).
+  // Corner-node exclusion is NOT stored here — it is tracked dynamically via
+  // node_active_masters during the sweep so the list stays tiny (O(degree)).
   // ================================================================================================================
   {
-    // Node IDs are 1-based and bounded by numnod.
-    slave_excl.assign(numnod + 1, std::vector<int>());
-
-    // 1. Corner-node self-exclusion: slave nn must skip master k if it is a corner of k.
-    for (int k = 0; k < n_masters; ++k) {
-      auto add = [&](int nn) {
-        if (nn > 0 && nn <= numnod) slave_excl[nn].push_back(k);
-      };
-      add(masters[k].m1);
-      add(masters[k].m2);
-      add(masters[k].m3);
-      add(masters[k].m4);
-    }
-
-    // 2. Remnode adjacency exclusion: invert the (ne → remnode list) mapping.
-    //    Original: kremnode/remnode[ne] = set of slave nodes to skip for segment ne.
-    //    Inverted: slave_excl[nn] += master index k  for each ne=masters[k].ne whose
-    //              remnode list contains nn.
+    node_remnode_excl.assign(numnod + 1, std::vector<int>());
     if (flagremnode == 2 && iremnode == 2) {
+      // Invert (ne → remnode list) to (nn → master-index list).
       for (int k = 0; k < n_masters; ++k) {
         int ne      = masters[k].ne;
         int k_start = kremnode[ne - 1];
         int k_end   = kremnode[ne];
         for (int m = k_start; m < k_end; ++m) {
           int rem_nn = remnode[m];
-          if (rem_nn > 0 && rem_nn <= numnod) slave_excl[rem_nn].push_back(k);
+          if (rem_nn > 0 && rem_nn <= numnod) node_remnode_excl[rem_nn].push_back(k);
         }
       }
-    }
-
-    // Sort and deduplicate each node's exclusion list.
-    // Lists are typically short (4-20 entries), so insertion-sort behaviour of std::sort is fast.
-    for (auto& v : slave_excl) {
-      if (v.size() > 1) {
-        std::sort(v.begin(), v.end());
-        v.erase(std::unique(v.begin(), v.end()), v.end());
+      for (auto& v : node_remnode_excl) {
+        if (v.size() > 1) {
+          std::sort(v.begin(), v.end());
+          v.erase(std::unique(v.begin(), v.end()), v.end());
+        }
       }
     }
   }
 
-  // O(log n) lookup used in the inner loop.
-  auto is_excluded = [&](int nn, int master_idx) -> bool {
+  // O(log n) binary-search used only for the remnode adjacency check.
+  auto is_remnode_excl = [&](int nn, int master_idx) -> bool {
     if (nn <= 0 || nn > numnod) return false;
-    const auto& v = slave_excl[nn];
+    const auto& v = node_remnode_excl[nn];
     return !v.empty() && std::binary_search(v.begin(), v.end(), master_idx);
   };
+
+  // ================================================================================================================
+  // Dynamic corner-node active list: node_active_masters[nn] is maintained in O(4) per
+  // MASTER_START / MASTER_END event so the inner loop sees only currently-alive sweep masters.
+  // Initialised here; populated inside the event loop below.
+  // ================================================================================================================
+  node_active_masters.assign(numnod + 1, std::vector<int>());
 
   // Diagnostic counters
   long long cnt_tests        = 0;
@@ -1049,7 +1032,7 @@ void cpp_i7SAP(
   for (const auto& ev : events) {
     switch (ev.type) {
 
-    case 0: // MASTER_START — add to bucketed active set
+    case 0: // MASTER_START — add to bucketed active set; register corner-node membership
     {
       int k = ev.idx;
       int blo = coord_to_bucket(masters[k].lo[bucket_axis]);
@@ -1057,9 +1040,15 @@ void cpp_i7SAP(
       for (int b = blo; b <= bhi; ++b) {
         buckets[b].push_back(k);
       }
+      // Register k in each corner node's live list so slaves can find it in O(degree).
+      auto reg = [&](int nn) {
+        if (nn > 0 && nn <= numnod) node_active_masters[nn].push_back(k);
+      };
+      reg(masters[k].m1); reg(masters[k].m2);
+      reg(masters[k].m3); reg(masters[k].m4);
     } break;
 
-    case 2: // MASTER_END — remove from bucketed active set (swap-erase)
+    case 2: // MASTER_END — remove from bucketed active set (swap-erase); retire corner-node membership
     {
       int k = ev.idx;
       int blo = coord_to_bucket(masters[k].lo[bucket_axis]);
@@ -1075,6 +1064,16 @@ void cpp_i7SAP(
           }
         }
       }
+      // Retire k from each corner node's live list (swap-erase on a tiny vector).
+      auto unreg = [&](int nn) {
+        if (nn <= 0 || nn > numnod) return;
+        auto& v = node_active_masters[nn];
+        for (int i = 0; i < static_cast<int>(v.size()); ++i) {
+          if (v[i] == k) { v[i] = v.back(); v.pop_back(); return; }
+        }
+      };
+      unreg(masters[k].m1); unreg(masters[k].m2);
+      unreg(masters[k].m3); unreg(masters[k].m4);
     } break;
 
     case 1: // SLAVE_POINT — test against masters in the relevant bucket only
@@ -1084,15 +1083,23 @@ void cpp_i7SAP(
       const auto& bucket = buckets[bk];
       cnt_bucket_sum += static_cast<int>(bucket.size());
 
+      // Corner-exclusion list for this slave: the live set of sweep-active masters
+      // that own sl.nn as a corner node. Typically 0 entries (non-self-contact) or
+      // 4-6 entries (auto-impact). The list lives in L1 cache — a linear scan here
+      // beats any hash/binary-search because the list is always tiny.
+      const auto& corner_excl = (sl.nn > 0 && sl.nn <= numnod)
+                                 ? node_active_masters[sl.nn]
+                                 : node_active_masters[0]; // always-empty fallback
+
       for (int a = 0; a < static_cast<int>(bucket.size()); ++a) {
         int master_idx = bucket[a];
 
-        // Combined exclusion: corner-node self-contact + remnode adjacency.
-        // Single O(log n) binary search into the pre-built inverted index,
-        // replacing the old O(8) SmallVec (capped, could miss exclusions) and
-        // the O(list_length) is_remnode linear scan. Checked before loading
-        // MasterInfo so excluded pairs cost only one cache-miss-free branch.
-        if (is_excluded(sl.nn, master_idx)) { cnt_self_skipped++; continue; }
+        // Corner-node self-contact exclusion: O(degree) scan on the live active list.
+        // For separate master/slave surfaces corner_excl is empty → branch taken once, free.
+        // For auto-impact it has ≤8 entries — 4-8 comparisons, all in one cache line.
+        bool corner_hit = false;
+        for (int c : corner_excl) { if (c == master_idx) { corner_hit = true; break; } }
+        if (corner_hit) { cnt_self_skipped++; continue; }
 
         const MasterInfo& mi = masters[master_idx];
         cnt_tests++;
@@ -1101,6 +1108,10 @@ void cpp_i7SAP(
         if (sl.coord[bucket_axis] < mi.lo[bucket_axis] || sl.coord[bucket_axis] > mi.hi[bucket_axis]) continue;
         // Overlap on third_axis
         if (sl.coord[third_axis] < mi.lo[third_axis] || sl.coord[third_axis] > mi.hi[third_axis]) continue;
+
+        // Remnode adjacency exclusion: O(log n) binary search on the pre-built inverted
+        // index. Separated from the corner check so each pays only its own cost.
+        if (is_remnode_excl(sl.nn, master_idx)) continue;
 
         // Tight AABB with per-node local_aaa (when igap != 0)
         my_real local_aaa = mi.aaa;
