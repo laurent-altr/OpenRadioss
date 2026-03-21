@@ -1023,6 +1023,25 @@ void cpp_i7SAP(
   // ================================================================================================================
   node_active_masters.assign(numnod + 1, std::vector<int>());
 
+  // ================================================================================================================
+  // Epoch stamp array for O(1) per-pair corner-node exclusion check.
+  //
+  // Problem with the O(degree) scan on corner_excl: we still iterate every entry in
+  // corner_excl for every master in the bucket.  Since all parent segments of a slave
+  // node are always in its bucket (they own that node, so their AABB always contains it),
+  // there is no reduction in the number of segments tested — only a per-pair scan cost.
+  //
+  // Solution: before entering the inner loop, STAMP each corner-excluded master once
+  // with the current slave epoch.  The per-pair check then becomes one array read and
+  // one integer comparison — O(1) with no scan, regardless of how many segments own
+  // that node.  The epoch counter auto-invalidates old stamps; no cleanup is needed.
+  //
+  //   Setup cost per slave : O(|corner_excl|) = O(4–6) stores
+  //   Per-pair check cost  : O(1)  (one read of master_epoch[master_idx])
+  // ================================================================================================================
+  std::vector<int> master_epoch(n_masters, 0);  // stamp[k] == slave_epoch → k excluded
+  int slave_epoch = 0;                           // incremented once per SLAVE_POINT event
+
   // Diagnostic counters
   long long cnt_tests        = 0;
   long long cnt_accepted     = 0;
@@ -1083,23 +1102,22 @@ void cpp_i7SAP(
       const auto& bucket = buckets[bk];
       cnt_bucket_sum += static_cast<int>(bucket.size());
 
-      // Corner-exclusion list for this slave: the live set of sweep-active masters
-      // that own sl.nn as a corner node. Typically 0 entries (non-self-contact) or
-      // 4-6 entries (auto-impact). The list lives in L1 cache — a linear scan here
-      // beats any hash/binary-search because the list is always tiny.
+      // Stamp corner-excluded masters with the current slave epoch (O(|corner_excl|) = O(4–6)).
+      // All parent segments of sl.nn are always in its bucket (they own that node, so their
+      // inflated AABB always contains it), so the per-pair scan on corner_excl paid the same
+      // cost regardless of bucket size.  Stamping once and checking once per pair with a
+      // single array read reduces the per-pair exclusion cost from O(degree) to O(1).
+      ++slave_epoch;
       const auto& corner_excl = (sl.nn > 0 && sl.nn <= numnod)
                                  ? node_active_masters[sl.nn]
                                  : node_active_masters[0]; // always-empty fallback
+      for (int c : corner_excl) master_epoch[c] = slave_epoch;
 
       for (int a = 0; a < static_cast<int>(bucket.size()); ++a) {
         int master_idx = bucket[a];
 
-        // Corner-node self-contact exclusion: O(degree) scan on the live active list.
-        // For separate master/slave surfaces corner_excl is empty → branch taken once, free.
-        // For auto-impact it has ≤8 entries — 4-8 comparisons, all in one cache line.
-        bool corner_hit = false;
-        for (int c : corner_excl) { if (c == master_idx) { corner_hit = true; break; } }
-        if (corner_hit) { cnt_self_skipped++; continue; }
+        // Corner-node exclusion: O(1) — one integer read + one compare, no scan.
+        if (master_epoch[master_idx] == slave_epoch) { cnt_self_skipped++; continue; }
 
         const MasterInfo& mi = masters[master_idx];
         cnt_tests++;
