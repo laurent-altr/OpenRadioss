@@ -476,7 +476,8 @@ C------------------
         IS_USED_151_INT = 0
         IF (IS_USED_WITH_LAW151) IS_USED_151_INT = 1
 C
-        CALL CPP_I7SAP(
+!       CALL CPP_I7SAP(
+        CALL CPP_I7TRIVOX1(
      1   NSN      ,IRECT    ,X        ,STF      ,
      2   STFN     ,XYZM     ,NSV      ,
      3   TZINF_ST ,GAP_S_L  ,GAP_M_L  ,

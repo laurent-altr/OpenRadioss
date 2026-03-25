@@ -522,6 +522,7 @@ void cpp_i7trivox1(
             j_stok++;
 
             if (j_stok == MVSIZ) {
+              // may need a lock here if parallelized
               process_batch(j_stok, x, irect, nsv, prov_e, prov_n,
                             stf, stfn, gapv, &igap, &gap,
                             gap_s, gap_m, &istf, &gapmin, &gapmax,
@@ -979,38 +980,13 @@ void cpp_i7SAP(
     return std::max(0, std::min(b, N_BUCKETS - 1));
   };
 
-  // ================================================================================================================
-  // Pre-build node → parent master exclusion map.
-  // For self-contact interfaces, every master segment's nodes are also slave nodes.
-  // A slave node sitting on its own segment always passes AABB tests (it's inside by
-  // definition), so we want to skip these pairs as early as possible — before any
-  // floating-point overlap work.
-  // ================================================================================================================
-  // Map: global node nn → list of masters[] indices that contain this node
-  // Using a flat array indexed by node nn for O(1) lookup.
-  // Each node typically belongs to 4-6 segments, so we store small vectors.
-  struct SmallVec {
-    int data[8];   // most nodes belong to <=8 segments
-    int count = 0;
-    void push(int v) { if (count < 8) data[count++] = v; }
-    bool contains(int v) const {
-      for (int i = 0; i < count; ++i) { if (data[i] == v) return true; }
-      return false;
-    }
-  };
-
-  // Find max node ID to size the lookup array
-  int max_nn = 0;
+  // Compact node-ID array for self-contact exclusion: 16 bytes per master
+  // instead of loading full MasterInfo (~200 bytes, 3 cache lines) just to
+  // check 4 node IDs.  Sequential layout helps the prefetcher.
+  struct MasterNodes { int m1, m2, m3, m4; };
+  std::vector<MasterNodes> master_nodes(n_masters);
   for (int k = 0; k < n_masters; ++k) {
-    max_nn = std::max(max_nn, std::max({masters[k].m1, masters[k].m2, masters[k].m3, masters[k].m4}));
-  }
-  // Allocate and populate the exclusion map
-  std::vector<SmallVec> node_parent_masters(max_nn + 1);
-  for (int k = 0; k < n_masters; ++k) {
-    node_parent_masters[masters[k].m1].push(k);
-    node_parent_masters[masters[k].m2].push(k);
-    node_parent_masters[masters[k].m3].push(k);
-    node_parent_masters[masters[k].m4].push(k);
+    master_nodes[k] = {masters[k].m1, masters[k].m2, masters[k].m3, masters[k].m4};
   }
 
   // Diagnostic counters
@@ -1057,16 +1033,16 @@ void cpp_i7SAP(
       const auto& bucket = buckets[bk];
       cnt_bucket_sum += static_cast<int>(bucket.size());
 
-      // Get this slave's parent master exclusion list (O(1) lookup)
-      const SmallVec& exclude = (sl.nn <= max_nn) ? node_parent_masters[sl.nn] : node_parent_masters[0];
-
       for (int a = 0; a < static_cast<int>(bucket.size()); ++a) {
         int master_idx = bucket[a];
 
-        // EARLY self-contact exclusion: skip if this slave node belongs to this
-        // master segment. Checked BEFORE any floating-point work because these
-        // pairs always pass AABB tests (the node is on the segment by definition).
-        if (exclude.contains(master_idx)) { cnt_self_skipped++; continue; }
+        // Self-contact exclusion from compact node-ID array (16 bytes, fits in
+        // 1 cache line with neighbours).  Avoids loading full MasterInfo (~200
+        // bytes) for pairs that are mostly self-contact skips.
+        const MasterNodes& mn = master_nodes[master_idx];
+        if (sl.nn == mn.m1 || sl.nn == mn.m2 || sl.nn == mn.m3 || sl.nn == mn.m4) {
+          cnt_self_skipped++; continue;
+        }
 
         const MasterInfo& mi = masters[master_idx];
         cnt_tests++;
