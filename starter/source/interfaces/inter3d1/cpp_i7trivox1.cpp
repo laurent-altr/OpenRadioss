@@ -30,8 +30,7 @@
 #include <numeric>
 #include <cstring>
 #include <cstdlib>
-#include <iostream>
-#include <chrono>
+#include <cstdint>
 
 #ifdef MYREAL8
 typedef double my_real;
@@ -121,9 +120,9 @@ static void process_batch(
   my_real* lc1, my_real* lc2, my_real* lc3, my_real* lc4,
   my_real* n11, my_real* n21, my_real* n31,
   my_real* pene, my_real* stif,
-  // output candidate vectors
-  std::vector<int>& cand_n_vec,
-  std::vector<int>& cand_e_vec)
+  // output candidate buffers (raw malloc'd; may be realloc'd)
+  int*& cand_n_buf, int*& cand_e_buf,
+  int& n_cand, int& cand_capacity)
 {
   cpp_i7cor3(x, irect, nsv, prov_e, prov_n,
              stf, stfn, gapv, igap, gap,
@@ -153,8 +152,14 @@ static void process_batch(
   // Save non-zero penetration candidates
   for (int i = 0; i < j_stok; ++i) {
     if (pene[i] != ZERO) {
-      cand_n_vec.push_back(prov_n[i]);
-      cand_e_vec.push_back(prov_e[i]);
+      if (n_cand >= cand_capacity) {
+        cand_capacity *= 2;
+        cand_n_buf = static_cast<int*>(std::realloc(cand_n_buf, cand_capacity * sizeof(int)));
+        cand_e_buf = static_cast<int*>(std::realloc(cand_e_buf, cand_capacity * sizeof(int)));
+      }
+      cand_n_buf[n_cand] = prov_n[i];
+      cand_e_buf[n_cand] = prov_e[i];
+      n_cand++;
     }
   }
 }
@@ -289,9 +294,7 @@ void cpp_i7trivox1(
   };
 
   // LAST_NOD: temporary, used during node placement
-  std::vector<int> last_nod(nsn + 1, 0); // 1-based, index [1..nsn]
-
-  auto t_start = std::chrono::high_resolution_clock::now();
+  int* last_nod = static_cast<int*>(std::calloc(nsn + 1, sizeof(int))); // 1-based, index [1..nsn]
 
   // ==================================================================================================================
   // 1. Place slave nodes into voxel grid
@@ -367,7 +370,7 @@ void cpp_i7trivox1(
   // ==================================================================================================================
   int stagnod = numnod + numfakenodigeo;
   if (is_used_151) stagnod += numels;
-  std::vector<int> tagnod(stagnod, 0);
+  int* tagnod = static_cast<int*>(std::calloc(stagnod, sizeof(int)));
 
   // ==================================================================================================================
   // 3. Search voxels for each master segment and create candidate pairs
@@ -391,13 +394,47 @@ void cpp_i7trivox1(
   my_real arr_n11[MVSIZ], arr_n21[MVSIZ], arr_n31[MVSIZ];
   my_real arr_stif[MVSIZ], arr_pene[MVSIZ];
 
-  // Dynamic candidate storage
-  std::vector<int> cand_n_vec;
-  std::vector<int> cand_e_vec;
-  cand_n_vec.reserve(1024+25*nsn);
-  cand_e_vec.reserve(1024+25*nsn);
+  // Candidate storage
+  std::vector<int> cand_n_vec, cand_e_vec;
+  cand_n_vec.reserve(1024 + 25 * nsn);
+  cand_e_vec.reserve(1024 + 25 * nsn);
 
   int j_stok = 0;
+
+  // Inline batch flush: captures all locals by reference, avoids passing 50+
+  // pointer parameters through a separate function (which killed optimization
+  // due to aliasing and prevented the compiler from keeping values in registers).
+  auto flush_batch = [&]() {
+    cpp_i7cor3(x, irect, nsv, prov_e, prov_n,
+               stf, stfn, gapv, &igap, &gap,
+               gap_s, gap_m, &istf, &gapmin, &gapmax,
+               gap_s_l, gap_m_l, &drad,
+               ix11, ix12, ix13, ix14, nsvg,
+               arr_x1, arr_x2, arr_x3, arr_x4,
+               arr_y1, arr_y2, arr_y3, arr_y4,
+               arr_z1, arr_z2, arr_z3, arr_z4,
+               arr_xi, arr_yi, arr_zi, arr_stif, &dgapload, &j_stok);
+    cpp_i7dst3(ix13, ix14, arr_x1, arr_x2, arr_x3, arr_x4,
+               arr_y1, arr_y2, arr_y3, arr_y4,
+               arr_z1, arr_z2, arr_z3, arr_z4,
+               arr_xi, arr_yi, arr_zi, arr_x0, arr_y0, arr_z0,
+               arr_nx1, arr_ny1, arr_nz1, arr_nx2, arr_ny2, arr_nz2,
+               arr_nx3, arr_ny3, arr_nz3, arr_nx4, arr_ny4, arr_nz4,
+               arr_p1, arr_p2, arr_p3, arr_p4,
+               arr_lb1, arr_lb2, arr_lb3, arr_lb4,
+               arr_lc1, arr_lc2, arr_lc3, arr_lc4, &j_stok);
+    cpp_i7pen3(&marge, gapv, arr_n11, arr_n21, arr_n31,
+               arr_pene, arr_nx1, arr_ny1, arr_nz1, arr_nx2, arr_ny2, arr_nz2,
+               arr_nx3, arr_ny3, arr_nz3, arr_nx4, arr_ny4, arr_nz4,
+               arr_p1, arr_p2, arr_p3, arr_p4, &j_stok);
+    for (int i = 0; i < j_stok; ++i) {
+      if (arr_pene[i] != ZERO) {
+        cand_n_vec.push_back(prov_n[i]);
+        cand_e_vec.push_back(prov_e[i]);
+      }
+    }
+    j_stok = 0;
+  };
 
   for (int kk = 0; kk < nrtm_l; ++kk) {
     int ne = index[kk]; // Fortran 1-based segment index
@@ -433,22 +470,22 @@ void cpp_i7trivox1(
     my_real xx2 = x[3*(m2-1) + 0];
     my_real xx3 = x[3*(m3-1) + 0];
     my_real xx4 = x[3*(m4-1) + 0];
-    my_real xmaxe = std::max({xx1, xx2, xx3, xx4});
-    my_real xmine = std::min({xx1, xx2, xx3, xx4});
+    my_real xmaxe = std::max(std::max(xx1, xx2), std::max(xx3, xx4));
+    my_real xmine = std::min(std::min(xx1, xx2), std::min(xx3, xx4));
 
     my_real yy1 = x[3*(m1-1) + 1];
     my_real yy2 = x[3*(m2-1) + 1];
     my_real yy3 = x[3*(m3-1) + 1];
     my_real yy4 = x[3*(m4-1) + 1];
-    my_real ymaxe = std::max({yy1, yy2, yy3, yy4});
-    my_real ymine = std::min({yy1, yy2, yy3, yy4});
+    my_real ymaxe = std::max(std::max(yy1, yy2), std::max(yy3, yy4));
+    my_real ymine = std::min(std::min(yy1, yy2), std::min(yy3, yy4));
 
     my_real zz1 = x[3*(m1-1) + 2];
     my_real zz2 = x[3*(m2-1) + 2];
     my_real zz3 = x[3*(m3-1) + 2];
     my_real zz4 = x[3*(m4-1) + 2];
-    my_real zmaxe = std::max({zz1, zz2, zz3, zz4});
-    my_real zmine = std::min({zz1, zz2, zz3, zz4});
+    my_real zmaxe = std::max(std::max(zz1, zz2), std::max(zz3, zz4));
+    my_real zmine = std::min(std::min(zz1, zz2), std::min(zz3, zz4));
 
     // Surface normal (approximate) for candidate elimination
     my_real sx = (yy3 - yy1) * (zz4 - zz2) - (zz3 - zz1) * (yy4 - yy2);
@@ -473,13 +510,15 @@ void cpp_i7trivox1(
     int iy2 = std::max(1, 2 + voxel_hi(ymaxe, aaa, yminb, ymaxb, nby));
     int iz2 = std::max(1, 2 + voxel_hi(zmaxe, aaa, zminb, zmaxb, nbz));
 
-    // Search overlapping voxels
+    // Search overlapping voxels (precomputed strides avoid repeated multiplication)
     for (int iz = iz1; iz <= iz2; ++iz) {
+      const int base_iz = (iz - 1) * vdim_y * vdim_x;
       for (int iy = iy1; iy <= iy2; ++iy) {
+        const int base_iy = base_iz + (iy - 1) * vdim_x - 1;
         for (int ix = ix1; ix <= ix2; ++ix) {
 
           // Walk the linked list of slave nodes in this voxel cell
-          for (int jj = voxel[VOXEL_IDX(ix, iy, iz)]; jj != 0; jj = local_next_nod[jj - 1]) {
+          for (int jj = voxel[base_iy + ix]; jj != 0; jj = local_next_nod[jj - 1]) {
             // jj is 1-based index into nsv, stfn, etc.
             int nn = nsv[jj - 1]; // Fortran 1-based global node number
 
@@ -522,28 +561,7 @@ void cpp_i7trivox1(
             j_stok++;
 
             if (j_stok == MVSIZ) {
-              // may need a lock here if parallelized
-              process_batch(j_stok, x, irect, nsv, prov_e, prov_n,
-                            stf, stfn, gapv, &igap, &gap,
-                            gap_s, gap_m, &istf, &gapmin, &gapmax,
-                            gap_s_l, gap_m_l, &drad, &marge, &dgapload,
-                            ix11, ix12, ix13, ix14, nsvg,
-                            arr_x1, arr_x2, arr_x3, arr_x4,
-                            arr_y1, arr_y2, arr_y3, arr_y4,
-                            arr_z1, arr_z2, arr_z3, arr_z4,
-                            arr_xi, arr_yi, arr_zi,
-                            arr_x0, arr_y0, arr_z0,
-                            arr_nx1, arr_ny1, arr_nz1,
-                            arr_nx2, arr_ny2, arr_nz2,
-                            arr_nx3, arr_ny3, arr_nz3,
-                            arr_nx4, arr_ny4, arr_nz4,
-                            arr_p1, arr_p2, arr_p3, arr_p4,
-                            arr_lb1, arr_lb2, arr_lb3, arr_lb4,
-                            arr_lc1, arr_lc2, arr_lc3, arr_lc4,
-                            arr_n11, arr_n21, arr_n31,
-                            arr_pene, arr_stif,
-                            cand_n_vec, cand_e_vec);
-              j_stok = 0;
+              flush_batch();
             }
           } // for jj (linked list walk)
 
@@ -562,30 +580,13 @@ void cpp_i7trivox1(
 
   } // for kk (segments)
 
-  // Process remaining candidates
   if (j_stok != 0) {
-    process_batch(j_stok, x, irect, nsv, prov_e, prov_n,
-                  stf, stfn, gapv, &igap, &gap,
-                  gap_s, gap_m, &istf, &gapmin, &gapmax,
-                  gap_s_l, gap_m_l, &drad, &marge, &dgapload,
-                  ix11, ix12, ix13, ix14, nsvg,
-                  arr_x1, arr_x2, arr_x3, arr_x4,
-                  arr_y1, arr_y2, arr_y3, arr_y4,
-                  arr_z1, arr_z2, arr_z3, arr_z4,
-                  arr_xi, arr_yi, arr_zi,
-                  arr_x0, arr_y0, arr_z0,
-                  arr_nx1, arr_ny1, arr_nz1,
-                  arr_nx2, arr_ny2, arr_nz2,
-                  arr_nx3, arr_ny3, arr_nz3,
-                  arr_nx4, arr_ny4, arr_nz4,
-                  arr_p1, arr_p2, arr_p3, arr_p4,
-                  arr_lb1, arr_lb2, arr_lb3, arr_lb4,
-                  arr_lc1, arr_lc2, arr_lc3, arr_lc4,
-                  arr_n11, arr_n21, arr_n31,
-                  arr_pene, arr_stif,
-                  cand_n_vec, cand_e_vec);
-    j_stok = 0;
+    flush_batch();
   }
+
+  // Free temporary arrays no longer needed
+  std::free(last_nod);
+  std::free(tagnod);
 
   // ==================================================================================================================
   // 4. Sort candidates for reproducibility (sort by (cand_n, cand_e) pairs)
@@ -593,37 +594,33 @@ void cpp_i7trivox1(
   {
     int n_cand = static_cast<int>(cand_n_vec.size());
     if (n_cand > 0) {
-      std::vector<int> idx(n_cand);
-      std::iota(idx.begin(), idx.end(), 0);
-      std::sort(idx.begin(), idx.end(), [&](int a, int b) {
-        if (cand_n_vec[a] != cand_n_vec[b]) return cand_n_vec[a] < cand_n_vec[b];
-        return cand_e_vec[a] < cand_e_vec[b];
-      });
-
-      // Apply permutation
-      std::vector<int> sorted_n(n_cand), sorted_e(n_cand);
+      int64_t* sort_keys = static_cast<int64_t*>(std::malloc(n_cand * sizeof(int64_t)));
+      for (int i = 0; i < n_cand; ++i)
+        sort_keys[i] = (static_cast<int64_t>(cand_n_vec[i]) << 32) | static_cast<uint32_t>(cand_e_vec[i]);
+      std::sort(sort_keys, sort_keys + n_cand);
       for (int i = 0; i < n_cand; ++i) {
-        sorted_n[i] = cand_n_vec[idx[i]];
-        sorted_e[i] = cand_e_vec[idx[i]];
+        cand_n_vec[i] = static_cast<int>(sort_keys[i] >> 32);
+        cand_e_vec[i] = static_cast<int>(sort_keys[i] & 0xFFFFFFFF);
       }
-      cand_n_vec.swap(sorted_n);
-      cand_e_vec.swap(sorted_e);
+      std::free(sort_keys);
     }
   }
 
   // ==================================================================================================================
-  // 5. Allocate output arrays and copy candidates (caller must free via cpp_i7trivox1_free)
+  // 5. Copy candidates to output (caller must free via cpp_i7trivox1_free)
   // ==================================================================================================================
-  int n_cand = static_cast<int>(cand_n_vec.size());
-  *num_cand_out = n_cand;
-  if (n_cand > 0) {
-    *cand_n_ptr_out = static_cast<int*>(std::malloc(n_cand * sizeof(int)));
-    *cand_e_ptr_out = static_cast<int*>(std::malloc(n_cand * sizeof(int)));
-    std::memcpy(*cand_n_ptr_out, cand_n_vec.data(), n_cand * sizeof(int));
-    std::memcpy(*cand_e_ptr_out, cand_e_vec.data(), n_cand * sizeof(int));
-  } else {
-    *cand_n_ptr_out = nullptr;
-    *cand_e_ptr_out = nullptr;
+  {
+    int n_cand = static_cast<int>(cand_n_vec.size());
+    *num_cand_out = n_cand;
+    if (n_cand > 0) {
+      *cand_n_ptr_out = static_cast<int*>(std::malloc(n_cand * sizeof(int)));
+      *cand_e_ptr_out = static_cast<int*>(std::malloc(n_cand * sizeof(int)));
+      std::memcpy(*cand_n_ptr_out, cand_n_vec.data(), n_cand * sizeof(int));
+      std::memcpy(*cand_e_ptr_out, cand_e_vec.data(), n_cand * sizeof(int));
+    } else {
+      *cand_n_ptr_out = nullptr;
+      *cand_e_ptr_out = nullptr;
+    }
   }
 
   // ==================================================================================================================
@@ -634,9 +631,6 @@ void cpp_i7trivox1(
       voxel[VOXEL_IDX(iix[i], iiy[i], iiz[i])] = 0;
     }
   }
-
-  double t_total = std::chrono::duration<double>(std::chrono::high_resolution_clock::now() - t_start).count();
-  std::cout << "  [cpp_i7trivox1] total=" << t_total << " s  candidates=" << *num_cand_out << std::endl;
 
   #undef VOXEL_IDX
   #undef CRVOXEL_VAL
@@ -724,8 +718,6 @@ void cpp_i7SAP(
   const int     numfakenodigeo = *numfakenodigeo_ptr;
   const int     numels         = *numels_ptr;
   const int     is_used_151    = *is_used_with_law151_ptr;
-
-  auto t_start = std::chrono::high_resolution_clock::now();
 
   // ================================================================================================================
   // Helper: check if slave node nn is in the remnode list for segment ne
@@ -892,12 +884,6 @@ void cpp_i7SAP(
   }
   third_axis = 3 - sweep_axis - bucket_axis;
 
-  std::cout << "  [cpp_i7SAP] axis scores: X=" << axis_score[0]
-            << " Y=" << axis_score[1] << " Z=" << axis_score[2]
-            << "  => sweep=" << axis_names[sweep_axis]
-            << " bucket=" << axis_names[bucket_axis]
-            << " third=" << axis_names[third_axis] << std::endl;
-
   // ================================================================================================================
   // 4. Build sweep events on the chosen sweep axis and sort
   // ================================================================================================================
@@ -947,11 +933,11 @@ void cpp_i7SAP(
   my_real arr_n11[MVSIZ], arr_n21[MVSIZ], arr_n31[MVSIZ];
   my_real arr_stif[MVSIZ], arr_pene[MVSIZ];
 
-  // Dynamic candidate storage
-  std::vector<int> cand_n_vec;
-  std::vector<int> cand_e_vec;
-  cand_n_vec.reserve(10000);
-  cand_e_vec.reserve(10000);
+  // Dynamic candidate storage (raw malloc'd buffers, no std::vector overhead)
+  int cand_capacity = std::max(10000, 25 * nsn);
+  int* cand_n_buf = static_cast<int*>(std::malloc(cand_capacity * sizeof(int)));
+  int* cand_e_buf = static_cast<int*>(std::malloc(cand_capacity * sizeof(int)));
+  int n_cand_total = 0;
 
   int j_stok = 0;
 
@@ -1108,7 +1094,7 @@ void cpp_i7SAP(
                         arr_lc1, arr_lc2, arr_lc3, arr_lc4,
                         arr_n11, arr_n21, arr_n31,
                         arr_pene, arr_stif,
-                        cand_n_vec, cand_e_vec);
+                        cand_n_buf, cand_e_buf, n_cand_total, cand_capacity);
           j_stok = 0;
         }
       } // for masters in bucket
@@ -1140,7 +1126,7 @@ void cpp_i7SAP(
                   arr_lc1, arr_lc2, arr_lc3, arr_lc4,
                   arr_n11, arr_n21, arr_n31,
                   arr_pene, arr_stif,
-                  cand_n_vec, cand_e_vec);
+                  cand_n_buf, cand_e_buf, n_cand_total, cand_capacity);
     j_stok = 0;
   }
 
@@ -1148,49 +1134,33 @@ void cpp_i7SAP(
   // 6. Sort candidates for reproducibility (sort by (cand_n, cand_e) pairs)
   // ================================================================================================================
   {
-    int n_cand = static_cast<int>(cand_n_vec.size());
-    if (n_cand > 0) {
-      std::vector<int> idx(n_cand);
-      std::iota(idx.begin(), idx.end(), 0);
-      std::sort(idx.begin(), idx.end(), [&](int a, int b) {
-        if (cand_n_vec[a] != cand_n_vec[b]) return cand_n_vec[a] < cand_n_vec[b];
-        return cand_e_vec[a] < cand_e_vec[b];
-      });
-
-      std::vector<int> sorted_n(n_cand), sorted_e(n_cand);
-      for (int i = 0; i < n_cand; ++i) {
-        sorted_n[i] = cand_n_vec[idx[i]];
-        sorted_e[i] = cand_e_vec[idx[i]];
+    if (n_cand_total > 0) {
+      int64_t* sort_keys = static_cast<int64_t*>(std::malloc(n_cand_total * sizeof(int64_t)));
+      for (int i = 0; i < n_cand_total; ++i)
+        sort_keys[i] = (static_cast<int64_t>(cand_n_buf[i]) << 32) | static_cast<uint32_t>(cand_e_buf[i]);
+      std::sort(sort_keys, sort_keys + n_cand_total);
+      for (int i = 0; i < n_cand_total; ++i) {
+        cand_n_buf[i] = static_cast<int>(sort_keys[i] >> 32);
+        cand_e_buf[i] = static_cast<int>(sort_keys[i] & 0xFFFFFFFF);
       }
-      cand_n_vec.swap(sorted_n);
-      cand_e_vec.swap(sorted_e);
+      std::free(sort_keys);
     }
   }
 
   // ================================================================================================================
-  // 7. Allocate output arrays and copy candidates (caller must free via cpp_i7trivox1_free)
+  // 7. Transfer ownership of candidate buffers to caller (no extra copy)
   // ================================================================================================================
-  int n_cand = static_cast<int>(cand_n_vec.size());
-  *num_cand_out = n_cand;
-  if (n_cand > 0) {
-    *cand_n_ptr_out = static_cast<int*>(std::malloc(n_cand * sizeof(int)));
-    *cand_e_ptr_out = static_cast<int*>(std::malloc(n_cand * sizeof(int)));
-    std::memcpy(*cand_n_ptr_out, cand_n_vec.data(), n_cand * sizeof(int));
-    std::memcpy(*cand_e_ptr_out, cand_e_vec.data(), n_cand * sizeof(int));
+  *num_cand_out = n_cand_total;
+  if (n_cand_total > 0) {
+    *cand_n_ptr_out = static_cast<int*>(std::realloc(cand_n_buf, n_cand_total * sizeof(int)));
+    *cand_e_ptr_out = static_cast<int*>(std::realloc(cand_e_buf, n_cand_total * sizeof(int)));
   } else {
+    std::free(cand_n_buf);
+    std::free(cand_e_buf);
     *cand_n_ptr_out = nullptr;
     *cand_e_ptr_out = nullptr;
   }
 
-  double t_total = std::chrono::duration<double>(std::chrono::high_resolution_clock::now() - t_start).count();
-  double avg_bucket = (n_slaves > 0) ? static_cast<double>(cnt_bucket_sum) / n_slaves : 0.0;
-  std::cout << "  [cpp_i7SAP] total=" << t_total << " s  candidates=" << *num_cand_out
-            << "  sweep=" << axis_names[sweep_axis]
-            << "  bucket=" << axis_names[bucket_axis] << "(" << N_BUCKETS << ")"
-            << "  avg_bucket_size=" << avg_bucket
-            << "  self_skipped=" << cnt_self_skipped
-            << "  tests=" << cnt_tests
-            << "  accepted=" << cnt_accepted << std::endl; 
 }
 
 
