@@ -315,3 +315,256 @@ The main cost of this approach is the **memory** required on the I/O rank to
 hold the entire frame buffer while it is writing, plus the engineering effort
 to separate the gather and write steps currently fused inside `SPMD_GATHERF`,
 `SPMD_GATHERITAB`, and the FVB routines.
+
+---
+
+## Concrete async design using the existing spmd_mod infrastructure
+
+This section describes a concrete implementation plan using the wrappers
+already available in `engine/source/mpi/spmd_mod.F90`.
+
+### Available non-blocking primitives
+
+`spmd_mod` re-exports the following relevant wrappers (all accept an optional
+`comm` argument defaulting to `SPMD_COMM_WORLD`):
+
+| Wrapper | Underlying MPI call | Signature |
+|---------|---------------------|-----------|
+| `spmd_isend` | `MPI_Isend` | `(buf, buf_count, dest, tag, request [,comm])` |
+| `spmd_irecv` | `MPI_Irecv` | `(buf, buf_count, source, tag, request [,comm])` |
+| `spmd_wait`  | `MPI_Wait`  | `(request [,status])` |
+| `spmd_waitall` | `MPI_Waitall` | `(count, requests [,statuses])` |
+| `spmd_waitany` | `MPI_Waitany` | `(count, requests, index [,status])` |
+| `spmd_barrier` | `MPI_Barrier` | `([comm])` |
+
+All are overloaded for `real`, `integer`, `double precision` arrays and scalars.
+
+### Rank numbering with a dedicated I/O rank
+
+The current code runs `NSPMD` compute processes (ISPMD 0 … NSPMD-1).
+`IT_SPMD(I)` is the MPI rank of the I-th SPMD process (1-based index).
+`IT_SPMD(1)` is the MPI rank of ISPMD==0 (master).
+
+With a dedicated I/O rank the job is launched with **NSPMD+1** MPI processes.
+The last process (`MPI rank = NSPMD`) becomes the I/O rank; it is not part
+of the domain decomposition and has no finite-element arrays.
+
+```
+NSPMD  = N     (compute ranks, ISPMD 0..N-1, MPI ranks IT_SPMD(1)..IT_SPMD(N))
+IO_RANK = N    (MPI rank of the I/O process, constant known to all ranks)
+```
+
+A new integer parameter `IO_RANK = NSPMD` can be stored in a module so all
+animation routines can address it without hard-coding.
+
+### Protocol: frame lifecycle
+
+Three control messages (small integer tags distinct from the data tags) govern
+the frame lifecycle.  Suggested tag constants:
+
+```fortran
+integer, parameter :: TAG_ANIM_START  = 9001  ! rank 0 → I/O rank: "frame coming"
+integer, parameter :: TAG_ANIM_DONE   = 9002  ! I/O rank → rank 0: "write complete"
+integer, parameter :: TAG_ANIM_STOP   = 9003  ! rank 0 → I/O rank: "simulation ended"
+```
+
+The `TAG_ANIM_START` message carries a single integer: the total number of
+data messages the I/O rank should expect in this frame (so it knows when it
+has received everything).
+
+### Compute-rank side changes
+
+#### In `SORTIE_MAIN` / `resol.F` (where GENANI is triggered)
+
+Replace the blocking call to `SORTIE_MAIN` → `GENANI` with:
+
+1. **Rank 0 only**: before entering `GENANI`, send the start signal to the I/O
+   rank using `spmd_isend`.  The integer payload is the expected message count.
+2. All compute ranks call a new `GENANI_ASYNC` which packs and sends all data,
+   then returns immediately.
+3. Compute ranks save the array of outstanding `request` handles in a
+   module-level array.
+4. At the next animation trigger (or at end-of-simulation), call
+   `spmd_waitall` on those handles before sending the next frame.  This is the
+   only synchronisation point on the compute side.
+
+```fortran
+! Pseudocode in resol.F / sortie_main.F
+if (need_animation) then
+  ! Wait for previous frame's sends to complete (handles from last time)
+  if (num_anim_requests > 0) then
+    call spmd_waitall(num_anim_requests, anim_requests)
+    num_anim_requests = 0
+  end if
+  if (ISPMD == 0) then
+    call spmd_isend(expected_msg_count, 1, IO_RANK, TAG_ANIM_START, req_ctrl)
+    call spmd_wait(req_ctrl)
+  end if
+  call GENANI_ASYNC(..., anim_requests, num_anim_requests)
+  ! return immediately — I/O rank now owns the data
+end if
+```
+
+#### New `SPMD_GATHERF_ISEND` (replaces `SPMD_GATHERF` on compute ranks)
+
+```fortran
+! engine/source/mpi/anim/spmd_gatherf_isend.F90
+subroutine SPMD_GATHERF_ISEND(V, WEIGHT, NODGLOB, requests, nreq)
+  use spmd_mod, only: spmd_isend
+  ! ... includes ...
+  integer, intent(inout) :: requests(:)   ! grows per call
+  integer, intent(inout) :: nreq
+
+  ! Pack (same logic as current SPMD_GATHERF worker branch)
+  SIZ = 0
+  do I = 1, NUMNOD
+    if (WEIGHT(I) == 1) then
+      SIZ = SIZ + 1
+      IBUF(SIZ) = NODGLOB(I)
+      BUFSR(SIZ) = V(I)
+    end if
+  end do
+
+  ! Non-blocking sends to I/O rank (IO_RANK) instead of rank 0
+  nreq = nreq + 1
+  call spmd_isend(IBUF,  SIZ, IO_RANK, TAG_ANIM_IDX,  requests(nreq))
+  nreq = nreq + 1
+  call spmd_isend(BUFSR, SIZ, IO_RANK, TAG_ANIM_REAL, requests(nreq))
+
+  ! BUFSR and IBUF must remain valid until spmd_waitall is called.
+  ! They are local allocations, so they must be promoted to a persistent
+  ! module-level buffer (double-buffered if needed).
+end subroutine
+```
+
+**Important**: `BUFSR` and `IBUF` are currently stack-allocated inside
+`SPMD_GATHERF` and freed before the routine returns.  For non-blocking sends
+the MPI standard requires the buffer to remain valid until `MPI_Wait`
+completes.  They must therefore be promoted to **module-level persistent
+allocations**, sized `NUMNODM`, and managed with a double-buffer (ping-pong)
+so that frame N+1 packing does not overwrite frame N's in-flight buffers.
+
+### I/O rank side: dedicated event loop
+
+The I/O rank runs a simple event loop instead of the normal `resol` timestep.
+It lives in a new subroutine, e.g. `ANIM_IO_RANK_LOOP`, called from
+`radioss2.F` when `ISPMD == NSPMD`:
+
+```fortran
+! Pseudocode for the I/O rank loop
+subroutine ANIM_IO_RANK_LOOP(NSPMD, NUMNODG, ...)
+  use spmd_mod, only: spmd_irecv, spmd_waitany, spmd_recv, spmd_send
+  integer :: ctrl_msg, completed, frame_count
+  real,    allocatable :: XGLOB_R(:)
+  integer, allocatable :: XGLOB_I(:)
+  integer, allocatable :: recv_req(:,:)   ! (2, NSPMD) — idx + val per rank
+
+  allocate(XGLOB_R(NUMNODG), XGLOB_I(NUMNODG))
+  allocate(recv_req(2, NSPMD))
+
+  do   ! event loop
+    ! 1. Wait for frame-start signal from rank 0
+    call spmd_recv(ctrl_msg, 1, rank0, TAG_ANIM_START)
+    if (ctrl_msg == TAG_ANIM_STOP) exit
+
+    ! expected_msgs = ctrl_msg (number of (idx,val) pairs to receive)
+    ! 2. Open animation file, write header (rank 0 sent header metadata too)
+    call OPEN_C(...)
+    call WRITE_header(...)
+
+    ! 3. For each field variable (the I/O rank knows the variable list
+    !    because GENANI_ASYNC sends a small descriptor first):
+    do var = 1, num_vars
+      XGLOB_R = 1.0e6   ! sentinel
+
+      ! Post irecv for all compute ranks simultaneously
+      do I = 1, NSPMD
+        call spmd_irecv(IBUF_R(I)%idx,  IBUF_R(I)%siz, IT_SPMD(I), TAG_ANIM_IDX,  recv_req(1,I))
+        call spmd_irecv(IBUF_R(I)%vals, IBUF_R(I)%siz, IT_SPMD(I), TAG_ANIM_REAL, recv_req(2,I))
+      end do
+
+      ! Process completions as they arrive (spmd_waitany)
+      do cnt = 1, NSPMD
+        call spmd_waitany(NSPMD, recv_req(1,:), completed)
+        I = completed
+        call spmd_wait(recv_req(2,I))   ! matching value buffer
+        ! Scatter into global array
+        do K = 1, IBUF_R(I)%siz
+          XGLOB_R(IBUF_R(I)%idx(K)) = IBUF_R(I)%vals(K)
+        end do
+      end do
+
+      call WRITE_R_C(XGLOB_R, NUMNODG)
+    end do
+
+    call CLOSE_C(...)
+  end do
+end subroutine
+```
+
+Using `spmd_waitany` means the I/O rank can process and scatter data from each
+compute rank as soon as it arrives, without waiting for the slowest sender.
+
+### Buffer size concern (I/O rank)
+
+The I/O rank must pre-allocate receive buffers of size `NUMNODM` per rank per
+variable.  Since `NUMNODM` is the maximum local node count and is broadcast to
+all ranks during initialisation (it is in `com04_c.inc` / `com01_c.inc`), the
+I/O rank can query it with a small `spmd_recv` during initialisation.
+
+Alternative: use `MPI_Probe` + `MPI_Get_count` as the current code does, which
+avoids pre-allocation but breaks full non-blocking receive.  The recommended
+approach is to pre-allocate.
+
+### Tags for variable-typed data
+
+Each call to `SPMD_GATHERF` currently uses the same tags (7014/7015).  With
+async sends, in-flight messages from different variables must not interfere.
+Options:
+
+1. **Sequential discipline** (simplest): the I/O rank processes one variable
+   at a time, posting all `NSPMD` receives for variable N before moving to N+1.
+   Tags can remain 7014/7015 because the ordering is enforced by the I/O rank's
+   loop structure.
+2. **Variable-indexed tags**: encode the variable index into the tag, e.g.
+   `TAG = 7000 + var_index * 2`. This allows the I/O rank to receive
+   out-of-order but requires a larger tag space.
+
+Option 1 is strongly recommended as the first implementation.
+
+### Summary of file changes required
+
+| File | Change |
+|------|--------|
+| `engine/source/mpi/anim/spmd_gatherf.F` | Add `SPMD_GATHERF_ISEND` variant; keep original for serial path |
+| `engine/source/mpi/anim/spmd_gatheritab.F` | Same — add `SPMD_GATHERITAB_ISEND` variant |
+| `engine/source/output/anim/generate/genani.F` | Add `GENANI_ASYNC` wrapper; replace `SPMD_GATHERF` calls with `SPMD_GATHERF_ISEND` inside it |
+| `engine/source/output/sortie_main.F` | Manage `anim_requests` array; send `TAG_ANIM_START` to I/O rank |
+| `engine/source/engine/resol.F` | Call `spmd_waitall` before next animation trigger; call `ANIM_IO_RANK_LOOP` for I/O rank |
+| `engine/source/engine/radioss2.F` | Fork I/O rank into `ANIM_IO_RANK_LOOP` at startup |
+| New: `engine/source/mpi/anim/anim_io_rank_mod.F90` | I/O rank event loop and persistent buffer management |
+
+### Relationship to FVB (Flexible Volume Bag) routines
+
+The FVB routines (`SPMD_FVB_AVEC`, `SPMD_FVB_ANOD`, …) use a delegation
+pattern where a designated `PMAIN` process owns each bag and sends data to
+rank 0.  For the async design, `PMAIN` would send to `IO_RANK` instead.
+Since `PMAIN` may equal rank 0, the delegation logic is unchanged; only the
+destination rank identifier changes from `IT_SPMD(1)` to `IT_SPMD(IO_RANK+1)`.
+
+### Correctness requirements
+
+1. **No compute-rank blocking**: `GENANI_ASYNC` must return before any
+   `spmd_wait` on the compute side.  All waits happen at the start of the
+   *next* animation cycle.
+2. **I/O rank completeness**: the I/O rank must receive exactly the number of
+   messages announced in `TAG_ANIM_START`.  A mismatch causes deadlock; add
+   an assertion in debug mode.
+3. **End-of-simulation flush**: at `TSTOP`, compute ranks call `spmd_waitall`
+   on any outstanding animation sends, then rank 0 sends `TAG_ANIM_STOP` to
+   the I/O rank before calling `MPI_Finalize`.
+4. **NSPMD consistency**: within the domain-decomposition code, `NSPMD` still
+   equals the number of compute ranks.  The I/O rank is invisible to all
+   existing SPMD communication (force exchange, contact, etc.) because it
+   does not participate in `SPMD_COMM_WORLD` for those operations — it only
+   shares `SPMD_COMM_WORLD` for the animation messages.
