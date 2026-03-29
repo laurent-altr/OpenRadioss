@@ -30,20 +30,21 @@
 !||    selects the correct specific routine based on the number and
 !||    types of the arguments:
 !||
-!||      call stlsort(len, array)          – sort real(WP) array
-!||      call stlsort(len, keys, values)   – sort key-value pairs:
-!||            integer keys  + integer values  → stlsort_int_int
-!||            real(WP) keys + integer values  → stlsort_real_int
-!||            real(WP) keys + real(WP) values → stlsort_real_real
+!||      call stlsort(len, array)           – sort real or double precision array
+!||      call stlsort(len, keys, values)    – sort key-value pairs:
+!||            integer        keys + integer        values
+!||            real           keys + integer        values
+!||            double prec.   keys + integer        values
+!||            real           keys + real           values
+!||            double prec.   keys + double prec.   values
 !||
-!||    iso_c_binding is used throughout so no name-mangling variants
+!||    iso_c_binding is used throughout; no name-mangling variants
 !||    are needed in the C++ translation unit.
 !||====================================================================
 
       module cppsort_mod
 
-        use iso_c_binding, only : c_int
-        use precision_mod,  only : WP
+        use iso_c_binding, only : c_int, c_float, c_double
         implicit none
         private
 
@@ -51,16 +52,22 @@
 
 ! ----------------------------------------------------------------------------------------------------------------------
 !  iso_c_binding declarations – private, implementation detail
-!  bind(C, name='...') pins the exact C symbol; the Fortran compiler
-!  never mangles these names.
 ! ----------------------------------------------------------------------------------------------------------------------
 
         interface
-          subroutine c_stlsort(len, array) bind(C, name='stlsort')
-            import :: c_int, WP
+          subroutine c_stlsort_float(len, array) &
+              bind(C, name='stlsort_float')
+            import :: c_int, c_float
             integer(c_int), intent(in)    :: len
-            real(WP),       intent(inout) :: array(*)
-          end subroutine c_stlsort
+            real(c_float),  intent(inout) :: array(*)
+          end subroutine c_stlsort_float
+
+          subroutine c_stlsort_double(len, array) &
+              bind(C, name='stlsort_double')
+            import :: c_int, c_double
+            integer(c_int),  intent(in)    :: len
+            real(c_double),  intent(inout) :: array(*)
+          end subroutine c_stlsort_double
 
           subroutine c_stlsort_int_int(len, keys, values) &
               bind(C, name='stlsort_int_int')
@@ -70,21 +77,37 @@
             integer(c_int), intent(inout) :: values(*)
           end subroutine c_stlsort_int_int
 
-          subroutine c_stlsort_real_int(len, keys, values) &
-              bind(C, name='stlsort_real_int')
-            import :: c_int, WP
+          subroutine c_stlsort_float_int(len, keys, values) &
+              bind(C, name='stlsort_float_int')
+            import :: c_int, c_float
             integer(c_int), intent(in)    :: len
-            real(WP),       intent(inout) :: keys(*)
+            real(c_float),  intent(inout) :: keys(*)
             integer(c_int), intent(inout) :: values(*)
-          end subroutine c_stlsort_real_int
+          end subroutine c_stlsort_float_int
 
-          subroutine c_stlsort_real_real(len, keys, values) &
-              bind(C, name='stlsort_real_real')
-            import :: c_int, WP
+          subroutine c_stlsort_double_int(len, keys, values) &
+              bind(C, name='stlsort_double_int')
+            import :: c_int, c_double
             integer(c_int), intent(in)    :: len
-            real(WP),       intent(inout) :: keys(*)
-            real(WP),       intent(inout) :: values(*)
-          end subroutine c_stlsort_real_real
+            real(c_double), intent(inout) :: keys(*)
+            integer(c_int), intent(inout) :: values(*)
+          end subroutine c_stlsort_double_int
+
+          subroutine c_stlsort_float_float(len, keys, values) &
+              bind(C, name='stlsort_float_float')
+            import :: c_int, c_float
+            integer(c_int), intent(in)    :: len
+            real(c_float),  intent(inout) :: keys(*)
+            real(c_float),  intent(inout) :: values(*)
+          end subroutine c_stlsort_float_float
+
+          subroutine c_stlsort_double_double(len, keys, values) &
+              bind(C, name='stlsort_double_double')
+            import :: c_int, c_double
+            integer(c_int), intent(in)    :: len
+            real(c_double), intent(inout) :: keys(*)
+            real(c_double), intent(inout) :: values(*)
+          end subroutine c_stlsort_double_double
         end interface
 
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -92,21 +115,30 @@
 ! ----------------------------------------------------------------------------------------------------------------------
 
         interface stlsort
-          module procedure f_stlsort
+          module procedure f_stlsort_float
+          module procedure f_stlsort_double
           module procedure f_stlsort_int_int
-          module procedure f_stlsort_real_int
-          module procedure f_stlsort_real_real
+          module procedure f_stlsort_float_int
+          module procedure f_stlsort_double_int
+          module procedure f_stlsort_float_float
+          module procedure f_stlsort_double_double
         end interface stlsort
 
       contains
 
 ! ----------------------------------------------------------------------------------------------------------------------
 
-        subroutine f_stlsort(len, array)
+        subroutine f_stlsort_float(len, array)
           integer(c_int), intent(in)    :: len
-          real(WP),       intent(inout) :: array(*)
-          call c_stlsort(len, array)
-        end subroutine f_stlsort
+          real(c_float),  intent(inout) :: array(*)
+          call c_stlsort_float(len, array)
+        end subroutine f_stlsort_float
+
+        subroutine f_stlsort_double(len, array)
+          integer(c_int),  intent(in)    :: len
+          real(c_double),  intent(inout) :: array(*)
+          call c_stlsort_double(len, array)
+        end subroutine f_stlsort_double
 
 ! ----------------------------------------------------------------------------------------------------------------------
 
@@ -119,20 +151,34 @@
 
 ! ----------------------------------------------------------------------------------------------------------------------
 
-        subroutine f_stlsort_real_int(len, keys, values)
+        subroutine f_stlsort_float_int(len, keys, values)
           integer(c_int), intent(in)    :: len
-          real(WP),       intent(inout) :: keys(*)
+          real(c_float),  intent(inout) :: keys(*)
           integer(c_int), intent(inout) :: values(*)
-          call c_stlsort_real_int(len, keys, values)
-        end subroutine f_stlsort_real_int
+          call c_stlsort_float_int(len, keys, values)
+        end subroutine f_stlsort_float_int
+
+        subroutine f_stlsort_double_int(len, keys, values)
+          integer(c_int), intent(in)    :: len
+          real(c_double), intent(inout) :: keys(*)
+          integer(c_int), intent(inout) :: values(*)
+          call c_stlsort_double_int(len, keys, values)
+        end subroutine f_stlsort_double_int
 
 ! ----------------------------------------------------------------------------------------------------------------------
 
-        subroutine f_stlsort_real_real(len, keys, values)
+        subroutine f_stlsort_float_float(len, keys, values)
           integer(c_int), intent(in)    :: len
-          real(WP),       intent(inout) :: keys(*)
-          real(WP),       intent(inout) :: values(*)
-          call c_stlsort_real_real(len, keys, values)
-        end subroutine f_stlsort_real_real
+          real(c_float),  intent(inout) :: keys(*)
+          real(c_float),  intent(inout) :: values(*)
+          call c_stlsort_float_float(len, keys, values)
+        end subroutine f_stlsort_float_float
+
+        subroutine f_stlsort_double_double(len, keys, values)
+          integer(c_int), intent(in)    :: len
+          real(c_double), intent(inout) :: keys(*)
+          real(c_double), intent(inout) :: values(*)
+          call c_stlsort_double_double(len, keys, values)
+        end subroutine f_stlsort_double_double
 
       end module cppsort_mod

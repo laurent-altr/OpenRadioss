@@ -22,18 +22,12 @@
 //Copyright>    commercial version may interest you: https://www.altair.com/radioss/.
 
 // C++ wrappers around STL sort, callable from Fortran via iso_c_binding.
-// Only canonical (no-underscore) symbols are exported; name mangling is
-// handled entirely on the Fortran side through bind(C, name='...').
+// Both float and double variants are provided explicitly so callers are
+// not limited to a single precision configured at compile time.
 
 #include <algorithm>
 #include <utility>
 #include <vector>
-
-#ifdef MYREAL8
-#define my_real double
-#else
-#define my_real float
-#endif
 
 // ---------------------------------------------------------------------------
 // Internal generic key-value sort
@@ -63,28 +57,40 @@ static void stlsort_kv_impl(int n, K *keys, V *values)
 
 extern "C" {
 
-// Sort a real array in ascending order
-void stlsort(int *len, my_real *array)
-{
-    std::sort(array, array + *len);
-}
+// --- sort a plain array ------------------------------------------------------
 
-// Sort integer keys, carrying integer values
+void stlsort_float (int *len, float  *array) { std::sort(array, array + *len); }
+void stlsort_double(int *len, double *array) { std::sort(array, array + *len); }
+
+// --- sort integer keys, carrying integer values ------------------------------
+
 void stlsort_int_int(int *len, int *keys, int *values)
 {
     stlsort_kv_impl<int, int>(*len, keys, values);
 }
 
-// Sort real keys, carrying integer values
-void stlsort_real_int(int *len, my_real *keys, int *values)
+// --- sort float/double keys, carrying integer values ------------------------
+
+void stlsort_float_int(int *len, float *keys, int *values)
 {
-    stlsort_kv_impl<my_real, int>(*len, keys, values);
+    stlsort_kv_impl<float, int>(*len, keys, values);
 }
 
-// Sort real keys, carrying real values
-void stlsort_real_real(int *len, my_real *keys, my_real *values)
+void stlsort_double_int(int *len, double *keys, int *values)
 {
-    stlsort_kv_impl<my_real, my_real>(*len, keys, values);
+    stlsort_kv_impl<double, int>(*len, keys, values);
+}
+
+// --- sort float/double keys, carrying float/double values -------------------
+
+void stlsort_float_float(int *len, float *keys, float *values)
+{
+    stlsort_kv_impl<float, float>(*len, keys, values);
+}
+
+void stlsort_double_double(int *len, double *keys, double *values)
+{
+    stlsort_kv_impl<double, double>(*len, keys, values);
 }
 
 } // extern "C"
