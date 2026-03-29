@@ -25,16 +25,19 @@
 !||    cppsort_mod   ../common_source/tools/sort/cppsort.F90
 !||--- Description -------------------------------------------------
 !||    Fortran interface to the C++ STL-sort wrappers in cppsort.cpp.
-!||    Uses iso_c_binding so the correct C symbol is resolved at link
-!||    time regardless of the Fortran compiler's name-mangling scheme.
 !||
-!||    Available procedures:
-!||      stlsort          – sort a real(WP) array in ascending order
-!||      stlsort_int_int  – sort integer keys, carrying integer values
-!||      stlsort_real_int – sort real(WP) keys, carrying integer values
-!||      stlsort_real_real– sort real(WP) keys, carrying real(WP) values
-!||      stlsort_kv       – generic: dispatches to one of the three
-!||                         key-value variants based on argument types
+!||    A single generic name  stlsort  is provided; the compiler
+!||    selects the correct specific routine based on the number and
+!||    types of the arguments:
+!||
+!||      call stlsort(len, array)          – sort real(WP) array
+!||      call stlsort(len, keys, values)   – sort key-value pairs:
+!||            integer keys  + integer values  → stlsort_int_int
+!||            real(WP) keys + integer values  → stlsort_real_int
+!||            real(WP) keys + real(WP) values → stlsort_real_real
+!||
+!||    iso_c_binding is used throughout so no name-mangling variants
+!||    are needed in the C++ translation unit.
 !||====================================================================
 
       module cppsort_mod
@@ -45,65 +48,91 @@
         private
 
         public :: stlsort
-        public :: stlsort_int_int
-        public :: stlsort_real_int
-        public :: stlsort_real_real
-        public :: stlsort_kv
 
 ! ----------------------------------------------------------------------------------------------------------------------
-!  iso_c_binding interface declarations
-!  Each bind(C, name='...') points to the canonical (no-underscore) symbol
-!  in cppsort.cpp, bypassing any compiler-specific name mangling.
+!  iso_c_binding declarations – private, implementation detail
+!  bind(C, name='...') pins the exact C symbol; the Fortran compiler
+!  never mangles these names.
 ! ----------------------------------------------------------------------------------------------------------------------
 
         interface
-
-          !> Sort a real array of length \p len in ascending order.
-          subroutine stlsort(len, array) bind(C, name='stlsort')
+          subroutine c_stlsort(len, array) bind(C, name='stlsort')
             import :: c_int, WP
             integer(c_int), intent(in)    :: len
             real(WP),       intent(inout) :: array(*)
-          end subroutine stlsort
+          end subroutine c_stlsort
 
-          !> Sort integer \p keys ascending; \p values are reordered accordingly.
-          subroutine stlsort_int_int(len, keys, values) &
+          subroutine c_stlsort_int_int(len, keys, values) &
               bind(C, name='stlsort_int_int')
             import :: c_int
             integer(c_int), intent(in)    :: len
             integer(c_int), intent(inout) :: keys(*)
             integer(c_int), intent(inout) :: values(*)
-          end subroutine stlsort_int_int
+          end subroutine c_stlsort_int_int
 
-          !> Sort real \p keys ascending; integer \p values are reordered accordingly.
-          subroutine stlsort_real_int(len, keys, values) &
+          subroutine c_stlsort_real_int(len, keys, values) &
               bind(C, name='stlsort_real_int')
             import :: c_int, WP
             integer(c_int), intent(in)    :: len
             real(WP),       intent(inout) :: keys(*)
             integer(c_int), intent(inout) :: values(*)
-          end subroutine stlsort_real_int
+          end subroutine c_stlsort_real_int
 
-          !> Sort real \p keys ascending; real \p values are reordered accordingly.
-          subroutine stlsort_real_real(len, keys, values) &
+          subroutine c_stlsort_real_real(len, keys, values) &
               bind(C, name='stlsort_real_real')
             import :: c_int, WP
             integer(c_int), intent(in)    :: len
             real(WP),       intent(inout) :: keys(*)
             real(WP),       intent(inout) :: values(*)
-          end subroutine stlsort_real_real
-
+          end subroutine c_stlsort_real_real
         end interface
 
 ! ----------------------------------------------------------------------------------------------------------------------
-!  Generic interface: stlsort_kv(len, keys, values)
-!  The compiler selects the specific subroutine based on the types of
-!  keys and values – no explicit function suffix required at call sites.
+!  Generic public interface – single name stlsort, dispatch by signature
 ! ----------------------------------------------------------------------------------------------------------------------
 
-        interface stlsort_kv
-          procedure :: stlsort_int_int
-          procedure :: stlsort_real_int
-          procedure :: stlsort_real_real
-        end interface stlsort_kv
+        interface stlsort
+          module procedure f_stlsort
+          module procedure f_stlsort_int_int
+          module procedure f_stlsort_real_int
+          module procedure f_stlsort_real_real
+        end interface stlsort
+
+      contains
+
+! ----------------------------------------------------------------------------------------------------------------------
+
+        subroutine f_stlsort(len, array)
+          integer(c_int), intent(in)    :: len
+          real(WP),       intent(inout) :: array(*)
+          call c_stlsort(len, array)
+        end subroutine f_stlsort
+
+! ----------------------------------------------------------------------------------------------------------------------
+
+        subroutine f_stlsort_int_int(len, keys, values)
+          integer(c_int), intent(in)    :: len
+          integer(c_int), intent(inout) :: keys(*)
+          integer(c_int), intent(inout) :: values(*)
+          call c_stlsort_int_int(len, keys, values)
+        end subroutine f_stlsort_int_int
+
+! ----------------------------------------------------------------------------------------------------------------------
+
+        subroutine f_stlsort_real_int(len, keys, values)
+          integer(c_int), intent(in)    :: len
+          real(WP),       intent(inout) :: keys(*)
+          integer(c_int), intent(inout) :: values(*)
+          call c_stlsort_real_int(len, keys, values)
+        end subroutine f_stlsort_real_int
+
+! ----------------------------------------------------------------------------------------------------------------------
+
+        subroutine f_stlsort_real_real(len, keys, values)
+          integer(c_int), intent(in)    :: len
+          real(WP),       intent(inout) :: keys(*)
+          real(WP),       intent(inout) :: values(*)
+          call c_stlsort_real_real(len, keys, values)
+        end subroutine f_stlsort_real_real
 
       end module cppsort_mod

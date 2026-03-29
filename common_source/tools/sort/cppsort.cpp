@@ -21,13 +21,9 @@
 //Copyright>    software under a commercial license.  Contact Altair to discuss further if the
 //Copyright>    commercial version may interest you: https://www.altair.com/radioss/.
 
-// C++ wrappers around STL sort, callable from Fortran.
-//
-// Canonical entry points (no trailing underscores) are the authoritative
-// implementations used by the cppsort_mod Fortran module via iso_c_binding.
-// Legacy mangled names (single/double underscore, uppercase) are thin
-// wrappers kept for backward compatibility with Fortran callers that do
-// not use the module.
+// C++ wrappers around STL sort, callable from Fortran via iso_c_binding.
+// Only canonical (no-underscore) symbols are exported; name mangling is
+// handled entirely on the Fortran side through bind(C, name='...').
 
 #include <algorithm>
 #include <utility>
@@ -40,7 +36,7 @@
 #endif
 
 // ---------------------------------------------------------------------------
-// Internal generic implementation
+// Internal generic key-value sort
 // ---------------------------------------------------------------------------
 
 template<typename K, typename V>
@@ -62,7 +58,7 @@ static void stlsort_kv_impl(int n, K *keys, V *values)
 }
 
 // ---------------------------------------------------------------------------
-// Canonical extern "C" entry points  (used by cppsort_mod via iso_c_binding)
+// Public C interface  (consumed by cppsort_mod via iso_c_binding)
 // ---------------------------------------------------------------------------
 
 extern "C" {
@@ -90,29 +86,5 @@ void stlsort_real_real(int *len, my_real *keys, my_real *values)
 {
     stlsort_kv_impl<my_real, my_real>(*len, keys, values);
 }
-
-// ---------------------------------------------------------------------------
-// Legacy mangled names for Fortran callers without iso_c_binding
-// ---------------------------------------------------------------------------
-
-void stlsort_(int *len, my_real *array)           { stlsort(len, array); }
-void stlsort__(int *len, my_real *array)           { stlsort(len, array); }
-void STLSORT(int *len, my_real *array)             { stlsort(len, array); }
-void STLSORT_(int *len, my_real *array)            { stlsort(len, array); }
-
-void stlsort_int_int_(int *len, int *k, int *v)   { stlsort_int_int(len, k, v); }
-void stlsort_int_int__(int *len, int *k, int *v)  { stlsort_int_int(len, k, v); }
-void STLSORT_INT_INT(int *len, int *k, int *v)    { stlsort_int_int(len, k, v); }
-void STLSORT_INT_INT_(int *len, int *k, int *v)   { stlsort_int_int(len, k, v); }
-
-void stlsort_real_int_(int *len, my_real *k, int *v)  { stlsort_real_int(len, k, v); }
-void stlsort_real_int__(int *len, my_real *k, int *v) { stlsort_real_int(len, k, v); }
-void STLSORT_REAL_INT(int *len, my_real *k, int *v)   { stlsort_real_int(len, k, v); }
-void STLSORT_REAL_INT_(int *len, my_real *k, int *v)  { stlsort_real_int(len, k, v); }
-
-void stlsort_real_real_(int *len, my_real *k, my_real *v)  { stlsort_real_real(len, k, v); }
-void stlsort_real_real__(int *len, my_real *k, my_real *v) { stlsort_real_real(len, k, v); }
-void STLSORT_REAL_REAL(int *len, my_real *k, my_real *v)   { stlsort_real_real(len, k, v); }
-void STLSORT_REAL_REAL_(int *len, my_real *k, my_real *v)  { stlsort_real_real(len, k, v); }
 
 } // extern "C"
