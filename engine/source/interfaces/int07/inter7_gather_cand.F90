@@ -20,22 +20,15 @@
 !Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 !Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 !Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
-!||====================================================================
-!||    inter7_gather_cand_mod   ../engine/source/interfaces/int07/inter7_gather_cand.F90
-!||--- called by ------------------------------------------------------
-!||    inter7_filter_cand       ../engine/source/interfaces/intsort/inter7_filter_cand.F90
-!||====================================================================
+!hd|====================================================================
+!hd|  INTER7_GATHER_CAND_MOD        source/interfaces/int07/inter7_gather_cand.F
+!hd|-- called by -----------
+!hd|        INTER7_FILTER_CAND            source/interfaces/intsort/inter7_filter_cand.F
+!hd|-- calls ---------------
+!hd|        COLLISION_MOD                 source/interfaces/intsort/collision_mod.F
+!hd|====================================================================
       MODULE INTER7_GATHER_CAND_MOD
-      implicit none
       CONTAINS
-!||====================================================================
-!||    inter7_gather_cand   ../engine/source/interfaces/int07/inter7_gather_cand.F90
-!||--- called by ------------------------------------------------------
-!||    inter7_filter_cand   ../engine/source/interfaces/intsort/inter7_filter_cand.F90
-!||--- uses       -----------------------------------------------------
-!||    collision_mod        ../engine/source/interfaces/intsort/collision_mod.F
-!||    precision_mod        ../common_source/modules/precision_mod.F90
-!||====================================================================
         subroutine inter7_gather_cand(jlt     ,x     ,irect ,nsv   ,cand_e ,&
         &cand_n  ,igap  ,gap   ,x1    ,x2     ,&
         &x3      ,x4    ,y1    ,y2    ,y3     ,&
@@ -45,81 +38,77 @@
         &gap_m   ,gapv  ,gapmax,gapmin,curv_max,&
         &ityp    ,gap_s_l,gap_m_l,&
         &drad    ,dgapload, nsnr,&
-        &s_xrem, xrem, nrtm,mulnsn,numnod)
-          USE COLLISION_MOD ,  ONLY : GROUP_SIZE
-          USE PRECISION_MOD, ONLY : WP
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                 implicit none
-! ----------------------------------------------------------------------------------------------------------------------
+        &s_xrem, xrem)
+          use precision_mod, only : WP
           implicit none
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                   arguments
-! ----------------------------------------------------------------------------------------------------------------------
+! defines real(WP) as DOUBLE PRECISION or REAL
+!-----------------------------------------------
+!   D u m m y   A r g u m e n t s
+!-----------------------------------------------
           integer, intent(in), value :: jlt !< number of secondary nodes to be checked
           integer, intent(in), value :: nsn !< number of secondary nodes
           integer, intent(in), value :: ityp !< contact interface type
-          integer, intent(in), value :: nrtm !< number of main segments
-          integer, intent(in), value :: mulnsn !< number of collision candidates
-          integer, intent(in), value :: numnod  !< number of nodes
 
-          integer, intent(in) :: irect(4,nrtm) !< irect(1:4,i) contains the node id of the i-th main segment
-          integer, intent(in) :: nsv(nsn)     !< nsv(i) contains the id of the i-th secondary node
-          integer, intent(inout) :: cand_e(mulnsn)  !< cand_e(i) contains the id of the main segment of the i-th pair of collision candidates
-          integer, intent(inout) :: cand_n(mulnsn)  !< cand_n(i) contains the id of the secondary node of the i-th pair of collision candidates
+          integer, intent(in) :: irect(4,*) !< irect(1:4,i) contains the node id of the i-th main segment
+          integer, intent(in) :: nsv(*)     !< nsv(i) contains the id of the i-th secondary node
+          integer, intent(inout) :: cand_e(*)  !< cand_e(i) contains the id of the main segment of the i-th pair of collision candidates
+          integer, intent(inout) :: cand_n(*)  !< cand_n(i) contains the id of the secondary node of the i-th pair of collision candidates
           integer, intent(in), value :: igap       !< flag for gap formulation
 
-          real(kind=WP), intent(in) :: x(3,numnod)     !< x(1:3,i) contains the coordinates of the i-th node
-          real(kind=WP), intent(inout) :: gapv(nsn) !< gap per secondary node, may be variable depending on the gap formulation
-          real(kind=WP), intent(in) :: gap_s(nsn)   !< gap of the secondary nodes
-          real(kind=WP), intent(in) :: gap_m(nrtm) !< gap of the main segments
-          real(kind=WP), intent(in) :: curv_max(nrtm) !< maximum curvature of the main segments
-          real(kind=WP), intent(in), value :: gap !< initial gap
-          real(kind=WP), intent(in), value :: gapmax !< maximum gap
-          real(kind=WP), intent(in), value :: gapmin !< minimum gap
+          real(WP), intent(in) :: x(3,*)     !< x(1:3,i) contains the coordinates of the i-th node
+          real(WP), intent(inout) :: gapv(*) !< gap per secondary node, may be variable depending on the gap formulation
+          real(WP), intent(in) :: gap_s(*)
+          real(WP), intent(in) :: gap_m(*)
+          real(WP), intent(in) :: curv_max(*)
+          real(WP), intent(in), value :: gap
+          real(WP), intent(in), value :: gapmax
+          real(WP), intent(in), value :: gapmin
 
-          real(kind=WP), intent(in), value :: dgapload !< ??
-          real(kind=WP), intent(in), value :: drad !< radiation gap
+          real(WP), intent(in), value :: dgapload
+          real(WP), intent(in), value :: drad
 
-          real(kind=WP), intent(inout) :: x1(GROUP_SIZE)    !<x coordinate of the first node of the main segment
-          real(kind=WP), intent(inout) :: x2(GROUP_SIZE)    !<x coordinate of the second node of the main segment
-          real(kind=WP), intent(inout) :: x3(GROUP_SIZE)    !<x coordinate of the third node of the main segment
-          real(kind=WP), intent(inout) :: x4(GROUP_SIZE)    !<x coordinate of the fourth node of the main segment
-          real(kind=WP), intent(inout) :: y1(GROUP_SIZE)    !<y coordinate of the first node of the main segment
-          real(kind=WP), intent(inout) :: y2(GROUP_SIZE)    !<y coordinate of the second node of the main segment
-          real(kind=WP), intent(inout) :: y3(GROUP_SIZE)    !<y coordinate of the third node of the main segment
-          real(kind=WP), intent(inout) :: y4(GROUP_SIZE)    !<y coordinate of the fourth node of the main segment
-          real(kind=WP), intent(inout) :: z1(GROUP_SIZE)    !<z coordinate of the first node of the main segment
-          real(kind=WP), intent(inout) :: z2(GROUP_SIZE)    !<z coordinate of the second node of the main segment
-          real(kind=WP), intent(inout) :: z3(GROUP_SIZE)    !<z coordinate of the third node of the main segment
-          real(kind=WP), intent(inout) :: z4(GROUP_SIZE)    !<z coordinate of the fourth node of the main segment
-          real(kind=WP), intent(inout) :: xi(GROUP_SIZE) !<x coordinate of the i-th secondary node
-          real(kind=WP), intent(inout) :: yi(GROUP_SIZE) !<y coordinate of the i-th secondary node
-          real(kind=WP), intent(inout) :: zi(GROUP_SIZE) !<z coordinate of the i-th secondary node
-          real(kind=WP), intent(in) :: gap_s_l(nsn) !< ???
-          real(kind=WP), intent(in) :: gap_m_l(nrtm) !< ???
+          real(WP), intent(inout) :: x1(jlt)    !<x coordinate of the first node of the main segment
+          real(WP), intent(inout) :: x2(jlt)    !<x coordinate of the second node of the main segment
+          real(WP), intent(inout) :: x3(jlt)    !<x coordinate of the third node of the main segment
+          real(WP), intent(inout) :: x4(jlt)    !<x coordinate of the fourth node of the main segment
+          real(WP), intent(inout) :: y1(jlt)    !<y coordinate of the first node of the main segment
+          real(WP), intent(inout) :: y2(jlt)    !<y coordinate of the second node of the main segment
+          real(WP), intent(inout) :: y3(jlt)    !<y coordinate of the third node of the main segment
+          real(WP), intent(inout) :: y4(jlt)    !<y coordinate of the fourth node of the main segment
+          real(WP), intent(inout) :: z1(jlt)    !<z coordinate of the first node of the main segment
+          real(WP), intent(inout) :: z2(jlt)    !<z coordinate of the second node of the main segment
+          real(WP), intent(inout) :: z3(jlt)    !<z coordinate of the third node of the main segment
+          real(WP), intent(inout) :: z4(jlt)    !<z coordinate of the fourth node of the main segment
+          real(WP), intent(inout) :: xi(jlt) !<x coordinate of the i-th secondary node
+          real(WP), intent(inout) :: yi(jlt) !<y coordinate of the i-th secondary node
+          real(WP), intent(inout) :: zi(jlt) !<z coordinate of the i-th secondary node
+          real(WP), intent(in) :: gap_s_l(*)
+          real(WP), intent(in) :: gap_m_l(*)
           integer, intent(in), value :: s_xrem              !< size of xrem
           integer, intent(in), value :: nsnr                !< number of remote (spmd) secondary nodes
-          real(kind=WP), intent(in) :: xrem(s_xrem, nsnr)  !< Remote (spmd) secondary data (coordinates etc.)
-          integer,intent(inout) :: ix1(GROUP_SIZE) !< list of first node of the main segments
-          integer,intent(inout) :: ix2(GROUP_SIZE) !< list of second node of the main segments
-          integer,intent(inout) :: ix3(GROUP_SIZE) !< list of third node of the main segments
-          integer,intent(inout) :: ix4(GROUP_SIZE) !< list of fourth node of the main segments
-
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                   local variables
-! ----------------------------------------------------------------------------------------------------------------------
+          real(WP), intent(in) :: xrem(s_xrem, nsnr)  !< Remote (spmd) secondary data (coordinates etc.)
+          integer,intent(inout) :: ix1(jlt)
+          integer,intent(inout) :: ix2(jlt)
+          integer,intent(inout) :: ix3(jlt)
+          integer,intent(inout) :: ix4(jlt)
+!-----------------------------------------------
+!   L o c a l   V a r i a b l e s
+!-----------------------------------------------
           integer :: i
           integer :: j
           integer :: l
           integer :: ig
           integer :: iadd
-! ----------------------------------------------------------------------------------------------------------------------
+
+!-----------------------------------------------
           if(igap==0)then
+!$ACC PARALLEL LOOP GANG VECTOR DEFAULT(PRESENT)
             do i=1,jlt
               gapv(i)=max(gap+dgapload,drad)
             end do
-          else if(igap == 3)then
+          elseif(igap == 3)then
             iadd = 9
+!$ACC PARALLEL LOOP GANG VECTOR DEFAULT(PRESENT)
             do i=1,jlt
               j = cand_n(i)
               if(j<=nsn) then
@@ -135,6 +124,7 @@
               gapv(i)=max(drad,gapv(i)+dgapload)
             end do
           else
+!$ACC PARALLEL LOOP GANG VECTOR DEFAULT(PRESENT)
             do i=1,jlt
               j = cand_n(i)
               if(j<=nsn) then
@@ -148,6 +138,7 @@
               gapv(i)=max(drad,gapv(i)+dgapload)
             end do
           end if
+!$ACC PARALLEL LOOP GANG VECTOR DEFAULT(PRESENT)
           do i=1,jlt
             j = cand_n(i)
             if(j<=nsn) then
@@ -160,7 +151,7 @@
               xi(i) = xrem(1,ig)
               yi(i) = xrem(2,ig)
               zi(i) = xrem(3,ig)
-            end if
+            endif
 !
             l  = cand_e(i)
 !
@@ -183,14 +174,14 @@
             x4(i)=x(1,ix4(i))
             y4(i)=x(2,ix4(i))
             z4(i)=x(3,ix4(i))
-          end do
+          enddo
           if(ityp == 7)then
+!$ACC PARALLEL LOOP GANG VECTOR DEFAULT(PRESENT)
             do i=1,jlt
               gapv(i) = gapv(i) + curv_max(cand_e(i))
             end do
-          end if
+          endif
 !
           return
-        end subroutine inter7_gather_cand
-      end module INTER7_GATHER_CAND_MOD
-
+        end
+      end module

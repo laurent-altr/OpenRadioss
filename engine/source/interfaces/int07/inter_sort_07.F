@@ -210,7 +210,7 @@ C -------------------------------------------------------------
                 CALL SPMD_CELL_EXCHANGE(TIMERS, NIN,ISENDTO,IRCVFROM,NSN,NSNR,IPARI(21,NIN),
      1                                   IFQ,INACTI,NSNFIOLD,IPARI(47,NIN),NTY, intbuf_tab%stfns, intbuf_tab%nsv,
      2                                   NRTM, X,
-     2                                   ITIED,NMN,INTER_STRUCT,SORT_COMM, GOT_PREVIEW)
+     2                                   ITIED,NMN,INTER_STRUCT,SORT_COMM)
 C
                 IF(INACTI==5.OR.INACTI==6.OR.INACTI==7.OR.
      +               IFQ>0.OR.ITIED/=0)THEN
@@ -256,7 +256,7 @@ C
      3      GAP    ,NOINT            ,INTBUF_TAB%I_STOK(1) ,NCONTACT ,INTER_STRUCT(NIN)%BOX_LIMIT_MAIN,
      4      TZINF  ,INTER_STRUCT(NIN)%CAND_A  ,INTER_STRUCT(NIN)%CURV_MAX, RENUM_SIZ,
      6      NB_N_B ,ESHIFT      ,ILD            ,IFQ    ,INTBUF_TAB%IFPEN,
-     8      INTBUF_TAB%STFM,IPARI(21,NIN),INTBUF_TAB%GAP_S,
+     8      INTBUF_TAB%STFM, INTBUF_TAB%STFNS, IPARI(21,NIN),INTBUF_TAB%GAP_S,
      A      NSNR   ,NCONT  ,RENUM  ,NSNROLD  ,INTBUF_TAB%GAP_M,
      B      GAPMIN ,GAPMAX  ,NUM_IMP   ,INTBUF_TAB%GAP_SL,
      C      INTBUF_TAB%GAP_ML,ITASK  , INTBUF_TAB%VARIABLES(bgapsmx_index),I_MEM     ,  
@@ -306,6 +306,8 @@ C
      E ITIED ,INTBUF_TAB%CAND_F,DGAPLOADP,INTHEAT, IDT_THERM, NODADT_THERM)
 
         ENDIF
+
+        write(6,*) I_MEM,"I_STOK ", INTBUF_TAB%I_STOK(1)
       
         IF (I_MEM >= 1 )THEN
 #include "lockon.inc"

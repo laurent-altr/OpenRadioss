@@ -40,7 +40,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
         SUBROUTINE SPMD_CELL_LIST_EXCHANGE(IRCVFROM,ISENDTO,MODE,WEIGHT,IAD_ELEM,
      .             FR_ELEM,X,V,MS,TEMP,
      .             KINET,NODNX_SMS,ITAB,INTBUF_TAB,IPARI,
-     .             NIN,INTER_STRUCT,SORT_COMM,NODNX_SMS_SIZ,TEMP_SIZE, GOT_PREVIEW,component)
+     .             NIN,INTER_STRUCT,SORT_COMM,NODNX_SMS_SIZ,TEMP_SIZE, component)
 !$COMMENT
 !       SPMD_CELL_LIST_EXCHANGE description :
 !       exchange of remote cell and preparation of comm "send/rcv the data of remote nodes"
@@ -100,7 +100,6 @@ C-----------------------------------------------
         TYPE(INTBUF_STRUCT_), DIMENSION(NINTER), INTENT(in) :: INTBUF_TAB
         TYPE(inter_struct_type), DIMENSION(NINTER), INTENT(inout) :: INTER_STRUCT   !   structure for interface
         TYPE(sorting_comm_type), DIMENSION(NINTER), INTENT(inout) :: SORT_COMM   ! structure for interface sorting comm
-        INTEGER, INTENT(IN) :: GOT_PREVIEW
         type(component_), dimension(ninter), intent(inout) :: component
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
@@ -357,18 +356,13 @@ C-----------------------------------------------
             IF(ISENDTO(NIN,LOC_PROC)/=0) ALREADY_SEND(1:NB_CELL_X,1:NB_CELL_Y,1:NB_CELL_Z) = .FALSE.
             ALLOCATE( INDEX_ALREADY_SEND(NB_CELL_X*NB_CELL_Y*NB_CELL_Z) )
             !   -------------------------
-            if(GOT_PREVIEW == 1) THEN
-            CALL MPI_WAITALL( SORT_COMM(NIN)%NB_REQUEST_CELL_RCV, SORT_COMM(NIN)%REQUEST_CELL_RCV,MPI_STATUSES_IGNORE,IERROR )
-            ENDIF
 
             DO KK=1,SORT_COMM(NIN)%NB_REQUEST_CELL_RCV
                 INDEX_R = KK 
                 !   wait the first message
 
-               if(GOT_PREVIEW == 0 ) then
                CALL MPI_WAITANY( SORT_COMM(NIN)%NB_REQUEST_CELL_RCV,
      .                            SORT_COMM(NIN)%REQUEST_CELL_RCV,INDEX_R,STATUS,IERROR )
-               endif
 
                 REMOTE_PROC = SORT_COMM(NIN)%INDEX_RCV(INDEX_R)
                 IS_EXCHANGE_NEEDED = .TRUE.

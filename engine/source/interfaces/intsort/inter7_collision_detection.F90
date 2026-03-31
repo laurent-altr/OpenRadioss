@@ -26,7 +26,7 @@
 !||    inter_sort_07                    ../engine/source/interfaces/int07/inter_sort_07.F
 !||====================================================================
       MODULE INTER7_COLLISION_DETECTION_MOD
-      implicit none
+        implicit none
       CONTAINS
 !||====================================================================
 !||    inter7_collision_detection   ../engine/source/interfaces/intsort/inter7_collision_detection.F90
@@ -53,7 +53,7 @@
         &GAP      ,NOINT   ,II_STOK ,NCONTACT ,BMINMA  ,&
         &TZINF    ,CAND_A,CURV_MAX, RENUM_SIZ,&
         &NB_N_B   ,ESHIFT  ,ILD     ,IFQ      ,IFPEN   ,&
-        &STF     ,IGAP     ,GAP_S   ,&
+        &STF       ,STFN,IGAP     ,GAP_S   ,&
         &NSNR     ,NCONT   ,RENUM   ,NSNROLD  ,GAP_M   ,&
         &GAPMIN   ,GAPMAX  ,NUM_IMP,GAP_S_L ,&
         &GAP_M_L  ,ITASK   ,BGAPSMX  ,I_MEM   ,&
@@ -67,7 +67,6 @@
 !                                                        Modules
 ! ----------------------------------------------------------------------------------------------------------------------
           USE voxel_dimensions_mod, only : compute_voxel_dimensions
-          USE FILL_VOXEL_MOD
           USE INTER_STRUCT_MOD
           USE TRI7BOX
           USE INTER7_CANDIDATE_PAIRS_MOD
@@ -133,6 +132,7 @@
           real(kind=WP) :: X(3,NUMNOD)
           real(kind=WP) :: CAND_P(NCONTACT)
           real(kind=WP) :: STF(NRTM)
+          real(kind=WP) :: STFN(NSN)
           real(kind=WP) :: GAP_S(NSN)
           real(kind=WP) :: GAP_M(NRTM)
           real(kind=WP) :: GAP_S_L(NSN)
@@ -185,97 +185,50 @@
                 intheat,idt_therm,nodadt_therm)
             end if
           end if
-!$OMP SINGLE
-          if(nrtm>0)then
-            ! finish to fill the voxel with local nondes
-            !     CALL FILL_VOXEL_LOCAL_PARTIAL(nsn,nsv,nsnr,nrtm,numnod,x,stfn,INTER_STRUCT, DUMMY, 0)
 
-!            call fill_voxel(FLAG_LOCAL,&
-!       &                    nsn,&
-!       &                    nsnr,&
-!       &                    inter_struct%nbx,&
-!       &                    inter_struct%nby,&
-!       &                    inter_struct%nbz,&
-!       &                    nrtm,&
-!       &                    size(XREM,1),&
-!       &                    numnod,&
-!       &                    nsv,&
-!       &                    inter_struct%voxel,&
-!       &                    inter_struct%next_nod,&
-!       &                    inter_struct%size_node,&
-!       &                    inter_struct%nb_voxel_on,&
-!       &                    inter_struct%list_nb_voxel_on,&
-!       &                    inter_struct%last_nod,&
-!       &                    x,&
-!       &                    stfn,&
-!       &                    xrem,&
-!       &                    inter_struct%box_limit_main)
-
-
-!            call fill_voxel(FLAG_NONE,&
-!       &                    1, &
-!       &                    nsn,&
-!       &                    nsnr,&
-!       &                    inter_struct%nbx,&
-!       &                    inter_struct%nby,&
-!       &                    inter_struct%nbz,&
-!       &                    nrtm,&
-!       &                    size(XREM,1),&
-!       &                    numnod,&
-!       &                    nsv,&
-!       &                    inter_struct%voxel,&
-!       &                    inter_struct%next_nod,&
-!       &                    inter_struct%size_node,&
-!       &                    inter_struct%nb_voxel_on,&
-!       &                    inter_struct%list_nb_voxel_on,&
-!       &                    inter_struct%last_nod,&
-!       &                    x,&
-!       &                    stfn,&
-!       &                    xrem,&
-!       &                    inter_struct%box_limit_main)
-          END IF
-!$OMP END SINGLE
-
+          call compute_voxel_dimensions(nrtm,nrtm, inter_struct)
 
 
           CALL INTER7_CANDIDATE_PAIRS( &
-          & NSN, &
-          & PREV_REMOTE_NUMBER, &
-          & NSNR, &
-          & S_PREV_REMOTE_NUMBER, &
-          & I_MEM, &
-          & IRECT, &
-          & X, &
-          & STF, &
-          & XYZM, &
-          & NSV, &
-          & II_STOK, &
-          & CAND_N, &
-          & ESHIFT, &
-          & CAND_E, &
-          & NCONTACT, &
-          & TZINF, &
-          & GAP_S_L, &
-          & GAP_M_L, &
-          & inter_struct%VOXEL, &
-          & inter_struct%NBX, &
-          & inter_struct%NBY, &
-          & inter_struct%NBZ, &
-          & INACTI, &
-          & IFQ, &
-          & CAND_A, &
-          & CAND_P, &
-          & IFPEN, &
-          & NRTM, &
-          & NSNROLD, &
-          & IGAP, &
-          & GAP, &
-          & GAP_S, &
-          & GAP_M, &
-          & GAPMIN, &
-          & GAPMAX, &
-          & MARGE, &
+          & NSN, &                    !1
+          & PREV_REMOTE_NUMBER, &     !2
+          & NSNR, &                    !3
+          & S_PREV_REMOTE_NUMBER, &     !4
+          & I_MEM, &                    !5
+          & IRECT, &                    !6
+          & X, &                        !7
+          & STF, &                      !8
+          & STFN, &                     !9
+          & XYZM, &                     !10
+          & NSV, &                      !11
+          & II_STOK, &                  !12
+          & CAND_N, &                   !13
+          & ESHIFT, &                   !14
+          & CAND_E, &                   !15
+          & NCONTACT, &                 !16
+          & TZINF, &                    !17
+          & GAP_S_L, &                  !18
+          & GAP_M_L, &                  !19
+          & INTER_STRUCT%VOXEL, &       !20
+          & INTER_STRUCT%NBX, &         !21
+          & INTER_STRUCT%NBY, &         !22
+          & INTER_STRUCT%NBZ, &         !23
+          & INACTI, &                   !24
+          & IFQ, &                      !25
+          & CAND_A, &                   !26
+          & CAND_P, &                   !27
+          & IFPEN, &                    !28
+          & NRTM, &                     !29
+          & NSNROLD, &                  !30
+          & IGAP, &                     !31
+          & GAP, &                      !32
+          & GAP_S, &                    !33
+          & GAP_M, &                    !34
+          & GAPMIN, &                   !35
+          & GAPMAX, &                   !36
+          & MARGE, &                    !37
           & CURV_MAX, &
+          & itask, &
           & BGAPSMX, &
           & S_KREMNOD, &
           & KREMNOD, &
@@ -287,12 +240,12 @@
           & CAND_F, &
           & DGAPLOAD, &
           & s_cand_a, &
+          & NRTM, &
           & NUMNOD, &
           & XREM, &
           & SIZE(XREM, 1), &
           & IREM, &
-          & SIZE(IREM, 1), &
-          & inter_struct%NEXT_NOD)
+          & SIZE(IREM, 1))
 
           IF(ITASK==0)  THEN
 !           IF(ALLOCATED(inter_struct%NEXT_NOD)) DEALLOCATE(inter_struct%NEXT_NOD)

@@ -80,7 +80,6 @@ C-----------------------------------------------
         USE TRI7BOX
         USE FILL_VOXEL_MOD                                                  
         USE VOXEL_DIMENSIONS_MOD, ONLY : COMPUTE_VOXEL_DIMENSIONS
-        USE COMMAND_LINE_ARGS_MOD, ONLY : GOT_PREVIEW
         use inter_component_bound_mod , only : inter_component_bound
         use spmd_exchange_component_mod , only : spmd_exchange_component      
 
@@ -242,15 +241,7 @@ C-----------------------------------------------
               CALL SPMD_CELL_LIST_EXCHANGE(IRECVFROM,ISENDTO,mode,WEIGHT,IAD_ELEM,
      .                 FR_ELEM,X,V,MS,TEMP,
      .                 KINET,NODNX_SMS,ITAB,INTBUF_TAB,IPARI,
-     .                 N,INTER_STRUCT,SORT_COMM,NODNX_SMS_SIZ,TEMP_SIZ, GOT_PREVIEW,component)   !   size of cell list
-              ! -----------------------------
-              if(GOT_PREVIEW == 1) THEN
-                nrtm = IPARI(4,N)
-                nsn = IPARI(5,N)
-                nsnr = IPARI(24,N)
-                nmn = IPARI(6,N)
-                call compute_voxel_dimensions(nmn, nrtm, inter_struct(N))
-              endif
+     .                 N,INTER_STRUCT,SORT_COMM,NODNX_SMS_SIZ,TEMP_SIZ, component)   !   size of cell list
               ! -----------------------------
               ! creation of voxel of secondary nodes 
               ! wait comm R "exchange of number of colored cells" & send/rcv the colored cells
@@ -259,13 +250,8 @@ C-----------------------------------------------
               CALL SPMD_CELL_LIST_EXCHANGE(IRECVFROM,ISENDTO,mode,WEIGHT,IAD_ELEM,
      .                 FR_ELEM,X,V,MS,TEMP,
      .                 KINET,NODNX_SMS,ITAB,INTBUF_TAB,IPARI,
-     .                 N,INTER_STRUCT,SORT_COMM,NODNX_SMS_SIZ,TEMP_SIZ, GOT_PREVIEW,component) !   mpi wait size of cell list
+     .                 N,INTER_STRUCT,SORT_COMM,NODNX_SMS_SIZ,TEMP_SIZ, component) !   mpi wait size of cell list
 
-              ! -----------------------------
-              if(GOT_PREVIEW == 1) THEN
-                CALL FILL_VOXEL_LOCAL_PARTIAL(nsn,intbuf_tab(n)%nsv,nsnr,nrtm,numnod,x,intbuf_tab(N)%stfns,INTER_STRUCT(N),
-     .                   sort_comm(n)%request_cell_rcv, sort_comm(n)%NB_REQUEST_CELL_RCV)
-              endif            
               ! -----------------------------
               ! wait comm R "send/rcv the colored cells" 
               ! and compute the number of secondary nodes needed by remote proc 
@@ -275,18 +261,8 @@ C-----------------------------------------------
               CALL SPMD_CELL_LIST_EXCHANGE(IRECVFROM,ISENDTO,3,WEIGHT,IAD_ELEM,
      .                 FR_ELEM,X,V,MS,TEMP,
      .                 KINET,NODNX_SMS,ITAB,INTBUF_TAB,IPARI,
-     .                 N,INTER_STRUCT,SORT_COMM,NODNX_SMS_SIZ,TEMP_SIZ, GOT_PREVIEW,component)   
+     .                 N,INTER_STRUCT,SORT_COMM,NODNX_SMS_SIZ,TEMP_SIZ, component)   
 
-            ENDDO
-          ELSEIF (ITASK == 0) THEN
-            DO KK=1,NB_INTER_SORTED
-              N = LIST_INTER_SORTED(KK)
-              if(GOT_PREVIEW == 1) THEN
-                nrtm = IPARI(4,N) ;   nsn = IPARI(5,N) ; nsnr = IPARI(24,N) ; nmn = IPARI(6,N)
-                call compute_voxel_dimensions(nmn, nrtm, inter_struct(N))
-                CALL FILL_VOXEL_LOCAL_PARTIAL(nsn,intbuf_tab(n)%nsv,nsnr,nrtm,numnod,x,
-     .                                           intbuf_tab(N)%stfns,INTER_STRUCT(N),DUMMY,0) 
-              ENDIF
             ENDDO
           ENDIF
         ENDIF
@@ -308,14 +284,8 @@ C-----------------------------------------------
               CALL SPMD_CELL_LIST_EXCHANGE(IRECVFROM,ISENDTO,4,WEIGHT,IAD_ELEM,
      .                 FR_ELEM,X,V,MS,TEMP,
      .                 KINET,NODNX_SMS,ITAB,INTBUF_TAB,IPARI,
-     .                 N,INTER_STRUCT,SORT_COMM,NODNX_SMS_SIZ,TEMP_SIZ, GOT_PREVIEW,component)
+     .                 N,INTER_STRUCT,SORT_COMM,NODNX_SMS_SIZ,TEMP_SIZ, component)
                     ! wait "number of secondary nodes needed by remote proc"
-              if(GOT_PREVIEW == 1) THEN
-                nrtm = IPARI(4,N) ;   nsn = IPARI(5,N) ; nsnr = IPARI(24,N) ; nmn = IPARI(6,N)
-                CALL FILL_VOXEL_LOCAL_PARTIAL(nsn,intbuf_tab(n)%nsv,nsnr,nrtm,numnod,x,intbuf_tab(N)%stfns,INTER_STRUCT(N),
-     .                     SORT_COMM(N)%REQUEST_NB_R, SORT_COMM(N)%NBRECV_NB)
-              endif
-
               CALL SPMD_WAIT_NB(IRECVFROM,ISENDTO,N,SORT_COMM)    
             ENDIF
             CALL MY_BARRIER()

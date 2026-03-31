@@ -153,6 +153,7 @@ C-----------------------------------------------
      1                              IRECVFROM,RETRI,ITAB,NRTM_T,RENUM,RENUM_SIZ,
      2                              NSNFIOLD,ESHIFT,MULTI_FVM,INTBUF_TAB(N),H3D_DATA,
      3                              INTER_STRUCT,SORT_COMM,GLOB_THERM%INTHEAT, GLOB_THERM%IDT_THERM, GLOB_THERM%NODADT_THERM)
+
             ENDIF
             ! -----------------------------------------------------
 

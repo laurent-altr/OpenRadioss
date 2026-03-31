@@ -20,83 +20,84 @@
 !Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss
 !Copyright>        software under a commercial license.  Contact Altair to discuss further if the
 !Copyright>        commercial version may interest you: https://www.altair.com/radioss/.
-
-!||====================================================================
-!||    inter7_penetration_mod   ../engine/source/interfaces/intsort/inter7_penetration.F90
-!||--- called by ------------------------------------------------------
-!||    inter7_filter_cand       ../engine/source/interfaces/intsort/inter7_filter_cand.F90
-!||====================================================================
+!hd|====================================================================
+!hd|  INTER7_PENETRATION_MOD        source/interfaces/intsort/inter7_penetration.F
+!hd|-- called by -----------
+!hd|        INTER7_FILTER_CAND            source/interfaces/intsort/inter7_filter_cand.F
+!hd|-- calls ---------------
+!hd|        COLLISION_MOD                 source/interfaces/intsort/collision_mod.F
+!hd|====================================================================
       MODULE INTER7_PENETRATION_MOD
-      implicit none
       contains
 !! \brief computes the penetration between a chuck of secondary nodes and a main surface/segment
 !! \details the candidate for penetration are couple of secondary nodes and the main surface/segment
 !! the couple is the result of the broad phase collision detection, keeping all possible penetration
 !! for the given timestep, and also the possible penetration for the few next timesteps, until
 !! a secondary node has moved more than the margin (relatively to the main surface/segment)
-!||====================================================================
-!||    inter7_penetration   ../engine/source/interfaces/intsort/inter7_penetration.F90
-!||--- called by ------------------------------------------------------
-!||    inter7_filter_cand   ../engine/source/interfaces/intsort/inter7_filter_cand.F90
-!||--- uses       -----------------------------------------------------
-!||    collision_mod        ../engine/source/interfaces/intsort/collision_mod.F
-!||    constant_mod         ../common_source/modules/constant_mod.F
-!||    precision_mod        ../common_source/modules/precision_mod.F90
-!||====================================================================
         subroutine inter7_penetration(jlt   ,margin ,x1    ,x2     ,x3   ,&
         &x4    ,y1    ,y2    ,y3     ,y4   ,&
         &z1    ,z2    ,z3    ,z4     ,xi   ,&
         &ix3,  ix4,&
         &yi    ,zi    ,pene  ,gapv)
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                 implicit none
-! ----------------------------------------------------------------------------------------------------------------------
+!-----------------------------------------------
+!   I m p l i c i t   T y p e s
+!-----------------------------------------------
           USE CONSTANT_MOD
-          USE COLLISION_MOD , ONLY : GROUP_SIZE
           USE PRECISION_MOD, ONLY : WP
           implicit none
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                   arguments
-! ----------------------------------------------------------------------------------------------------------------------
+!-----------------------------------------------
+!   D u m m y   A r g u m e n t s
+!-----------------------------------------------
           integer, intent(in) :: jlt
-          real(kind=WP), intent(in) :: gapv(GROUP_SIZE), margin
-          real(kind=WP), intent(in) ::&
-          &x1(GROUP_SIZE), x2(GROUP_SIZE), x3(GROUP_SIZE), x4(GROUP_SIZE),& !< x coordinates of the 4 nodes of the surface
-          &y1(GROUP_SIZE), y2(GROUP_SIZE), y3(GROUP_SIZE), y4(GROUP_SIZE),& !< y coordinates of the 4 nodes of the surface
-          &z1(GROUP_SIZE), z2(GROUP_SIZE), z3(GROUP_SIZE), z4(GROUP_SIZE),& !< z coordinates of the 4 nodes of the surface
-          &xi(GROUP_SIZE), yi(GROUP_SIZE), zi(GROUP_SIZE)
-          real(kind=WP), intent(inout) ::  pene(GROUP_SIZE) !< secondary nodes and penetration
-          integer, intent(in) :: ix3(GROUP_SIZE), ix4(GROUP_SIZE) !< index of the 3rd and 4th nodes of the surface
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                   local variables
-! ----------------------------------------------------------------------------------------------------------------------
-          integer :: i, i3n
-          real(kind=WP) :: X0(GROUP_SIZE), Y0(GROUP_SIZE), Z0(GROUP_SIZE), GAP2(GROUP_SIZE),&
-          &NX1(GROUP_SIZE), NX2(GROUP_SIZE), NX3(GROUP_SIZE), NX4(GROUP_SIZE),&
-          &NY1(GROUP_SIZE), NY2(GROUP_SIZE), NY3(GROUP_SIZE), NY4(GROUP_SIZE),&
-          &NZ1(GROUP_SIZE), NZ2(GROUP_SIZE), NZ3(GROUP_SIZE), NZ4(GROUP_SIZE),&
-          &LB1(GROUP_SIZE), LB2(GROUP_SIZE), LB3(GROUP_SIZE), LB4(GROUP_SIZE),&
-          &LC1(GROUP_SIZE), LC2(GROUP_SIZE), LC3(GROUP_SIZE), LC4(GROUP_SIZE),&
-          &AL1(GROUP_SIZE), AL2(GROUP_SIZE), AL3(GROUP_SIZE), AL4(GROUP_SIZE),&
-          &P1(GROUP_SIZE),  P2(GROUP_SIZE),  P3(GROUP_SIZE),  P4(GROUP_SIZE),&
-          &X01(GROUP_SIZE),  X02(GROUP_SIZE),  X03(GROUP_SIZE), X04(GROUP_SIZE),&
-          &Y01(GROUP_SIZE),  Y02(GROUP_SIZE),  Y03(GROUP_SIZE), Y04(GROUP_SIZE),&
-          &Z01(GROUP_SIZE),  Z02(GROUP_SIZE),  Z03(GROUP_SIZE), Z04(GROUP_SIZE),&
-          &XI1(GROUP_SIZE),  XI2(GROUP_SIZE),  XI3(GROUP_SIZE), XI4(GROUP_SIZE),&
-          &YI1(GROUP_SIZE),  YI2(GROUP_SIZE),  YI3(GROUP_SIZE), YI4(GROUP_SIZE),&
-          &ZI1(GROUP_SIZE),  ZI2(GROUP_SIZE),  ZI3(GROUP_SIZE), ZI4(GROUP_SIZE),&
-          &HLB1(GROUP_SIZE), HLC1(GROUP_SIZE), HLB2(GROUP_SIZE),HLC2(GROUP_SIZE),&
-          &HLB3(GROUP_SIZE), HLC3(GROUP_SIZE), HLB4(GROUP_SIZE),HLC4(GROUP_SIZE)
-          real(kind=WP) :: s2,d1,d2,d3,d4,&
+          real(WP), intent(in) :: gapv(jlt), margin
+          real(WP), intent(in) ::&
+          &x1(jlt), x2(jlt), x3(jlt), x4(jlt),& !< x coordinates of the 4 nodes of the surface
+          &y1(jlt), y2(jlt), y3(jlt), y4(jlt),& !< y coordinates of the 4 nodes of the surface
+          &z1(jlt), z2(jlt), z3(jlt), z4(jlt),& !< z coordinates of the 4 nodes of the surface
+          &xi(jlt), yi(jlt), zi(jlt)
+          real(WP), intent(inout) ::  pene(jlt) !< secondary nodes and penetration
+          integer, intent(in) :: ix3(jlt), ix4(jlt) !< index of the 3rd and 4th nodes of the surface
+!-----------------------------------------------
+!   L o c a l   V a r i a b l e s
+!-----------------------------------------------
+          integer i, i3n
+          real(WP)&
+          &x0(JLT), y0(JLT), z0(JLT), gap2(JLT),&
+          &nx1(JLT), nx2(JLT), nx3(JLT), nx4(JLT),&
+          &ny1(JLT), ny2(JLT), ny3(JLT), ny4(JLT),&
+          &nz1(JLT), nz2(JLT), nz3(JLT), nz4(JLT),&
+          &lb1(JLT), lb2(JLT), lb3(JLT), lb4(JLT),&
+          &lc1(JLT), lc2(JLT), lc3(JLT), lc4(JLT),&
+          &al1(JLT), al2(JLT), al3(JLT), al4(JLT),&
+          &p1(JLT),  p2(JLT),  p3(JLT),  p4(JLT),&
+          &x01(JLT),  x02(JLT),  x03(JLT), x04(JLT),&
+          &y01(JLT),  y02(JLT),  y03(JLT), y04(JLT),&
+          &z01(JLT),  z02(JLT),  z03(JLT), z04(JLT),&
+          &xi1(JLT),  xi2(JLT),  xi3(JLT), xi4(JLT),&
+          &yi1(JLT),  yi2(JLT),  yi3(JLT), yi4(JLT),&
+          &zi1(JLT),  zi2(JLT),  zi3(JLT), zi4(JLT),&
+          &hlb1(JLT), hlc1(JLT), hlb2(JLT),hlc2(JLT),&
+          &hlb3(JLT), hlc3(JLT), hlb4(JLT),hlc4(JLT)
+          real(WP)&
+          &s2,d1,d2,d3,d4,&
           &x12,x23,x34,x41,xi0,sx1,sx2,sx3,sx4,sx0,&
           &y12,y23,y34,y41,yi0,sy1,sy2,sy3,sy4,sy0,&
           &z12,z23,z34,z41,zi0,sz1,sz2,sz3,sz4,sz0,&
           &la, hla, aaa, zoneinf
-! ----------------------------------------------------------------------------------------------------------------------
+
+
+!$ACC DATA CREATE(CAPTURE:x0,y0,z0,gap2,nx1,nx2,nx3,nx4,ny1,ny2,ny3)
+!$ACC DATA CREATE(CAPTURE:ny4,nz1,nz2,nz3,nz4,lb1,lb2,lb3,lb4,lc1,lc2,lc3,lc4,al1,al2,al3,al4,p1,p2)
+!$ACC DATA CREATE(CAPTURE:p3,p4,x01,x02,x03,x04,y01,y02,y03,y04,z01,z02,z03,z04,xi1,xi2,xi3,xi4,yi1,yi2)
+!$ACC DATA CREATE(CAPTURE:yi3,yi4,zi1,zi2,zi3,zi4,hlb1,hlc1,hlb2,hlc2,hlb3,hlc3,hlb4,hlc4)
+
+
+!-----------------------------------------------
 ! the aim is to compute the penetration between a chuck of secondary nodes and a main surface
 ! the candidate for penetration are couple of secondary nodes and the main surface
 ! we keep the nodes that are in the zone of influence of the main surface
 ! we will perform a new collision detection when a node has moved more than the zone of influence (relatively to the main surface)
+!$ACC PARALLEL LOOP
           do i = 1, jlt
             zoneinf = gapv(i)+margin !< zone of influence: gap of the element + margin
             gap2(i)= zoneinf*zoneinf
@@ -104,27 +105,30 @@
 !
 !  0 quad, 1 tri ,2 mixte
           i3n=0
+!$ACC PARALLEL LOOP GANG VECTOR REDUCTION(+:i3n)
           do i=1,jlt
             if(ix3(i)==ix4(i))i3n=i3n+1
-          end do
+          enddo
           if(i3n==jlt)then
             i3n=1
-          else if(i3n/=0)then
+          elseif(i3n/=0)then
             i3n=2
-          end if
-! ----------------------------------------------------------------------------------------------------------------------
+          endif
+!--------------------------------------------------------
 !   quadrangle
-! ----------------------------------------------------------------------------------------------------------------------
+!--------------------------------------------------------
           if(i3n==0) then
+!$ACC PARALLEL LOOP GANG VECTOR
             do i=1,jlt
               x0(i) = fourth*(x1(i)+x2(i)+x3(i)+x4(i))
               y0(i) = fourth*(y1(i)+y2(i)+y3(i)+y4(i))
               z0(i) = fourth*(z1(i)+z2(i)+z3(i)+z4(i))
-            end do
-! ----------------------------------------------------------------------------------------------------------------------
+            enddo
+!--------------------------------------------------------
 !  triangle
-! ----------------------------------------------------------------------------------------------------------------------
-          else if(i3n==2) then
+!--------------------------------------------------------
+          elseif(i3n==2) then
+!$ACC PARALLEL LOOP GANG VECTOR
             do i=1,jlt
               if(ix3(i)/=ix4(i))then
                 x0(i) = fourth*(x1(i)+x2(i)+x3(i)+x4(i))
@@ -134,13 +138,14 @@
                 x0(i) = x3(i)
                 y0(i) = y3(i)
                 z0(i) = z3(i)
-              end if
-            end do
-          end if
-! ----------------------------------------------------------------------------------------------------------------------
+              endif
+            enddo
+          endif
+!--------------------------------------------------------
 !  triangle
-! ----------------------------------------------------------------------------------------------------------------------
+!--------------------------------------------------------
           if(i3n==1) then
+!$ACC PARALLEL LOOP GANG VECTOR
             do i=1,jlt
 !
               x01(i) = x1(i) - x3(i)
@@ -187,8 +192,9 @@
               hlb1(i)= lb1(i)*abs(lb1(i))*aaa
               al2(i) = -(xi0*x02(i)+yi0*y02(i)+zi0*z02(i))*aaa
               al2(i) = max(zero,min(one,al2(i)))
-            end do
+            enddo
 !
+!$ACC PARALLEL LOOP GANG VECTOR
             do i=1,jlt
               x12 = x2(i) - x1(i)
               y12 = y2(i) - y1(i)
@@ -201,17 +207,18 @@
                 lb1(i) = (xi2(i)*x12+yi2(i)*y12+zi2(i)*z12)*aaa
                 lb1(i) = max(zero,min(one,lb1(i)))
                 lc1(i) = one - lb1(i)
-              else if(lb1(i)<zero.and.&
+              elseif(lb1(i)<zero.and.&
               &hlb1(i)<=hlc1(i).and.hlb1(i)<=hla)then
                 lb1(i) = zero
                 lc1(i) = al2(i)
-              else if(lc1(i)<zero.and.&
+              elseif(lc1(i)<zero.and.&
               &hlc1(i)<=hla.and.hlc1(i)<=hlb1(i))then
                 lc1(i) = zero
                 lb1(i) = al1(i)
-              end if
-            end do
+              endif
+            enddo
 !
+!$ACC PARALLEL LOOP GANG VECTOR
             do i=1,jlt
 !
               nx1(i) = xi(i)-(x3(i) + lb1(i)*x01(i) + lc1(i)*x02(i))
@@ -219,16 +226,17 @@
               nz1(i) = zi(i)-(z3(i) + lb1(i)*z01(i) + lc1(i)*z02(i))
               p1(i) = nx1(i)*nx1(i) + ny1(i)*ny1(i) +nz1(i)*nz1(i)
 ! !!!!!!!!!!!!!!!!!!!!!!!
-!  pene = gap^2 - dist^2 used for testing if non-zero
+!  pene = gap^2 - dist^2 utilise pour tester si non nul
 !!!!!!!!!!!!!!!!!!!!!!!!!
               pene(i) = max(zero, gap2(i) - p1(i))
 !
-            end do
-! ----------------------------------------------------------------------------------------------------------------------
+            enddo
+!--------------------------------------------------------
 !  mixed group of quadrangle and triangles
-! ----------------------------------------------------------------------------------------------------------------------
+!--------------------------------------------------------
           else
 !
+!$ACC PARALLEL LOOP GANG VECTOR
             do i=1,jlt
 !
               x01(i) = x1(i) - x0(i)
@@ -336,8 +344,9 @@
               al4(i) = -(xi0*x04(i)+yi0*y04(i)+zi0*z04(i))*aaa
               al4(i) = max(zero,min(one,al4(i)))
 !
-            end do
+            enddo
 !
+!$ACC PARALLEL LOOP GANG VECTOR
             do i=1,jlt
               x12 = x2(i) - x1(i)
               y12 = y2(i) - y1(i)
@@ -350,17 +359,18 @@
                 lb1(i) = (xi2(i)*x12+yi2(i)*y12+zi2(i)*z12) * aaa
                 lb1(i) = max(zero,min(one,lb1(i)))
                 lc1(i) = one - lb1(i)
-              else if(lb1(i)<zero.and.&
+              elseif(lb1(i)<zero.and.&
               &hlb1(i)<=hlc1(i).and.hlb1(i)<=hla)then
                 lb1(i) = zero
                 lc1(i) = al2(i)
-              else if(lc1(i)<zero.and.&
+              elseif(lc1(i)<zero.and.&
               &hlc1(i)<=hla.and.hlc1(i)<=hlb1(i))then
                 lc1(i) = zero
                 lb1(i) = al1(i)
-              end if
-            end do
+              endif
+            enddo
 !
+!$ACC PARALLEL LOOP GANG VECTOR
             do i=1,jlt
               x23 = x3(i) - x2(i)
               y23 = y3(i) - y2(i)
@@ -373,17 +383,18 @@
                 lb2(i) = (xi3(i)*x23+yi3(i)*y23+zi3(i)*z23)*aaa
                 lb2(i) = max(zero,min(one,lb2(i)))
                 lc2(i) = one - lb2(i)
-              else if(lb2(i)<zero.and.&
+              elseif(lb2(i)<zero.and.&
               &hlb2(i)<=hlc2(i).and.hlb2(i)<=hla)then
                 lb2(i) = zero
                 lc2(i) = al3(i)
-              else if(lc2(i)<zero.and.&
+              elseif(lc2(i)<zero.and.&
               &hlc2(i)<=hla.and.hlc2(i)<=hlb2(i))then
                 lc2(i) = zero
                 lb2(i) = al2(i)
-              end if
-            end do
+              endif
+            enddo
 !
+!$ACC PARALLEL LOOP GANG VECTOR
             do i=1,jlt
               x34 = x4(i) - x3(i)
               y34 = y4(i) - y3(i)
@@ -396,17 +407,18 @@
                 lb3(i) = (xi4(i)*x34+yi4(i)*y34+zi4(i)*z34)*aaa
                 lb3(i) = max(zero,min(one,lb3(i)))
                 lc3(i) = one - lb3(i)
-              else if(lb3(i)<zero.and.&
+              elseif(lb3(i)<zero.and.&
               &hlb3(i)<=hlc3(i).and.hlb3(i)<=hla)then
                 lb3(i) = zero
                 lc3(i) = al4(i)
-              else if(lc3(i)<zero.and.&
+              elseif(lc3(i)<zero.and.&
               &hlc3(i)<=hla.and.hlc3(i)<=hlb3(i))then
                 lc3(i) = zero
                 lb3(i) = al3(i)
-              end if
-            end do
+              endif
+            enddo
 !
+!$ACC PARALLEL LOOP GANG VECTOR
             do i=1,jlt
               x41 = x1(i) - x4(i)
               y41 = y1(i) - y4(i)
@@ -419,17 +431,18 @@
                 lb4(i) = (xi1(i)*x41+yi1(i)*y41+zi1(i)*z41)*aaa
                 lb4(i) = max(zero,min(one,lb4(i)))
                 lc4(i) = one - lb4(i)
-              else if(lb4(i)<zero.and.&
+              elseif(lb4(i)<zero.and.&
               &hlb4(i)<=hlc4(i).and.hlb4(i)<=hla)then
                 lb4(i) = zero
                 lc4(i) = al1(i)
-              else if(lc4(i)<zero.and.&
+              elseif(lc4(i)<zero.and.&
               &hlc4(i)<=hla.and.hlc4(i)<=hlb4(i))then
                 lc4(i) = zero
                 lb4(i) = al4(i)
-              end if
-            end do
+              endif
+            enddo
 
+!$ACC PARALLEL LOOP GANG VECTOR
             do i=1,jlt
 !
               nx1(i) = xi(i)-(x0(i) + lb1(i)*x01(i) + lc1(i)*x02(i))
@@ -456,11 +469,15 @@
               p4(i) = nx4(i)*nx4(i) + ny4(i)*ny4(i) +nz4(i)*nz4(i)
               d4 = max(zero, gap2(i) - p4(i))
 ! !!!!!!!!!!!!!!!!!!!!!!!
-!  pene = gap^2 - dist^2 used for testing if non-zero
+!  pene = gap^2 - dist^2 utilise pour tester si non nul
 !!!!!!!!!!!!!!!!!!!!!!!!!
               pene(i) = max(d1,d2,d3,d4)
-            end do
-          end if
+            enddo
+          endif
+!$ACC END DATA
+!$ACC END DATA
+!$ACC END DATA
+!$ACC END DATA
           return
-        end subroutine inter7_penetration
-      end module INTER7_PENETRATION_MOD
+        end
+      end module

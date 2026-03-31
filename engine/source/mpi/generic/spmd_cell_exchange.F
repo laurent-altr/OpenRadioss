@@ -44,7 +44,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
       SUBROUTINE SPMD_CELL_EXCHANGE(TIMERS, NIN,ISENDTO,IRCVFROM,NSN,NSNR,IGAP,
      1                               IFQ,INACTI,NSNFIOLD,INTTH,ITYP,STFNS, NSV,
      2                               NRTM, X,
-     2                               ITIED,NMN,INTER_STRUCT,SORT_COMM, GOT_PREVIEW)
+     2                               ITIED,NMN,INTER_STRUCT,SORT_COMM)
 !$COMMENT
 !       SPMD_CELL_EXCHANGE description :
 !       exchange of secondary node data (x, v, temp...)
@@ -88,7 +88,6 @@ C-----------------------------------------------
      .        NSNFIOLD(NSPMD),
      .        ISENDTO(NINTER+1,NSPMD+1), IRCVFROM(NINTER+1,NSPMD+1),
      .        ITYP
-        INTEGER :: GOT_PREVIEW !< flag to indicate if -preview is available
         INTEGER :: NMN
         TYPE(inter_struct_type), DIMENSION(NINTER), INTENT(inout) :: INTER_STRUCT   !   structure for interface
         TYPE(sorting_comm_type), DIMENSION(NINTER), INTENT(inout) :: SORT_COMM   ! structure for interface sorting comm
@@ -198,12 +197,6 @@ C================================================================
       ENDDO
 
 
-        ! -----------------------------
-        if(GOT_PREVIEW == 1) THEN
-        ! finish the last groups of secondary nodes, if any
-            CALL FILL_VOXEL_LOCAL_PARTIAL(nsn,nsv,nsnr,nrtm,numnod,x,stfns,INTER_STRUCT(NIN),DUMMY,0) 
-        ENDIF
- 
 
       ! ---------------------------------------
       ! wait the rcv comm
@@ -214,25 +207,6 @@ C================================================================
 
          ! CALL MPI_WAITANY(SORT_COMM(NIN)%NBIRECV,REQ_RD2,INDEXI,STATUS,IERROR)
 
-          if(GOT_PREVIEW==1) then
-          call fill_voxel_remote(
-     .                    OFFSET(INDEXI), 
-     .                    OFFSET(INDEXI+1)-1, 
-     .                    nsn,
-     .                    nsnr,
-     .                    inter_struct(nin)%nbx,
-     .                    inter_struct(nin)%nby,
-     .                    inter_struct(nin)%nbz,
-     .                    size(XREM,1),
-     .                    inter_struct(nin)%voxel,
-     .                    inter_struct(nin)%next_nod,
-     .                    inter_struct(nin)%size_node,
-     .                    inter_struct(nin)%nb_voxel_on,
-     .                    inter_struct(nin)%list_nb_voxel_on,
-     .                    inter_struct(nin)%last_nod,
-     .                    xrem,
-     .                    inter_struct(nin)%box_limit_main)
-          endif
           CALL MPI_WAIT(REQ_RD2(INDEXI),STATUS,IERROR) !IREM
 
     
@@ -268,10 +242,6 @@ C================================================================
       ! ---------------------------------------
       ELSE 
 
-        if(GOT_PREVIEW == 1) THEN
-        ! finish the last groups of secondary nodes, if any
-            CALL FILL_VOXEL_LOCAL_PARTIAL(nsn,nsv,nsnr,nrtm,numnod,x,stfns,INTER_STRUCT(NIN),DUMMY,0) 
-        ENDIF
 
        ENDIF
 
