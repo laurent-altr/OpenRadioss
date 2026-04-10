@@ -30,7 +30,7 @@
 #include <vector>
 
 // ---------------------------------------------------------------------------
-// Internal generic key-value sort
+// Internal generic key-value helpers
 // ---------------------------------------------------------------------------
 
 template<typename K, typename V>
@@ -44,6 +44,24 @@ static void stlsort_kv_impl(int n, K *keys, V *values)
               [](const std::pair<K,V> &a, const std::pair<K,V> &b){
                   return a.first < b.first;
               });
+
+    for (int i = 0; i < n; ++i) {
+        keys[i]   = pairs[i].first;
+        values[i] = pairs[i].second;
+    }
+}
+
+template<typename K, typename V>
+static void stlstable_sort_kv_impl(int n, K *keys, V *values)
+{
+    std::vector<std::pair<K, V>> pairs(n);
+    for (int i = 0; i < n; ++i)
+        pairs[i] = {keys[i], values[i]};
+
+    std::stable_sort(pairs.begin(), pairs.end(),
+                     [](const std::pair<K,V> &a, const std::pair<K,V> &b){
+                         return a.first < b.first;
+                     });
 
     for (int i = 0; i < n; ++i) {
         keys[i]   = pairs[i].first;
@@ -91,6 +109,46 @@ void stlsort_float_float(int *len, float *keys, float *values)
 void stlsort_double_double(int *len, double *keys, double *values)
 {
     stlsort_kv_impl<double, double>(*len, keys, values);
+}
+
+// ---------------------------------------------------------------------------
+// stable_sort – same signatures, preserves relative order of equal keys
+// ---------------------------------------------------------------------------
+
+// --- sort a plain array ------------------------------------------------------
+
+void stlstable_sort_float (int *len, float  *array) { std::stable_sort(array, array + *len); }
+void stlstable_sort_double(int *len, double *array) { std::stable_sort(array, array + *len); }
+
+// --- sort integer keys, carrying integer values ------------------------------
+
+void stlstable_sort_int_int(int *len, int *keys, int *values)
+{
+    stlstable_sort_kv_impl<int, int>(*len, keys, values);
+}
+
+// --- sort float/double keys, carrying integer values ------------------------
+
+void stlstable_sort_float_int(int *len, float *keys, int *values)
+{
+    stlstable_sort_kv_impl<float, int>(*len, keys, values);
+}
+
+void stlstable_sort_double_int(int *len, double *keys, int *values)
+{
+    stlstable_sort_kv_impl<double, int>(*len, keys, values);
+}
+
+// --- sort float/double keys, carrying float/double values -------------------
+
+void stlstable_sort_float_float(int *len, float *keys, float *values)
+{
+    stlstable_sort_kv_impl<float, float>(*len, keys, values);
+}
+
+void stlstable_sort_double_double(int *len, double *keys, double *values)
+{
+    stlstable_sort_kv_impl<double, double>(*len, keys, values);
 }
 
 } // extern "C"
