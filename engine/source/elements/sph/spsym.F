@@ -316,6 +316,9 @@ C        preparing all real neighbours for sort.
           END IF
          ENDDO
 C-------
+         DO K=1,NVOIS2+NVOISS
+          JPERM(K) = K
+         END DO
          CALL stlsort(NVOIS2+NVOISS,DVOIS,JPERM)
          DO K=1,NVOIS2+NVOISS
           JSTOR(K)=JVOIS(K)
@@ -540,6 +543,9 @@ C         preparing all real neighbours for sort.
            END IF
           ENDDO
 C-------
+          DO K=1,NVOIS2+NVOISS
+           JPERM(K) = K
+          END DO
           CALL stlsort(NVOIS2+NVOISS,DVOIS,JPERM)
           DO K=1,NVOIS2+NVOISS
            JSTOR(K)=JVOIS(K)

@@ -80,9 +80,12 @@ C-----------------
             TAB_DK(IL) = -ONE
             IF(NVOIS>KVOISPH)THEN
 
-                IREDUCE    =1 
-                KREDUCE(IL)=1 
+                IREDUCE    =1
+                KREDUCE(IL)=1
 
+                DO K=1,NVOIS
+                    JPERM(K) = K
+                END DO
                 CALL stlsort(NVOIS,DVOIS,JPERM)
                 DO K=1,NVOIS
                     JSTOR(K)=JVOIS(K)
@@ -133,6 +136,9 @@ C-----------------
 C-----------------
 C Choice of cells to keep such that distance < DK to avoid parallelization problems
                     NVOIS=KXSPR(IL-NUMSPH)
+                    DO K=1,NVOIS
+                        JPERM(K) = K
+                    END DO
                     CALL stlsort(NVOIS,DVOIS,JPERM)
                     DO K=1,NVOIS
                         JSTOR(K)=JVOIS(K)
@@ -186,6 +192,9 @@ C-----------------
             NVOIS=KXSP(5,IL)
             IF(NVOIS>KVOISPH)THEN
 
+                DO K=1,NVOIS
+                    JPERM(K) = K
+                END DO
                 CALL stlsort(NVOIS,DVOIS,JPERM)
                 DO K=1,NVOIS
                     JSTOR(K)=JVOIS(K)

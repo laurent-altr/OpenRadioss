@@ -390,6 +390,9 @@ C To do: Perfect symet <=> x (hmin) -x (hmax)
         IF(KREDUCE(N)/=0 .AND. NVOIS > KVOISPH) THEN
           BOOL_SPH_SORT(N) = .TRUE.
 
+          DO K=1,NVOIS
+            JPERM(K) = K
+          END DO
           CALL stlsort(NVOIS,DVOIS,JPERM)
            DO K=1,NVOIS
             JSTOR(K)=JVOIS(K)
