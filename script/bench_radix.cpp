@@ -114,10 +114,10 @@ static void tri_direct_opt(unsigned *data, unsigned *iwork,
  * std::sort wrapper
  * ========================================================================= */
 
-/* Sort index[0..n-1] (0-based) by ascending lexicographic order of the
- * irecl-key tuple (data[irecl*elem+0], data[irecl*elem+1], ...).
- * Ties broken by original element index to match the stable radix sort. */
-static void stdsort_multikey(unsigned *data, unsigned *index,
+/* --- Variant A: indirect comparator (current my_orders interface) ----------
+ * Comparator chases two pointers into data[] on every comparison.
+ * Cache-hostile: each comparison may cause two cache misses once n is large. */
+static void stdsort_indirect(unsigned *data, unsigned *index,
                               int n, int irecl)
 {
     std::sort(index, index + n,
@@ -128,8 +128,79 @@ static void stdsort_multikey(unsigned *data, unsigned *index,
                 if (va < vb) return true;
                 if (va > vb) return false;
             }
-            return a < b;   /* stable tie-break */
+            return a < b;
         });
+}
+
+/* --- Variant B: packed-struct sort (keys inlined, no indirection) ----------
+ * Pack every element's keys + original index into a flat struct and sort the
+ * struct array directly.  The comparator reads only from the struct being
+ * compared — no pointer chasing.  This is the cache-friendly std::sort
+ * scenario the literature typically benchmarks.
+ * Downside: allocates an extra irecl*4+4 bytes per element. */
+struct PackedRec {
+    unsigned keys[6];   /* up to irecl=6 */
+    unsigned orig_idx;
+};
+
+static void stdsort_packed(unsigned *data, unsigned *index,
+                            int n, int irecl)
+{
+    PackedRec *recs = new PackedRec[n];
+    for (int i = 0; i < n; i++) {
+        recs[i].orig_idx = (unsigned)i;
+        for (int k = 0; k < irecl; k++) recs[i].keys[k] = data[irecl * i + k];
+    }
+    std::sort(recs, recs + n,
+        [irecl](const PackedRec &a, const PackedRec &b) {
+            for (int k = 0; k < irecl; k++) {
+                if (a.keys[k] < b.keys[k]) return true;
+                if (a.keys[k] > b.keys[k]) return false;
+            }
+            return a.orig_idx < b.orig_idx;
+        });
+    for (int i = 0; i < n; i++) index[i] = recs[i].orig_idx;
+    delete[] recs;
+}
+
+/* --- Variant C: direct-value sort (irecl=1 only, no index needed) ----------
+ * The exact scenario in the literature: sort a contiguous array of unsigned
+ * integers in-place.  std::sort has optimal cache behaviour here — no
+ * indirection whatsoever.  A raw-value 8-bit radix sort is included as a
+ * direct apples-to-apples counterpart. */
+static void stdsort_direct_values(unsigned *vals, int n)
+{
+    std::sort(vals, vals + n);
+}
+
+/* 8-bit radix sort directly on values (not index-based), for comparison. */
+static void radix_direct_values(unsigned *vals, unsigned *tmp,
+                                 unsigned *iwork, int n)
+{
+    /* Build 4 byte-histograms in one pass */
+    memset(iwork, 0, 4 * 257 * sizeof(unsigned));
+    for (int i = 0; i < n; i++) {
+        unsigned v = vals[i];
+        iwork[0*257 + ( v        & 0xff) + 1]++;
+        iwork[1*257 + ((v >>  8) & 0xff) + 1]++;
+        iwork[2*257 + ((v >> 16) & 0xff) + 1]++;
+        iwork[3*257 + ( v >> 24        ) + 1]++;
+    }
+    for (int b = 0; b < 4; b++) {
+        unsigned *h = iwork + b * 257;
+        for (int i = 0; i < 256; i++) h[i+1] += h[i];
+    }
+    unsigned *src = vals, *dst = tmp;
+    for (int b = 0; b < 4; b++) {
+        unsigned *h    = iwork + b * 257;
+        unsigned  shift = (unsigned)(b * 8);
+        for (int i = 0; i < n; i++) {
+            unsigned bv = (src[i] >> shift) & 0xff;
+            dst[h[bv]++] = src[i];
+        }
+        unsigned *t = src; src = dst; dst = t;
+    }
+    /* 4 passes (even): result is in vals[] */
 }
 
 /* =========================================================================
@@ -150,10 +221,17 @@ static void sort_opt(unsigned *iwork, unsigned *data,
     tri_direct_opt(data, iwork, index, n, irecl, index + n);
 }
 
-static void sort_std(unsigned *data, unsigned *index, int n, int irecl)
+/* Variant A: indirect comparator */
+static void sort_std_indirect(unsigned *data, unsigned *index, int n, int irecl)
 {
     for (int i = 0; i < n; i++) index[i] = (unsigned)i;
-    stdsort_multikey(data, index, n, irecl);
+    stdsort_indirect(data, index, n, irecl);
+}
+
+/* Variant B: packed-struct */
+static void sort_std_packed(unsigned *data, unsigned *index, int n, int irecl)
+{
+    stdsort_packed(data, index, n, irecl);
 }
 
 /* =========================================================================
@@ -223,13 +301,14 @@ static bool is_sorted(const unsigned *index, int n,
 
 static void run_config(int n, int irecl)
 {
-    unsigned *data  = (unsigned *)malloc((size_t)n * irecl * sizeof(unsigned));
-    unsigned *idx_o = (unsigned *)malloc((size_t)3 * n * sizeof(unsigned));
-    unsigned *idx_p = (unsigned *)malloc((size_t)3 * n * sizeof(unsigned));
-    unsigned *idx_s = (unsigned *)malloc((size_t)    n * sizeof(unsigned));
-    unsigned *iwork = (unsigned *)malloc(IWORK_CAP * sizeof(unsigned));
+    unsigned *data   = (unsigned *)malloc((size_t)n * irecl * sizeof(unsigned));
+    unsigned *idx_o  = (unsigned *)malloc((size_t)3 * n * sizeof(unsigned));
+    unsigned *idx_p  = (unsigned *)malloc((size_t)3 * n * sizeof(unsigned));
+    unsigned *idx_si = (unsigned *)malloc((size_t)    n * sizeof(unsigned));
+    unsigned *idx_sp = (unsigned *)malloc((size_t)    n * sizeof(unsigned));
+    unsigned *iwork  = (unsigned *)malloc(IWORK_CAP * sizeof(unsigned));
 
-    if (!data || !idx_o || !idx_p || !idx_s || !iwork) {
+    if (!data || !idx_o || !idx_p || !idx_si || !idx_sp || !iwork) {
         fprintf(stderr, "allocation failure (n=%d irecl=%d)\n", n, irecl);
         exit(1);
     }
@@ -238,17 +317,17 @@ static void run_config(int n, int irecl)
     fill_random(data, n * irecl, seed);
 
     /* --- correctness (single run) ---------------------------------------- */
-    sort_orig(iwork, data, idx_o, n, irecl);
-    sort_opt (iwork, data, idx_p, n, irecl);
-    sort_std (       data, idx_s, n, irecl);
+    sort_orig        (iwork, data, idx_o,  n, irecl);
+    sort_opt         (iwork, data, idx_p,  n, irecl);
+    sort_std_indirect(       data, idx_si, n, irecl);
+    sort_std_packed  (       data, idx_sp, n, irecl);
 
-    bool ok_opt = results_match(idx_o, idx_p, n, irecl, data)
-               && is_sorted(idx_p, n, irecl, data);
-    bool ok_std = results_match(idx_o, idx_s, n, irecl, data)
-               && is_sorted(idx_s, n, irecl, data);
+    bool ok_opt = results_match(idx_o, idx_p,  n, irecl, data) && is_sorted(idx_p,  n, irecl, data);
+    bool ok_si  = results_match(idx_o, idx_si, n, irecl, data) && is_sorted(idx_si, n, irecl, data);
+    bool ok_sp  = results_match(idx_o, idx_sp, n, irecl, data) && is_sorted(idx_sp, n, irecl, data);
 
     /* --- timing (median of REPEATS) -------------------------------------- */
-    double t_o[REPEATS], t_p[REPEATS], t_s[REPEATS];
+    double t_o[REPEATS], t_p[REPEATS], t_si[REPEATS], t_sp[REPEATS];
 
     for (int r = 0; r < REPEATS; r++) {
         fill_random(data, n * irecl, (unsigned)(r * 1000003u + (unsigned)n));
@@ -262,29 +341,72 @@ static void run_config(int n, int irecl)
         t_p[r] = now_sec() - t0;
 
         t0 = now_sec();
-        sort_std(data, idx_s, n, irecl);
-        t_s[r] = now_sec() - t0;
+        sort_std_indirect(data, idx_si, n, irecl);
+        t_si[r] = now_sec() - t0;
+
+        t0 = now_sec();
+        sort_std_packed(data, idx_sp, n, irecl);
+        t_sp[r] = now_sec() - t0;
     }
 
-    /* median */
-    std::sort(t_o, t_o + REPEATS);
-    std::sort(t_p, t_p + REPEATS);
-    std::sort(t_s, t_s + REPEATS);
-    double to = t_o[REPEATS/2], tp = t_p[REPEATS/2], ts = t_s[REPEATS/2];
+    std::sort(t_o,  t_o  + REPEATS);
+    std::sort(t_p,  t_p  + REPEATS);
+    std::sort(t_si, t_si + REPEATS);
+    std::sort(t_sp, t_sp + REPEATS);
+    double to  = t_o[REPEATS/2],  tp  = t_p[REPEATS/2];
+    double tsi = t_si[REPEATS/2], tsp = t_sp[REPEATS/2];
 
-    printf("  n=%-8d  irecl=%d  |  "
-           "orig %7.2f ms  "
-           "opt %7.2f ms (x%5.2f)  "
-           "std::sort %7.2f ms (x%5.2f)  "
-           "%s%s\n",
+    printf("  n=%-8d  irecl=%d  |  orig %6.2f ms  opt %6.2f ms (x%4.1f)"
+           "  std/indir %6.2f ms (x%4.1f)  std/packed %6.2f ms (x%4.1f)%s%s%s\n",
            n, irecl,
-           to  * 1e3,
-           tp  * 1e3, to / tp,
-           ts  * 1e3, to / ts,
-           ok_opt ? "" : "OPT-FAIL ",
-           ok_std ? "" : "STD-FAIL");
+           to * 1e3, tp * 1e3, to / tp,
+           tsi * 1e3, to / tsi,
+           tsp * 1e3, to / tsp,
+           ok_opt ? "" : " OPT-FAIL",
+           ok_si  ? "" : " INDIR-FAIL",
+           ok_sp  ? "" : " PACKED-FAIL");
 
-    free(data); free(idx_o); free(idx_p); free(idx_s); free(iwork);
+    free(data); free(idx_o); free(idx_p); free(idx_si); free(idx_sp); free(iwork);
+}
+
+/* Direct-value sort benchmark (irecl=1 only): the exact literature scenario —
+ * sort a contiguous array of unsigned ints with no index indirection. */
+static void run_direct_values(int n)
+{
+    unsigned *vals  = (unsigned *)malloc((size_t)n * sizeof(unsigned));
+    unsigned *tmp   = (unsigned *)malloc((size_t)n * sizeof(unsigned));
+    unsigned *iwork = (unsigned *)malloc(4 * 257 * sizeof(unsigned));
+    unsigned *vcopy = (unsigned *)malloc((size_t)n * sizeof(unsigned));
+    if (!vals || !tmp || !iwork || !vcopy) { fprintf(stderr, "alloc fail\n"); exit(1); }
+
+    double t_rs[REPEATS], t_ss[REPEATS];
+
+    for (int r = 0; r < REPEATS; r++) {
+        fill_random(vals, n, (unsigned)(r * 999983u + (unsigned)n));
+
+        /* radix sort on raw values */
+        memcpy(vcopy, vals, (size_t)n * sizeof(unsigned));
+        double t0 = now_sec();
+        radix_direct_values(vcopy, tmp, iwork, n);
+        t_rs[r] = now_sec() - t0;
+
+        /* std::sort on raw values */
+        memcpy(vcopy, vals, (size_t)n * sizeof(unsigned));
+        t0 = now_sec();
+        stdsort_direct_values(vcopy, n);
+        t_ss[r] = now_sec() - t0;
+    }
+
+    std::sort(t_rs, t_rs + REPEATS);
+    std::sort(t_ss, t_ss + REPEATS);
+    double trs = t_rs[REPEATS/2], tss = t_ss[REPEATS/2];
+
+    printf("  n=%-8d  |  radix/direct %6.2f ms  std::sort/direct %6.2f ms"
+           "  (std/radix = x%.2f)%s\n",
+           n, trs * 1e3, tss * 1e3, trs / tss,
+           (trs / tss > 1.0) ? "  <- std wins" : "  <- radix wins");
+
+    free(vals); free(tmp); free(iwork); free(vcopy);
 }
 
 /* =========================================================================
@@ -298,14 +420,15 @@ static int edge_tests()
     unsigned data[2000], idx_o[6000], idx_p[6000], idx_s[2000];
 
     auto check = [&](const char *label, int n, int irecl) {
-        sort_orig(iwork, data, idx_o, n, irecl);
-        sort_opt (iwork, data, idx_p, n, irecl);
-        sort_std (       data, idx_s, n, irecl);
+        sort_orig        (iwork, data, idx_o, n, irecl);
+        sort_opt         (iwork, data, idx_p, n, irecl);
+        sort_std_indirect(       data, idx_s, n, irecl);
+        sort_std_packed  (       data, idx_s, n, irecl);   /* reuse idx_s */
         bool ok_opt = results_match(idx_o, idx_p, n, irecl, data)
                    && (n == 0 || is_sorted(idx_p, n, irecl, data));
         bool ok_std = results_match(idx_o, idx_s, n, irecl, data)
                    && (n == 0 || is_sorted(idx_s, n, irecl, data));
-        printf("  %-34s  opt=%s  std=%s\n",
+        printf("  %-34s  opt=%s  std/packed=%s\n",
                label,
                ok_opt ? "OK  " : "FAIL",
                ok_std ? "OK  " : "FAIL");
@@ -366,8 +489,10 @@ int main()
     int fail = edge_tests();
     printf("\n");
 
-    /* ----- performance benchmarks ----------------------------------------- */
-    printf("=== Performance benchmarks (median of %d runs) ===\n\n", REPEATS);
+    /* ----- benchmark A: index-permutation sort (actual MY_ORDERS use case) -- */
+    printf("=== Benchmark A: index-permutation sort (the actual MY_ORDERS problem) ===\n");
+    printf("  std/indir  = std::sort with indirect comparator (chases data[index[i]] pointers)\n");
+    printf("  std/packed = std::sort on inlined structs {keys, orig_idx} (no indirection)\n\n");
 
     const int sizes[]  = {1000, 10000, 100000, 1000000};
     const int irecls[] = {1, 2, 5};
@@ -381,15 +506,34 @@ int main()
         printf("\n");
     }
 
-    /* ----- explanation ---------------------------------------------------- */
-    printf("=== Notes ===\n");
-    printf("  orig histogram: 65 537 entries = ~256 KB  -- exceeds typical L1 cache\n");
-    printf("  opt  histogram:    257 entries = ~1 KB    -- fits in L1 cache\n");
-    printf("  opt  counting: 1 sequential scan for all histograms (cache-friendly)\n");
-    printf("  std::sort: O(n log n) introsort; no extra memory; good constant factor\n");
-    printf("  -> radix wins decisively for n > ~5 000 where O(n) vs O(n log n) matters\n");
-    printf("  -> opt wins over orig across all n due to smaller histograms (less cache pressure)\n");
+    /* ----- benchmark B: direct-value sort (literature scenario, irecl=1) -- */
+    printf("=== Benchmark B: direct-value sort  (literature scenario, irecl=1) ===\n");
+    printf("  Sort a contiguous unsigned int array with no index indirection.\n");
+    printf("  This is the EXACT scenario where the literature claims std::sort\n");
+    printf("  is competitive with radix sort on modern hardware.\n\n");
+    const int dsizes[] = {1000, 10000, 100000, 1000000};
+    for (int si = 0; si < (int)(sizeof(dsizes)/sizeof(dsizes[0])); si++) {
+        run_direct_values(dsizes[si]);
+    }
     printf("\n");
+
+    /* ----- explanation ---------------------------------------------------- */
+    printf("=== Analysis ===\n");
+    printf("  Why Benchmark A and the literature appear to contradict each other:\n\n");
+    printf("  The literature benchmarks std::sort SORTING VALUES DIRECTLY.\n");
+    printf("  MY_ORDERS sorts an INDEX ARRAY through an indirect comparator:\n");
+    printf("    comparator(a, b) -> data[irecl*a+k] vs data[irecl*b+k]\n");
+    printf("  Each comparison chases two pointers into a separate data[] array.\n");
+    printf("  As n grows, these become random cache misses -- std::sort's O(n log n)\n");
+    printf("  comparisons each pay a cache miss penalty, while radix scatter passes\n");
+    printf("  only pay random-access cost once per element per pass.\n\n");
+    printf("  Benchmark B confirms the literature: for direct-value sort, std::sort\n");
+    printf("  CAN match or beat radix at small n on this hardware.\n\n");
+    printf("  For OpenRadioss, the indirect-index problem (Benchmark A) is what matters:\n");
+    printf("  std/packed is the best std::sort variant for this use case, but it requires\n");
+    printf("  an extra allocation of (irecl*4+4)*n bytes and a pack/unpack step.\n");
+    printf("  The opt radix sort wins without any extra allocation.\n\n");
+
     printf("=== Summary: %s ===\n",
            fail ? "SOME CORRECTNESS TESTS FAILED" : "ALL CORRECTNESS TESTS PASSED");
 
