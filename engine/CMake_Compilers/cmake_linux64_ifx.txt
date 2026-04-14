@@ -116,8 +116,14 @@ if ( NOT DEFINED WITH_LINEAR_ALGEBRA)
 set ( wo_linalg "-DWITHOUT_LINALG" )
 endif()
 
-set(opt_flag  "-axCORE-AVX2,COMMON-AVX512 -qopt-mem-layout-trans=4 -no-fma -O3 -fp-model precise -fimf-use-svml=true -qopenmp")
-set(optc_flag "-axCORE-AVX2,COMMON-AVX512 -qopt-mem-layout-trans=4 -no-fma -O3 -fp-model precise -fimf-use-svml=true -qopenmp")
+if ( fast STREQUAL "1" )
+  message( STATUS "Fast mode enabled: -xHost, no -no-fma, no -fp-model precise")
+  set(opt_flag  "-xHost -qopt-mem-layout-trans=4 -O3 -fimf-use-svml=true -qopenmp")
+  set(optc_flag "-xHost -qopt-mem-layout-trans=4 -O3 -fimf-use-svml=true -qopenmp")
+else()
+  set(opt_flag  "-axCORE-AVX2,COMMON-AVX512 -qopt-mem-layout-trans=4 -no-fma -O3 -fp-model precise -fimf-use-svml=true -qopenmp")
+  set(optc_flag "-axCORE-AVX2,COMMON-AVX512 -qopt-mem-layout-trans=4 -no-fma -O3 -fp-model precise -fimf-use-svml=true -qopenmp")
+endif()
 
 set(opt_flag_debug "-g3 -traceback -no-fma -O0 -fp-model precise -qopenmp")
 set(optc_flag_debug "-g3 -no-fma -O0 -fp-model precise -qopenmp")
@@ -176,7 +182,7 @@ string(STRIP ${LINK} LINK)
 
 
 # -------------------------------------------------------------------------------------------------------------------------------------------
-# Specific set of compilation flag
+# Specific set of compilation flag to avoid compiler bugs, or performance regression
 
 set (F_O1_AXSSE3 " -O1 -axsse3 -no-fma -qopenmp -fp-model precise ${precision_flag} ${Fortran} ${mumps_flags} ${mpi_flag} ${cppmach} ${cpprel}")
 set (F_O2_AXSSE3 " -O2 -axsse3 -no-fma -qopenmp -fp-model precise ${precision_flag} ${Fortran} ${mumps_flags} ${mpi_flag} ${cppmach} ${cpprel}")
