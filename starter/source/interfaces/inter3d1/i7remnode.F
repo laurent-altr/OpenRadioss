@@ -48,6 +48,7 @@ C-----------------------------------------------
       USE INTBUFDEF_MOD
       USE NAMES_AND_TITLES_MOD , ONLY : NCHARTITLE
       use get_list_remnode_mod , only : get_list_remnode
+      use get_list_remnode_cpp_mod , only : get_list_remnode_cpp
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -72,6 +73,7 @@ C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
       INTEGER IFIRST,ILAST,ISELF_IMPACTANT
+      INTEGER I_DBG, J_DBG
       INTEGER, DIMENSION(:),ALLOCATABLE ::
      .        KNOD2SEG,NOD2SEG,NODDEL,TAGNOD,ID_NOD,TAGSECND,ITAGSEG,NOD2EXPAND
       my_real
@@ -114,15 +116,69 @@ C-----------------------------------------------
       ILAST =NRTM
       I_MEM_REM=1
       intbuf_tab%kremnode(1) = 0
-!$OMP PARALLEL
-      call get_list_remnode(nrtm,igap ,numnod,npari,irect,intbuf_tab%kremnode, 
-     .                      knod2seg,nod2seg,tagsecnd,    
-     .                      ipari,gapmin,gapmax,gap,drad,        
-     .                      gaps_mx,gaps_l_mx,  
-     .                      minseg,dgapload,x,gap_m,              
-     .                      gap_m_l,gapsecnd,gap_s_l_tmp,    
+
+C     C++ Dijkstra-based version (sequential, no OMP needed)
+      call get_list_remnode_cpp(nrtm,igap ,numnod,npari,irect,
+     .                      intbuf_tab%kremnode,
+     .                      knod2seg,nod2seg,tagsecnd,
+     .                      ipari,gapmin,gapmax,gap,drad,
+     .                      gaps_mx,gaps_l_mx,
+     .                      minseg,dgapload,x,gap_m,
+     .                      gap_m_l,gapsecnd,gap_s_l_tmp,
      .                      intbuf_tab)
-!$OMP END PARALLEL
+
+C --- DEBUG: dump C++ results ---
+      WRITE(*,*) '=== C++ REMNODE DEBUG ==='
+      WRITE(*,*) 'NRTM=',NRTM,' IGAP=',IGAP,' NUMNOD=',NUMNOD
+      WRITE(*,*) 'GAPMIN=',GAPMIN,' GAPMAX=',GAPMAX,' GAP=',GAP
+      WRITE(*,*) 'DRAD=',DRAD,' DGAPLOAD=',DGAPLOAD
+      WRITE(*,*) 'GAPS_MX=',GAPS_MX,' GAPS_L_MX=',GAPS_L_MX
+      WRITE(*,*) 'MINSEG=',MINSEG
+      WRITE(*,*) 'TOTAL KREMNODE=',INTBUF_TAB%KREMNODE(NRTM+1)
+      DO I_DBG=1,MIN(NRTM,20)
+        IF(INTBUF_TAB%KREMNODE(I_DBG+1)-INTBUF_TAB%KREMNODE(I_DBG)
+     .   > 0) THEN
+          WRITE(*,'(A,I6,A,I6,A,20I8)') ' SEG ',I_DBG,' CNT=',
+     .      INTBUF_TAB%KREMNODE(I_DBG+1)-INTBUF_TAB%KREMNODE(I_DBG),
+     .      ' NODES=',
+     .      (INTBUF_TAB%REMNODE(J_DBG),
+     .       J_DBG=INTBUF_TAB%KREMNODE(I_DBG)+1,
+     .       MIN(INTBUF_TAB%KREMNODE(I_DBG)+20,
+     .           INTBUF_TAB%KREMNODE(I_DBG+1)))
+        END IF
+      END DO
+      WRITE(*,*) '=== END C++ DEBUG ==='
+
+!!!! C     Now run the Fortran version for comparison
+!!!!       intbuf_tab%kremnode(1) = 0
+!!!! !$OMP PARALLEL
+!!!!       call get_list_remnode(nrtm,igap ,numnod,npari,irect,
+!!!!      .                      intbuf_tab%kremnode,
+!!!!      .                      knod2seg,nod2seg,tagsecnd,
+!!!!      .                      ipari,gapmin,gapmax,gap,drad,
+!!!!      .                      gaps_mx,gaps_l_mx,
+!!!!      .                      minseg,dgapload,x,gap_m,
+!!!!      .                      gap_m_l,gapsecnd,gap_s_l_tmp,
+!!!!      .                      intbuf_tab)
+!!!! !$OMP END PARALLEL
+!!!! 
+!!!! C --- DEBUG: dump Fortran results ---
+!!!!       WRITE(*,*) '=== FORTRAN REMNODE DEBUG ==='
+!!!!       WRITE(*,*) 'TOTAL KREMNODE=',INTBUF_TAB%KREMNODE(NRTM+1)
+!!!!       DO I_DBG=1,MIN(NRTM,20)
+!!!!         IF(INTBUF_TAB%KREMNODE(I_DBG+1)-INTBUF_TAB%KREMNODE(I_DBG)
+!!!!      .   > 0) THEN
+!!!!           WRITE(*,'(A,I6,A,I6,A,20I8)') ' SEG ',I_DBG,' CNT=',
+!!!!      .      INTBUF_TAB%KREMNODE(I_DBG+1)-INTBUF_TAB%KREMNODE(I_DBG),
+!!!!      .      ' NODES=',
+!!!!      .      (INTBUF_TAB%REMNODE(J_DBG),
+!!!!      .       J_DBG=INTBUF_TAB%KREMNODE(I_DBG)+1,
+!!!!      .       MIN(INTBUF_TAB%KREMNODE(I_DBG)+20,
+!!!!      .           INTBUF_TAB%KREMNODE(I_DBG+1)))
+!!!!         END IF
+!!!!       END DO
+!!!!       WRITE(*,*) '=== END FORTRAN DEBUG ==='
+
       IREMNODE = IREMNODE + 1
 C-----------------------------------------------
       IF(NTY==25)THEN
