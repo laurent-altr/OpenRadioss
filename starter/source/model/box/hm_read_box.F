@@ -117,7 +117,7 @@ c
 c-----------------------------------------------
       IAD = 0
       LEN = 5*NBBOX
-      CALL MY_ALLOC(BUFTMP  ,LEN)
+      CALL MY_ALLOC(BUFTMP  ,LEN,"BUFTMP  ")
 c--------------------------------------------------
 c
       CALL READ_BOX_SPHER(
@@ -137,7 +137,7 @@ c
 c--------------------------------------------------
 c     Search for double IDs
 c
-      CALL MY_ALLOC (IBOXTMP  ,NBOX )
+      CALL MY_ALLOC(IBOXTMP  ,NBOX ,"IBOXTMP  ")
       IBOXTMP(1:NBOX) = IBOX(1:NBOX)%ID
       CALL UDOUBLE_IGR(IBOXTMP,NBOX,MESS,0,ZERO)
 c

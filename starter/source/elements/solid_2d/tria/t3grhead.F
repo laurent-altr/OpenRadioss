@@ -209,7 +209,7 @@ C
      .                           C1='XNUM_RNOISE')
       ENDIF
 C
-      CALL MY_ALLOC(INDEX2,NUMELTG)
+      CALL MY_ALLOC(INDEX2,NUMELTG,"INDEX2")
 
       IF(NDRAPE > 0 .AND. NUMELTG_DRAPE > 0) THEN 
          DO I=1,NUMELTG                                                          

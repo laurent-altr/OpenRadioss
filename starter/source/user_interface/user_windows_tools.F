@@ -79,8 +79,8 @@ C-----------------------------------------------
       USERWI_ID = USER_WINDOWS%USER_WINDOWS_ID
       USER_WINDOWS%N_USERNODS = NUMBER_USERNODS
       
-      CALL MY_ALLOC(USER_NDS,NUMBER_USERNODS)
-      CALL MY_ALLOC(USER_WINDOWS%USERNODS,NUMBER_USERNODS)
+      CALL MY_ALLOC(USER_NDS,NUMBER_USERNODS,"USER_NDS")
+      CALL MY_ALLOC(USER_WINDOWS%USERNODS,NUMBER_USERNODS,"USER_WINDOWS%USERNODS")
       
       !print*,'NUMBER_USERNODS=',NUMBER_USERNODS
       !print*,'USERNDS=',USERNODS(1:NUMBER_USERNODS)
@@ -92,9 +92,9 @@ C-----------------------------------------------
       ENDDO
 
       ! Sort Nodes
-      CALL MY_ALLOC(WORK,70000)
-      CALL MY_ALLOC(IDX,2*NUMBER_USERNODS)
-      CALL MY_ALLOC(SORT,NUMBER_USERNODS)
+      CALL MY_ALLOC(WORK,70000,"WORK")
+      CALL MY_ALLOC(IDX,2*NUMBER_USERNODS,"IDX")
+      CALL MY_ALLOC(SORT,NUMBER_USERNODS,"SORT")
       DO I=1,NUMBER_USERNODS
          IDX(I)=I
          SORT(I)=USER_NDS(I)
@@ -233,8 +233,8 @@ C======================================================================|
          
            !  Send Index & Buffer
            ! ---------------------
-           CALL MY_ALLOC(IAD_USERW,NSPMD+1)
-           CALL MY_ALLOC(PLIST,NSPMD)
+           CALL MY_ALLOC(IAD_USERW,NSPMD+1,"IAD_USERW")
+           CALL MY_ALLOC(PLIST,NSPMD,"PLIST")
            IAD_USERW(1:NSPMD+1)=0
 
            DO II=1,USER_WINDOWS%N_USERNODS
@@ -253,8 +253,8 @@ C======================================================================|
               IAD_USERW(NP)=IAD_USERW(NP) + IAD_USERW(NP-1)
            ENDDO
            SFR_USERWI_L = IAD_USERW(NSPMD+1)-1
-           CALL MY_ALLOC(FR_USERWI_L,SFR_USERWI_L)
-           CALL MY_ALLOC(IAD_USERW2,NSPMD+1)
+           CALL MY_ALLOC(FR_USERWI_L,SFR_USERWI_L,"FR_USERWI_L")
+           CALL MY_ALLOC(IAD_USERW2,NSPMD+1,"IAD_USERW2")
            IAD_USERW2(1:NSPMD+1) = IAD_USERW(1:NSPMD+1)
 
            DO II=1,USER_WINDOWS%N_USERNODS
@@ -270,7 +270,7 @@ C======================================================================|
            
            !  UserNode LIST Transform
            ! -----------------------
-           CALL MY_ALLOC(USERNODS_L,USER_WINDOWS%N_USERNODS)
+           CALL MY_ALLOC(USERNODS_L,USER_WINDOWS%N_USERNODS,"USERNODS_L")
            DO I=1,USER_WINDOWS%N_USERNODS
                USERNODS_L(I) = NODLOCAL(USER_WINDOWS%USERNODS(I))
            ENDDO
@@ -304,7 +304,7 @@ C======================================================================|
            DEALLOCATE(DUM_SAV)
 
          ELSE                               ! Receive buffer from P=1
-           CALL MY_ALLOC(FR_USERWI_L,USER_WINDOWS%N_USERNODS)
+           CALL MY_ALLOC(FR_USERWI_L,USER_WINDOWS%N_USERNODS,"FR_USERWI_L")
            FR_USERWI_L(1:USER_WINDOWS%N_USERNODS)=0
            SFR_USERWI_L = 0
            DO II=1,USER_WINDOWS%N_USERNODS
@@ -329,4 +329,3 @@ C======================================================================|
 
 
       END
-

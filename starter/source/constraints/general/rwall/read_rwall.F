@@ -104,7 +104,7 @@ C=======================================================================
 C-----------------------------------------------
 C     B e g i n n i n g   o f   s o u r c e
 C-----------------------------------------------
-      CALL MY_ALLOC(IKINE1,3*NUMNOD)
+      CALL MY_ALLOC(IKINE1,3*NUMNOD,"IKINE1")
 C     Beginning of RWALL cards in the IIN file
       WRITE(IOUT,1000)
 C

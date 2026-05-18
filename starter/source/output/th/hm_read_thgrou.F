@@ -372,7 +372,7 @@ C-----------------------------------------------
       VARSG(1:NVARSG) = ' '
 
       ! INTEGER Arrays - use MY_ALLOC
-      CALL MY_ALLOC(IVARSG,18,NVARSG)
+      CALL MY_ALLOC(IVARSG,18,NVARSG,"IVARSG")
 C   nodes
       DATA VARN1/'DX      ','DY      ','DZ      ',
      .           'VX      ','VY      ','VZ      ',

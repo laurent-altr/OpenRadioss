@@ -70,10 +70,10 @@ C-----------------------------------------------
      .                                        PROCNE_L
       INTEGER, DIMENSION(:,:), ALLOCATABLE :: IADS,IADC,IADTG
 C=======================================================================
-      CALL MY_ALLOC(INDX_L,NUMNOD_L)
-      CALL MY_ALLOC(NDDL,NUMNOD_L)
-      CALL MY_ALLOC(IDXI_L,NUMNOD_L)
-      CALL MY_ALLOC(POSI,NUMNOD_L+1)
+      CALL MY_ALLOC(INDX_L,NUMNOD_L,"INDX_L")
+      CALL MY_ALLOC(NDDL,NUMNOD_L,"NDDL")
+      CALL MY_ALLOC(IDXI_L,NUMNOD_L,"IDXI_L")
+      CALL MY_ALLOC(POSI,NUMNOD_L+1,"POSI")
 
       ! Flag for non-local computation 
       LCNENL_L = 0

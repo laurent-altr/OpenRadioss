@@ -174,8 +174,8 @@ C-----------------------------------------------
       TYPE(G_BUFEL_) ,POINTER :: GBUF
       TYPE(L_BUFEL_) ,POINTER :: LBUF
 C=======================================================================
-      CALL MY_ALLOC(MATLY,MVSIZ*LAY_MAX)
-      CALL MY_ALLOC(POSLY,MVSIZ,LAY_MAX*LAYNPT_MAX)
+      CALL MY_ALLOC(MATLY,MVSIZ*LAY_MAX,"MATLY")
+      CALL MY_ALLOC(POSLY,MVSIZ,LAY_MAX*LAYNPT_MAX,"POSLY")
       GBUF  => ELBUF_STR%GBUF
 c
       IMAT  = IXC(1,1+NFT)         ! mat N

@@ -82,7 +82,7 @@ C-----------------------------------------------
        END SUBROUTINE  
       END INTERFACE     
 C=======================================================================
-      CALL MY_ALLOC(BUFTMP,NUMEN*2)
+      CALL MY_ALLOC(BUFTMP,NUMEN*2,"BUFTMP")
       IF (FLAG == 0) ICOUNT=0
       IGS = 0
 C     loop over the groups
@@ -163,7 +163,7 @@ C                  sorted group
                 ENDIF                               
 C
                 IGRELEM(IGS)%NENTITY = NEL
-                CALL MY_ALLOC(IGRELEM(IGS)%ENTITY,NEL)
+                CALL MY_ALLOC(IGRELEM(IGS)%ENTITY,NEL,"IGRELEM(IGS)%ENTITY")
                 IGRELEM(IGS)%ENTITY = 0
               ENDIF                                 
 C-----------                                             

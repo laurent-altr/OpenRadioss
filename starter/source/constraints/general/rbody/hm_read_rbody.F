@@ -172,7 +172,7 @@ C=======================================================================
       DATA MESS/'RIGID BODY DEFINITION                   '/
 C=======================================================================
       IF (NUMSL > 0) THEN
-        CALL MY_ALLOC(TABSL,2,NUMSL)
+        CALL MY_ALLOC(TABSL,2,NUMSL,"TABSL")
         TABSL=0
       END IF
 
@@ -183,7 +183,7 @@ C--------------------------------------------------
       IS_AVAILABLE = .FALSE.
       CALL HM_OPTION_START('/RBODY')
 C
-      CALL MY_ALLOC(ITAG,NUMNOD) 
+      CALL MY_ALLOC(ITAG,NUMNOD,"ITAG")
       ITAG(1:NUMNOD) = 0
 C
       K=0
@@ -647,7 +647,7 @@ C
       END DO
 C
 C init a 0 de itag
-      CALL MY_ALLOC(ITAG,NUMNOD) 
+      CALL MY_ALLOC(ITAG,NUMNOD,"ITAG")
       DO I=1,NUMNOD
         ITAG(I)=0
       ENDDO
@@ -830,7 +830,7 @@ C======================================================================|
 C
       IRBYON = 1
 C
-      CALL MY_ALLOC(ITAG,NUMNOD) 
+      CALL MY_ALLOC(ITAG,NUMNOD,"ITAG")
 C Initial initialization on NUMNOD
       DO I=1,NUMNOD
         ITAG(I)=0
@@ -1063,4 +1063,3 @@ C-----------
 C
       RETURN
       END SUBROUTINE SETELOFF
-

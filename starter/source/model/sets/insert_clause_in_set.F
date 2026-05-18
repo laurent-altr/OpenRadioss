@@ -586,7 +586,7 @@ C-----------------------------------------------
          SET%ELLIPSE_B = CLAUSE%ELLIPSE_B
          SET%ELLIPSE_C = CLAUSE%ELLIPSE_C
          SET%EXT_ALL = CLAUSE%EXT_ALL
-         CALL MY_ALLOC(SET%ELLIPSE_SKEW,9)
+         CALL MY_ALLOC(SET%ELLIPSE_SKEW,9,"SET%ELLIPSE_SKEW")
          SET%ELLIPSE_SKEW(1:9) = CLAUSE%ELLIPSE_SKEW(1:9)
 
       !------------------------!
@@ -656,9 +656,9 @@ C-----------------------------------------------
               DEALLOCATE(SET%SURF_ELTYP)
               DEALLOCATE(SET%SURF_ELEM)
 
-              CALL MY_ALLOC(SET%SURF_NODES,NS,4)
-              CALL MY_ALLOC  (SET%SURF_ELTYP,NS)
-              CALL MY_ALLOC  (SET%SURF_ELEM,NS)
+              CALL MY_ALLOC(SET%SURF_NODES,NS,4,"SET%SURF_NODES")
+              CALL MY_ALLOC(SET%SURF_ELTYP,NS,"SET%SURF_ELTYP")
+              CALL MY_ALLOC(SET%SURF_ELEM,NS,"SET%SURF_ELEM")
 
               SET%NB_SURF_SEG = NS
 
@@ -677,9 +677,9 @@ C-----------------------------------------------
               IF (ALLOCATED (SET%SURF_ELEM) ) DEALLOCATE(SET%SURF_ELEM)
 
               NEW_SIZE = CLAUSE%NB_SURF_SEG
-              CALL MY_ALLOC(SET%SURF_NODES,NEW_SIZE,4)
-              CALL MY_ALLOC  (SET%SURF_ELTYP,NEW_SIZE)
-              CALL MY_ALLOC  (SET%SURF_ELEM,NEW_SIZE)
+              CALL MY_ALLOC(SET%SURF_NODES,NEW_SIZE,4,"SET%SURF_NODES")
+              CALL MY_ALLOC(SET%SURF_ELTYP,NEW_SIZE,"SET%SURF_ELTYP")
+              CALL MY_ALLOC(SET%SURF_ELEM,NEW_SIZE,"SET%SURF_ELEM")
 
               SET%NB_SURF_SEG = NEW_SIZE
               SET%SURF_NODES(1:NEW_SIZE,1:4) = CLAUSE%SURF_NODES(1:NEW_SIZE,1:4)
@@ -743,9 +743,9 @@ C-----------------------------------------------
                 DEALLOCATE(SET%LINE_ELTYP)
                 DEALLOCATE(SET%LINE_ELEM)
 
-                CALL MY_ALLOC(SET%LINE_NODES,NEW_SIZE,4)
-                CALL MY_ALLOC  (SET%LINE_ELTYP,NEW_SIZE)
-                CALL MY_ALLOC  (SET%LINE_ELEM,NEW_SIZE)
+                CALL MY_ALLOC(SET%LINE_NODES,NEW_SIZE,4,"SET%LINE_NODES")
+                CALL MY_ALLOC(SET%LINE_ELTYP,NEW_SIZE,"SET%LINE_ELTYP")
+                CALL MY_ALLOC(SET%LINE_ELEM,NEW_SIZE,"SET%LINE_ELEM")
 
                 SET%NB_LINE_SEG = NEW_SIZE
 
@@ -762,9 +762,9 @@ C-----------------------------------------------
                     IF (ALLOCATED (SET%LINE_ELEM) ) DEALLOCATE(SET%LINE_ELEM)
 
                     NEW_SIZE = CLAUSE%NB_LINE_SEG
-                    CALL MY_ALLOC(SET%LINE_NODES,NEW_SIZE,2)
-                    CALL MY_ALLOC  (SET%LINE_ELTYP,NEW_SIZE)
-                    CALL MY_ALLOC  (SET%LINE_ELEM,NEW_SIZE)
+                    CALL MY_ALLOC(SET%LINE_NODES,NEW_SIZE,2,"SET%LINE_NODES")
+                    CALL MY_ALLOC(SET%LINE_ELTYP,NEW_SIZE,"SET%LINE_ELTYP")
+                    CALL MY_ALLOC(SET%LINE_ELEM,NEW_SIZE,"SET%LINE_ELEM")
 
                     SET%NB_LINE_SEG = NEW_SIZE
                     SET%LINE_NODES(1:NEW_SIZE,1:2) = CLAUSE%LINE_NODES(1:NEW_SIZE,1:2)
@@ -852,9 +852,9 @@ C-----------------------------------------------
         IF(ALLOCATED(SET%SURF_ELEM)) DEALLOCATE(SET%SURF_ELEM)
         IF(ALLOCATED(DELBUF%SURF))   DEALLOCATE(DELBUF%SURF)
 
-        CALL MY_ALLOC(SET%SURF_NODES,NS,4)
-        CALL MY_ALLOC(SET%SURF_ELTYP,NS)
-        CALL MY_ALLOC(SET%SURF_ELEM,NS)
+        CALL MY_ALLOC(SET%SURF_NODES,NS,4,"SET%SURF_NODES")
+        CALL MY_ALLOC(SET%SURF_ELTYP,NS,"SET%SURF_ELTYP")
+        CALL MY_ALLOC(SET%SURF_ELEM,NS,"SET%SURF_ELEM")
 
         SET%NB_SURF_SEG = NS
 
@@ -890,9 +890,9 @@ C-----------------------------------------------
         IF(ALLOCATED(SET%LINE_ELEM)) DEALLOCATE(SET%LINE_ELEM)
         IF(ALLOCATED(DELBUF%LINE))   DEALLOCATE(DELBUF%LINE)
 
-        CALL MY_ALLOC(SET%LINE_NODES,NEW_SIZE,4)
-        CALL MY_ALLOC  (SET%LINE_ELTYP,NEW_SIZE)
-        CALL MY_ALLOC  (SET%LINE_ELEM,NEW_SIZE)
+        CALL MY_ALLOC(SET%LINE_NODES,NEW_SIZE,4,"SET%LINE_NODES")
+        CALL MY_ALLOC(SET%LINE_ELTYP,NEW_SIZE,"SET%LINE_ELTYP")
+        CALL MY_ALLOC(SET%LINE_ELEM,NEW_SIZE,"SET%LINE_ELEM")
 
         SET%NB_LINE_SEG = NEW_SIZE
 
@@ -926,9 +926,9 @@ C-----------------------------------------------
         IF(ALLOCATED(SET%LINE_ELEM)) DEALLOCATE(SET%LINE_ELEM)
         IF(ALLOCATED(DELBUF%LINE))   DEALLOCATE(DELBUF%LINE)
 
-        CALL MY_ALLOC(SET%LINE_NODES,NEW_SIZE,4)
-        CALL MY_ALLOC  (SET%LINE_ELTYP,NEW_SIZE)
-        CALL MY_ALLOC  (SET%LINE_ELEM,NEW_SIZE)
+        CALL MY_ALLOC(SET%LINE_NODES,NEW_SIZE,4,"SET%LINE_NODES")
+        CALL MY_ALLOC(SET%LINE_ELTYP,NEW_SIZE,"SET%LINE_ELTYP")
+        CALL MY_ALLOC(SET%LINE_ELEM,NEW_SIZE,"SET%LINE_ELEM")
 
         SET%NB_LINE_SEG = NEW_SIZE
 
@@ -943,9 +943,3 @@ C-----------------------------------------------
 
 
       END
-
-
-
-
-
-

@@ -213,13 +213,13 @@ C-----------------------------------------------
           IF (FLAG == 0) THEN                                              
             CALL HM_GET_INTV('segmax',NSEG,IS_AVAILABLE,LSUBMODEL)                                             
             IGRSLIN(IGS)%NSEG = NSEG                                       
-            CALL MY_ALLOC(IGRSLIN(IGS)%NODES,NSEG,2)                       
+            CALL MY_ALLOC(IGRSLIN(IGS)%NODES,NSEG,2,"IGRSLIN(IGS)%NODES")
             IGRSLIN(IGS)%NODES(1:NSEG,1:2) = 0                             
-            CALL MY_ALLOC(IGRSLIN(IGS)%ELTYP,NSEG)                           
+            CALL MY_ALLOC(IGRSLIN(IGS)%ELTYP,NSEG,"IGRSLIN(IGS)%ELTYP")
             IGRSLIN(IGS)%ELTYP(1:NSEG) = 0                                 
-            CALL MY_ALLOC(IGRSLIN(IGS)%ELEM,NSEG)                            
+            CALL MY_ALLOC(IGRSLIN(IGS)%ELEM,NSEG,"IGRSLIN(IGS)%ELEM")
             IGRSLIN(IGS)%ELEM(1:NSEG) = 0                                  
-            CALL MY_ALLOC(IGRSLIN(IGS)%PROC,NSEG)                            
+            CALL MY_ALLOC(IGRSLIN(IGS)%PROC,NSEG,"IGRSLIN(IGS)%PROC")
             IGRSLIN(IGS)%PROC(1:NSEG) = 0                                  
           ENDIF  
           IF(FLAG == 1) THEN                    
@@ -340,13 +340,13 @@ C-------------------------
 
               IF (FLAG == 1) THEN ! NSEG counted at FLAG = 0
                 NSEG0 = IGRSLIN(IGS)%NSEG
-                CALL MY_ALLOC(IGRSLIN(IGS)%NODES,NSEG0,2)
+                CALL MY_ALLOC(IGRSLIN(IGS)%NODES,NSEG0,2,"IGRSLIN(IGS)%NODES")
                 IGRSLIN(IGS)%NODES(1:NSEG0,1:2) = 0
-                CALL MY_ALLOC(IGRSLIN(IGS)%ELTYP,NSEG0)
+                CALL MY_ALLOC(IGRSLIN(IGS)%ELTYP,NSEG0,"IGRSLIN(IGS)%ELTYP")
                 IGRSLIN(IGS)%ELTYP(1:NSEG0) = 0
-                CALL MY_ALLOC(IGRSLIN(IGS)%ELEM,NSEG0)
+                CALL MY_ALLOC(IGRSLIN(IGS)%ELEM,NSEG0,"IGRSLIN(IGS)%ELEM")
                 IGRSLIN(IGS)%ELEM(1:NSEG0) = 0
-                CALL MY_ALLOC(IGRSLIN(IGS)%PROC,NSEG0)
+                CALL MY_ALLOC(IGRSLIN(IGS)%PROC,NSEG0,"IGRSLIN(IGS)%PROC")
                 IGRSLIN(IGS)%PROC(1:NSEG0) = 0
               ENDIF
 
@@ -408,13 +408,13 @@ C=======================================================================
             IF (KEY(1:4) == 'PART'.OR.KEY(1:6) == 'SUBSET'.OR. KEY(1:3) == 'MAT' .OR.KEY(1:4) == 'PROP') THEN
               IF (FLAG == 1) THEN ! NSEG counted at FLAG = 0
                 NSEG0 = IGRSLIN(IGS)%NSEG
-                CALL MY_ALLOC(IGRSLIN(IGS)%NODES,NSEG0,2)
+                CALL MY_ALLOC(IGRSLIN(IGS)%NODES,NSEG0,2,"IGRSLIN(IGS)%NODES")
                 IGRSLIN(IGS)%NODES(1:NSEG0,1:2) = 0
-                CALL MY_ALLOC(IGRSLIN(IGS)%ELTYP,NSEG0)
+                CALL MY_ALLOC(IGRSLIN(IGS)%ELTYP,NSEG0,"IGRSLIN(IGS)%ELTYP")
                 IGRSLIN(IGS)%ELTYP(1:NSEG0) = 0
-                CALL MY_ALLOC(IGRSLIN(IGS)%ELEM,NSEG0)
+                CALL MY_ALLOC(IGRSLIN(IGS)%ELEM,NSEG0,"IGRSLIN(IGS)%ELEM")
                 IGRSLIN(IGS)%ELEM(1:NSEG0) = 0
-                CALL MY_ALLOC(IGRSLIN(IGS)%PROC,NSEG0)
+                CALL MY_ALLOC(IGRSLIN(IGS)%PROC,NSEG0,"IGRSLIN(IGS)%PROC")
                 IGRSLIN(IGS)%PROC(1:NSEG0) = 0
               ENDIF
               CALL HM_TAGPART2(BUFTMP,IPART ,KEY   ,
@@ -461,13 +461,13 @@ C=======================================================================
             IF (KEY(1:6)=='SUBMOD') THEN
               IF (FLAG == 1) THEN ! NSEG counted at FLAG = 0
                 NSEG0 = IGRSLIN(IGS)%NSEG
-                CALL MY_ALLOC(IGRSLIN(IGS)%NODES,NSEG0,2)
+                CALL MY_ALLOC(IGRSLIN(IGS)%NODES,NSEG0,2,"IGRSLIN(IGS)%NODES")
                 IGRSLIN(IGS)%NODES(1:NSEG0,1:2) = 0
-                CALL MY_ALLOC(IGRSLIN(IGS)%ELTYP,NSEG0)
+                CALL MY_ALLOC(IGRSLIN(IGS)%ELTYP,NSEG0,"IGRSLIN(IGS)%ELTYP")
                 IGRSLIN(IGS)%ELTYP(1:NSEG0) = 0
-                CALL MY_ALLOC(IGRSLIN(IGS)%ELEM,NSEG0)
+                CALL MY_ALLOC(IGRSLIN(IGS)%ELEM,NSEG0,"IGRSLIN(IGS)%ELEM")
                 IGRSLIN(IGS)%ELEM(1:NSEG0) = 0
-                CALL MY_ALLOC(IGRSLIN(IGS)%PROC,NSEG0)
+                CALL MY_ALLOC(IGRSLIN(IGS)%PROC,NSEG0,"IGRSLIN(IGS)%PROC")
                 IGRSLIN(IGS)%PROC(1:NSEG0) = 0
               ENDIF
 !
@@ -539,13 +539,13 @@ C=======================================================================
                 ENDIF                                                                      
               ENDDO
               IF (FLAG == 1) THEN ! NSEG counted at FLAG = 0
-                CALL MY_ALLOC(IGRSLIN(IGS)%NODES, IGRSLIN(IGS)%NSEG,2)
+                CALL MY_ALLOC(IGRSLIN(IGS)%NODES, IGRSLIN(IGS)%NSEG,2,"IGRSLIN(IGS)%NODES")
                 IGRSLIN(IGS)%NODES(1:IGRSLIN(IGS)%NSEG,1:2) = 0
-                CALL MY_ALLOC(IGRSLIN(IGS)%ELTYP,IGRSLIN(IGS)%NSEG)
+                CALL MY_ALLOC(IGRSLIN(IGS)%ELTYP,IGRSLIN(IGS)%NSEG,"IGRSLIN(IGS)%ELTYP")
                 IGRSLIN(IGS)%ELTYP(1:IGRSLIN(IGS)%NSEG) = 0
-                CALL MY_ALLOC(IGRSLIN(IGS)%ELEM,IGRSLIN(IGS)%NSEG)
+                CALL MY_ALLOC(IGRSLIN(IGS)%ELEM,IGRSLIN(IGS)%NSEG,"IGRSLIN(IGS)%ELEM")
                 IGRSLIN(IGS)%ELEM(1:IGRSLIN(IGS)%NSEG) = 0
-                CALL MY_ALLOC(IGRSLIN(IGS)%PROC,IGRSLIN(IGS)%NSEG)
+                CALL MY_ALLOC(IGRSLIN(IGS)%PROC,IGRSLIN(IGS)%NSEG,"IGRSLIN(IGS)%PROC")
                 IGRSLIN(IGS)%PROC(1:IGRSLIN(IGS)%NSEG) = 0
               ENDIF
               IF (NSEG0 > 0) THEN
@@ -582,13 +582,13 @@ C=======================================================================
             IF (KEY(1:2) == 'GR'.OR.KEY(1:4) == 'WIRE') THEN
               IF (FLAG == 1) THEN ! NSEG counted at FLAG = 0
                 NSEG0 = IGRSLIN(IGS)%NSEG
-                CALL MY_ALLOC(IGRSLIN(IGS)%NODES,NSEG0,2)
+                CALL MY_ALLOC(IGRSLIN(IGS)%NODES,NSEG0,2,"IGRSLIN(IGS)%NODES")
                 IGRSLIN(IGS)%NODES(1:NSEG0,1:2) = 0
-                CALL MY_ALLOC(IGRSLIN(IGS)%ELTYP,IGRSLIN(IGS)%NSEG)
+                CALL MY_ALLOC(IGRSLIN(IGS)%ELTYP,IGRSLIN(IGS)%NSEG,"IGRSLIN(IGS)%ELTYP")
                 IGRSLIN(IGS)%ELTYP(1:IGRSLIN(IGS)%NSEG) = 0
-                CALL MY_ALLOC(IGRSLIN(IGS)%ELEM,IGRSLIN(IGS)%NSEG)
+                CALL MY_ALLOC(IGRSLIN(IGS)%ELEM,IGRSLIN(IGS)%NSEG,"IGRSLIN(IGS)%ELEM")
                 IGRSLIN(IGS)%ELEM(1:IGRSLIN(IGS)%NSEG) = 0
-                CALL MY_ALLOC(IGRSLIN(IGS)%PROC,NSEG0)
+                CALL MY_ALLOC(IGRSLIN(IGS)%PROC,NSEG0,"IGRSLIN(IGS)%PROC")
                 IGRSLIN(IGS)%PROC(1:NSEG0) = 0
               ENDIF
               IF(KEY(1:6) == 'GRSPRI') THEN

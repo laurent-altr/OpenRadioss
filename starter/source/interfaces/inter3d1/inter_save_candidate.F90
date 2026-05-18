@@ -26,7 +26,7 @@
 !||    i7trivox1                  ../starter/source/interfaces/inter3d1/i7trivox1.F
 !||====================================================================
       module inter_save_candidate_mod
-      implicit none
+        implicit none
       contains
 ! ======================================================================================================================
 !                                                   procedures
@@ -48,6 +48,7 @@
           use constant_mod
           use array_mod
           use precision_mod, only : WP
+          use MY_ALLOC_MOD
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Implicit none
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -99,8 +100,8 @@
             if(local_i_stok+k_stok>local_cand_n%size_int_array_1d) then
               my_old_size = local_cand_n%size_int_array_1d
               my_size = nint((my_old_size+k_stok) * 1.25)
-              allocate( tmp_array_1( my_size ) )
-              allocate( tmp_array_2( my_size ) )
+              call my_alloc(tmp_array_1, my_size, "tmp_array_1")
+              call my_alloc(tmp_array_2, my_size, "tmp_array_2")
               tmp_array_1(1:my_old_size) = local_cand_n%int_array_1d(1:my_old_size)
               tmp_array_2(1:my_old_size) = local_cand_e%int_array_1d(1:my_old_size)
               call dealloc_1d_array(local_cand_n)

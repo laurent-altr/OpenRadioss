@@ -87,8 +87,8 @@ C-----------------------------------------------
 C       Solid elements
 C-----------------------------------------------
 C
-        CALL MY_ALLOC(INDEX,2*NUMELS)
-        CALL MY_ALLOC(ITR1,NUMELS)
+        CALL MY_ALLOC(INDEX,2*NUMELS,"INDEX")
+        CALL MY_ALLOC(ITR1,NUMELS,"ITR1")
 C
         DO I=1,NUMELS8
           ITR1(I)=IXS(NIXS,I)
@@ -236,8 +236,8 @@ C-----------------------------------------------
 C       Spring elements
 C-----------------------------------------------
 C
-        CALL MY_ALLOC(INDEX,2*NUMELR)
-        CALL MY_ALLOC(ITR1,NUMELR)
+        CALL MY_ALLOC(INDEX,2*NUMELR,"INDEX")
+        CALL MY_ALLOC(ITR1,NUMELR,"ITR1")
 C
         DO I=1,NUMELR
           ITR1(I)=IXR(NIXR,I)
@@ -293,8 +293,8 @@ C
         IF (NUMELR > 0) THEN
 C
           NUMEL_KJ = IXR_KJ(1,NUMELR+1)
-          CALL MY_ALLOC(INDEX,2*NUMEL_KJ)
-          CALL MY_ALLOC(ITR1,NUMEL_KJ)
+          CALL MY_ALLOC(INDEX,2*NUMEL_KJ,"INDEX")
+          CALL MY_ALLOC(ITR1,NUMEL_KJ,"ITR1")
 C
           DO I=1,NUMEL_KJ
             ITR1(I)=IXR_KJ(4,I)
@@ -322,8 +322,8 @@ C-----------------------------------------------
 C       Beam elements
 C-----------------------------------------------
 C
-        CALL MY_ALLOC(INDEX,2*NUMELP)
-        CALL MY_ALLOC(ITR1,NUMELP)
+        CALL MY_ALLOC(INDEX,2*NUMELP,"INDEX")
+        CALL MY_ALLOC(ITR1,NUMELP,"ITR1")
 C
         DO I=1,NUMELP
           ITR1(I)=IXP(NIXP,I)
@@ -378,8 +378,8 @@ C-----------------------------------------------
 C       Truss elements
 C-----------------------------------------------
 C
-        CALL MY_ALLOC(INDEX,2*NUMELT)
-        CALL MY_ALLOC(ITR1,NUMELT)
+        CALL MY_ALLOC(INDEX,2*NUMELT,"INDEX")
+        CALL MY_ALLOC(ITR1,NUMELT,"ITR1")
 C
         DO I=1,NUMELT
           ITR1(I)=IXT(NIXT,I)
@@ -413,8 +413,8 @@ C
 C-----------------------------------------------
 C       SHELL elements
 C-----------------------------------------------
-        CALL MY_ALLOC(INDEX,2*NUMELC)
-        CALL MY_ALLOC(ITR1,NUMELC)
+        CALL MY_ALLOC(INDEX,2*NUMELC,"INDEX")
+        CALL MY_ALLOC(ITR1,NUMELC,"ITR1")
 C
         DO I=1,NUMELC
           ITR1(I)=IXC(NIXC,I)
@@ -452,8 +452,8 @@ C
 C-----------------------------------------------
 C       QUAD elements
 C-----------------------------------------------
-        CALL MY_ALLOC(INDEX,2*NUMELQ)
-        CALL MY_ALLOC(ITR1,NUMELQ)
+        CALL MY_ALLOC(INDEX,2*NUMELQ,"INDEX")
+        CALL MY_ALLOC(ITR1,NUMELQ,"ITR1")
 C
         DO I=1,NUMELQ
           ITR1(I)=IXQ(NIXQ,I)
@@ -483,8 +483,8 @@ C
 C-----------------------------------------------
 C       SH3N elements
 C-----------------------------------------------
-        CALL MY_ALLOC(INDEX,2*NUMELTG)
-        CALL MY_ALLOC(ITR1,NUMELTG)
+        CALL MY_ALLOC(INDEX,2*NUMELTG,"INDEX")
+        CALL MY_ALLOC(ITR1,NUMELTG,"ITR1")
 C
         DO I=1,NUMELTG
           ITR1(I)=IXTG(NIXTG,I)
@@ -523,8 +523,8 @@ C
 C-----------------------------------------------
 C       Sph elements
 C-----------------------------------------------
-        CALL MY_ALLOC(INDEX,2*NUMSPH)
-        CALL MY_ALLOC(ITR1,NUMSPH)
+        CALL MY_ALLOC(INDEX,2*NUMSPH,"INDEX")
+        CALL MY_ALLOC(ITR1,NUMSPH,"ITR1")
 C
         DO I=1,NUMSPH
           ITR1(I)=KXSP(NISP,I)
@@ -560,8 +560,8 @@ C
 C-----------------------------------------------
 C       Xelem elements
 C-----------------------------------------------
-        CALL MY_ALLOC(INDEX,2*NUMELX)
-        CALL MY_ALLOC(ITR1,NUMELX)
+        CALL MY_ALLOC(INDEX,2*NUMELX,"INDEX")
+        CALL MY_ALLOC(ITR1,NUMELX,"ITR1")
 C
         DO I=1,NUMELX
           ITR1(I)=KXX(NIXX,I)
@@ -591,8 +591,8 @@ C
 C-----------------------------------------------
 C       Rivet elements
 C-----------------------------------------------
-        CALL MY_ALLOC(INDEX,2*NRIVET)
-        CALL MY_ALLOC(ITR1,NRIVET)
+        CALL MY_ALLOC(INDEX,2*NRIVET,"INDEX")
+        CALL MY_ALLOC(ITR1,NRIVET,"ITR1")
 C
         DO I=1,NRIVET
           ITR1(I)=IXRI(4,I)

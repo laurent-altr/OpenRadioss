@@ -1173,9 +1173,9 @@ C----------------------
       NREV=0
       IPGMAT = 700
       IF(NUMELS > 0) THEN
-        CALL MY_ALLOC(TAGELEMS,NUMELS)
+        CALL MY_ALLOC(TAGELEMS,NUMELS,"TAGELEMS")
         TAGELEMS = 0
-        CALL MY_ALLOC(INDEXE,NUMELS)
+        CALL MY_ALLOC(INDEXE,NUMELS,"INDEXE")
         INDEXE = 0
       ENDIF
       NINV = 0
@@ -2513,4 +2513,3 @@ C
 C-----------------------------------------------
       RETURN
       END
-

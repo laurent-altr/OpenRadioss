@@ -585,7 +585,7 @@ C-----------------------------------------------
 #if CPP_comp == f90
          ALLOCATE(INDEX(3*NLIST))
 #else
-        CALL MY_ALLOC(IINDEX,3*NLIST,0)
+        CALL MY_ALLOC(IINDEX,3*NLIST,0,"IINDEX")
 #endif
         CALL UDOUBL2(INDEX,NLIST,MESS,LIST,ILIST,IR,RLIST) 
 #if CPP_comp == f90
@@ -634,7 +634,7 @@ C-----------------------------------------------
 #if CPP_comp == f90
          ALLOCATE(INDEX(3*NLIST))
 #else
-        CALL MY_ALLOC(IINDEX,3*NLIST,0)
+        CALL MY_ALLOC(IINDEX,3*NLIST,0,"IINDEX")
 #endif
       DO n=1,nlist
         IAD=KXX(4,N)
@@ -751,7 +751,7 @@ C-----------------------------------------------
 #if CPP_comp == f90
          ALLOCATE(INDEX(3*NLIST))
 #else
-        CALL MY_ALLOC(IINDEX,3*NLIST,0)
+        CALL MY_ALLOC(IINDEX,3*NLIST,0,"IINDEX")
 #endif
         CALL NEWDBL2(INDEX,NLIST,LIST,ILIST,TAB,ERRID,STATUS,NOM_OPT) 
 #if CPP_comp == f90
@@ -877,7 +877,7 @@ C-----------------------------------------------
 #if CPP_comp == f90
          ALLOCATE(INDEX(3*NLIST))
 #else
-        CALL MY_ALLOC(IINDEX,3*NLIST,0)
+        CALL MY_ALLOC(IINDEX,3*NLIST,0,"IINDEX")
 #endif
       CALL VDOUBL2(INDEX,NLIST,MESS,LIST,ILIST,IR,RLIST) 
 #if CPP_comp == f90
@@ -986,7 +986,7 @@ C-----------------------------------------------
 #if CPP_comp == f90
          ALLOCATE(INDEX(3*NLIST))
 #else
-        CALL MY_ALLOC(IINDEX,3*NLIST,0)
+        CALL MY_ALLOC(IINDEX,3*NLIST,0,"IINDEX")
 #endif
         CALL UDOUBL2_WO_TITLE(INDEX,NLIST,MESS,LIST,ILIST,IR,RLIST) 
 #if CPP_comp == f90
@@ -1097,7 +1097,7 @@ C-----------------------------------------------
 #if CPP_comp == f90
          ALLOCATE(INDEX(3*NLIST))
 #else
-        CALL MY_ALLOC(IINDEX,3*NLIST,0)
+        CALL MY_ALLOC(IINDEX,3*NLIST,0,"IINDEX")
 #endif
         CALL UDOUBL3(INDEX,NLIST,MESS,MESS2,LIST,ILIST,IR,RLIST) 
 #if CPP_comp == f90
@@ -1217,7 +1217,7 @@ C-----------------------------------------------
 #if CPP_comp == f90
          ALLOCATE(INDEX(3*NLIST))
 #else
-        CALL MY_ALLOC(IINDEX,3*NLIST,0)
+        CALL MY_ALLOC(IINDEX,3*NLIST,0,"IINDEX")
 #endif
         CALL UDOUBL2_IGR(INDEX,NLIST,MESS,LIST,IR,RLIST) 
 #if CPP_comp == f90
@@ -1267,7 +1267,7 @@ C-----------------------------------------------
 #if CPP_comp == f90
          ALLOCATE(INDEX(3*NLIST))
 #else
-        CALL MY_ALLOC(IINDEX,3*NLIST,0)
+        CALL MY_ALLOC(IINDEX,3*NLIST,0,"IINDEX")
 #endif
         CALL UDOUBL2_SET(INDEX,NLIST,MESS,LIST,IR,RLIST) 
 #if CPP_comp == f90

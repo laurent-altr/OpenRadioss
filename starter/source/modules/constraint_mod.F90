@@ -89,6 +89,7 @@
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Modules
 ! ----------------------------------------------------------------------------------------------------------------------
+          use MY_ALLOC_MOD, only : my_alloc
 
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Implicit none
@@ -110,13 +111,15 @@
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Body
 ! ----------------------------------------------------------------------------------------------------------------------
-          allocate( constraint_struct%rwall%dd(nspmd+2,nrwall) )
+          call my_alloc(constraint_struct%rwall%dd,nspmd+2,nrwall,                 &
+          &                  "constraint_struct%rwall%dd")
           constraint_struct%rwall%dd(1:nspmd+2,1:nrwall) = 0
 
           allocate( constraint_struct%rwall%spmd(nrwall) )
           ! ------------
           do n=1,nrwall
-            allocate( constraint_struct%rwall%spmd(n)%m_proc_list(nspmd) )
+            call my_alloc(constraint_struct%rwall%spmd(n)%m_proc_list,nspmd,       &
+            &                    "constraint_struct%rwall%spmd(n)%m_proc_list")
             constraint_struct%rwall%spmd(n)%m_proc_list(1:nspmd) = 0
           end do
           ! ------------
@@ -138,6 +141,7 @@
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Modules
 ! ----------------------------------------------------------------------------------------------------------------------
+          use my_dealloc_mod, only : my_dealloc
 
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Implicit none
@@ -160,12 +164,12 @@
 ! ----------------------------------------------------------------------------------------------------------------------
           ! ------------
           do n=1,nrwall
-            deallocate( constraint_struct%rwall%spmd(n)%m_proc_list )
+            call my_dealloc(constraint_struct%rwall%spmd(n)%m_proc_list, "constraint_struct%rwall%spmd(n)%m_proc_list")
           end do
           ! ------------
-          deallocate( constraint_struct%rwall%spmd )
+          deallocate(constraint_struct%rwall%spmd)
 
-          deallocate( constraint_struct%rwall%dd )
+          call my_dealloc(constraint_struct%rwall%dd, "constraint_struct%rwall%dd")
 
 ! ----------------------------------------------------------------------------------------------------------------------
         end subroutine dealloc_constraint_struct

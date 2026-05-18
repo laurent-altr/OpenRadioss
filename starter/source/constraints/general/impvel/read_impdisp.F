@@ -109,8 +109,8 @@ C-----------------------------------------------
       DATA ZZ /'ZZ'/
       DATA MESS/'IMPOSED DISPLACEMENT DEFINITION  '/
 C======================================================================|
-      CALL MY_ALLOC(IKINE1,3*NUMNOD)
-      CALL MY_ALLOC(NODENUM,NFXVEL)
+      CALL MY_ALLOC(IKINE1,3*NUMNOD,"IKINE1")
+      CALL MY_ALLOC(NODENUM,NFXVEL,"NODENUM")
 c
       IS_AVAILABLE = .FALSE.
 c

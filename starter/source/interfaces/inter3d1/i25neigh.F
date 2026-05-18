@@ -120,9 +120,9 @@ C-----------------------------------------------
       DATA KPERM1/1,3,5,7/
       DATA KPERM2/2,4,6,8/
 C-----------------------------------------------
-      CALL MY_ALLOC(ITAG,NUMNOD)
-      CALL MY_ALLOC(NTAG,4*NRTM)
-      CALL MY_ALLOC(ROOT,4*NRTM)
+      CALL MY_ALLOC(ITAG,NUMNOD,"ITAG")
+      CALL MY_ALLOC(NTAG,4*NRTM,"NTAG")
+      CALL MY_ALLOC(ROOT,4*NRTM,"ROOT")
 C
       DO I=1,NRTM
         MSEGLO(I)=I      

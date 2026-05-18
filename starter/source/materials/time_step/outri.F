@@ -74,7 +74,7 @@ C-----------------------------------------------
 C=======================================================================
 C     INITIALIZATION OF INTERNAL NUMBERS OF ELEMENTS BEFORE SORTING
 C
-      CALL MY_ALLOC(PERM,NUMEL)
+      CALL MY_ALLOC(PERM,NUMEL,"PERM")
       ! --------------------
       ! solid and quad
       NUM2 = 0
@@ -400,8 +400,8 @@ C-----------------------------------------------
       INTEGER :: IERROR
       INTEGER, DIMENSION(:), ALLOCATABLE :: PERM
 C=======================================================================
-      CALL MY_ALLOC(PERM,NUMNOD)
-      CALL MY_ALLOC(DT,NUMNOD)
+      CALL MY_ALLOC(PERM,NUMNOD,"PERM")
+      CALL MY_ALLOC(DT,NUMNOD,"DT")
       DTNODA = EP30
 C 
       DO I=1,NUMNOD

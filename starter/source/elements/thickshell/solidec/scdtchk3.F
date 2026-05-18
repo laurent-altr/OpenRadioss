@@ -68,7 +68,7 @@ C-----------------------------------------------
       TYPE(G_BUFEL_) ,POINTER :: GBUF     
 C     REAL
 C-------
-      CALL MY_ALLOC(ITAG,NUMNOD)
+      CALL MY_ALLOC(ITAG,NUMNOD,"ITAG")
       ITAG(1:NUMNOD)=0
       NEDG = 0
       DO NG=1,NGROUP

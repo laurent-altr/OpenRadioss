@@ -73,8 +73,8 @@ C         Writing TH/SURF tabs in restart file
 C          /PLOAD option
 C-----------------------------------------------
 
-      CALL MY_ALLOC(KSEGS_L,TH_SURF%S_PLOAD_KSEGS)
-      CALL MY_ALLOC(SEGS_L,TH_SURF%S_PLOAD_SEGS)
+      CALL MY_ALLOC(KSEGS_L,TH_SURF%S_PLOAD_KSEGS,"KSEGS_L")
+      CALL MY_ALLOC(SEGS_L,TH_SURF%S_PLOAD_SEGS,"SEGS_L")
       KSEGS_L = 0
       SEGS_L = 0
       NSEGP  = 0      

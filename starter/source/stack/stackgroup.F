@@ -179,7 +179,7 @@ C    For Shell
 C-----------------------------------------------  
        NS_STACK = 0
        NPT_STACK = 0
-       CALL MY_ALLOC(GEO0,1000,NUMGEO)
+       CALL MY_ALLOC(GEO0,1000,NUMGEO,"GEO0")
        ALLOCATE(IWORK_T(NUMELC+NUMELTG))
        ALLOCATE(IPIDPLY(NUMGEO+NUMPLY))
        ALLOCATE(IDGR4N(NUMGEO+NUMPLY))

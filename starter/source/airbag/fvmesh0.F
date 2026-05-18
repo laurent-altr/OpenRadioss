@@ -105,7 +105,7 @@ C-----------------------------------------------
       my_real, DIMENSION(:,:), ALLOCATABLE :: X
       my_real DIRX,DIRY,DIRZ,DIR2X,DIR2Y,DIR2Z,ORIGX,ORIGY,ORIGZ,LX,LY,LZ
 C---+----1----+----2----+----3----+----4----+----5----+----6----+----7--
-      CALL MY_ALLOC(X,3,NB_NODE)
+      CALL MY_ALLOC(X,3,NB_NODE,"X")
       PFLAG = 0
       IFV=0
       DO N = 1, NVOLU

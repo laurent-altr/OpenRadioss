@@ -51,6 +51,7 @@
           use multi_fvm_mod , only : multi_fvm_struct
           use bcs_mod , only : bcs
           use my_alloc_mod
+          use my_dealloc_mod, only : my_dealloc
           use precision_mod , only : WP
           use matparam_def_mod, only: matparam_struct_
           use constant_mod , only : four_over_3, half, third, fourth
@@ -171,12 +172,12 @@
                     call my_alloc(itmp,2,isize)
                     itmp(1,1:isize) = bcs%iworking_array(1,1:isize)
                     itmp(2,1:isize) = bcs%iworking_array(2,1:isize)
-                    deallocate(bcs%iworking_array)
+                    call my_dealloc(bcs%iworking_array, "bcs%iworking_array")
                     isize=isize+numnod
                     call my_alloc(bcs%iworking_array,2,isize)
                     bcs%iworking_array(1,1:isize/2)=itmp(1,1:isize/2)
                     bcs%iworking_array(2,1:isize/2)=itmp(2,1:isize/2)
-                    deallocate(itmp)
+                    call my_dealloc(itmp, "itmp")
                   end if
                   !test binary codes to identify boundary faces
                   kk = 0 !number of identified faces
@@ -210,12 +211,12 @@
                     call my_alloc(itmp,2,isize)
                     itmp(1,1:isize) = bcs%iworking_array(1,1:isize)
                     itmp(2,1:isize) = bcs%iworking_array(2,1:isize)
-                    deallocate(bcs%iworking_array)
+                    call my_dealloc(bcs%iworking_array, "bcs%iworking_array")
                     isize=isize+numnod
                     call my_alloc(bcs%iworking_array,2,isize)
                     bcs%iworking_array(1,1:isize-numnod)=itmp(1,1:isize-numnod)
                     bcs%iworking_array(2,1:isize-numnod)=itmp(2,1:isize-numnod)
-                    deallocate(itmp)
+                    call my_dealloc(itmp, "itmp")
                   end if
                   !test binary codes to identify boundary faces
                   kk = 0 !number of identified faces
@@ -244,12 +245,12 @@
                     call my_alloc(itmp,2,isize)
                     itmp(1,1:isize) = bcs%iworking_array(1,1:isize)
                     itmp(2,1:isize) = bcs%iworking_array(2,1:isize)
-                    deallocate(bcs%iworking_array)
+                    call my_dealloc(bcs%iworking_array, "bcs%iworking_array")
                     isize=isize+numnod
                     call my_alloc(bcs%iworking_array,2,isize)
                     bcs%iworking_array(1,1:isize-numnod)=itmp(1,1:isize-numnod)
                     bcs%iworking_array(2,1:isize-numnod)=itmp(2,1:isize-numnod)
-                    deallocate(itmp)
+                    call my_dealloc(itmp, "itmp")
                   end if
                   !test binary codes to identify boundary faces
                   if(03 == IAND(icode,03))then; kk=kk+1 ; bcs%iworking_array(2,nseg+kk) = 1 ; end if
@@ -277,12 +278,12 @@
                     call my_alloc(itmp,2,isize)
                     itmp(1,1:isize) = bcs%iworking_array(1,1:isize)
                     itmp(2,1:isize) = bcs%iworking_array(2,1:isize)
-                    deallocate(bcs%iworking_array)
+                    call my_dealloc(bcs%iworking_array, "bcs%iworking_array")
                     isize=isize+numnod
                     call my_alloc(bcs%iworking_array,2,isize)
                     bcs%iworking_array(1,1:isize-numnod)=itmp(1,1:isize-numnod)
                     bcs%iworking_array(2,1:isize-numnod)=itmp(2,1:isize-numnod)
-                    deallocate(itmp)
+                    call my_dealloc(itmp, "itmp")
                   end if
                   !test binary codes to identify boundary faces
                   if(3 == IAND(icode,3))then; kk=kk+1 ; bcs%iworking_array(2,nseg+kk) = 1 ; end if
@@ -296,10 +297,10 @@
 
             end do!next ng
 
-            allocate(bcs%nrf(ii)%list%elem(nseg))
-            allocate(bcs%nrf(ii)%list%face(nseg))
-            allocate(bcs%nrf(ii)%list%rCp(nseg))
-            allocate(bcs%nrf(ii)%list%rCs(nseg))
+            call my_alloc(bcs%nrf(ii)%list%elem, nseg, "bcs%nrf(ii)%list%elem")
+            call my_alloc(bcs%nrf(ii)%list%face, nseg, "bcs%nrf(ii)%list%face")
+            call my_alloc(bcs%nrf(ii)%list%rCp, nseg, "bcs%nrf(ii)%list%rCp")
+            call my_alloc(bcs%nrf(ii)%list%rCs, nseg, "bcs%nrf(ii)%list%rCs")
 
             do jj=1,nseg
               ie = bcs%iworking_array(1,jj)
@@ -356,7 +357,7 @@
               if(ipri >= 3)write(iout, 2022)
             end if
 
-            deallocate(bcs%iworking_array)
+            call my_dealloc(bcs%iworking_array, "bcs%iworking_array")
 
           end do !next ii
 

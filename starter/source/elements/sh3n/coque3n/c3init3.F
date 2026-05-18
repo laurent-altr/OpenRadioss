@@ -188,8 +188,8 @@ C-----------------------------------------------
       TYPE(BUF_LAY_) ,POINTER :: BUFLY 
 C=======================================================================
       ! Allocate buffers
-      CALL MY_ALLOC(MATLY,MVSIZ*LAY_MAX)
-      CALL MY_ALLOC(POSLY,MVSIZ,LAY_MAX*LAYNPT_MAX)
+      CALL MY_ALLOC(MATLY,MVSIZ*LAY_MAX,"MATLY")
+      CALL MY_ALLOC(POSLY,MVSIZ,LAY_MAX*LAYNPT_MAX,"POSLY")
 
       GBUF  => ELBUF_STR%GBUF
       BUFLY => ELBUF_STR%BUFLY(1)

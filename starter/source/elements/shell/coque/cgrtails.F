@@ -151,8 +151,8 @@ C     real or real*8
       
       TYPE (DRAPE_PLY_)  , POINTER         :: DRAPE_PLY
 C---+----1----+----2----+----3----+----4----+----5----+----6----+----7--
-      CALL MY_ALLOC(INUM_R2R,1+R2R_SIU*NUMELC)
-      CALL MY_ALLOC(ANGLE,NUMELC)
+      CALL MY_ALLOC(INUM_R2R,1+R2R_SIU*NUMELC,"INUM_R2R")
+      CALL MY_ALLOC(ANGLE,NUMELC,"ANGLE")
 
       IF(NADMESH /= 0)THEN
         ALLOCATE( ISTOR(KSH4TREE+1,NUMELC) )
@@ -160,7 +160,7 @@ C---+----1----+----2----+----3----+----4----+----5----+----6----+----7--
         ALLOCATE( ISTOR(0,0) )
       ENDIF
 
-      CALL MY_ALLOC(INDEXS2,NUMELC)
+      CALL MY_ALLOC(INDEXS2,NUMELC,"INDEXS2")
       INDEXS2(1:NUMELC)=PERMUTATION%SHELL(1:NUMELC)
 C
       IF (NPERTURB > 0) THEN

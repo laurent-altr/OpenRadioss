@@ -278,8 +278,23 @@
 !||    write_nloc_struct                  ../engine/source/output/restart/write_nloc_struct.F
 !||====================================================================
       module my_alloc_mod
+        use iso_c_binding, only : c_char, c_int, c_int64_t
         implicit none
         integer, parameter :: len_error_message = 100
+
+        interface
+          subroutine cpp_record_alloc(msg, msg_len, nbytes) bind(C, name="cpp_record_alloc")
+            import :: c_char, c_int, c_int64_t
+            character(kind=c_char), intent(in) :: msg(*)
+            integer(c_int), intent(in) :: msg_len
+            integer(c_int64_t), intent(in) :: nbytes
+          end subroutine cpp_record_alloc
+
+          subroutine cpp_print_alloc_report() bind(C, name="cpp_print_alloc_report")
+          end subroutine cpp_print_alloc_report
+        end interface
+
+        public :: report_alloc
 
         ! lengths : integer
         private :: my_alloc_real_1d
@@ -494,6 +509,30 @@
           end if
         end subroutine my_alloc_check
 
+!! \brief Record an allocation in the C++ tracking map
+        subroutine record_alloc(msg, nbytes)
+! ----------------------------------------------------------------------------------------------------------------------
+!                                                     Arguments
+! ----------------------------------------------------------------------------------------------------------------------
+          character(len=*), intent(in) :: msg
+          integer(kind=8), intent(in) :: nbytes
+! ----------------------------------------------------------------------------------------------------------------------
+!                                                   Local variables
+! ----------------------------------------------------------------------------------------------------------------------
+          integer(c_int) :: msg_len
+          integer(c_int64_t) :: c_nbytes
+! ----------------------------------------------------------------------------------------------------------------------
+!                                                      Body
+! ----------------------------------------------------------------------------------------------------------------------
+          msg_len = len_trim(msg)
+          c_nbytes = nbytes
+          call cpp_record_alloc(msg, msg_len, c_nbytes)
+        end subroutine record_alloc
+
+!! \brief Print a report of the top allocation sites
+        subroutine report_alloc()
+          call cpp_print_alloc_report()
+        end subroutine report_alloc
 
 ! ======================================================================================================================
 !                                           REAL ALLOCATION ROUTINES
@@ -521,6 +560,7 @@
 !                                                      Body
 ! ----------------------------------------------------------------------------------------------------------------------
           allocate(a(n), stat=ierr)
+          if (ierr == 0 .and. present(msg)) call record_alloc(msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
               call my_alloc_check(ierr, msg=msg)
@@ -555,6 +595,7 @@
 !                                                      Body
 ! ----------------------------------------------------------------------------------------------------------------------
           allocate(a(n,m), stat=ierr)
+          if (ierr == 0 .and. present(msg)) call record_alloc(msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
               call my_alloc_check(ierr, msg=msg)
@@ -590,6 +631,7 @@
 ! ----------------------------------------------------------------------------------------------------------------------
 
           allocate(a(l,m,n), stat=ierr)
+          if (ierr == 0 .and. present(msg)) call record_alloc(msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
               call my_alloc_check(ierr, msg=msg)
@@ -626,6 +668,7 @@
 !                                                      Body
 ! ----------------------------------------------------------------------------------------------------------------------
           allocate(a(n), stat=ierr)
+          if (ierr == 0 .and. present(msg)) call record_alloc(msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
               call my_alloc_check(ierr, msg=msg)
@@ -660,6 +703,7 @@
 !                                                      Body
 ! ----------------------------------------------------------------------------------------------------------------------
           allocate(a(n,m), stat=ierr)
+          if (ierr == 0 .and. present(msg)) call record_alloc(msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
               call my_alloc_check(ierr, msg=msg)
@@ -695,6 +739,7 @@
 ! ----------------------------------------------------------------------------------------------------------------------
 
           allocate(a(l,m,n), stat=ierr)
+          if (ierr == 0 .and. present(msg)) call record_alloc(msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
               call my_alloc_check(ierr, msg=msg)
@@ -732,6 +777,7 @@
 !                                                      Body
 ! ----------------------------------------------------------------------------------------------------------------------
           allocate(a(n), stat=ierr)
+          if (ierr == 0 .and. present(msg)) call record_alloc(msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
               call my_alloc_check(ierr, msg=msg)
@@ -766,6 +812,7 @@
 !                                                      Body
 ! ----------------------------------------------------------------------------------------------------------------------
           allocate(a(n,m), stat=ierr)
+          if (ierr == 0 .and. present(msg)) call record_alloc(msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
               call my_alloc_check(ierr, msg=msg)
@@ -802,6 +849,7 @@
 ! ----------------------------------------------------------------------------------------------------------------------
 
           allocate(a(l,m,n), stat=ierr)
+          if (ierr == 0 .and. present(msg)) call record_alloc(msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
               call my_alloc_check(ierr, msg=msg)
@@ -838,6 +886,7 @@
 !                                                      Body
 ! ----------------------------------------------------------------------------------------------------------------------
           allocate(a(n), stat=ierr)
+          if (ierr == 0 .and. present(msg)) call record_alloc(msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
               call my_alloc_check(ierr, msg=msg)
@@ -872,6 +921,7 @@
 !                                                      Body
 ! ----------------------------------------------------------------------------------------------------------------------
           allocate(a(n,m), stat=ierr)
+          if (ierr == 0 .and. present(msg)) call record_alloc(msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
               call my_alloc_check(ierr, msg=msg)
@@ -907,6 +957,7 @@
 ! ----------------------------------------------------------------------------------------------------------------------
 
           allocate(a(l,m,n), stat=ierr)
+          if (ierr == 0 .and. present(msg)) call record_alloc(msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
               call my_alloc_check(ierr, msg=msg)
@@ -943,6 +994,7 @@
 !                                                      Body
 ! ----------------------------------------------------------------------------------------------------------------------
           allocate(a(n), stat=ierr)
+          if (ierr == 0 .and. present(msg)) call record_alloc(msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
               call my_alloc_check(ierr, msg=msg)
@@ -977,6 +1029,7 @@
 !                                                      Body
 ! ----------------------------------------------------------------------------------------------------------------------
           allocate(a(n,m), stat=ierr)
+          if (ierr == 0 .and. present(msg)) call record_alloc(msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
               call my_alloc_check(ierr, msg=msg)
@@ -1012,6 +1065,7 @@
 ! ----------------------------------------------------------------------------------------------------------------------
 
           allocate(a(l,m,n), stat=ierr)
+          if (ierr == 0 .and. present(msg)) call record_alloc(msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
               call my_alloc_check(ierr, msg=msg)
@@ -1049,6 +1103,7 @@
 !                                                      Body
 ! ----------------------------------------------------------------------------------------------------------------------
           allocate(a(n), stat=ierr)
+          if (ierr == 0 .and. present(msg)) call record_alloc(msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
               call my_alloc_check(ierr, msg=msg)
@@ -1083,6 +1138,7 @@
 !                                                      Body
 ! ----------------------------------------------------------------------------------------------------------------------
           allocate(a(n,m), stat=ierr)
+          if (ierr == 0 .and. present(msg)) call record_alloc(msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
               call my_alloc_check(ierr, msg=msg)
@@ -1119,6 +1175,7 @@
 ! ----------------------------------------------------------------------------------------------------------------------
 
           allocate(a(l,m,n), stat=ierr)
+          if (ierr == 0 .and. present(msg)) call record_alloc(msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
               call my_alloc_check(ierr, msg=msg)
@@ -1158,6 +1215,7 @@
 !                                                      Body
 ! ----------------------------------------------------------------------------------------------------------------------
           allocate(a(n), stat=ierr)
+          if (ierr == 0 .and. present(msg)) call record_alloc(msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
               call my_alloc_check(ierr, msg=msg)
@@ -1192,6 +1250,7 @@
 !                                                      Body
 ! ----------------------------------------------------------------------------------------------------------------------
           allocate(a(n,m), stat=ierr)
+          if (ierr == 0 .and. present(msg)) call record_alloc(msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
               call my_alloc_check(ierr, msg=msg)
@@ -1227,6 +1286,7 @@
 ! ----------------------------------------------------------------------------------------------------------------------
 
           allocate(a(l,m,n), stat=ierr)
+          if (ierr == 0 .and. present(msg)) call record_alloc(msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
               call my_alloc_check(ierr, msg=msg)
@@ -1263,6 +1323,7 @@
 !                                                      Body
 ! ----------------------------------------------------------------------------------------------------------------------
           allocate(a(n), stat=ierr)
+          if (ierr == 0 .and. present(msg)) call record_alloc(msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
               call my_alloc_check(ierr, msg=msg)
@@ -1297,6 +1358,7 @@
 !                                                      Body
 ! ----------------------------------------------------------------------------------------------------------------------
           allocate(a(n,m), stat=ierr)
+          if (ierr == 0 .and. present(msg)) call record_alloc(msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
               call my_alloc_check(ierr, msg=msg)
@@ -1332,6 +1394,7 @@
 ! ----------------------------------------------------------------------------------------------------------------------
 
           allocate(a(l,m,n), stat=ierr)
+          if (ierr == 0 .and. present(msg)) call record_alloc(msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
               call my_alloc_check(ierr, msg=msg)
@@ -1369,6 +1432,7 @@
 !                                                      Body
 ! ----------------------------------------------------------------------------------------------------------------------
           allocate(a(n), stat=ierr)
+          if (ierr == 0 .and. present(msg)) call record_alloc(msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
               call my_alloc_check(ierr, msg=msg)
@@ -1403,6 +1467,7 @@
 !                                                      Body
 ! ----------------------------------------------------------------------------------------------------------------------
           allocate(a(n,m), stat=ierr)
+          if (ierr == 0 .and. present(msg)) call record_alloc(msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
               call my_alloc_check(ierr, msg=msg)
@@ -1439,6 +1504,7 @@
 ! ----------------------------------------------------------------------------------------------------------------------
 
           allocate(a(l,m,n), stat=ierr)
+          if (ierr == 0 .and. present(msg)) call record_alloc(msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
               call my_alloc_check(ierr, msg=msg)
@@ -1474,6 +1540,7 @@
 !                                                      Body
 ! ----------------------------------------------------------------------------------------------------------------------
           allocate(a(n), stat=ierr)
+          if (ierr == 0 .and. present(msg)) call record_alloc(msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
               call my_alloc_check(ierr, msg=msg)
@@ -1508,6 +1575,7 @@
 !                                                      Body
 ! ----------------------------------------------------------------------------------------------------------------------
           allocate(a(n,m), stat=ierr)
+          if (ierr == 0 .and. present(msg)) call record_alloc(msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
               call my_alloc_check(ierr, msg=msg)
@@ -1543,6 +1611,7 @@
 ! ----------------------------------------------------------------------------------------------------------------------
 
           allocate(a(l,m,n), stat=ierr)
+          if (ierr == 0 .and. present(msg)) call record_alloc(msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
               call my_alloc_check(ierr, msg=msg)
@@ -1579,6 +1648,7 @@
 !                                                      Body
 ! ----------------------------------------------------------------------------------------------------------------------
           allocate(a(n), stat=ierr)
+          if (ierr == 0 .and. present(msg)) call record_alloc(msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
               call my_alloc_check(ierr, msg=msg)
@@ -1613,6 +1683,7 @@
 !                                                      Body
 ! ----------------------------------------------------------------------------------------------------------------------
           allocate(a(n,m), stat=ierr)
+          if (ierr == 0 .and. present(msg)) call record_alloc(msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
               call my_alloc_check(ierr, msg=msg)
@@ -1648,6 +1719,7 @@
 ! ----------------------------------------------------------------------------------------------------------------------
 
           allocate(a(l,m,n), stat=ierr)
+          if (ierr == 0 .and. present(msg)) call record_alloc(msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
               call my_alloc_check(ierr, msg=msg)
@@ -1685,6 +1757,7 @@
 !                                                      Body
 ! ----------------------------------------------------------------------------------------------------------------------
           allocate(a(n), stat=ierr)
+          if (ierr == 0 .and. present(msg)) call record_alloc(msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
               call my_alloc_check(ierr, msg=msg)
@@ -1719,6 +1792,7 @@
 !                                                      Body
 ! ----------------------------------------------------------------------------------------------------------------------
           allocate(a(n,m), stat=ierr)
+          if (ierr == 0 .and. present(msg)) call record_alloc(msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
               call my_alloc_check(ierr, msg=msg)
@@ -1755,6 +1829,7 @@
 ! ----------------------------------------------------------------------------------------------------------------------
 
           allocate(a(l,m,n), stat=ierr)
+          if (ierr == 0 .and. present(msg)) call record_alloc(msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
               call my_alloc_check(ierr, msg=msg)
@@ -1790,6 +1865,7 @@
 !                                                      Body
 ! ----------------------------------------------------------------------------------------------------------------------
           allocate(a(n), stat=ierr)
+          if (ierr == 0 .and. present(msg)) call record_alloc(msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
               call my_alloc_check(ierr, msg=msg)
@@ -1824,6 +1900,7 @@
 !                                                      Body
 ! ----------------------------------------------------------------------------------------------------------------------
           allocate(a(n,m), stat=ierr)
+          if (ierr == 0 .and. present(msg)) call record_alloc(msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
               call my_alloc_check(ierr, msg=msg)
@@ -1859,6 +1936,7 @@
 ! ----------------------------------------------------------------------------------------------------------------------
 
           allocate(a(l,m,n), stat=ierr)
+          if (ierr == 0 .and. present(msg)) call record_alloc(msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
               call my_alloc_check(ierr, msg=msg)
@@ -1891,6 +1969,7 @@
 !                                                      Body
 ! ----------------------------------------------------------------------------------------------------------------------
           allocate(a(n), stat=ierr)
+          if (ierr == 0 .and. present(msg)) call record_alloc(msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
               call my_alloc_check(ierr, msg=msg)
@@ -1925,6 +2004,7 @@
 !                                                      Body
 ! ----------------------------------------------------------------------------------------------------------------------
           allocate(a(n,m), stat=ierr)
+          if (ierr == 0 .and. present(msg)) call record_alloc(msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
               call my_alloc_check(ierr, msg=msg)
@@ -1960,6 +2040,7 @@
 ! ----------------------------------------------------------------------------------------------------------------------
 
           allocate(a(l,m,n), stat=ierr)
+          if (ierr == 0 .and. present(msg)) call record_alloc(msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
               call my_alloc_check(ierr, msg=msg)
@@ -1995,6 +2076,7 @@
 !                                                      Body
 ! ----------------------------------------------------------------------------------------------------------------------
           allocate(a(n), stat=ierr)
+          if (ierr == 0 .and. present(msg)) call record_alloc(msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
               call my_alloc_check(ierr, msg=msg)
@@ -2029,6 +2111,7 @@
 !                                                      Body
 ! ----------------------------------------------------------------------------------------------------------------------
           allocate(a(n,m), stat=ierr)
+          if (ierr == 0 .and. present(msg)) call record_alloc(msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
               call my_alloc_check(ierr, msg=msg)
@@ -2064,6 +2147,7 @@
 ! ----------------------------------------------------------------------------------------------------------------------
 
           allocate(a(l,m,n), stat=ierr)
+          if (ierr == 0 .and. present(msg)) call record_alloc(msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
               call my_alloc_check(ierr, msg=msg)
@@ -2096,6 +2180,7 @@
 !                                                      Body
 ! ----------------------------------------------------------------------------------------------------------------------
           allocate(a(n), stat=ierr)
+          if (ierr == 0 .and. present(msg)) call record_alloc(msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
               call my_alloc_check(ierr, msg=msg)
@@ -2130,6 +2215,7 @@
 !                                                      Body
 ! ----------------------------------------------------------------------------------------------------------------------
           allocate(a(n,m), stat=ierr)
+          if (ierr == 0 .and. present(msg)) call record_alloc(msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
               call my_alloc_check(ierr, msg=msg)
@@ -2165,6 +2251,7 @@
 ! ----------------------------------------------------------------------------------------------------------------------
 
           allocate(a(l,m,n), stat=ierr)
+          if (ierr == 0 .and. present(msg)) call record_alloc(msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
               call my_alloc_check(ierr, msg=msg)

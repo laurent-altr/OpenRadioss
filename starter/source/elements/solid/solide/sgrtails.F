@@ -144,7 +144,7 @@ C-----------------------------------------------
 C--------------------------------------------------------------
 C         GROUPING BY MVSIZ GROUPS
 C--------------------------------------------------------------
-      CALL MY_ALLOC(INDEXS2,NUMELS)
+      CALL MY_ALLOC(INDEXS2,NUMELS,"INDEXS2")
       nullify(MATPARAM)
       INDEXS2(1:NUMELS)=PERMUTATION%SOLID(1:NUMELS)
       NGR1 = NGROUP + 1

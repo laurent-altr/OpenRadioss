@@ -99,9 +99,9 @@ C-----------------------------------------------
 C--------------------------------------------------------------
 C         bounding of MVSIZ groups
 C--------------------------------------------------------------
-      CALL MY_ALLOC(INUM,13,NUMSPH)
-      CALL MY_ALLOC(INDEX,2*NUMSPH)
-      CALL MY_ALLOC(RNUM,NSPBUF,NUMSPH)
+      CALL MY_ALLOC(INUM,13,NUMSPH,"INUM")
+      CALL MY_ALLOC(INDEX,2*NUMSPH,"INDEX")
+      CALL MY_ALLOC(RNUM,NSPBUF,NUMSPH,"RNUM")
       NEL = 0
       DO N=1,ND
         NEL = NEL + EADD(N+1)-EADD(N)

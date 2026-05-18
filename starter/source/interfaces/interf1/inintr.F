@@ -175,7 +175,7 @@ C-----------------------------------------------
       INTEGER :: SKIP_TYPE25_EDGE_2_EDGE !< flag to activate only the computation of interface type 25 with edge to edge
       INTEGER, DIMENSION(:), ALLOCATABLE :: ELEM_LINKED_TO_SEGMENT
 C-----------------------------------------------
-      CALL MY_ALLOC(ITABM1,SITABM1)
+      CALL MY_ALLOC(ITABM1,SITABM1,"ITABM1")
 C
       I_MEM = 0
       RESORT = 0

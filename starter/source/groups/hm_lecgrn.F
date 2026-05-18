@@ -249,7 +249,7 @@ c          non sorted nodes
             IGRNOD(IGS)%NENTITY=NNOD
 ! may be allocated already (prelecgrns.F) if NUMELX > 0
             IF (.NOT. ALLOCATED(IGRNOD(IGS)%ENTITY)) 
-     .                CALL MY_ALLOC(IGRNOD(IGS)%ENTITY,NNOD)
+     .                CALL MY_ALLOC(IGRNOD(IGS)%ENTITY,NNOD,"IGRNOD(IGS)%ENTITY")
             IGRNOD(IGS)%GRPGRP=1
             MAXNNOD = MAX(NNOD,MAXNNOD)
           ELSE 
@@ -274,7 +274,7 @@ C         group of nodes
             IGRNOD(IGS)%NENTITY=NNOD
 ! may be allocated already (prelecgrns.F) if NUMELX > 0
             IF( .NOT. ALLOCATED(IGRNOD(IGS)%ENTITY)) 
-     .                CALL MY_ALLOC(IGRNOD(IGS)%ENTITY,NNOD)
+     .                CALL MY_ALLOC(IGRNOD(IGS)%ENTITY,NNOD,"IGRNOD(IGS)%ENTITY")
             IGRNOD(IGS)%GRPGRP=1
             MAXNNOD = MAX(NNOD,MAXNNOD)
           ELSE
@@ -434,7 +434,7 @@ C---
                 IF (BUFTMP(J) == 1) NNOD = NNOD+1
               ENDDO
               IGRNOD(IGS)%NENTITY=NNOD
-              CALL MY_ALLOC(IGRNOD(IGS)%ENTITY,NNOD)
+              CALL MY_ALLOC(IGRNOD(IGS)%ENTITY,NNOD,"IGRNOD(IGS)%ENTITY")
               IGRNOD(IGS)%ENTITY=0
             ELSE
               DO J=1,NUMNOD
@@ -509,7 +509,7 @@ C---
             IADBOXMAX = MAX(IADBOX,IADBOXMAX)
             IF (FLAG == 0) THEN
               IGRNOD(IGS)%NENTITY=NNOD
-              CALL MY_ALLOC(IGRNOD(IGS)%ENTITY,NNOD)
+              CALL MY_ALLOC(IGRNOD(IGS)%ENTITY,NNOD,"IGRNOD(IGS)%ENTITY")
               IGRNOD(IGS)%ENTITY = 0
             ELSEIF (FLAG == 1) THEN
               IGRNOD(IGS)%NENTITY=NNOD
@@ -557,7 +557,7 @@ C---
                 IF (BUFTMP(J+NPART) /= 0) NNOD=NNOD+1
               ENDDO
               IGRNOD(IGS)%NENTITY=NNOD
-              CALL MY_ALLOC(IGRNOD(IGS)%ENTITY,NNOD)
+              CALL MY_ALLOC(IGRNOD(IGS)%ENTITY,NNOD,"IGRNOD(IGS)%ENTITY")
               IGRNOD(IGS)%ENTITY=0
             ELSE
               DO J=1,NUMNOD
@@ -594,7 +594,7 @@ c
      .                        TITR1   ,LSUBMODEL  ,IGRNOD(IGS),NN     )
             IF (FLAG == 0) THEN
               IGRNOD(IGS)%NENTITY=NNOD
-              CALL MY_ALLOC(IGRNOD(IGS)%ENTITY,NNOD)
+              CALL MY_ALLOC(IGRNOD(IGS)%ENTITY,NNOD,"IGRNOD(IGS)%ENTITY")
               IGRNOD(IGS)%ENTITY = 0
             ENDIF
           ENDIF
@@ -662,7 +662,7 @@ C---
                 IF (BUFTMP(J) /= 0) NNOD=NNOD+1
               ENDDO
               IGRNOD(IGS)%NENTITY=NNOD
-              CALL MY_ALLOC(IGRNOD(IGS)%ENTITY,NNOD)
+              CALL MY_ALLOC(IGRNOD(IGS)%ENTITY,NNOD,"IGRNOD(IGS)%ENTITY")
               IGRNOD(IGS)%ENTITY = 0
             ELSE
               DO J=1,NUMNOD
@@ -720,7 +720,7 @@ C---
                 IF (BUFTMP(J) == 1) NNOD=NNOD+1
               ENDDO
               IGRNOD(IGS)%NENTITY=NNOD
-              CALL MY_ALLOC(IGRNOD(IGS)%ENTITY,NNOD)
+              CALL MY_ALLOC(IGRNOD(IGS)%ENTITY,NNOD,"IGRNOD(IGS)%ENTITY")
               IGRNOD(IGS)%ENTITY=0
             ELSE
               DO J=1,NUMNOD

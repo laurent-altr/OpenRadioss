@@ -72,7 +72,7 @@ C     DUPLICATED FROM OUTRIN - STATS ON ADDED MASS + TARGET NODAL TIME STEP ESTI
 C--------------------------------------------------------------------------------------
 C
       ALLOCATE(DT(2*NUMNOD))
-      CALL MY_ALLOC(PERM,NUMNOD)
+      CALL MY_ALLOC(PERM,NUMNOD,"PERM")
       MASS0_START = TOTMAS1
       DTSCA = ZEP9
 C

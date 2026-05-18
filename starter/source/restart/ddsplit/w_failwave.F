@@ -53,8 +53,8 @@ C-----------------------------------------------
       INTEGER, DIMENSION(4)  :: HEAD
       INTEGER, DIMENSION(:), ALLOCATABLE :: RBUF
 C=======================================================================
-      CALL MY_ALLOC(INDX_LOC,NUMNOD_L)
-      CALL MY_ALLOC(IDXI_LOC,NUMNOD_L)
+      CALL MY_ALLOC(INDX_LOC,NUMNOD_L,"INDX_LOC")
+      CALL MY_ALLOC(IDXI_LOC,NUMNOD_L,"IDXI_LOC")
       IWAVE = FAILWAVE%WAVE_MOD
       NNOD  = FAILWAVE%NNOD
       NDDL  = FAILWAVE%NDDL

@@ -104,8 +104,8 @@ C     ! Initialisations and allocation
            NSEGPLOAD = NSEGPL
 
            IF(NSEGPL > 0) THEN
-              CALL MY_ALLOC(TH_SURF%PLOAD_KSEGS,NSEGPL+1)
-              CALL MY_ALLOC(TH_SURF%PLOAD_SEGS,TH_SURF%NSURF*NSEGPL)
+              CALL MY_ALLOC(TH_SURF%PLOAD_KSEGS,NSEGPL+1,"TH_SURF%PLOAD_KSEGS")
+              CALL MY_ALLOC(TH_SURF%PLOAD_SEGS,TH_SURF%NSURF*NSEGPL,"TH_SURF%PLOAD_SEGS")
               TH_SURF%PLOAD_KSEGS = 0
               TH_SURF%PLOAD_SEGS = 0         
            ENDIF
@@ -115,14 +115,14 @@ C
               NSEGPL = NSEGPL + ILOADP(1,NL)/4 
            ENDDO
            IF(NSEGPL > 0) THEN 
-              CALL MY_ALLOC(TH_SURF%LOADP_KSEGS,NSEGPL+1)
-              CALL MY_ALLOC(TH_SURF%LOADP_SEGS,TH_SURF%NSURF*NSEGPL)
+              CALL MY_ALLOC(TH_SURF%LOADP_KSEGS,NSEGPL+1,"TH_SURF%LOADP_KSEGS")
+              CALL MY_ALLOC(TH_SURF%LOADP_SEGS,TH_SURF%NSURF*NSEGPL,"TH_SURF%LOADP_SEGS")
               TH_SURF%LOADP_KSEGS = 0
               TH_SURF%LOADP_SEGS = 0
            ENDIF
            NSEGLOADP = NSEGPL
 C
-           CALL MY_ALLOC(TAG,NUMNOD)
+           CALL MY_ALLOC(TAG,NUMNOD,"TAG")
            TAG(1:NUMNOD) = 0
 
 C     ! list of th surfaces to which each segment of PLOAD is included
@@ -224,7 +224,7 @@ C
               TH_SURF%S_PLOAD_KSEGS= NSEGPLOAD + 1
               TH_SURF%S_PLOAD_SEGS= TH_SURF%PLOAD_KSEGS(NSEGPLOAD + 1)
 
-              CALL MY_ALLOC (OLD_TAB,SIZE_NEW)
+              CALL MY_ALLOC(OLD_TAB,SIZE_NEW,"OLD_TAB")
               DO I=1,SIZE_NEW
                  OLD_TAB(I)=TH_SURF%PLOAD_SEGS(I)
               ENDDO      
@@ -232,7 +232,7 @@ C
 C            !reallocate with new size and copy saved values 
               IF(ALLOCATED(TH_SURF%PLOAD_SEGS)) DEALLOCATE(TH_SURF%PLOAD_SEGS)    
       
-              CALL MY_ALLOC(TH_SURF%PLOAD_SEGS,TH_SURF%S_PLOAD_SEGS)
+              CALL MY_ALLOC(TH_SURF%PLOAD_SEGS,TH_SURF%S_PLOAD_SEGS,"TH_SURF%PLOAD_SEGS")
               DO I=1,SIZE_NEW
                  TH_SURF%PLOAD_SEGS(I) = OLD_TAB(I)
               ENDDO   
@@ -246,14 +246,14 @@ C
              TH_SURF%S_LOADP_KSEGS= NSEGLOADP + 1
              TH_SURF%S_LOADP_SEGS= TH_SURF%LOADP_KSEGS(NSEGLOADP + 1)
 
-             CALL MY_ALLOC (OLD_TAB,SIZE_NEW)
+             CALL MY_ALLOC(OLD_TAB,SIZE_NEW,"OLD_TAB")
              DO I=1,SIZE_NEW
                 OLD_TAB(I)=TH_SURF%LOADP_SEGS(I)
              ENDDO      
              IF(ALLOCATED(OLD_TAB)) DEALLOCATE(TH_SURF%LOADP_SEGS)
 
 C            !reallocate with new size and copy saved values 
-             CALL MY_ALLOC(TH_SURF%LOADP_SEGS,TH_SURF%LOADP_KSEGS( NSEGLOADP + 1))
+             CALL MY_ALLOC(TH_SURF%LOADP_SEGS,TH_SURF%LOADP_KSEGS( NSEGLOADP + 1),"TH_SURF%LOADP_SEGS")
              DO I=1,SIZE_NEW
                 TH_SURF%LOADP_SEGS(I) = OLD_TAB(I)
              ENDDO   

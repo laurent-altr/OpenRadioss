@@ -26,7 +26,7 @@
 !||    hm_read_fail                 ../starter/source/materials/fail/hm_read_fail.F
 !||====================================================================
       module hm_read_fail_composite_mod
-      implicit none
+        implicit none
       contains
 !||====================================================================
 !||    hm_read_fail_composite   ../starter/source/materials/fail/composite/hm_read_fail_composite.F90
@@ -56,6 +56,7 @@
           use elbuftag_mod
           use constant_mod
           use precision_mod , only : WP
+          use MY_ALLOC_MOD, only : my_alloc
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                 implicit none
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -144,10 +145,10 @@
           fail%nmod    = 9
           fail%pthk    = pthkf
 !
-          allocate (fail%uparam(fail%nuparam))
-          allocate (fail%iparam(fail%niparam))
-          allocate (fail%ifunc (fail%nfunc))
-          allocate (fail%table (fail%ntable))
+          call my_alloc(fail%uparam, fail%nuparam, "fail%uparam")
+          call my_alloc(fail%iparam, fail%niparam, "fail%iparam")
+          call my_alloc(fail%ifunc , fail%nfunc,   "fail%ifunc")
+          call my_alloc(fail%table , fail%ntable,  "fail%table")
 !
           ! Modes of failure
           fail_tag%lf_dammx = fail_tag%lf_dammx + fail%nmod

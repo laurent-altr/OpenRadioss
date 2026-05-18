@@ -292,7 +292,7 @@ C-------------------------------------
                 IF(FLAG == 0)THEN
                   CALL GROUPS_GET_NENTITY(NEL,LSUBMODEL)
                   IGRELEM(IGS)%NENTITY=NEL
-                  CALL MY_ALLOC(IGRELEM(IGS)%ENTITY,NEL)
+                  CALL MY_ALLOC(IGRELEM(IGS)%ENTITY,NEL,"IGRELEM(IGS)%ENTITY")
                   IGRELEM(IGS)%ENTITY = 0
                 ELSEIF (FLAG == 1) THEN
                   
@@ -342,7 +342,7 @@ C-------------------------------------
      .                         KK       ,NEL     ,ELKEY  ,IGRELEM(IGS)%ID,TITR,LSUBMODEL)
                   KK=1
                   IGRELEM(IGS)%NENTITY=NEL
-                  CALL MY_ALLOC(IGRELEM(IGS)%ENTITY,NEL)
+                  CALL MY_ALLOC(IGRELEM(IGS)%ENTITY,NEL,"IGRELEM(IGS)%ENTITY")
                   IGRELEM(IGS)%ENTITY = 0
                 ELSEIF (FLAG == 1) THEN
                   NEL = IGRELEM(IGS)%NENTITY
@@ -409,7 +409,7 @@ C-------------------------
                     IF (BUFTMP(J) == 1) NEL=NEL+1
                   ENDDO!next J
                   IGRELEM(IGS)%NENTITY=NEL
-                  CALL MY_ALLOC(IGRELEM(IGS)%ENTITY,NEL)
+                  CALL MY_ALLOC(IGRELEM(IGS)%ENTITY,NEL,"IGRELEM(IGS)%ENTITY")
                   IGRELEM(IGS)%ENTITY = 0
                 ELSEIF (FLAG == 1) THEN
                   DO J=1,NUMEL
@@ -432,7 +432,7 @@ C-------------------------
                     END IF
                   ENDDO!next J
                   IGRELEM(IGS)%NENTITY=NEL
-                  CALL MY_ALLOC(IGRELEM(IGS)%ENTITY,NEL)
+                  CALL MY_ALLOC(IGRELEM(IGS)%ENTITY,NEL,"IGRELEM(IGS)%ENTITY")
                   IGRELEM(IGS)%ENTITY = 0
                 ELSEIF (FLAG == 1) THEN
                   DO J=1,NUMEL
@@ -519,7 +519,7 @@ C---
              IADBOXMAX = MAX(IADBOX,IADBOXMAX)
               IF(FLAG == 0)THEN
                 IGRELEM(IGS)%NENTITY=NEL
-                CALL MY_ALLOC(IGRELEM(IGS)%ENTITY,NEL)
+                CALL MY_ALLOC(IGRELEM(IGS)%ENTITY,NEL,"IGRELEM(IGS)%ENTITY")
                 IGRELEM(IGS)%ENTITY = 0
               ELSE IF(FLAG == 1)THEN
                 IGRELEM(IGS)%NENTITY=NEL
@@ -558,7 +558,7 @@ C---
                     IF (BUFTMP(IPARTE(J)) == 1) NEL=NEL+1
                   ENDDO
                   IGRELEM(IGS)%NENTITY=NEL
-                  CALL MY_ALLOC(IGRELEM(IGS)%ENTITY,NEL)
+                  CALL MY_ALLOC(IGRELEM(IGS)%ENTITY,NEL,"IGRELEM(IGS)%ENTITY")
                   IGRELEM(IGS)%ENTITY = 0
                 ELSEIF (FLAG == 1) THEN
                   DO J=1,NUMEL
@@ -580,7 +580,7 @@ C---
                     END IF
                   ENDDO
                   IGRELEM(IGS)%NENTITY=NEL
-                  CALL MY_ALLOC(IGRELEM(IGS)%ENTITY,NEL)
+                  CALL MY_ALLOC(IGRELEM(IGS)%ENTITY,NEL,"IGRELEM(IGS)%ENTITY")
                   IGRELEM(IGS)%ENTITY = 0
                 ELSEIF (FLAG == 1) THEN
                   DO J=1,NUMEL
@@ -626,7 +626,7 @@ C-------------------------
      .             NN      ,IGS     )
               IF (FLAG == 0) THEN
                 IGRELEM(IGS)%NENTITY=NEL
-                CALL MY_ALLOC(IGRELEM(IGS)%ENTITY,NEL)
+                CALL MY_ALLOC(IGRELEM(IGS)%ENTITY,NEL,"IGRELEM(IGS)%ENTITY")
                 IGRELEM(IGS)%ENTITY = 0
               ENDIF
             ENDIF
@@ -672,7 +672,7 @@ C-------------------------
                     IF (BUFTMP(J) == 1) NEL=NEL+1
                   ENDDO
                   IGRELEM(IGS)%NENTITY=NEL
-                  CALL MY_ALLOC(IGRELEM(IGS)%ENTITY,NEL)
+                  CALL MY_ALLOC(IGRELEM(IGS)%ENTITY,NEL,"IGRELEM(IGS)%ENTITY")
                   IGRELEM(IGS)%ENTITY = 0
                 ELSEIF (FLAG == 1) THEN
                   DO J=1,NUMEL
@@ -695,7 +695,7 @@ C-------------------------
                     END IF
                   ENDDO
                   IGRELEM(IGS)%NENTITY=NEL
-                  CALL MY_ALLOC(IGRELEM(IGS)%ENTITY,NEL)
+                  CALL MY_ALLOC(IGRELEM(IGS)%ENTITY,NEL,"IGRELEM(IGS)%ENTITY")
                   IGRELEM(IGS)%ENTITY = 0
                 ELSEIF (FLAG == 1) THEN
                   DO J=1,NUMEL

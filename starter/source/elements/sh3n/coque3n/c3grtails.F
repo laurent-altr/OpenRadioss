@@ -140,7 +140,7 @@ C
 C-----------------------------------------------
 C   S O U R C E   L I N E S
 C-----------------------------------------------
-      CALL MY_ALLOC(INDEX2,NUMELTG)
+      CALL MY_ALLOC(INDEX2,NUMELTG,"INDEX2")
       INDEX2(1:NUMELTG)=PERMUTATION%TRIANGLE(1:NUMELTG)
 
       IF(NADMESH /= 0)THEN

@@ -217,11 +217,11 @@ C-----
                IF (SKIPFLAG == 0) THEN             
                   INSEG=INSEG+NISX*NSEG    
                   IGRSURF(IGS)%NSEG=NSEG
-                  CALL MY_ALLOC(IGRSURF(IGS)%NODES,NSEG,4)
+                  CALL MY_ALLOC(IGRSURF(IGS)%NODES,NSEG,4,"IGRSURF(IGS)%NODES")
                   IGRSURF(IGS)%NODES(1:NSEG,1:4) = 0
-                  CALL MY_ALLOC(IGRSURF(IGS)%ELTYP,NSEG)
+                  CALL MY_ALLOC(IGRSURF(IGS)%ELTYP,NSEG,"IGRSURF(IGS)%ELTYP")
                   IGRSURF(IGS)%ELTYP(1:NSEG) = 0
-                  CALL MY_ALLOC(IGRSURF(IGS)%ELEM,NSEG)
+                  CALL MY_ALLOC(IGRSURF(IGS)%ELEM,NSEG,"IGRSURF(IGS)%ELEM")
                   IGRSURF(IGS)%ELEM(1:NSEG) = 0
                ENDIF                                 
 C-----------
@@ -336,11 +336,11 @@ C-----------
                IF (SKIPFLAG == 0) THEN               
                   INSEG=INSEG+NISX*NSEG    
                   IGRSURF(IGS)%NSEG=NSEG
-                  CALL MY_ALLOC(IGRSURF(IGS)%NODES,NSEG,4)
+                  CALL MY_ALLOC(IGRSURF(IGS)%NODES,NSEG,4,"IGRSURF(IGS)%NODES")
                   IGRSURF(IGS)%NODES(1:NSEG,1:4) = 0
-                  CALL MY_ALLOC(IGRSURF(IGS)%ELTYP,NSEG)
+                  CALL MY_ALLOC(IGRSURF(IGS)%ELTYP,NSEG,"IGRSURF(IGS)%ELTYP")
                   IGRSURF(IGS)%ELTYP(1:NSEG) = 0
-                  CALL MY_ALLOC(IGRSURF(IGS)%ELEM,NSEG)
+                  CALL MY_ALLOC(IGRSURF(IGS)%ELEM,NSEG,"IGRSURF(IGS)%ELEM")
                   IGRSURF(IGS)%ELEM(1:NSEG) = 0
                ENDIF  
 C-----------
@@ -527,7 +527,7 @@ C------ for re-allocation %NODES
               ENDDO             
               IF (NSEGV /= NSEG) THEN               
                 DEALLOCATE(IGRSURF(IGS)%NODES)
-                CALL MY_ALLOC(IGRSURF(IGS)%NODES,NSEGV,4)
+                CALL MY_ALLOC(IGRSURF(IGS)%NODES,NSEGV,4,"IGRSURF(IGS)%NODES")
                 IGRSURF(IGS)%NODES(1:NSEGV,1:4) = 0
               ENDIF  
               DO L=1,NSEG

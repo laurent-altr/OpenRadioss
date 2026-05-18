@@ -45,6 +45,7 @@
 !                                                   Modules
 ! ----------------------------------------------------------------------------------------------------------------------
           use bcs_mod , only : bcs, bcs_struct_
+          use MY_ALLOC_MOD
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Included files
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -98,10 +99,10 @@
             !---allcoation of local data structure (on each domain)
             do p=1,nspmd
               bcs_per_proc(p)%nrf(ii)%list%size = size_on_proc(p)
-              allocate( bcs_per_proc(p)%nrf(ii)%list%elem(size_on_proc(p)))
-              allocate( bcs_per_proc(p)%nrf(ii)%list%face(size_on_proc(p)))
-              allocate( bcs_per_proc(p)%nrf(ii)%list%rCp(size_on_proc(p)))
-              allocate( bcs_per_proc(p)%nrf(ii)%list%rCs(size_on_proc(p)))
+              call my_alloc(bcs_per_proc(p)%nrf(ii)%list%elem, size_on_proc(p), "bcs_per_proc(p)%nrf(ii)%list%elem")
+              call my_alloc(bcs_per_proc(p)%nrf(ii)%list%face, size_on_proc(p), "bcs_per_proc(p)%nrf(ii)%list%face")
+              call my_alloc(bcs_per_proc(p)%nrf(ii)%list%rCp, size_on_proc(p), "bcs_per_proc(p)%nrf(ii)%list%rCp")
+              call my_alloc(bcs_per_proc(p)%nrf(ii)%list%rCs, size_on_proc(p), "bcs_per_proc(p)%nrf(ii)%list%rCs")
             end do
 
             !--filling local data structure

@@ -83,7 +83,7 @@ C-----------------------------------------------
        END SUBROUTINE  
       END INTERFACE 
 C=======================================================================
-      CALL MY_ALLOC(BUFTMP,NUMNOD*2)
+      CALL MY_ALLOC(BUFTMP,NUMNOD*2,"BUFTMP")
       IS_AVAILABLE = .FALSE.
       IF (FLAG == 0) ICOUNT=0
       IGS =0
@@ -165,7 +165,7 @@ C                  sorted group
               ENDIF                               
 C
               IGRNOD(IGS)%NENTITY = NEL
-              CALL MY_ALLOC(IGRNOD(IGS)%ENTITY,NEL)
+              CALL MY_ALLOC(IGRNOD(IGS)%ENTITY,NEL,"IGRNOD(IGS)%ENTITY")
               IGRNOD(IGS)%ENTITY = 0
             ENDIF ! IF (SKIPFLAG == 0)
 C-----------                                             

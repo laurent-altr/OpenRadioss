@@ -124,9 +124,9 @@ C-----------------------------------------------
       INTEGER :: INTER_LAW151
       LOGICAL :: INTER18_LAW151
 C-----------------------------------------------
-      CALL MY_ALLOC(NSNFI,NSPMD)
-      CALL MY_ALLOC(NUMP,NSPMD)
-      CALL MY_ALLOC(NMNFI,NSPMD)
+      CALL MY_ALLOC(NSNFI,NSPMD,"NSNFI")
+      CALL MY_ALLOC(NUMP,NSPMD,"NUMP")
+      CALL MY_ALLOC(NMNFI,NSPMD,"NMNFI")
 C
 
       DO NI =1, NINTER

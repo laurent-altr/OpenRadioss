@@ -67,20 +67,20 @@ C-----------------------------------------------
       INTEGER, DIMENSION(:, :), ALLOCATABLE :: ELEM
       INTEGER, DIMENSION(:), ALLOCATABLE :: ISAVE
 
-      CALL MY_ALLOC(ISAVE, (NTG + NTGI))
+      CALL MY_ALLOC(ISAVE, (NTG + NTGI),"ISAVE")
 !     Resize and copy ELTG
       DO II = 1, NTG + NTGI
          ISAVE(II) = T_MONVOLN%ELTG(II)
       ENDDO
       DEALLOCATE(T_MONVOLN%ELTG)
-      CALL MY_ALLOC(T_MONVOLN%ELTG, (NTG + NTGI))
+      CALL MY_ALLOC(T_MONVOLN%ELTG, (NTG + NTGI),"T_MONVOLN%ELTG")
       DO II = 1, NTG + NTGI
          T_MONVOLN%ELTG(II) = ISAVE(II)
       ENDDO
 !     Build edges of the elements
-      CALL MY_ALLOC(EDGE_ARRAY_N1, (3 * (NTG + NTGI)))
-      CALL MY_ALLOC(EDGE_ARRAY_N2, (3 * (NTG + NTGI)))
-      CALL MY_ALLOC(EDGE_ARRAY_ELEM, (3 * (NTG + NTGI)))
+      CALL MY_ALLOC(EDGE_ARRAY_N1, (3 * (NTG + NTGI)),"EDGE_ARRAY_N1")
+      CALL MY_ALLOC(EDGE_ARRAY_N2, (3 * (NTG + NTGI)),"EDGE_ARRAY_N2")
+      CALL MY_ALLOC(EDGE_ARRAY_ELEM, (3 * (NTG + NTGI)),"EDGE_ARRAY_ELEM")
       IDX = 0
       DO II = 1, NTG + NTGI
          EDGE_ARRAY_N1(IDX + 1) = MIN(T_MONVOLN%ELEM(1, II), T_MONVOLN%ELEM(2, II))
@@ -98,10 +98,10 @@ C-----------------------------------------------
       EDGE_PTR = 0
       CALL EDGE_SORT(EDGE_PTR, EDGE_ARRAY_N1, EDGE_ARRAY_N2, EDGE_ARRAY_ELEM, NEDGE)
       
-      CALL MY_ALLOC(NB_CONNECT, (NEDGE))
+      CALL MY_ALLOC(NB_CONNECT, (NEDGE),"NB_CONNECT")
       CALL EDGE_GET_NB_CONNECT(EDGE_PTR, NB_CONNECT)
-      CALL MY_ALLOC(EDGE_ELEM, (SUM(NB_CONNECT)))
-      CALL MY_ALLOC(IAD_EDGE_ELEM, (NEDGE + 1))
+      CALL MY_ALLOC(EDGE_ELEM, (SUM(NB_CONNECT)),"EDGE_ELEM")
+      CALL MY_ALLOC(IAD_EDGE_ELEM, (NEDGE + 1),"IAD_EDGE_ELEM")
       CALL EDGE_GET_CONNECT(EDGE_PTR, EDGE_ELEM)
 
       IAD_EDGE_ELEM(1) = 1
@@ -146,14 +146,14 @@ C-----------------------------------------------
       
 !     Get pairs of duplicated elements
       CALL INTVECTOR_GET_SIZE(PAIR_VEC_PTR, NPAIR)
-      CALL MY_ALLOC(PAIR_LIST, (NPAIR))
+      CALL MY_ALLOC(PAIR_LIST, (NPAIR),"PAIR_LIST")
       CALL INTVECTOR_COPY_TO(PAIR_VEC_PTR, PAIR_LIST)
       NPAIR = NPAIR / 2
 
 !     Reduce
-      CALL MY_ALLOC(FLAG_ELEM, (NTG + NTGI))
+      CALL MY_ALLOC(FLAG_ELEM, (NTG + NTGI),"FLAG_ELEM")
       FLAG_ELEM(1:NTG + NTGI) = 0
-      CALL MY_ALLOC(INV_LIST, (NTG + NTGI))
+      CALL MY_ALLOC(INV_LIST, (NTG + NTGI),"INV_LIST")
       INV_LIST(1:NTG + NTGI) = 0
 
       NB_DUPLICATED_ELTS = 0
@@ -178,7 +178,7 @@ C-----------------------------------------------
       ENDIF
 
       CALL INTVECTOR_GET_SIZE(LIST_PTR, NB_DUPLICATED_ELTS)
-      CALL MY_ALLOC(LIST, (NB_DUPLICATED_ELTS))
+      CALL MY_ALLOC(LIST, (NB_DUPLICATED_ELTS),"LIST")
       CALL INTVECTOR_COPY_TO(LIST_PTR, LIST)
       
       DO II = 1, NPAIR
@@ -188,10 +188,10 @@ C-----------------------------------------------
 
       GRAPH_PTR = 0
       CALL GRAPH_BUILD_PATH(NB_DUPLICATED_ELTS, NPAIR, PAIR_LIST, NB_CONNEX_COMP, GRAPH_PTR)
-      CALL MY_ALLOC(SIZES, (NB_CONNEX_COMP))
+      CALL MY_ALLOC(SIZES, (NB_CONNEX_COMP),"SIZES")
       CALL GRAPH_GET_SIZES(GRAPH_PTR, SIZES)
       PATH_SIZE = SUM(SIZES)
-      CALL MY_ALLOC(PATHS, (PATH_SIZE))
+      CALL MY_ALLOC(PATHS, (PATH_SIZE),"PATHS")
       CALL GRAPH_GET_PATH(GRAPH_PTR, PATHS)
 
       DO II = 1, PATH_SIZE
@@ -228,7 +228,7 @@ C-----------------------------------------------
       NTG_NEW = SUM(FLAG_ELEM(1:NTG))
       NTGI_NEW = SUM(FLAG_ELEM(NTG + 1:NTG + NTGI))
       
-      CALL MY_ALLOC(ELEM, 3, NTG_NEW + NTGI_NEW)
+      CALL MY_ALLOC(ELEM, 3, NTG_NEW + NTGI_NEW,"ELEM")
       IAD1 = 1
       DO II = 1, NTG + NTGI
          IF (FLAG_ELEM(II) == 1) THEN
@@ -242,7 +242,7 @@ C-----------------------------------------------
          ISAVE(II) = T_MONVOLN%FVBAG_ELEMID(II)
       ENDDO
       DEALLOCATE(T_MONVOLN%FVBAG_ELEMID)
-      CALL MY_ALLOC(T_MONVOLN%FVBAG_ELEMID, NTG_NEW + NTGI_NEW)
+      CALL MY_ALLOC(T_MONVOLN%FVBAG_ELEMID, NTG_NEW + NTGI_NEW,"T_MONVOLN%FVBAG_ELEMID")
       IAD1 = 1
       DO II = 1, NTG + NTGI
          IF (FLAG_ELEM(II) == 1) THEN
@@ -255,7 +255,7 @@ C-----------------------------------------------
          ISAVE(II) = T_MONVOLN%ELTG(II)
       ENDDO
       DEALLOCATE(T_MONVOLN%ELTG)
-      CALL MY_ALLOC(T_MONVOLN%ELTG, (NTG_NEW + NTGI_NEW))
+      CALL MY_ALLOC(T_MONVOLN%ELTG, (NTG_NEW + NTGI_NEW),"T_MONVOLN%ELTG")
       IAD1 = 1
       DO II = 1, NTG + NTGI
          IF (FLAG_ELEM(II) == 1) THEN
@@ -268,7 +268,7 @@ C-----------------------------------------------
       T_MONVOLN%NTGI = NTGI_NEW
       NTG = NTG_NEW
       NTGI = NTGI_NEW
-      CALL MY_ALLOC(T_MONVOLN%ELEM, 3, NTG + NTGI)
+      CALL MY_ALLOC(T_MONVOLN%ELEM, 3, NTG + NTGI,"T_MONVOLN%ELEM")
       DO II = 1, NTG + NTGI
          T_MONVOLN%ELEM(1:3, II) = ELEM(1:3, II)
       ENDDO

@@ -153,7 +153,7 @@ C--------------------------------------------------
 C      ALLOCS & INITS
 c      use NUMELQ IN PLACE OF NUMELC ( NBADMESH routine is modifying NUMELC )
 C--------------------------------------------------
-      CALL MY_ALLOC(ITAG,NUMNOD)
+      CALL MY_ALLOC(ITAG,NUMNOD,"ITAG")
       ALLOCATE (SUB_SPH(NUMSPH),STAT=stat)
       IF (STAT /= 0) CALL ANCMSG(MSGID=268,ANMODE=ANINFO,
      .                             MSGTYPE=MSGERROR,

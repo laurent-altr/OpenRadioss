@@ -439,7 +439,7 @@ C
 C---------------Tag of nodes with nlocal dof-------------------------C
             IF (NLOC_DMG%IMOD > 0) THEN
               NN = 5
-              CALL MY_ALLOC(TAG_NLOCAL,NUMNOD)
+              CALL MY_ALLOC(TAG_NLOCAL,NUMNOD,"TAG_NLOCAL")
               TAG_NLOCAL(1:NUMNOD) = 0
               CALL TAGNOD_R2R_NL(IXC,IXTG,IXS,IXS10,IXS20,
      .                           IXS16,TAG_NLOCAL,MAT_PARAM)

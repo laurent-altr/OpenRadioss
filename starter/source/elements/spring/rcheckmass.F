@@ -74,10 +74,10 @@ C     REAL
 C-----------------------------------------------------
 C     Check for springs with stiffness but no mass
 C-----------------------------------------------------
-      CALL MY_ALLOC(INDEX,2*NUMELR)
-      CALL MY_ALLOC(ITRI ,NUMELR)
+      CALL MY_ALLOC(INDEX,2*NUMELR,"INDEX")
+      CALL MY_ALLOC(ITRI ,NUMELR,"ITRI ")
 C
-      CALL MY_ALLOC(TAGSLV,NUMNOD)
+      CALL MY_ALLOC(TAGSLV,NUMNOD,"TAGSLV")
       TAGSLV(1:NUMNOD)=0
       DO N=1,NRBYKIN
         M  =NPBY(1,N)

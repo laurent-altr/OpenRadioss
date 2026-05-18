@@ -58,6 +58,8 @@
           use precision_mod , only : WP
           use stack_mod , only : stack_ply
           use element_mod , only :nixc,nixtg,nixs,nixs10,nixs16,nixs20
+          use MY_ALLOC_MOD, only : my_alloc
+          use my_dealloc_mod, only : my_dealloc
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Implicit none
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -164,8 +166,8 @@
 !                                                   Body
 ! ----------------------------------------------------------------------------------------------------------------------
           total_cell_nb = cell_nb(1)*cell_nb(2)*cell_nb(3)
-          allocate(cell_id(nsn)) ! cell id of each S node
-          allocate(s_node_nb(total_cell_nb)) ! number of S nodes in each cell
+          call my_alloc(cell_id, nsn, "cell_id") ! cell id of each S node
+          call my_alloc(s_node_nb, total_cell_nb, "s_node_nb") ! number of S nodes in each cell
           cell_id(:) = 0 ! initialize the array
           s_node_nb(:) = 0 ! initialize the array
           do i=1,nsn ! loop over the secondary node of the interface
@@ -183,13 +185,13 @@
             endif
           enddo
 
-          allocate(cell_pointer(total_cell_nb+1)) ! pointer to the first node of each cell in the s_bucket array
+          call my_alloc(cell_pointer, total_cell_nb+1, "cell_pointer") ! pointer to the first node of each cell in the s_bucket array
           cell_pointer(1) = 0
           do i=2,total_cell_nb+1
             cell_pointer(i) = cell_pointer(i-1) + s_node_nb(i-1)
           enddo
           s_node_nb(:) = 0 ! reuse this array to count the number of nodes in each cell
-          allocate(s_bucket(nsn))
+          call my_alloc(s_bucket, nsn, "s_bucket")
           do i=1,nsn ! loop over the secondary node of the interface
             my_cell_id = cell_id(i) ! get the cell id of the current node
             if(my_cell_id>0) then
@@ -338,10 +340,10 @@
                 lc2,lc3,lc4,s,t)
             endif
           endif
-          deallocate( cell_pointer )
-          deallocate( cell_id )
-          deallocate( s_bucket )
-          deallocate( s_node_nb )
+          call my_dealloc(cell_pointer, "cell_pointer")
+          call my_dealloc(cell_id, "cell_id")
+          call my_dealloc(s_bucket, "s_bucket")
+          call my_dealloc(s_node_nb, "s_node_nb")
 
           return
 ! ----------------------------------------------------------------------------------------------------------------------

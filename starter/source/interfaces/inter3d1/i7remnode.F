@@ -936,7 +936,7 @@ C--------dim first
                               SIZE_INSERTED_NODE =  4 * NRTM *MAX_INSERTED_NODE
                             ENDIF
 
-                            CALL MY_ALLOC(INSERTED_NODE,SIZE_INSERTED_NODE) 
+                            CALL MY_ALLOC(INSERTED_NODE,SIZE_INSERTED_NODE,"INSERTED_NODE")
 
                             DO II=1,NRTM
                                 NNREM_SAVE = NNREM
@@ -961,7 +961,7 @@ C
 C extend INSERTED_NODE if needed
                                   OLDSIZE = SIZE_INSERTED_NODE
                                   SIZE_INSERTED_NODE = SIZE_INSERTED_NODE  + MIN(NRTM,10*NNOD*MAX_INSERTED_NODE)
-                                  CALL MY_ALLOC(TMP,SIZE_INSERTED_NODE)
+                                  CALL MY_ALLOC(TMP,SIZE_INSERTED_NODE,"TMP")
                                   TMP(1:OLDSIZE) = INSERTED_NODE(1:OLDSIZE)
 !                                 move_alloc deallocates TMP
                                   CALL MOVE_ALLOC(TMP,INSERTED_NODE)
@@ -1056,7 +1056,7 @@ C
                                     TOTAL_INSERTED = TOTAL_INSERTED + NBR_INSERT_II(II)
                                 ENDDO
                                 !       allocate the buffer array
-                                ALLOCATE( REMNODE(NREMOV(N)+TOTAL_INSERTED) )
+                                CALL MY_ALLOC(REMNODE,NREMOV(N)+TOTAL_INSERTED,"REMNODE")
        
                                 J = 0
                                 I = 0

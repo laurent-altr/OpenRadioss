@@ -806,7 +806,7 @@ C-------------------------------------------------------------------------------
 
           NUMELC0 = NUMELC
           ALLOCATE(IX_TEMP(NUMELC*NIXC),CORESC(NUMELC))
-          CALL MY_ALLOC (IWORKSH_TEMP,3,NUMELC)
+          CALL MY_ALLOC(IWORKSH_TEMP,3,NUMELC,"IWORKSH_TEMP")
           DO J=1,NUMELC
             DO K=1,NIXC
               IX_TEMP(NIXC*(J-1)+K)=IXC(NIXC*(J-1)+K)
