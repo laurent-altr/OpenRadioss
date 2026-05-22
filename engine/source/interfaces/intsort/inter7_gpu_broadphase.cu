@@ -78,11 +78,18 @@ Copyright>        along with this program.  If not, see <https://www.gnu.org/lic
 
 /* ------------------------------------------------------------------ */
 /* Compile-time block size for the candidate kernel                    */
+/* 128 threads per block gives good occupancy on SM7+ devices          */
 /* ------------------------------------------------------------------ */
 #define BLOCK_SIZE  128
-/* Maximum candidate pairs buffered in shared memory per block before  */
-/* flushing to the global output (must be >= BLOCK_SIZE)              */
-#define BLOCK_BUF   256
+
+/*
+ * SPMD limitation
+ * Remote (SPMD) slave nodes (jj > nsn in the Fortran linked list) are NOT
+ * processed by the GPU kernel.  When nsnr > 0, the caller must supplement
+ * GPU candidate pairs with CPU-computed remote-node pairs by running the
+ * CPU inter7_candidate_pairs path after the GPU path, or by passing nsnr=0
+ * and restricting the GPU call to local nodes only.
+ */
 
 /* ------------------------------------------------------------------ */
 /* Global device state                                                 */
@@ -185,24 +192,10 @@ __global__ void kernel_fill_voxel(
         return;
     }
 
-    int ix = (int)(nbx * (xj - xminb) / (xmaxb - xminb));
-    int iy = (int)(nby * (yj - yminb) / (ymaxb - yminb));
-    int iz = (int)(nbz * (zj - zminb) / (zmaxb - zminb));
-
-    /* Fortran: MAX(1, 2+MIN(NBX, ix)) – map to [1, NBX+2] in Fortran */
-    if (ix < 0)   ix = -1; /* will become 1 after +2 clamp */
-    if (ix > nbx) ix = nbx;
-    ix = 1 + ix;   /* shift so range is [1, nbx+1]; then clamp below  */
-    /* replicate Fortran: MAX(1, 2+MIN(NBX,ix_raw)) */
-    /* We have ix_raw in [0,nbx].  2+MIN(NBX,ix_raw) in [2,nbx+2].   */
-    /* MAX(1, ...) is always 2+ for in-range nodes → range [2,nbx+2]. */
-    /* Re-compute cleanly: */
-    int ix_raw = (int)(nbx * (xj - xminb) / (xmaxb - xminb));
-    int iy_raw = (int)(nby * (yj - yminb) / (ymaxb - yminb));
-    int iz_raw = (int)(nbz * (zj - zminb) / (zmaxb - zminb));
-    ix = max(1, 2 + min(nbx, ix_raw));
-    iy = max(1, 2 + min(nby, iy_raw));
-    iz = max(1, 2 + min(nbz, iz_raw));
+    /* Mirrors Fortran: MAX(1, 2+MIN(NBX, INT(NBX*(xj-xminb)/(xmaxb-xminb)))) */
+    int ix = max(1, 2 + min(nbx, (int)(nbx * (xj - xminb) / (xmaxb - xminb))));
+    int iy = max(1, 2 + min(nby, (int)(nby * (yj - yminb) / (ymaxb - yminb))));
+    int iz = max(1, 2 + min(nbz, (int)(nbz * (zj - zminb) / (zmaxb - zminb))));
 
     /* Flat cell index (1-based in Fortran, 0-based C equivalent) */
     int cellid = (iz - 1) * (nbx + 2) * (nby + 2) + (iy - 1) * (nbx + 2) + ix - 1;
@@ -217,18 +210,17 @@ __global__ void kernel_fill_voxel(
     next_nod[i] = old_head;  /* chain the old head as our successor */
 }
 
-/* ================================================================== */
-/* Binary search helper (device)                                       */
-/* Returns true if key is found in sorted array a[lo..hi).            */
-/* ================================================================== */
-__device__ __forceinline__ bool dev_binary_search(
-    const int* __restrict__ a, int lo, int hi, int key)
+/*
+ * Linear scan over the per-segment KREMNODE list.
+ * Binary search would be faster for large lists but requires sorted input,
+ * which the Fortran code does not guarantee.  Kremnode lists are typically
+ * very short (O(10) entries = neighbouring elements), so linear scan is fine.
+ */
+__device__ __forceinline__ bool dev_kremnode_forbidden(
+    const int* __restrict__ remnod, int lo, int hi, int global_node_id)
 {
-    while (lo < hi) {
-        int mid = lo + ((hi - lo) >> 1);
-        if      (a[mid] == key) return true;
-        else if (a[mid] <  key) lo = mid + 1;
-        else                    hi = mid;
+    for (int k = lo; k < hi; k++) {
+        if (remnod[k] == global_node_id) return true;
     }
     return false;
 }
@@ -297,21 +289,29 @@ __global__ void kernel_candidate_pairs(
     __shared__ int         s_krem_lo, s_krem_hi;      /* kremnode range  */
     __shared__ int         s_valid;                   /* segment alive?  */
 
-    /* Block-level candidate buffer before global flush */
-    __shared__ int  s_buf_n[BLOCK_BUF];
-    __shared__ int  s_buf_e[BLOCK_BUF];
-    __shared__ int  s_buf_cnt;
+    /*
+     * No shared-memory output buffer.
+     * Each valid pair is written to global memory via atomicAdd on g_counter.
+     * This avoids the __syncthreads()-inside-conditional deadlock that a
+     * mid-loop flush would cause (threads exit the inner while loop at
+     * different times so a block-wide barrier inside it is illegal).
+     * atomicAdd contention is acceptable since the broad phase produces
+     * O(candidates) writes, which is small relative to the voxel traversal.
+     */
 
     if (threadIdx.x == 0) {
         s_buf_cnt = 0;
         s_valid   = (stf[ne] != (my_real_gpu)0) ? 1 : 0;
 
         if (s_valid) {
-            /* Fortran irect(k,ne+1) → C irect[ne + (k-1)*nrtm] (col-major) */
-            s_m[0] = irect[ne + 0 * nrtm];   /* M1 */
-            s_m[1] = irect[ne + 1 * nrtm];   /* M2 */
-            s_m[2] = irect[ne + 2 * nrtm];   /* M3 */
-            s_m[3] = irect[ne + 3 * nrtm];   /* M4 */
+            /*
+             * Fortran IRECT(4,NRTM) is column-major: first index (k=1..4) varies
+             * fastest in memory.  IRECT(k, ne+1) → C flat index ne*4 + (k-1).
+             */
+            s_m[0] = irect[ne * 4 + 0];   /* IRECT(1,ne+1) = M1 */
+            s_m[1] = irect[ne * 4 + 1];   /* IRECT(2,ne+1) = M2 */
+            s_m[2] = irect[ne * 4 + 2];   /* IRECT(3,ne+1) = M3 */
+            s_m[3] = irect[ne * 4 + 3];   /* IRECT(4,ne+1) = M4 */
 
             /* Node coords (Fortran: x(k,j) → C: x[3*(j-1)+(k-1)]) */
             #define XC(j,k) x[3*((j)-1)+(k)]
@@ -415,7 +415,7 @@ __global__ void kernel_candidate_pairs(
 
                         /* (b) KREMNODE forbidden pair rejection */
                         if (flagremnode == 2 && s_krem_lo < s_krem_hi) {
-                            if (dev_binary_search(remnod, s_krem_lo, s_krem_hi, nn)) {
+                            if (dev_kremnode_forbidden(remnod, s_krem_lo, s_krem_hi, nn)) {
                                 jj = next_nod[jj - 1];
                                 continue;
                             }
@@ -456,25 +456,13 @@ __global__ void kernel_candidate_pairs(
                             }
                         }
 
-                        /* Valid candidate – store in shared buffer */
-                        int slot = atomicAdd(&s_buf_cnt, 1);
-                        if (slot < BLOCK_BUF) {
-                            s_buf_n[slot] = jj;        /* local slave index (1-based) */
-                            s_buf_e[slot] = ne + 1;    /* local segment index (1-based) */
-                        }
-                        /* If buffer is full, flush now */
-                        if (slot + 1 == BLOCK_BUF) {
-                            __syncthreads();
-                            if (threadIdx.x == 0) {
-                                int base = atomicAdd(g_counter, BLOCK_BUF);
-                                int write_n = min(BLOCK_BUF, mulnsn - base);
-                                for (int k = 0; k < write_n; k++) {
-                                    cand_n[base + k] = s_buf_n[k];
-                                    cand_e[base + k] = s_buf_e[k];
-                                }
-                                s_buf_cnt = 0;
+                        /* Valid candidate – write directly to global output */
+                        {
+                            int slot = atomicAdd(g_counter, 1);
+                            if (slot < mulnsn) {
+                                cand_n[slot] = jj;      /* local slave index (1-based) */
+                                cand_e[slot] = ne + 1;  /* local segment index (1-based) */
                             }
-                            __syncthreads();
                         }
                     }
                     jj = next_nod[jj - 1];
@@ -483,19 +471,6 @@ __global__ void kernel_candidate_pairs(
         }
     }
 
-    /* Final flush of partial buffer */
-    __syncthreads();
-    if (threadIdx.x == 0 && s_buf_cnt > 0) {
-        int cnt  = s_buf_cnt;
-        int base = atomicAdd(g_counter, cnt);
-        int write_n = min(cnt, mulnsn - base);
-        if (write_n > 0) {
-            for (int k = 0; k < write_n; k++) {
-                cand_n[base + k] = s_buf_n[k];
-                cand_e[base + k] = s_buf_e[k];
-            }
-        }
-    }
 }
 
 /* ================================================================== */
