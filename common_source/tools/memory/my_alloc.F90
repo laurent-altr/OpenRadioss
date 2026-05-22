@@ -277,8 +277,28 @@
 !||    w_th_surf_pload                    ../starter/source/restart/ddsplit/w_th_surf_pload.F
 !||    write_nloc_struct                  ../engine/source/output/restart/write_nloc_struct.F
 !||====================================================================
+
+! ======================================================================================================================
+! fypp template — generates my_alloc.F90
+! Do NOT edit the generated my_alloc.F90 directly; edit this file and re-run fypp.
+!
+! Axes of variation, each represented as a fypp set:
+!   TYPES     : (fortran_type, short_name_for_subroutine_suffix)
+!   MEM_KINDS : (fortran_attribute, name_prefix)   allocatable vs pointer
+!   IDX_KINDS : (index_integer_type, name_prefix)  integer(4) vs integer(8) dimension args
+!   RANKS     : (rank_number, list_of_dim_variable_names)
+!
+! Subroutine naming convention:
+!   my_alloc_<idx_prefix><mem_prefix><type_name>_<rank>d
+!   e.g. my_alloc_8_pdouble_3d  =>  integer(8) dims, pointer, double precision, 3D
+!
+! Placeholder for derived types is at the bottom of the contains section.
+! ======================================================================================================================
+
+
+
       module my_alloc_mod
-        use iso_c_binding, only : c_char, c_int, c_int64_t
+        use iso_c_binding, only : c_char, c_int, c_int64_t, c_ptr, c_loc
         implicit none
         integer, parameter :: len_error_message = 100
 
@@ -290,62 +310,71 @@
             integer(c_int64_t), intent(in) :: nbytes
           end subroutine cpp_record_alloc
 
+          subroutine cpp_record_alloc_addr(addr, msg, msg_len, nbytes) bind(C, name="cpp_record_alloc_addr")
+            import :: c_ptr, c_char, c_int, c_int64_t
+            type(c_ptr), value, intent(in) :: addr
+            character(kind=c_char), intent(in) :: msg(*)
+            integer(c_int), intent(in) :: msg_len
+            integer(c_int64_t), intent(in) :: nbytes
+          end subroutine cpp_record_alloc_addr
+
+          subroutine cpp_record_dealloc_addr(addr) bind(C, name="cpp_record_dealloc_addr")
+            import :: c_ptr
+            type(c_ptr), value, intent(in) :: addr
+          end subroutine cpp_record_dealloc_addr
+
           subroutine cpp_print_alloc_report() bind(C, name="cpp_print_alloc_report")
           end subroutine cpp_print_alloc_report
         end interface
 
         public :: report_alloc
+        public :: record_dealloc_addr
 
-        ! lengths : integer
         private :: my_alloc_real_1d
         private :: my_alloc_real_2d
         private :: my_alloc_real_3d
-        private :: my_alloc_integer_1d
-        private :: my_alloc_integer_2d
-        private :: my_alloc_integer_3d
         private :: my_alloc_double_1d
         private :: my_alloc_double_2d
         private :: my_alloc_double_3d
+        private :: my_alloc_integer_1d
+        private :: my_alloc_integer_2d
+        private :: my_alloc_integer_3d
         private :: my_alloc_logical_1d
         private :: my_alloc_logical_2d
         private :: my_alloc_logical_3d
-
         private :: my_alloc_preal_1d
         private :: my_alloc_preal_2d
         private :: my_alloc_preal_3d
-        private :: my_alloc_pinteger_1d
-        private :: my_alloc_pinteger_2d
-        private :: my_alloc_pinteger_3d
         private :: my_alloc_pdouble_1d
         private :: my_alloc_pdouble_2d
         private :: my_alloc_pdouble_3d
+        private :: my_alloc_pinteger_1d
+        private :: my_alloc_pinteger_2d
+        private :: my_alloc_pinteger_3d
         private :: my_alloc_plogical_1d
         private :: my_alloc_plogical_2d
         private :: my_alloc_plogical_3d
-
-
-        !lengths : integer(8)
         private :: my_alloc_8_real_1d
         private :: my_alloc_8_real_2d
         private :: my_alloc_8_real_3d
-        private :: my_alloc_8_integer_1d
-        private :: my_alloc_8_integer_2d
-        private :: my_alloc_8_integer_3d
         private :: my_alloc_8_double_1d
         private :: my_alloc_8_double_2d
         private :: my_alloc_8_double_3d
+        private :: my_alloc_8_integer_1d
+        private :: my_alloc_8_integer_2d
+        private :: my_alloc_8_integer_3d
         private :: my_alloc_8_logical_1d
         private :: my_alloc_8_logical_2d
         private :: my_alloc_8_logical_3d
         private :: my_alloc_8_preal_1d
         private :: my_alloc_8_preal_2d
         private :: my_alloc_8_preal_3d
-        private :: my_alloc_8_pinteger_1d
-        private :: my_alloc_8_pinteger_2d
-        private :: my_alloc_8_pinteger_3d
         private :: my_alloc_8_pdouble_1d
         private :: my_alloc_8_pdouble_2d
         private :: my_alloc_8_pdouble_3d
+        private :: my_alloc_8_pinteger_1d
+        private :: my_alloc_8_pinteger_2d
+        private :: my_alloc_8_pinteger_3d
         private :: my_alloc_8_plogical_1d
         private :: my_alloc_8_plogical_2d
         private :: my_alloc_8_plogical_3d
@@ -356,52 +385,48 @@
           module procedure my_alloc_real_1d
           module procedure my_alloc_real_2d
           module procedure my_alloc_real_3d
-          module procedure my_alloc_integer_1d
-          module procedure my_alloc_integer_2d
-          module procedure my_alloc_integer_3d
           module procedure my_alloc_double_1d
           module procedure my_alloc_double_2d
           module procedure my_alloc_double_3d
+          module procedure my_alloc_integer_1d
+          module procedure my_alloc_integer_2d
+          module procedure my_alloc_integer_3d
           module procedure my_alloc_logical_1d
           module procedure my_alloc_logical_2d
           module procedure my_alloc_logical_3d
           module procedure my_alloc_preal_1d
           module procedure my_alloc_preal_2d
           module procedure my_alloc_preal_3d
-          module procedure my_alloc_pinteger_1d
-          module procedure my_alloc_pinteger_2d
-          module procedure my_alloc_pinteger_3d
           module procedure my_alloc_pdouble_1d
           module procedure my_alloc_pdouble_2d
           module procedure my_alloc_pdouble_3d
+          module procedure my_alloc_pinteger_1d
+          module procedure my_alloc_pinteger_2d
+          module procedure my_alloc_pinteger_3d
           module procedure my_alloc_plogical_1d
           module procedure my_alloc_plogical_2d
           module procedure my_alloc_plogical_3d
-
-
           module procedure my_alloc_8_real_1d
           module procedure my_alloc_8_real_2d
           module procedure my_alloc_8_real_3d
-          module procedure my_alloc_8_integer_1d
-          module procedure my_alloc_8_integer_2d
-          module procedure my_alloc_8_integer_3d
           module procedure my_alloc_8_double_1d
           module procedure my_alloc_8_double_2d
           module procedure my_alloc_8_double_3d
+          module procedure my_alloc_8_integer_1d
+          module procedure my_alloc_8_integer_2d
+          module procedure my_alloc_8_integer_3d
           module procedure my_alloc_8_logical_1d
           module procedure my_alloc_8_logical_2d
           module procedure my_alloc_8_logical_3d
-
-
           module procedure my_alloc_8_preal_1d
           module procedure my_alloc_8_preal_2d
           module procedure my_alloc_8_preal_3d
-          module procedure my_alloc_8_pinteger_1d
-          module procedure my_alloc_8_pinteger_2d
-          module procedure my_alloc_8_pinteger_3d
           module procedure my_alloc_8_pdouble_1d
           module procedure my_alloc_8_pdouble_2d
           module procedure my_alloc_8_pdouble_3d
+          module procedure my_alloc_8_pinteger_1d
+          module procedure my_alloc_8_pinteger_2d
+          module procedure my_alloc_8_pinteger_3d
           module procedure my_alloc_8_plogical_1d
           module procedure my_alloc_8_plogical_2d
           module procedure my_alloc_8_plogical_3d
@@ -420,14 +445,8 @@
 !||    starter0       ../starter/source/starter/starter0.F
 !||====================================================================
         function build_msg(str) result(error_message)
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                     Arguments
-! ----------------------------------------------------------------------------------------------------------------------
           character(len=*), intent(in) :: str
           character(len=len_error_message) :: error_message
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                      Body
-! ----------------------------------------------------------------------------------------------------------------------
           if(len_trim(str) > len_error_message) then
             error_message = str(1:len_error_message)
           else
@@ -435,71 +454,14 @@
           end if
         end function build_msg
 
-!! \brief Check if the allocation was successful and print an error message if it was noti
 !||====================================================================
-!||    my_alloc_check           ../common_source/tools/memory/my_alloc.F90
-!||--- called by ------------------------------------------------------
-!||    my_alloc_8_double_1d     ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_8_double_2d     ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_8_double_3d     ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_8_integer_1d    ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_8_integer_2d    ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_8_integer_3d    ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_8_logical_1d    ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_8_logical_2d    ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_8_logical_3d    ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_8_pdouble_1d    ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_8_pdouble_2d    ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_8_pdouble_3d    ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_8_pinteger_1d   ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_8_pinteger_2d   ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_8_pinteger_3d   ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_8_plogical_1d   ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_8_plogical_2d   ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_8_plogical_3d   ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_8_preal_1d      ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_8_preal_2d      ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_8_preal_3d      ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_8_real_1d       ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_8_real_2d       ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_8_real_3d       ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_double_1d       ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_double_2d       ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_double_3d       ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_integer_1d      ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_integer_2d      ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_integer_3d      ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_logical_1d      ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_logical_2d      ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_logical_3d      ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_pdouble_1d      ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_pdouble_2d      ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_pdouble_3d      ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_pinteger_1d     ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_pinteger_2d     ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_pinteger_3d     ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_plogical_1d     ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_plogical_2d     ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_plogical_3d     ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_preal_1d        ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_preal_2d        ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_preal_3d        ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_real_1d         ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_real_2d         ../common_source/tools/memory/my_alloc.F90
-!||    my_alloc_real_3d         ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_check   ../common_source/tools/memory/my_alloc.F90
 !||--- calls      -----------------------------------------------------
-!||    arret                    ../engine/source/system/arret.F
+!||    arret            ../engine/source/system/arret.F
 !||====================================================================
         subroutine my_alloc_check(stat,msg)
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                     Arguments
-! ----------------------------------------------------------------------------------------------------------------------
           integer, intent(in) :: stat
           character(len=len_error_message), optional,  intent(in) :: msg
-
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                      Body
-! ----------------------------------------------------------------------------------------------------------------------
           if (stat /= 0) then
             write(6, "(a,i10,a)") "Error in memory allocation"
             if(present(msg)) then
@@ -509,58 +471,50 @@
           end if
         end subroutine my_alloc_check
 
-!! \brief Record an allocation in the C++ tracking map
-        subroutine record_alloc(msg, nbytes)
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                     Arguments
-! ----------------------------------------------------------------------------------------------------------------------
+        subroutine record_alloc_addr(addr, msg, nbytes)
+          type(c_ptr), intent(in) :: addr
           character(len=*), intent(in) :: msg
           integer(kind=8), intent(in) :: nbytes
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                   Local variables
-! ----------------------------------------------------------------------------------------------------------------------
           integer(c_int) :: msg_len
           integer(c_int64_t) :: c_nbytes
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                      Body
-! ----------------------------------------------------------------------------------------------------------------------
           msg_len = len_trim(msg)
           c_nbytes = nbytes
-          call cpp_record_alloc(msg, msg_len, c_nbytes)
-        end subroutine record_alloc
+          call cpp_record_alloc_addr(addr, msg, msg_len, c_nbytes)
+        end subroutine record_alloc_addr
 
-!! \brief Print a report of the top allocation sites
+        subroutine record_dealloc_addr(addr)
+          type(c_ptr), intent(in) :: addr
+          call cpp_record_dealloc_addr(addr)
+        end subroutine record_dealloc_addr
+
         subroutine report_alloc()
           call cpp_print_alloc_report()
         end subroutine report_alloc
 
 ! ======================================================================================================================
-!                                           REAL ALLOCATION ROUTINES
+!                                     GENERATED ALLOCATION ROUTINES
+!   Loop order: IDX_KINDS x MEM_KINDS x TYPES x RANKS
+!   IDX_KINDS  : integer(4) dims (''), integer(8) dims ('8_')
+!   MEM_KINDS  : allocatable (''), pointer ('p')
+!   TYPES      : real, double precision, integer, logical
+!   RANKS      : 1d, 2d, 3d
 ! ======================================================================================================================
 
-!! \brief Allocate a 1D array of real numbers
+!! \brief Allocate a 1D real array (allocatable, integer dims)
 !||====================================================================
 !||    my_alloc_real_1d   ../common_source/tools/memory/my_alloc.F90
 !||--- calls      -----------------------------------------------------
-!||    my_alloc_check     ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_check   ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
         subroutine my_alloc_real_1d(a, n, msg, stat)
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                     Arguments
-! ----------------------------------------------------------------------------------------------------------------------
-          real, dimension(:), allocatable, intent(inout) :: a !< The allocated array
+          real, dimension(:), allocatable, target, intent(inout) :: a !< The allocated array
           integer, intent(in) :: n !< The size of the array
           character(len=*), optional, intent(in) :: msg !< The error message to print if the allocation fails
           integer, optional, intent(out) :: stat !< The error code returned by the allocation
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                   Local variables
-! ----------------------------------------------------------------------------------------------------------------------
           integer :: ierr
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                      Body
-! ----------------------------------------------------------------------------------------------------------------------
           allocate(a(n), stat=ierr)
-          if (ierr == 0 .and. present(msg)) call record_alloc(msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
+          if (ierr == 0 .and. present(msg)) &
+            call record_alloc_addr(c_loc(a(lbound(a,1))), msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
               call my_alloc_check(ierr, msg=msg)
@@ -569,33 +523,24 @@
             end if
           end if
           if(present(stat)) stat = ierr
-
         end subroutine my_alloc_real_1d
 
-!! \brief Allocate a 2D array of real numbers
+!! \brief Allocate a 2D real array (allocatable, integer dims)
 !||====================================================================
 !||    my_alloc_real_2d   ../common_source/tools/memory/my_alloc.F90
 !||--- calls      -----------------------------------------------------
-!||    my_alloc_check     ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_check   ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
-        subroutine my_alloc_real_2d(a, n,m, msg, stat)
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                     Arguments
-! ----------------------------------------------------------------------------------------------------------------------
-          real, dimension(:,:), allocatable, intent(inout) :: a !< The allocated array
+        subroutine my_alloc_real_2d(a, n, m, msg, stat)
+          real, dimension(:, :), allocatable, target, intent(inout) :: a !< The allocated array
           integer, intent(in) :: n !< The first dimension of the array
           integer, intent(in) :: m !< The second dimension of the array
           character(len=*), optional, intent(in) :: msg !< The error message to print if the allocation fails
           integer, optional, intent(out) :: stat !< The error code returned by the allocation
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                   Local variables
-! ----------------------------------------------------------------------------------------------------------------------
           integer :: ierr
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                      Body
-! ----------------------------------------------------------------------------------------------------------------------
-          allocate(a(n,m), stat=ierr)
-          if (ierr == 0 .and. present(msg)) call record_alloc(msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
+          allocate(a(n, m), stat=ierr)
+          if (ierr == 0 .and. present(msg)) &
+            call record_alloc_addr(c_loc(a(lbound(a,1), lbound(a,2))), msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
               call my_alloc_check(ierr, msg=msg)
@@ -604,34 +549,26 @@
             end if
           end if
           if(present(stat)) stat = ierr
-
         end subroutine my_alloc_real_2d
 
+!! \brief Allocate a 3D real array (allocatable, integer dims)
 !||====================================================================
 !||    my_alloc_real_3d   ../common_source/tools/memory/my_alloc.F90
 !||--- calls      -----------------------------------------------------
-!||    my_alloc_check     ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_check   ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
-        subroutine my_alloc_real_3d(a,l,m,n, msg, stat)
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                     Arguments
-! ----------------------------------------------------------------------------------------------------------------------
-          real, dimension(:,:,:), allocatable, intent(inout) :: a !< The allocated array
+        subroutine my_alloc_real_3d(a, l, m, n, msg, stat)
+          real, dimension(:, :, :), allocatable, target, intent(inout) :: a !< The allocated array
           integer, intent(in) :: l !< The first dimension of the array
           integer, intent(in) :: m !< The second dimension of the array
           integer, intent(in) :: n !< The third dimension of the array
           character(len=*), optional, intent(in) :: msg !< The error message to print if the allocation fails
           integer, optional, intent(out) :: stat !< The error code returned by the allocation
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                   Local variables
-! ----------------------------------------------------------------------------------------------------------------------
           integer :: ierr
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                      Body
-! ----------------------------------------------------------------------------------------------------------------------
-
-          allocate(a(l,m,n), stat=ierr)
-          if (ierr == 0 .and. present(msg)) call record_alloc(msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
+          allocate(a(l, m, n), stat=ierr)
+          if (ierr == 0 .and. present(msg)) &
+            call record_alloc_addr(c_loc(a(lbound(a,1), lbound(a,2), lbound(a,3))), msg, int(storage_size(a), kind=8) / 8_8 *&
+                & size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
               call my_alloc_check(ierr, msg=msg)
@@ -640,35 +577,23 @@
             end if
           end if
           if(present(stat)) stat = ierr
-
         end subroutine my_alloc_real_3d
-! ======================================================================================================================
-!                                           double ALLOCATION ROUTINES
-! ======================================================================================================================
 
-!! \brief Allocate a 1D array of double numbers
+!! \brief Allocate a 1D double precision array (allocatable, integer dims)
 !||====================================================================
 !||    my_alloc_double_1d   ../common_source/tools/memory/my_alloc.F90
 !||--- calls      -----------------------------------------------------
-!||    my_alloc_check       ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_check   ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
         subroutine my_alloc_double_1d(a, n, msg, stat)
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                     Arguments
-! ----------------------------------------------------------------------------------------------------------------------
-          double precision, dimension(:), allocatable, intent(inout) :: a !< The allocated array
+          double precision, dimension(:), allocatable, target, intent(inout) :: a !< The allocated array
           integer, intent(in) :: n !< The size of the array
           character(len=*), optional, intent(in) :: msg !< The error message to print if the allocation fails
           integer, optional, intent(out) :: stat !< The error code returned by the allocation
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                   Local variables
-! ----------------------------------------------------------------------------------------------------------------------
           integer :: ierr
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                      Body
-! ----------------------------------------------------------------------------------------------------------------------
           allocate(a(n), stat=ierr)
-          if (ierr == 0 .and. present(msg)) call record_alloc(msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
+          if (ierr == 0 .and. present(msg)) &
+            call record_alloc_addr(c_loc(a(lbound(a,1))), msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
               call my_alloc_check(ierr, msg=msg)
@@ -677,33 +602,24 @@
             end if
           end if
           if(present(stat)) stat = ierr
-
         end subroutine my_alloc_double_1d
 
-!! \brief Allocate a 2D array of double numbers
+!! \brief Allocate a 2D double precision array (allocatable, integer dims)
 !||====================================================================
 !||    my_alloc_double_2d   ../common_source/tools/memory/my_alloc.F90
 !||--- calls      -----------------------------------------------------
-!||    my_alloc_check       ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_check   ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
-        subroutine my_alloc_double_2d(a, n,m, msg, stat)
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                     Arguments
-! ----------------------------------------------------------------------------------------------------------------------
-          double precision, dimension(:,:), allocatable, intent(inout) :: a !< The allocated array
+        subroutine my_alloc_double_2d(a, n, m, msg, stat)
+          double precision, dimension(:, :), allocatable, target, intent(inout) :: a !< The allocated array
           integer, intent(in) :: n !< The first dimension of the array
           integer, intent(in) :: m !< The second dimension of the array
           character(len=*), optional, intent(in) :: msg !< The error message to print if the allocation fails
           integer, optional, intent(out) :: stat !< The error code returned by the allocation
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                   Local variables
-! ----------------------------------------------------------------------------------------------------------------------
           integer :: ierr
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                      Body
-! ----------------------------------------------------------------------------------------------------------------------
-          allocate(a(n,m), stat=ierr)
-          if (ierr == 0 .and. present(msg)) call record_alloc(msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
+          allocate(a(n, m), stat=ierr)
+          if (ierr == 0 .and. present(msg)) &
+            call record_alloc_addr(c_loc(a(lbound(a,1), lbound(a,2))), msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
               call my_alloc_check(ierr, msg=msg)
@@ -712,34 +628,26 @@
             end if
           end if
           if(present(stat)) stat = ierr
-
         end subroutine my_alloc_double_2d
 
+!! \brief Allocate a 3D double precision array (allocatable, integer dims)
 !||====================================================================
 !||    my_alloc_double_3d   ../common_source/tools/memory/my_alloc.F90
 !||--- calls      -----------------------------------------------------
-!||    my_alloc_check       ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_check   ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
-        subroutine my_alloc_double_3d(a,l,m,n, msg, stat)
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                     Arguments
-! ----------------------------------------------------------------------------------------------------------------------
-          double precision, dimension(:,:,:), allocatable, intent(inout) :: a !< The allocated array
+        subroutine my_alloc_double_3d(a, l, m, n, msg, stat)
+          double precision, dimension(:, :, :), allocatable, target, intent(inout) :: a !< The allocated array
           integer, intent(in) :: l !< The first dimension of the array
           integer, intent(in) :: m !< The second dimension of the array
           integer, intent(in) :: n !< The third dimension of the array
           character(len=*), optional, intent(in) :: msg !< The error message to print if the allocation fails
           integer, optional, intent(out) :: stat !< The error code returned by the allocation
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                   Local variables
-! ----------------------------------------------------------------------------------------------------------------------
           integer :: ierr
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                      Body
-! ----------------------------------------------------------------------------------------------------------------------
-
-          allocate(a(l,m,n), stat=ierr)
-          if (ierr == 0 .and. present(msg)) call record_alloc(msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
+          allocate(a(l, m, n), stat=ierr)
+          if (ierr == 0 .and. present(msg)) &
+            call record_alloc_addr(c_loc(a(lbound(a,1), lbound(a,2), lbound(a,3))), msg, int(storage_size(a), kind=8) / 8_8 *&
+                & size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
               call my_alloc_check(ierr, msg=msg)
@@ -748,36 +656,23 @@
             end if
           end if
           if(present(stat)) stat = ierr
-
         end subroutine my_alloc_double_3d
 
-
-! ======================================================================================================================
-!                                           INTEGER ALLOCATION ROUTINES
-! ======================================================================================================================
-        !! \brief Allocate a 1D array of integer numbers
+!! \brief Allocate a 1D integer array (allocatable, integer dims)
 !||====================================================================
 !||    my_alloc_integer_1d   ../common_source/tools/memory/my_alloc.F90
 !||--- calls      -----------------------------------------------------
-!||    my_alloc_check        ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_check   ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
         subroutine my_alloc_integer_1d(a, n, msg, stat)
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                     Arguments
-! ----------------------------------------------------------------------------------------------------------------------
-          integer, dimension(:), allocatable, intent(inout) :: a !< The allocated array
+          integer, dimension(:), allocatable, target, intent(inout) :: a !< The allocated array
           integer, intent(in) :: n !< The size of the array
           character(len=*), optional, intent(in) :: msg !< The error message to print if the allocation fails
           integer, optional, intent(out) :: stat !< The error code returned by the allocation
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                   Local variables
-! ----------------------------------------------------------------------------------------------------------------------
           integer :: ierr
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                      Body
-! ----------------------------------------------------------------------------------------------------------------------
           allocate(a(n), stat=ierr)
-          if (ierr == 0 .and. present(msg)) call record_alloc(msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
+          if (ierr == 0 .and. present(msg)) &
+            call record_alloc_addr(c_loc(a(lbound(a,1))), msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
               call my_alloc_check(ierr, msg=msg)
@@ -786,33 +681,24 @@
             end if
           end if
           if(present(stat)) stat = ierr
-
         end subroutine my_alloc_integer_1d
 
-!! \brief Allocate a 2D array of integers
+!! \brief Allocate a 2D integer array (allocatable, integer dims)
 !||====================================================================
 !||    my_alloc_integer_2d   ../common_source/tools/memory/my_alloc.F90
 !||--- calls      -----------------------------------------------------
-!||    my_alloc_check        ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_check   ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
-        subroutine my_alloc_integer_2d(a, n,m, msg, stat)
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                     Arguments
-! ----------------------------------------------------------------------------------------------------------------------
-          integer, dimension(:,:), allocatable, intent(inout) :: a !< The allocated array
+        subroutine my_alloc_integer_2d(a, n, m, msg, stat)
+          integer, dimension(:, :), allocatable, target, intent(inout) :: a !< The allocated array
           integer, intent(in) :: n !< The first dimension of the array
           integer, intent(in) :: m !< The second dimension of the array
           character(len=*), optional, intent(in) :: msg !< The error message to print if the allocation fails
           integer, optional, intent(out) :: stat !< The error code returned by the allocation
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                   Local variables
-! ----------------------------------------------------------------------------------------------------------------------
           integer :: ierr
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                      Body
-! ----------------------------------------------------------------------------------------------------------------------
-          allocate(a(n,m), stat=ierr)
-          if (ierr == 0 .and. present(msg)) call record_alloc(msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
+          allocate(a(n, m), stat=ierr)
+          if (ierr == 0 .and. present(msg)) &
+            call record_alloc_addr(c_loc(a(lbound(a,1), lbound(a,2))), msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
               call my_alloc_check(ierr, msg=msg)
@@ -821,35 +707,26 @@
             end if
           end if
           if(present(stat)) stat = ierr
-
         end subroutine my_alloc_integer_2d
 
-!! \brief Allocate a 3D array of integers
+!! \brief Allocate a 3D integer array (allocatable, integer dims)
 !||====================================================================
 !||    my_alloc_integer_3d   ../common_source/tools/memory/my_alloc.F90
 !||--- calls      -----------------------------------------------------
-!||    my_alloc_check        ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_check   ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
-        subroutine my_alloc_integer_3d(a,l,m,n, msg, stat)
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                     Arguments
-! ----------------------------------------------------------------------------------------------------------------------
-          integer, dimension(:,:,:), allocatable, intent(inout) :: a !< The allocated array
+        subroutine my_alloc_integer_3d(a, l, m, n, msg, stat)
+          integer, dimension(:, :, :), allocatable, target, intent(inout) :: a !< The allocated array
           integer, intent(in) :: l !< The first dimension of the array
           integer, intent(in) :: m !< The second dimension of the array
           integer, intent(in) :: n !< The third dimension of the array
           character(len=*), optional, intent(in) :: msg !< The error message to print if the allocation fails
           integer, optional, intent(out) :: stat !< The error code returned by the allocation
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                   Local variables
-! ----------------------------------------------------------------------------------------------------------------------
           integer :: ierr
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                      Body
-! ----------------------------------------------------------------------------------------------------------------------
-
-          allocate(a(l,m,n), stat=ierr)
-          if (ierr == 0 .and. present(msg)) call record_alloc(msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
+          allocate(a(l, m, n), stat=ierr)
+          if (ierr == 0 .and. present(msg)) &
+            call record_alloc_addr(c_loc(a(lbound(a,1), lbound(a,2), lbound(a,3))), msg, int(storage_size(a), kind=8) / 8_8 *&
+                & size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
               call my_alloc_check(ierr, msg=msg)
@@ -860,33 +737,100 @@
           if(present(stat)) stat = ierr
         end subroutine my_alloc_integer_3d
 
-! ======================================================================================================================
-!                                           REAL ALLOCATION ROUTINES
-! ======================================================================================================================
+!! \brief Allocate a 1D logical array (allocatable, integer dims)
+!||====================================================================
+!||    my_alloc_logical_1d   ../common_source/tools/memory/my_alloc.F90
+!||--- calls      -----------------------------------------------------
+!||    my_alloc_check   ../common_source/tools/memory/my_alloc.F90
+!||====================================================================
+        subroutine my_alloc_logical_1d(a, n, msg, stat)
+          logical, dimension(:), allocatable, target, intent(inout) :: a !< The allocated array
+          integer, intent(in) :: n !< The size of the array
+          character(len=*), optional, intent(in) :: msg !< The error message to print if the allocation fails
+          integer, optional, intent(out) :: stat !< The error code returned by the allocation
+          integer :: ierr
+          allocate(a(n), stat=ierr)
+          if (ierr == 0 .and. present(msg)) &
+            call record_alloc_addr(c_loc(a(lbound(a,1))), msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
+          if(.not. present(stat)) then
+            if(present(msg)) then
+              call my_alloc_check(ierr, msg=msg)
+            else
+              call my_alloc_check(ierr)
+            end if
+          end if
+          if(present(stat)) stat = ierr
+        end subroutine my_alloc_logical_1d
 
-!! \brief Allocate a 1D array of real numbers
+!! \brief Allocate a 2D logical array (allocatable, integer dims)
+!||====================================================================
+!||    my_alloc_logical_2d   ../common_source/tools/memory/my_alloc.F90
+!||--- calls      -----------------------------------------------------
+!||    my_alloc_check   ../common_source/tools/memory/my_alloc.F90
+!||====================================================================
+        subroutine my_alloc_logical_2d(a, n, m, msg, stat)
+          logical, dimension(:, :), allocatable, target, intent(inout) :: a !< The allocated array
+          integer, intent(in) :: n !< The first dimension of the array
+          integer, intent(in) :: m !< The second dimension of the array
+          character(len=*), optional, intent(in) :: msg !< The error message to print if the allocation fails
+          integer, optional, intent(out) :: stat !< The error code returned by the allocation
+          integer :: ierr
+          allocate(a(n, m), stat=ierr)
+          if (ierr == 0 .and. present(msg)) &
+            call record_alloc_addr(c_loc(a(lbound(a,1), lbound(a,2))), msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
+          if(.not. present(stat)) then
+            if(present(msg)) then
+              call my_alloc_check(ierr, msg=msg)
+            else
+              call my_alloc_check(ierr)
+            end if
+          end if
+          if(present(stat)) stat = ierr
+        end subroutine my_alloc_logical_2d
+
+!! \brief Allocate a 3D logical array (allocatable, integer dims)
+!||====================================================================
+!||    my_alloc_logical_3d   ../common_source/tools/memory/my_alloc.F90
+!||--- calls      -----------------------------------------------------
+!||    my_alloc_check   ../common_source/tools/memory/my_alloc.F90
+!||====================================================================
+        subroutine my_alloc_logical_3d(a, l, m, n, msg, stat)
+          logical, dimension(:, :, :), allocatable, target, intent(inout) :: a !< The allocated array
+          integer, intent(in) :: l !< The first dimension of the array
+          integer, intent(in) :: m !< The second dimension of the array
+          integer, intent(in) :: n !< The third dimension of the array
+          character(len=*), optional, intent(in) :: msg !< The error message to print if the allocation fails
+          integer, optional, intent(out) :: stat !< The error code returned by the allocation
+          integer :: ierr
+          allocate(a(l, m, n), stat=ierr)
+          if (ierr == 0 .and. present(msg)) &
+            call record_alloc_addr(c_loc(a(lbound(a,1), lbound(a,2), lbound(a,3))), msg, int(storage_size(a), kind=8) / 8_8 *&
+                & size(a, kind=8))
+          if(.not. present(stat)) then
+            if(present(msg)) then
+              call my_alloc_check(ierr, msg=msg)
+            else
+              call my_alloc_check(ierr)
+            end if
+          end if
+          if(present(stat)) stat = ierr
+        end subroutine my_alloc_logical_3d
+
+!! \brief Allocate a 1D real array (pointer, integer dims)
 !||====================================================================
 !||    my_alloc_preal_1d   ../common_source/tools/memory/my_alloc.F90
 !||--- calls      -----------------------------------------------------
-!||    my_alloc_check      ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_check   ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
         subroutine my_alloc_preal_1d(a, n, msg, stat)
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                     Arguments
-! ----------------------------------------------------------------------------------------------------------------------
-          real, dimension(:), pointer, intent(inout) :: a !< The allocated array
+          real, dimension(:), pointer, target, intent(inout) :: a !< The allocated array
           integer, intent(in) :: n !< The size of the array
           character(len=*), optional, intent(in) :: msg !< The error message to print if the allocation fails
           integer, optional, intent(out) :: stat !< The error code returned by the allocation
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                   Local variables
-! ----------------------------------------------------------------------------------------------------------------------
           integer :: ierr
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                      Body
-! ----------------------------------------------------------------------------------------------------------------------
           allocate(a(n), stat=ierr)
-          if (ierr == 0 .and. present(msg)) call record_alloc(msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
+          if (ierr == 0 .and. present(msg)) &
+            call record_alloc_addr(c_loc(a(lbound(a,1))), msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
               call my_alloc_check(ierr, msg=msg)
@@ -895,33 +839,24 @@
             end if
           end if
           if(present(stat)) stat = ierr
-
         end subroutine my_alloc_preal_1d
 
-!! \brief Allocate a 2D array of real numbers
+!! \brief Allocate a 2D real array (pointer, integer dims)
 !||====================================================================
 !||    my_alloc_preal_2d   ../common_source/tools/memory/my_alloc.F90
 !||--- calls      -----------------------------------------------------
-!||    my_alloc_check      ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_check   ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
-        subroutine my_alloc_preal_2d(a, n,m, msg, stat)
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                     Arguments
-! ----------------------------------------------------------------------------------------------------------------------
-          real, dimension(:,:), pointer, intent(inout) :: a !< The allocated array
+        subroutine my_alloc_preal_2d(a, n, m, msg, stat)
+          real, dimension(:, :), pointer, target, intent(inout) :: a !< The allocated array
           integer, intent(in) :: n !< The first dimension of the array
           integer, intent(in) :: m !< The second dimension of the array
           character(len=*), optional, intent(in) :: msg !< The error message to print if the allocation fails
           integer, optional, intent(out) :: stat !< The error code returned by the allocation
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                   Local variables
-! ----------------------------------------------------------------------------------------------------------------------
           integer :: ierr
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                      Body
-! ----------------------------------------------------------------------------------------------------------------------
-          allocate(a(n,m), stat=ierr)
-          if (ierr == 0 .and. present(msg)) call record_alloc(msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
+          allocate(a(n, m), stat=ierr)
+          if (ierr == 0 .and. present(msg)) &
+            call record_alloc_addr(c_loc(a(lbound(a,1), lbound(a,2))), msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
               call my_alloc_check(ierr, msg=msg)
@@ -930,34 +865,26 @@
             end if
           end if
           if(present(stat)) stat = ierr
-
         end subroutine my_alloc_preal_2d
 
+!! \brief Allocate a 3D real array (pointer, integer dims)
 !||====================================================================
 !||    my_alloc_preal_3d   ../common_source/tools/memory/my_alloc.F90
 !||--- calls      -----------------------------------------------------
-!||    my_alloc_check      ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_check   ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
-        subroutine my_alloc_preal_3d(a,l,m,n, msg, stat)
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                     Arguments
-! ----------------------------------------------------------------------------------------------------------------------
-          real, dimension(:,:,:), pointer, intent(inout) :: a !< The allocated array
+        subroutine my_alloc_preal_3d(a, l, m, n, msg, stat)
+          real, dimension(:, :, :), pointer, target, intent(inout) :: a !< The allocated array
           integer, intent(in) :: l !< The first dimension of the array
           integer, intent(in) :: m !< The second dimension of the array
           integer, intent(in) :: n !< The third dimension of the array
           character(len=*), optional, intent(in) :: msg !< The error message to print if the allocation fails
           integer, optional, intent(out) :: stat !< The error code returned by the allocation
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                   Local variables
-! ----------------------------------------------------------------------------------------------------------------------
           integer :: ierr
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                      Body
-! ----------------------------------------------------------------------------------------------------------------------
-
-          allocate(a(l,m,n), stat=ierr)
-          if (ierr == 0 .and. present(msg)) call record_alloc(msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
+          allocate(a(l, m, n), stat=ierr)
+          if (ierr == 0 .and. present(msg)) &
+            call record_alloc_addr(c_loc(a(lbound(a,1), lbound(a,2), lbound(a,3))), msg, int(storage_size(a), kind=8) / 8_8 *&
+                & size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
               call my_alloc_check(ierr, msg=msg)
@@ -966,35 +893,23 @@
             end if
           end if
           if(present(stat)) stat = ierr
-
         end subroutine my_alloc_preal_3d
-! ======================================================================================================================
-!                                           double ALLOCATION ROUTINES
-! ======================================================================================================================
 
-!! \brief Allocate a 1D array of double numbers
+!! \brief Allocate a 1D double precision array (pointer, integer dims)
 !||====================================================================
 !||    my_alloc_pdouble_1d   ../common_source/tools/memory/my_alloc.F90
 !||--- calls      -----------------------------------------------------
-!||    my_alloc_check        ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_check   ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
         subroutine my_alloc_pdouble_1d(a, n, msg, stat)
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                     Arguments
-! ----------------------------------------------------------------------------------------------------------------------
-          double precision, dimension(:), pointer, intent(inout) :: a !< The allocated array
+          double precision, dimension(:), pointer, target, intent(inout) :: a !< The allocated array
           integer, intent(in) :: n !< The size of the array
           character(len=*), optional, intent(in) :: msg !< The error message to print if the allocation fails
           integer, optional, intent(out) :: stat !< The error code returned by the allocation
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                   Local variables
-! ----------------------------------------------------------------------------------------------------------------------
           integer :: ierr
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                      Body
-! ----------------------------------------------------------------------------------------------------------------------
           allocate(a(n), stat=ierr)
-          if (ierr == 0 .and. present(msg)) call record_alloc(msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
+          if (ierr == 0 .and. present(msg)) &
+            call record_alloc_addr(c_loc(a(lbound(a,1))), msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
               call my_alloc_check(ierr, msg=msg)
@@ -1003,33 +918,24 @@
             end if
           end if
           if(present(stat)) stat = ierr
-
         end subroutine my_alloc_pdouble_1d
 
-!! \brief Allocate a 2D array of double numbers
+!! \brief Allocate a 2D double precision array (pointer, integer dims)
 !||====================================================================
 !||    my_alloc_pdouble_2d   ../common_source/tools/memory/my_alloc.F90
 !||--- calls      -----------------------------------------------------
-!||    my_alloc_check        ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_check   ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
-        subroutine my_alloc_pdouble_2d(a, n,m, msg, stat)
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                     Arguments
-! ----------------------------------------------------------------------------------------------------------------------
-          double precision, dimension(:,:), pointer, intent(inout) :: a !< The allocated array
+        subroutine my_alloc_pdouble_2d(a, n, m, msg, stat)
+          double precision, dimension(:, :), pointer, target, intent(inout) :: a !< The allocated array
           integer, intent(in) :: n !< The first dimension of the array
           integer, intent(in) :: m !< The second dimension of the array
           character(len=*), optional, intent(in) :: msg !< The error message to print if the allocation fails
           integer, optional, intent(out) :: stat !< The error code returned by the allocation
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                   Local variables
-! ----------------------------------------------------------------------------------------------------------------------
           integer :: ierr
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                      Body
-! ----------------------------------------------------------------------------------------------------------------------
-          allocate(a(n,m), stat=ierr)
-          if (ierr == 0 .and. present(msg)) call record_alloc(msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
+          allocate(a(n, m), stat=ierr)
+          if (ierr == 0 .and. present(msg)) &
+            call record_alloc_addr(c_loc(a(lbound(a,1), lbound(a,2))), msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
               call my_alloc_check(ierr, msg=msg)
@@ -1038,34 +944,26 @@
             end if
           end if
           if(present(stat)) stat = ierr
-
         end subroutine my_alloc_pdouble_2d
 
+!! \brief Allocate a 3D double precision array (pointer, integer dims)
 !||====================================================================
 !||    my_alloc_pdouble_3d   ../common_source/tools/memory/my_alloc.F90
 !||--- calls      -----------------------------------------------------
-!||    my_alloc_check        ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_check   ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
-        subroutine my_alloc_pdouble_3d(a,l,m,n, msg, stat)
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                     Arguments
-! ----------------------------------------------------------------------------------------------------------------------
-          double precision, dimension(:,:,:), pointer, intent(inout) :: a !< The allocated array
+        subroutine my_alloc_pdouble_3d(a, l, m, n, msg, stat)
+          double precision, dimension(:, :, :), pointer, target, intent(inout) :: a !< The allocated array
           integer, intent(in) :: l !< The first dimension of the array
           integer, intent(in) :: m !< The second dimension of the array
           integer, intent(in) :: n !< The third dimension of the array
           character(len=*), optional, intent(in) :: msg !< The error message to print if the allocation fails
           integer, optional, intent(out) :: stat !< The error code returned by the allocation
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                   Local variables
-! ----------------------------------------------------------------------------------------------------------------------
           integer :: ierr
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                      Body
-! ----------------------------------------------------------------------------------------------------------------------
-
-          allocate(a(l,m,n), stat=ierr)
-          if (ierr == 0 .and. present(msg)) call record_alloc(msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
+          allocate(a(l, m, n), stat=ierr)
+          if (ierr == 0 .and. present(msg)) &
+            call record_alloc_addr(c_loc(a(lbound(a,1), lbound(a,2), lbound(a,3))), msg, int(storage_size(a), kind=8) / 8_8 *&
+                & size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
               call my_alloc_check(ierr, msg=msg)
@@ -1074,36 +972,23 @@
             end if
           end if
           if(present(stat)) stat = ierr
-
         end subroutine my_alloc_pdouble_3d
 
-
-! ======================================================================================================================
-!                                           INTEGER ALLOCATION ROUTINES
-! ======================================================================================================================
-        !! \brief Allocate a 1D array of integer numbers
+!! \brief Allocate a 1D integer array (pointer, integer dims)
 !||====================================================================
 !||    my_alloc_pinteger_1d   ../common_source/tools/memory/my_alloc.F90
 !||--- calls      -----------------------------------------------------
-!||    my_alloc_check         ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_check   ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
         subroutine my_alloc_pinteger_1d(a, n, msg, stat)
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                     Arguments
-! ----------------------------------------------------------------------------------------------------------------------
-          integer, dimension(:), pointer, intent(inout) :: a !< The allocated array
+          integer, dimension(:), pointer, target, intent(inout) :: a !< The allocated array
           integer, intent(in) :: n !< The size of the array
           character(len=*), optional, intent(in) :: msg !< The error message to print if the allocation fails
           integer, optional, intent(out) :: stat !< The error code returned by the allocation
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                   Local variables
-! ----------------------------------------------------------------------------------------------------------------------
           integer :: ierr
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                      Body
-! ----------------------------------------------------------------------------------------------------------------------
           allocate(a(n), stat=ierr)
-          if (ierr == 0 .and. present(msg)) call record_alloc(msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
+          if (ierr == 0 .and. present(msg)) &
+            call record_alloc_addr(c_loc(a(lbound(a,1))), msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
               call my_alloc_check(ierr, msg=msg)
@@ -1112,33 +997,24 @@
             end if
           end if
           if(present(stat)) stat = ierr
-
         end subroutine my_alloc_pinteger_1d
 
-!! \brief Allocate a 2D array of integers
+!! \brief Allocate a 2D integer array (pointer, integer dims)
 !||====================================================================
 !||    my_alloc_pinteger_2d   ../common_source/tools/memory/my_alloc.F90
 !||--- calls      -----------------------------------------------------
-!||    my_alloc_check         ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_check   ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
-        subroutine my_alloc_pinteger_2d(a, n,m, msg, stat)
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                     Arguments
-! ----------------------------------------------------------------------------------------------------------------------
-          integer, dimension(:,:), pointer, intent(inout) :: a !< The allocated array
+        subroutine my_alloc_pinteger_2d(a, n, m, msg, stat)
+          integer, dimension(:, :), pointer, target, intent(inout) :: a !< The allocated array
           integer, intent(in) :: n !< The first dimension of the array
           integer, intent(in) :: m !< The second dimension of the array
           character(len=*), optional, intent(in) :: msg !< The error message to print if the allocation fails
           integer, optional, intent(out) :: stat !< The error code returned by the allocation
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                   Local variables
-! ----------------------------------------------------------------------------------------------------------------------
           integer :: ierr
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                      Body
-! ----------------------------------------------------------------------------------------------------------------------
-          allocate(a(n,m), stat=ierr)
-          if (ierr == 0 .and. present(msg)) call record_alloc(msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
+          allocate(a(n, m), stat=ierr)
+          if (ierr == 0 .and. present(msg)) &
+            call record_alloc_addr(c_loc(a(lbound(a,1), lbound(a,2))), msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
               call my_alloc_check(ierr, msg=msg)
@@ -1147,35 +1023,26 @@
             end if
           end if
           if(present(stat)) stat = ierr
-
         end subroutine my_alloc_pinteger_2d
 
-!! \brief Allocate a 3D array of integers
+!! \brief Allocate a 3D integer array (pointer, integer dims)
 !||====================================================================
 !||    my_alloc_pinteger_3d   ../common_source/tools/memory/my_alloc.F90
 !||--- calls      -----------------------------------------------------
-!||    my_alloc_check         ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_check   ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
-        subroutine my_alloc_pinteger_3d(a,l,m,n, msg, stat)
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                     Arguments
-! ----------------------------------------------------------------------------------------------------------------------
-          integer, dimension(:,:,:), pointer, intent(inout) :: a !< The allocated array
+        subroutine my_alloc_pinteger_3d(a, l, m, n, msg, stat)
+          integer, dimension(:, :, :), pointer, target, intent(inout) :: a !< The allocated array
           integer, intent(in) :: l !< The first dimension of the array
           integer, intent(in) :: m !< The second dimension of the array
           integer, intent(in) :: n !< The third dimension of the array
           character(len=*), optional, intent(in) :: msg !< The error message to print if the allocation fails
           integer, optional, intent(out) :: stat !< The error code returned by the allocation
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                   Local variables
-! ----------------------------------------------------------------------------------------------------------------------
           integer :: ierr
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                      Body
-! ----------------------------------------------------------------------------------------------------------------------
-
-          allocate(a(l,m,n), stat=ierr)
-          if (ierr == 0 .and. present(msg)) call record_alloc(msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
+          allocate(a(l, m, n), stat=ierr)
+          if (ierr == 0 .and. present(msg)) &
+            call record_alloc_addr(c_loc(a(lbound(a,1), lbound(a,2), lbound(a,3))), msg, int(storage_size(a), kind=8) / 8_8 *&
+                & size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
               call my_alloc_check(ierr, msg=msg)
@@ -1186,36 +1053,100 @@
           if(present(stat)) stat = ierr
         end subroutine my_alloc_pinteger_3d
 
-! ======================
-! ====================== INTEGER*8
-! ======================
-! ======================================================================================================================
-!                                           REAL ALLOCATION ROUTINES
-! ======================================================================================================================
+!! \brief Allocate a 1D logical array (pointer, integer dims)
+!||====================================================================
+!||    my_alloc_plogical_1d   ../common_source/tools/memory/my_alloc.F90
+!||--- calls      -----------------------------------------------------
+!||    my_alloc_check   ../common_source/tools/memory/my_alloc.F90
+!||====================================================================
+        subroutine my_alloc_plogical_1d(a, n, msg, stat)
+          logical, dimension(:), pointer, target, intent(inout) :: a !< The allocated array
+          integer, intent(in) :: n !< The size of the array
+          character(len=*), optional, intent(in) :: msg !< The error message to print if the allocation fails
+          integer, optional, intent(out) :: stat !< The error code returned by the allocation
+          integer :: ierr
+          allocate(a(n), stat=ierr)
+          if (ierr == 0 .and. present(msg)) &
+            call record_alloc_addr(c_loc(a(lbound(a,1))), msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
+          if(.not. present(stat)) then
+            if(present(msg)) then
+              call my_alloc_check(ierr, msg=msg)
+            else
+              call my_alloc_check(ierr)
+            end if
+          end if
+          if(present(stat)) stat = ierr
+        end subroutine my_alloc_plogical_1d
 
-!! \brief Allocate a 1D array of real numbers
+!! \brief Allocate a 2D logical array (pointer, integer dims)
+!||====================================================================
+!||    my_alloc_plogical_2d   ../common_source/tools/memory/my_alloc.F90
+!||--- calls      -----------------------------------------------------
+!||    my_alloc_check   ../common_source/tools/memory/my_alloc.F90
+!||====================================================================
+        subroutine my_alloc_plogical_2d(a, n, m, msg, stat)
+          logical, dimension(:, :), pointer, target, intent(inout) :: a !< The allocated array
+          integer, intent(in) :: n !< The first dimension of the array
+          integer, intent(in) :: m !< The second dimension of the array
+          character(len=*), optional, intent(in) :: msg !< The error message to print if the allocation fails
+          integer, optional, intent(out) :: stat !< The error code returned by the allocation
+          integer :: ierr
+          allocate(a(n, m), stat=ierr)
+          if (ierr == 0 .and. present(msg)) &
+            call record_alloc_addr(c_loc(a(lbound(a,1), lbound(a,2))), msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
+          if(.not. present(stat)) then
+            if(present(msg)) then
+              call my_alloc_check(ierr, msg=msg)
+            else
+              call my_alloc_check(ierr)
+            end if
+          end if
+          if(present(stat)) stat = ierr
+        end subroutine my_alloc_plogical_2d
+
+!! \brief Allocate a 3D logical array (pointer, integer dims)
+!||====================================================================
+!||    my_alloc_plogical_3d   ../common_source/tools/memory/my_alloc.F90
+!||--- calls      -----------------------------------------------------
+!||    my_alloc_check   ../common_source/tools/memory/my_alloc.F90
+!||====================================================================
+        subroutine my_alloc_plogical_3d(a, l, m, n, msg, stat)
+          logical, dimension(:, :, :), pointer, target, intent(inout) :: a !< The allocated array
+          integer, intent(in) :: l !< The first dimension of the array
+          integer, intent(in) :: m !< The second dimension of the array
+          integer, intent(in) :: n !< The third dimension of the array
+          character(len=*), optional, intent(in) :: msg !< The error message to print if the allocation fails
+          integer, optional, intent(out) :: stat !< The error code returned by the allocation
+          integer :: ierr
+          allocate(a(l, m, n), stat=ierr)
+          if (ierr == 0 .and. present(msg)) &
+            call record_alloc_addr(c_loc(a(lbound(a,1), lbound(a,2), lbound(a,3))), msg, int(storage_size(a), kind=8) / 8_8 *&
+                & size(a, kind=8))
+          if(.not. present(stat)) then
+            if(present(msg)) then
+              call my_alloc_check(ierr, msg=msg)
+            else
+              call my_alloc_check(ierr)
+            end if
+          end if
+          if(present(stat)) stat = ierr
+        end subroutine my_alloc_plogical_3d
+
+!! \brief Allocate a 1D real array (allocatable, integer(8) dims)
 !||====================================================================
 !||    my_alloc_8_real_1d   ../common_source/tools/memory/my_alloc.F90
 !||--- calls      -----------------------------------------------------
-!||    my_alloc_check       ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_check   ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
         subroutine my_alloc_8_real_1d(a, n, msg, stat)
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                     Arguments
-! ----------------------------------------------------------------------------------------------------------------------
-          real, dimension(:), allocatable, intent(inout) :: a !< The allocated array
+          real, dimension(:), allocatable, target, intent(inout) :: a !< The allocated array
           integer(8), intent(in) :: n !< The size of the array
           character(len=*), optional, intent(in) :: msg !< The error message to print if the allocation fails
           integer, optional, intent(out) :: stat !< The error code returned by the allocation
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                   Local variables
-! ----------------------------------------------------------------------------------------------------------------------
           integer :: ierr
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                      Body
-! ----------------------------------------------------------------------------------------------------------------------
           allocate(a(n), stat=ierr)
-          if (ierr == 0 .and. present(msg)) call record_alloc(msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
+          if (ierr == 0 .and. present(msg)) &
+            call record_alloc_addr(c_loc(a(lbound(a,1))), msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
               call my_alloc_check(ierr, msg=msg)
@@ -1224,33 +1155,24 @@
             end if
           end if
           if(present(stat)) stat = ierr
-
         end subroutine my_alloc_8_real_1d
 
-!! \brief Allocate a 2D array of real numbers
+!! \brief Allocate a 2D real array (allocatable, integer(8) dims)
 !||====================================================================
 !||    my_alloc_8_real_2d   ../common_source/tools/memory/my_alloc.F90
 !||--- calls      -----------------------------------------------------
-!||    my_alloc_check       ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_check   ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
-        subroutine my_alloc_8_real_2d(a, n,m, msg, stat)
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                     Arguments
-! ----------------------------------------------------------------------------------------------------------------------
-          real, dimension(:,:), allocatable, intent(inout) :: a !< The allocated array
+        subroutine my_alloc_8_real_2d(a, n, m, msg, stat)
+          real, dimension(:, :), allocatable, target, intent(inout) :: a !< The allocated array
           integer(8), intent(in) :: n !< The first dimension of the array
           integer(8), intent(in) :: m !< The second dimension of the array
           character(len=*), optional, intent(in) :: msg !< The error message to print if the allocation fails
           integer, optional, intent(out) :: stat !< The error code returned by the allocation
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                   Local variables
-! ----------------------------------------------------------------------------------------------------------------------
           integer :: ierr
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                      Body
-! ----------------------------------------------------------------------------------------------------------------------
-          allocate(a(n,m), stat=ierr)
-          if (ierr == 0 .and. present(msg)) call record_alloc(msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
+          allocate(a(n, m), stat=ierr)
+          if (ierr == 0 .and. present(msg)) &
+            call record_alloc_addr(c_loc(a(lbound(a,1), lbound(a,2))), msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
               call my_alloc_check(ierr, msg=msg)
@@ -1259,34 +1181,26 @@
             end if
           end if
           if(present(stat)) stat = ierr
-
         end subroutine my_alloc_8_real_2d
 
+!! \brief Allocate a 3D real array (allocatable, integer(8) dims)
 !||====================================================================
 !||    my_alloc_8_real_3d   ../common_source/tools/memory/my_alloc.F90
 !||--- calls      -----------------------------------------------------
-!||    my_alloc_check       ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_check   ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
-        subroutine my_alloc_8_real_3d(a,l,m,n, msg, stat)
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                     Arguments
-! ----------------------------------------------------------------------------------------------------------------------
-          real, dimension(:,:,:), allocatable, intent(inout) :: a !< The allocated array
+        subroutine my_alloc_8_real_3d(a, l, m, n, msg, stat)
+          real, dimension(:, :, :), allocatable, target, intent(inout) :: a !< The allocated array
           integer(8), intent(in) :: l !< The first dimension of the array
           integer(8), intent(in) :: m !< The second dimension of the array
           integer(8), intent(in) :: n !< The third dimension of the array
           character(len=*), optional, intent(in) :: msg !< The error message to print if the allocation fails
           integer, optional, intent(out) :: stat !< The error code returned by the allocation
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                   Local variables
-! ----------------------------------------------------------------------------------------------------------------------
           integer :: ierr
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                      Body
-! ----------------------------------------------------------------------------------------------------------------------
-
-          allocate(a(l,m,n), stat=ierr)
-          if (ierr == 0 .and. present(msg)) call record_alloc(msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
+          allocate(a(l, m, n), stat=ierr)
+          if (ierr == 0 .and. present(msg)) &
+            call record_alloc_addr(c_loc(a(lbound(a,1), lbound(a,2), lbound(a,3))), msg, int(storage_size(a), kind=8) / 8_8 *&
+                & size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
               call my_alloc_check(ierr, msg=msg)
@@ -1295,35 +1209,23 @@
             end if
           end if
           if(present(stat)) stat = ierr
-
         end subroutine my_alloc_8_real_3d
-! ======================================================================================================================
-!                                           double ALLOCATION ROUTINES
-! ======================================================================================================================
 
-!! \brief Allocate a 1D array of double numbers
+!! \brief Allocate a 1D double precision array (allocatable, integer(8) dims)
 !||====================================================================
 !||    my_alloc_8_double_1d   ../common_source/tools/memory/my_alloc.F90
 !||--- calls      -----------------------------------------------------
-!||    my_alloc_check         ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_check   ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
         subroutine my_alloc_8_double_1d(a, n, msg, stat)
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                     Arguments
-! ----------------------------------------------------------------------------------------------------------------------
-          double precision, dimension(:), allocatable, intent(inout) :: a !< The allocated array
+          double precision, dimension(:), allocatable, target, intent(inout) :: a !< The allocated array
           integer(8), intent(in) :: n !< The size of the array
           character(len=*), optional, intent(in) :: msg !< The error message to print if the allocation fails
           integer, optional, intent(out) :: stat !< The error code returned by the allocation
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                   Local variables
-! ----------------------------------------------------------------------------------------------------------------------
           integer :: ierr
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                      Body
-! ----------------------------------------------------------------------------------------------------------------------
           allocate(a(n), stat=ierr)
-          if (ierr == 0 .and. present(msg)) call record_alloc(msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
+          if (ierr == 0 .and. present(msg)) &
+            call record_alloc_addr(c_loc(a(lbound(a,1))), msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
               call my_alloc_check(ierr, msg=msg)
@@ -1332,33 +1234,24 @@
             end if
           end if
           if(present(stat)) stat = ierr
-
         end subroutine my_alloc_8_double_1d
 
-!! \brief Allocate a 2D array of double numbers
+!! \brief Allocate a 2D double precision array (allocatable, integer(8) dims)
 !||====================================================================
 !||    my_alloc_8_double_2d   ../common_source/tools/memory/my_alloc.F90
 !||--- calls      -----------------------------------------------------
-!||    my_alloc_check         ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_check   ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
-        subroutine my_alloc_8_double_2d(a, n,m, msg, stat)
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                     Arguments
-! ----------------------------------------------------------------------------------------------------------------------
-          double precision, dimension(:,:), allocatable, intent(inout) :: a !< The allocated array
+        subroutine my_alloc_8_double_2d(a, n, m, msg, stat)
+          double precision, dimension(:, :), allocatable, target, intent(inout) :: a !< The allocated array
           integer(8), intent(in) :: n !< The first dimension of the array
           integer(8), intent(in) :: m !< The second dimension of the array
           character(len=*), optional, intent(in) :: msg !< The error message to print if the allocation fails
           integer, optional, intent(out) :: stat !< The error code returned by the allocation
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                   Local variables
-! ----------------------------------------------------------------------------------------------------------------------
           integer :: ierr
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                      Body
-! ----------------------------------------------------------------------------------------------------------------------
-          allocate(a(n,m), stat=ierr)
-          if (ierr == 0 .and. present(msg)) call record_alloc(msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
+          allocate(a(n, m), stat=ierr)
+          if (ierr == 0 .and. present(msg)) &
+            call record_alloc_addr(c_loc(a(lbound(a,1), lbound(a,2))), msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
               call my_alloc_check(ierr, msg=msg)
@@ -1367,34 +1260,26 @@
             end if
           end if
           if(present(stat)) stat = ierr
-
         end subroutine my_alloc_8_double_2d
 
+!! \brief Allocate a 3D double precision array (allocatable, integer(8) dims)
 !||====================================================================
 !||    my_alloc_8_double_3d   ../common_source/tools/memory/my_alloc.F90
 !||--- calls      -----------------------------------------------------
-!||    my_alloc_check         ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_check   ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
-        subroutine my_alloc_8_double_3d(a,l,m,n, msg, stat)
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                     Arguments
-! ----------------------------------------------------------------------------------------------------------------------
-          double precision, dimension(:,:,:), allocatable, intent(inout) :: a !< The allocated array
+        subroutine my_alloc_8_double_3d(a, l, m, n, msg, stat)
+          double precision, dimension(:, :, :), allocatable, target, intent(inout) :: a !< The allocated array
           integer(8), intent(in) :: l !< The first dimension of the array
           integer(8), intent(in) :: m !< The second dimension of the array
           integer(8), intent(in) :: n !< The third dimension of the array
           character(len=*), optional, intent(in) :: msg !< The error message to print if the allocation fails
           integer, optional, intent(out) :: stat !< The error code returned by the allocation
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                   Local variables
-! ----------------------------------------------------------------------------------------------------------------------
           integer :: ierr
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                      Body
-! ----------------------------------------------------------------------------------------------------------------------
-
-          allocate(a(l,m,n), stat=ierr)
-          if (ierr == 0 .and. present(msg)) call record_alloc(msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
+          allocate(a(l, m, n), stat=ierr)
+          if (ierr == 0 .and. present(msg)) &
+            call record_alloc_addr(c_loc(a(lbound(a,1), lbound(a,2), lbound(a,3))), msg, int(storage_size(a), kind=8) / 8_8 *&
+                & size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
               call my_alloc_check(ierr, msg=msg)
@@ -1403,36 +1288,23 @@
             end if
           end if
           if(present(stat)) stat = ierr
-
         end subroutine my_alloc_8_double_3d
 
-
-! ======================================================================================================================
-!                                           INTEGER ALLOCATION ROUTINES
-! ======================================================================================================================
-        !! \brief Allocate a 1D array of integer numbers
+!! \brief Allocate a 1D integer array (allocatable, integer(8) dims)
 !||====================================================================
 !||    my_alloc_8_integer_1d   ../common_source/tools/memory/my_alloc.F90
 !||--- calls      -----------------------------------------------------
-!||    my_alloc_check          ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_check   ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
         subroutine my_alloc_8_integer_1d(a, n, msg, stat)
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                     Arguments
-! ----------------------------------------------------------------------------------------------------------------------
-          integer, dimension(:), allocatable, intent(inout) :: a !< The allocated array
+          integer, dimension(:), allocatable, target, intent(inout) :: a !< The allocated array
           integer(8), intent(in) :: n !< The size of the array
           character(len=*), optional, intent(in) :: msg !< The error message to print if the allocation fails
           integer, optional, intent(out) :: stat !< The error code returned by the allocation
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                   Local variables
-! ----------------------------------------------------------------------------------------------------------------------
           integer :: ierr
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                      Body
-! ----------------------------------------------------------------------------------------------------------------------
           allocate(a(n), stat=ierr)
-          if (ierr == 0 .and. present(msg)) call record_alloc(msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
+          if (ierr == 0 .and. present(msg)) &
+            call record_alloc_addr(c_loc(a(lbound(a,1))), msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
               call my_alloc_check(ierr, msg=msg)
@@ -1441,33 +1313,24 @@
             end if
           end if
           if(present(stat)) stat = ierr
-
         end subroutine my_alloc_8_integer_1d
 
-!! \brief Allocate a 2D array of integers
+!! \brief Allocate a 2D integer array (allocatable, integer(8) dims)
 !||====================================================================
 !||    my_alloc_8_integer_2d   ../common_source/tools/memory/my_alloc.F90
 !||--- calls      -----------------------------------------------------
-!||    my_alloc_check          ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_check   ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
-        subroutine my_alloc_8_integer_2d(a, n,m, msg, stat)
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                     Arguments
-! ----------------------------------------------------------------------------------------------------------------------
-          integer, dimension(:,:), allocatable, intent(inout) :: a !< The allocated array
+        subroutine my_alloc_8_integer_2d(a, n, m, msg, stat)
+          integer, dimension(:, :), allocatable, target, intent(inout) :: a !< The allocated array
           integer(8), intent(in) :: n !< The first dimension of the array
           integer(8), intent(in) :: m !< The second dimension of the array
           character(len=*), optional, intent(in) :: msg !< The error message to print if the allocation fails
           integer, optional, intent(out) :: stat !< The error code returned by the allocation
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                   Local variables
-! ----------------------------------------------------------------------------------------------------------------------
           integer :: ierr
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                      Body
-! ----------------------------------------------------------------------------------------------------------------------
-          allocate(a(n,m), stat=ierr)
-          if (ierr == 0 .and. present(msg)) call record_alloc(msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
+          allocate(a(n, m), stat=ierr)
+          if (ierr == 0 .and. present(msg)) &
+            call record_alloc_addr(c_loc(a(lbound(a,1), lbound(a,2))), msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
               call my_alloc_check(ierr, msg=msg)
@@ -1476,35 +1339,26 @@
             end if
           end if
           if(present(stat)) stat = ierr
-
         end subroutine my_alloc_8_integer_2d
 
-!! \brief Allocate a 3D array of integers
+!! \brief Allocate a 3D integer array (allocatable, integer(8) dims)
 !||====================================================================
 !||    my_alloc_8_integer_3d   ../common_source/tools/memory/my_alloc.F90
 !||--- calls      -----------------------------------------------------
-!||    my_alloc_check          ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_check   ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
-        subroutine my_alloc_8_integer_3d(a,l,m,n, msg, stat)
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                     Arguments
-! ----------------------------------------------------------------------------------------------------------------------
-          integer, dimension(:,:,:), allocatable, intent(inout) :: a !< The allocated array
+        subroutine my_alloc_8_integer_3d(a, l, m, n, msg, stat)
+          integer, dimension(:, :, :), allocatable, target, intent(inout) :: a !< The allocated array
           integer(8), intent(in) :: l !< The first dimension of the array
           integer(8), intent(in) :: m !< The second dimension of the array
           integer(8), intent(in) :: n !< The third dimension of the array
           character(len=*), optional, intent(in) :: msg !< The error message to print if the allocation fails
           integer, optional, intent(out) :: stat !< The error code returned by the allocation
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                   Local variables
-! ----------------------------------------------------------------------------------------------------------------------
           integer :: ierr
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                      Body
-! ----------------------------------------------------------------------------------------------------------------------
-
-          allocate(a(l,m,n), stat=ierr)
-          if (ierr == 0 .and. present(msg)) call record_alloc(msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
+          allocate(a(l, m, n), stat=ierr)
+          if (ierr == 0 .and. present(msg)) &
+            call record_alloc_addr(c_loc(a(lbound(a,1), lbound(a,2), lbound(a,3))), msg, int(storage_size(a), kind=8) / 8_8 *&
+                & size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
               call my_alloc_check(ierr, msg=msg)
@@ -1514,33 +1368,101 @@
           end if
           if(present(stat)) stat = ierr
         end subroutine my_alloc_8_integer_3d
-! ======================================================================================================================
-!                                           REAL ALLOCATION ROUTINES
-! ======================================================================================================================
 
-!! \brief Allocate a 1D array of real numbers
+!! \brief Allocate a 1D logical array (allocatable, integer(8) dims)
+!||====================================================================
+!||    my_alloc_8_logical_1d   ../common_source/tools/memory/my_alloc.F90
+!||--- calls      -----------------------------------------------------
+!||    my_alloc_check   ../common_source/tools/memory/my_alloc.F90
+!||====================================================================
+        subroutine my_alloc_8_logical_1d(a, n, msg, stat)
+          logical, dimension(:), allocatable, target, intent(inout) :: a !< The allocated array
+          integer(8), intent(in) :: n !< The size of the array
+          character(len=*), optional, intent(in) :: msg !< The error message to print if the allocation fails
+          integer, optional, intent(out) :: stat !< The error code returned by the allocation
+          integer :: ierr
+          allocate(a(n), stat=ierr)
+          if (ierr == 0 .and. present(msg)) &
+            call record_alloc_addr(c_loc(a(lbound(a,1))), msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
+          if(.not. present(stat)) then
+            if(present(msg)) then
+              call my_alloc_check(ierr, msg=msg)
+            else
+              call my_alloc_check(ierr)
+            end if
+          end if
+          if(present(stat)) stat = ierr
+        end subroutine my_alloc_8_logical_1d
+
+!! \brief Allocate a 2D logical array (allocatable, integer(8) dims)
+!||====================================================================
+!||    my_alloc_8_logical_2d   ../common_source/tools/memory/my_alloc.F90
+!||--- calls      -----------------------------------------------------
+!||    my_alloc_check   ../common_source/tools/memory/my_alloc.F90
+!||====================================================================
+        subroutine my_alloc_8_logical_2d(a, n, m, msg, stat)
+          logical, dimension(:, :), allocatable, target, intent(inout) :: a !< The allocated array
+          integer(8), intent(in) :: n !< The first dimension of the array
+          integer(8), intent(in) :: m !< The second dimension of the array
+          character(len=*), optional, intent(in) :: msg !< The error message to print if the allocation fails
+          integer, optional, intent(out) :: stat !< The error code returned by the allocation
+          integer :: ierr
+          allocate(a(n, m), stat=ierr)
+          if (ierr == 0 .and. present(msg)) &
+            call record_alloc_addr(c_loc(a(lbound(a,1), lbound(a,2))), msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
+          if(.not. present(stat)) then
+            if(present(msg)) then
+              call my_alloc_check(ierr, msg=msg)
+            else
+              call my_alloc_check(ierr)
+            end if
+          end if
+          if(present(stat)) stat = ierr
+        end subroutine my_alloc_8_logical_2d
+
+!! \brief Allocate a 3D logical array (allocatable, integer(8) dims)
+!||====================================================================
+!||    my_alloc_8_logical_3d   ../common_source/tools/memory/my_alloc.F90
+!||--- calls      -----------------------------------------------------
+!||    my_alloc_check   ../common_source/tools/memory/my_alloc.F90
+!||====================================================================
+        subroutine my_alloc_8_logical_3d(a, l, m, n, msg, stat)
+          logical, dimension(:, :, :), allocatable, target, intent(inout) :: a !< The allocated array
+          integer(8), intent(in) :: l !< The first dimension of the array
+          integer(8), intent(in) :: m !< The second dimension of the array
+          integer(8), intent(in) :: n !< The third dimension of the array
+          character(len=*), optional, intent(in) :: msg !< The error message to print if the allocation fails
+          integer, optional, intent(out) :: stat !< The error code returned by the allocation
+          integer :: ierr
+          allocate(a(l, m, n), stat=ierr)
+          if (ierr == 0 .and. present(msg)) &
+            call record_alloc_addr(c_loc(a(lbound(a,1), lbound(a,2), lbound(a,3))), msg, int(storage_size(a), kind=8) / 8_8 *&
+                & size(a, kind=8))
+          if(.not. present(stat)) then
+            if(present(msg)) then
+              call my_alloc_check(ierr, msg=msg)
+            else
+              call my_alloc_check(ierr)
+            end if
+          end if
+          if(present(stat)) stat = ierr
+        end subroutine my_alloc_8_logical_3d
+
+!! \brief Allocate a 1D real array (pointer, integer(8) dims)
 !||====================================================================
 !||    my_alloc_8_preal_1d   ../common_source/tools/memory/my_alloc.F90
 !||--- calls      -----------------------------------------------------
-!||    my_alloc_check        ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_check   ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
         subroutine my_alloc_8_preal_1d(a, n, msg, stat)
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                     Arguments
-! ----------------------------------------------------------------------------------------------------------------------
-          real, dimension(:), pointer, intent(inout) :: a !< The allocated array
+          real, dimension(:), pointer, target, intent(inout) :: a !< The allocated array
           integer(8), intent(in) :: n !< The size of the array
           character(len=*), optional, intent(in) :: msg !< The error message to print if the allocation fails
           integer, optional, intent(out) :: stat !< The error code returned by the allocation
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                   Local variables
-! ----------------------------------------------------------------------------------------------------------------------
           integer :: ierr
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                      Body
-! ----------------------------------------------------------------------------------------------------------------------
           allocate(a(n), stat=ierr)
-          if (ierr == 0 .and. present(msg)) call record_alloc(msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
+          if (ierr == 0 .and. present(msg)) &
+            call record_alloc_addr(c_loc(a(lbound(a,1))), msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
               call my_alloc_check(ierr, msg=msg)
@@ -1549,33 +1471,24 @@
             end if
           end if
           if(present(stat)) stat = ierr
-
         end subroutine my_alloc_8_preal_1d
 
-!! \brief Allocate a 2D array of real numbers
+!! \brief Allocate a 2D real array (pointer, integer(8) dims)
 !||====================================================================
 !||    my_alloc_8_preal_2d   ../common_source/tools/memory/my_alloc.F90
 !||--- calls      -----------------------------------------------------
-!||    my_alloc_check        ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_check   ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
-        subroutine my_alloc_8_preal_2d(a, n,m, msg, stat)
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                     Arguments
-! ----------------------------------------------------------------------------------------------------------------------
-          real, dimension(:,:), pointer, intent(inout) :: a !< The allocated array
+        subroutine my_alloc_8_preal_2d(a, n, m, msg, stat)
+          real, dimension(:, :), pointer, target, intent(inout) :: a !< The allocated array
           integer(8), intent(in) :: n !< The first dimension of the array
           integer(8), intent(in) :: m !< The second dimension of the array
           character(len=*), optional, intent(in) :: msg !< The error message to print if the allocation fails
           integer, optional, intent(out) :: stat !< The error code returned by the allocation
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                   Local variables
-! ----------------------------------------------------------------------------------------------------------------------
           integer :: ierr
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                      Body
-! ----------------------------------------------------------------------------------------------------------------------
-          allocate(a(n,m), stat=ierr)
-          if (ierr == 0 .and. present(msg)) call record_alloc(msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
+          allocate(a(n, m), stat=ierr)
+          if (ierr == 0 .and. present(msg)) &
+            call record_alloc_addr(c_loc(a(lbound(a,1), lbound(a,2))), msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
               call my_alloc_check(ierr, msg=msg)
@@ -1584,34 +1497,26 @@
             end if
           end if
           if(present(stat)) stat = ierr
-
         end subroutine my_alloc_8_preal_2d
 
+!! \brief Allocate a 3D real array (pointer, integer(8) dims)
 !||====================================================================
 !||    my_alloc_8_preal_3d   ../common_source/tools/memory/my_alloc.F90
 !||--- calls      -----------------------------------------------------
-!||    my_alloc_check        ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_check   ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
-        subroutine my_alloc_8_preal_3d(a,l,m,n, msg, stat)
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                     Arguments
-! ----------------------------------------------------------------------------------------------------------------------
-          real, dimension(:,:,:), pointer, intent(inout) :: a !< The allocated array
+        subroutine my_alloc_8_preal_3d(a, l, m, n, msg, stat)
+          real, dimension(:, :, :), pointer, target, intent(inout) :: a !< The allocated array
           integer(8), intent(in) :: l !< The first dimension of the array
           integer(8), intent(in) :: m !< The second dimension of the array
           integer(8), intent(in) :: n !< The third dimension of the array
           character(len=*), optional, intent(in) :: msg !< The error message to print if the allocation fails
           integer, optional, intent(out) :: stat !< The error code returned by the allocation
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                   Local variables
-! ----------------------------------------------------------------------------------------------------------------------
           integer :: ierr
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                      Body
-! ----------------------------------------------------------------------------------------------------------------------
-
-          allocate(a(l,m,n), stat=ierr)
-          if (ierr == 0 .and. present(msg)) call record_alloc(msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
+          allocate(a(l, m, n), stat=ierr)
+          if (ierr == 0 .and. present(msg)) &
+            call record_alloc_addr(c_loc(a(lbound(a,1), lbound(a,2), lbound(a,3))), msg, int(storage_size(a), kind=8) / 8_8 *&
+                & size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
               call my_alloc_check(ierr, msg=msg)
@@ -1620,35 +1525,23 @@
             end if
           end if
           if(present(stat)) stat = ierr
-
         end subroutine my_alloc_8_preal_3d
-! ======================================================================================================================
-!                                           double ALLOCATION ROUTINES
-! ======================================================================================================================
 
-!! \brief Allocate a 1D array of double numbers
+!! \brief Allocate a 1D double precision array (pointer, integer(8) dims)
 !||====================================================================
 !||    my_alloc_8_pdouble_1d   ../common_source/tools/memory/my_alloc.F90
 !||--- calls      -----------------------------------------------------
-!||    my_alloc_check          ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_check   ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
         subroutine my_alloc_8_pdouble_1d(a, n, msg, stat)
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                     Arguments
-! ----------------------------------------------------------------------------------------------------------------------
-          double precision, dimension(:), pointer, intent(inout) :: a !< The allocated array
+          double precision, dimension(:), pointer, target, intent(inout) :: a !< The allocated array
           integer(8), intent(in) :: n !< The size of the array
           character(len=*), optional, intent(in) :: msg !< The error message to print if the allocation fails
           integer, optional, intent(out) :: stat !< The error code returned by the allocation
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                   Local variables
-! ----------------------------------------------------------------------------------------------------------------------
           integer :: ierr
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                      Body
-! ----------------------------------------------------------------------------------------------------------------------
           allocate(a(n), stat=ierr)
-          if (ierr == 0 .and. present(msg)) call record_alloc(msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
+          if (ierr == 0 .and. present(msg)) &
+            call record_alloc_addr(c_loc(a(lbound(a,1))), msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
               call my_alloc_check(ierr, msg=msg)
@@ -1657,33 +1550,24 @@
             end if
           end if
           if(present(stat)) stat = ierr
-
         end subroutine my_alloc_8_pdouble_1d
 
-!! \brief Allocate a 2D array of double numbers
+!! \brief Allocate a 2D double precision array (pointer, integer(8) dims)
 !||====================================================================
 !||    my_alloc_8_pdouble_2d   ../common_source/tools/memory/my_alloc.F90
 !||--- calls      -----------------------------------------------------
-!||    my_alloc_check          ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_check   ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
-        subroutine my_alloc_8_pdouble_2d(a, n,m, msg, stat)
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                     Arguments
-! ----------------------------------------------------------------------------------------------------------------------
-          double precision, dimension(:,:), pointer, intent(inout) :: a !< The allocated array
+        subroutine my_alloc_8_pdouble_2d(a, n, m, msg, stat)
+          double precision, dimension(:, :), pointer, target, intent(inout) :: a !< The allocated array
           integer(8), intent(in) :: n !< The first dimension of the array
           integer(8), intent(in) :: m !< The second dimension of the array
           character(len=*), optional, intent(in) :: msg !< The error message to print if the allocation fails
           integer, optional, intent(out) :: stat !< The error code returned by the allocation
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                   Local variables
-! ----------------------------------------------------------------------------------------------------------------------
           integer :: ierr
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                      Body
-! ----------------------------------------------------------------------------------------------------------------------
-          allocate(a(n,m), stat=ierr)
-          if (ierr == 0 .and. present(msg)) call record_alloc(msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
+          allocate(a(n, m), stat=ierr)
+          if (ierr == 0 .and. present(msg)) &
+            call record_alloc_addr(c_loc(a(lbound(a,1), lbound(a,2))), msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
               call my_alloc_check(ierr, msg=msg)
@@ -1692,34 +1576,26 @@
             end if
           end if
           if(present(stat)) stat = ierr
-
         end subroutine my_alloc_8_pdouble_2d
 
+!! \brief Allocate a 3D double precision array (pointer, integer(8) dims)
 !||====================================================================
 !||    my_alloc_8_pdouble_3d   ../common_source/tools/memory/my_alloc.F90
 !||--- calls      -----------------------------------------------------
-!||    my_alloc_check          ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_check   ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
-        subroutine my_alloc_8_pdouble_3d(a,l,m,n, msg, stat)
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                     Arguments
-! ----------------------------------------------------------------------------------------------------------------------
-          double precision, dimension(:,:,:), pointer, intent(inout) :: a !< The allocated array
+        subroutine my_alloc_8_pdouble_3d(a, l, m, n, msg, stat)
+          double precision, dimension(:, :, :), pointer, target, intent(inout) :: a !< The allocated array
           integer(8), intent(in) :: l !< The first dimension of the array
           integer(8), intent(in) :: m !< The second dimension of the array
           integer(8), intent(in) :: n !< The third dimension of the array
           character(len=*), optional, intent(in) :: msg !< The error message to print if the allocation fails
           integer, optional, intent(out) :: stat !< The error code returned by the allocation
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                   Local variables
-! ----------------------------------------------------------------------------------------------------------------------
           integer :: ierr
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                      Body
-! ----------------------------------------------------------------------------------------------------------------------
-
-          allocate(a(l,m,n), stat=ierr)
-          if (ierr == 0 .and. present(msg)) call record_alloc(msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
+          allocate(a(l, m, n), stat=ierr)
+          if (ierr == 0 .and. present(msg)) &
+            call record_alloc_addr(c_loc(a(lbound(a,1), lbound(a,2), lbound(a,3))), msg, int(storage_size(a), kind=8) / 8_8 *&
+                & size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
               call my_alloc_check(ierr, msg=msg)
@@ -1728,36 +1604,23 @@
             end if
           end if
           if(present(stat)) stat = ierr
-
         end subroutine my_alloc_8_pdouble_3d
 
-
-! ======================================================================================================================
-!                                           INTEGER ALLOCATION ROUTINES
-! ======================================================================================================================
-        !! \brief Allocate a 1D array of integer numbers
+!! \brief Allocate a 1D integer array (pointer, integer(8) dims)
 !||====================================================================
 !||    my_alloc_8_pinteger_1d   ../common_source/tools/memory/my_alloc.F90
 !||--- calls      -----------------------------------------------------
-!||    my_alloc_check           ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_check   ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
         subroutine my_alloc_8_pinteger_1d(a, n, msg, stat)
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                     Arguments
-! ----------------------------------------------------------------------------------------------------------------------
-          integer, dimension(:), pointer, intent(inout) :: a !< The allocated array
+          integer, dimension(:), pointer, target, intent(inout) :: a !< The allocated array
           integer(8), intent(in) :: n !< The size of the array
           character(len=*), optional, intent(in) :: msg !< The error message to print if the allocation fails
           integer, optional, intent(out) :: stat !< The error code returned by the allocation
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                   Local variables
-! ----------------------------------------------------------------------------------------------------------------------
           integer :: ierr
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                      Body
-! ----------------------------------------------------------------------------------------------------------------------
           allocate(a(n), stat=ierr)
-          if (ierr == 0 .and. present(msg)) call record_alloc(msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
+          if (ierr == 0 .and. present(msg)) &
+            call record_alloc_addr(c_loc(a(lbound(a,1))), msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
               call my_alloc_check(ierr, msg=msg)
@@ -1766,33 +1629,24 @@
             end if
           end if
           if(present(stat)) stat = ierr
-
         end subroutine my_alloc_8_pinteger_1d
 
-!! \brief Allocate a 2D array of integers
+!! \brief Allocate a 2D integer array (pointer, integer(8) dims)
 !||====================================================================
 !||    my_alloc_8_pinteger_2d   ../common_source/tools/memory/my_alloc.F90
 !||--- calls      -----------------------------------------------------
-!||    my_alloc_check           ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_check   ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
-        subroutine my_alloc_8_pinteger_2d(a, n,m, msg, stat)
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                     Arguments
-! ----------------------------------------------------------------------------------------------------------------------
-          integer, dimension(:,:), pointer, intent(inout) :: a !< The allocated array
+        subroutine my_alloc_8_pinteger_2d(a, n, m, msg, stat)
+          integer, dimension(:, :), pointer, target, intent(inout) :: a !< The allocated array
           integer(8), intent(in) :: n !< The first dimension of the array
           integer(8), intent(in) :: m !< The second dimension of the array
           character(len=*), optional, intent(in) :: msg !< The error message to print if the allocation fails
           integer, optional, intent(out) :: stat !< The error code returned by the allocation
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                   Local variables
-! ----------------------------------------------------------------------------------------------------------------------
           integer :: ierr
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                      Body
-! ----------------------------------------------------------------------------------------------------------------------
-          allocate(a(n,m), stat=ierr)
-          if (ierr == 0 .and. present(msg)) call record_alloc(msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
+          allocate(a(n, m), stat=ierr)
+          if (ierr == 0 .and. present(msg)) &
+            call record_alloc_addr(c_loc(a(lbound(a,1), lbound(a,2))), msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
               call my_alloc_check(ierr, msg=msg)
@@ -1801,35 +1655,26 @@
             end if
           end if
           if(present(stat)) stat = ierr
-
         end subroutine my_alloc_8_pinteger_2d
 
-!! \brief Allocate a 3D array of integers
+!! \brief Allocate a 3D integer array (pointer, integer(8) dims)
 !||====================================================================
 !||    my_alloc_8_pinteger_3d   ../common_source/tools/memory/my_alloc.F90
 !||--- calls      -----------------------------------------------------
-!||    my_alloc_check           ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_check   ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
-        subroutine my_alloc_8_pinteger_3d(a,l,m,n, msg, stat)
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                     Arguments
-! ----------------------------------------------------------------------------------------------------------------------
-          integer, dimension(:,:,:), pointer, intent(inout) :: a !< The allocated array
+        subroutine my_alloc_8_pinteger_3d(a, l, m, n, msg, stat)
+          integer, dimension(:, :, :), pointer, target, intent(inout) :: a !< The allocated array
           integer(8), intent(in) :: l !< The first dimension of the array
           integer(8), intent(in) :: m !< The second dimension of the array
           integer(8), intent(in) :: n !< The third dimension of the array
           character(len=*), optional, intent(in) :: msg !< The error message to print if the allocation fails
           integer, optional, intent(out) :: stat !< The error code returned by the allocation
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                   Local variables
-! ----------------------------------------------------------------------------------------------------------------------
           integer :: ierr
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                      Body
-! ----------------------------------------------------------------------------------------------------------------------
-
-          allocate(a(l,m,n), stat=ierr)
-          if (ierr == 0 .and. present(msg)) call record_alloc(msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
+          allocate(a(l, m, n), stat=ierr)
+          if (ierr == 0 .and. present(msg)) &
+            call record_alloc_addr(c_loc(a(lbound(a,1), lbound(a,2), lbound(a,3))), msg, int(storage_size(a), kind=8) / 8_8 *&
+                & size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
               call my_alloc_check(ierr, msg=msg)
@@ -1840,347 +1685,21 @@
           if(present(stat)) stat = ierr
         end subroutine my_alloc_8_pinteger_3d
 
-! ======================================================================================================================
-!                                           LOGICAL ALLOCATION ROUTINES
-! ======================================================================================================================
-!! \brief Allocate a 1D array of logical numbers
-!||====================================================================
-!||    my_alloc_logical_1d   ../common_source/tools/memory/my_alloc.F90
-!||--- calls      -----------------------------------------------------
-!||    my_alloc_check        ../common_source/tools/memory/my_alloc.F90
-!||====================================================================
-        subroutine my_alloc_logical_1d(a, n, msg, stat)
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                     Arguments
-! ----------------------------------------------------------------------------------------------------------------------
-          logical, dimension(:), allocatable, intent(inout) :: a !< The allocated array
-          integer, intent(in) :: n !< The size of the array
-          character(len=*), optional, intent(in) :: msg !< The error message to print if the allocation fails
-          integer, optional, intent(out) :: stat !< The error code returned by the allocation
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                   Local variables
-! ----------------------------------------------------------------------------------------------------------------------
-          integer :: ierr
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                      Body
-! ----------------------------------------------------------------------------------------------------------------------
-          allocate(a(n), stat=ierr)
-          if (ierr == 0 .and. present(msg)) call record_alloc(msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
-          if(.not. present(stat)) then
-            if(present(msg)) then
-              call my_alloc_check(ierr, msg=msg)
-            else
-              call my_alloc_check(ierr)
-            end if
-          end if
-          if(present(stat)) stat = ierr
-
-        end subroutine my_alloc_logical_1d
-
-!! \brief Allocate a 2D array of logical numbers
-!||====================================================================
-!||    my_alloc_logical_2d   ../common_source/tools/memory/my_alloc.F90
-!||--- calls      -----------------------------------------------------
-!||    my_alloc_check        ../common_source/tools/memory/my_alloc.F90
-!||====================================================================
-        subroutine my_alloc_logical_2d(a, n,m, msg, stat)
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                     Arguments
-! ----------------------------------------------------------------------------------------------------------------------
-          logical, dimension(:,:), allocatable, intent(inout) :: a !< The allocated array
-          integer, intent(in) :: n !< The first dimension of the array
-          integer, intent(in) :: m !< The second dimension of the array
-          character(len=*), optional, intent(in) :: msg !< The error message to print if the allocation fails
-          integer, optional, intent(out) :: stat !< The error code returned by the allocation
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                   Local variables
-! ----------------------------------------------------------------------------------------------------------------------
-          integer :: ierr
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                      Body
-! ----------------------------------------------------------------------------------------------------------------------
-          allocate(a(n,m), stat=ierr)
-          if (ierr == 0 .and. present(msg)) call record_alloc(msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
-          if(.not. present(stat)) then
-            if(present(msg)) then
-              call my_alloc_check(ierr, msg=msg)
-            else
-              call my_alloc_check(ierr)
-            end if
-          end if
-          if(present(stat)) stat = ierr
-
-        end subroutine my_alloc_logical_2d
-
-!||====================================================================
-!||    my_alloc_logical_3d   ../common_source/tools/memory/my_alloc.F90
-!||--- calls      -----------------------------------------------------
-!||    my_alloc_check        ../common_source/tools/memory/my_alloc.F90
-!||====================================================================
-        subroutine my_alloc_logical_3d(a,l,m,n, msg, stat)
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                     Arguments
-! ----------------------------------------------------------------------------------------------------------------------
-          logical, dimension(:,:,:), allocatable, intent(inout) :: a !< The allocated array
-          integer, intent(in) :: l !< The first dimension of the array
-          integer, intent(in) :: m !< The second dimension of the array
-          integer, intent(in) :: n !< The third dimension of the array
-          character(len=*), optional, intent(in) :: msg !< The error message to print if the allocation fails
-          integer, optional, intent(out) :: stat !< The error code returned by the allocation
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                   Local variables
-! ----------------------------------------------------------------------------------------------------------------------
-          integer :: ierr
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                      Body
-! ----------------------------------------------------------------------------------------------------------------------
-
-          allocate(a(l,m,n), stat=ierr)
-          if (ierr == 0 .and. present(msg)) call record_alloc(msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
-          if(.not. present(stat)) then
-            if(present(msg)) then
-              call my_alloc_check(ierr, msg=msg)
-            else
-              call my_alloc_check(ierr)
-            end if
-          end if
-          if(present(stat)) stat = ierr
-
-        end subroutine my_alloc_logical_3d
-!! \brief Allocate a 1D array of logical numbers
-!||====================================================================
-!||    my_alloc_plogical_1d   ../common_source/tools/memory/my_alloc.F90
-!||--- calls      -----------------------------------------------------
-!||    my_alloc_check         ../common_source/tools/memory/my_alloc.F90
-!||====================================================================
-        subroutine my_alloc_plogical_1d(a, n, msg, stat)
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                     Arguments
-! ----------------------------------------------------------------------------------------------------------------------
-          logical, dimension(:), pointer, intent(inout) :: a !< The allocated array
-          integer, intent(in) :: n !< The size of the array
-          character(len=*), optional, intent(in) :: msg !< The error message to print if the allocation fails
-          integer, optional, intent(out) :: stat !< The error code returned by the allocation
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                   Local variables
-! ----------------------------------------------------------------------------------------------------------------------
-          integer :: ierr
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                      Body
-! ----------------------------------------------------------------------------------------------------------------------
-          allocate(a(n), stat=ierr)
-          if (ierr == 0 .and. present(msg)) call record_alloc(msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
-          if(.not. present(stat)) then
-            if(present(msg)) then
-              call my_alloc_check(ierr, msg=msg)
-            else
-              call my_alloc_check(ierr)
-            end if
-          end if
-          if(present(stat)) stat = ierr
-
-        end subroutine my_alloc_plogical_1d
-
-!! \brief Allocate a 2D array of logical numbers
-!||====================================================================
-!||    my_alloc_plogical_2d   ../common_source/tools/memory/my_alloc.F90
-!||--- calls      -----------------------------------------------------
-!||    my_alloc_check         ../common_source/tools/memory/my_alloc.F90
-!||====================================================================
-        subroutine my_alloc_plogical_2d(a, n,m, msg, stat)
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                     Arguments
-! ----------------------------------------------------------------------------------------------------------------------
-          logical, dimension(:,:), pointer, intent(inout) :: a !< The allocated array
-          integer, intent(in) :: n !< The first dimension of the array
-          integer, intent(in) :: m !< The second dimension of the array
-          character(len=*), optional, intent(in) :: msg !< The error message to print if the allocation fails
-          integer, optional, intent(out) :: stat !< The error code returned by the allocation
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                   Local variables
-! ----------------------------------------------------------------------------------------------------------------------
-          integer :: ierr
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                      Body
-! ----------------------------------------------------------------------------------------------------------------------
-          allocate(a(n,m), stat=ierr)
-          if (ierr == 0 .and. present(msg)) call record_alloc(msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
-          if(.not. present(stat)) then
-            if(present(msg)) then
-              call my_alloc_check(ierr, msg=msg)
-            else
-              call my_alloc_check(ierr)
-            end if
-          end if
-          if(present(stat)) stat = ierr
-
-        end subroutine my_alloc_plogical_2d
-
-!||====================================================================
-!||    my_alloc_plogical_3d   ../common_source/tools/memory/my_alloc.F90
-!||--- calls      -----------------------------------------------------
-!||    my_alloc_check         ../common_source/tools/memory/my_alloc.F90
-!||====================================================================
-        subroutine my_alloc_plogical_3d(a,l,m,n, msg, stat)
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                     Arguments
-! ----------------------------------------------------------------------------------------------------------------------
-          logical, dimension(:,:,:), pointer, intent(inout) :: a !< The allocated array
-          integer, intent(in) :: l !< The first dimension of the array
-          integer, intent(in) :: m !< The second dimension of the array
-          integer, intent(in) :: n !< The third dimension of the array
-          character(len=*), optional, intent(in) :: msg !< The error message to print if the allocation fails
-          integer, optional, intent(out) :: stat !< The error code returned by the allocation
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                   Local variables
-! ----------------------------------------------------------------------------------------------------------------------
-          integer :: ierr
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                      Body
-! ----------------------------------------------------------------------------------------------------------------------
-
-          allocate(a(l,m,n), stat=ierr)
-          if (ierr == 0 .and. present(msg)) call record_alloc(msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
-          if(.not. present(stat)) then
-            if(present(msg)) then
-              call my_alloc_check(ierr, msg=msg)
-            else
-              call my_alloc_check(ierr)
-            end if
-          end if
-          if(present(stat)) stat = ierr
-
-        end subroutine my_alloc_plogical_3d
-! ======================================================================================================================
-!                                           LOGICAL ALLOCATION ROUTINES
-! ======================================================================================================================
-!! \brief Allocate a 1D array of logical numbers
-!||====================================================================
-!||    my_alloc_8_logical_1d   ../common_source/tools/memory/my_alloc.F90
-!||--- calls      -----------------------------------------------------
-!||    my_alloc_check          ../common_source/tools/memory/my_alloc.F90
-!||====================================================================
-        subroutine my_alloc_8_logical_1d(a, n, msg, stat)
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                     Arguments
-! ----------------------------------------------------------------------------------------------------------------------
-          logical, dimension(:), allocatable, intent(inout) :: a !< The allocated array
-          integer(8), intent(in) :: n !< The size of the array
-          character(len=*), optional, intent(in) :: msg !< The error message to print if the allocation fails
-          integer, optional, intent(out) :: stat !< The error code returned by the allocation
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                   Local variables
-! ----------------------------------------------------------------------------------------------------------------------
-          integer :: ierr
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                      Body
-! ----------------------------------------------------------------------------------------------------------------------
-          allocate(a(n), stat=ierr)
-          if (ierr == 0 .and. present(msg)) call record_alloc(msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
-          if(.not. present(stat)) then
-            if(present(msg)) then
-              call my_alloc_check(ierr, msg=msg)
-            else
-              call my_alloc_check(ierr)
-            end if
-          end if
-          if(present(stat)) stat = ierr
-
-        end subroutine my_alloc_8_logical_1d
-
-!! \brief Allocate a 2D array of logical numbers
-!||====================================================================
-!||    my_alloc_8_logical_2d   ../common_source/tools/memory/my_alloc.F90
-!||--- calls      -----------------------------------------------------
-!||    my_alloc_check          ../common_source/tools/memory/my_alloc.F90
-!||====================================================================
-        subroutine my_alloc_8_logical_2d(a, n,m, msg, stat)
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                     Arguments
-! ----------------------------------------------------------------------------------------------------------------------
-          logical, dimension(:,:), allocatable, intent(inout) :: a !< The allocated array
-          integer(8), intent(in) :: n !< The first dimension of the array
-          integer(8), intent(in) :: m !< The second dimension of the array
-          character(len=*), optional, intent(in) :: msg !< The error message to print if the allocation fails
-          integer, optional, intent(out) :: stat !< The error code returned by the allocation
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                   Local variables
-! ----------------------------------------------------------------------------------------------------------------------
-          integer :: ierr
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                      Body
-! ----------------------------------------------------------------------------------------------------------------------
-          allocate(a(n,m), stat=ierr)
-          if (ierr == 0 .and. present(msg)) call record_alloc(msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
-          if(.not. present(stat)) then
-            if(present(msg)) then
-              call my_alloc_check(ierr, msg=msg)
-            else
-              call my_alloc_check(ierr)
-            end if
-          end if
-          if(present(stat)) stat = ierr
-
-        end subroutine my_alloc_8_logical_2d
-
-!||====================================================================
-!||    my_alloc_8_logical_3d   ../common_source/tools/memory/my_alloc.F90
-!||--- calls      -----------------------------------------------------
-!||    my_alloc_check          ../common_source/tools/memory/my_alloc.F90
-!||====================================================================
-        subroutine my_alloc_8_logical_3d(a,l,m,n, msg, stat)
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                     Arguments
-! ----------------------------------------------------------------------------------------------------------------------
-          logical, dimension(:,:,:), allocatable, intent(inout) :: a !< The allocated array
-          integer(8), intent(in) :: l !< The first dimension of the array
-          integer(8), intent(in) :: m !< The second dimension of the array
-          integer(8), intent(in) :: n !< The third dimension of the array
-          character(len=*), optional, intent(in) :: msg !< The error message to print if the allocation fails
-          integer, optional, intent(out) :: stat !< The error code returned by the allocation
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                   Local variables
-! ----------------------------------------------------------------------------------------------------------------------
-          integer :: ierr
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                      Body
-! ----------------------------------------------------------------------------------------------------------------------
-
-          allocate(a(l,m,n), stat=ierr)
-          if (ierr == 0 .and. present(msg)) call record_alloc(msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
-          if(.not. present(stat)) then
-            if(present(msg)) then
-              call my_alloc_check(ierr, msg=msg)
-            else
-              call my_alloc_check(ierr)
-            end if
-          end if
-          if(present(stat)) stat = ierr
-
-        end subroutine my_alloc_8_logical_3d
-!! \brief Allocate a 1D array of logical numbers
+!! \brief Allocate a 1D logical array (pointer, integer(8) dims)
 !||====================================================================
 !||    my_alloc_8_plogical_1d   ../common_source/tools/memory/my_alloc.F90
 !||--- calls      -----------------------------------------------------
-!||    my_alloc_check           ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_check   ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
         subroutine my_alloc_8_plogical_1d(a, n, msg, stat)
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                     Arguments
-! ----------------------------------------------------------------------------------------------------------------------
-          logical, dimension(:), pointer, intent(inout) :: a !< The allocated array
+          logical, dimension(:), pointer, target, intent(inout) :: a !< The allocated array
           integer(8), intent(in) :: n !< The size of the array
           character(len=*), optional, intent(in) :: msg !< The error message to print if the allocation fails
           integer, optional, intent(out) :: stat !< The error code returned by the allocation
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                   Local variables
-! ----------------------------------------------------------------------------------------------------------------------
           integer :: ierr
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                      Body
-! ----------------------------------------------------------------------------------------------------------------------
           allocate(a(n), stat=ierr)
-          if (ierr == 0 .and. present(msg)) call record_alloc(msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
+          if (ierr == 0 .and. present(msg)) &
+            call record_alloc_addr(c_loc(a(lbound(a,1))), msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
               call my_alloc_check(ierr, msg=msg)
@@ -2189,33 +1708,24 @@
             end if
           end if
           if(present(stat)) stat = ierr
-
         end subroutine my_alloc_8_plogical_1d
 
-!! \brief Allocate a 2D array of logical numbers
+!! \brief Allocate a 2D logical array (pointer, integer(8) dims)
 !||====================================================================
 !||    my_alloc_8_plogical_2d   ../common_source/tools/memory/my_alloc.F90
 !||--- calls      -----------------------------------------------------
-!||    my_alloc_check           ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_check   ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
-        subroutine my_alloc_8_plogical_2d(a, n,m, msg, stat)
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                     Arguments
-! ----------------------------------------------------------------------------------------------------------------------
-          logical, dimension(:,:), pointer, intent(inout) :: a !< The allocated array
+        subroutine my_alloc_8_plogical_2d(a, n, m, msg, stat)
+          logical, dimension(:, :), pointer, target, intent(inout) :: a !< The allocated array
           integer(8), intent(in) :: n !< The first dimension of the array
           integer(8), intent(in) :: m !< The second dimension of the array
           character(len=*), optional, intent(in) :: msg !< The error message to print if the allocation fails
           integer, optional, intent(out) :: stat !< The error code returned by the allocation
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                   Local variables
-! ----------------------------------------------------------------------------------------------------------------------
           integer :: ierr
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                      Body
-! ----------------------------------------------------------------------------------------------------------------------
-          allocate(a(n,m), stat=ierr)
-          if (ierr == 0 .and. present(msg)) call record_alloc(msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
+          allocate(a(n, m), stat=ierr)
+          if (ierr == 0 .and. present(msg)) &
+            call record_alloc_addr(c_loc(a(lbound(a,1), lbound(a,2))), msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
               call my_alloc_check(ierr, msg=msg)
@@ -2224,34 +1734,26 @@
             end if
           end if
           if(present(stat)) stat = ierr
-
         end subroutine my_alloc_8_plogical_2d
 
+!! \brief Allocate a 3D logical array (pointer, integer(8) dims)
 !||====================================================================
 !||    my_alloc_8_plogical_3d   ../common_source/tools/memory/my_alloc.F90
 !||--- calls      -----------------------------------------------------
-!||    my_alloc_check           ../common_source/tools/memory/my_alloc.F90
+!||    my_alloc_check   ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
-        subroutine my_alloc_8_plogical_3d(a,l,m,n, msg, stat)
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                     Arguments
-! ----------------------------------------------------------------------------------------------------------------------
-          logical, dimension(:,:,:), pointer, intent(inout) :: a !< The allocated array
+        subroutine my_alloc_8_plogical_3d(a, l, m, n, msg, stat)
+          logical, dimension(:, :, :), pointer, target, intent(inout) :: a !< The allocated array
           integer(8), intent(in) :: l !< The first dimension of the array
           integer(8), intent(in) :: m !< The second dimension of the array
           integer(8), intent(in) :: n !< The third dimension of the array
           character(len=*), optional, intent(in) :: msg !< The error message to print if the allocation fails
           integer, optional, intent(out) :: stat !< The error code returned by the allocation
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                   Local variables
-! ----------------------------------------------------------------------------------------------------------------------
           integer :: ierr
-! ----------------------------------------------------------------------------------------------------------------------
-!                                                      Body
-! ----------------------------------------------------------------------------------------------------------------------
-
-          allocate(a(l,m,n), stat=ierr)
-          if (ierr == 0 .and. present(msg)) call record_alloc(msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
+          allocate(a(l, m, n), stat=ierr)
+          if (ierr == 0 .and. present(msg)) &
+            call record_alloc_addr(c_loc(a(lbound(a,1), lbound(a,2), lbound(a,3))), msg, int(storage_size(a), kind=8) / 8_8 *&
+                & size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
               call my_alloc_check(ierr, msg=msg)
@@ -2260,6 +1762,20 @@
             end if
           end if
           if(present(stat)) stat = ierr
-
         end subroutine my_alloc_8_plogical_3d
+
+
+! ======================================================================================================================
+!                            PLACEHOLDER — DERIVED TYPE ALLOCATION ROUTINES
+!
+! To add derived type support, add the type to the TYPES set above, or add a dedicated
+! interface block below for types that need special treatment (e.g. no storage_size).
+!
+! Example future entry in TYPES:
+!   #:set TYPES = [..., ('type(my_derived_type)', 'mytype')]
+!
+! Note: storage_size() works on derived types in Fortran 2008+, but the record_alloc
+! call may need adjustment if the type contains allocatable components.
+! ======================================================================================================================
+
       end module my_alloc_mod

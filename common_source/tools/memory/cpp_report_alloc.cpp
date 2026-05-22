@@ -23,6 +23,7 @@
 
 #include <unordered_map>
 #include <string>
+#include <utility>
 #include <vector>
 #include <algorithm>
 #include <cstdint>
@@ -48,6 +49,16 @@ static std::unordered_map<std::string, uint64_t>& get_peak_map()
 }
 
 // ------------------------------------------------------------------------------------
+// Internal storage: maps live pointer address -> (allocation site name, bytes)
+// One name can have many live pointers (same site called from multiple callers).
+// ------------------------------------------------------------------------------------
+static std::unordered_map<uintptr_t, std::pair<std::string, uint64_t>>& get_addr_map()
+{
+    static std::unordered_map<uintptr_t, std::pair<std::string, uint64_t>> addr_map;
+    return addr_map;
+}
+
+// ------------------------------------------------------------------------------------
 // Helper: trim trailing spaces from a Fortran string
 // ------------------------------------------------------------------------------------
 static std::string trim(const char* str, int len)
@@ -62,7 +73,7 @@ static std::string trim(const char* str, int len)
 }
 
 // ------------------------------------------------------------------------------------
-// C interface: record an allocation
+// C interface: record an allocation (legacy — no address tracking)
 //   msg     : Fortran character string (not null-terminated)
 //   msg_len : length of the msg string
 //   nbytes  : number of bytes allocated (passed as int64)
@@ -73,16 +84,68 @@ extern "C" void cpp_record_alloc(const char* msg, const int* msg_len, const int6
     if (key.empty()) return;
     uint64_t& current = get_alloc_map()[key];
     current += static_cast<uint64_t>(*nbytes);
-    // Update peak (high-water mark)
     uint64_t& peak = get_peak_map()[key];
     if (current > peak) peak = current;
 }
 
 // ------------------------------------------------------------------------------------
-// C interface: record a deallocation (subtracts bytes from the allocation map)
+// C interface: record an allocation with pointer address
+//   addr    : base address of the allocated array (used as unique key per live alloc)
 //   msg     : Fortran character string (not null-terminated)
 //   msg_len : length of the msg string
-//   nbytes  : number of bytes deallocated (passed as int64)
+//   nbytes  : number of bytes allocated (passed as int64)
+//
+// A single site name can have many live pointers simultaneously (same site called
+// from multiple callers or in a loop), so we track each allocation individually
+// via its address.
+// ------------------------------------------------------------------------------------
+extern "C" void cpp_record_alloc_addr(const void* addr, const char* msg, const int* msg_len, const int64_t* nbytes)
+{
+    std::string key = trim(msg, *msg_len);
+    if (key.empty()) return;
+    uintptr_t iaddr = reinterpret_cast<uintptr_t>(addr);
+    uint64_t nb = static_cast<uint64_t>(*nbytes);
+
+    get_addr_map()[iaddr] = {key, nb};
+
+    uint64_t& current = get_alloc_map()[key];
+    current += nb;
+    uint64_t& peak = get_peak_map()[key];
+    if (current > peak) peak = current;
+}
+
+// ------------------------------------------------------------------------------------
+// C interface: record a deallocation by pointer address
+//   addr    : base address of the array being freed
+//
+// Looks up the address in the per-allocation map to find the site name and byte
+// count, then decrements the per-site counter and removes the address entry.
+// Safe to call for addresses not tracked by cpp_record_alloc_addr (no-op).
+// ------------------------------------------------------------------------------------
+extern "C" void cpp_record_dealloc_addr(const void* addr)
+{
+    uintptr_t iaddr = reinterpret_cast<uintptr_t>(addr);
+    auto& addr_map = get_addr_map();
+    auto it = addr_map.find(iaddr);
+    if (it == addr_map.end()) return;
+
+    const std::string& key = it->second.first;
+    uint64_t nb            = it->second.second;
+
+    auto& alloc_map = get_alloc_map();
+    auto sit = alloc_map.find(key);
+    if (sit != alloc_map.end()) {
+        if (sit->second > nb)
+            sit->second -= nb;
+        else
+            alloc_map.erase(sit);
+    }
+
+    addr_map.erase(it);
+}
+
+// ------------------------------------------------------------------------------------
+// C interface: record a deallocation (legacy — name+bytes, no address map)
 // ------------------------------------------------------------------------------------
 extern "C" void cpp_record_dealloc(const char* msg, const int* msg_len, const int64_t* nbytes)
 {
@@ -92,11 +155,10 @@ extern "C" void cpp_record_dealloc(const char* msg, const int* msg_len, const in
     auto it = alloc_map.find(key);
     if (it != alloc_map.end()) {
         uint64_t to_subtract = static_cast<uint64_t>(*nbytes);
-        if (it->second > to_subtract) {
+        if (it->second > to_subtract)
             it->second -= to_subtract;
-        } else {
+        else
             alloc_map.erase(it);
-        }
     }
 }
 
