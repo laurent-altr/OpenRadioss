@@ -161,6 +161,7 @@ void inter7_gpu_candidate_pairs_(
     const int*       nsv,          /* slave-to-global node map [nsn]         */
     const int*       irect,        /* segment connectivity [4*nrtm], col-maj */
     const my_real_gpu* x,          /* node coords [3*numnod], col-major      */
+    const my_real_gpu* stfn,       /* slave node stiffness [nsn]             */
     const my_real_gpu* stf,        /* segment stiffness [nrtm]               */
     const my_real_gpu* xyzm,       /* bounding boxes [12]: xmin,ymin,zmin,   */
                                    /*   xmax,ymax,zmax,xminb,...,zmaxb       */

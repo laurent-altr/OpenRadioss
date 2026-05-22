@@ -38,7 +38,7 @@
 !   if (use_gpu) then
 !     call inter7_gpu_fill_voxel(nsn, nsnr, nbx, nby, nbz, nrtm, numnod,
 !    &    nsv, x, stfn, box_limit_main)
-!     call inter7_gpu_candidate_pairs(nsn, nrtm, numnod, nsv, irect, x, stf,
+!     call inter7_gpu_candidate_pairs(nsn, nrtm, numnod, nsv, irect, x, stfn, stf,
 !    &    xyzm, inter_struct%voxel, inter_struct%next_nod, nsnr, nbx, nby, nbz,
 !    &    igap, marge, tzinf, gap, gapmin, gapmax, bgapsmx, drad, dgapload,
 !    &    gap_s, gap_m, curv_max, flagremnode, s_kremnod, kremnod, s_remnod,
@@ -133,7 +133,7 @@
           END SUBROUTINE
 
           SUBROUTINE c_gpu_candidate_pairs( &
-              nsn, nrtm, numnod, nsv, irect, x, stf, xyzm, &
+              nsn, nrtm, numnod, nsv, irect, x, stfn, stf, xyzm, &
               voxel, next_nod, nsnr, nbx, nby, nbz, &
               igap, marge, tzinf, gap, gapmin, gapmax, bgapsmx, drad, dgapload, &
               gap_s, gap_m, curv_max, &
@@ -148,7 +148,7 @@
             INTEGER(C_INT),  INTENT(IN)    :: flagremnode, s_kremnod, s_remnod, mulnsn
             INTEGER(C_INT),  INTENT(IN)    :: nsv(*), irect(*), voxel(*), next_nod(*)
             INTEGER(C_INT),  INTENT(IN)    :: kremnod(*), remnod(*)
-            REAL(C_DOUBLE),  INTENT(IN)    :: x(*), stf(*), xyzm(*)
+            REAL(C_DOUBLE),  INTENT(IN)    :: x(*), stfn(*), stf(*), xyzm(*)
             REAL(C_DOUBLE),  INTENT(IN)    :: marge, tzinf, gap, gapmin, gapmax
             REAL(C_DOUBLE),  INTENT(IN)    :: bgapsmx, drad, dgapload
             REAL(C_DOUBLE),  INTENT(IN)    :: gap_s(*), gap_m(*), curv_max(*)
@@ -160,7 +160,7 @@
             INTEGER(C_INT),  INTENT(IN)    :: flagremnode, s_kremnod, s_remnod, mulnsn
             INTEGER(C_INT),  INTENT(IN)    :: nsv(*), irect(*), voxel(*), next_nod(*)
             INTEGER(C_INT),  INTENT(IN)    :: kremnod(*), remnod(*)
-            REAL(C_FLOAT),   INTENT(IN)    :: x(*), stf(*), xyzm(*)
+            REAL(C_FLOAT),   INTENT(IN)    :: x(*), stfn(*), stf(*), xyzm(*)
             REAL(C_FLOAT),   INTENT(IN)    :: marge, tzinf, gap, gapmin, gapmax
             REAL(C_FLOAT),   INTENT(IN)    :: bgapsmx, drad, dgapload
             REAL(C_FLOAT),   INTENT(IN)    :: gap_s(*), gap_m(*), curv_max(*)
@@ -241,7 +241,7 @@
 !     xyzm(7..12) = xminb, yminb, zminb, xmaxb, ymaxb, zmaxb
 ! ======================================================================
         SUBROUTINE inter7_gpu_candidate_pairs( &
-            nsn, nrtm, numnod, nsv, irect, x, stf, xyzm, &
+            nsn, nrtm, numnod, nsv, irect, x, stfn, stf, xyzm, &
             voxel, next_nod, nsnr, nbx, nby, nbz, &
             igap, marge, tzinf, gap, gapmin, gapmax, bgapsmx, drad, dgapload, &
             gap_s, gap_m, curv_max, &
@@ -258,6 +258,7 @@
           INTEGER,         INTENT(IN)    :: kremnod(s_kremnod)
           INTEGER,         INTENT(IN)    :: remnod(s_remnod)
           REAL(KIND=WP),   INTENT(IN)    :: x(3,numnod)
+          REAL(KIND=WP),   INTENT(IN)    :: stfn(nsn)
           REAL(KIND=WP),   INTENT(IN)    :: stf(nrtm)
           REAL(KIND=WP),   INTENT(IN)    :: xyzm(12)
           REAL(KIND=WP),   INTENT(IN)    :: marge, tzinf, gap
@@ -275,7 +276,7 @@
             ALLOCATE(kremnod_csr(s_krem_csr))
             CALL inter7_gpu_convert_kremnod_csr(nrtm, kremnod, kremnod_csr)
             CALL c_gpu_candidate_pairs( &
-                nsn, nrtm, numnod, nsv, irect, x, stf, xyzm, &
+                nsn, nrtm, numnod, nsv, irect, x, stfn, stf, xyzm, &
                 voxel, next_nod, nsnr, nbx, nby, nbz, &
                 igap, marge, tzinf, gap, gapmin, gapmax, bgapsmx, drad, dgapload, &
                 gap_s, gap_m, curv_max, &
@@ -285,7 +286,7 @@
           ELSE
             ! Dummy kremnode arrays when not used
             CALL c_gpu_candidate_pairs( &
-                nsn, nrtm, numnod, nsv, irect, x, stf, xyzm, &
+                nsn, nrtm, numnod, nsv, irect, x, stfn, stf, xyzm, &
                 voxel, next_nod, nsnr, nbx, nby, nbz, &
                 igap, marge, tzinf, gap, gapmin, gapmax, bgapsmx, drad, dgapload, &
                 gap_s, gap_m, curv_max, &
