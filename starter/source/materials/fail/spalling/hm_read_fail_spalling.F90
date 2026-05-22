@@ -122,7 +122,7 @@
           call my_alloc(fail%iparam, fail%niparam, "fail%iparam")
           call my_alloc(fail%ifunc , fail%nfunc,   "fail%ifunc")
           call my_alloc(fail%table , fail%ntable,  "fail%table")
-          allocate(fail%mode  (fail%nmod))
+          allocate(fail%mode(fail%nmod))
 !
           ! Modes of failure
           fail_tag%lf_dammx = 1 + fail%nmod

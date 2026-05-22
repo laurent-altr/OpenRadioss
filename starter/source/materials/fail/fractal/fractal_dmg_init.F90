@@ -175,7 +175,7 @@
                 end if
               end do            !   ifail = 1,nfail
             end do              !  il=1,nlay
-            if (allocated(lay_dmg)) call my_dealloc(lay_dmg, "lay_dmg")
+            if (allocated(lay_dmg)) call my_dealloc(lay_dmg)
           end do          !  loop over fractal models
 ! ----------------------------------------------------------------------------------------------------------------------
           return

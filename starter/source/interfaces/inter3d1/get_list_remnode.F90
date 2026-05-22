@@ -290,7 +290,7 @@
                 my_new_size = local_remnode_size + max( local_remnode_size/10, 10*cpt1)
                 call my_alloc(tmp_array, my_new_size, "tmp_array")
                 tmp_array(1:local_remnode_size) = local_remnode(1:local_remnode_size)
-                call my_dealloc(local_remnode, "local_remnode")
+                call my_dealloc(local_remnode)
                 call move_alloc( tmp_array,local_remnode )
                 local_remnode_size = my_new_size
               end if
@@ -333,15 +333,15 @@
           end do
 
 
-          call my_dealloc(noddel, "noddel")
-          call my_dealloc(nod2expand, "nod2expand")
-          call my_dealloc(listseg, "listseg")
-          call my_dealloc(listsegtmp, "listsegtmp")
-          call my_dealloc(listsegtotal, "listsegtotal")
-          call my_dealloc(local_remnode, "local_remnode")
-          call my_dealloc(local_kremnode, "local_kremnode")
-          call my_dealloc(itagseg, "itagseg")
-          call my_dealloc(gapv, "gapv")
+          call my_dealloc(noddel)
+          call my_dealloc(nod2expand)
+          call my_dealloc(listseg)
+          call my_dealloc(listsegtmp)
+          call my_dealloc(listsegtotal)
+          call my_dealloc(local_remnode)
+          call my_dealloc(local_kremnode)
+          call my_dealloc(itagseg)
+          call my_dealloc(gapv)
 
 
 

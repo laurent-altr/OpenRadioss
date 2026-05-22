@@ -41,6 +41,7 @@ C   M o d u l e s
 C-----------------------------------------------
       USE INTBUFDEF_MOD 
       USE FRONT_MOD
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -73,9 +74,9 @@ C-----------------------------------------------
       INTEGER :: OFFSET_SHELL,OFFSET_SHELL3N
       INTEGER, DIMENSION(:),ALLOCATABLE :: IBUF1,IBUF3
 C ----------------------------------------
-      ALLOCATE(IBUF1(2*NRTM_L))
+      call my_alloc(IBUF1, 2*NRTM_L, "IBUF1")
       IBUF1(1:2*NRTM_L) = 0
-      ALLOCATE(IBUF3(4*NRTM_L))
+      call my_alloc(IBUF3, 4*NRTM_L, "IBUF3")
       IF(IDEL_SOLID > 0) THEN
         IBUF3(1:4*NRTM_L) = 0
       ELSE

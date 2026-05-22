@@ -34,6 +34,7 @@ C   M o d u l e s
 C----------------------------------------------- 
       USE GROUPDEF_MOD , ONLY : SURF_
       USE NAMES_AND_TITLES_MOD , ONLY : NCHARTITLE
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -67,7 +68,7 @@ C-----------------------------------------------
       ENDDO ! DO ISU=1,NSLIN
       LEN_IA = LEN_IA + NSLIN
       ERR = 0
-      ALLOCATE (IGRSLIN_L(LENISLIN), STAT=ERR)
+      call my_alloc(IGRSLIN_L, LENISLIN, "IGRSLIN_L", stat=ERR)
       IGRSLIN_L(1:LENISLIN) = 0  
 !
 ! COUNT LOCAL SEGMENTS "NSEG_L"

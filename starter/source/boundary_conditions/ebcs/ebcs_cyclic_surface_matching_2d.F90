@@ -259,14 +259,14 @@
             END DO
           END DO
 
-          call my_dealloc(nodlist1, "nodlist1")
-          call my_dealloc(nodlist2, "nodlist2")
-          call my_dealloc(nodlist3, "nodlist3")
-          call my_dealloc(ITAG_ELEM, "ITAG_ELEM")
-          call my_dealloc(IFACE, "IFACE")
-          call my_dealloc(IELEM, "IELEM")
-          call my_dealloc(ELEM_LIST, "ELEM_LIST")
-          call my_dealloc(ISEG, "ISEG")
+          call my_dealloc(nodlist1)
+          call my_dealloc(nodlist2)
+          call my_dealloc(nodlist3)
+          call my_dealloc(ITAG_ELEM)
+          call my_dealloc(IFACE)
+          call my_dealloc(IELEM)
+          call my_dealloc(ELEM_LIST)
+          call my_dealloc(ISEG)
 ! ----------------------------------------------------------------------------------------------------------------------
         end subroutine ebcs_cyclic_surface_matching_2d
       end module ebcs_cyclic_surface_matching_2d_mod

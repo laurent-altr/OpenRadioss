@@ -242,7 +242,8 @@ C=======================================================================
       IEXT=0
       IFRE=0
       IBUFSIZ=NUMELC+NUMELTG+6*NUMELS+NPART
-      ALLOCATE(BUFTMP(IBUFSIZ),INDX(IBUFSIZ),STAT=stat)
+      call my_alloc(BUFTMP, IBUFSIZ, "BUFTMP", stat=stat)
+      call my_alloc(INDX, IBUFSIZ, "INDX", stat=stat)
       IF (STAT /= 0) CALL ANCMSG(MSGID=268,ANMODE=ANINFO,
      .                           MSGTYPE=MSGERROR,
      .                           C1='BUFTMP')
@@ -443,16 +444,16 @@ C=======================================================================
 C NEW BOX OPTION (MULTI BOX COMBINATION)
 C=======================================================================
       IF (IT8/=0) THEN
-        ALLOCATE(TAGSHELLBOXC(NUMELC),STAT=stat)
-        ALLOCATE(TAGSHELLBOXG(NUMELTG),STAT=stat)
+        call my_alloc(TAGSHELLBOXC, NUMELC, "TAGSHELLBOXC", stat=stat)
+        call my_alloc(TAGSHELLBOXG, NUMELTG, "TAGSHELLBOXG", stat=stat)
         TAGSHELLBOXC(1:NUMELC) = 0
         TAGSHELLBOXG(1:NUMELTG) = 0
         IADBOX = 1
         IF (FLAG == 0) THEN
-          ALLOCATE(BUFBOX(1))
+          call my_alloc(BUFBOX, 1, "BUFBOX")
           BUFBOX = 0
         ELSEIF (FLAG == 1) THEN
-          ALLOCATE(BUFBOX(IADBOXMAX))
+          call my_alloc(BUFBOX, IADBOXMAX, "BUFBOX")
           BUFBOX(1:IADBOXMAX) = 0
         ENDIF
         SBUFBOX = INT(INTMAX)
@@ -561,7 +562,7 @@ C groups of SUBSETS,PART,MAT,PROP,BRIC
 C=======================================================================
 
       IF(IT2/=0.OR.IT6/=0)THEN
-        ALLOCATE( SURF_ELM(NPART) )
+        allocate(SURF_ELM(NPART))
         MODE = 1
         CALL INIT_SURF_ELM(NUMELS  ,NUMELS8,NUMELS10,NUMELC ,NUMELTG ,
      1                     IBID    ,IBID   ,IBID    ,NPART  ,IPARTS  ,
@@ -572,8 +573,8 @@ C=======================================================================
       IF(IT2/=0)THEN
         NINDX_SOL = 0
         NINDX_SOL10 = 0
-        ALLOCATE( INDX_SOL(NUMELS) )
-        ALLOCATE( INDX_SOL10(NUMELS) )
+        call my_alloc(INDX_SOL, NUMELS, "INDX_SOL")
+        call my_alloc(INDX_SOL10, NUMELS, "INDX_SOL10")
         CALL HM_OPTION_START('/SURF')
         DO IGS=1,NSURF
           CALL HM_OPTION_READ_KEY(LSUBMODEL,

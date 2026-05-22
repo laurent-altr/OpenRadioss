@@ -329,6 +329,7 @@
 
         public :: report_alloc
         public :: record_dealloc_addr
+        private :: build_msg, my_alloc_check, record_alloc_addr
 
         private :: my_alloc_real_1d
         private :: my_alloc_real_2d
@@ -823,7 +824,7 @@
 !||    my_alloc_check   ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
         subroutine my_alloc_preal_1d(a, n, msg, stat)
-          real, dimension(:), pointer, target, intent(inout) :: a !< The allocated array
+          real, dimension(:), pointer, intent(inout) :: a !< The allocated array
           integer, intent(in) :: n !< The size of the array
           character(len=*), optional, intent(in) :: msg !< The error message to print if the allocation fails
           integer, optional, intent(out) :: stat !< The error code returned by the allocation
@@ -848,7 +849,7 @@
 !||    my_alloc_check   ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
         subroutine my_alloc_preal_2d(a, n, m, msg, stat)
-          real, dimension(:, :), pointer, target, intent(inout) :: a !< The allocated array
+          real, dimension(:, :), pointer, intent(inout) :: a !< The allocated array
           integer, intent(in) :: n !< The first dimension of the array
           integer, intent(in) :: m !< The second dimension of the array
           character(len=*), optional, intent(in) :: msg !< The error message to print if the allocation fails
@@ -874,7 +875,7 @@
 !||    my_alloc_check   ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
         subroutine my_alloc_preal_3d(a, l, m, n, msg, stat)
-          real, dimension(:, :, :), pointer, target, intent(inout) :: a !< The allocated array
+          real, dimension(:, :, :), pointer, intent(inout) :: a !< The allocated array
           integer, intent(in) :: l !< The first dimension of the array
           integer, intent(in) :: m !< The second dimension of the array
           integer, intent(in) :: n !< The third dimension of the array
@@ -902,7 +903,7 @@
 !||    my_alloc_check   ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
         subroutine my_alloc_pdouble_1d(a, n, msg, stat)
-          double precision, dimension(:), pointer, target, intent(inout) :: a !< The allocated array
+          double precision, dimension(:), pointer, intent(inout) :: a !< The allocated array
           integer, intent(in) :: n !< The size of the array
           character(len=*), optional, intent(in) :: msg !< The error message to print if the allocation fails
           integer, optional, intent(out) :: stat !< The error code returned by the allocation
@@ -927,7 +928,7 @@
 !||    my_alloc_check   ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
         subroutine my_alloc_pdouble_2d(a, n, m, msg, stat)
-          double precision, dimension(:, :), pointer, target, intent(inout) :: a !< The allocated array
+          double precision, dimension(:, :), pointer, intent(inout) :: a !< The allocated array
           integer, intent(in) :: n !< The first dimension of the array
           integer, intent(in) :: m !< The second dimension of the array
           character(len=*), optional, intent(in) :: msg !< The error message to print if the allocation fails
@@ -953,7 +954,7 @@
 !||    my_alloc_check   ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
         subroutine my_alloc_pdouble_3d(a, l, m, n, msg, stat)
-          double precision, dimension(:, :, :), pointer, target, intent(inout) :: a !< The allocated array
+          double precision, dimension(:, :, :), pointer, intent(inout) :: a !< The allocated array
           integer, intent(in) :: l !< The first dimension of the array
           integer, intent(in) :: m !< The second dimension of the array
           integer, intent(in) :: n !< The third dimension of the array
@@ -981,7 +982,7 @@
 !||    my_alloc_check   ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
         subroutine my_alloc_pinteger_1d(a, n, msg, stat)
-          integer, dimension(:), pointer, target, intent(inout) :: a !< The allocated array
+          integer, dimension(:), pointer, intent(inout) :: a !< The allocated array
           integer, intent(in) :: n !< The size of the array
           character(len=*), optional, intent(in) :: msg !< The error message to print if the allocation fails
           integer, optional, intent(out) :: stat !< The error code returned by the allocation
@@ -1006,7 +1007,7 @@
 !||    my_alloc_check   ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
         subroutine my_alloc_pinteger_2d(a, n, m, msg, stat)
-          integer, dimension(:, :), pointer, target, intent(inout) :: a !< The allocated array
+          integer, dimension(:, :), pointer, intent(inout) :: a !< The allocated array
           integer, intent(in) :: n !< The first dimension of the array
           integer, intent(in) :: m !< The second dimension of the array
           character(len=*), optional, intent(in) :: msg !< The error message to print if the allocation fails
@@ -1032,7 +1033,7 @@
 !||    my_alloc_check   ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
         subroutine my_alloc_pinteger_3d(a, l, m, n, msg, stat)
-          integer, dimension(:, :, :), pointer, target, intent(inout) :: a !< The allocated array
+          integer, dimension(:, :, :), pointer, intent(inout) :: a !< The allocated array
           integer, intent(in) :: l !< The first dimension of the array
           integer, intent(in) :: m !< The second dimension of the array
           integer, intent(in) :: n !< The third dimension of the array
@@ -1060,7 +1061,7 @@
 !||    my_alloc_check   ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
         subroutine my_alloc_plogical_1d(a, n, msg, stat)
-          logical, dimension(:), pointer, target, intent(inout) :: a !< The allocated array
+          logical, dimension(:), pointer, intent(inout) :: a !< The allocated array
           integer, intent(in) :: n !< The size of the array
           character(len=*), optional, intent(in) :: msg !< The error message to print if the allocation fails
           integer, optional, intent(out) :: stat !< The error code returned by the allocation
@@ -1085,7 +1086,7 @@
 !||    my_alloc_check   ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
         subroutine my_alloc_plogical_2d(a, n, m, msg, stat)
-          logical, dimension(:, :), pointer, target, intent(inout) :: a !< The allocated array
+          logical, dimension(:, :), pointer, intent(inout) :: a !< The allocated array
           integer, intent(in) :: n !< The first dimension of the array
           integer, intent(in) :: m !< The second dimension of the array
           character(len=*), optional, intent(in) :: msg !< The error message to print if the allocation fails
@@ -1111,7 +1112,7 @@
 !||    my_alloc_check   ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
         subroutine my_alloc_plogical_3d(a, l, m, n, msg, stat)
-          logical, dimension(:, :, :), pointer, target, intent(inout) :: a !< The allocated array
+          logical, dimension(:, :, :), pointer, intent(inout) :: a !< The allocated array
           integer, intent(in) :: l !< The first dimension of the array
           integer, intent(in) :: m !< The second dimension of the array
           integer, intent(in) :: n !< The third dimension of the array
@@ -1455,7 +1456,7 @@
 !||    my_alloc_check   ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
         subroutine my_alloc_8_preal_1d(a, n, msg, stat)
-          real, dimension(:), pointer, target, intent(inout) :: a !< The allocated array
+          real, dimension(:), pointer, intent(inout) :: a !< The allocated array
           integer(8), intent(in) :: n !< The size of the array
           character(len=*), optional, intent(in) :: msg !< The error message to print if the allocation fails
           integer, optional, intent(out) :: stat !< The error code returned by the allocation
@@ -1480,7 +1481,7 @@
 !||    my_alloc_check   ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
         subroutine my_alloc_8_preal_2d(a, n, m, msg, stat)
-          real, dimension(:, :), pointer, target, intent(inout) :: a !< The allocated array
+          real, dimension(:, :), pointer, intent(inout) :: a !< The allocated array
           integer(8), intent(in) :: n !< The first dimension of the array
           integer(8), intent(in) :: m !< The second dimension of the array
           character(len=*), optional, intent(in) :: msg !< The error message to print if the allocation fails
@@ -1506,7 +1507,7 @@
 !||    my_alloc_check   ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
         subroutine my_alloc_8_preal_3d(a, l, m, n, msg, stat)
-          real, dimension(:, :, :), pointer, target, intent(inout) :: a !< The allocated array
+          real, dimension(:, :, :), pointer, intent(inout) :: a !< The allocated array
           integer(8), intent(in) :: l !< The first dimension of the array
           integer(8), intent(in) :: m !< The second dimension of the array
           integer(8), intent(in) :: n !< The third dimension of the array
@@ -1534,7 +1535,7 @@
 !||    my_alloc_check   ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
         subroutine my_alloc_8_pdouble_1d(a, n, msg, stat)
-          double precision, dimension(:), pointer, target, intent(inout) :: a !< The allocated array
+          double precision, dimension(:), pointer, intent(inout) :: a !< The allocated array
           integer(8), intent(in) :: n !< The size of the array
           character(len=*), optional, intent(in) :: msg !< The error message to print if the allocation fails
           integer, optional, intent(out) :: stat !< The error code returned by the allocation
@@ -1559,7 +1560,7 @@
 !||    my_alloc_check   ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
         subroutine my_alloc_8_pdouble_2d(a, n, m, msg, stat)
-          double precision, dimension(:, :), pointer, target, intent(inout) :: a !< The allocated array
+          double precision, dimension(:, :), pointer, intent(inout) :: a !< The allocated array
           integer(8), intent(in) :: n !< The first dimension of the array
           integer(8), intent(in) :: m !< The second dimension of the array
           character(len=*), optional, intent(in) :: msg !< The error message to print if the allocation fails
@@ -1585,7 +1586,7 @@
 !||    my_alloc_check   ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
         subroutine my_alloc_8_pdouble_3d(a, l, m, n, msg, stat)
-          double precision, dimension(:, :, :), pointer, target, intent(inout) :: a !< The allocated array
+          double precision, dimension(:, :, :), pointer, intent(inout) :: a !< The allocated array
           integer(8), intent(in) :: l !< The first dimension of the array
           integer(8), intent(in) :: m !< The second dimension of the array
           integer(8), intent(in) :: n !< The third dimension of the array
@@ -1613,7 +1614,7 @@
 !||    my_alloc_check   ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
         subroutine my_alloc_8_pinteger_1d(a, n, msg, stat)
-          integer, dimension(:), pointer, target, intent(inout) :: a !< The allocated array
+          integer, dimension(:), pointer, intent(inout) :: a !< The allocated array
           integer(8), intent(in) :: n !< The size of the array
           character(len=*), optional, intent(in) :: msg !< The error message to print if the allocation fails
           integer, optional, intent(out) :: stat !< The error code returned by the allocation
@@ -1638,7 +1639,7 @@
 !||    my_alloc_check   ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
         subroutine my_alloc_8_pinteger_2d(a, n, m, msg, stat)
-          integer, dimension(:, :), pointer, target, intent(inout) :: a !< The allocated array
+          integer, dimension(:, :), pointer, intent(inout) :: a !< The allocated array
           integer(8), intent(in) :: n !< The first dimension of the array
           integer(8), intent(in) :: m !< The second dimension of the array
           character(len=*), optional, intent(in) :: msg !< The error message to print if the allocation fails
@@ -1664,7 +1665,7 @@
 !||    my_alloc_check   ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
         subroutine my_alloc_8_pinteger_3d(a, l, m, n, msg, stat)
-          integer, dimension(:, :, :), pointer, target, intent(inout) :: a !< The allocated array
+          integer, dimension(:, :, :), pointer, intent(inout) :: a !< The allocated array
           integer(8), intent(in) :: l !< The first dimension of the array
           integer(8), intent(in) :: m !< The second dimension of the array
           integer(8), intent(in) :: n !< The third dimension of the array
@@ -1692,7 +1693,7 @@
 !||    my_alloc_check   ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
         subroutine my_alloc_8_plogical_1d(a, n, msg, stat)
-          logical, dimension(:), pointer, target, intent(inout) :: a !< The allocated array
+          logical, dimension(:), pointer, intent(inout) :: a !< The allocated array
           integer(8), intent(in) :: n !< The size of the array
           character(len=*), optional, intent(in) :: msg !< The error message to print if the allocation fails
           integer, optional, intent(out) :: stat !< The error code returned by the allocation
@@ -1717,7 +1718,7 @@
 !||    my_alloc_check   ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
         subroutine my_alloc_8_plogical_2d(a, n, m, msg, stat)
-          logical, dimension(:, :), pointer, target, intent(inout) :: a !< The allocated array
+          logical, dimension(:, :), pointer, intent(inout) :: a !< The allocated array
           integer(8), intent(in) :: n !< The first dimension of the array
           integer(8), intent(in) :: m !< The second dimension of the array
           character(len=*), optional, intent(in) :: msg !< The error message to print if the allocation fails
@@ -1743,7 +1744,7 @@
 !||    my_alloc_check   ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
         subroutine my_alloc_8_plogical_3d(a, l, m, n, msg, stat)
-          logical, dimension(:, :, :), pointer, target, intent(inout) :: a !< The allocated array
+          logical, dimension(:, :, :), pointer, intent(inout) :: a !< The allocated array
           integer(8), intent(in) :: l !< The first dimension of the array
           integer(8), intent(in) :: m !< The second dimension of the array
           integer(8), intent(in) :: n !< The third dimension of the array

@@ -138,8 +138,8 @@
             elm_group_data(my_index,2) = elm_group(group_id) ! save the number of element of the group for the element i
           end do
 
-          call my_dealloc(index, "index")
-          call my_dealloc(elm_group, "elm_group")
+          call my_dealloc(index)
+          call my_dealloc(elm_group)
 
           return
 

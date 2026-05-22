@@ -38,6 +38,7 @@ C
 C-----------------------------------------------
       USE XFEM2DEF_MOD
       use element_mod , only : nixc,nixtg
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -85,7 +86,8 @@ c
       my_real, DIMENSION(:)  , ALLOCATABLE :: RATIOEDGE,AVX,AVXX,FSKY,AREA
 C=======================================================================
 !     1d array
-      ALLOCATE( NODTAG(NUMNOD_L),ELEMTAG(NUMELC_L+NUMELTG_L) )
+      call my_alloc(NODTAG, NUMNOD_L, "NODTAG")
+      call my_alloc(ELEMTAG, NUMELC_L+NUMELTG_L, "ELEMTAG")
       ALLOCATE( CRKSIZN_L(NLEVMAX) )
 ! --------------------------------------
       OFFC = NUMELS + NUMELQ
@@ -98,8 +100,8 @@ C
       CRKSHELLID_L = 0
       NCOUNTALL = 0
 C
-      ALLOCATE(ELEMLOC_C(NUMELC))
-      ALLOCATE(ELEMLOC_TG(NUMELTG))
+      call my_alloc(ELEMLOC_C, NUMELC, "ELEMLOC_C")
+      call my_alloc(ELEMLOC_TG, NUMELTG, "ELEMLOC_TG")
       ELEMLOC_C  = 0
       ELEMLOC_TG = 0
 c
@@ -120,7 +122,7 @@ c
 C=======================================================================
 c     storage by ILEV
 C=======================================================================
-      ALLOCATE (ELCUT(NUMELC_L+NUMELTG_L))
+      call my_alloc(ELCUT, NUMELC_L+NUMELTG_L, "ELCUT")
 c
       DO K=1,NLEVMAX
         NODTAG  = 0
@@ -164,20 +166,22 @@ C
 C
         IDIM = CRKSIZN_L(K)  ! number of phantom nodes per ply per processor
 C
-        ALLOCATE(ELEMXFEMID(ELSZ_L))
-        ALLOCATE(ELTYPE(ELSZ_L))
-        ALLOCATE(AREA(ELSZ_L))
+        call my_alloc(ELEMXFEMID, ELSZ_L, "ELEMXFEMID")
+        call my_alloc(ELTYPE, ELSZ_L, "ELTYPE")
+        call my_alloc(AREA, ELSZ_L, "AREA")
 
         ELCUT = 0
         ELEMXFEMID = 0
         ELTYPE  = 0
         AREA    = 0
-        ALLOCATE(KNOD2ELC(4,ELSZ_L),XFECRKNODID(4*ELSZ_L),
-     .           SH_XFENODES(4,ELSZ_L),ENRICH0(LCNECRKXFEM_L),
-     .           NOD_XFENODES(4*ELSZ_L))
+        call my_alloc(KNOD2ELC, 4, ELSZ_L, "KNOD2ELC")
+        call my_alloc(XFECRKNODID, 4*ELSZ_L, "XFECRKNODID")
+        call my_alloc(SH_XFENODES, 4, ELSZ_L, "SH_XFENODES")
+        call my_alloc(ENRICH0, LCNECRKXFEM_L, "ENRICH0")
+        call my_alloc(NOD_XFENODES, 4*ELSZ_L, "NOD_XFENODES")
         IF (K==1) THEN
-          ALLOCATE(LAYCUT(ELSZ_L))
-          ALLOCATE(IEDGEX(IDIM))
+          call my_alloc(LAYCUT, ELSZ_L, "LAYCUT")
+          call my_alloc(IEDGEX, IDIM, "IEDGEX")
           IEDGEX = 0
        ENDIF
 C
@@ -239,10 +243,10 @@ C
         ENDDO  !  1,NELXFE_L
 C
         XFENUMNODS = 4*ELSZ_L
-        ALLOCATE(AVX(3*LCNECRKXFEM_L))
-        ALLOCATE(AVXX(3*XFENUMNODS))
-        ALLOCATE(FSKY(8*LCNECRKXFEM_L))
-        ALLOCATE(NOD2IAD(XFENUMNODS))
+        call my_alloc(AVX, 3*LCNECRKXFEM_L, "AVX")
+        call my_alloc(AVXX, 3*XFENUMNODS, "AVXX")
+        call my_alloc(FSKY, 8*LCNECRKXFEM_L, "FSKY")
+        call my_alloc(NOD2IAD, XFENUMNODS, "NOD2IAD")
         AVX   = ZERO
         AVXX  = ZERO
         FSKY  = ZERO
@@ -299,9 +303,9 @@ C=======================================================================
       NENR = INT(IENRNOD/NLEVMAX)
 c
 c---  write XFEM_PHANTOM  ----------------------------
-      ALLOCATE(IFI  (LCNECRKXFEM_L)  )
+      call my_alloc(IFI, LCNECRKXFEM_L, "IFI")
       ALLOCATE(TAGXP(NUMNODCRK_L*IENRNOD*5))  ! IENRNOD -> NENR
-      ALLOCATE(ITRI (ELSZ_L*2))        
+      call my_alloc(ITRI, ELSZ_L*2, "ITRI")
       TAGXP = 0
       IFI   = 0    
       ITRI  = 0    
@@ -321,12 +325,12 @@ C
 c---  write CRKEDGE  ----------------------------
       IDIM = CRKSIZN_L(1)
 c      ALLOCATE(IEDGEX(IDIM))
-      ALLOCATE(EDGEICRK(NUMEDGES_L))   
-      ALLOCATE(EDGEIFI(2,NUMEDGES_L))  
-      ALLOCATE(EDGEENR(2,NUMEDGES_L))  
-      ALLOCATE(EDGETIP(2,NUMEDGES_L))  
-      ALLOCATE(ICUTEDGE (NUMEDGES_L))   
-      ALLOCATE(RATIOEDGE(NUMEDGES_L))
+      call my_alloc(EDGEICRK, NUMEDGES_L, "EDGEICRK")
+      call my_alloc(EDGEIFI, 2, NUMEDGES_L, "EDGEIFI")
+      call my_alloc(EDGEENR, 2, NUMEDGES_L, "EDGEENR")
+      call my_alloc(EDGETIP, 2, NUMEDGES_L, "EDGETIP")
+      call my_alloc(ICUTEDGE, NUMEDGES_L, "ICUTEDGE")
+      call my_alloc(RATIOEDGE, NUMEDGES_L, "RATIOEDGE")
       EDGEICRK  = 0
       EDGEIFI   = 0
       EDGEENR   = 0

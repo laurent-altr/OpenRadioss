@@ -105,6 +105,7 @@ C-----------------------------------------------
       USE INOUTFILE_MOD
       USE NAMES_AND_TITLES_MOD , ONLY : NCHARTITLE
       use element_mod , only : nixs,nixq,nixc,nixt,nixp,nixr,nixtg
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -529,7 +530,7 @@ C
       IF (IFVANI==1) THEN
          ELOFF=0
          DO I=1,NFVBAG
-            ALLOCATE(ITAGT(FVDATA(I)%NNTR))
+            call my_alloc(ITAGT, FVDATA(I)%NNTR, "ITAGT")
             DO J=1,FVDATA(I)%NNTR
                ITAGT(J)=0
             ENDDO
@@ -580,7 +581,7 @@ C
       ENDDO
 C
       IF (IFVANI==1) THEN
-         ALLOCATE(OFFTR(NFVTR))
+         call my_alloc(OFFTR, NFVTR, "OFFTR")
          DO I=1,NFVTR
             OFFTR(I)=0
          ENDDO
@@ -638,7 +639,7 @@ C
       IF (IFVANI==1) THEN
          FVIAD=NELCUT+NBF+NESCT+NERWL+NESRG+NESMD1
          DO I=1,NFVBAG
-            ALLOCATE(ITAGT(FVDATA(I)%NNTR))
+            call my_alloc(ITAGT, FVDATA(I)%NNTR, "ITAGT")
             DO J=1,FVDATA(I)%NNTR
                ITAGT(J)=0
             ENDDO

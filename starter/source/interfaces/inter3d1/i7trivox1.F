@@ -214,8 +214,10 @@ C=======================================================================
 
 !$OMP MASTER
 
-      allocate( cand_n_size(nthreads+1),cand_e_size(nthreads+1) )
-      allocate( address_cand_n(nthreads+1),address_cand_e(nthreads+1) )
+      call my_alloc(cand_n_size, nthreads+1, "cand_n_size")
+      call my_alloc(cand_e_size, nthreads+1, "cand_e_size")
+      call my_alloc(address_cand_n, nthreads+1, "address_cand_n")
+      call my_alloc(address_cand_e, nthreads+1, "address_cand_e")
       cand_n_size(1:nthreads+1) = 0 
       cand_e_size(1:nthreads+1) = 0
       address_cand_n(1:nthreads+1) = 0 
@@ -560,9 +562,9 @@ c    underestimation of the distance**2 for candidate elimination
 !$OMP SINGLE
       ! ------------
       my_size = cand_n_size(nthreads+1)
-      allocate(my_index(2*my_size))
-      allocate(sort_array(2,my_size))
-      allocate(save_array(2,my_size))
+      call my_alloc(my_index, 2*my_size, "my_index")
+      call my_alloc(sort_array, 2, my_size, "sort_array")
+      call my_alloc(save_array, 2, my_size, "save_array")
       
       my_address = i_stok_old + address_cand_n(1) ! get the address of the first pair of candidate
       sort_array(1,1:my_size) = intbuf_tab%cand_n(my_address+1:my_address+my_size)

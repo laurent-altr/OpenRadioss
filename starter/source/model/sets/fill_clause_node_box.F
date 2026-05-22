@@ -42,6 +42,7 @@ C-----------------------------------------------
       USE MESSAGE_MOD
       USE NAMES_AND_TITLES_MOD , ONLY : NCHARTITLE, NCHARFIELD
       USE SET_MOD , ONLY : SET_ADD
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -70,8 +71,8 @@ C-----------------------------------------------
      .        IB,CLAUSE_OPERATOR 
       INTEGER, DIMENSION(:) , ALLOCATABLE :: B_NDS,RESULT      
 C-----------------------------------------------
-      ALLOCATE(B_NDS(NUMNOD))
-      ALLOCATE(RESULT(NUMNOD))
+      call my_alloc(B_NDS, NUMNOD, "B_NDS")
+      call my_alloc(RESULT, NUMNOD, "RESULT")
 
 !
       ! Tag nodes from boxes
@@ -141,6 +142,7 @@ C-----------------------------------------------
       USE MESSAGE_MOD
       USE NAMES_AND_TITLES_MOD , ONLY : NCHARTITLE, NCHARFIELD
       USE SET_MOD , ONLY : SET_ADD,SET_DELETE
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -184,8 +186,8 @@ C-----------------------------------------------
      *                         BOXNDS, SZ_BOXNDS)
 
       ELSE
-          ALLOCATE(B_NDS(NUMNOD))
-          ALLOCATE(RESULT(NUMNOD))
+          call my_alloc(B_NDS, NUMNOD, "B_NDS")
+          call my_alloc(RESULT, NUMNOD, "RESULT")
 
 
           DO I=1,NB_BOX_OF_BOX

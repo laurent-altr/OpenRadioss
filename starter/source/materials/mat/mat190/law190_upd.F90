@@ -217,15 +217,15 @@
             ener = (x_i-x_ii)*(y_i + y_ii)/two
             y_ener(kk) = y_ener(kk+1) + ener
           end do
-          allocate(table_mat(2)%x(ndim)          ,stat=stat)
+          allocate(table_mat(2)%x(ndim), stat=stat)
           call my_alloc(table_mat(2)%x(1)%values, npt, "table_mat(2)%x(1)%values", stat=stat)
           call my_alloc(table_mat(2)%y1d, npt, "table_mat(2)%y1d", stat=stat)
           do i = 1,npt
             table_mat(2)%x(1)%values(i) = x_ener(i)
             table_mat(2)%y1d(i) = y_ener(i)
           end do
-          call my_dealloc(x_ener, "x_ener")
-          call my_dealloc(y_ener, "y_ener")
+          call my_dealloc(x_ener)
+          call my_dealloc(y_ener)
 !
         end subroutine law190_upd
       end module law190_upd_mod

@@ -62,6 +62,7 @@ C-----------------------------------------------
       USE READER_OLD_MOD , ONLY : LINE
       USE USER_ID_MOD , ONLY : ID_LIMIT
       use element_mod , only : nixp
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -112,16 +113,16 @@ C=======================================================================
 C--------------------------------------------------
 C      ALLOCS & INITS
 C--------------------------------------------------
-      ALLOCATE (SUB_BEAM(NUMELP),STAT=stat)
+      call my_alloc(SUB_BEAM, NUMELP, "SUB_BEAM", stat=stat)
       IF (STAT /= 0) CALL ANCMSG(MSGID=268,ANMODE=ANINFO,MSGTYPE=MSGERROR,C1='SUB_BEAM')
       SUB_BEAM(1:NUMELP) = 0
-      ALLOCATE (VX(NUMELP),STAT=stat)
+      call my_alloc(VX, NUMELP, "VX", stat=stat)
       IF (STAT /= 0) CALL ANCMSG(MSGID=268,ANMODE=ANINFO,MSGTYPE=MSGERROR,C1='VX')
       VX(1:NUMELP) = ZERO
-      ALLOCATE (VY(NUMELP),STAT=stat)
+      call my_alloc(VY, NUMELP, "VY", stat=stat)
       IF (STAT /= 0) CALL ANCMSG(MSGID=268,ANMODE=ANINFO,MSGTYPE=MSGERROR,C1='VY')
       VY(1:NUMELP) = ZERO
-      ALLOCATE (VZ(NUMELP),STAT=stat)
+      call my_alloc(VZ, NUMELP, "VZ", stat=stat)
       IF (STAT /= 0) CALL ANCMSG(MSGID=268,ANMODE=ANINFO,MSGTYPE=MSGERROR,C1='VZ')
       VZ(1:NUMELP) = ZERO
       INDEX_PART = 1

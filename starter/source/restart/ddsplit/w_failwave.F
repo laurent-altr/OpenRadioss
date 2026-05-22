@@ -94,7 +94,7 @@ c
         LEN_AM = LEN_AM + NUMNOD_L
 c
         LEN = NNOD_L*NDDL*SIZE + NNOD_L
-        ALLOCATE( RBUF(LEN) )
+        call my_alloc(RBUF, LEN, "RBUF")
         RBUF(:) = 0
         CALL WRITE_I_C(RBUF,LEN)
         LEN_AM = LEN_AM + LEN

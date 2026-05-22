@@ -34,6 +34,7 @@ C
      *                      NUMNOD_L,CEL,CEP,PROC)
       USE PLYXFEM_MOD
       use element_mod , only : nixc
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -58,7 +59,8 @@ C-----------------------------------------------
       EXTERNAL GET_PLY_NOD
 C-----------------------------------------------
 !     1d array
-      ALLOCATE( NODTAG(NUMNOD_L),ELEMTAG(NUMELC_L) )
+      call my_alloc(NODTAG, NUMNOD_L, "NODTAG")
+      call my_alloc(ELEMTAG, NUMELC_L, "ELEMTAG")
       ALLOCATE( PLYSIZNG(NPLYMAX) )
 ! ----------------------------------
 
@@ -99,7 +101,9 @@ C L engine
 
 C we prepare the tables to send
         ELPL = 0
-        ALLOCATE ( ELNUM(ELSZ_L),ELEMIPT(ELSZ_L),ELEMXFEMID(ELSZ_L) )
+        call my_alloc(ELNUM, ELSZ_L, "ELNUM")
+        call my_alloc(ELEMIPT, ELSZ_L, "ELEMIPT")
+        call my_alloc(ELEMXFEMID, ELSZ_L, "ELEMXFEMID")
 
 C Local tables elements
         DO I=1,NUMELC_L
@@ -114,7 +118,8 @@ C
         ENDDO
 C XFEM local node paintings
         NCOUNT = 0
-        ALLOCATE ( NODNUM(NDSZ_L), NODEXTN(NDSZ_L) )
+        call my_alloc(NODNUM, NDSZ_L, "NODNUM")
+        call my_alloc(NODEXTN, NDSZ_L, "NODEXTN")
         DO I=1,NUMNOD_L
           IF (NODTAG(I) > 0) THEN
             NCOUNT = NCOUNT + 1

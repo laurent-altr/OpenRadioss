@@ -74,6 +74,7 @@ C-----------------------------------------------
       USE NAMES_AND_TITLES_MOD , ONLY : NCHARTITLE, NCHARKEY, NCHARFIELD
       USE SENSOR_MOD
       USE INIVEL_MOD 
+      use my_alloc_mod
 C----------------------------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -571,7 +572,7 @@ C
                  ELSEIF(ITYPE == 4) THEN
 C--                 /INIVEL/AXIS -> tag of main nodes of rbody
                     IF ((.NOT.ALLOCATED(TAGNO_RBY)).AND.(NRBODY > 0)) THEN
-                      ALLOCATE(TAGNO_RBY(NUMNOD))
+                      call my_alloc(TAGNO_RBY, NUMNOD, "TAGNO_RBY")
                       TAGNO_RBY(1:NUMNOD) = 0
                       DO NRB=1,NRBODY
                         TAGNO_RBY(RBY_MSN(2,NRB)) = NRB

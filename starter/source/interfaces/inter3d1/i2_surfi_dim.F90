@@ -134,9 +134,9 @@
           end do
           nsn = nsn + ns
           nmn = nsn
-          call my_dealloc(itags1, "itags1")
-          call my_dealloc(itags2, "itags2")
-          call my_dealloc(itagn, "itagn")
+          call my_dealloc(itags1)
+          call my_dealloc(itags2)
+          call my_dealloc(itagn)
 
 ! ----------------------------------------------------------------------------------------------------------------------
         end subroutine i2_surfi_dim

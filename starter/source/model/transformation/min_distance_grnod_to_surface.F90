@@ -297,8 +297,8 @@
             end do
           end if
 
-          if(allocated(xn)) call my_dealloc(xn, "xn")
-          if(allocated(xsn)) call my_dealloc(xsn, "xsn")
+          if(allocated(xn)) call my_dealloc(xn)
+          if(allocated(xsn)) call my_dealloc(xsn)
 ! ----------------------------------------------------------------------------------------------------------------------
         end subroutine min_dist_grnod_to_surface
       end module min_dist_grnod_to_surface_mod

@@ -109,7 +109,7 @@
             dx(1:3) = norm_nod(1:3,n)*shoset_n(n)
             xyz(1:3,n) = xyz(1:3,n) + dx(1:3)
           end do
-          call my_dealloc(norm_nod, "norm_nod")
+          call my_dealloc(norm_nod)
 !
         end subroutine sh_offset_nproj
       end module sh_offset_nproj_mod

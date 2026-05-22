@@ -208,12 +208,12 @@
             end do
           end if
 !
-          call my_dealloc(intag, "intag")
-          call my_dealloc(idnneoset, "idnneoset")
-          call my_dealloc(ixnneoset, "ixnneoset")
-          call my_dealloc(shoset_n, "shoset_n")
-          call my_dealloc(sh_oset, "sh_oset")
-          call my_dealloc(thk_g, "thk_g")
+          call my_dealloc(intag)
+          call my_dealloc(idnneoset)
+          call my_dealloc(ixnneoset)
+          call my_dealloc(shoset_n)
+          call my_dealloc(sh_oset)
+          call my_dealloc(thk_g)
 !-----------
         end subroutine shell_offsetp
       end module shell_offsetp_mod

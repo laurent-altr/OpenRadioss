@@ -44,6 +44,7 @@ C-----------------------------------------------
       USE SPLIT_CFD_MOD
       USE ALE_CONNECTIVITY_MOD
       use element_mod , only : nixs,nixq,nixtg
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -84,9 +85,11 @@ C-----------------------------------------------
       INTEGER IAD, IAD1, LGTH
 C-----------------------------------------------
 !     allocate 1d array
-      ALLOCATE( TAGE(NUMEL),TAG(NUMNOD) )
+      call my_alloc(TAGE, NUMEL, "TAGE")
+      call my_alloc(TAG, NUMNOD, "TAG")
 !     allocate 2d array
-      ALLOCATE( TAGE_L(NSPMD,NUMEL_L),TAG_L(NSPMD,NUMNOD_L) )
+      call my_alloc(TAGE_L, NSPMD, NUMEL_L, "TAGE_L")
+      call my_alloc(TAG_L, NSPMD, NUMNOD_L, "TAG_L")
       ALLOCATE( TAGS(NSPMD,SEGINDX) )
 ! ------------------------------------
 C

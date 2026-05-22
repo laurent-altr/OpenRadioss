@@ -668,7 +668,7 @@ C-----------------------------------------------------------------------
        DRAD = INTBUF_TAB(NIN)%VARIABLES(32)
 
        IF(INTBUF_TAB(NIN)%S_NIGE/=0) THEN
-            ALLOCATE(XE(3*(NUMNOD+INTBUF_TAB(NIN)%S_NIGE)))
+            call my_alloc(XE, 3*(NUMNOD+INTBUF_TAB(NIN)%S_NIGE), "XE")
             XE(1:3*NUMNOD) = X(1:3*NUMNOD)
             XE(3*NUMNOD+1:3*(NUMNOD+INTBUF_TAB(NIN)%S_NIGE)) = INTBUF_TAB(NIN)%XIGE(1:3*INTBUF_TAB(NIN)%S_NIGE)
             PTR_X(3*NUMNOD+1:3*(NUMNOD+INTBUF_TAB(NIN)%S_NIGE)) => XE(3*NUMNOD+1:3*(NUMNOD+INTBUF_TAB(NIN)%S_NIGE))
@@ -1104,7 +1104,9 @@ C
 C
        IF (IREMNODE == 1) THEN
 C
-          ALLOCATE(INOD2LIN(NUMNOD+1),TAGSECND(NUMNOD),NOD2LIN(2*NRTM))
+          call my_alloc(INOD2LIN, NUMNOD+1, "INOD2LIN")
+          call my_alloc(TAGSECND, NUMNOD, "TAGSECND")
+          call my_alloc(NOD2LIN, 2*NRTM, "NOD2LIN")
           I_START = 1
           I_MEM_REM = 0
           DO WHILE (I_START < NRTM)
@@ -1484,7 +1486,7 @@ C-----------------------------------------------------------------------
 C
 C      NODAL AND ELEMENTARY STIFFNESS
 C----  INTBUF_TAB(NIN)%CRIT V/A is used temporarily for sorting and Pen-max
-       ALLOCATE(IPARTNS(NSN))
+       call my_alloc(IPARTNS, NSN, "IPARTNS")
        IPARTNS(1:NSN)=0
        CALL I24STI3(
      1 X         ,INTBUF_TAB(NIN)%IRECTM,INTBUF_TAB(NIN)%STFM  ,IXS       ,PM ,
@@ -1670,7 +1672,7 @@ C---------PENE_OLD(5,NI)=ZERO
        DO I=1,NSN
         INTBUF_TAB(NIN)%PENE_OLD(1+5*(I-1)+4)=ZERO
        END DO
-       ALLOCATE(PENMIN(NSN))
+       call my_alloc(PENMIN, NSN, "PENMIN")
        PENMIN=EP10
        IWPENE0 = 0
        DO NG=1,NGROUS
@@ -1884,7 +1886,7 @@ C      IPEN0 = IPARI(54,NIN)
           ALLOCATE(IPARTSM(NRTM)) ! saving parts id of main segments :friction mode + mvoisin research
           IPARTSM(1:NRTM)=0
        ELSE
-          ALLOCATE(IPARTSM(0))
+          call my_alloc(IPARTSM, 0, "IPARTSM")
        ENDIF
 
        IF(NRTM >0) THEN
@@ -2060,7 +2062,12 @@ C
 C
         IF (IREMNODE_EDG == 1) THEN
 C
-          ALLOCATE(INOD2LIN(NUMNOD+1),TAGSECND(NUMNOD),NOD2LIN(2*NEDGE),PERM(NEDGE),PERMINV(NEDGE),GAP_MAXNEIGH(NEDGE))
+          call my_alloc(INOD2LIN, NUMNOD+1, "INOD2LIN")
+          call my_alloc(TAGSECND, NUMNOD, "TAGSECND")
+          call my_alloc(NOD2LIN, 2*NEDGE, "NOD2LIN")
+          call my_alloc(PERM, NEDGE, "PERM")
+          call my_alloc(PERMINV, NEDGE, "PERMINV")
+          call my_alloc(GAP_MAXNEIGH, NEDGE, "GAP_MAXNEIGH")
           I_START = 1
           I_MEM_REM = 0
           I_FIN = 0

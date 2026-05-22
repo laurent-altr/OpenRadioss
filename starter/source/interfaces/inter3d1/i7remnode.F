@@ -80,10 +80,18 @@ C-----------------------------------------------
      .        DIST1,GAPV,GAPSECND,GAP_S_L_TMP
 C-----------------------------------------------
 C
-      ALLOCATE(KNOD2SEG(NUMNOD+1),NOD2SEG(4*NRTM),NODDEL(NUMNOD),
-     .         TAGNOD(NUMNOD),ID_NOD(NUMNOD),NOD2EXPAND(NUMNOD),ITAGSEG(NRTM))
-      ALLOCATE(DIST1(NUMNOD),GAPV(NUMNOD),TAGSECND(NUMNOD),
-     .         GAPSECND(NUMNOD),GAP_S_L_TMP(NUMNOD))
+      call my_alloc(KNOD2SEG, NUMNOD+1, "KNOD2SEG")
+      call my_alloc(NOD2SEG, 4*NRTM, "NOD2SEG")
+      call my_alloc(NODDEL, NUMNOD, "NODDEL")
+      call my_alloc(TAGNOD, NUMNOD, "TAGNOD")
+      call my_alloc(ID_NOD, NUMNOD, "ID_NOD")
+      call my_alloc(NOD2EXPAND, NUMNOD, "NOD2EXPAND")
+      call my_alloc(ITAGSEG, NRTM, "ITAGSEG")
+      call my_alloc(DIST1, NUMNOD, "DIST1")
+      call my_alloc(GAPV, NUMNOD, "GAPV")
+      call my_alloc(TAGSECND, NUMNOD, "TAGSECND")
+      call my_alloc(GAPSECND, NUMNOD, "GAPSECND")
+      call my_alloc(GAP_S_L_TMP, NUMNOD, "GAP_S_L_TMP")
 C
       KNOD2SEG(1:NUMNOD+1) = 0
       TAGSECND (1:NUMNOD)   = 0
@@ -453,8 +461,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C----like Irem_gap of int7, creat list of SECONDARY nodes to be removed per M_seg
 C---------IFLAG=0 : DIM
-      ALLOCATE(TAGN(NUMNOD))
-C-----
+      call my_alloc(TAGN, NUMNOD, "TAGN")
        DO N=1,NINTER
         NTY=IPARI(7,N)
         NSN   =IPARI(5,N)
@@ -471,7 +478,7 @@ C-----
         END DO
         CALL DIM_IEDGN2(NE2,NSNE,INTBUF_TAB(N)%IS2SE,INTBUF_TAB(N)%IRTSE,TAGN)
         IF (NE2==0) CYCLE
-        ALLOCATE(IEDGN2(3,NE2))
+        call my_alloc(IEDGN2, 3, NE2, "IEDGN2")
         CALL IND_IEDGN2(NE2,NSNE,INTBUF_TAB(N)%IS2SE,INTBUF_TAB(N)%IRTSE,TAGN,IEDGN2)
         CALL ADD_NSFIC(NE2,NRTM,NSNE,INTBUF_TAB(N)%IS2SE,NREMOV(N),
      +       INTBUF_TAB(N)%KREMNODE,INTBUF_TAB(N)%REMNODE,IEDGN2,IFLAG)
@@ -771,7 +778,7 @@ C----------only during dimensioning
                 RETURN
         END IF
         IF(TYP25_USE==1) THEN
-                ALLOCATE( TAGNOD(NUMNOD) )
+                call my_alloc(TAGNOD, NUMNOD, "TAGNOD")
                 TAGNOD(1:NUMNOD) = 0
         ENDIF
 C-------tag int2 nodes------ 
@@ -803,9 +810,9 @@ C-------tag int2 nodes------
                 ENDIF
         ENDDO
         IF (I2NODE_SIZE==0) RETURN
-        ALLOCATE(I2NODE(I2NODE_SIZE,3))
-        ALLOCATE(POINTS_I2N(NUMNOD,2))   
-        ALLOCATE(TAGD(NUMNOD))
+        call my_alloc(I2NODE, I2NODE_SIZE, 3, "I2NODE")
+        call my_alloc(POINTS_I2N, NUMNOD, 2, "POINTS_I2N")
+        call my_alloc(TAGD, NUMNOD, "TAGD")
 
         CALL PRE_I2(IPARI  ,INTBUF_TAB ,I2NODE_SIZE, I2NODE,POINTS_I2N)
  
@@ -889,9 +896,9 @@ C---------
                     IF(IDDLEVEL==0.AND.NTY==25.AND.SKIP_TYPE25_EDGE_2_EDGE==1) CYCLE
                     ! type/=25 + SKIP_TYPE25_EDGE_2_EDGE==2 -6> only compute the interface 25 with e2e
                     IF(IDDLEVEL==0.AND.NTY/=25.AND.SKIP_TYPE25_EDGE_2_EDGE==2) CYCLE
-                    ALLOCATE( NBR_INSERT_II(NRTM) )
-                    ALLOCATE( ADRESS_II(NRTM) )
-                    ALLOCATE( KREMNODE_SAVE(NRTM+1) )
+                    call my_alloc(NBR_INSERT_II, NRTM, "NBR_INSERT_II")
+                    call my_alloc(ADRESS_II, NRTM, "ADRESS_II")
+                    call my_alloc(KREMNODE_SAVE, NRTM+1, "KREMNODE_SAVE")
                     NBR_INSERT_II(1:NRTM) = 0
                     ADRESS_II(1:NRTM) = 0
                     KREMNODE_SAVE(1:NRTM+1) = 0
@@ -1271,7 +1278,7 @@ C-----------------------------------------------
 
 !      Compute the size of I2NODE array
 !     Allocate the temporary I2NODE array to I2NODE_SIZE , 3
-      ALLOCATE(I2NODE_LOC(I2NODE_SIZE,3))
+      call my_alloc(I2NODE_LOC, I2NODE_SIZE, 3, "I2NODE_LOC")
       
        COMPTEUR=1
        DO N=1,NINTER
@@ -1336,7 +1343,7 @@ C-----------------------------------------------
 !               | 4 | 5 | 
 !               | 0 | 0 | 
 
-       ALLOCATE( INDEX(2*I2NODE_SIZE) )
+       call my_alloc(INDEX, 2*I2NODE_SIZE, "INDEX")
        DO I=1,2*I2NODE_SIZE
         INDEX(I)=I
        ENDDO
@@ -1451,7 +1458,7 @@ C----like Irem_gap of int7, creat list of SECONDARY nodes to be removed per M_se
        END DO
        IF (IACT==0) RETURN
 C--------- DIM
-      ALLOCATE(TAGN(NUMNOD))
+      call my_alloc(TAGN, NUMNOD, "TAGN")
        DO N=1,NINTER
         NTY=IPARI(7,N)
         NSN   =IPARI(5,N)
@@ -1466,12 +1473,13 @@ C--------- DIM
          END DO
          CALL DIM_PTEDGN(NE2,NSNE,INTBUF_TAB(N)%IS2SE,INTBUF_TAB(N)%IRTSE,TAGN)
          IF (NE2==0) CYCLE
-         ALLOCATE(E2NODE(NE2),PT_E2NODE(NUMNOD,2))
+         call my_alloc(E2NODE, NE2, "E2NODE")
+         call my_alloc(PT_E2NODE, NUMNOD, 2, "PT_E2NODE")
          CALL PRE_I2EDGE(NE2,NSNE,INTBUF_TAB(N)%IS2SE,INTBUF_TAB(N)%IRTSE,TAGN,
      +                   E2NODE,PT_E2NODE)
 C---- dim
          IFLAG = 0
-         ALLOCATE(TAGE(NSNE))
+         call my_alloc(TAGE, NSNE, "TAGE")
          TAGE(1:NSNE)=0
          NNREMEG=0
          CALL ADD_NSFIC1(NRTM,NNREMEG,INTBUF_TAB(N)%KREMNODE,INTBUF_TAB(N)%REMNODE,
@@ -1546,6 +1554,7 @@ C----6---------------------------------------------------------------7---------8
 C----6---------------------------------------------------------------7---------8
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
@@ -1574,7 +1583,7 @@ C-----
 
 !      Compute the size of E2NODE array
 !     Allocate the temporary E2NODE array to I2NODE_SIZE , 2
-      ALLOCATE(E2NODE_LOC(NSIZE,2))
+      call my_alloc(E2NODE_LOC, NSIZE, 2, "E2NODE_LOC")
       
        COMPTEUR=1
       DO I=1,NSNE
@@ -1603,7 +1612,7 @@ C-----
             COMPTEUR = COMPTEUR + 1 
        END IF
       END DO ! I=1,NSNE  
-       ALLOCATE( INDEX(2*NSIZE) )
+       call my_alloc(INDEX, 2*NSIZE, "INDEX")
        DO I=1,2*NSIZE
         INDEX(I)=I
        ENDDO
@@ -1639,6 +1648,7 @@ C----6---------------------------------------------------------------7---------8
 C----6---------------------------------------------------------------7---------8
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
@@ -1681,7 +1691,8 @@ C reset  TAGN(NN) =0
         END DO !II=1,NRTM
        ELSE
 C-------- copy KREMNODE,REMNODE in *_CP and re-build KREMNODE,REMNODE to avoid insert       
-        ALLOCATE(KREMN_CP(NRTM+1),REMN_CP(NREMOV))
+        call my_alloc(KREMN_CP, NRTM+1, "KREMN_CP")
+        call my_alloc(REMN_CP, NREMOV, "REMN_CP")
         KREMN_CP(1:NRTM+1)=KREMNODE(1:NRTM+1)
         REMN_CP(1:NREMOV)=REMNODE(1:NREMOV)
         DO II=1,NRTM

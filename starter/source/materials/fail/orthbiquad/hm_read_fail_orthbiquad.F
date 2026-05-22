@@ -51,6 +51,7 @@ C-----------------------------------------------
       USE SUBMODEL_MOD
       USE HM_OPTION_READ_MOD
       USE NAMES_AND_TITLES_MOD , ONLY : NCHARTITLE
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -402,7 +403,8 @@ c
       ENDDO
 c
       ! Allocation of the A-MATRIX and the Pivot vector
-      ALLOCATE (AMAT(NANGLE,NANGLE),IPIV(NANGLE))
+      call my_alloc(AMAT, NANGLE, NANGLE, "AMAT")
+      call my_alloc(IPIV, NANGLE, "IPIV")
 c
       ! Filling the A-MATRIX
       DO J = 1,NANGLE
@@ -415,8 +417,12 @@ c
       ENDDO
 c
       ! Allocation of factors
-      ALLOCATE(Q_X11(NANGLE),Q_X12(NANGLE),Q_X13(NANGLE),
-     .         Q_X21(NANGLE),Q_X22(NANGLE),Q_X23(NANGLE))
+      call my_alloc(Q_X11, NANGLE, "Q_X11")
+      call my_alloc(Q_X12, NANGLE, "Q_X12")
+      call my_alloc(Q_X13, NANGLE, "Q_X13")
+      call my_alloc(Q_X21, NANGLE, "Q_X21")
+      call my_alloc(Q_X22, NANGLE, "Q_X22")
+      call my_alloc(Q_X23, NANGLE, "Q_X23")
 c
       ! Initialization of tables
       Q_X11(1:NANGLE) = ZERO
@@ -426,15 +432,15 @@ c
       Q_X22(1:NANGLE) = ZERO
       Q_X23(1:NANGLE) = ZERO
       IF (SFLAG == 3) THEN 
-        ALLOCATE(Q_INST(NANGLE))
+        call my_alloc(Q_INST, NANGLE, "Q_INST")
         Q_INST(1:NANGLE) = ZERO
       ENDIF
 c
       ! Filling the B vector with experimental points
       IF (SFLAG == 3) THEN 
-        ALLOCATE (BVEC(NANGLE,7))
+        call my_alloc(BVEC, NANGLE, 7, "BVEC")
       ELSE
-        ALLOCATE (BVEC(NANGLE,6))
+        call my_alloc(BVEC, NANGLE, 6, "BVEC")
       ENDIF
       BVEC(1:NANGLE,1) = X_1(1:NANGLE,1)
       BVEC(1:NANGLE,2) = X_1(1:NANGLE,2)
@@ -501,10 +507,10 @@ C===============================================================================
       FAIL%NMOD    = 0
       FAIL%PTHK    = PTHK
 c            
-      ALLOCATE (FAIL%UPARAM(FAIL%NUPARAM))
-      ALLOCATE (FAIL%IPARAM(FAIL%NIPARAM))
-      ALLOCATE (FAIL%IFUNC (FAIL%NFUNC))
-      ALLOCATE (FAIL%TABLE (FAIL%NTABLE))
+      call my_alloc(FAIL%UPARAM, FAIL%NUPARAM, "FAIL%UPARAM")
+      call my_alloc(FAIL%IPARAM, FAIL%NIPARAM, "FAIL%IPARAM")
+      call my_alloc(FAIL%IFUNC, FAIL%NFUNC, "FAIL%IFUNC")
+      call my_alloc(FAIL%TABLE, FAIL%NTABLE, "FAIL%TABLE")
 c
       FAIL%IFUNC(1:NFUNC) = IFUNC(1:NFUNC)
 c

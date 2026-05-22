@@ -171,7 +171,7 @@
 ! ----------------------------------------------------------------------------------------------------------------------
 
 ! ----------------------------------------------------------------------------------------------------------------------
-          if(allocated(elm_group%solid))call my_dealloc(elm_group%solid, "elm_group%solid")
+          if(allocated(elm_group%solid))call my_dealloc(elm_group%solid)
           call my_alloc(elm_group%solid,numels,2,"elm_group%solid")
           elm_group%solid(:,:) = 0
           numels8a = 0
@@ -190,10 +190,10 @@
 
             call create_element_group(numels,nb_key,elm_group%solid,sort_key,iddlevel)
 
-            call my_dealloc(sort_key, "sort_key")
+            call my_dealloc(sort_key)
           end if
 
-          if(allocated(elm_group%shell))call my_dealloc(elm_group%shell, "elm_group%shell")
+          if(allocated(elm_group%shell))call my_dealloc(elm_group%shell)
           call my_alloc(elm_group%shell,numelc,2,"elm_group%shell")
           elm_group%shell(:,:) = 0
           if(numelc>0) then
@@ -211,10 +211,10 @@
 
             call create_element_group(numelc,nb_key,elm_group%shell,sort_key,iddlevel)
 
-            call my_dealloc(sort_key, "sort_key")
+            call my_dealloc(sort_key)
           end if
 
-          if(allocated(elm_group%shell3n))call my_dealloc(elm_group%shell3n, "elm_group%shell3n")
+          if(allocated(elm_group%shell3n))call my_dealloc(elm_group%shell3n)
           call my_alloc(elm_group%shell3n,numeltg,2,"elm_group%shell3n")
 
           elm_group%shell3n(:,:) = 0
@@ -233,7 +233,7 @@
 
             call create_element_group(numeltg,nb_key,elm_group%shell3n,sort_key,iddlevel)
 
-            call my_dealloc(sort_key, "sort_key")
+            call my_dealloc(sort_key)
           end if
 
 

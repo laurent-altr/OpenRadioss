@@ -63,6 +63,7 @@ C-----------------------------------------------
       USE MATPARAM_DEF_MOD          
       USE ELBUFTAG_MOD
       USE NAMES_AND_TITLES_MOD , ONLY : NCHARTITLE
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -192,7 +193,7 @@ c-----------------------------------------
       MATPARAM%NIPARAM = 1
       MATPARAM%NFUNC   = 0
 !
-      ALLOCATE (MATPARAM%UPARAM(MATPARAM%NUPARAM))
+      call my_alloc(MATPARAM%UPARAM, MATPARAM%NUPARAM, "MATPARAM%UPARAM")
       ALLOCATE (MATPARAM%IPARAM(MATPARAM%NIPARAM))
 c-----------------------------------------
       MATPARAM%IPARAM(1)  = ISENS 

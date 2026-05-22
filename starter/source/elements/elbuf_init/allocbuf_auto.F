@@ -546,84 +546,84 @@ c
               ELBUF_TAB(NG)%GBUF%MU = ZERO 
       ENDIF  ! NPT
 c---
-      ALLOCATE(ELBUF_TAB(NG)%GBUF%FILL(NEL*GBUF%G_FILL),STAT=Stat)
+      call my_alloc(ELBUF_TAB(NG)%GBUF%FILL, NEL*GBUF%G_FILL, "ELBUF_TAB(NG)%GBUF%FILL", stat=Stat)
         ELBUF_TAB(NG)%GBUF%FILL = ONE    
                                                    
 c---
 C 1-D elements (TRUSS, BEAM, SPRING, NSTRAND)
 c---
       IF(IGTYP == 3 .and. ITY == 5) THEN 
-        ALLOCATE (GBUF%DMGSCL(NEL*GBUF%G_DMGSCL)           ,STAT=Stat)
+        call my_alloc(GBUF%DMGSCL, NEL*GBUF%G_DMGSCL, "GBUF%DMGSCL", stat=Stat)
           GBUF%DMGSCL = ONE
       ENDIF 
-      ALLOCATE (GBUF%AREA(NEL*GBUF%G_AREA)               ,STAT=Stat)
+      call my_alloc(GBUF%AREA, NEL*GBUF%G_AREA, "GBUF%AREA", stat=Stat)
         GBUF%AREA = ZERO
-      ALLOCATE (GBUF%SKEW(NEL*GBUF%G_SKEW)               ,STAT=Stat)
+      call my_alloc(GBUF%SKEW, NEL*GBUF%G_SKEW, "GBUF%SKEW", stat=Stat)
         GBUF%SKEW = ZERO
-      ALLOCATE (GBUF%LENGTH(NEL*GBUF%G_LENGTH)           ,STAT=Stat)
+      call my_alloc(GBUF%LENGTH, NEL*GBUF%G_LENGTH, "GBUF%LENGTH", stat=Stat)
         GBUF%LENGTH = ZERO
-      ALLOCATE (GBUF%TOTDEPL(NEL*GBUF%G_TOTDEPL)         ,STAT=Stat)
+      call my_alloc(GBUF%TOTDEPL, NEL*GBUF%G_TOTDEPL, "GBUF%TOTDEPL", stat=Stat)
         GBUF%TOTDEPL = ZERO
-      ALLOCATE (GBUF%TOTROT(NEL*GBUF%G_TOTROT)           ,STAT=Stat)
+      call my_alloc(GBUF%TOTROT, NEL*GBUF%G_TOTROT, "GBUF%TOTROT", stat=Stat)
         GBUF%TOTROT = ZERO
-      ALLOCATE (GBUF%FOREP(NEL*GBUF%G_FOREP)             ,STAT=Stat)
+      call my_alloc(GBUF%FOREP, NEL*GBUF%G_FOREP, "GBUF%FOREP", stat=Stat)
         GBUF%FOREP = ZERO
-      ALLOCATE (GBUF%MOMEP(NEL*GBUF%G_MOMEP)             ,STAT=Stat)
+      call my_alloc(GBUF%MOMEP, NEL*GBUF%G_MOMEP, "GBUF%MOMEP", stat=Stat)
         GBUF%MOMEP = ZERO
-      ALLOCATE (GBUF%DEP_IN_TENS(NEL*GBUF%G_DEP_IN_TENS) ,STAT=Stat)
+      call my_alloc(GBUF%DEP_IN_TENS, NEL*GBUF%G_DEP_IN_TENS, "GBUF%DEP_IN_TENS", stat=Stat)
         GBUF%DEP_IN_TENS = ZERO
-      ALLOCATE (GBUF%DEP_IN_COMP(NEL*GBUF%G_DEP_IN_COMP) ,STAT=Stat)
+      call my_alloc(GBUF%DEP_IN_COMP, NEL*GBUF%G_DEP_IN_COMP, "GBUF%DEP_IN_COMP", stat=Stat)
         GBUF%DEP_IN_COMP = ZERO
-      ALLOCATE (GBUF%ROT_IN_TENS(NEL*GBUF%G_ROT_IN_TENS) ,STAT=Stat)
+      call my_alloc(GBUF%ROT_IN_TENS, NEL*GBUF%G_ROT_IN_TENS, "GBUF%ROT_IN_TENS", stat=Stat)
         GBUF%ROT_IN_TENS = ZERO
-      ALLOCATE (GBUF%ROT_IN_COMP(NEL*GBUF%G_ROT_IN_COMP) ,STAT=Stat)
+      call my_alloc(GBUF%ROT_IN_COMP, NEL*GBUF%G_ROT_IN_COMP, "GBUF%ROT_IN_COMP", stat=Stat)
         GBUF%ROT_IN_COMP = ZERO
-      ALLOCATE (GBUF%POSX(NEL*GBUF%G_POSX)               ,STAT=Stat)
+      call my_alloc(GBUF%POSX, NEL*GBUF%G_POSX, "GBUF%POSX", stat=Stat)
         GBUF%POSX = ZERO
-      ALLOCATE (GBUF%POSY(NEL*GBUF%G_POSY)               ,STAT=Stat)
+      call my_alloc(GBUF%POSY, NEL*GBUF%G_POSY, "GBUF%POSY", stat=Stat)
         GBUF%POSY = ZERO
-      ALLOCATE (GBUF%POSZ(NEL*GBUF%G_POSZ)               ,STAT=Stat)
+      call my_alloc(GBUF%POSZ, NEL*GBUF%G_POSZ, "GBUF%POSZ", stat=Stat)
         GBUF%POSZ = ZERO
-      ALLOCATE (GBUF%POSXX(NEL*GBUF%G_POSXX)             ,STAT=Stat)
+      call my_alloc(GBUF%POSXX, NEL*GBUF%G_POSXX, "GBUF%POSXX", stat=Stat)
         GBUF%POSXX = ZERO
-      ALLOCATE (GBUF%POSYY(NEL*GBUF%G_POSYY)             ,STAT=Stat)
+      call my_alloc(GBUF%POSYY, NEL*GBUF%G_POSYY, "GBUF%POSYY", stat=Stat)
         GBUF%POSYY = ZERO
-      ALLOCATE (GBUF%POSZZ(NEL*GBUF%G_POSZZ)             ,STAT=Stat)
+      call my_alloc(GBUF%POSZZ, NEL*GBUF%G_POSZZ, "GBUF%POSZZ", stat=Stat)
         GBUF%POSZZ = ZERO
-      ALLOCATE (GBUF%YIELD(NEL*GBUF%G_YIELD)             ,STAT=Stat)
+      call my_alloc(GBUF%YIELD, NEL*GBUF%G_YIELD, "GBUF%YIELD", stat=Stat)
         GBUF%YIELD = ZERO
-      ALLOCATE (GBUF%LENGTH_ERR(NEL*GBUF%G_LENGTH_ERR)   ,STAT=Stat)
+      call my_alloc(GBUF%LENGTH_ERR, NEL*GBUF%G_LENGTH_ERR, "GBUF%LENGTH_ERR", stat=Stat)
         GBUF%LENGTH_ERR = ZERO
-      ALLOCATE (GBUF%DV(NEL*GBUF%G_DV)                   ,STAT=Stat)
+      call my_alloc(GBUF%DV, NEL*GBUF%G_DV, "GBUF%DV", stat=Stat)
         GBUF%DV = ZERO
-      ALLOCATE (GBUF%DFS(NEL*GBUF%G_DFS)                 ,STAT=Stat)
+      call my_alloc(GBUF%DFS, NEL*GBUF%G_DFS, "GBUF%DFS", stat=Stat)
         GBUF%DFS = ZERO
-      ALLOCATE (GBUF%SKEW_ERR(NEL*GBUF%G_SKEW_ERR)       ,STAT=Stat)
+      call my_alloc(GBUF%SKEW_ERR, NEL*GBUF%G_SKEW_ERR, "GBUF%SKEW_ERR", stat=Stat)
         GBUF%SKEW_ERR = ZERO
-      ALLOCATE (GBUF%E6(NEL*GBUF%G_E6)                   ,STAT=Stat)
+      call my_alloc(GBUF%E6, NEL*GBUF%G_E6, "GBUF%E6", stat=Stat)
         GBUF%E6 = ZERO
-      ALLOCATE (GBUF%RUPTCRIT(NEL*GBUF%G_RUPTCRIT)       ,STAT=Stat)
+      call my_alloc(GBUF%RUPTCRIT, NEL*GBUF%G_RUPTCRIT, "GBUF%RUPTCRIT", stat=Stat)
         GBUF%RUPTCRIT = ZERO
-      ALLOCATE (GBUF%MASS(NEL*GBUF%G_MASS)               ,STAT=Stat)
+      call my_alloc(GBUF%MASS, NEL*GBUF%G_MASS, "GBUF%MASS", stat=Stat)
         GBUF%MASS = ZERO
-      ALLOCATE (GBUF%V_REPCVT(NEL*GBUF%G_V_REPCVT)       ,STAT=Stat)
+      call my_alloc(GBUF%V_REPCVT, NEL*GBUF%G_V_REPCVT, "GBUF%V_REPCVT", stat=Stat)
         GBUF%V_REPCVT = ZERO
-      ALLOCATE (GBUF%VR_REPCVT(NEL*GBUF%G_VR_REPCVT)     ,STAT=Stat)
+      call my_alloc(GBUF%VR_REPCVT, NEL*GBUF%G_VR_REPCVT, "GBUF%VR_REPCVT", stat=Stat)
         GBUF%VR_REPCVT = ZERO
-      ALLOCATE (GBUF%VAR(NEL*GBUF%G_NUVAR)               ,STAT=Stat)
+      call my_alloc(GBUF%VAR, NEL*GBUF%G_NUVAR, "GBUF%VAR", stat=Stat)
         GBUF%VAR = ZERO
-      ALLOCATE (GBUF%VARN(NEL*GBUF%G_NUVARN)             ,STAT=Stat)
+      call my_alloc(GBUF%VARN, NEL*GBUF%G_NUVARN, "GBUF%VARN", stat=Stat)
         GBUF%VARN = ZERO
-      ALLOCATE (GBUF%DEFINI(NEL*GBUF%G_DEFINI)           ,STAT=Stat)
+      call my_alloc(GBUF%DEFINI, NEL*GBUF%G_DEFINI, "GBUF%DEFINI", stat=Stat)
         GBUF%DEFINI = ZERO
-      ALLOCATE (GBUF%FORINI(NEL*GBUF%G_FORINI)           ,STAT=Stat)
+      call my_alloc(GBUF%FORINI, NEL*GBUF%G_FORINI, "GBUF%FORINI", stat=Stat)
         GBUF%FORINI = ZERO
-      ALLOCATE (GBUF%INIFRIC(NEL*GBUF%G_INIFRIC)         ,STAT=Stat)
+      call my_alloc(GBUF%INIFRIC, NEL*GBUF%G_INIFRIC, "GBUF%INIFRIC", stat=Stat)
         GBUF%INIFRIC = ZERO
 c---
-      ALLOCATE (GBUF%DT_PITER(NEL*GBUF%G_DT_PITER)         ,STAT=Stat)
+      call my_alloc(GBUF%DT_PITER, NEL*GBUF%G_DT_PITER, "GBUF%DT_PITER", stat=Stat)
         GBUF%DT_PITER = ZERO
-      ALLOCATE (GBUF%IDT_TSH(NEL*GBUF%G_IDT_TSH)         ,STAT=Stat)
+      call my_alloc(GBUF%IDT_TSH, NEL*GBUF%G_IDT_TSH, "GBUF%IDT_TSH", stat=Stat)
         GBUF%IDT_TSH = 1
 C --- needed for batoz shell and /heat/mat 
       IF (NPG == 1) THEN
@@ -633,51 +633,51 @@ C --- needed for batoz shell and /heat/mat
         ELBUF_TAB(NG)%GBUF%TEMPG = ZERO  
       ENDIF
 C
-      ALLOCATE (GBUF%SKEW_ID(NEL*GBUF%G_SKEW_ID)                 ,STAT=Stat)
+      call my_alloc(GBUF%SKEW_ID, NEL*GBUF%G_SKEW_ID, "GBUF%SKEW_ID", stat=Stat)
         GBUF%SKEW_ID = 0
-      ALLOCATE (GBUF%YIELD_IN_COMP(NEL*GBUF%G_YIELD_IN_COMP)     ,STAT=Stat)
+      call my_alloc(GBUF%YIELD_IN_COMP, NEL*GBUF%G_YIELD_IN_COMP, "GBUF%YIELD_IN_COMP", stat=Stat)
         GBUF%YIELD_IN_COMP = ZERO
-      ALLOCATE (GBUF%XXOLD_IN_COMP(NEL*GBUF%G_XXOLD_IN_COMP)     ,STAT=Stat)
+      call my_alloc(GBUF%XXOLD_IN_COMP, NEL*GBUF%G_XXOLD_IN_COMP, "GBUF%XXOLD_IN_COMP", stat=Stat)
         GBUF%XXOLD_IN_COMP = ZERO
 c---
 C seatbelt elements
 c---
-      ALLOCATE (GBUF%SLIPRING_ID(NEL*GBUF%G_SLIPRING_ID)             ,STAT=Stat)
+      call my_alloc(GBUF%SLIPRING_ID, NEL*GBUF%G_SLIPRING_ID, "GBUF%SLIPRING_ID", stat=Stat)
         GBUF%SLIPRING_ID = 0
-      ALLOCATE (GBUF%SLIPRING_FRAM_ID(NEL*GBUF%G_SLIPRING_FRAM_ID)    ,STAT=Stat)
+      call my_alloc(GBUF%SLIPRING_FRAM_ID, NEL*GBUF%G_SLIPRING_FRAM_ID, "GBUF%SLIPRING_FRAM_ID", stat=Stat)
         GBUF%SLIPRING_FRAM_ID = 0
-      ALLOCATE (GBUF%SLIPRING_STRAND(NEL*GBUF%G_SLIPRING_STRAND)     ,STAT=Stat)
+      call my_alloc(GBUF%SLIPRING_STRAND, NEL*GBUF%G_SLIPRING_STRAND, "GBUF%SLIPRING_STRAND", stat=Stat)
         GBUF%SLIPRING_STRAND = 0
-      ALLOCATE (GBUF%RETRACTOR_ID(NEL*GBUF%G_RETRACTOR_ID)           ,STAT=Stat)
+      call my_alloc(GBUF%RETRACTOR_ID, NEL*GBUF%G_RETRACTOR_ID, "GBUF%RETRACTOR_ID", stat=Stat)
         GBUF%RETRACTOR_ID = 0
-      ALLOCATE (GBUF%RINGSLIP(NEL*GBUF%G_RINGSLIP)                   ,STAT=Stat)
+      call my_alloc(GBUF%RINGSLIP, NEL*GBUF%G_RINGSLIP, "GBUF%RINGSLIP", stat=Stat)
         GBUF%RINGSLIP = ZERO
-      ALLOCATE (GBUF%ADD_NODE(NEL*GBUF%G_ADD_NODE)                   ,STAT=Stat)
+      call my_alloc(GBUF%ADD_NODE, NEL*GBUF%G_ADD_NODE, "GBUF%ADD_NODE", stat=Stat)
         GBUF%ADD_NODE = 0
-      ALLOCATE (GBUF%UPDATE(NEL*GBUF%G_UPDATE)                       ,STAT=Stat)
+      call my_alloc(GBUF%UPDATE, NEL*GBUF%G_UPDATE, "GBUF%UPDATE", stat=Stat)
         GBUF%UPDATE = 0
-      ALLOCATE (GBUF%FRAM_FACTOR(NEL*GBUF%G_FRAM_FACTOR)             ,STAT=Stat)
+      call my_alloc(GBUF%FRAM_FACTOR, NEL*GBUF%G_FRAM_FACTOR, "GBUF%FRAM_FACTOR", stat=Stat)
         GBUF%FRAM_FACTOR = ZERO  
-      ALLOCATE (GBUF%INTVAR(NEL*GBUF%G_INTVAR)                       ,STAT=Stat)
+      call my_alloc(GBUF%INTVAR, NEL*GBUF%G_INTVAR, "GBUF%INTVAR", stat=Stat)
         GBUF%INTVAR = ZERO          
 c---
 C ---H3D/TMAX in BUFLEN         
 c---
-      ALLOCATE (GBUF%TM_YIELD(NEL*GBUF%G_TM_YIELD)           ,STAT=Stat)
+      call my_alloc(GBUF%TM_YIELD, NEL*GBUF%G_TM_YIELD, "GBUF%TM_YIELD", stat=Stat)
                 GBUF%TM_YIELD = ZERO
-      ALLOCATE (GBUF%TM_SEQ(NEL*GBUF%G_TM_SEQ)               ,STAT=Stat)
+      call my_alloc(GBUF%TM_SEQ, NEL*GBUF%G_TM_SEQ, "GBUF%TM_SEQ", stat=Stat)
                 GBUF%TM_SEQ = ZERO
-      ALLOCATE (GBUF%TM_EINT(NEL*GBUF%G_TM_EINT)             ,STAT=Stat)
+      call my_alloc(GBUF%TM_EINT, NEL*GBUF%G_TM_EINT, "GBUF%TM_EINT", stat=Stat)
                 GBUF%TM_EINT = ZERO
-      ALLOCATE (GBUF%TM_DMG(NEL*GBUF%G_TM_DMG)               ,STAT=Stat)
+      call my_alloc(GBUF%TM_DMG, NEL*GBUF%G_TM_DMG, "GBUF%TM_DMG", stat=Stat)
                 GBUF%TM_DMG = ZERO
-      ALLOCATE (GBUF%TM_SIG1(NEL*GBUF%G_TM_SIG)               ,STAT=Stat)
+      call my_alloc(GBUF%TM_SIG1, NEL*GBUF%G_TM_SIG, "GBUF%TM_SIG1", stat=Stat)
                 GBUF%TM_SIG1 = ZERO  
-      ALLOCATE (GBUF%TM_STRA1(NEL*GBUF%G_TM_STRA)             ,STAT=Stat)
+      call my_alloc(GBUF%TM_STRA1, NEL*GBUF%G_TM_STRA, "GBUF%TM_STRA1", stat=Stat)
                 GBUF%TM_STRA1 = ZERO
-      ALLOCATE (GBUF%TM_SIG3(NEL*GBUF%G_TM_SIG)               ,STAT=Stat)
+      call my_alloc(GBUF%TM_SIG3, NEL*GBUF%G_TM_SIG, "GBUF%TM_SIG3", stat=Stat)
                 GBUF%TM_SIG3 = ZERO  
-      ALLOCATE (GBUF%TM_STRA3(NEL*GBUF%G_TM_STRA)             ,STAT=Stat)
+      call my_alloc(GBUF%TM_STRA3, NEL*GBUF%G_TM_STRA, "GBUF%TM_STRA3", stat=Stat)
                 GBUF%TM_STRA3 = ZERO
                 
       IF (STAT /= 0) THEN                         

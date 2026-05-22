@@ -110,6 +110,7 @@ C-----------------------------------------------
       USE TABLE_MOD
       USE NAMES_AND_TITLES_MOD , ONLY : NCHARTITLE
       USE LAW92_NLSQF_MOD, ONLY : LAW92_NLSQF
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -153,8 +154,8 @@ C====================================================================
        NOGD=(IC2-IC1)/2
        NDATA=NOGD
 
-       ALLOCATE (STRETCH(NOGD))                              
-       ALLOCATE (STRESS(NOGD))                               
+       call my_alloc(STRETCH, NOGD, "STRETCH")
+       call my_alloc(STRESS, NOGD, "STRESS")
 
        AVE_SLOPE = ZERO
        JJ=0                                                  

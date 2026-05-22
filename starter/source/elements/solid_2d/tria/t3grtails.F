@@ -146,16 +146,16 @@ C-----------------------------------------------
       INDEX2(1:NUMELTG)=PERMUTATION%TRIANGLE(1:NUMELTG)
 
       IF(NADMESH/=0)THEN
-        ALLOCATE( ISTOR(KSH3TREE+1,NUMELTG) )
+        call my_alloc(ISTOR, KSH3TREE+1, NUMELTG, "ISTOR")
       ELSE
-        ALLOCATE( ISTOR(0,0) )
+        call my_alloc(ISTOR, 0, 0, "ISTOR")
       ENDIF
 C
       IF (NPERTURB > 0) THEN
-        ALLOCATE(XNUM_RNOISE(NPERTURB,NUMELTG),STAT=stat)
+        call my_alloc(XNUM_RNOISE, NPERTURB, NUMELTG, "XNUM_RNOISE", stat=stat)
         IF (STAT /= 0) CALL ANCMSG(MSGID=268,ANMODE=ANINFO,MSGTYPE=MSGERROR,C1='XNUM_RNOISE')
       ELSE
-        ALLOCATE(XNUM_RNOISE(0,0))
+        call my_alloc(XNUM_RNOISE, 0, 0, "XNUM_RNOISE")
       ENDIF
 C
       IPTUN = 1
@@ -183,29 +183,29 @@ C
       DO N=1,ND
         NEL = EADD(N+1)-EADD(N)
         IF (NDRAPE > 0 .AND. NUMELTG_DRAPE > 0) THEN
-         ALLOCATE(XNUM_DRAPE(NEL))                                                  
-         ALLOCATE(XNUM_DRAPEG%INDX(NEL))
+         allocate(XNUM_DRAPE(NEL))
+         call my_alloc(XNUM_DRAPEG%INDX, NEL, "XNUM_DRAPEG%INDX")
          XNUM_DRAPEG%INDX = 0                                             
          DO I =1, NEL
            IEL0 = DRAPEG%INDX(NUMELC + I + NFT)
            IF(IEL0 == 0) CYCLE 
            NPT = DRAPE(IEL0)%NPLY 
            NPT_DRP = DRAPE(IEL0)%NPLY_DRAPE                                               
-           ALLOCATE(XNUM_DRAPE(I)%INDX_PLY(NPT_DRP))                                              
-           ALLOCATE(XNUM_DRAPE(I)%DRAPE_PLY(NPT_DRP))        
+           call my_alloc(XNUM_DRAPE(I)%INDX_PLY, NPT_DRP, "XNUM_DRAPE(I)%INDX_PLY")
+           allocate(XNUM_DRAPE(I)%DRAPE_PLY(NPT_DRP))
             XNUM_DRAPE(I)%INDX_PLY= 0                                                       
            DO J = 1,NPT_DRP                            
                 NSLICE = DRAPE(IEL0)%DRAPE_PLY(J)%NSLICE    
-                ALLOCATE(XNUM_DRAPE(I)%DRAPE_PLY(J)%RDRAPE(NSLICE,2))    
-                ALLOCATE(XNUM_DRAPE(I)%DRAPE_PLY(J)%IDRAPE(NSLICE,2))
+                call my_alloc(XNUM_DRAPE(I)%DRAPE_PLY(J)%RDRAPE, NSLICE, 2, "XNUM_DRAPE(I)%DRAPE_PLY(J)%RDRAPE")
+                call my_alloc(XNUM_DRAPE(I)%DRAPE_PLY(J)%IDRAPE, NSLICE, 2, "XNUM_DRAPE(I)%DRAPE_PLY(J)%IDRAPE")
                 XNUM_DRAPE(I)%DRAPE_PLY(J)%RDRAPE = 0             
                 XNUM_DRAPE(I)%DRAPE_PLY(J)%IDRAPE = 0  
            ENDDO                                                                           
          ENDDO      
         ELSE
-            ALLOCATE( XNUM_DRAPE(0) )
+            allocate(XNUM_DRAPE(0))
         ENDIF
-        ALLOCATE(INUM_WORKSH(3,NEL))
+        call my_alloc(INUM_WORKSH, 3, NEL, "INUM_WORKSH")
 
         IF(NDRAPE > 0 .AND. NUMELTG_DRAPE > 0 ) THEN
          DO I = 1, NEL
@@ -281,7 +281,7 @@ C
         ENDIF 
 
         IF(ABS(ISIGI) == 3  .OR. ABS(ISIGI) == 4 .OR. ABS(ISIGI) == 5) THEN
-          ALLOCATE(INUM_PTSH3N(NEL))
+          call my_alloc(INUM_PTSH3N, NEL, "INUM_PTSH3N")
           DO I = 1, NEL
             INUM_PTSH3N(I)=PTSH3N(NFT+I)
           ENDDO
@@ -328,18 +328,19 @@ C
             NPT = XNUM_DRAPE(INDEX(I))%NPLY ! number of ply 
             DRAPE(IEL)%NPLY = NPT                                    
             DRAPEG%INDX(NUMELC + NFT + I)= IEL
-            ALLOCATE(DRAPE(IEL)%INDX_PLY(NPT))                                 
+            call my_alloc(DRAPE(IEL)%INDX_PLY, NPT, "DRAPE(IEL)%INDX_PLY")
             DRAPE(IEL)%INDX_PLY(1:NPT) =  XNUM_DRAPE(INDEX(I))%INDX_PLY(1:NPT)
             NPT = XNUM_DRAPE(INDEX(I))%NPLY_DRAPE       ! NPT_DRP                                   
             DRAPE(IEL)%NPLY_DRAPE = NPT 
             DRAPE(IEL)%THICK      = XNUM_DRAPE(INDEX(I))%THICK 
-            ALLOCATE(DRAPE(IEL)%INDX_PLY(NPT))                                                        
+            call my_alloc(DRAPE(IEL)%INDX_PLY, NPT, "DRAPE(IEL)%INDX_PLY")
             DO JJ = 1, NPT                                                                   
               DRAPE_PLY => DRAPE(IEL)%DRAPE_PLY(JJ)                                           
               NSLICE = XNUM_DRAPE(INDEX(I))%DRAPE_PLY(JJ)%NSLICE                              
               DRAPE_PLY%NSLICE = NSLICE                                                      
               DRAPE_PLY%IPID =  XNUM_DRAPE(INDEX(I))%DRAPE_PLY(JJ)%IPID   
-              ALLOCATE(DRAPE_PLY%IDRAPE(NSLICE,2), DRAPE_PLY%RDRAPE(NSLICE,2))
+              call my_alloc(DRAPE_PLY%IDRAPE, NSLICE, 2, "DRAPE_PLY%IDRAPE")
+              call my_alloc(DRAPE_PLY%RDRAPE, NSLICE, 2, "DRAPE_PLY%RDRAPE")
               DRAPE_PLY%IDRAPE = 0
               DRAPE_PLY%RDRAPE = ZERO                   
               DO KK = 1,NSLICE                                                                 

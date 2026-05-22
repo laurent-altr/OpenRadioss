@@ -649,6 +649,7 @@ C   M o d u l e s
 C-----------------------------------------------
       USE R2R_MOD
       USE SUBMODEL_MOD , ONLY : NSUBMOD
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -669,7 +670,7 @@ C-----------------------------------------------
 C=======================================================================
 C-- Split of NOM_OPT
 
-        ALLOCATE (NOM_OPT_TEMP(SNOM_OPT_OLD))
+        call my_alloc(NOM_OPT_TEMP, SNOM_OPT_OLD, "NOM_OPT_TEMP")
         DO I=1,SNOM_OPT_OLD
           NOM_OPT_TEMP(I) = NOM_OPT(I)
           NOM_OPT(I) = 0

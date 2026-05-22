@@ -139,21 +139,21 @@ c
           ENDDO  
 c
           ! Allocation of the local ADDCNE_L table
-          ALLOCATE(ADDCNE_L(NNOD_L + 1))
+          call my_alloc(ADDCNE_L, NNOD_L + 1, "ADDCNE_L")
           ADDCNE_L(1:NNOD_L + 1) = 0
-          ALLOCATE(PROCNE_L(LCNENL_L))
+          call my_alloc(PROCNE_L, LCNENL_L, "PROCNE_L")
           PROCNE_L(1:LCNENL_L)   = 0
-          ALLOCATE(IADS(8,NUMELS_L))
+          call my_alloc(IADS, 8, NUMELS_L, "IADS")
           IADS(1:8,1:NUMELS_L)   = 0
-          ALLOCATE(IADC(4,NUMELC_L))
+          call my_alloc(IADC, 4, NUMELC_L, "IADC")
           IADC(1:4,1:NUMELC_L)   = 0
-          ALLOCATE(IADTG(3,NUMELTG_L))
+          call my_alloc(IADTG, 3, NUMELTG_L, "IADTG")
           IADTG(1:3,1:NUMELTG_L) = 0
-          ALLOCATE(SOLTAG(NUMELS))
+          call my_alloc(SOLTAG, NUMELS, "SOLTAG")
           SOLTAG(1:NUMELS)       = 0
-          ALLOCATE(SHTAG(NUMELC))
+          call my_alloc(SHTAG, NUMELC, "SHTAG")
           SHTAG(1:NUMELC)        = 0
-          ALLOCATE(TGTAG(NUMELTG))
+          call my_alloc(TGTAG, NUMELTG, "TGTAG")
           TGTAG(1:NUMELTG)       = 0
 c
           ! Filling the ADDCNE_L table

@@ -81,7 +81,7 @@ C-----------------------------------------------
         NUMGEO0 = NUMGEO
 
 C---------filling of array PM_R2R--------------------------------C
-        ALLOCATE (PM_R2R(NUMMAT+NPART+1),STAT=stat)
+        call my_alloc(PM_R2R, NUMMAT+NPART+1, "PM_R2R", stat=stat)
         IF (STAT /= 0) CALL ANCMSG(MSGID=268,ANMODE=ANINFO,MSGTYPE=MSGERROR,C1='PM_R2R')
         DO I=1,NUMMAT
           PM_R2R(I) = PM(NPROPM*(I-1)+20)
@@ -161,11 +161,11 @@ C---------Allocation of temporary arrays ----------------------C
 
         NB_PART = COMPT
 
-        ALLOCATE (IPM_TEMP(NPROPMI,NUMMAT+NB_PART),STAT=stat)
+        call my_alloc(IPM_TEMP, NPROPMI, NUMMAT+NB_PART, "IPM_TEMP", stat=stat)
         IF (STAT /= 0) CALL ANCMSG(MSGID=268,ANMODE=ANINFO,MSGTYPE=MSGERROR,C1='IPM_TEMP')
-        ALLOCATE (PM_TEMP(NPROPM,NUMMAT+NB_PART),STAT=stat)
+        call my_alloc(PM_TEMP, NPROPM, NUMMAT+NB_PART, "PM_TEMP", stat=stat)
         IF (STAT /= 0) CALL ANCMSG(MSGID=268,ANMODE=ANINFO,MSGTYPE=MSGERROR,C1='PM_TEMP')
-        ALLOCATE (DDW_TEMP(2,2,NUMMAT+NB_PART+1),STAT=stat)
+        call my_alloc(DDW_TEMP, 2, 2, NUMMAT+NB_PART+1, "DDW_TEMP", stat=stat)
         IF (STAT /= 0) CALL ANCMSG(MSGID=268,ANMODE=ANINFO,MSGTYPE=MSGERROR,C1='DDW_TEMP')
 
         IPM_TEMP(:,:)=0
@@ -275,9 +275,9 @@ C----------------Reallocation and filling of IPM and PM-----------C
         LEN2 = NPROPM*NUMMAT
 
         DEALLOCATE(IPM,PM,DDWEIGHTS)
-        ALLOCATE (IPM(LEN1),STAT=stat)
+        call my_alloc(IPM, LEN1, "IPM", stat=stat)
         IF (STAT /= 0) CALL ANCMSG(MSGID=268,ANMODE=ANINFO, MSGTYPE=MSGERROR, C1='IPM')
-        ALLOCATE (PM(LEN2),STAT=stat)
+        call my_alloc(PM, LEN2, "PM", stat=stat)
         IF (STAT /= 0) CALL ANCMSG(MSGID=268,ANMODE=ANINFO, MSGTYPE=MSGERROR, C1='PM')
         CALL INIT_MAT_WEIGHT(NUMMAT)
 

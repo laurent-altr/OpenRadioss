@@ -115,6 +115,7 @@ C-----------------------------------------------
       USE EOS_PARAM_MOD , ONLY : ANALY_TEMP
       use element_mod , only : nixs
       use SEATBELT_MOD, only : NGUIDED_CABLE
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -1071,24 +1072,24 @@ C--------------------------------------------
 C     PRE-READ OF Prop IDS for triangles SH3N6 & solid rotations 
 C     PRE-READ OF Prop IDS , PARTS & SOLIDSfor sol to SPH
 C--------------------------------------------
-      ALLOCATE(IGEO(NPROPGI*NUMGEO),STAT=stat)
+      call my_alloc(IGEO, NPROPGI*NUMGEO, "IGEO", stat=stat)
       IF (STAT /= 0) CALL ANCMSG(MSGID=268,ANMODE=ANINFO,MSGTYPE=MSGERROR,C1='IGEO')
       IGEO=0
       NUMELTG6 = 0
       NSPHSOL  = 0
-      ALLOCATE(NSUB (NUMGEO + NUMSTACK) ,STAT=stat)
-      ALLOCATE(NISUB(NUMGEO + NUMSTACK) ,STAT=stat)
-      ALLOCATE(NPLY (NUMGEO + NUMSTACK) ,STAT=stat)
+      call my_alloc(NSUB, NUMGEO + NUMSTACK, "NSUB", stat=stat)
+      call my_alloc(NISUB, NUMGEO + NUMSTACK, "NISUB", stat=stat)
+      call my_alloc(NPLY, NUMGEO + NUMSTACK, "NPLY", stat=stat)
 c      
       CALL HM_PREREAD_PROPERTIES(IGEO,NSPHSOL,NPLY,NSUB,NISUB,LSUBMODEL,DEFAULTS)
 
       IF(NSPHSOL/=0.AND.NUMELS8/=0)THEN
-        ALLOCATE(IPART(LIPART1*NPART),STAT=stat)
+        call my_alloc(IPART, LIPART1*NPART, "IPART", stat=stat)
         IF (STAT /= 0) CALL ANCMSG(MSGID=268,ANMODE=ANINFO,MSGTYPE=MSGERROR,C1='IPART')
         IPART=0
         CALL HM_PREREAD_PART(IPART,IGEO,LSUBMODEL)
 C
-        ALLOCATE(IXS(NIXS*NUMELS8),STAT=stat)
+        call my_alloc(IXS, NIXS*NUMELS8, "IXS", stat=stat)
         IF (STAT /= 0) CALL ANCMSG(MSGID=268,ANMODE=ANINFO,MSGTYPE=MSGERROR,C1='IPART')
         CALL HM_PRELCE16S(IPART,IGEO,IXS,NSPHSOL,LSUBMODEL,IS_DYNA)
 C
@@ -1806,6 +1807,7 @@ C-----------------------------------------------
       USE INOUTFILE_MOD
       USE OUTMAX_MOD
       USE NAMES_AND_TITLES_MOD , ONLY : NCHARLINE
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -1838,7 +1840,8 @@ C-----------------------------------------------
 C-----------------------------------------------
       IF (ALLOCATED(IKEYMAX)) DEALLOCATE(IKEYMAX)
       IF (ALLOCATED(IPART_OK)) DEALLOCATE(IPART_OK)
-      ALLOCATE(IKEYMAX(NKEYMAX),IPART_OK(NGROUP,NKEYMAX))
+      call my_alloc(IKEYMAX, NKEYMAX, "IKEYMAX")
+      call my_alloc(IPART_OK, NGROUP, NKEYMAX, "IPART_OK")
       IKEYMAX =0
       IPART_OK = 0
       LMAX_DIS = 0

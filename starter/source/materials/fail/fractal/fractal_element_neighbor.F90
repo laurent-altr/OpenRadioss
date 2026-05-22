@@ -274,11 +274,11 @@
             elem1 = elem2
           end do
 !
-          call my_dealloc(edge2, "edge2")
-          call my_dealloc(edge1, "edge1")
-          call my_dealloc(indx, "indx")
-          call my_dealloc(nixel, "nixel")
-          call my_dealloc(elmat, "elmat")
+          call my_dealloc(edge2)
+          call my_dealloc(edge1)
+          call my_dealloc(indx)
+          call my_dealloc(nixel)
+          call my_dealloc(elmat)
 ! ----------------------------------------------------------------------------------------------------------------------
           return
         end subroutine fractal_element_neighbor

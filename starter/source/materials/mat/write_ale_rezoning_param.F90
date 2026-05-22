@@ -77,7 +77,7 @@
           ibuf(iad) = rezon%num_nuvar_eos
 !
           call write_i_c(ibuf,ifix)
-          call my_dealloc(ibuf, "ibuf")
+          call my_dealloc(ibuf)
 
 !-----------
           return

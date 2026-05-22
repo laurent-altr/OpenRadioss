@@ -45,6 +45,7 @@ C-----------------------------------------------
       USE NAMES_AND_TITLES_MOD , ONLY : NCHARFIELD
       USE READER_OLD_MOD , ONLY : LINE
       USE USER_ID_MOD , ONLY : ID_LIMIT
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -77,17 +78,17 @@ C-----------------------------------------------
 C--------------------------------------------------
 C      ALLOCS & INITS
 C--------------------------------------------------
-      ALLOCATE (ITAB(NUMNUSR+NUMCNOD),STAT=stat)
+      call my_alloc(ITAB, NUMNUSR+NUMCNOD, "ITAB", stat=stat)
       IF (STAT /= 0) CALL ANCMSG(MSGID=268,ANMODE=ANINFO,MSGTYPE=MSGERROR,C1='ITAB')
-      ALLOCATE (X(3,NUMNUSR+NUMCNOD),STAT=stat)
+      call my_alloc(X, 3, NUMNUSR+NUMCNOD, "X", stat=stat)
       IF (STAT /= 0) CALL ANCMSG(MSGID=268,ANMODE=ANINFO,MSGTYPE=MSGERROR,C1='X')
-      ALLOCATE (SUB_NOD(NUMNUSR+NUMCNOD),STAT=stat)
+      call my_alloc(SUB_NOD, NUMNUSR+NUMCNOD, "SUB_NOD", stat=stat)
       IF (STAT /= 0) CALL ANCMSG(MSGID=268,ANMODE=ANINFO,MSGTYPE=MSGERROR,C1='SUB_NOD')
-      ALLOCATE (UID_NOD(NUMNUSR+NUMCNOD),STAT=stat)
+      call my_alloc(UID_NOD, NUMNUSR+NUMCNOD, "UID_NOD", stat=stat)
       IF (STAT /= 0) CALL ANCMSG(MSGID=268,ANMODE=ANINFO,MSGTYPE=MSGERROR,C1='UID_NOD')
-      ALLOCATE (HM_X(3,NUMNUSR+NUMCNOD),STAT=stat)
+      call my_alloc(HM_X, 3, NUMNUSR+NUMCNOD, "HM_X", stat=stat)
       IF (STAT /= 0) CALL ANCMSG(MSGID=268,ANMODE=ANINFO,MSGTYPE=MSGERROR,C1='HM_X')
-      ALLOCATE (DMERGE(NUMCNOD),STAT=stat)
+      call my_alloc(DMERGE, NUMCNOD, "DMERGE", stat=stat)
       IF (STAT /= 0) CALL ANCMSG(MSGID=268,ANMODE=ANINFO,MSGTYPE=MSGERROR,C1='DMERGE')
       SUB_NOD(1:NUMNUSR+NUMCNOD) = 0
       UID_NOD(1:NUMNUSR+NUMCNOD) = 0

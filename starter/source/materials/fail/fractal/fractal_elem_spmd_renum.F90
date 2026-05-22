@@ -119,10 +119,10 @@
               fail_fractal%fractal(ifract)%random_walk(i)%elnum  = tag_elem(i)
               fail_fractal%fractal(ifract)%random_walk(i)%nix    = tag_nix(i)
             end do
-            call my_dealloc(tag_id, "tag_id")
-            call my_dealloc(tag_dmg, "tag_dmg")
-            call my_dealloc(tag_nix, "tag_nix")
-            call my_dealloc(tag_elem, "tag_elem")
+            call my_dealloc(tag_id)
+            call my_dealloc(tag_dmg)
+            call my_dealloc(tag_nix)
+            call my_dealloc(tag_elem)
           end do
 ! ----------------------------------------------------------------------------------------------------------------------
           return

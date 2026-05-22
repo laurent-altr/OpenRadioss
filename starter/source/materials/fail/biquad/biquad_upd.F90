@@ -133,8 +133,8 @@
           ! hardening function from material law is deallocated from failure model data structure
           ! replaced by regularization scale factor function
 !-----------------------------------------------
-          call my_dealloc(fail%table4d(ntable)%x(1)%values, "fail%table4d(ntable)%x(1)%values")
-          call my_dealloc(fail%table4d(ntable)%y1d, "fail%table4d(ntable)%y1d")
+          call my_dealloc(fail%table4d(ntable)%x(1)%values)
+          call my_dealloc(fail%table4d(ntable)%y1d)
           call my_alloc(fail%table4d(ntable)%x(1)%values, npt_eta, "fail%table4d(ntable)%x(1)%values")
           call my_alloc(fail%table4d(ntable)%y1d, npt_eta, "fail%table4d(ntable)%y1d")
 !

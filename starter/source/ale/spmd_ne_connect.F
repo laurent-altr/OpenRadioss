@@ -41,6 +41,7 @@ C-----------------------------------------------
 C  M o d u l e s
 C-----------------------------------------------
       USE ALE_CONNECTIVITY_MOD
+      use my_alloc_mod
 !     Includes
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
@@ -73,14 +74,14 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   S o u r c e   L i n e s
 C-----------------------------------------------
-      ALLOCATE(TAGELE(NUMEL))
+      call my_alloc(TAGELE, NUMEL, "TAGELE")
       TAGELE(1:NUMEL) = 0
-      ALLOCATE(TAGELE_L(NSPMD, NUMEL_L))
+      call my_alloc(TAGELE_L, NSPMD, NUMEL_L, "TAGELE_L")
       TAGELE_L(1:NSPMD, 1:NUMEL_L) = 0
       
-      ALLOCATE(NERCVOIS(NSPMD + 1))
+      call my_alloc(NERCVOIS, NSPMD + 1, "NERCVOIS")
       NERCVOIS(1:NSPMD + 1) = 0
-      ALLOCATE(NESDVOIS(NSPMD + 1))
+      call my_alloc(NESDVOIS, NSPMD + 1, "NESDVOIS")
       NESDVOIS(1:NSPMD + 1) = 0
 
       NSVOIS = 0
@@ -176,6 +177,7 @@ C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
       USE ALE_CONNECTIVITY_MOD
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -211,32 +213,32 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   S o u r c e   L i n e s
 C-----------------------------------------------
-      ALLOCATE(TAGELE(NUMEL))
+      call my_alloc(TAGELE, NUMEL, "TAGELE")
       TAGELE(1:NUMEL) = 0
-      ALLOCATE(TAGELE_L(NSPMD, NUMEL_L))
+      call my_alloc(TAGELE_L, NSPMD, NUMEL_L, "TAGELE_L")
       TAGELE_L(1:NSPMD, 1:NUMEL_L) = 0
       ELEMID_L(1:NUMEL) = 0
-      ALLOCATE(LERCVOIS(NERVOIS))
+      call my_alloc(LERCVOIS, NERVOIS, "LERCVOIS")
       LERCVOIS(1:NERVOIS) = 0
-      ALLOCATE(LESDVOIS(NESVOIS))
+      call my_alloc(LESDVOIS, NESVOIS, "LESDVOIS")
       LERCVOIS(1:NERVOIS) = 0
-      ALLOCATE(NERCVOIS(NSPMD + 1))
+      call my_alloc(NERCVOIS, NSPMD + 1, "NERCVOIS")
       NERCVOIS(1:NSPMD + 1) = 0
-      ALLOCATE(NESDVOIS(NSPMD + 1))
+      call my_alloc(NESDVOIS, NSPMD + 1, "NESDVOIS")
       NESDVOIS(1:NSPMD + 1) = 0
-      ALLOCATE(TAGER(NERVOIS))
+      call my_alloc(TAGER, NERVOIS, "TAGER")
       TAGER(1:NERVOIS) = 0
-      ALLOCATE(CPULOCALER(NERVOIS))
+      call my_alloc(CPULOCALER, NERVOIS, "CPULOCALER")
       CPULOCALER(1:NERVOIS) = 0
-      ALLOCATE(TAGES(NESVOIS))
+      call my_alloc(TAGES, NESVOIS, "TAGES")
       TAGES(1:NESVOIS) = 0
-      ALLOCATE(CPULOCALES(NESVOIS))
+      call my_alloc(CPULOCALES, NESVOIS, "CPULOCALES")
       CPULOCALES(1:NESVOIS) = 0
-      ALLOCATE(IDX(MAX(NERVOIS, NESVOIS)))
+      call my_alloc(IDX, MAX(NERVOIS, NESVOIS), "IDX")
       IDX(1:MAX(NERVOIS, NESVOIS)) = 0
-      ALLOCATE(TMP(MAX(NERVOIS, NESVOIS)))
+      call my_alloc(TMP, MAX(NERVOIS, NESVOIS), "TMP")
       TMP(1:MAX(NERVOIS, NESVOIS)) = 0
-      ALLOCATE(TMP2(MAX(NERVOIS, NESVOIS)))
+      call my_alloc(TMP2, MAX(NERVOIS, NESVOIS), "TMP2")
       TMP2(1:MAX(NERVOIS, NESVOIS)) = 0
 
       IFE = 0

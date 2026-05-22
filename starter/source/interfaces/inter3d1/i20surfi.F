@@ -334,6 +334,7 @@ C   M o d u l e s
 C-----------------------------------------------
       USE MESSAGE_MOD
       USE FORMAT_MOD , ONLY : FMW_4I
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -370,12 +371,12 @@ C=======================================================================
       NLMAX = 0
       IF(ISU /= 0) NLMAX = 4*NSEG0
 
-      ALLOCATE (LINEIX(2,NLMAX)    ,STAT=stat)
-      ALLOCATE (LINEIX2(2,NLMAX)   ,STAT=stat)
-      ALLOCATE (XLINEIX(3,NLMAX)   ,STAT=stat)
-      ALLOCATE (INDEX(2*NLMAX)     ,STAT=stat)
-      ALLOCATE (TAG(NUMNOD)        ,STAT=stat)
-      ALLOCATE (IXWORK(5,NLMAX)    ,STAT=stat)
+      call my_alloc(LINEIX, 2, NLMAX, "LINEIX", stat=stat)
+      call my_alloc(LINEIX2, 2, NLMAX, "LINEIX2", stat=stat)
+      call my_alloc(XLINEIX, 3, NLMAX, "XLINEIX", stat=stat)
+      call my_alloc(INDEX, 2*NLMAX, "INDEX", stat=stat)
+      call my_alloc(TAG, NUMNOD, "TAG", stat=stat)
+      call my_alloc(IXWORK, 5, NLMAX, "IXWORK", stat=stat)
 
       IF (STAT /= 0) CALL ANCMSG(MSGID=268,ANMODE=ANINFO,
      .                           MSGTYPE=MSGERROR,
@@ -650,6 +651,7 @@ C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
       USE MESSAGE_MOD
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -679,8 +681,8 @@ C=======================================================================
       I2 = 0
       IF(ISU /= 0)NLMAX = 4*NSEG
 
-      ALLOCATE (LINEIX(2,NLMAX)    ,STAT=stat)
-      ALLOCATE (INDEX(2*NLMAX)     ,STAT=stat)
+      call my_alloc(LINEIX, 2, NLMAX, "LINEIX", stat=stat)
+      call my_alloc(INDEX, 2*NLMAX, "INDEX", stat=stat)
 
       IF (STAT /= 0) CALL ANCMSG(MSGID=268,ANMODE=ANINFO,
      .                           MSGTYPE=MSGERROR,

@@ -453,9 +453,9 @@
             nvartmp_therm + nvartmp_heat
 !
           !< Allocation of material parameters tables
-          allocate(matparam%iparam(matparam%niparam))
-          allocate(matparam%uparam(matparam%nuparam))
-          allocate(matparam%table (matparam%ntable ))
+          call my_alloc(matparam%iparam, matparam%niparam, "matparam%iparam")
+          call my_alloc(matparam%uparam, matparam%nuparam, "matparam%uparam")
+          allocate(matparam%table(matparam%ntable))
 !
           !< Integer material parameter
           ! -> Elastic parameters

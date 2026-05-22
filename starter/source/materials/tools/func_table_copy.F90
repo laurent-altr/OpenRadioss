@@ -190,11 +190,11 @@
               mat_table%y2d(1:nptx,i) = yf(1:nptx,i)
             end do
             !--------------------
-            call my_dealloc(yi, "yi")
-            call my_dealloc(xi, "xi")
-            call my_dealloc(yf, "yf")
-            call my_dealloc(xf, "xf")
-            call my_dealloc(len, "len")
+            call my_dealloc(yi)
+            call my_dealloc(xi)
+            call my_dealloc(yf)
+            call my_dealloc(xf)
+            call my_dealloc(len)
             !--------------------
 !
           end if  ! end of 2d table treatment

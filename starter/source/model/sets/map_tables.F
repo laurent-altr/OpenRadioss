@@ -52,6 +52,7 @@ C-----------------------------------------------
       USE MESSAGE_MOD
       USE NAMES_AND_TITLES_MOD , ONLY : NCHARTITLE, NCHARKEY, NCHARFIELD
       use element_mod , only : nixs,nixq,nixc,nixt,nixp,nixr,nixtg
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -96,10 +97,10 @@ C-----------------------------------------------
 C-----------------------------------------------
       IF(MODE==1) THEN
 C Parts
-          ALLOCATE( MAP_TABLES%IPARTM(NPART,2))
+          call my_alloc(MAP_TABLES%IPARTM, NPART, 2, "MAP_TABLES%IPARTM")
 
-          ALLOCATE(ISORT(NPART))
-          ALLOCATE(INDEX_SORT(2*NPART))
+          call my_alloc(ISORT, NPART, "ISORT")
+          call my_alloc(INDEX_SORT, 2*NPART, "INDEX_SORT")
     
           DO I=1,NPART
              ISORT(I)=IPART(4,I)
@@ -120,14 +121,14 @@ C Sets
           NSET_COL = 0
 
           ! ISORT & INDEX_SORT are used for /SET/GENERAL
-          ALLOCATE(ISORT(NSETS))
-          ALLOCATE(SAV(NSETS))
-          ALLOCATE(INDEX_SORT(2*NSETS))
+          call my_alloc(ISORT, NSETS, "ISORT")
+          call my_alloc(SAV, NSETS, "SAV")
+          call my_alloc(INDEX_SORT, 2*NSETS, "INDEX_SORT")
     
           ! ISORT2 & INDEX_SORT2 are used for /SET/COLLECT
-          ALLOCATE(ISORT2(NSETS))
-          ALLOCATE(SAV2(NSETS))
-          ALLOCATE(INDEX_SORT2(2*NSETS))
+          call my_alloc(ISORT2, NSETS, "ISORT2")
+          call my_alloc(SAV2, NSETS, "SAV2")
+          call my_alloc(INDEX_SORT2, 2*NSETS, "INDEX_SORT2")
 
           CALL HM_OPTION_START('/SET')
           DO I=1,NSETS
@@ -156,7 +157,7 @@ C Sets
           ! Sorting SET/GENERAL
           ! -------------------
           CALL MY_ORDERS(0,IWORK,ISORT,INDEX_SORT,NSET_G,1)
-          ALLOCATE( MAP_TABLES%ISETM(NSET_G,2))
+          call my_alloc(MAP_TABLES%ISETM, NSET_G, 2, "MAP_TABLES%ISETM")
           
           DO I=1,NSET_G
              MAP_TABLES%ISETM(I,1)=ISORT(INDEX_SORT(I))
@@ -187,7 +188,7 @@ C Sets
           ! Sorting SET/COLLECT
           ! -------------------
           CALL MY_ORDERS(0,IWORK,ISORT2,INDEX_SORT2,NSET_COL,1)
-          ALLOCATE( MAP_TABLES%ISETCOLM(NSET_COL,2))
+          call my_alloc(MAP_TABLES%ISETCOLM, NSET_COL, 2, "MAP_TABLES%ISETCOLM")
           
           DO I=1,NSET_COL
              MAP_TABLES%ISETCOLM(I,1)=ISORT2(INDEX_SORT2(I))
@@ -212,10 +213,10 @@ C Sets
           DEALLOCATE (INDEX_SORT2)
           DEALLOCATE (SAV2) 
 C Subset
-          ALLOCATE( MAP_TABLES%ISUBSM(NSUBS,2))
+          call my_alloc(MAP_TABLES%ISUBSM, NSUBS, 2, "MAP_TABLES%ISUBSM")
 
-          ALLOCATE(ISORT(NSUBS))
-          ALLOCATE(INDEX_SORT(2*NSUBS))
+          call my_alloc(ISORT, NSUBS, "ISORT")
+          call my_alloc(INDEX_SORT, 2*NSUBS, "INDEX_SORT")
     
           DO I=1,NSUBS
              ISORT(I)=SUBSET(I)%ID
@@ -231,10 +232,10 @@ C Subset
           DEALLOCATE (ISORT)
           DEALLOCATE (INDEX_SORT)
 C Submodel
-          ALLOCATE( MAP_TABLES%ISUBMM(NSUBMOD,2))
+          call my_alloc(MAP_TABLES%ISUBMM, NSUBMOD, 2, "MAP_TABLES%ISUBMM")
     
-          ALLOCATE(ISORT(NSUBMOD))
-          ALLOCATE(INDEX_SORT(2*NSUBMOD))
+          call my_alloc(ISORT, NSUBMOD, "ISORT")
+          call my_alloc(INDEX_SORT, 2*NSUBMOD, "INDEX_SORT")
 
           DO I=1,NSUBMOD
              ISORT(I) = LSUBMODEL(I)%NOSUBMOD
@@ -250,10 +251,10 @@ C Submodel
           DEALLOCATE (ISORT)
           DEALLOCATE (INDEX_SORT)
 C Rbody
-          ALLOCATE( MAP_TABLES%IRBODYM(NRBODY,2))
+          call my_alloc(MAP_TABLES%IRBODYM, NRBODY, 2, "MAP_TABLES%IRBODYM")
 
-          ALLOCATE(ISORT(NRBODY))
-          ALLOCATE(INDEX_SORT(2*NRBODY))
+          call my_alloc(ISORT, NRBODY, "ISORT")
+          call my_alloc(INDEX_SORT, 2*NRBODY, "INDEX_SORT")
     
           DO I=1,NRBODY
              ISORT(I)=RBY_MSN(1,I)
@@ -302,7 +303,7 @@ C SPH
 !   ------------------------------------------------------------
         IF(MODE==2) THEN
 C Rivet 
-          ALLOCATE( MAP_TABLES%IRIVETM(NRIVET,2))
+          call my_alloc(MAP_TABLES%IRIVETM, NRIVET, 2, "MAP_TABLES%IRIVETM")
           CALL MAP_ORDER(LRIVET,4,4,NRIVET,MAP_TABLES%IRIVETM)
         ENDIF
 !---

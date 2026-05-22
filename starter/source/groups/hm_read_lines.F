@@ -177,7 +177,8 @@ C-----------------------------------------------
       OK =0
       FLAG_GRBRIC = .FALSE.
       IBUFSIZ=6*NSEGS
-      ALLOCATE(BUFTMP(IBUFSIZ),INDX(IBUFSIZ),STAT=stat)
+      call my_alloc(BUFTMP, IBUFSIZ, "BUFTMP", stat=stat)
+      call my_alloc(INDX, IBUFSIZ, "INDX", stat=stat)
       IF (STAT /= 0) CALL ANCMSG(MSGID=268,ANMODE=ANINFO,MSGTYPE=MSGERROR,C1='BUFTMP')
       NINDX=0
       BUFTMP(1:IBUFSIZ)=0    ! init to 0 only one time
@@ -299,15 +300,15 @@ C-------------------------
 C NEW BOX OPTION (MULTI BOX COMBINATION)
 C-------------------------
       IF (IT8 /= 0) THEN
-        ALLOCATE(TAGT(NUMELT),STAT=stat)
-        ALLOCATE(TAGP(NUMELP),STAT=stat)
+        call my_alloc(TAGT, NUMELT, "TAGT", stat=stat)
+        call my_alloc(TAGP, NUMELP, "TAGP", stat=stat)
         TAGT(1:NUMELT) = 0
         TAGP(1:NUMELP) = 0
         IF (FLAG == 0) THEN
-          ALLOCATE(BUFBOX(1))
+          call my_alloc(BUFBOX, 1, "BUFBOX")
           BUFBOX = 0
         ELSEIF (FLAG == 1) THEN
-          ALLOCATE(BUFBOX(IADBOXMAX))
+          call my_alloc(BUFBOX, IADBOXMAX, "BUFBOX")
           BUFBOX(1:IADBOXMAX) = 0
         ENDIF
         SBUFBOX = INT(INTMAX)
@@ -385,7 +386,7 @@ C=======================================================================
 C line of subsets, share, mat, prop
 C=======================================================================
       IF(IT2/=0.OR.IT6/=0) THEN
-        ALLOCATE( SURF_ELM(NPART) )        
+        allocate(SURF_ELM(NPART))
         MODE = 2
         CALL INIT_SURF_ELM(IBID    ,IBID   ,IBID    ,IBID   ,IBID    ,
      1                     NUMELT  ,NUMELP ,NUMELR  ,NPART  ,IBID    ,

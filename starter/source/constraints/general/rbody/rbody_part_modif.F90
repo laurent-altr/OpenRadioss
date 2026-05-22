@@ -143,7 +143,7 @@
             nsn = nsn_i
             isl(1:nsn) = isl_copy(1:nsn)
           end if !(changed) then
-          call my_dealloc(itag, "itag")
+          call my_dealloc(itag)
         end subroutine rbody_part_modif
 ! ======================================================================================================================
 ! \brief check rbody by part with bcs(boundary conditions),impvel,gravity,inivel
@@ -227,7 +227,7 @@
             call rpart_grav_check(m,itag,ngrav,nigrav,igrav,slgrav,lgrav,numnod,itab,part_id)
             itag(lpby(iad+1:iad+nsl)) = 0
           end do
-          call my_dealloc(itag, "itag")
+          call my_dealloc(itag)
         end subroutine rbody_part_check
 ! ======================================================================================================================
 ! \brief check rbody by part with bcs(boundary conditions),replace slave nodes by main_id if needed
@@ -825,7 +825,7 @@
             end if !(itype == 6) then
 
           end do
-          call my_dealloc(itagns2rb, "itagns2rb")
+          call my_dealloc(itagns2rb)
 
 
         end subroutine rpart_inivel_check

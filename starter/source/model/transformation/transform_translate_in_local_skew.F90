@@ -203,7 +203,7 @@
             end do
           end if
 
-          if(allocated(xn)) call my_dealloc(xn, "xn")
+          if(allocated(xn)) call my_dealloc(xn)
 ! ----------------------------------------------------------------------------------------------------------------------
         end subroutine transform_translate_in_local_skew
       end module transform_translate_in_local_skew_mod

@@ -58,6 +58,7 @@
           use precision_mod, only : WP
           USE MESSAGE_MOD
           USE NAMES_AND_TITLES_MOD , ONLY : NCHARTITLE
+          use my_alloc_mod
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Implicit None
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -140,7 +141,7 @@
 !                                                   Body
 ! ----------------------------------------------------------------------------------------------------------------------
           ERRAVE_MIN = huge(ERRAVE_MIN)
-          ALLOCATE (SIG(1:NPT))
+          call my_alloc(SIG, NPT, "SIG")
 
           ! IF ABS(Y(I)) <  SMALL_ABS_YI, use SMALL_ABS_YI to avoid
           ! unnecessary numerical issues when avoid divided by small value

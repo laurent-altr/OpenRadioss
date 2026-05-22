@@ -231,9 +231,9 @@
 
 
 
-          if (allocated(tmp)) call my_dealloc(tmp, "tmp")
-          if (allocated(tmp2)) call my_dealloc(tmp2, "tmp2")
-          if (allocated(indx)) call my_dealloc(indx, "indx")
+          if (allocated(tmp)) call my_dealloc(tmp)
+          if (allocated(tmp2)) call my_dealloc(tmp2)
+          if (allocated(indx)) call my_dealloc(indx)
 
         end subroutine iniebcs_propellant_get_cp
 

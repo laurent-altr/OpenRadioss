@@ -73,7 +73,7 @@
 ! ----------------------------------------------------------------------------------------------------------------------
 
           do p=1,nspmd
-            allocate( bcs_per_proc(p)%nrf(bcs%num_nrf) )
+            allocate(bcs_per_proc(p)%nrf(bcs%num_nrf))
           end do
 
           ! --- filling global parameters for bcs nrf data structure on each domain

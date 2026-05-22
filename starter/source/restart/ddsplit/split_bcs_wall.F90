@@ -73,7 +73,7 @@
 ! ----------------------------------------------------------------------------------------------------------------------
 
           do p=1,nspmd
-            allocate( bcs_per_proc(p)%wall(bcs%num_wall) )
+            allocate(bcs_per_proc(p)%wall(bcs%num_wall))
           end do
 
           ! --- filling global parameters for bcs wall data structure on each domain

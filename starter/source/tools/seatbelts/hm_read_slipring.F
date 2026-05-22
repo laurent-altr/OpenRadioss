@@ -118,7 +118,7 @@ C
 C
         WRITE(IOUT,1000)
 C
-        ALLOCATE(SLIPRING(NSLIPRING))
+        allocate(SLIPRING(NSLIPRING))
         DO I=1,NSLIPRING
           SLIPRING(I)%ID = 0
           SLIPRING(I)%IDG = 0
@@ -279,7 +279,7 @@ C--------   Initialisation of fram structure
 C
             NFRAM = 1
             SLIPRING(I)%NFRAM = 1
-            ALLOCATE(SLIPRING(I)%FRAM(NFRAM))
+            allocate(SLIPRING(I)%FRAM(NFRAM))
 C
             DO J=1,NFRAM
               SLIPRING(I)%FRAM(J)%UPDATE = 0
@@ -456,7 +456,7 @@ C
 C--------   Initialisation of fram structure
 C
             SLIPRING(I)%NFRAM = NFRAM
-            ALLOCATE(SLIPRING(I)%FRAM(NFRAM))
+            allocate(SLIPRING(I)%FRAM(NFRAM))
             DO J=1,NFRAM
               SLIPRING(I)%FRAM(J)%UPDATE = 0
               SLIPRING(I)%FRAM(J)%ANCHOR_NODE = 0

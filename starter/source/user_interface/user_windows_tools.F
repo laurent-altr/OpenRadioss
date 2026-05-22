@@ -297,7 +297,7 @@ C======================================================================|
            IF(ALLOCATED(FR_USERWI_L))  DEALLOCATE(FR_USERWI_L)
            
            ! WRITE A_SAV & AR_SAV only on ispmd==0
-           ALLOCATE(DUM_SAV(3*NUMNOD_L))
+           call my_alloc(DUM_SAV, 3*NUMNOD_L, "DUM_SAV")
            DUM_SAV(1:3*NUMNOD_L)=ZERO
            CALL WRITE_DB(DUM_SAV,3*NUMNOD_L)
            CALL WRITE_DB(DUM_SAV,3*NUMNOD_L)

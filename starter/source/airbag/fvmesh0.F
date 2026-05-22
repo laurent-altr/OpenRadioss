@@ -176,10 +176,10 @@ C
             NBY = T_MONVOL(N)%IVOLU(55)          
             NBRIC = NBX * NBY          
             NNB = (NBX + 1) * (NBY + 1) * 2
-            ALLOCATE(FVDATA(IFV)%BRIC(8,NBRIC),
-     .           FVDATA(IFV)%TBRIC(13,NBRIC),
-     .           FVDATA(IFV)%XB(3,NNB),
-     .           FVDATA(IFV)%SFAC(6,4,NBRIC))
+            call my_alloc(FVDATA(IFV)%BRIC, 8, NBRIC, "FVDATA(IFV)%BRIC")
+            call my_alloc(FVDATA(IFV)%TBRIC, 13, NBRIC, "FVDATA(IFV)%TBRIC")
+            call my_alloc(FVDATA(IFV)%XB, 3, NNB, "FVDATA(IFV)%XB")
+            call my_alloc(FVDATA(IFV)%SFAC, 6, 4, NBRIC, "FVDATA(IFV)%SFAC")
 C
             CALL FVBRIC(T_MONVOL(N)%IVOLU, T_MONVOL(N)%RVOLU, T_MONVOL(N)%NODES, X, NNS)
 C
@@ -222,7 +222,7 @@ C-----------------------------
 C--------------------------------
 C  Injectors on internal surface
 C--------------------------------
-              ALLOCATE(MINUS_SIGN_REVERSE(NTGI))
+              call my_alloc(MINUS_SIGN_REVERSE, NTGI, "MINUS_SIGN_REVERSE")
               MINUS_SIGN_REVERSE(:) = 0
               CALL FVINJECTINT(
      .               T_MONVOL(N)%NODES, T_MONVOL(N)%ELEM(1, NTG + 1), T_MONVOL(N)%IBAGJET,
@@ -333,6 +333,7 @@ C-----------------------------------------------
       USE FVMBAG_MESHCONTROL_MOD
       USE REORDER_MOD
       USE MONVOL_STRUCT_MOD
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -375,7 +376,7 @@ C Parameters for automatic volume splitting
 C----------------------------------------------
 C           PERMUTATION ELTG
             IF (NTG > 0) THEN
-              ALLOCATE(TMP(NTG))
+              call my_alloc(TMP, NTG, "TMP")
               DO J = 1, NTG
                 IEL = T_MONVOL(N)%ELTG(J)
                 IF (IEL <= NUMELC) THEN
@@ -389,7 +390,7 @@ C           PERMUTATION ELTG
             ENDIF
      
             IF (NTGI > 0) THEN
-              ALLOCATE(TMP(NTGI))
+              call my_alloc(TMP, NTGI, "TMP")
               DO J = 1, NTGI
                 IEL = T_MONVOL(N)%ELTG(NTG + J) 
                 IF (IEL <= NUMELC) THEN

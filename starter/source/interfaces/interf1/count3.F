@@ -34,6 +34,7 @@ C-----------------------------------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
@@ -53,7 +54,7 @@ C-----------------------------------------------
         INTEGER, DIMENSION(:), ALLOCATABLE ::  INDEX0
 C-----------------------------------------------
 C
-      ALLOCATE(INDEX0(2*NUMNOD))
+      call my_alloc(INDEX0, 2*NUMNOD, "INDEX0")
       NTAG(0) = 1      ! special case IRECT=0
       N = 0
       NINDEX0 = 0

@@ -69,9 +69,9 @@ C=======================================================================
       IF (SZELMAX == 0) RETURN
 !
       LINE_NENTITY = 4 ! NOD1, NOD2, ELTYP, ELEM
-      ALLOCATE(BUFTMPLINE(SZELMAX*LINE_NENTITY))
-      ALLOCATE(ITRI(3,SZELMAX))
-      ALLOCATE(INDEX(2*SZELMAX))
+      call my_alloc(BUFTMPLINE, SZELMAX*LINE_NENTITY, "BUFTMPLINE")
+      call my_alloc(ITRI, 3, SZELMAX, "ITRI")
+      call my_alloc(INDEX, 2*SZELMAX, "INDEX")
 !
       IAD_LINE = 1
 !------------------
@@ -104,7 +104,7 @@ C=======================================================================
 ! ----------------------------------------------------------------------------
       IF (GO_IN_ARRAY .EQV. .TRUE.) THEN
         DELBUF%SZ_LINE = NSEG
-        ALLOCATE(DELBUF%LINE(NSEG,4))
+        call my_alloc(DELBUF%LINE, NSEG, 4, "DELBUF%LINE")
         DO I=1,NSEG
           DELBUF%LINE(I,1) = BUFTMPLINE((INDEX(I)-1)*NIX+1)
           DELBUF%LINE(I,2) = BUFTMPLINE((INDEX(I)-1)*NIX+2)

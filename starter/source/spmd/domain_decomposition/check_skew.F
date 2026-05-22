@@ -38,6 +38,7 @@ C-----------------------------------------------
         USE SKEW_MOD
         USE SUBMODEL_MOD , ONLY : NSUBMOD
         use element_mod , only : nixr
+        use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -153,8 +154,8 @@ C
         ENDDO
 
 !       allocation and initialization of local array
-        ALLOCATE(SKEW_PER_SP(NUMBER_SKEW_SP))
-        ALLOCATE(LOCAL_P(NUMBER_SKEW_SP))
+        call my_alloc(SKEW_PER_SP, NUMBER_SKEW_SP, "SKEW_PER_SP")
+        call my_alloc(LOCAL_P, NUMBER_SKEW_SP, "LOCAL_P")
 
 
 
@@ -201,7 +202,7 @@ C
                 ENDIF
         ENDDO    
 
-        ALLOCATE(P_SKEW(NUMSKW+1))
+        call my_alloc(P_SKEW, NUMSKW+1, "P_SKEW")
         P_SKEW(1:NUMSKW+1) = 0
                 
 !       stick a SKEW on a given processor

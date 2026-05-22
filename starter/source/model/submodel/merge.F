@@ -34,6 +34,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
       SUBROUTINE MERGE(X      ,ITAB   ,ITABM1 ,CMERGE ,IMERGE,
      .                 IMERGE2,IADMERGE2,NMERGE_TOT)
       USE MESSAGE_MOD
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -80,13 +81,13 @@ C-----------------------------------------------
       EXTERNAL USRTOS,USRTOSC
 C=======================================================================
 
-      ALLOCATE(NOBX(NUMNOD))
-      ALLOCATE(NOBY(NUMNOD))
-      ALLOCATE(NOBZ(NUMNOD))
-      ALLOCATE(NOBCX(NUMCNOD))
-      ALLOCATE(NOBCY(NUMCNOD))
-      ALLOCATE(NOBCZ(NUMCNOD))
-      ALLOCATE(LBUF(NUMNOD))
+      call my_alloc(NOBX, NUMNOD, "NOBX")
+      call my_alloc(NOBY, NUMNOD, "NOBY")
+      call my_alloc(NOBZ, NUMNOD, "NOBZ")
+      call my_alloc(NOBCX, NUMCNOD, "NOBCX")
+      call my_alloc(NOBCY, NUMCNOD, "NOBCY")
+      call my_alloc(NOBCZ, NUMCNOD, "NOBCZ")
+      call my_alloc(LBUF, NUMNOD, "LBUF")
       ALLOCATE(IADMERGE2TMP(NUMNOD+1))
 C-------    dbuc------------------------------
       DO  N=1,2*NUMCNOD

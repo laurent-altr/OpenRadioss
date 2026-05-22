@@ -145,6 +145,7 @@ C-----------------------------------------------
       USE SUBMODEL_MOD
       USE MESSAGE_MOD
       USE HM_OPTION_READ_MOD
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -176,10 +177,10 @@ C=======================================================================
 
       CALL HM_GET_INT_ARRAY_INDEX('idsmax' ,IDS_MAX ,JCLAUSE,IS_AVAILABLE,LSUBMODEL)
 
-      ALLOCATE(NODE_READ_TMP(IDS_MAX))
+      call my_alloc(NODE_READ_TMP, IDS_MAX, "NODE_READ_TMP")
       NODE_READ_TMP(1:IDS_MAX) = 0
-      ALLOCATE(INDEX(2*IDS_MAX))
-      ALLOCATE(SORT(IDS_MAX))
+      call my_alloc(INDEX, 2*IDS_MAX, "INDEX")
+      call my_alloc(SORT, IDS_MAX, "SORT")
 
       INDEX = 0
 
@@ -232,7 +233,7 @@ C=======================================================================
       ! Copy in final SET
       ! ------------------
       CLAUSE%NB_NODE = LIST_SIZE  
-      ALLOCATE( CLAUSE%NODE( LIST_SIZE ) )
+      call my_alloc(CLAUSE%NODE, LIST_SIZE, "CLAUSE%NODE")
 
       DO I=1,LIST_SIZE
         CLAUSE%NODE(I) = NODE_READ_TMP(I)
@@ -283,6 +284,7 @@ C-----------------------------------------------
       USE SUBMODEL_MOD
       USE MESSAGE_MOD
       USE HM_OPTION_READ_MOD
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -314,12 +316,12 @@ C
 C=======================================================================
       CALL HM_GET_INT_ARRAY_INDEX('genemax' ,GENE_MAX ,JCLAUSE,IS_AVAILABLE,LSUBMODEL)
 
-      ALLOCATE(NODE_READ_TMP(NUMNOD))
-      ALLOCATE(NODE_READ_ONE(NUMNOD))
+      call my_alloc(NODE_READ_TMP, NUMNOD, "NODE_READ_TMP")
+      call my_alloc(NODE_READ_ONE, NUMNOD, "NODE_READ_ONE")
 
 
       IF (GENE_MAX > 1) THEN
-          ALLOCATE(RESULT(NUMNOD))
+          call my_alloc(RESULT, NUMNOD, "RESULT")
       ENDIF
 
       STACK=0
@@ -359,7 +361,7 @@ C=======================================================================
       ENDDO
 
       CLAUSE%NB_NODE = STACK
-      ALLOCATE(CLAUSE%NODE(STACK))
+      call my_alloc(CLAUSE%NODE, STACK, "CLAUSE%NODE")
       CLAUSE%NODE(1:STACK) = NODE_READ_TMP(1:STACK)
 C-------------------------
       DEALLOCATE (NODE_READ_TMP)

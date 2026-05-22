@@ -138,7 +138,7 @@ c---------------------------------------------
       END IF
 c---------------------------------------------
       IF (ALLOCATED(SENSORS%SENSOR_TAB)) DEALLOCATE(SENSORS%SENSOR_TAB)
-      ALLOCATE(SENSORS%SENSOR_TAB(HM_NSENS))
+      allocate(SENSORS%SENSOR_TAB(HM_NSENS))
       CALL MY_ALLOC(SID,HM_NSENS,"SID")
       SENSORS%NSENSOR = HM_NSENS
 c

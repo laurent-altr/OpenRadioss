@@ -104,7 +104,7 @@
               end if
             end select
           end do
-          call my_dealloc(intage, "intage")
+          call my_dealloc(intage)
 !-----------
         end subroutine inter_offset_itag
       end module  inter_offset_itag_mod

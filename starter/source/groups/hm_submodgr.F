@@ -43,6 +43,7 @@ C-----------------------------------------------
       USE SUBMODEL_MOD
       USE GROUPDEF_MOD
       USE NAMES_AND_TITLES_MOD , ONLY : NCHARTITLE, NCHARLINE, NCHARFIELD, NCHARKEY
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -132,7 +133,7 @@ C-------------------------------------
 C Tag submodel nodes
 C-------------------------------------
       CALL CPP_NODES_COUNT(NBNODES,NBCNODES) 
-      ALLOCATE(TAGNODSUB(NBNODES+NBCNODES))
+      call my_alloc(TAGNODSUB, NBNODES+NBCNODES, "TAGNODSUB")
       TAGNODSUB = 0
       CALL CPP_NODE_SUB_TAG(TAGNODSUB)                             
       IF (FLAG == 0) THEN 
@@ -183,6 +184,7 @@ C-----------------------------------------------
       USE SUBMODEL_MOD
       USE GROUPDEF_MOD
       USE NAMES_AND_TITLES_MOD , ONLY : NCHARFIELD, NCHARLINE, NCHARKEY
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -301,7 +303,7 @@ C                          4 TRUSS, 5 BEAM, 6 SPRINGS,7 SHELL_3N)
         ELEMTYPE = 103
       ENDIF
 
-      ALLOCATE(TAGELEMSUB(NUMEL))
+      call my_alloc(TAGELEMSUB, NUMEL, "TAGELEMSUB")
       TAGELEMSUB = 0
       CALL CPP_ELEM_SUB_TAG(ELEMTYPE,TAGELEMSUB)
       IF (FLAG == 0) THEN 

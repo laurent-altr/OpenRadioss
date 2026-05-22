@@ -136,12 +136,12 @@ C   GLOBAL SORTING ON ALL CRITERIA FOR ALL ELEMENTS
       CALL MY_ALLOC(INDEX2,NUMELS,"INDEX2")
 C
       IF (NPERTURB > 0) THEN
-        ALLOCATE(XNUM_RNOISE(NPERTURB,NUMELS),STAT=stat)
+        call my_alloc(XNUM_RNOISE, NPERTURB, NUMELS, "XNUM_RNOISE", stat=stat)
         IF (STAT /= 0) CALL ANCMSG(MSGID=268,ANMODE=ANINFO,
      .                           MSGTYPE=MSGERROR,
      .                           C1='XNUM_RNOISE')
       ELSE
-        ALLOCATE(XNUM_RNOISE(NPERTURB,0),STAT=stat)
+        call my_alloc(XNUM_RNOISE, NPERTURB, 0, "XNUM_RNOISE", stat=stat)
       ENDIF
 C
       DO I=1,NUMELS
@@ -370,7 +370,7 @@ C
         CLUSTER_TYP = CLUSTERS(I)%TYPE
         IF(CLUSTER_TYP==1) THEN
             CLUSTER_NEL = CLUSTERS(I)%NEL
-            ALLOCATE( SAVE_CLUSTER( CLUSTER_NEL ) )
+            call my_alloc(SAVE_CLUSTER, CLUSTER_NEL, "SAVE_CLUSTER")
             SAVE_CLUSTER( 1:CLUSTER_NEL ) = CLUSTERS(I)%ELEM( 1:CLUSTER_NEL )
             DO J=1,CLUSTER_NEL
                 CLUSTERS(I)%ELEM(J) = ITR1( SAVE_CLUSTER( J ) )

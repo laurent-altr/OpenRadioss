@@ -184,8 +184,8 @@
           func_comp%x(1)%values(1:npt_comp) = x_comp(1:npt_comp)
           func_comp%y1d(1:npt_comp)         = y_comp(1:npt_comp)
 !---------------------------------------------------------------------------------------------------
-          call my_dealloc(yshear, "yshear")
-          call my_dealloc(ytens, "ytens")
+          call my_dealloc(yshear)
+          call my_dealloc(ytens)
 !===================================================================================================
         end subroutine law76_func_comp
       end module law76_func_comp_mod

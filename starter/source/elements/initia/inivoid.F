@@ -85,6 +85,7 @@ C-----------------------------------------------
       use glob_therm_mod
       USE DRAPE_MOD
       use element_mod , only : nixs,nixc,nixt,nixp,nixr,nixtg
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -176,7 +177,7 @@ C
       TYPE (DRAPE_), DIMENSION(NUMELC_DRAPE + NUMELTG_DRAPE) :: DRAPE
 
 C-----------------------------------------------
-      ALLOCATE(STIFNTMP(NUMNOD))
+      call my_alloc(STIFNTMP, NUMNOD, "STIFNTMP")
       GBUF => ELBUF_STR%GBUF
 
       BIDBUF => NULL()

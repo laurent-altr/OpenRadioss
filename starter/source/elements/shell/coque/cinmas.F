@@ -101,6 +101,7 @@ C-----------------------------------------------
       USE DRAPE_MOD
       USE NAMES_AND_TITLES_MOD , ONLY : NCHARTITLE
       use element_mod , only : nixc
+      use my_alloc_mod
 C----------------------------------------------
 C     initialization of nodal masses and inertias
 C----------------------------------------------
@@ -237,9 +238,11 @@ C
           DO ILAY=1,NLAY   !  NPT  
               MAX_NPTT = MAX(MAX_NPTT ,ELBUF_STR%BUFLY(ILAY)%NPTT)
           ENDDO
-          ALLOCATE(THK_IT(MAX_NPTT),POS_IT(MAX_NPTT))
+          call my_alloc(THK_IT, MAX_NPTT, "THK_IT")
+          call my_alloc(POS_IT, MAX_NPTT, "POS_IT")
        ELSE
-          ALLOCATE(THK_IT(0),POS_IT(0))  
+          call my_alloc(THK_IT, 0, "THK_IT")
+          call my_alloc(POS_IT, 0, "POS_IT")
        ENDIF 
        NLAY_MAX = MAX(NLAY, NPT)
        ALLOCATE(POSLY(NLAY_MAX*MAX_NPTT),RATIO_THKLY(NLAY_MAX*MAX_NPTT)) 

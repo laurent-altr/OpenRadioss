@@ -66,6 +66,7 @@ C-----------------------------------------------
       USE SUBMODEL_MOD
       USE SENSOR_MOD
       use element_mod , only : nixc,nixtg
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -153,14 +154,24 @@ C     =======
       T_MONVOLN%NJET = NJET
       T_MONVOLN%IVOLU(8) = NJET
       IF (NJET > 0) THEN
-         ALLOCATE(T_MONVOLN%IBAGJET(NIBJET, NJET))
+         call my_alloc(T_MONVOLN%IBAGJET, NIBJET, NJET, "T_MONVOLN%IBAGJET")
          T_MONVOLN%IBAGJET(1:NIBJET, 1:NJET) = 0
-         ALLOCATE(T_MONVOLN%RBAGJET(NRBJET, NJET))
+         call my_alloc(T_MONVOLN%RBAGJET, NRBJET, NJET, "T_MONVOLN%RBAGJET")
          T_MONVOLN%RBAGJET(1:NRBJET, 1:NJET) = ZERO
       ENDIF
       IF (NJET > 0) THEN
-         ALLOCATE(I_INJ(NJET), ISENS(NJET), IJET(NJET), NJ1(NJET), NJ2(NJET), NJ3(NJET),
-     .        IPT(NJET), IPA(NJET), IPZ(NJET), FPT(NJET), FPA(NJET), FPZ(NJET))
+         call my_alloc(I_INJ, NJET, "I_INJ")
+         call my_alloc(ISENS, NJET, "ISENS")
+         call my_alloc(IJET, NJET, "IJET")
+         call my_alloc(NJ1, NJET, "NJ1")
+         call my_alloc(NJ2, NJET, "NJ2")
+         call my_alloc(NJ3, NJET, "NJ3")
+         call my_alloc(IPT, NJET, "IPT")
+         call my_alloc(IPA, NJET, "IPA")
+         call my_alloc(IPZ, NJET, "IPZ")
+         call my_alloc(FPT, NJET, "FPT")
+         call my_alloc(FPA, NJET, "FPA")
+         call my_alloc(FPZ, NJET, "FPZ")
          DO II = 1, NJET
             CALL HM_GET_INT_ARRAY_INDEX('inject_ID', I_INJ(II), II, IS_AVAILABLE, LSUBMODEL)
             CALL HM_GET_INT_ARRAY_INDEX('sensor', ISENS(II), II, IS_AVAILABLE, LSUBMODEL)
@@ -186,20 +197,36 @@ C     =======
       T_MONVOLN%NVENT = NVENT
       T_MONVOLN%NPORSURF = NPORSURF
       IF (NVENT > 0) THEN
-         ALLOCATE(T_MONVOLN%IBAGHOL(NIBHOL, NVENT))
+         call my_alloc(T_MONVOLN%IBAGHOL, NIBHOL, NVENT, "T_MONVOLN%IBAGHOL")
          T_MONVOLN%IBAGHOL(1:NIBHOL, 1:NVENT) = 0
-         ALLOCATE(T_MONVOLN%RBAGHOL(NRBHOL, NVENT))
+         call my_alloc(T_MONVOLN%RBAGHOL, NRBHOL, NVENT, "T_MONVOLN%RBAGHOL")
          T_MONVOLN%RBAGHOL(1:NRBHOL, 1:NVENT) = ZERO
       ENDIF
-         ALLOCATE(IPVENT(NVENT), IFVENT(NVENT), AVENT(NVENT), BVENT(NVENT))
-         ALLOCATE(TVENT(NVENT), TSTOPE(NVENT), DPDEF(NVENT), DTPDEF(NVENT),
-     .        IDTPDEF(NVENT))
-         ALLOCATE(IPORT(NVENT), IPORP(NVENT), IPORA(NVENT), FPORT(NVENT),
-     .        FPORP(NVENT), FPORA(NVENT))
-         ALLOCATE(IPORT1(NVENT), IPORP1(NVENT), IPORA1(NVENT), FPORT1(NVENT),
-     .        FPORP1(NVENT), FPORA1(NVENT))
-         ALLOCATE(IBLOCKAGE(NVENT), CLEAK(NVENT))
-         ALLOCATE(IVDP(NVENT), FVDP(NVENT))
+         call my_alloc(IPVENT, NVENT, "IPVENT")
+         call my_alloc(IFVENT, NVENT, "IFVENT")
+         call my_alloc(AVENT, NVENT, "AVENT")
+         call my_alloc(BVENT, NVENT, "BVENT")
+         call my_alloc(TVENT, NVENT, "TVENT")
+         call my_alloc(TSTOPE, NVENT, "TSTOPE")
+         call my_alloc(DPDEF, NVENT, "DPDEF")
+         call my_alloc(DTPDEF, NVENT, "DTPDEF")
+         call my_alloc(IDTPDEF, NVENT, "IDTPDEF")
+         call my_alloc(IPORT, NVENT, "IPORT")
+         call my_alloc(IPORP, NVENT, "IPORP")
+         call my_alloc(IPORA, NVENT, "IPORA")
+         call my_alloc(FPORT, NVENT, "FPORT")
+         call my_alloc(FPORP, NVENT, "FPORP")
+         call my_alloc(FPORA, NVENT, "FPORA")
+         call my_alloc(IPORT1, NVENT, "IPORT1")
+         call my_alloc(IPORP1, NVENT, "IPORP1")
+         call my_alloc(IPORA1, NVENT, "IPORA1")
+         call my_alloc(FPORT1, NVENT, "FPORT1")
+         call my_alloc(FPORP1, NVENT, "FPORP1")
+         call my_alloc(FPORA1, NVENT, "FPORA1")
+         call my_alloc(IBLOCKAGE, NVENT, "IBLOCKAGE")
+         call my_alloc(CLEAK, NVENT, "CLEAK")
+         call my_alloc(IVDP, NVENT, "IVDP")
+         call my_alloc(FVDP, NVENT, "FVDP")
       IF (NVENTHOLES > 0) THEN
          DO II = 1, NVENTHOLES
             VENTTITLE = ''
@@ -369,7 +396,7 @@ C     Reverse all normals to ensure positive volume
       ENDIF
 !     Injectors
       IF (NJET > 0) THEN
-         ALLOCATE(I_INJSYS(NJET))
+         call my_alloc(I_INJSYS, NJET, "I_INJSYS")
          DO II = 1, NJET
 !     Check injector property
             I_INJSYS(II) = 0

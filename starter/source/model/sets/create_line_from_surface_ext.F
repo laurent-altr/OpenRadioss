@@ -59,13 +59,13 @@ C=======================================================================
 
 !
       LINE_NENTITY = 4 ! NOD1, NOD2, ELTYP, ELEM
-      ALLOCATE(LINE_ORD(LINE_NENTITY,SIZEMAX))
-      ALLOCATE(ITRI(3,SIZEMAX))
-      ALLOCATE(INDEX(2*SIZEMAX))
+      call my_alloc(LINE_ORD, LINE_NENTITY, SIZEMAX, "LINE_ORD")
+      call my_alloc(ITRI, 3, SIZEMAX, "ITRI")
+      call my_alloc(INDEX, 2*SIZEMAX, "INDEX")
 !
-      ALLOCATE(IW1(4*SIZEMAX))
-      ALLOCATE(IW2(4*SIZEMAX))
-      ALLOCATE(IW5(4*SIZEMAX))
+      call my_alloc(IW1, 4*SIZEMAX, "IW1")
+      call my_alloc(IW2, 4*SIZEMAX, "IW2")
+      call my_alloc(IW5, 4*SIZEMAX, "IW5")
       ALLOCATE(IW6(4*SIZEMAX))
 !------------------
       ! NSEG of lines  initialization

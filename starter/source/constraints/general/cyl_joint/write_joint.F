@@ -40,6 +40,7 @@ C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------     
             USE JOINT_MOD
+            use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -75,7 +76,7 @@ C
         K = K + NJOINT
         !   ----------------------
         !   buffer allocation
-        ALLOCATE(BUF_W(K))
+        call my_alloc(BUF_W, K, "BUF_W")
 
         !   write for all processor the number of node per proc
         DO N=1,NJOINT            
@@ -97,7 +98,7 @@ C
                 !   list of processor for the current joint
                 CALL WRITE_I_C(CYL_JOIN(N)%LIST_PROC,CYL_JOIN(N)%NUMBER_PROC)
 
-                ALLOCATE( SECONDARY_NODE(CYL_JOIN(N)%NB_NODE(P)) )
+                call my_alloc(SECONDARY_NODE, CYL_JOIN(N)%NB_NODE(P), "SECONDARY_NODE")
                 DO I=1,CYL_JOIN(N)%NB_NODE(P)
                     SECONDARY_NODE(I) = NODLOCAL(CYL_JOIN(N)%PROC(P)%NODE(I))
                 ENDDO

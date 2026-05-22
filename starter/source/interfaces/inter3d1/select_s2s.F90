@@ -358,14 +358,14 @@
               end do
             end do
           end do
-          call my_dealloc(ind_1, "ind_1")
-          call my_dealloc(ind_2, "ind_2")
-          call my_dealloc(xs1, "xs1")
-          call my_dealloc(n1, "n1")
-          call my_dealloc(dim1, "dim1")
-          call my_dealloc(xs2, "xs2")
-          call my_dealloc(n2, "n2")
-          call my_dealloc(dim2, "dim2")
+          call my_dealloc(ind_1)
+          call my_dealloc(ind_2)
+          call my_dealloc(xs1)
+          call my_dealloc(n1)
+          call my_dealloc(dim1)
+          call my_dealloc(xs2)
+          call my_dealloc(n2)
+          call my_dealloc(dim2)
         end subroutine select_s2s
       end module select_s2s_mod
 

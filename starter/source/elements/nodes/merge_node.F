@@ -42,6 +42,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
       USE NOD2EL_MOD
       USE GROUPDEF_MOD
       use element_mod , only : nixs,nixq,nixc,nixt,nixp,nixr,nixtg
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -104,11 +105,18 @@ C
       NN1 = NMERGE_NODE_CAND
       NN2 = NMERGE_NODE_DEST
 C
-      ALLOCATE(IMERGE0(NN1),DIST(NN1),LIST1(NMERGE_NODE_CAND),LIST2(NMERGE_NODE_DEST))
-      ALLOCATE(LIST1_INV(NUMNOD),LIST2_INV(NUMNOD),IADMERGE2TMP(NUMNOD+1))
-      ALLOCATE(LIST1_IDMERGE(NMERGE_NODE_CAND),LIST2_IDMERGE(NMERGE_NODE_DEST))
-      ALLOCATE(LIST1_NBMERGE(NMERGE_NODE_CAND),LIST2_NBMERGE(NMERGE_NODE_DEST))
-      ALLOCATE(TAGNOD_TEMP(NUMNOD))
+      call my_alloc(IMERGE0, NN1, "IMERGE0")
+      call my_alloc(DIST, NN1, "DIST")
+      call my_alloc(LIST1, NMERGE_NODE_CAND, "LIST1")
+      call my_alloc(LIST2, NMERGE_NODE_DEST, "LIST2")
+      call my_alloc(LIST1_INV, NUMNOD, "LIST1_INV")
+      call my_alloc(LIST2_INV, NUMNOD, "LIST2_INV")
+      call my_alloc(IADMERGE2TMP, NUMNOD+1, "IADMERGE2TMP")
+      call my_alloc(LIST1_IDMERGE, NMERGE_NODE_CAND, "LIST1_IDMERGE")
+      call my_alloc(LIST2_IDMERGE, NMERGE_NODE_DEST, "LIST2_IDMERGE")
+      call my_alloc(LIST1_NBMERGE, NMERGE_NODE_CAND, "LIST1_NBMERGE")
+      call my_alloc(LIST2_NBMERGE, NMERGE_NODE_DEST, "LIST2_NBMERGE")
+      call my_alloc(TAGNOD_TEMP, NUMNOD, "TAGNOD_TEMP")
 C
       IMERGE0 = 0
       DIST = ZERO

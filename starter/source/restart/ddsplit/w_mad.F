@@ -76,6 +76,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
@@ -100,9 +101,11 @@ C-----------------------------------------------
      .        TMPNOD,ICONX_L
 C-----------------------------------------------
 !     allocate 1d arrays
-      ALLOCATE(MADCL_TMPNOD(MADCL_NMADNOD_L))
-      ALLOCATE( TMPSH3(NMADSH3_L),TMPSH4(NMADSH4_L) )
-      ALLOCATE( TMPSOL(NMADSOL_L),TMPNOD(NMADNOD_L) )
+      call my_alloc(MADCL_TMPNOD, MADCL_NMADNOD_L, "MADCL_TMPNOD")
+      call my_alloc(TMPSH3, NMADSH3_L, "TMPSH3")
+      call my_alloc(TMPSH4, NMADSH4_L, "TMPSH4")
+      call my_alloc(TMPSOL, NMADSOL_L, "TMPSOL")
+      call my_alloc(TMPNOD, NMADNOD_L, "TMPNOD")
       ALLOCATE( ICONX_L(7*NCONX) )
 ! -------------------------------
 C

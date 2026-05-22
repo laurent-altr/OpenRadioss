@@ -171,7 +171,7 @@ C     NRT_SH nb of shells before symetrization, NRT nb of MAIN segments before s
 C------------------------------------
 C     GAP NODES SECONDS
 C------------------------------------
-      ALLOCATE(TAGB(NUMNOD))
+      call my_alloc(TAGB, NUMNOD, "TAGB")
       DO I=1,NUMNOD
         WA(I)=ZERO
       ENDDO
@@ -466,7 +466,7 @@ C -----NITSCHE method for contact : construction of tabs needed to compute equiv
 C IRECTS tab : case NRTS=NRTM, similar to irect 
 C                   but irects  (seg -> SECONDARY or MAIN node) / irect (seg -> local node)
 
-          ALLOCATE(TAGNOD(NUMNOD))
+          call my_alloc(TAGNOD, NUMNOD, "TAGNOD")
           TAGNOD(1:NUMNOD)=0
           DO NM=1,NMN
             TAGNOD(MSR(NM))=NM
@@ -1810,6 +1810,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
@@ -1827,7 +1828,7 @@ C-----------------------------------------------
       DATA NEXTK/2,3,4,1/
 C=======================================================================
       NLMAX = 4*NSEG
-      ALLOCATE (LINEIX(2,NLMAX)    ,STAT=stat)
+      call my_alloc(LINEIX, 2, NLMAX, "LINEIX", stat=stat)
       ALLOCATE (INDEX(2*NLMAX)     ,STAT=stat)
 c---------------------------------------
 c       search for all lines on the surface
@@ -1913,6 +1914,7 @@ C============================================================================
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
@@ -1935,7 +1937,8 @@ C     REAL
       my_real, DIMENSION(:,:), ALLOCATABLE :: NORM
       INTEGER, DIMENSION(:), ALLOCATABLE :: ITAG  
 C=======================================================================
-       ALLOCATE(NORM(3,NUMNOD),ITAG(NUMNOD))
+       call my_alloc(NORM, 3, NUMNOD, "NORM")
+       call my_alloc(ITAG, NUMNOD, "ITAG")
        DO I=1,NUMNOD
         NORM(1,I) = ZERO
         NORM(2,I) = ZERO

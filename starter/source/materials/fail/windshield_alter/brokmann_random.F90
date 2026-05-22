@@ -103,7 +103,7 @@
             call my_alloc(a_seed,i_seed,"a_seed")
             a_seed = seed
             call random_seed(put=a_seed)
-            call my_dealloc(a_seed, "a_seed")
+            call my_dealloc(a_seed)
           end if
 !
           call my_alloc(elmat,numelc+numeltg,"elmat")
@@ -191,7 +191,7 @@
           ! initialize brokmann element structure
 
           brokmann%nelem = nshell
-          allocate (brokmann%brokmann_elem(nshell))
+          allocate(brokmann%brokmann_elem(nshell))
           do i = 1,nshell
             brokmann%brokmann_elem(i)%elnum = elmat(i)
             nix = nixel(i)
@@ -216,8 +216,8 @@
             brokmann%brokmann_elem(i)%random(6) = randp
           end do
 !
-          call my_dealloc(nixel, "nixel")
-          call my_dealloc(elmat, "elmat")
+          call my_dealloc(nixel)
+          call my_dealloc(elmat)
 ! ----------------------------------------------------------------------------------------------------------------------
           return
         end subroutine brokmann_random

@@ -33,6 +33,7 @@ C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
       USE MONVOL_STRUCT_MOD
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -249,7 +250,7 @@ c End elimination of double elements
         ENDIF
       END DO
       T_MONVOLN%NNS = NNB
-      ALLOCATE(T_MONVOLN%NODES(NNB))
+      call my_alloc(T_MONVOLN%NODES, NNB, "T_MONVOLN%NODES")
       NNB = 0
       DO I=1,NUMNOD
         IF (ITAG(I)==1) THEN
@@ -430,6 +431,7 @@ C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
       USE MONVOL_STRUCT_MOD
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -454,7 +456,9 @@ C-----------------------------------------------
       INTEGER, DIMENSION(:), ALLOCATABLE :: ITAG, ITAG_SURFEXT, ITABINV_SURFEXT
       INTEGER(8) :: VEC_PTR_SURFINT
 
-      ALLOCATE(ITAG(NUMNOD), ITAG_SURFEXT(NUMNOD), ITABINV_SURFEXT(NUMNOD))
+      call my_alloc(ITAG, NUMNOD, "ITAG")
+      call my_alloc(ITAG_SURFEXT, NUMNOD, "ITAG_SURFEXT")
+      call my_alloc(ITABINV_SURFEXT, NUMNOD, "ITABINV_SURFEXT")
 
       DO I = 1, NUMNOD
         ITAG(I) = 0
@@ -463,7 +467,7 @@ C-----------------------------------------------
       ENDDO
 
       NNS = T_MONVOLN%NNS
-      ALLOCATE(BUFNODE(NNS))
+      call my_alloc(BUFNODE, NNS, "BUFNODE")
       DO I = 1, NNS
         BUFNODE(I) = T_MONVOLN%NODES(I)
 !     FLAG NODES OF EXTERNAL SURFACE
@@ -502,7 +506,7 @@ C-----------------------------------------------
       END DO
 
       DEALLOCATE(T_MONVOLN%NODES)
-      ALLOCATE(T_MONVOLN%NODES(NNB + NNS))
+      call my_alloc(T_MONVOLN%NODES, NNB + NNS, "T_MONVOLN%NODES")
       DO I = 1, NNS
         T_MONVOLN%NODES(I) = BUFNODE(I)
       ENDDO

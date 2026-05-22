@@ -152,8 +152,10 @@ C-------------------------------------------------------------------------------
 C---------------------Allocation and initialisation of array tags------------------C
 C----------------------------------------------------------------------------------C
 
-          ALLOCATE(TAG_MAT(NUMMAT),TAG_PROP(NUMGEO),TAG_SUBS(NSUBS))
-          ALLOCATE(TAG_SURF(NUMELC+NUMELTG+NUMELS+NPART))
+          call my_alloc(TAG_MAT, NUMMAT, "TAG_MAT")
+          call my_alloc(TAG_PROP, NUMGEO, "TAG_PROP")
+          call my_alloc(TAG_SUBS, NSUBS, "TAG_SUBS")
+          call my_alloc(TAG_SURF, NUMELC+NUMELTG+NUMELS+NPART, "TAG_SURF")
 
           TAG_SURF(:) = 0
           TAG_SUBS(:) = 0
@@ -164,8 +166,8 @@ C------------Temporarily all mat and properties are kept -----------------------
           TAG_PROP(:) = 1
 
 C------------TAG_EL must be stored-------------------------------------------------C
-          ALLOCATE(TAG_ELCF2(NUMELC))
-          ALLOCATE(TAG_ELSF2(NUMELS))
+          call my_alloc(TAG_ELCF2, NUMELC, "TAG_ELCF2")
+          call my_alloc(TAG_ELSF2, NUMELS, "TAG_ELSF2")
           TAG_ELCF2 = 0
           TAG_ELSF2 = 0
           DO I=1,NUMELS
@@ -415,8 +417,9 @@ C-------------------------------------------------------------------------------
 C-------------Split of materials --------------------------------------------------C
 C----------------------------------------------------------------------------------C
 
-          ALLOCATE (IPM_TEMP(NPROPMI*NUMMAT),PM_TEMP(NPROPM*NUMMAT))
-          ALLOCATE(CORESMA(NUMMAT))
+          call my_alloc(IPM_TEMP, NPROPMI*NUMMAT, "IPM_TEMP")
+          call my_alloc(PM_TEMP, NPROPM*NUMMAT, "PM_TEMP")
+          call my_alloc(CORESMA, NUMMAT, "CORESMA")
           DO I=1,NUMMAT
             DO J=1,NPROPMI
               IPM_TEMP(NPROPMI*(I-1)+J)=IPM(NPROPMI*(I-1)+J)
@@ -431,7 +434,8 @@ C-------------------------------------------------------------------------------
 
 C-------------Split----------------------------------------------------------------C
 
-          ALLOCATE(IPM(SIZ_IPM_NEW),PM(SIZ_PM_NEW))
+          call my_alloc(IPM, SIZ_IPM_NEW, "IPM")
+          call my_alloc(PM, SIZ_PM_NEW, "PM")
           COMPT = 0
           DO J=1,NUMMAT
             IF ((TAG_MAT(J)/=0).OR.(J==NUMMAT)) THEN
@@ -453,8 +457,9 @@ C-------------------------------------------------------------------------------
 C-------------Split of properties -------------------------------------------------C
 C----------------------------------------------------------------------------------C
 
-          ALLOCATE (IGEO_TEMP(NPROPGI*NUMGEO),GEO_TEMP(NPROPG*NUMGEO))
-          ALLOCATE(CORESPRO(NUMGEO))
+          call my_alloc(IGEO_TEMP, NPROPGI*NUMGEO, "IGEO_TEMP")
+          call my_alloc(GEO_TEMP, NPROPG*NUMGEO, "GEO_TEMP")
+          call my_alloc(CORESPRO, NUMGEO, "CORESPRO")
           DO I=1,NUMGEO
             DO J=1,NPROPGI
               IGEO_TEMP(NPROPGI*(I-1)+J)=IGEO(NPROPGI*(I-1)+J)
@@ -469,7 +474,8 @@ C-------------------------------------------------------------------------------
 
 C-------------Split----------------------------------------------------------------C
 
-          ALLOCATE(IGEO(SIZ_IGEO_NEW),GEO(SIZ_GEO_NEW))
+          call my_alloc(IGEO, SIZ_IGEO_NEW, "IGEO")
+          call my_alloc(GEO, SIZ_GEO_NEW, "GEO")
           COMPT = 0
           MAXANUS = 0
           DO J=1,NUMGEO
@@ -502,8 +508,9 @@ C-------------------------------------------------------------------------------
 C-------------Split of nodes-------------------------------------------------------C
 C----------------------------------------------------------------------------------C
 
-          ALLOCATE(CORESN(NUMNOD),X_TEMP(3,NUMNOD))
-          ALLOCATE(ITAB_TEMP(NUMNOD))
+          call my_alloc(CORESN, NUMNOD, "CORESN")
+          call my_alloc(X_TEMP, 3, NUMNOD, "X_TEMP")
+          call my_alloc(ITAB_TEMP, NUMNOD, "ITAB_TEMP")
           DO J=1,NUMNOD
             ITAB_TEMP(J)=ITAB(J)
             X_TEMP(1,J)=X(3*(J-1)+1)
@@ -513,9 +520,11 @@ C-------------------------------------------------------------------------------
           DEALLOCATE(ITAB,X)
 
 C-------------Split----------------------------------------------------------------C
-          ALLOCATE(ITAB(NNODN),X(3*NNODN),ITAB_SUP(NODSUPR))
-          ALLOCATE(FRONT_R2R(NNODN))
-          ALLOCATE(FLAGKIN_R2R(NNODN))
+          call my_alloc(ITAB, NNODN, "ITAB")
+          call my_alloc(X, 3*NNODN, "X")
+          call my_alloc(ITAB_SUP, NODSUPR, "ITAB_SUP")
+          call my_alloc(FRONT_R2R, NNODN, "FRONT_R2R")
+          call my_alloc(FLAGKIN_R2R, NNODN, "FLAGKIN_R2R")
           FLAGKIN_R2R(1:NNODN)=0
           FRONT_R2R(1:NNODN)=0
           COMPT = 0
@@ -602,7 +611,7 @@ C-------------------------------------------------------------------------------
 
           IF (ALE%GLOBAL%SNALE>0) THEN
 C
-            ALLOCATE(NALE_R2R_TEMP(ALE%GLOBAL%SNALE))
+            call my_alloc(NALE_R2R_TEMP, ALE%GLOBAL%SNALE, "NALE_R2R_TEMP")
             DO J=1,NUMNOD_OLD
               NALE_R2R_TEMP(J)=NALE_R2R(J)
             END DO
@@ -625,7 +634,7 @@ C-------------Split of EANI-----------------------------------------------------
 C----------------------------------------------------------------------------------C
 
           NTOT = NELSN+NELCN+NELTGN+NELQN
-          ALLOCATE(EANI_TEMP(SEANI))
+          call my_alloc(EANI_TEMP, SEANI, "EANI_TEMP")
           COMPT = 0
 
           DO J=1,SEANI
@@ -656,7 +665,7 @@ C-------------------------------------------------------------------------------
 
           SIPART0 = LIPART1*NPART+LIPART1*NTHPART
           SIPARTTH= 2*9*NPART+2*9*NTHPART
-          ALLOCATE(IPART_TEMP(SIPART))
+          call my_alloc(IPART_TEMP, SIPART, "IPART_TEMP")
 
           DO J=1,SIPART
             IPART_TEMP(J)=IPART(J)
@@ -665,7 +674,7 @@ C-------------------------------------------------------------------------------
           DEALLOCATE(IPART)
           SIPART  = SIPART0+SIPARTTH+NELSN+NELQN+NELCN+NELTN+NELPN
      .        + NELRN+NELTGN+NUMELX+NUMSPH
-          ALLOCATE(IPART(SIPART))
+          call my_alloc(IPART, SIPART, "IPART")
 
           DO J=1,SIPART0+SIPARTTH
             IPART(J)=IPART_TEMP(J)
@@ -678,7 +687,8 @@ C-------------------------------------------------------------------------------
 C-------------Split of SOLID elements----------------------------------------------C
 C----------------------------------------------------------------------------------C
 
-          ALLOCATE(IX_TEMP(SIXS),CORESS(NUMELS))
+          call my_alloc(IX_TEMP, SIXS, "IX_TEMP")
+          call my_alloc(CORESS, NUMELS, "CORESS")
 
           DO J=1,NUMELS
             DO K=1,NIXS
@@ -697,7 +707,8 @@ C-------------Storage of additional terms IXS10,IXS20,IXS16---------------------
 C-------------Split----------------------------------------------------------------C
 
           SIXSN = NELSN*NIXS+NELS10N*6+NELS20N*12+NELS16N*8
-          ALLOCATE(IXS(SIXSN),TAG_ELSF(NELSN))
+          call my_alloc(IXS, SIXSN, "IXS")
+          call my_alloc(TAG_ELSF, NELSN, "TAG_ELSF")
           TAG_ELSF = 0
           COMPT = 0
           COMPT8 = 0
@@ -767,7 +778,8 @@ C-------------------------------------------------------------------------------
 C-------------Split of QUAD elements-----------------------------------------------C
 C----------------------------------------------------------------------------------C
 
-          ALLOCATE(IX_TEMP(NUMELQ*NIXQ),CORESQ(NUMELQ))
+          call my_alloc(IX_TEMP, NUMELQ*NIXQ, "IX_TEMP")
+          call my_alloc(CORESQ, NUMELQ, "CORESQ")
           DO J=1,NUMELQ
             DO K=1,NIXQ
               IX_TEMP(NIXQ*(J-1)+K)=IXQ(NIXQ*(J-1)+K)
@@ -777,7 +789,7 @@ C-------------------------------------------------------------------------------
 
 C-------------Split----------------------------------------------------------------C
 
-          ALLOCATE(IXQ(NELQN*NIXQ))
+          call my_alloc(IXQ, NELQN*NIXQ, "IXQ")
           COMPT = 0
           DO J=1,NUMELQ
             COMPT_IP_TMP=COMPT_IP_TMP+1
@@ -805,7 +817,8 @@ C-------------Split of SHELL elements-------------------------------------------
 C----------------------------------------------------------------------------------C
 
           NUMELC0 = NUMELC
-          ALLOCATE(IX_TEMP(NUMELC*NIXC),CORESC(NUMELC))
+          call my_alloc(IX_TEMP, NUMELC*NIXC, "IX_TEMP")
+          call my_alloc(CORESC, NUMELC, "CORESC")
           CALL MY_ALLOC(IWORKSH_TEMP,3,NUMELC,"IWORKSH_TEMP")
           DO J=1,NUMELC
             DO K=1,NIXC
@@ -818,7 +831,8 @@ C-------------------------------------------------------------------------------
           DEALLOCATE(IXC)
 
 C-------------Split----------------------------------------------------------------C
-          ALLOCATE(IXC(NELCN*NIXC),TAG_ELCF(NELCN))
+          call my_alloc(IXC, NELCN*NIXC, "IXC")
+          call my_alloc(TAG_ELCF, NELCN, "TAG_ELCF")
           TAG_ELCF = 0
           COMPT = 0
           DO J=1,NUMELC
@@ -856,7 +870,8 @@ C-------------------------------------------------------------------------------
 C-------------Split of TRUSS elements----------------------------------------------C
 C----------------------------------------------------------------------------------C
 
-          ALLOCATE(IX_TEMP(NUMELT*NIXT),COREST(NUMELT))
+          call my_alloc(IX_TEMP, NUMELT*NIXT, "IX_TEMP")
+          call my_alloc(COREST, NUMELT, "COREST")
           DO J=1,NUMELT
             DO K=1,NIXT
               IX_TEMP(NIXT*(J-1)+K)=IXT(NIXT*(J-1)+K)
@@ -866,7 +881,7 @@ C-------------------------------------------------------------------------------
 
 C-------------Split----------------------------------------------------------------C
 
-          ALLOCATE(IXT(NELTN*NIXT))
+          call my_alloc(IXT, NELTN*NIXT, "IXT")
           COMPT = 0
           DO J=1,NUMELT
             COMPT_IP_TMP=COMPT_IP_TMP+1
@@ -894,7 +909,8 @@ C-------------------------------------------------------------------------------
 C-------------Split of BEAM elements-----------------------------------------------C
 C----------------------------------------------------------------------------------C
 
-          ALLOCATE(IX_TEMP(NUMELP*NIXP),CORESP(NUMELP))
+          call my_alloc(IX_TEMP, NUMELP*NIXP, "IX_TEMP")
+          call my_alloc(CORESP, NUMELP, "CORESP")
           DO J=1,NUMELP
             DO K=1,NIXP
               IX_TEMP(NIXP*(J-1)+K)=IXP(NIXP*(J-1)+K)
@@ -904,7 +920,7 @@ C-------------------------------------------------------------------------------
 
 C-------------Split----------------------------------------------------------------C
 
-          ALLOCATE(IXP(NELPN*NIXP))
+          call my_alloc(IXP, NELPN*NIXP, "IXP")
           COMPT = 0
           DO J=1,NUMELP
             COMPT_IP_TMP=COMPT_IP_TMP+1
@@ -932,7 +948,7 @@ C-------------------------------------------------------------------------------
 C-------------Split of SPRINGS and KJOINTS-----------------------------------------C
 C----------------------------------------------------------------------------------C
 
-          ALLOCATE(IX_TEMP(NUMELR*5+1))
+          call my_alloc(IX_TEMP, NUMELR*5+1, "IX_TEMP")
           DO J=1,NUMELR
             DO K=1,5
               IX_TEMP(5*(J-1)+K)=IXR_KJ(5*(J-1)+K)
@@ -966,7 +982,8 @@ C-------------------------------------------------------------------------------
 C-------------Split of SPRING elements---------------------------------------------C
 C----------------------------------------------------------------------------------C
 
-          ALLOCATE(IX_TEMP(NUMELR*NIXR),CORESR(NUMELR))
+          call my_alloc(IX_TEMP, NUMELR*NIXR, "IX_TEMP")
+          call my_alloc(CORESR, NUMELR, "CORESR")
           DO J=1,NUMELR
             DO K=1,NIXR
               IX_TEMP(NIXR*(J-1)+K)=IXR(NIXR*(J-1)+K)
@@ -976,7 +993,7 @@ C-------------------------------------------------------------------------------
 
 C-------------Split----------------------------------------------------------------C
 
-          ALLOCATE(IXR(NELRN*NIXR))
+          call my_alloc(IXR, NELRN*NIXR, "IXR")
           COMPT = 0
           DO J=1,NUMELR
             COMPT_IP_TMP=COMPT_IP_TMP+1
@@ -1006,7 +1023,8 @@ C-------------Split of SH3N elements--------------------------------------------
 C----------------------------------------------------------------------------------C
 
           NUMELTG0 = NUMELTG
-          ALLOCATE(IX_TEMP(NUMELTG*NIXTG),CORESTG(NUMELTG))
+          call my_alloc(IX_TEMP, NUMELTG*NIXTG, "IX_TEMP")
+          call my_alloc(CORESTG, NUMELTG, "CORESTG")
           DO J=1,NUMELTG
             DO K=1,NIXTG
               IX_TEMP(NIXTG*(J-1)+K)=IXTG(NIXTG*(J-1)+K)
@@ -1016,7 +1034,7 @@ C-------------------------------------------------------------------------------
 
 C-------------Split----------------------------------------------------------------C
 
-          ALLOCATE(IXTG(NELTGN*NIXTG))
+          call my_alloc(IXTG, NELTGN*NIXTG, "IXTG")
           COMPT = 0
           DO J=1,NUMELTG
             COMPT_IP_TMP=COMPT_IP_TMP+1
@@ -1043,7 +1061,7 @@ C-------------------------------------------------------------------------------
 C-------------Split of /SPH/RESERVE------------------------------------------------C
 C----------------------------------------------------------------------------------C
 
-          ALLOCATE(RES_TEMP(NBPARTINLET))
+          call my_alloc(RES_TEMP, NBPARTINLET, "RES_TEMP")
           DO J=1,NBPARTINLET
             RES_TEMP(J) = RESERVEP(J)
           END DO
@@ -1074,7 +1092,8 @@ C-------------------------------------------------------------------------------
           IF (NSPHN>0) COEFF = 1
           NUMSPHA = NUMSPH - NSPHRES
 C
-          ALLOCATE(KXSP_TEMP(NISP*NUMSPH),CORESSP(NUMSPH))
+          call my_alloc(KXSP_TEMP, NISP*NUMSPH, "KXSP_TEMP")
+          call my_alloc(CORESSP, NUMSPH, "CORESSP")
           DO J=1,NUMSPH
             DO K=1,NISP
               KXSP_TEMP(NISP*(J-1)+K)=KXSP(NISP*(J-1)+K)
@@ -1083,8 +1102,10 @@ C
           DEALLOCATE(IXSP,KXSP,NOD2SP,SPBUF)
 
 C-------------Split----------------------------------------------------------------C
-          ALLOCATE(IXSP(KVOISPH,NSPHN),KXSP(NISP*NSPHN),NOD2SP(COEFF*NUMNOD))
-          ALLOCATE(SPBUF(NSPBUF*NSPHN))
+          call my_alloc(IXSP, KVOISPH, NSPHN, "IXSP")
+          call my_alloc(KXSP, NISP*NSPHN, "KXSP")
+          call my_alloc(NOD2SP, COEFF*NUMNOD, "NOD2SP")
+          call my_alloc(SPBUF, NSPBUF*NSPHN, "SPBUF")
           COMPT = 0
           NSPHRESN = 0
           DO J=1,NUMSPH
@@ -1121,7 +1142,7 @@ C-------------------------------------------------------------------------------
 C-------------Split of THKE for shell and sh3n elements----------------------------C
 C----------------------------------------------------------------------------------C
 
-          ALLOCATE(THK_TMP(NUMELTG0+NUMELC0))
+          call my_alloc(THK_TMP, NUMELTG0+NUMELC0, "THK_TMP")
           DO J=1,NUMELTG0+NUMELC0
             THK_TMP(J)=THKE(J)
           END DO
@@ -1129,7 +1150,7 @@ C-------------------------------------------------------------------------------
 
 C-------------Split----------------------------------------------------------------C
 
-          ALLOCATE(THKE(NUMELTG+NUMELC))
+          call my_alloc(THKE, NUMELTG+NUMELC, "THKE")
           DO J=1,NUMELC0
             IF (TAG_ELC(J+NPART)/=0) THEN
               THKE(CORESC(J))=THK_TMP(J)
@@ -1457,13 +1478,13 @@ C-------------------------------------------------------------------------------
 C--------------Update of TAGNO-----------------------------------------------------C
 C----------------------------------------------------------------------------------C
 
-          ALLOCATE(TAGNO_TEMP(2*NUMNOD_OLD+NPART))
+          call my_alloc(TAGNO_TEMP, 2*NUMNOD_OLD+NPART, "TAGNO_TEMP")
           DO J=1,NPART+2*NUMNOD_OLD
             TAGNO_TEMP(J)=TAGNO(J)
           END DO
 
           DEALLOCATE(TAGNO)
-          ALLOCATE(TAGNO(2*NUMNOD+NPART))
+          call my_alloc(TAGNO, 2*NUMNOD+NPART, "TAGNO")
           DO J=1,NPART
             TAGNO(J)=TAGNO_TEMP(J)
           END DO
@@ -1511,7 +1532,7 @@ C------Split of RBY_MSN (used for /INIVEL/AXIS) --------------------------------
 C----------------------------------------------------------------------------------C
 
           NRBODY_OLD = SIZE(TAGRBY)
-          ALLOCATE(RBY_MSN_TEMP(2,NRBODY_OLD))
+          call my_alloc(RBY_MSN_TEMP, 2, NRBODY_OLD, "RBY_MSN_TEMP")
           DO I=1,NRBODY_OLD
             RBY_MSN_TEMP(1,I) = RBY_MSN(1,I)
             RBY_MSN_TEMP(2,I) = RBY_MSN(2,I)

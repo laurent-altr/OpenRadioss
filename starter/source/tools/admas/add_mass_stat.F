@@ -71,7 +71,7 @@ C-------------------------------------------------------------------------------
 C     DUPLICATED FROM OUTRIN - STATS ON ADDED MASS + TARGET NODAL TIME STEP ESTIMATION
 C--------------------------------------------------------------------------------------
 C
-      ALLOCATE(DT(2*NUMNOD))
+      call my_alloc(DT, 2*NUMNOD, "DT")
       CALL MY_ALLOC(PERM,NUMNOD,"PERM")
       MASS0_START = TOTMAS1
       DTSCA = ZEP9

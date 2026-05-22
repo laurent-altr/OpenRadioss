@@ -117,7 +117,7 @@ C     START BROWSING MODEL /PCYL
 C--------------------------------------------------
       CALL HM_OPTION_COUNT('/LOAD/PCYL',NLOAD_CYL)
       LOADS%NLOAD_CYL = NLOAD_CYL
-      ALLOCATE(LOADS%LOAD_CYL(NLOAD_CYL))
+      allocate(LOADS%LOAD_CYL(NLOAD_CYL))
 
       CALL HM_OPTION_START('/LOAD/PCYL')
 C--------------------------------------------------

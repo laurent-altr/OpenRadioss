@@ -240,6 +240,7 @@ C-----------------------------------------------
       USE MESSAGE_MOD
       USE NAMES_AND_TITLES_MOD , ONLY : NCHARTITLE, NCHARKEY
       use element_mod , only : nixc,nixtg
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -325,7 +326,7 @@ C
         KNOD2SH(N)=KNOD2SH(N)+KNOD2SH(N-1)
       END DO
 C
-      ALLOCATE(NOD2SH(4*NUMELC_LEV+3*NUMELTG_LEV),STAT=stat)
+      call my_alloc(NOD2SH, 4*NUMELC_LEV+3*NUMELTG_LEV, "NOD2SH", stat=stat)
       IF (STAT /= 0) CALL ANCMSG(MSGID=268,ANMODE=ANINFO,
      .                           MSGTYPE=MSGERROR,
      .                         C1='NOD2SH')     
@@ -354,7 +355,7 @@ C
       KNOD2SH(0)=0
 C
 C     allocation tag
-      ALLOCATE(TAG(5,NUMELC_LEV+NUMELTG_LEV),STAT=stat)
+      call my_alloc(TAG, 5, NUMELC_LEV+NUMELTG_LEV, "TAG", stat=stat)
       IF (STAT /= 0) CALL ANCMSG(MSGID=268,ANMODE=ANINFO,
      .                           MSGTYPE=MSGERROR,
      .                         C1='TAG')     

@@ -154,19 +154,19 @@ C      ALLOCS & INITS
 c      use NUMELQ IN PLACE OF NUMELC ( NBADMESH routine is modifying NUMELC )
 C--------------------------------------------------
       CALL MY_ALLOC(ITAG,NUMNOD,"ITAG")
-      ALLOCATE (SUB_SPH(NUMSPH),STAT=stat)
+      call my_alloc(SUB_SPH, NUMSPH, "SUB_SPH", stat=stat)
       IF (STAT /= 0) CALL ANCMSG(MSGID=268,ANMODE=ANINFO,
      .                             MSGTYPE=MSGERROR,
      .                             C1='SUB_SPH')
-      ALLOCATE (UID_SPH(NUMSPH),STAT=stat)
+      call my_alloc(UID_SPH, NUMSPH, "UID_SPH", stat=stat)
       IF (STAT /= 0) CALL ANCMSG(MSGID=268,ANMODE=ANINFO,
      .                             MSGTYPE=MSGERROR,
      .                             C1='UID_SPH') 
-      ALLOCATE (TYPE(NUMSPH),STAT=stat)
+      call my_alloc(TYPE, NUMSPH, "TYPE", stat=stat)
       IF (STAT /= 0) CALL ANCMSG(MSGID=268,ANMODE=ANINFO,
      .                             MSGTYPE=MSGERROR,
      .                             C1='TYPE') 
-      ALLOCATE (HM_MASS(NUMSPH),STAT=stat)
+      call my_alloc(HM_MASS, NUMSPH, "HM_MASS", stat=stat)
       IF (STAT /= 0) CALL ANCMSG(MSGID=268,ANMODE=ANINFO,
      .                             MSGTYPE=MSGERROR,
      .                             C1='HM_MASS') 

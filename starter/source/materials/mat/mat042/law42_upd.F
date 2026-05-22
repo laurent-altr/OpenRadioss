@@ -36,6 +36,7 @@ C-----------------------------------------------
       USE TABLE_MOD
       USE NAMES_AND_TITLES_MOD , ONLY : NCHARTITLE
       USE MATPARAM_DEF_MOD
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -102,10 +103,10 @@ C     Formulation for solid elements time step computation.
          ENDDO  
        ENDIF 
 C
-       ALLOCATE (STRETCH(NDATA))                              
-       ALLOCATE (STRESS(NDATA))                                  
-       ALLOCATE (ITAB_ON_A(NDATA))                                    
-       ALLOCATE (INDEX(NDATA))                                                                           
+       call my_alloc(STRETCH, NDATA, "STRETCH")
+       call my_alloc(STRESS, NDATA, "STRESS")
+       call my_alloc(ITAB_ON_A, NDATA, "ITAB_ON_A")
+       call my_alloc(INDEX, NDATA, "INDEX")
        STRETCH(1)=LAM_MIN
        ITAB_ON_A = 0
        DO K= 2,NDATA

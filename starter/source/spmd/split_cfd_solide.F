@@ -49,6 +49,7 @@ C-----------------------------------------------
         USE SPLIT_CFD_MOD
         USE ALE_CONNECTIVITY_MOD
         use element_mod , only : nixs
+        use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -88,7 +89,7 @@ C ----------------------------------------
         !       allocation of ALE_ELM (overestimation of the size)
         SIZE_ALE_ELM(1:NSPMD) = NUMELS/NSPMD+1
         DO ISPMD=1,NSPMD
-                ALLOCATE( ALE_ELM(ISPMD)%SOL_ID(SIZE_ALE_ELM(ISPMD)) )
+                call my_alloc(ALE_ELM(ISPMD)%SOL_ID, SIZE_ALE_ELM(ISPMD), "ALE_ELM(ISPMD)%SOL_ID")
         ENDDO
         !       -----------------------------
         II(1:NSPMD) = 0
@@ -122,7 +123,7 @@ C ----------------------------------------
                       !       need to check the size for small test, ie. when NUMELS < NSPMS
                       MIN_SIZE=MAX(1,5* NUMELS/ ( 4*NSPMD ))
                       NEW_SIZE_II = SIZE_ALE_ELM(ISPMD) + MIN_SIZE
-                      ALLOCATE( TMP( NEW_SIZE_II ) )
+                      call my_alloc(TMP, NEW_SIZE_II, "TMP")
                       TMP(1:SIZE_ALE_ELM(ISPMD)) = ALE_ELM(ISPMD)%SOL_ID( 1:SIZE_ALE_ELM(ISPMD) )
                       CALL MOVE_ALLOC(FROM=TMP,TO=ALE_ELM(ISPMD)%SOL_ID)
                       SIZE_ALE_ELM(ISPMD) = NEW_SIZE_II

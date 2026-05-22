@@ -51,6 +51,7 @@ C-----------------------------------------------
       USE ELBUFTAG_MOD
       USE MATPARAM_DEF_MOD
       USE NAMES_AND_TITLES_MOD , ONLY : NCHARTITLE
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e sXM
 C-----------------------------------------------
@@ -568,7 +569,8 @@ c     Computation of cosine interpolation factor
 c----------------------------------------------  
 c
       ! Allocation of the A-MATRIX and the Pivot vector
-      ALLOCATE (AMAT(NANGLE,NANGLE),IPIV(NANGLE))
+      call my_alloc(AMAT, NANGLE, NANGLE, "AMAT")
+      call my_alloc(IPIV, NANGLE, "IPIV")
 c
       ! Filling the A-MATRIX
       DO J = 1,NANGLE
@@ -584,8 +586,12 @@ c
       IF ((Icrit == 1).OR.(Icrit == 2).OR.(Icrit == 3)) THEN 
 c      
         ! Allocation of factors
-        ALLOCATE(Q_fSH(NANGLE,2),Q_fUN(NANGLE,2),Q_fPS(NANGLE,2),
-     .          Q_HISH(NANGLE,2),Q_HIUN(NANGLE,2),Q_HIPS(NANGLE,2))      
+        call my_alloc(Q_fSH, NANGLE, 2, "Q_fSH")
+        call my_alloc(Q_fUN, NANGLE, 2, "Q_fUN")
+        call my_alloc(Q_fPS, NANGLE, 2, "Q_fPS")
+        call my_alloc(Q_HISH, NANGLE, 2, "Q_HISH")
+        call my_alloc(Q_HIUN, NANGLE, 2, "Q_HIUN")
+        call my_alloc(Q_HIPS, NANGLE, 2, "Q_HIPS")
 c
         ! Initialization of tables
         Q_fSH(1:NANGLE,1:2)  = ZERO
@@ -596,7 +602,7 @@ c
         Q_HIPS(1:NANGLE,1:2) = ZERO     
 c
         ! Filling the B vector with experimental points
-        ALLOCATE (BVEC(NANGLE,12))
+        call my_alloc(BVEC, NANGLE, 12, "BVEC")
         BVEC(1:NANGLE,1:2)   = fSH(1:NANGLE,1:2)
         BVEC(1:NANGLE,3:4)   = fUN(1:NANGLE,1:2)
         BVEC(1:NANGLE,5:6)   = fPS(1:NANGLE,1:2)
@@ -626,8 +632,11 @@ c
       ELSE
 c
         ! Allocation of factors
-        ALLOCATE(Q_fUN(NANGLE,2),Q_HISH(NANGLE,2),Q_HIPS(NANGLE,2),
-     .           Q_WSH(NANGLE),Q_WPS(NANGLE))
+        call my_alloc(Q_fUN, NANGLE, 2, "Q_fUN")
+        call my_alloc(Q_HISH, NANGLE, 2, "Q_HISH")
+        call my_alloc(Q_HIPS, NANGLE, 2, "Q_HIPS")
+        call my_alloc(Q_WSH, NANGLE, "Q_WSH")
+        call my_alloc(Q_WPS, NANGLE, "Q_WPS")
 c
         ! Initialization of factors
         Q_fUN(1:NANGLE,1:2)  = ZERO
@@ -637,7 +646,7 @@ c
         Q_WPS(1:NANGLE)      = ZERO
 c
         ! Filling the B vector with experimental points
-        ALLOCATE (BVEC(NANGLE,8))
+        call my_alloc(BVEC, NANGLE, 8, "BVEC")
         BVEC(1:NANGLE,1:2) = fUN(1:NANGLE,1:2)
         BVEC(1:NANGLE,3:4) = HISH(1:NANGLE,1:2)
         BVEC(1:NANGLE,5:6) = HIPS(1:NANGLE,1:2)

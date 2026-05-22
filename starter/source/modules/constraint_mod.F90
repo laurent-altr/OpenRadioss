@@ -115,7 +115,7 @@
           &                  "constraint_struct%rwall%dd")
           constraint_struct%rwall%dd(1:nspmd+2,1:nrwall) = 0
 
-          allocate( constraint_struct%rwall%spmd(nrwall) )
+          allocate(constraint_struct%rwall%spmd(nrwall))
           ! ------------
           do n=1,nrwall
             call my_alloc(constraint_struct%rwall%spmd(n)%m_proc_list,nspmd,       &
@@ -164,12 +164,12 @@
 ! ----------------------------------------------------------------------------------------------------------------------
           ! ------------
           do n=1,nrwall
-            call my_dealloc(constraint_struct%rwall%spmd(n)%m_proc_list, "constraint_struct%rwall%spmd(n)%m_proc_list")
+            call my_dealloc(constraint_struct%rwall%spmd(n)%m_proc_list)
           end do
           ! ------------
           deallocate(constraint_struct%rwall%spmd)
 
-          call my_dealloc(constraint_struct%rwall%dd, "constraint_struct%rwall%dd")
+          call my_dealloc(constraint_struct%rwall%dd)
 
 ! ----------------------------------------------------------------------------------------------------------------------
         end subroutine dealloc_constraint_struct

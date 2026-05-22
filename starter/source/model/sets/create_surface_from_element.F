@@ -88,9 +88,9 @@ C=======================================================================
       NFACES = 6  ! HEXA_8
       IF (NUMELS > NUMELS8) NFACES = 16 ! TETRA_10
 !
-      ALLOCATE(BUFTMPSURF(SZELMAX*NFACES*6))
-      ALLOCATE(ITRI(5,SZELMAX*NFACES))
-      ALLOCATE(INDEX(2*SZELMAX*NFACES))
+      call my_alloc(BUFTMPSURF, SZELMAX*NFACES*6, "BUFTMPSURF")
+      call my_alloc(ITRI, 5, SZELMAX*NFACES, "ITRI")
+      call my_alloc(INDEX, 2*SZELMAX*NFACES, "INDEX")
 !
       IAD_SURF = 1
 !------------------
@@ -137,7 +137,7 @@ C=======================================================================
 ! ----------------------------------------------------------------------------
       IF (GO_IN_ARRAY .EQV. .TRUE.) THEN
         DELBUF%SZ_SURF = NSEG
-        ALLOCATE(DELBUF%SURF(NSEG,6))
+        call my_alloc(DELBUF%SURF, NSEG, 6, "DELBUF%SURF")
         DO L=1,NSEG
           DELBUF%SURF(L,1) = BUFTMPSURF((INDEX(L)-1)*NIX+1)
           DELBUF%SURF(L,2) = BUFTMPSURF((INDEX(L)-1)*NIX+2)

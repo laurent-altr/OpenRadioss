@@ -91,9 +91,9 @@
             elem_list_bij(elem_list(kk)) = kk
           end do
 
-          call my_dealloc(int_tmp_array, "int_tmp_array")
-          call my_dealloc(real_tmp_array, "real_tmp_array")
-          call my_dealloc(indx, "indx")
+          call my_dealloc(int_tmp_array)
+          call my_dealloc(real_tmp_array)
+          call my_dealloc(indx)
 
         end subroutine eikonal_init_sorting
 ! ----------------------------------------------------------------------------------------------------------------------

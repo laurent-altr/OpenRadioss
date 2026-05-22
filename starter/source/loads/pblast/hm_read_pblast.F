@@ -69,6 +69,7 @@ C-----------------------------------------------
       USE SUBMODEL_MOD
       USE HM_OPTION_READ_MOD
       USE NAMES_AND_TITLES_MOD , ONLY : NCHARTITLE, NCHARLINE
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -231,7 +232,7 @@ C-----------------------------------------------
       IS_ITA_SHIFT = .FALSE.
       NWARN = 0
 
-      ALLOCATE( OUTPUT_USER_PARAMS(6,PBLAST%NLOADP_B))
+      call my_alloc(OUTPUT_USER_PARAMS, 6, PBLAST%NLOADP_B, "OUTPUT_USER_PARAMS")
       OUTPUT_USER_PARAMS(:,:) = ZERO
 
       CALL HM_OPTION_START('/LOAD/PBLAST')

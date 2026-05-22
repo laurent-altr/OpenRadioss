@@ -831,9 +831,9 @@
 
 
           ! --- deallocate
-          if(allocated(itag_n))call my_dealloc(itag_n, "itag_n")
-          if(allocated(list_quad))call my_dealloc(list_quad, "list_quad")
-          if(allocated(list_tria))call my_dealloc(list_tria, "list_tria")
+          if(allocated(itag_n))call my_dealloc(itag_n)
+          if(allocated(list_quad))call my_dealloc(list_quad)
+          if(allocated(list_tria))call my_dealloc(list_tria)
           call polygon_destroy(user_polygon)
           call polygon_destroy(elem_polygon)
 

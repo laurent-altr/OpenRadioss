@@ -143,7 +143,7 @@
 !
           !< Modes of failure
           fail_tag%lf_dammx = fail_tag%lf_dammx + fail%nmod
-          allocate (fail%mode(fail%nmod))
+          allocate(fail%mode(fail%nmod))
           fail%mode(1) = "Tensile fiber failure"
           fail%mode(2) = "Compression fiber failure"
           fail%mode(3) = "Inter-fiber failure A"

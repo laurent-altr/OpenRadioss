@@ -168,7 +168,7 @@
             write(6,*) "reduction of margin for single element interface, new margin size: ", bumult*dd0, candidate_count,nsn
             if(dd0 < (dsav*0.001)) exit ! avoid too small margin
           enddo
-          call my_dealloc(volume, "volume")
+          call my_dealloc(volume)
 
 
         end subroutine margin_reduction

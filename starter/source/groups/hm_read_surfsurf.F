@@ -129,17 +129,17 @@ C-----------------------------------------------
 C-----------------------------------------------
 C SURFACES FORMED OF SURFACES
 C=======================================================================
-      ALLOCATE(ITRI(5,INSEG),STAT=IERROR)
+      call my_alloc(ITRI, 5, INSEG, "ITRI", stat=IERROR)
       IF(IERROR/=0)CALL ANCMSG(MSGID=268,ANMODE=ANINFO,
      .                         MSGTYPE=MSGERROR,
      .                         C1='SURFSURF')
 
-      ALLOCATE(INDEX(2*INSEG),STAT=IERROR)
+      call my_alloc(INDEX, 2*INSEG, "INDEX", stat=IERROR)
       IF(IERROR/=0)CALL ANCMSG(MSGID=268,ANMODE=ANINFO,
      .                         MSGTYPE=MSGERROR,
      .                         C1='SURFSURF')
 
-      ALLOCATE(BUFTMP(INSEG),STAT=IERROR)
+      call my_alloc(BUFTMP, INSEG, "BUFTMP", stat=IERROR)
       IF(IERROR/=0)CALL ANCMSG(MSGID=268,ANMODE=ANINFO,
      .                         MSGTYPE=MSGERROR,
      .                         C1='SURFSURF')
@@ -167,7 +167,7 @@ C     loop over the surfaces
             CALL HM_GET_INTV('idsmax', NB_IDS, IS_AVAILABLE, LSUBMODEL)
             CALL HM_GET_INTV('negativeIdsmax', NB_NEG_IDS, IS_AVAILABLE, LSUBMODEL)
             IF (NB_IDS + NB_NEG_IDS == 0) CYCLE
-            ALLOCATE(IDS(NB_IDS + NB_NEG_IDS))
+            call my_alloc(IDS, NB_IDS + NB_NEG_IDS, "IDS")
             DO II = 1, NB_IDS
                CALL HM_GET_INT_ARRAY_INDEX('ids', IDS(II), II, IS_AVAILABLE, LSUBMODEL)
             ENDDO
@@ -286,7 +286,7 @@ C-----------
             CALL HM_GET_INTV('idsmax', NB_IDS, IS_AVAILABLE, LSUBMODEL)
             CALL HM_GET_INTV('negativeIdsmax', NB_NEG_IDS, IS_AVAILABLE, LSUBMODEL)
             IF (NB_IDS + NB_NEG_IDS == 0) CYCLE
-            ALLOCATE(IDS(NB_IDS + NB_NEG_IDS))
+            call my_alloc(IDS, NB_IDS + NB_NEG_IDS, "IDS")
             DO II = 1, NB_IDS
                CALL HM_GET_INT_ARRAY_INDEX('ids', IDS(II), II, IS_AVAILABLE, LSUBMODEL)
             ENDDO

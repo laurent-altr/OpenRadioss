@@ -103,7 +103,7 @@
               end do
             end if !(isfem==1) then
           end do !ng=1,ngroup
-          call my_dealloc(imid, "imid")
+          call my_dealloc(imid)
 !
         end subroutine sfem_exclude_dim
 !=======================================================================================================================
@@ -181,7 +181,7 @@
               end do
             end if !(isfem==1) then
           end do !ng=1,ngroup
-          call my_dealloc(imid, "imid")
+          call my_dealloc(imid)
 !
         end subroutine sfem_exclude_ini
 !

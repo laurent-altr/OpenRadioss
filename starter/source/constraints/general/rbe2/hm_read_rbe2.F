@@ -396,6 +396,7 @@ C-----------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
@@ -418,8 +419,8 @@ C
       INTEGER, DIMENSION(:), ALLOCATABLE :: ITAG,IAD_N
 C========================================================================|
 C--------re-ordering if with hierarchy---------------------------------------
-      ALLOCATE(ITAG(NUMNOD))
-      ALLOCATE(IAD_N(NUMNOD+1))
+      call my_alloc(ITAG, NUMNOD, "ITAG")
+      call my_alloc(IAD_N, NUMNOD+1, "IAD_N")
       NC=0
       DO I=1,NUMNOD
        ITAG(I)=0
@@ -607,6 +608,7 @@ C
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
@@ -628,8 +630,8 @@ C
       INTEGER, DIMENSION(:), ALLOCATABLE :: ITAG, IAD_N
 C========================================================================|
 C--------defining hierarchy---------------------------------------
-      ALLOCATE(ITAG(NUMNOD))
-      ALLOCATE(IAD_N(NUMNOD+1))
+      call my_alloc(ITAG, NUMNOD, "ITAG")
+      call my_alloc(IAD_N, NUMNOD+1, "IAD_N")
       DO I=1,NUMNOD
        ITAG(I)=0
       ENDDO
@@ -1334,6 +1336,7 @@ C
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
@@ -1355,7 +1358,7 @@ C
 
 C========================================================================|
 C--------merging RBE2 w/ the same NS/M (separated IC)--------------------
-      ALLOCATE(ITAG(NUMNOD))
+      call my_alloc(ITAG, NUMNOD, "ITAG")
       ITAG(1:NUMNOD)=0
 C--------if same node as several IND. of /RBE2------------
       NZ=0

@@ -157,7 +157,8 @@ C-----------max number of connected segment per node
        NMAX=MAX(NMAX,ITAG(I))
        ITAG(I)=0
       ENDDO
-      ALLOCATE(MVOI(NMAX+10),EIDNOD(NMAX,NUMNOD))
+      call my_alloc(MVOI, NMAX+10, "MVOI")
+      call my_alloc(EIDNOD, NMAX, NUMNOD, "EIDNOD")
       MVOI(1:NMAX+10)=0
       EIDNOD(1:NMAX,1:NUMNOD)=0
 C------------ini- E_ids of each node
@@ -268,12 +269,12 @@ C
          NMAX=MAX(NMAX,ITAG(I))
          ITAG(I)=0
         ENDDO
-        ALLOCATE(EIDNOD(NMAX,NUMNOD))
+        call my_alloc(EIDNOD, NMAX, NUMNOD, "EIDNOD")
         EIDNOD(1:NMAX,1:NUMNOD)=0
-        ALLOCATE(MVOI(NMAX+10))
+        call my_alloc(MVOI, NMAX+10, "MVOI")
         MVOI(1:NMAX+10)=0
 C
-        ALLOCATE(MNEIGH_SOLID(NMAX,4,NRTM))
+        call my_alloc(MNEIGH_SOLID, NMAX, 4, NRTM, "MNEIGH_SOLID")
         MNEIGH_SOLID(1:NMAX,1:4,1:NRTM) = 0
         DO I=1,NRTM
           IF(IELEM_M(1,I) <= NUMELS) THEN
@@ -557,21 +558,21 @@ C      14: first node of right seg
 C      15: second node right seg
 
 C-----------------------------------------------------------------------
-      ALLOCATE(LEDGE_TMP1(NLEDGE,4*NRTM))
+      call my_alloc(LEDGE_TMP1, NLEDGE, 4*NRTM, "LEDGE_TMP1")
       IF(NEDGE_L >0) THEN
-         ALLOCATE(LEDGE_TMP3(2,NEDGE_L))
+         call my_alloc(LEDGE_TMP3, 2, NEDGE_L, "LEDGE_TMP3")
          LEDGE_TMP3(1:2,1:NEDGE_L) =LEDGE(5:6,1:NEDGE_L)
          LEDGE(5:6,1:NEDGE_L) = 0
          IF(ILEV==2) THEN
-           ALLOCATE(EBINFLG_TMP(NEDGE_L))
+           call my_alloc(EBINFLG_TMP, NEDGE_L, "EBINFLG_TMP")
             EBINFLG_TMP(1:NEDGE_L) =EBINFLG(1:NEDGE_L)
          ENDIF
          IF(NISUB > 0) THEN
-           ALLOCATE(ADDSUBE_TMP(NEDGE_L+1))
+           call my_alloc(ADDSUBE_TMP, NEDGE_L+1, "ADDSUBE_TMP")
            ADDSUBE_TMP(1:NEDGE_L+1) =ADDSUBE(1:NEDGE_L+1)
-           ALLOCATE(LISUBE_TMP(NISUBE))
+           call my_alloc(LISUBE_TMP, NISUBE, "LISUBE_TMP")
            LISUBE_TMP(1:NISUBE) =LISUBE(1:NISUBE)
-           ALLOCATE(INFLG_SUBE_TMP(NISUBE))
+           call my_alloc(INFLG_SUBE_TMP, NISUBE, "INFLG_SUBE_TMP")
            INFLG_SUBE_TMP(1:NISUBE) =INFLG_SUBE(1:NISUBE) 
          ENDIF
       ENDIF
@@ -691,7 +692,9 @@ C                 edge                            free edge
 C           It is considered as it is not a real problem
 C
 C-----------------------------------------------------------------------
-      ALLOCATE(CLEF(4,NEDGE),LEDGE_TMP2(NLEDGE,NEDGE),INDEX(2*NEDGE))
+      call my_alloc(CLEF, 4, NEDGE, "CLEF")
+      call my_alloc(LEDGE_TMP2, NLEDGE, NEDGE, "LEDGE_TMP2")
+      call my_alloc(INDEX, 2*NEDGE, "INDEX")
       DO I=1,NEDGE
 
        I1 = LEDGE_TMP1(5,I)
@@ -890,7 +893,9 @@ C-----1D element edges -----
          NEDGE = NEDGE+NEDGE_L
       ENDIF
 
-      ALLOCATE(IIXYZ(NEDGE),LEDGE_TMP(NLEDGE,NEDGE),INDEX2(2*NEDGE))
+      call my_alloc(IIXYZ, NEDGE, "IIXYZ")
+      call my_alloc(LEDGE_TMP, NLEDGE, NEDGE, "LEDGE_TMP")
+      call my_alloc(INDEX2, 2*NEDGE, "INDEX2")
        LEDGE_TMP(1:NLEDGE,1:NEDGE)=LEDGE(1:NLEDGE,1:NEDGE)
       DO I=1,NEDGE
         N1 = LEDGE(5,I)
@@ -941,7 +946,8 @@ C-----------------------------------------
 C
       IF(NEDGE/=0.AND.NISUB/=0.AND.NEDGE /=NEDGE_L)THEN
 
-        ALLOCATE (MLOC(NUMNOD),KAD(MAX(NMN,NEDGE)),STAT=stat)
+        call my_alloc(MLOC, NUMNOD, "MLOC", stat=stat)
+        call my_alloc(KAD, MAX(NMN,NEDGE), "KAD", stat=stat)
         MLOC(1:NUMNOD)=0
         DO I=1,NMN
           N       = MSR(I)
@@ -971,7 +977,8 @@ C
         ADDSUBN_TMP(1+NMN)=CUR
 C
         NISUBN=ADDSUBN_TMP(1+NMN)-1
-        ALLOCATE (LISUBN(NISUBN),INFLG_SUBN(NISUBN),STAT=stat)
+        call my_alloc(LISUBN, NISUBN, "LISUBN", stat=stat)
+        call my_alloc(INFLG_SUBN, NISUBN, "INFLG_SUBN", stat=stat)
         INFLG_SUBN(1:NISUBN)=0
 C
 C       Use Kad (1: NMN) to fill Lisubn, inflg_subn
@@ -997,7 +1004,7 @@ C-----------------------------------------
         DO N=1,NMN
           MAXADD=MAX(MAXADD,ADDSUBN_TMP(N+1)-ADDSUBN_TMP(N))
         END DO
-        ALLOCATE(IXSUB(2*MAXADD),STAT=stat)
+        call my_alloc(IXSUB, 2*MAXADD, "IXSUB", stat=stat)
 C
         DO N=1,NMN
           KAD(N)=ADDSUBN_TMP(N)
@@ -1254,6 +1261,7 @@ C-------------------------------------
      4 MSR   ,GAPN_M  ,GAPMAX_M ,GAPSCALE,IGEO  ,
      5 MSEGTYP,GAPMSAV,ITHK25,IGAP,THK_M   ,THK_M_SCALE)
       use element_mod , only :nixs,nixc,nixtg,nixt,nixp
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -1287,7 +1295,7 @@ C-----------------------------------------------
       my_real, DIMENSION(:), ALLOCATABLE :: WA
 C init 
 C
-       ALLOCATE(WA(NUMNOD))
+       call my_alloc(WA, NUMNOD, "WA")
        DO I=1,NUMNOD
         WA(I)=ZERO
        END DO

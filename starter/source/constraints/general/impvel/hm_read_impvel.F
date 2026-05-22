@@ -51,6 +51,7 @@ C-----------------------------------------------
       USE HM_OPTION_READ_MOD
       USE UNITAB_MOD
       use element_mod , only : nixr
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -124,7 +125,7 @@ c
 c
 c       TEST DOUBLE IDs of IMPDISP
 c
-        ALLOCATE( OPTID(NIMPDISP) )
+        call my_alloc(OPTID, NIMPDISP, "OPTID")
         OPTID(1:NIMPDISP) = NOM_OPT(1,1:NIMPDISP)
         CALL UDOUBLE(OPTID,1,NIMPDISP,MESS,0,ZERO)
         DEALLOCATE( OPTID )
@@ -166,7 +167,7 @@ c
 c
 c       TEST DOUBLE IDs of IMPVEL
 c
-        ALLOCATE( OPTID(NIMPVEL) )
+        call my_alloc(OPTID, NIMPVEL, "OPTID")
         OPTID(1:NIMPVEL) = NOM_OPT(1,NIMPDISP_0+1:NIMPVEL+NIMPDISP_0)
         CALL UDOUBLE(OPTID,1,NIMPVEL,MESS,0,ZERO)
         DEALLOCATE( OPTID )

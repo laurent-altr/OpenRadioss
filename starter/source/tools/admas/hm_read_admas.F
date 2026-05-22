@@ -414,9 +414,9 @@ C-----------Multidomains: we cannot split the mass in this case--------------
           IF (FLAG == 0) THEN
             CALL HM_GET_INTV('entityidsmax'   ,ENTITYMAX ,IS_AVAILABLE ,LSUBMODEL)
 !
-            ALLOCATE(AMAS_MULTI(ENTITYMAX))
+            call my_alloc(AMAS_MULTI, ENTITYMAX, "AMAS_MULTI")
             AMAS_MULTI(1:ENTITYMAX) = ZERO
-            ALLOCATE(ENTITY_MULTI(ENTITYMAX))
+            call my_alloc(ENTITY_MULTI, ENTITYMAX, "ENTITY_MULTI")
             ENTITY_MULTI(1:ENTITYMAX) = 0
             DO J=1,ENTITYMAX
               CALL HM_GET_FLOAT_ARRAY_INDEX('masses'  ,AMAS_MULTI(J)   ,J ,IS_AVAILABLE, LSUBMODEL, UNITAB)
@@ -458,11 +458,11 @@ C-----------multidomains: common nodes are only processed in one domain---------
 !---
           CALL HM_GET_INTV('entityidsmax'   ,ENTITYMAX ,IS_AVAILABLE ,LSUBMODEL)
 !
-          ALLOCATE(AMAS_MULTI(ENTITYMAX))
+          call my_alloc(AMAS_MULTI, ENTITYMAX, "AMAS_MULTI")
           AMAS_MULTI(1:ENTITYMAX) = ZERO
-          ALLOCATE(ENTITY_MULTI(ENTITYMAX))
+          call my_alloc(ENTITY_MULTI, ENTITYMAX, "ENTITY_MULTI")
           ENTITY_MULTI(1:ENTITYMAX) = 0
-          ALLOCATE(IFLAG_MULTI(ENTITYMAX))
+          call my_alloc(IFLAG_MULTI, ENTITYMAX, "IFLAG_MULTI")
           IFLAG_MULTI(1:ENTITYMAX) = 0
 !
           IF (FLAG == 0) THEN

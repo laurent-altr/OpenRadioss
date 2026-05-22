@@ -379,18 +379,18 @@ c
 c----------------------------------------------------
 c       allocation of element buffer sub-structures 
 c----------------------------------------------------
-          ALLOCATE(ELBUF_TAB(NG)%INTLAY(NINTLAY))
-          ALLOCATE(ELBUF_TAB(NG)%BUFLY(NLAY))
+          allocate(ELBUF_TAB(NG)%INTLAY(NINTLAY))
+          allocate(ELBUF_TAB(NG)%BUFLY(NLAY))
           DO IL = 1, NLAY
             BUFLY => ELBUF_TAB(NG)%BUFLY(IL)
             BUFLY%NPTT = NPTT
-            ALLOCATE(BUFLY%LBUF(NPTR,NPTS,NPTT))  
-            ALLOCATE(BUFLY%MAT (NPTR,NPTS,NPTT))      
-            ALLOCATE(BUFLY%FAIL(NPTR,NPTS,NPTT))  
-            ALLOCATE(BUFLY%PROP(NPTR,NPTS,NPTT))  
-            ALLOCATE(BUFLY%EOS (NPTR,NPTS,NPTT))  
-            ALLOCATE(BUFLY%VISC(NPTR,NPTS,NPTT))  
-            ALLOCATE(BUFLY%PORO(NPTR,NPTS,NPTT))  
+            allocate(BUFLY%LBUF(NPTR, NPTS, NPTT))
+            allocate(BUFLY%MAT(NPTR, NPTS, NPTT))
+            allocate(BUFLY%FAIL(NPTR, NPTS, NPTT))
+            allocate(BUFLY%PROP(NPTR, NPTS, NPTT))
+            allocate(BUFLY%EOS(NPTR, NPTS, NPTT))
+            allocate(BUFLY%VISC(NPTR, NPTS, NPTT))
+            allocate(BUFLY%PORO(NPTR, NPTS, NPTT))
           ENDDO
 c          ALLOCATE (ELBUF_TAB(NG)%XFEM(NPTR,NPTS,NPTT) ,STAT=Stat)   
           ELBUF_TAB(NG)%IGTYP = IGTYP                       
@@ -409,7 +409,7 @@ c--------------------------------------------------------
 c       no non-local structure allocation if not needed
 c--------------------------------------------------------
           IF (INLOC == 0) THEN 
-            ALLOCATE(ELBUF_TAB(NG)%NLOCTS(0,0))
+            allocate(ELBUF_TAB(NG)%NLOCTS(0, 0))
           ENDIF                  
 c-------------------------------------------------
           CALL ZEROVARS_AUTO(ELBUF_TAB(NG))
@@ -565,7 +565,7 @@ C---
             ! Non-local regularization in the shell thickness
             IF (INLOC > 0) THEN 
               ! Allocation of the non-local in thickness structural data
-              ALLOCATE(ELBUF_TAB(NG)%NLOCTS(NPTR,NPTS))
+              allocate(ELBUF_TAB(NG)%NLOCTS(NPTR, NPTS))
               ! Number of non-local nodes in the thickness
               NONL = NLAY+1
               ! Loop over Gauss points in the plane of the shell
@@ -652,7 +652,7 @@ c
                 LVISC = LVISC + NUVARV*NEL
                 LEOS  = LEOS  + NVAR_EOS*NEL
                 
-                ALLOCATE(ELBUF_TAB(NG)%BUFLY(IL)%FAIL(IR,IS,IT)%FLOC(NFAIL))
+                allocate(ELBUF_TAB(NG)%BUFLY(IL)%FAIL(IR,IS,IT)%FLOC(NFAIL))
                 MX = ELBUF_TAB(NG)%BUFLY(IL)%IMAT
 
                 DO J = 1,NFAIL
@@ -1163,7 +1163,7 @@ c---------------------------------------------------------
 c       no non-local structure allocation if not needed
 c---------------------------------------------------------
           IF (INLOC == 0) THEN 
-            ALLOCATE(ELBUF_TAB(NG)%NLOC(0,0))
+            allocate(ELBUF_TAB(NG)%NLOC(0, 0))
           ENDIF  
 c
           TFAIL(:,:) = 0
@@ -1173,7 +1173,7 @@ c
 c------------------------------------------------------
 c         allocation of element buffer sub-structures 
 c------------------------------------------------------
-          ALLOCATE(ELBUF_TAB(NG)%BUFLY(NLAY))
+          allocate(ELBUF_TAB(NG)%BUFLY(NLAY))
 C---
           IF(IDRAPE > 0) THEN
             IF (IGTYP == 51 .OR. IGTYP == 52 ) THEN
@@ -1220,13 +1220,13 @@ C---
           DO IL = 1, NLAY
             BUFLY => ELBUF_TAB(NG)%BUFLY(IL)
             NPTT = BUFLY%NPTT
-            ALLOCATE(BUFLY%LBUF(NPTR,NPTS,NPTT)) 
-            ALLOCATE(BUFLY%MAT (NPTR,NPTS,NPTT))      
-            ALLOCATE(BUFLY%FAIL(NPTR,NPTS,NPTT))  
-            ALLOCATE(BUFLY%PROP(NPTR,NPTS,NPTT))  
-            ALLOCATE(BUFLY%EOS (NPTR,NPTS,NPTT))  
-            ALLOCATE(BUFLY%VISC(NPTR,NPTS,NPTT))  
-            ALLOCATE(BUFLY%PORO(NPTR,NPTS,NPTT))
+            allocate(BUFLY%LBUF(NPTR, NPTS, NPTT))
+            allocate(BUFLY%MAT(NPTR, NPTS, NPTT))
+            allocate(BUFLY%FAIL(NPTR, NPTS, NPTT))
+            allocate(BUFLY%PROP(NPTR, NPTS, NPTT))
+            allocate(BUFLY%EOS(NPTR, NPTS, NPTT))
+            allocate(BUFLY%VISC(NPTR, NPTS, NPTT))
+            allocate(BUFLY%PORO(NPTR, NPTS, NPTT))
             IF(IDRAPE > 0 .AND. (IGTYP == 51 .OR. IGTYP == 52)) 
      .         ALLOCATE(ELBUF_TAB(NG)%BUFLY(IL)%LBUF_DIR(NPTT))
           ENDDO
@@ -1234,7 +1234,7 @@ C---
           ! Non-local regularization in the shell thickness
           IF ((INLOC > 0).AND.(NPTT>1)) THEN 
             ! Allocation of the non-local in thickness structural data
-            ALLOCATE(ELBUF_TAB(NG)%NLOC(NPTR,NPTS))
+            allocate(ELBUF_TAB(NG)%NLOC(NPTR, NPTS))
             ! Number of non-local nodes in the thickness
             IF (NPTT>2) THEN
               NONL = NPTT+1
@@ -1267,12 +1267,12 @@ C---
           ENDIF
 !-------------------------------------------------
 C---
-          ALLOCATE(ELBUF_TAB(NG)%INTLAY(NINTLAY))
+          allocate(ELBUF_TAB(NG)%INTLAY(NINTLAY))
           DO I = 1, NINTLAY                                      
             INTLAY => ELBUF_TAB(NG)%INTLAY(I)                  
-            ALLOCATE(INTLAY%ILBUF(NPTR,NPTS))       
-            ALLOCATE(INTLAY%MAT  (NPTR,NPTS)) 
-            ALLOCATE(INTLAY%FAIL (NPTR,NPTS))
+            allocate(INTLAY%ILBUF(NPTR, NPTS))
+            allocate(INTLAY%MAT(NPTR, NPTS))
+            allocate(INTLAY%FAIL(NPTR, NPTS))
           ENDDO                                                  
 c-------------------------------------------------
           CALL ZEROVARS_AUTO(ELBUF_TAB(NG))
@@ -1386,7 +1386,7 @@ c
                 LVISC = LVISC + NUVARV*NEL
                 LEOS = LEOS + NVAR_EOS*NEL
 
-                ALLOCATE(ELBUF_TAB(NG)%BUFLY(IL)%FAIL(IR,IS,IT)%FLOC(NFAIL))
+                allocate(ELBUF_TAB(NG)%BUFLY(IL)%FAIL(IR,IS,IT)%FLOC(NFAIL))
                 MX = ELBUF_TAB(NG)%BUFLY(IL)%IMAT
                 DO J = 1,NFAIL
                   FLOC=>ELBUF_TAB(NG)%BUFLY(IL)%FAIL(IR,IS,IT)%FLOC(J)         
@@ -1508,7 +1508,7 @@ c
 c                ALLOCATE(ELBUF_TAB(NG)%INTLAY(IL)%VISC(IR,IS)%                 
 c     .                   VAR(NUVARV*NEL) ,STAT=Stat)                               
 c
-                ALLOCATE(ELBUF_TAB(NG)%INTLAY(IL)%FAIL(IR,IS)%FLOC(NFAIL))
+                allocate(ELBUF_TAB(NG)%INTLAY(IL)%FAIL(IR,IS)%FLOC(NFAIL))
 c                LVISC = LVISC + NUVARV*NEL                                         
                 DO J = 1,NFAIL                                                     
                   FLOC=>ELBUF_TAB(NG)%INTLAY(IL)%FAIL(IR,IS)%FLOC(J)           
@@ -2043,15 +2043,15 @@ C
           LEOS = 0
 C
           IF (NLAY > 0) THEN  ! integrated beam (NLAY = 1)
-            ALLOCATE(ELBUF_TAB(NG)%BUFLY(NLAY))
+            allocate(ELBUF_TAB(NG)%BUFLY(NLAY))
 C---
             DO IL = 1,NLAY
               BUFLY => ELBUF_TAB(NG)%BUFLY(IL)
               BUFLY%NPTT = NPTT
-              ALLOCATE(BUFLY%LBUF(NPTR,NPTS,NPTT))  
-              ALLOCATE(BUFLY%MAT (NPTR,NPTS,NPTT))
-              ALLOCATE(BUFLY%EOS (NPTR,NPTS,NPTT))
-              ALLOCATE(BUFLY%FAIL(NPTR,NPTS,NPTT))         
+              allocate(BUFLY%LBUF(NPTR, NPTS, NPTT))
+              allocate(BUFLY%MAT(NPTR, NPTS, NPTT))
+              allocate(BUFLY%EOS(NPTR, NPTS, NPTT))
+              allocate(BUFLY%FAIL(NPTR, NPTS, NPTT))
             ENDDO
 C---
 c
@@ -2106,7 +2106,7 @@ c
 
                     IF (NFAIL == 1) THEN
                       IRUPT   = MAT_PARAM(IMAT(IL))%FAIL(1)%IRUPT   ! Failure model type    
-                      ALLOCATE(ELBUF_TAB(NG)%BUFLY(IL)%FAIL(IR,IS,IT)%FLOC(NFAIL))
+                      allocate(ELBUF_TAB(NG)%BUFLY(IL)%FAIL(IR,IS,IT)%FLOC(NFAIL))
                       FLOC   => ELBUF_TAB(NG)%BUFLY(IL)%FAIL(IR,IS,IT)%FLOC(1)         
 c
                       FLOC%ILAWF = IRUPT                                            
@@ -2162,7 +2162,7 @@ c
 c
 C---
           ELSE  ! NLAY = 0  (spring std)
-            ALLOCATE(ELBUF_TAB(NG)%BUFLY(0))
+            allocate(ELBUF_TAB(NG)%BUFLY(0))
           ENDIF ! IF (NLAY > 0)
 C
           BUFLEN = NPAR_TAB + LMAT  + LFAIL + LVISC + LPORO + LEOS + LIMAT + LIFAIL
@@ -2317,7 +2317,7 @@ c         failure struct for beams type 3 stored in global buffer
 c
           GFAIL = 0
           IF (IGTYP == 3 .and. IFAIL > 0) THEN
-             ALLOCATE(ELBUF_TAB(NG)%GBUF%FAIL(1))
+             allocate(ELBUF_TAB(NG)%GBUF%FAIL(1))
 c
              IRUPT = MAT_PARAM(IMID)%FAIL(1)%IRUPT
              ELBUF_TAB(NG)%GBUF%FAIL(1)%ILAWF = IRUPT                                           
@@ -2483,8 +2483,8 @@ c--------------------------------------------------------
 c       damping structure for damping frequency range
 c--------------------------------------------------------
         IF (IDAMP_FREQ_RANGE > 0) THEN
-          ALLOCATE(ELBUF_TAB(NG)%DAMP_RANGE%ALPHA(3))
-          ALLOCATE(ELBUF_TAB(NG)%DAMP_RANGE%TAU(3))
+          call my_alloc(ELBUF_TAB(NG)%DAMP_RANGE%ALPHA, 3, "ELBUF_TAB(NG)%DAMP_RANGE%ALPHA")
+          call my_alloc(ELBUF_TAB(NG)%DAMP_RANGE%TAU, 3, "ELBUF_TAB(NG)%DAMP_RANGE%TAU")
           BUFLEN = IPARG(66,NG) + LDAMP_FREQ_RANGE
           IPARG(66,NG) = BUFLEN 
 c        ELSE  

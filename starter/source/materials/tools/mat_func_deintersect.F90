@@ -131,12 +131,12 @@
                 xf(npt) = xtmp(i)
               end if
             end do
-            call my_dealloc(perm, "perm")
-            call my_dealloc(xtmp, "xtmp")
+            call my_dealloc(perm)
+            call my_dealloc(xtmp)
 !---------------------------------------------------------
             ! reallocate both functions and interpolate all values using common abscissa
-            call my_dealloc(func2%x(1)%values, "func2%x(1)%values")
-            call my_dealloc(func1%x(1)%values, "func1%x(1)%values")
+            call my_dealloc(func2%x(1)%values)
+            call my_dealloc(func1%x(1)%values)
             call my_alloc(func1%x(1)%values, npt, "func1%x(1)%values")
             call my_alloc(func2%x(1)%values, npt, "func2%x(1)%values")
             call my_alloc(yf1, npt, nxd1, "yf1")
@@ -188,31 +188,31 @@
             end if
 !
             if (ndim1 == 1) then
-              call my_dealloc(func1%y1d, "func1%y1d")
+              call my_dealloc(func1%y1d)
               call my_alloc(func1%y1d, npt, "func1%y1d")
               func1%y1d(1:npt) = yf1(1:npt,1)
             else
-              call my_dealloc(func1%y2d, "func1%y2d")
+              call my_dealloc(func1%y2d)
               call my_alloc(func1%y2d, npt, nxd1, "func1%y2d")
               func1%y2d(1:npt,1:nxd1) = yf1(1:npt,1:nxd1)
             end if
             if (ndim2 == 1) then
-              call my_dealloc(func2%y1d, "func2%y1d")
+              call my_dealloc(func2%y1d)
               call my_alloc(func2%y1d, npt, "func2%y1d")
               func2%y1d(1:npt) = yf2(1:npt,1)
             else
-              call my_dealloc(func2%y2d, "func2%y2d")
+              call my_dealloc(func2%y2d)
               call my_alloc(func2%y2d, npt, nxd2, "func2%y2d")
               func2%y2d(1:npt,1:nxd2) = yf1(1:npt,1:nxd2)
             end if
 !
-            call my_dealloc(yf1, "yf1")
-            call my_dealloc(yf2, "yf2")
-            call my_dealloc(xf, "xf")
-            call my_dealloc(y2, "y2")
-            call my_dealloc(x2, "x2")
-            call my_dealloc(x1, "x1")
-            call my_dealloc(y1, "y1")
+            call my_dealloc(yf1)
+            call my_dealloc(yf2)
+            call my_dealloc(xf)
+            call my_dealloc(y2)
+            call my_dealloc(x2)
+            call my_dealloc(x1)
+            call my_dealloc(y1)
 !---------------------------------------------------------
           end if  ! found intersection
 !-----------------------------------------------------------

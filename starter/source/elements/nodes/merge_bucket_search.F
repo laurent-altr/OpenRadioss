@@ -37,6 +37,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
      .                               LIST2_NBMERGE)
 C
       USE MESSAGE_MOD
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -89,14 +90,14 @@ C - --> LIST1 / NN1 : list of nodes candidate for merging
 C - --> LIST2 / NN2 : list of destinations
 C=======================================================================
 C 
-      ALLOCATE(NOBX(NUMNOD))
-      ALLOCATE(NOBY(NUMNOD))
-      ALLOCATE(NOBZ(NUMNOD))
-      ALLOCATE(NOBCX(NN2))
-      ALLOCATE(NOBCY(NN2))
-      ALLOCATE(NOBCZ(NN2))
-      ALLOCATE(TABS(NB_MERGE_NODE))
-      ALLOCATE(TABC(NB_MERGE_NODE))
+      call my_alloc(NOBX, NUMNOD, "NOBX")
+      call my_alloc(NOBY, NUMNOD, "NOBY")
+      call my_alloc(NOBZ, NUMNOD, "NOBZ")
+      call my_alloc(NOBCX, NN2, "NOBCX")
+      call my_alloc(NOBCY, NN2, "NOBCY")
+      call my_alloc(NOBCZ, NN2, "NOBCZ")
+      call my_alloc(TABS, NB_MERGE_NODE, "TABS")
+      call my_alloc(TABC, NB_MERGE_NODE, "TABC")
       DBUC = TWO*DBUC
       EPS=EM3*DBUC 
       XMIN=EP30

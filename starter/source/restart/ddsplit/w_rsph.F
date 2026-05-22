@@ -33,6 +33,7 @@ C
       SUBROUTINE W_RSPH(SPBUF ,NUMSPH_L,CEPSP,PROC,
      2                  VSPHIO,LEN_AM,SSPHVELN_L)
       USE MESSAGE_MOD
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -77,7 +78,7 @@ C
       LEN_AM = LEN_AM + NUMSPH_L*NSPBUF
 C
       IF(NSPHIO > 0) THEN
-        ALLOCATE(SPHVELN_L(SSPHVELN_L)    ,STAT=stat)
+        call my_alloc(SPHVELN_L, SSPHVELN_L, "SPHVELN_L", stat=stat)
         IF (STAT /= 0) CALL ANCMSG(MSGID=268,ANMODE=ANINFO,
      .                             MSGTYPE=MSGERROR)       
         SPHVELN_L(1:SSPHVELN_L)=ZERO

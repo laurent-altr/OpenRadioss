@@ -41,6 +41,7 @@ C============================================================================
 C   M o d u l e s
 C-----------------------------------------------
       USE TRI7BOX
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -115,10 +116,10 @@ c provisional
       SAVE IIX,IIY,IIZ,DISTMAX
 C-----------------------------------------------
 C      IF(ITASK == 0)THEN
-      ALLOCATE(NEXT_NOD(NSN))
-      ALLOCATE(IIX(NSN))
-      ALLOCATE(IIY(NSN))
-      ALLOCATE(IIZ(NSN))
+      call my_alloc(NEXT_NOD, NSN, "NEXT_NOD")
+      call my_alloc(IIX, NSN, "IIX")
+      call my_alloc(IIY, NSN, "IIY")
+      call my_alloc(IIZ, NSN, "IIZ")
 C      END IF
 C Barrier to wait init voxel and allocation NEX_NOD
 C      CALL MY_BARRIER

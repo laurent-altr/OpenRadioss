@@ -1645,7 +1645,7 @@
             endif
           end do
 
-          call my_dealloc(uparam, "uparam")
+          call my_dealloc(uparam)
 !------------------------------
           return
 !------------------------------

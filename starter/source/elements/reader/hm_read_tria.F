@@ -68,6 +68,7 @@ C-----------------------------------------------
       USE READER_OLD_MOD , ONLY : LINE
       USE USER_ID_MOD , ONLY : ID_LIMIT
       use element_mod , only : nixtg
+      use my_alloc_mod
 C--------------------------------------------------------
 C     READING DES ELEMENTS 2D TRIANGULAIRES
 C--------------------------------------------------------
@@ -128,19 +129,19 @@ C--------------------------------------------------
 C      ALLOCS & INITS
 c      use NUMELTG0 IN PLACE OF NUMELTG ( NBADMESH routine is modifying NUMELTG )
 C--------------------------------------------------
-      ALLOCATE (SUB_TRIA(NUMELTG0),STAT=stat)
+      call my_alloc(SUB_TRIA, NUMELTG0, "SUB_TRIA", stat=stat)
       IF (STAT /= 0) CALL ANCMSG(MSGID=268,ANMODE=ANINFO,
      .                             MSGTYPE=MSGERROR,
      .                             C1='SUB_TRIA') 
-      ALLOCATE (UID_TRIA(NUMELTG0),STAT=stat)
+      call my_alloc(UID_TRIA, NUMELTG0, "UID_TRIA", stat=stat)
       IF (STAT /= 0) CALL ANCMSG(MSGID=268,ANMODE=ANINFO,
      .                             MSGTYPE=MSGERROR,
      .                             C1='UID_TRIA')
-      ALLOCATE (TMP_IXTG(NIXTG,NUMELTG0),STAT=stat)
+      call my_alloc(TMP_IXTG, NIXTG, NUMELTG0, "TMP_IXTG", stat=stat)
       IF (STAT /= 0) CALL ANCMSG(MSGID=268,ANMODE=ANINFO,
      .                             MSGTYPE=MSGERROR,
      .                             C1='TMP_IXTG') 
-      ALLOCATE (TMP_IPARTTG(NUMELTG0),STAT=stat)
+      call my_alloc(TMP_IPARTTG, NUMELTG0, "TMP_IPARTTG", stat=stat)
       IF (STAT /= 0) CALL ANCMSG(MSGID=268,ANMODE=ANINFO,
      .                             MSGTYPE=MSGERROR,
      .                             C1='TMP_IPARTTG')

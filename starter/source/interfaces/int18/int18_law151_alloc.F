@@ -41,6 +41,7 @@ C     M o d u l e s
 C-----------------------------------------------           
         USE MULTI_FVM_MOD
         USE GROUPDEF_MOD
+        use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -93,13 +94,13 @@ C-----------------------------------------------
         ! 1:NUMNOD --> classical x/v/mass
         ! NUMNOD+1:NUMNOD+NUMELS --> x/v/mass of phantom nodes (located to the center of 
         !                            the ALE elements)
-        ALLOCATE( MULTI_FVM%X_APPEND(3*MY_SIZE) )
-        ALLOCATE( MULTI_FVM%V_APPEND(3*MY_SIZE) )
-        ALLOCATE( MULTI_FVM%MASS_APPEND(MY_SIZE) )
-        ALLOCATE( MULTI_FVM%KINET_APPEND(MY_SIZE) )
+        call my_alloc(MULTI_FVM%X_APPEND, 3*MY_SIZE, "MULTI_FVM%X_APPEND")
+        call my_alloc(MULTI_FVM%V_APPEND, 3*MY_SIZE, "MULTI_FVM%V_APPEND")
+        call my_alloc(MULTI_FVM%MASS_APPEND, MY_SIZE, "MULTI_FVM%MASS_APPEND")
+        call my_alloc(MULTI_FVM%KINET_APPEND, MY_SIZE, "MULTI_FVM%KINET_APPEND")
         
         ! allocation of INT18_GLOBAL_LIST : marker for the interface /INT18+LAW151
-        ALLOCATE( MULTI_FVM%INT18_GLOBAL_LIST(NINTER) )
+        call my_alloc(MULTI_FVM%INT18_GLOBAL_LIST, NINTER, "MULTI_FVM%INT18_GLOBAL_LIST")
 
         IF( MULTI_FVM%IS_INT18_LAW151 ) THEN
             MULTI_FVM%INT18_LIST(1:MULTI_FVM%NUMBER_INT18) = INT18_LIST(1:MULTI_FVM%NUMBER_INT18)

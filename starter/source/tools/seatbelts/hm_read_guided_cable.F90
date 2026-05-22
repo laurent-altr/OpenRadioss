@@ -630,7 +630,7 @@
               end do
 !
               call c_prevent_decomposition(compt,cc_elem)
-              call my_dealloc(cc_elem, "cc_elem")
+              call my_dealloc(cc_elem)
 !
             enddo
 !
@@ -683,13 +683,13 @@
 !
 !-------------------------------------------------------------------------------------------
 !
-          call my_dealloc(npart_to_guide, "npart_to_guide")
-          call my_dealloc(add_part_to_guide, "add_part_to_guide")
-          call my_dealloc(cpt_part_to_guide, "cpt_part_to_guide")
-          call my_dealloc(part_to_guide, "part_to_guide")
-          call my_dealloc(tagnod_guide, "tagnod_guide")
-          call my_dealloc(common_nodes, "common_nodes")
-          call my_dealloc(listnod_guide, "listnod_guide")
+          call my_dealloc(npart_to_guide)
+          call my_dealloc(add_part_to_guide)
+          call my_dealloc(cpt_part_to_guide)
+          call my_dealloc(part_to_guide)
+          call my_dealloc(tagnod_guide)
+          call my_dealloc(common_nodes)
+          call my_dealloc(listnod_guide)
 
 ! ----------------------------------------------------------------------------------------------------------------------
         end subroutine hm_read_inter_guided_cable

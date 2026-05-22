@@ -47,6 +47,7 @@ C   M o d u l e s
 C-----------------------------------------------
         USE LOADS_MOD
         USE ARRAY_MOD
+        use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -85,11 +86,11 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   E x t e r n a l   F u n c t i o n s
 C-----------------------------------------------
-        ALLOCATE( BOOL(NUMNOD) )
+        call my_alloc(BOOL, NUMNOD, "BOOL")
         BOOL(1:NUMNOD) = .true.
         NB_LOCAL_ARRAY = 0
-        ALLOCATE( INDEX_LOCAL_ARRAY(NUMNOD) )
-        ALLOCATE( LOCAL_ARRAY(NUMNOD) )
+        call my_alloc(INDEX_LOCAL_ARRAY, NUMNOD, "INDEX_LOCAL_ARRAY")
+        allocate(LOCAL_ARRAY(NUMNOD))
         LOCAL_ARRAY(1:NUMNOD)%SIZE_INT_ARRAY_1D = 0
 
         IF(.NOT.ALLOCATED(LOADS%CYL_RESTART)) ALLOCATE( LOADS%CYL_RESTART(LOADS%NLOAD_CYL) )
@@ -120,7 +121,7 @@ C-----------------------------------------------
             
             ! ------------
             IF(.NOT.ALLOCATED(LOADS%CYL_RESTART(I)%SEGMENT_TO_PROC)) THEN
-                ALLOCATE( LOADS%CYL_RESTART(I)%SEGMENT_TO_PROC(NUMBER_SEGMENT) )
+                call my_alloc(LOADS%CYL_RESTART(I)%SEGMENT_TO_PROC, NUMBER_SEGMENT, "LOADS%CYL_RESTART(I)%SEGMENT_TO_PROC")
             ENDIF
             IF(.NOT.ALLOCATED(LOADS%CYL_RESTART(I)%PROC)) ALLOCATE( LOADS%CYL_RESTART(I)%PROC(NSPMD) )
             DO J=1,NSPMD
@@ -130,7 +131,7 @@ C-----------------------------------------------
                 IF(ALLOCATED(LOADS%CYL_RESTART(I)%PROC(J)%LOCAL_SEGMENT)) THEN
                     DEALLOCATE( LOADS%CYL_RESTART(I)%PROC(J)%LOCAL_SEGMENT )
                 ENDIF
-                ALLOCATE( LOADS%CYL_RESTART(I)%PROC(J)%LOCAL_SEGMENT(MY_SIZE) )
+                call my_alloc(LOADS%CYL_RESTART(I)%PROC(J)%LOCAL_SEGMENT, MY_SIZE, "LOADS%CYL_RESTART(I)%PROC(J)%LOCAL_SEGMENT")
             ENDDO
 
             DO J=1,NUMBER_SEGMENT
@@ -186,13 +187,13 @@ C-----------------------------------------------
         
                 MY_SIZE = LOADS%CYL_RESTART(I)%PROC(MY_PROC)%S_LOCAL_SEGMENT
                 IF(MY_SIZE< LOCAL_NUMBER_SEG + 1 ) THEN
-                    ALLOCATE(TEMP_ARRAY(LOCAL_NUMBER_SEG))
+                    call my_alloc(TEMP_ARRAY, LOCAL_NUMBER_SEG, "TEMP_ARRAY")
                     TEMP_ARRAY(1:LOCAL_NUMBER_SEG) = 
      .               LOADS%CYL_RESTART(I)%PROC(MY_PROC)%LOCAL_SEGMENT(1:LOCAL_NUMBER_SEG)
                     DEALLOCATE( LOADS%CYL_RESTART(I)%PROC(MY_PROC)%LOCAL_SEGMENT )
                     LOADS%CYL_RESTART(I)%PROC(MY_PROC)%S_LOCAL_SEGMENT = MY_SIZE *1.2 + 4
                     MY_SIZE = LOADS%CYL_RESTART(I)%PROC(MY_PROC)%S_LOCAL_SEGMENT
-                    ALLOCATE( LOADS%CYL_RESTART(I)%PROC(MY_PROC)%LOCAL_SEGMENT(MY_SIZE) )
+                    call my_alloc(LOADS%CYL_RESTART(I)%PROC(MY_PROC)%LOCAL_SEGMENT, MY_SIZE, "LOADS%CYL_RESTART(I)%PROC(MY_PROC)%LOCAL_SEGMENT")
                     LOADS%CYL_RESTART(I)%PROC(MY_PROC)%LOCAL_SEGMENT(1:LOCAL_NUMBER_SEG) = 
      .               TEMP_ARRAY(1:LOCAL_NUMBER_SEG)
                     DEALLOCATE(TEMP_ARRAY)

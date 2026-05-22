@@ -619,6 +619,7 @@ C-----------
      3 IXTG_S,IXTG_S_IND,IXS,IXQ,IXC,IXT,IXP,IXR,IXTG,LENI)
 C      GROUP SORTING vs USER ID
       use element_mod , only : nixs,nixq,nixc,nixp,nixt,nixr,nixtg
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -644,7 +645,7 @@ C-----------------------------------------------
      .        IWORK(70000)
       INTEGER, DIMENSION(:), ALLOCATABLE :: INDEX ! LENI*2
 C-----------------------
-        ALLOCATE(INDEX(LENI*2))
+        call my_alloc(INDEX, LENI*2, "INDEX")
         DO I=1,NUMELS  
           IXS_S_IND(I) = IXS(NIXS,I)  
         ENDDO  

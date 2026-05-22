@@ -48,6 +48,7 @@ C-----------------------------------------------
       USE MESSAGE_MOD
       USE SUBMODEL_MOD
       USE HM_OPTION_READ_MOD
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -111,10 +112,20 @@ C===============================================================================
 !---------------
 ! -> Card2
 !---------------
-      ALLOCATE(INITYPE(NINIEVO),EVOTYPE(NINIEVO),EVOSHAP(NINIEVO),COMPTYP(NINIEVO))
-      ALLOCATE(TAB_ID(NINIEVO) ,SR_REF(NINIEVO) ,FSCALE(NINIEVO) ,INI_P1(NINIEVO))
-      ALLOCATE(TAB_EL(NINIEVO) ,EL_REF(NINIEVO) ,ELSCAL(NINIEVO) )
-      ALLOCATE(DISP(NINIEVO)   ,ENER(NINIEVO)   ,ALPHA(NINIEVO)  )
+      call my_alloc(INITYPE, NINIEVO, "INITYPE")
+      call my_alloc(EVOTYPE, NINIEVO, "EVOTYPE")
+      call my_alloc(EVOSHAP, NINIEVO, "EVOSHAP")
+      call my_alloc(COMPTYP, NINIEVO, "COMPTYP")
+      call my_alloc(TAB_ID, NINIEVO, "TAB_ID")
+      call my_alloc(SR_REF, NINIEVO, "SR_REF")
+      call my_alloc(FSCALE, NINIEVO, "FSCALE")
+      call my_alloc(INI_P1, NINIEVO, "INI_P1")
+      call my_alloc(TAB_EL, NINIEVO, "TAB_EL")
+      call my_alloc(EL_REF, NINIEVO, "EL_REF")
+      call my_alloc(ELSCAL, NINIEVO, "ELSCAL")
+      call my_alloc(DISP, NINIEVO, "DISP")
+      call my_alloc(ENER, NINIEVO, "ENER")
+      call my_alloc(ALPHA, NINIEVO, "ALPHA")
       INITYPE(1:NINIEVO) = 0
       EVOTYPE(1:NINIEVO) = 0
       EVOSHAP(1:NINIEVO) = 0
@@ -207,10 +218,10 @@ c-----------------------------------------------------
       FAIL%NMOD    = 0
       FAIL%PTHK    = PTHK
 c            
-      ALLOCATE (FAIL%UPARAM(FAIL%NUPARAM))
-      ALLOCATE (FAIL%IPARAM(FAIL%NIPARAM))
-      ALLOCATE (FAIL%IFUNC (FAIL%NFUNC))
-      ALLOCATE (FAIL%TABLE (FAIL%NTABLE))
+      call my_alloc(FAIL%UPARAM, FAIL%NUPARAM, "FAIL%UPARAM")
+      call my_alloc(FAIL%IPARAM, FAIL%NIPARAM, "FAIL%IPARAM")
+      call my_alloc(FAIL%IFUNC, FAIL%NFUNC, "FAIL%IFUNC")
+      call my_alloc(FAIL%TABLE, FAIL%NTABLE, "FAIL%TABLE")
 
       FAIL%UPARAM(1) = NINIEVO
       FAIL%UPARAM(2) = ISHEAR

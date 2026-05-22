@@ -46,6 +46,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
       USE MESSAGE_MOD
       USE NAMES_AND_TITLES_MOD , ONLY : NCHARTITLE
       use element_mod , only :nixs,nixc,nixtg
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -116,7 +117,7 @@ C-------------------------------------------------------
 C     THICKNESS PART ON SECOND NODES FOR GAP CALCULATION
 C-------------------------------------------------------
       IF(IGAP>=1)THEN
-         ALLOCATE (THK_PART_NODS(NUMNOD)        ,STAT=stat)
+         call my_alloc(THK_PART_NODS, NUMNOD, "THK_PART_NODS", stat=stat)
          IF (STAT /= 0) CALL ANCMSG(MSGID=268,ANMODE=ANINFO,
      .                                     MSGTYPE=MSGERROR,
      .                                   C1='THK_PART_NODS')

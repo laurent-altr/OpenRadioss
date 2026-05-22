@@ -164,7 +164,7 @@ C    IGRNOD(IGS)%LEVEL  : Hierarchy level
 C    IGRNOD(IGS)%R2R_ALL   ! Multidomaines -> number of node(elems, parts) before split
 C    IGRNOD(IGS)%R2R_SHARE ! shared on boundary subdomain
 C-----------------------------------------------
-      ALLOCATE(BUFTMP(2*NUMNOD + NPART))
+      call my_alloc(BUFTMP, 2*NUMNOD + NPART, "BUFTMP")
       IS_AVAILABLE = .FALSE.
       IT0=0
       IT1=0
@@ -354,7 +354,7 @@ C Replacement of user node n0 by system n0 (NODE type)
 C=======================================================================
       IF (IT1 /= 0 .AND. FLAG == 1)THEN
 !
-        ALLOCATE(BUFTMP2(MAXNNOD*2),STAT=stat)
+        call my_alloc(BUFTMP2, MAXNNOD*2, "BUFTMP2", stat=stat)
         IF (STAT /= 0) THEN
           CALL ANCMSG(MSGID=727,
      .                MSGTYPE=MSGERROR,
@@ -462,10 +462,10 @@ C-------------------------
       IF(IT8 /= 0)THEN
 C
         IF (FLAG == 0) THEN
-          ALLOCATE(BUFBOX(1))
+          call my_alloc(BUFBOX, 1, "BUFBOX")
           BUFBOX = 0
         ELSEIF (FLAG == 1) THEN
-          ALLOCATE(BUFBOX(IADBOXMAX))
+          call my_alloc(BUFBOX, IADBOXMAX, "BUFBOX")
           BUFBOX(1:IADBOXMAX) = 0
         ENDIF
 C

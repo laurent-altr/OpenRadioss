@@ -69,6 +69,7 @@ C-----------------------------------------------
       use glob_therm_mod
       use get_fsky_address_mod , only : get_fsky_address
       use element_mod , only : nixs,nixq,nixc,nixp,nixt,nixr,nixtg
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -239,95 +240,102 @@ C-----------------------------------------------
       logical, parameter :: ref = .false.
 C-----------------------------------------------
 
-      ALLOCATE(PROCNE(LCNE_L))
-      ALLOCATE(ITAGIB(NCONLD))
-      ALLOCATE(IADMV(4, NNMV_L))
-      ALLOCATE(IADMV2(NNMV_L))
-      ALLOCATE(IADMV3(NNMVC_L))
-      ALLOCATE(IADWAL(NSKYRW_L))
-      ALLOCATE(IADRBK(NSKYRBK_L))
-      ALLOCATE(IADI2(NIR, I2NSN_L))
-      ALLOCATE(I2TMP(NIR, I2NSN_L))
-      ALLOCATE(IADLL(NSKYLL_L))
-      ALLOCATE(PROCNI2(LCNI2_L))
-      ALLOCATE(IADRBM(NSKYRBM_L))
-      ALLOCATE(IADI18(NSKYI18_L))
-      ALLOCATE(IADIBCV(4, NCONV_L))
-      ALLOCATE(IADIBFX(4, NFXFLUX_L))
-      ALLOCATE(IADRBMK(NSKYRBMK_L))
-      ALLOCATE(IADIBCR(4, NRADIA_L))
-      ALLOCATE(ITAGLOADP(SLLOADP))
-      ALLOCATE(IADLOAD(4, LLLOADP_L))
-      ALLOCATE(ICNDTMP(3, NS10E_L))
-      ALLOCATE(PROCNCND(LCNCND_L))
-      ALLOCATE(IADCND(2, NS10E_L))
+      call my_alloc(PROCNE, LCNE_L, "PROCNE")
+      call my_alloc(ITAGIB, NCONLD, "ITAGIB")
+      call my_alloc(IADMV, 4, NNMV_L, "IADMV")
+      call my_alloc(IADMV2, NNMV_L, "IADMV2")
+      call my_alloc(IADMV3, NNMVC_L, "IADMV3")
+      call my_alloc(IADWAL, NSKYRW_L, "IADWAL")
+      call my_alloc(IADRBK, NSKYRBK_L, "IADRBK")
+      call my_alloc(IADI2, NIR, I2NSN_L, "IADI2")
+      call my_alloc(I2TMP, NIR, I2NSN_L, "I2TMP")
+      call my_alloc(IADLL, NSKYLL_L, "IADLL")
+      call my_alloc(PROCNI2, LCNI2_L, "PROCNI2")
+      call my_alloc(IADRBM, NSKYRBM_L, "IADRBM")
+      call my_alloc(IADI18, NSKYI18_L, "IADI18")
+      call my_alloc(IADIBCV, 4, NCONV_L, "IADIBCV")
+      call my_alloc(IADIBFX, 4, NFXFLUX_L, "IADIBFX")
+      call my_alloc(IADRBMK, NSKYRBMK_L, "IADRBMK")
+      call my_alloc(IADIBCR, 4, NRADIA_L, "IADIBCR")
+      call my_alloc(ITAGLOADP, SLLOADP, "ITAGLOADP")
+      call my_alloc(IADLOAD, 4, LLLOADP_L, "IADLOAD")
+      call my_alloc(ICNDTMP, 3, NS10E_L, "ICNDTMP")
+      call my_alloc(PROCNCND, LCNCND_L, "PROCNCND")
+      call my_alloc(IADCND, 2, NS10E_L, "IADCND")
 
       IUN = 1
-      ALLOCATE(SOLTAG(NUMELS))
+      call my_alloc(SOLTAG, NUMELS, "SOLTAG")
       SOLTAG(1:NUMELS)=0
 
-      ALLOCATE(SOL10TAG(NUMELS10))
+      call my_alloc(SOL10TAG, NUMELS10, "SOL10TAG")
       SOL10TAG(1:NUMELS10)=0
 
-      ALLOCATE(SOL20TAG(NUMELS20))
+      call my_alloc(SOL20TAG, NUMELS20, "SOL20TAG")
       SOL20TAG(1:NUMELS20)=0
 
-      ALLOCATE(SOL16TAG(NUMELS16))
+      call my_alloc(SOL16TAG, NUMELS16, "SOL16TAG")
       SOL16TAG(1:NUMELS16)=0
 
-      ALLOCATE(QUADTAG(NUMELQ))
+      call my_alloc(QUADTAG, NUMELQ, "QUADTAG")
       QUADTAG(1:NUMELQ)=0
 
-      ALLOCATE(SHTAG(NUMELC))
+      call my_alloc(SHTAG, NUMELC, "SHTAG")
       SHTAG(1:NUMELC)=0
 
-      ALLOCATE(TTAG(NUMELT))
+      call my_alloc(TTAG, NUMELT, "TTAG")
       TTAG(1:NUMELT)=0
 
-      ALLOCATE(PTAG(NUMELP))
+      call my_alloc(PTAG, NUMELP, "PTAG")
       PTAG(1:NUMELP)=0
 
-      ALLOCATE(RTAG(NUMELR))
+      call my_alloc(RTAG, NUMELR, "RTAG")
       RTAG(1:NUMELR)=0
 
-      ALLOCATE(TGTAG(NUMELTG))
+      call my_alloc(TGTAG, NUMELTG, "TGTAG")
       TGTAG(1:NUMELTG)=0
 
-      ALLOCATE(TG6TAG(NUMELTG6))
+      call my_alloc(TG6TAG, NUMELTG6, "TG6TAG")
       TG6TAG(1:NUMELTG6)=0
 
-      ALLOCATE(IBTAG(NCONLD))
+      call my_alloc(IBTAG, NCONLD, "IBTAG")
       IBTAG(1:NCONLD)=0
 
-      ALLOCATE(IBCVTAG(GLOB_THERM%NUMCONV))
+      call my_alloc(IBCVTAG, GLOB_THERM%NUMCONV, "IBCVTAG")
       IBCVTAG(1:GLOB_THERM%NUMCONV)=0
 
-      ALLOCATE(IBCRTAG(GLOB_THERM%NUMRADIA))
+      call my_alloc(IBCRTAG, GLOB_THERM%NUMRADIA, "IBCRTAG")
       IBCRTAG(1:GLOB_THERM%NUMRADIA)=0
 
-      ALLOCATE(IBFXTAG(GLOB_THERM%NFXFLUX))
+      call my_alloc(IBFXTAG, GLOB_THERM%NFXFLUX, "IBFXTAG")
       IBFXTAG(1:GLOB_THERM%NFXFLUX)=0
 
-      ALLOCATE(ILTAG(SLLOADP/4))
+      call my_alloc(ILTAG, SLLOADP/4, "ILTAG")
       ILTAG(1:SLLOADP/4)=0
 
-      ALLOCATE(TAGIG3D(NUMELIG3D))
+      call my_alloc(TAGIG3D, NUMELIG3D, "TAGIG3D")
       TAGIG3D(1:NUMELIG3D)=0
 ! ------------------------------
 ! allocate 1d arrays
-      ALLOCATE( ITAGC(NUMELC),ITAGTG(NUMELTG) )
-      ALLOCATE( ADDCNE_L(NUMNOD_L+1),ADDCNI2_L(NUMNOD_L+1))
+      call my_alloc(ITAGC, NUMELC, "ITAGC")
+      call my_alloc(ITAGTG, NUMELTG, "ITAGTG")
+      call my_alloc(ADDCNE_L, NUMNOD_L+1, "ADDCNE_L")
+      call my_alloc(ADDCNI2_L, NUMNOD_L+1, "ADDCNI2_L")
       ADDCNE_L(1:NUMNOD_L + 1) = 0
-      ALLOCATE( ADDCNCND_L(NUMNOD_L+1))
+      call my_alloc(ADDCNCND_L, NUMNOD_L+1, "ADDCNCND_L")
 !     IAD 2D arrays
-      ALLOCATE( IADS(8,NUMELS_L),IADS10(6,NUMELS10_L) )
-      ALLOCATE( IADS16(8,NUMELS16_L),IADS20(12,NUMELS20_L) )
-      ALLOCATE( IADQ(4,NUMELQ_L),IADC(4,NUMELC_L) )
-      ALLOCATE( IADT(2,NUMELT_L),IADP(2,NUMELP_L) ) 
-      ALLOCATE( IADR(3,NUMELR_L),IADTG(3,NUMELTG_L) )
+      call my_alloc(IADS, 8, NUMELS_L, "IADS")
+      call my_alloc(IADS10, 6, NUMELS10_L, "IADS10")
+      call my_alloc(IADS16, 8, NUMELS16_L, "IADS16")
+      call my_alloc(IADS20, 12, NUMELS20_L, "IADS20")
+      call my_alloc(IADQ, 4, NUMELQ_L, "IADQ")
+      call my_alloc(IADC, 4, NUMELC_L, "IADC")
+      call my_alloc(IADT, 2, NUMELT_L, "IADT")
+      call my_alloc(IADP, 2, NUMELP_L, "IADP")
+      call my_alloc(IADR, 3, NUMELR_L, "IADR")
+      call my_alloc(IADTG, 3, NUMELTG_L, "IADTG")
       IADR(1:3,1:NUMELR_L) = 0
       IADTG(1:3,1:NUMELTG_L) = 0
-      ALLOCATE(IADIB(4,NCONLD_L) )
+      call my_alloc(IADIB, 4, NCONLD_L, "IADIB")
       if(NCONLD_L >0) IADIB(1:4,1:NCONLD_L) = -HUGE(I)
       ALLOCATE( IADTG1(3,NUMELTG6_L),IADIG3D(100,NUMELIG3D_L) )
 ! ------------------------------
@@ -481,15 +489,15 @@ C
 
       ! --------------------------
       ! tag the element belonging to an ebcs
-      ALLOCATE( EBCS_TAG(NUMELS+NUMELQ+NUMELTG) )
+      call my_alloc(EBCS_TAG, NUMELS+NUMELQ+NUMELTG, "EBCS_TAG")
       EBCS_TAG(1:NUMELS+NUMELQ+NUMELTG) = .FALSE.
-      ALLOCATE(EBCS_PARITHON_L(LOCAL_NEBCS))
+      allocate(EBCS_PARITHON_L(LOCAL_NEBCS))
       IF(LOCAL_NEBCS>0) THEN
         ! ---------------------
         ! loop over the /EBCS
         DO I=1,LOCAL_NEBCS
             ! allocation of adress array
-            ALLOCATE( EBCS_PARITHON_L(I)%ELEM_ADRESS(4,EBCS_TAB_LOC_2%tab(I)%poly%nb_elem) )
+            call my_alloc(EBCS_PARITHON_L(I)%ELEM_ADRESS, 4, EBCS_TAB_LOC_2%tab(I)%poly%nb_elem, "EBCS_PARITHON_L(I)%ELEM_ADRESS")
             EBCS_PARITHON_L(I)%ELEM_ADRESS(1:4,1:EBCS_TAB_LOC_2%tab(I)%poly%nb_elem) = 0
             ! check if a surface is associated to the ebcs
             IF(EBCS_TAB_LOC_2%tab(I)%poly%surf_id>0) THEN

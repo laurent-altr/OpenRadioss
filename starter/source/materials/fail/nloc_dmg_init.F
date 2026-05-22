@@ -322,21 +322,21 @@ c
         WRITE(ISTDO,'(A)') ' .. NON-LOCAL STRUCTURE INITIALIZATION'
 c
         ! Allocation of tables
-        ALLOCATE( TAGNOD(NUMNOD,3) )
-        ALLOCATE( INDX(NUMNOD) )  
-        ALLOCATE( IDXI(NUMNOD) )     
-        ALLOCATE( NDDL(NUMNOD) )  
-        ALLOCATE( NMAT(NUMNOD) ) 
-        ALLOCATE( POSI(NUMNOD+1) )
-        ALLOCATE( ISLNOD(NUMELS))
-        ALLOCATE( SOLNOD(8,NUMELS))
-        ALLOCATE( VOLU(NUMELS+NUMELC+NUMELTG) )
-        ALLOCATE( VOLNOD(NUMELS+NUMELC+NUMELTG))
-        ALLOCATE( TAGTET(NUMELS) )
-        ALLOCATE( TAGPENT(NUMELS))
-        ALLOCATE( NELEN(NUMNOD))
-        ALLOCATE( INDEX(NUMELS+NUMELC+NUMELTG) )
-        ALLOCATE( ITRI(NUMELS+NUMELC+NUMELTG) )
+        call my_alloc(TAGNOD, NUMNOD, 3, "TAGNOD")
+        call my_alloc(INDX, NUMNOD, "INDX")
+        call my_alloc(IDXI, NUMNOD, "IDXI")
+        call my_alloc(NDDL, NUMNOD, "NDDL")
+        call my_alloc(NMAT, NUMNOD, "NMAT")
+        call my_alloc(POSI, NUMNOD+1, "POSI")
+        call my_alloc(ISLNOD, NUMELS, "ISLNOD")
+        call my_alloc(SOLNOD, 8, NUMELS, "SOLNOD")
+        call my_alloc(VOLU, NUMELS+NUMELC+NUMELTG, "VOLU")
+        call my_alloc(VOLNOD, NUMELS+NUMELC+NUMELTG, "VOLNOD")
+        call my_alloc(TAGTET, NUMELS, "TAGTET")
+        call my_alloc(TAGPENT, NUMELS, "TAGPENT")
+        call my_alloc(NELEN, NUMNOD, "NELEN")
+        call my_alloc(INDEX, NUMELS+NUMELC+NUMELTG, "INDEX")
+        call my_alloc(ITRI, NUMELS+NUMELC+NUMELTG, "ITRI")
 C
         IF (NSUBDOM > 0) THEN
 C--       multidomains - original nummat is used
@@ -722,7 +722,7 @@ C
         IF ((NUMELTG>0).AND.(NUMELTG_NL>0)) CALL QUICKSORT_I2(ITRI, INDEX, NUMELS+NUMELC+1, NUMELS+NUMELC+NUMELTG_NL)
 C
         ! Sorting table for PARITH/ON nodal volume computation
-        ALLOCATE(IADDN(NNOD))
+        call my_alloc(IADDN, NNOD, "IADDN")
         IADDN(1:NNOD) = 0
         POSN = 0
         ! -> Address of the first element attached to the node
@@ -735,11 +735,11 @@ C
         ENDDO 
         ! -> Size of the element connectivity table
         NELEN_MAX = SUM(NELEN(1:NUMNOD))
-        ALLOCATE(IDELEM(NELEN_MAX))
+        call my_alloc(IDELEM, NELEN_MAX, "IDELEM")
         IDELEM(1:NELEN_MAX) = 0
         ! -> Reshape the counter table of attached elements
         IF (ALLOCATED(NELEN)) DEALLOCATE(NELEN)
-        ALLOCATE(NELEN(NNOD))
+        call my_alloc(NELEN, NNOD, "NELEN")
         NELEN(1:NNOD) = 0
 C
         ! Assembling the volume per node always in the same order
@@ -868,7 +868,7 @@ C
         ENDDO
 c
         ! Parith/on assembly of the nodal volume
-        ALLOCATE(VOLN(NNOD))
+        call my_alloc(VOLN, NNOD, "VOLN")
         VOLN(1:NNOD) = ZERO
         ALLOCATE(ITRIN(MAXVAL(NELEN(1:NNOD))))
         ALLOCATE(VOLSORT(MAXVAL(NELEN(1:NNOD))))

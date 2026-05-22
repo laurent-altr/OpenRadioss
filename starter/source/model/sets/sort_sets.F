@@ -72,6 +72,7 @@ C-----------------------------------------------
       USE MAPPING_OPTION_MOD
       USE NAMES_AND_TITLES_MOD , ONLY : NCHARTITLE, NCHARFIELD, NCHARKEY, NCHARLINE
       USE SET_MOD , ONLY : SET_ADD
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -112,12 +113,12 @@ C-----------------------------------------------
          print*,' ' 
       ENDIF
 
-      ALLOCATE(SET_ARRAY(NSETS))
-      ALLOCATE(SETCOL_ARRAY(NSETS))
-      ALLOCATE(SET_CLAUSE_ARRAY(NSETS))
-      ALLOCATE(IS_COLLECT(NSETS))
-      ALLOCATE(RESULT(NSETS))
-      ALLOCATE(COLLECT_LIST(MAP_TABLES%NSET_COLLECT))
+      call my_alloc(SET_ARRAY, NSETS, "SET_ARRAY")
+      call my_alloc(SETCOL_ARRAY, NSETS, "SETCOL_ARRAY")
+      call my_alloc(SET_CLAUSE_ARRAY, NSETS, "SET_CLAUSE_ARRAY")
+      call my_alloc(IS_COLLECT, NSETS, "IS_COLLECT")
+      call my_alloc(RESULT, NSETS, "RESULT")
+      call my_alloc(COLLECT_LIST, MAP_TABLES%NSET_COLLECT, "COLLECT_LIST")
       
 
       !-------------------------------------------------

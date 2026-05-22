@@ -75,7 +75,7 @@
           ibuf(2) = therm%func_thexp
 !
           call write_i_c(ibuf,ifix)
-          call my_dealloc(ibuf, "ibuf")
+          call my_dealloc(ibuf)
 
           ! write real value parameters
           rfix = 10
@@ -93,7 +93,7 @@
           rbuf(10) = therm%scale_thexp
 !
           call write_db(rbuf,rfix)
-          call my_dealloc(rbuf, "rbuf")
+          call my_dealloc(rbuf)
 !
           len = len + ifix + rfix
 !-----------

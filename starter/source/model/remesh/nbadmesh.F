@@ -51,6 +51,7 @@ C-----------------------------------------------
       USE READER_OLD_MOD , ONLY : LINE, IREC
       USE USER_ID_MOD , ONLY : ID_LIMIT
       use element_mod , only : nixc,nixtg
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -204,17 +205,17 @@ C
 C--------------------------------------
 C     nb shells and 3-node shells + nb nodes estimation (NUMNUSR < ...)
 C---------------  
-      ALLOCATE (IPARTC(NUMELC)) 
-      ALLOCATE (SH_ANGLE(NUMELC)) 
+      call my_alloc(IPARTC, NUMELC, "IPARTC")
+      call my_alloc(SH_ANGLE, NUMELC, "SH_ANGLE")
       ALLOCATE (SH_THK(NUMELC))
 C--------------------------------------------------
 C      ALLOCS & INITS
 C--------------------------------------------------
-      ALLOCATE (SUBID_SHELL(NUMELC),STAT=stat)
+      call my_alloc(SUBID_SHELL, NUMELC, "SUBID_SHELL", stat=stat)
       IF (STAT /= 0) CALL ANCMSG(MSGID=268,ANMODE=ANINFO,
      .                             MSGTYPE=MSGERROR,
      .                             C1='SUBID_SHELL') 
-      ALLOCATE (UID_SHELL(NUMELC),STAT=stat)
+      call my_alloc(UID_SHELL, NUMELC, "UID_SHELL", stat=stat)
       IF (STAT /= 0) CALL ANCMSG(MSGID=268,ANMODE=ANINFO,
      .                             MSGTYPE=MSGERROR,
      .                             C1='UID_SHELL') 
@@ -258,17 +259,17 @@ c
       IF(ALLOCATED(SUBID_SHELL)) DEALLOCATE(SUBID_SHELL)
       IF(ALLOCATED(UID_SHELL)) DEALLOCATE(UID_SHELL)
 C------ 
-      ALLOCATE (IPARTTG(NUMELTG)) 
-      ALLOCATE (SH3_ANGLE(NUMELTG))  
+      call my_alloc(IPARTTG, NUMELTG, "IPARTTG")
+      call my_alloc(SH3_ANGLE, NUMELTG, "SH3_ANGLE")
       ALLOCATE (SH3_THK(NUMELTG)) 
 C--------------------------------------------------
 C      ALLOCS & INITS
 C--------------------------------------------------
-      ALLOCATE (SUBID_SH3N(NUMELTG),STAT=stat)
+      call my_alloc(SUBID_SH3N, NUMELTG, "SUBID_SH3N", stat=stat)
       IF (STAT /= 0) CALL ANCMSG(MSGID=268,ANMODE=ANINFO,
      .                             MSGTYPE=MSGERROR,
      .                             C1='SUBID_SH3N') 
-      ALLOCATE (UID_SH3N(NUMELTG),STAT=stat)
+      call my_alloc(UID_SH3N, NUMELTG, "UID_SH3N", stat=stat)
       IF (STAT /= 0) CALL ANCMSG(MSGID=268,ANMODE=ANINFO,
      .                             MSGTYPE=MSGERROR,
      .                             C1='UID_SH3N') 
@@ -317,7 +318,7 @@ C--------------------------------------
 C--------------------------------------------------
 C      ALLOCS & INITS
 C--------------------------------------------------
-      ALLOCATE (SUBID_NODES(NUMNUSR),STAT=stat)
+      call my_alloc(SUBID_NODES, NUMNUSR, "SUBID_NODES", stat=stat)
       IF (STAT /= 0) CALL ANCMSG(MSGID=268,ANMODE=ANINFO,
      .                             MSGTYPE=MSGERROR,
      .                             C1='SUBID_NODES') 

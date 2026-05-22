@@ -36,6 +36,7 @@ C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
       USE INTBUFDEF_MOD 
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -54,7 +55,7 @@ C-----------------------------------------------
       INTEGER, DIMENSION(:),ALLOCATABLE :: INTBUF_SIZE
       INTEGER N,L_INTBUF_SIZE
 C ----------------------------------------
-      ALLOCATE(INTBUF_SIZE(L_INTBUF_SIZE_MAX))
+      call my_alloc(INTBUF_SIZE, L_INTBUF_SIZE_MAX, "INTBUF_SIZE")
       INTBUF_SIZE(1:L_INTBUF_SIZE_MAX) = 0
 
       N = 1
@@ -633,6 +634,7 @@ C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
       USE INTBUFDEF_MOD 
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -647,7 +649,7 @@ C-----------------------------------------------
       INTEGER I,J,K
       INTEGER, DIMENSION(:),ALLOCATABLE :: IBUF
 C ----------------------------------------
-      ALLOCATE(IBUF(DIM1*DIM2))
+      call my_alloc(IBUF, DIM1*DIM2, "IBUF")
 
       DO I=1, DIM1
         K=TAG(I)
@@ -677,6 +679,7 @@ C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
       USE INTBUFDEF_MOD 
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -691,7 +694,7 @@ C-----------------------------------------------
       INTEGER I,K
       INTEGER, DIMENSION(:),ALLOCATABLE :: IBUF
 C ----------------------------------------
-      ALLOCATE(IBUF(DIM1))
+      call my_alloc(IBUF, DIM1, "IBUF")
       DO I=1, DIM1
         K = TAG(I)
         IF(K > 0) THEN
@@ -722,6 +725,7 @@ C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
       USE INTBUFDEF_MOD 
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -736,7 +740,7 @@ C-----------------------------------------------
       INTEGER I
       INTEGER, DIMENSION(:),ALLOCATABLE :: IBUF
 C ----------------------------------------
-      ALLOCATE(IBUF(DIM1))
+      call my_alloc(IBUF, DIM1, "IBUF")
       DO I=1, DIM1
         IBUF(I) = NODLOCAL(TAB(I))
       ENDDO
@@ -764,6 +768,7 @@ C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
       USE INTBUFDEF_MOD 
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -778,7 +783,7 @@ C-----------------------------------------------
       INTEGER I,K
       INTEGER, DIMENSION(:),ALLOCATABLE :: IBUF
 C ----------------------------------------
-      ALLOCATE(IBUF(DIM1))
+      call my_alloc(IBUF, DIM1, "IBUF")
       DO I=1, DIM1
         K = TAG(I)
         IBUF(I) = NODLOCAL(TAB(K))
@@ -804,6 +809,7 @@ C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
       USE INTBUFDEF_MOD 
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -821,7 +827,7 @@ C-----------------------------------------------
 
       my_real, DIMENSION(:),ALLOCATABLE :: RBUF
 C ----------------------------------------
-      ALLOCATE(RBUF(DIM1*DIM2))
+      call my_alloc(RBUF, DIM1*DIM2, "RBUF")
       DO I=1, DIM1
         K=TAG(I)
         DO J=1,DIM2
@@ -849,6 +855,7 @@ C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
       USE INTBUFDEF_MOD 
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -864,7 +871,7 @@ C-----------------------------------------------
 
       my_real, DIMENSION(:),ALLOCATABLE :: RBUF
 C ----------------------------------------
-      ALLOCATE(RBUF(DIM1*DIM2))
+      call my_alloc(RBUF, DIM1*DIM2, "RBUF")
       DO I=1, DIM1
         K=TAG(I)
         DO J=1,DIM2
@@ -894,6 +901,7 @@ C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
       USE INTBUFDEF_MOD 
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -908,7 +916,7 @@ C-----------------------------------------------
       INTEGER I,J,K,NOD
       INTEGER, DIMENSION(:),ALLOCATABLE :: IBUF
 C ----------------------------------------
-      ALLOCATE(IBUF(DIM1*DIM2))
+      call my_alloc(IBUF, DIM1*DIM2, "IBUF")
       IBUF = 0
       DO I=1, DIM1
         K=TAG_SEG(I)
@@ -940,6 +948,7 @@ C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
       USE INTBUFDEF_MOD 
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -954,7 +963,7 @@ C-----------------------------------------------
       INTEGER I,J,K,GLOB
       INTEGER, DIMENSION(:),ALLOCATABLE :: IBUF
 C ----------------------------------------
-      ALLOCATE(IBUF(DIM1*DIM2))
+      call my_alloc(IBUF, DIM1*DIM2, "IBUF")
       DO I=1, DIM1
         K=TAG_SEG(I)
         DO J=1,DIM2
@@ -993,6 +1002,7 @@ C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
       USE INTBUFDEF_MOD 
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -1007,7 +1017,7 @@ C-----------------------------------------------
       INTEGER I,J
       INTEGER, DIMENSION(:),ALLOCATABLE :: IBUF
 C ----------------------------------------
-      ALLOCATE(IBUF(DIM1*DIM2))
+      call my_alloc(IBUF, DIM1*DIM2, "IBUF")
 
       DO I=1, DIM1
         DO J=1, DIM2
@@ -1035,6 +1045,7 @@ C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
       USE INTBUFDEF_MOD 
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -1049,7 +1060,7 @@ C-----------------------------------------------
       INTEGER I,J
       INTEGER, DIMENSION(:),ALLOCATABLE :: IBUF
 C ----------------------------------------
-      ALLOCATE(IBUF(DIM1*DIM2))
+      call my_alloc(IBUF, DIM1*DIM2, "IBUF")
 
       DO I=1, DIM1
         DO J=1, DIM2
@@ -1077,6 +1088,7 @@ C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
       USE INTBUFDEF_MOD 
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -1091,7 +1103,7 @@ C-----------------------------------------------
       INTEGER I,J
       INTEGER, DIMENSION(:),ALLOCATABLE :: IBUF
 C ----------------------------------------
-      ALLOCATE(IBUF(DIM1*DIM2))
+      call my_alloc(IBUF, DIM1*DIM2, "IBUF")
 
       DO I=1, DIM1
         DO J=1, DIM2
@@ -1119,6 +1131,7 @@ C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
       USE INTBUFDEF_MOD 
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -1136,7 +1149,7 @@ C-----------------------------------------------
       INTEGER I,J
       my_real, DIMENSION(:),ALLOCATABLE :: RBUF
 C ----------------------------------------
-      ALLOCATE(RBUF(DIM1*DIM2))
+      call my_alloc(RBUF, DIM1*DIM2, "RBUF")
 
       DO I=1, DIM1
         DO J=1, DIM2
@@ -1165,6 +1178,7 @@ C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
       USE INTBUFDEF_MOD 
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -1179,7 +1193,7 @@ C-----------------------------------------------
       INTEGER I,J
       INTEGER, DIMENSION(:),ALLOCATABLE :: IBUF
 C ----------------------------------------
-      ALLOCATE(IBUF(DIM1*DIM2))
+      call my_alloc(IBUF, DIM1*DIM2, "IBUF")
       DO I=1, DIM1
         DO J=1, DIM2
           IBUF(DIM2*(I-1)+J) = NODLOCAL(TAB(DIM2*(I-1)+J))
@@ -1247,6 +1261,7 @@ C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
       USE INTBUFDEF_MOD 
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -1261,7 +1276,7 @@ C-----------------------------------------------
       INTEGER I,K
       INTEGER, DIMENSION(:),ALLOCATABLE :: IBUF
 C ----------------------------------------
-      ALLOCATE(IBUF(MULTIMP*NCONT))
+      call my_alloc(IBUF, MULTIMP*NCONT, "IBUF")
       IBUF(1:MULTIMP*NCONT) = 0
 
       DO I=1, II_STOK_L
@@ -1289,6 +1304,7 @@ C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
       USE INTBUFDEF_MOD 
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -1305,7 +1321,7 @@ C-----------------------------------------------
       INTEGER I,K
       my_real, DIMENSION(:),ALLOCATABLE :: RBUF
 C ----------------------------------------
-      ALLOCATE(RBUF(MULTIMP*NCONT))
+      call my_alloc(RBUF, MULTIMP*NCONT, "RBUF")
       RBUF(1:MULTIMP*NCONT) = 0
 
       DO I=1, II_STOK_L
@@ -1333,6 +1349,7 @@ C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
       USE INTBUFDEF_MOD 
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -1348,7 +1365,7 @@ C-----------------------------------------------
       INTEGER I,K
       my_real, DIMENSION(:),ALLOCATABLE :: RBUF
 C ----------------------------------------
-      ALLOCATE(RBUF(MULTIMP*NCONT))
+      call my_alloc(RBUF, MULTIMP*NCONT, "RBUF")
       RBUF(1:MULTIMP*NCONT) = 0
 
       DO I=1, II_STOK_L
@@ -1475,6 +1492,7 @@ C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
       USE INTBUFDEF_MOD 
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -1489,7 +1507,7 @@ C-----------------------------------------------
       INTEGER I,J,K
       INTEGER, DIMENSION(:),ALLOCATABLE :: IBUF
 C ----------------------------------------
-      ALLOCATE(IBUF(DIM1*DIM2))
+      call my_alloc(IBUF, DIM1*DIM2, "IBUF")
 
       DO I=1, DIM1
         K=TAG_NODE_2RY(I)
@@ -1518,6 +1536,7 @@ C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
       USE INTBUFDEF_MOD 
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -1532,7 +1551,7 @@ C-----------------------------------------------
       INTEGER I,K
       INTEGER, DIMENSION(:),ALLOCATABLE :: IBUF
 C ----------------------------------------
-      ALLOCATE(IBUF(DIM1))
+      call my_alloc(IBUF, DIM1, "IBUF")
 
       DO I=1, DIM1
         K=TAG(I)
@@ -1759,6 +1778,7 @@ C   M o d u l e s
 C-----------------------------------------------
       USE MESSAGE_MOD
       USE INTBUFDEF_MOD 
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -1818,20 +1838,21 @@ C-----------------------------------------------
 
       INTEGER, DIMENSION(:,:),ALLOCATABLE :: ITRI
 C ----------------------------------------
-      ALLOCATE(IBUF_E(MULTIMP*NCONT),IBUF_N(MULTIMP*NCONT))
+      call my_alloc(IBUF_E, MULTIMP*NCONT, "IBUF_E")
+      call my_alloc(IBUF_N, MULTIMP*NCONT, "IBUF_N")
       IBUF_E(1:MULTIMP*NCONT) = 0
       IBUF_N(1:MULTIMP*NCONT) = 0
       II_STOK_L = 0 !mandatory in case of inacti ne 5,6,7 
 
       IF(ITYP==23.OR.INACTI==5.OR.INACTI==6.OR.INACTI==7) THEN 
         IF(NSN>0) THEN
-          ALLOCATE(NSNLOCAL(NSN))
-          ALLOCATE(CPULOCAL(NSN))
-          ALLOCATE(CANDR(NSN))
+          call my_alloc(NSNLOCAL, NSN, "NSNLOCAL")
+          call my_alloc(CPULOCAL, NSN, "CPULOCAL")
+          call my_alloc(CANDR, NSN, "CANDR")
         END IF
         NUMP(1:NSPMD) = 0
 
-        ALLOCATE(PLIST(NSPMD)) 
+        call my_alloc(PLIST, NSPMD, "PLIST")
         PLIST(1:NSPMD) = -1
         DO K=1,NSN
           N = INTBUF_TAB%NSV(K)
@@ -1929,8 +1950,8 @@ C
 C Sorting remote candidates by proc and by ascending local nsv
 C
         IF(C_NSNR>0) THEN
-          ALLOCATE(INDEX(2*C_NSNR))
-          ALLOCATE(ITRI(2,C_NSNR))
+          call my_alloc(INDEX, 2*C_NSNR, "INDEX")
+          call my_alloc(ITRI, 2, C_NSNR, "ITRI")
         END IF
         DO I = 1, C_NSNR
           N = CANDR(I)
@@ -2038,6 +2059,7 @@ C   M o d u l e s
 C-----------------------------------------------
       USE MESSAGE_MOD
       USE INTBUFDEF_MOD 
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -2078,10 +2100,12 @@ C-----------------------------------------------
       INTEGER, DIMENSION(:),ALLOCATABLE :: 
      .  IBUF1,IBUF2,NODDEL,NODDELREMOTE
 C ----------------------------------------
-      ALLOCATE(SIZ_TMP(NRTM),NODDEL(NUMNOD),
-     .         NODDELREMOTE(NUMNOD))
+      call my_alloc(SIZ_TMP, NRTM, "SIZ_TMP")
+      call my_alloc(NODDEL, NUMNOD, "NODDEL")
+      call my_alloc(NODDELREMOTE, NUMNOD, "NODDELREMOTE")
 
-      ALLOCATE(IBUF1(2*(NRTM_L + 1)), IBUF2(NREMNODE))
+      call my_alloc(IBUF1, 2*(NRTM_L + 1), "IBUF1")
+      call my_alloc(IBUF2, NREMNODE, "IBUF2")
       IBUF1(1:2*(NRTM_L+1)) = 0
       IBUF2(1:NREMNODE) = 0
 
@@ -2169,6 +2193,7 @@ C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
       USE INTBUFDEF_MOD 
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -2314,7 +2339,7 @@ C INTERNAL EDGES
         ENDIF
       ENDDO
 
-      ALLOCATE(TAG1D(NUMNOD))
+      call my_alloc(TAG1D, NUMNOD, "TAG1D")
       TAG1D(1:NUMNOD)=0
       DO I=1,NEDGE
         IF(IABS(INTBUF_TAB%LEDGE(7+(I-1)*NLEDGE))==3) THEN
@@ -2347,15 +2372,15 @@ C       TAG_EDGE2(global id ) = local id
 
 C------IREMI2 OPTION : deleting couples already defined in tied contact-------
       
-      ALLOCATE(TAGREMCAND_E2E(II_STOK_E))
+      call my_alloc(TAGREMCAND_E2E, II_STOK_E, "TAGREMCAND_E2E")
 
       TAGREMCAND_E2E(1:II_STOK_E) = 0
       IF(IREMI2==1.AND.FLAGREMNODE==2) THEN
          !  connectivity edge > contact pairs  
 
-         ALLOCATE(KCANDMS(NEDGE+1))
-         ALLOCATE(ICANDMS(NEDGE+1))
-         ALLOCATE(CANDMS(II_STOK_E))
+         call my_alloc(KCANDMS, NEDGE+1, "KCANDMS")
+         call my_alloc(ICANDMS, NEDGE+1, "ICANDMS")
+         call my_alloc(CANDMS, II_STOK_E, "CANDMS")
          KCANDMS(1:NEDGE+1) = 0
          ICANDMS(1:NEDGE+1) = 0
          CANDMS(1:II_STOK_E) = 0
@@ -2415,16 +2440,16 @@ C         Slave is local
 
 C------IREMI2 OPTION : deleting couples already defined in tied contact-------
      
-      ALLOCATE(TAGREMCAND_E2S(II_STOK_S))
+      call my_alloc(TAGREMCAND_E2S, II_STOK_S, "TAGREMCAND_E2S")
 
       TAGREMCAND_E2S(1:II_STOK_S) = 0
       IF(IREMI2==1.AND.FLAGREMNODE==2.AND.II_STOK_S > 0) THEN
 
          !  connectivity NRTM > contact pairs  
 
-         ALLOCATE(KCANDMS(NRTM+1))
-         ALLOCATE(ICANDMS(NRTM+1))
-         ALLOCATE(CANDMS(II_STOK_S))
+         call my_alloc(KCANDMS, NRTM+1, "KCANDMS")
+         call my_alloc(ICANDMS, NRTM+1, "ICANDMS")
+         call my_alloc(CANDMS, II_STOK_S, "CANDMS")
          KCANDMS(1:NRTM+1) = 0
          ICANDMS(1:NRTM+1) = 0
          CANDMS(1:II_STOK_S) = 0
@@ -2496,6 +2521,7 @@ C   M o d u l e s
 C-----------------------------------------------
       USE INTBUFDEF_MOD 
       USE I25_FIE_MOD 
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -2532,8 +2558,8 @@ C-----------------------------------------------
 C ----------------------------------------
 
 ! prepare split candidates
-      ALLOCATE(CANDM_E2E(II_STOK_E_L)) 
-      ALLOCATE(CANDS_E2E(II_STOK_E_L)) 
+      call my_alloc(CANDM_E2E, II_STOK_E_L, "CANDM_E2E")
+      call my_alloc(CANDS_E2E, II_STOK_E_L, "CANDS_E2E")
       ASSERT(II_STOK_E_L==I25_SPLIT_CAND(NIN,PROC+1)%NB_CAND_E2E)
       ASSERT(II_STOK_S_L==I25_SPLIT_CAND(NIN,PROC+1)%NB_CAND_E2S)
 
@@ -2557,7 +2583,7 @@ C         CANDS_E2E(ID) = -INTBUF_TAB%CANDS_E2E(I)
         ENDIF
       ENDDO
 
-      ALLOCATE(CANDM_E2S(II_STOK_S_L))
+      call my_alloc(CANDM_E2S, II_STOK_S_L, "CANDM_E2S")
       ALLOCATE(CANDS_E2S(II_STOK_S_L))
 C local numbering of E2S candidates
       ID = 0
@@ -2614,6 +2640,7 @@ C-----------------------------------------------
       USE MESSAGE_MOD
       USE INTBUFDEF_MOD 
       USE FRONT_MOD
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -2654,10 +2681,12 @@ C-----------------------------------------------
       INTEGER, DIMENSION(:),ALLOCATABLE :: 
      .        SIZ_TMP
 C ----------------------------------------
-      ALLOCATE(SIZ_TMP(NRTM),NODDEL(NUMNOD),
-     .         NODDELREMOTE(NUMNOD))
+      call my_alloc(SIZ_TMP, NRTM, "SIZ_TMP")
+      call my_alloc(NODDEL, NUMNOD, "NODDEL")
+      call my_alloc(NODDELREMOTE, NUMNOD, "NODDELREMOTE")
 
-      ALLOCATE(IBUF1(2*(NRTM_L + 1)), IBUF2(NREMNODE))
+      call my_alloc(IBUF1, 2*(NRTM_L + 1), "IBUF1")
+      call my_alloc(IBUF2, NREMNODE, "IBUF2")
       IBUF1(1:2*(NRTM_L+1)) = 0
       IBUF2(1:NREMNODE) = 0
 
@@ -2727,9 +2756,10 @@ C ----------------------------------------
 C----Tab Main segment removed for each second node----
 c   1st : reorganizing the tab : keep only local main segments
 
-         ALLOCATE(IBUF1(NSN_L+1),IBUF2(NREMNOR))
+         call my_alloc(IBUF1, NSN_L+1, "IBUF1")
+         call my_alloc(IBUF2, NREMNOR, "IBUF2")
 
-         ALLOCATE(NODDEL(NRTM))
+         call my_alloc(NODDEL, NRTM, "NODDEL")
 
          IBUF1(1:NSN_L+1) = 0
          IBUF2(1:NREMNOR) = 0
@@ -2789,6 +2819,7 @@ C   M o d u l e s
 C-----------------------------------------------
       USE MESSAGE_MOD
       USE INTBUFDEF_MOD 
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -2812,12 +2843,12 @@ C-----------------------------------------------
       INTEGER, DIMENSION(:),ALLOCATABLE :: IBUF5 
       INTEGER, DIMENSION(:),ALLOCATABLE :: IBUF6 
 C ----------------------------------------
-      ALLOCATE(IBUF1(NSN_L+1))
-      ALLOCATE(IBUF2(NRTM_L+1))
-      ALLOCATE(IBUF3(NISUBS))
-      ALLOCATE(IBUF4(NISUBM))
-      ALLOCATE(IBUF5(NISUBS))
-      ALLOCATE(IBUF6(NISUBM))
+      call my_alloc(IBUF1, NSN_L+1, "IBUF1")
+      call my_alloc(IBUF2, NRTM_L+1, "IBUF2")
+      call my_alloc(IBUF3, NISUBS, "IBUF3")
+      call my_alloc(IBUF4, NISUBM, "IBUF4")
+      call my_alloc(IBUF5, NISUBS, "IBUF5")
+      call my_alloc(IBUF6, NISUBM, "IBUF6")
 
 
       IBUF1(1: NSN_L+1) = 0
@@ -2889,6 +2920,7 @@ C   M o d u l e s
 C-----------------------------------------------
       USE MESSAGE_MOD
       USE INTBUFDEF_MOD 
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -2926,12 +2958,12 @@ C-----------------------------------------------
       INTEGER, DIMENSION(:),ALLOCATABLE :: IBUF5 
       INTEGER, DIMENSION(:),ALLOCATABLE :: IBUF6 
 C ----------------------------------------
-      ALLOCATE(IBUF1(NSN_L+1))
-      ALLOCATE(IBUF2(NRTM_L+1))
-      ALLOCATE(IBUF3(NISUBS))
-      ALLOCATE(IBUF4(NISUBM))
-      ALLOCATE(IBUF5(NISUBS))
-      ALLOCATE(IBUF6(NISUBM))
+      call my_alloc(IBUF1, NSN_L+1, "IBUF1")
+      call my_alloc(IBUF2, NRTM_L+1, "IBUF2")
+      call my_alloc(IBUF3, NISUBS, "IBUF3")
+      call my_alloc(IBUF4, NISUBM, "IBUF4")
+      call my_alloc(IBUF5, NISUBS, "IBUF5")
+      call my_alloc(IBUF6, NISUBM, "IBUF6")
 
       IBUF1(1: NSN_L+1) = 0
       IBUF2(1: NRTM_L+1) = 0
@@ -2982,9 +3014,9 @@ C       CALL COPY_IVAL(INTBUF_TAB(NI)%ADDSUBE,NEDGE+1,1)
 C       CALL COPY_IVAL(INTBUF_TAB(NI)%LISUBE,NISUBE_L,1) 
 C       CALL COPY_IVAL(INTBUF_TAB(NI)%INFLG_SUBE,NISUBE_L,1) 
 
-        ALLOCATE(IBUF1(NEDGE_L+1))
-        ALLOCATE(IBUF3(NISUBE))
-        ALLOCATE(IBUF5(NISUBE))
+        call my_alloc(IBUF1, NEDGE_L+1, "IBUF1")
+        call my_alloc(IBUF3, NISUBE, "IBUF3")
+        call my_alloc(IBUF5, NISUBE, "IBUF5")
        
         IBUF1(1: NEDGE_L+1) = 0
         IBUF3(1: NISUBE) = 0
@@ -3034,6 +3066,7 @@ C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
       USE INTBUFDEF_MOD 
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -3069,7 +3102,7 @@ C-----------------------------------------------
 C ----------------------------------------
 
       SIZ_XSAV = 3*MIN(NUMNOD_L,NSN_L+NMN_L)
-      ALLOCATE(RBUF(SIZ_XSAV))
+      call my_alloc(RBUF, SIZ_XSAV, "RBUF")
       RBUF(1:SIZ_XSAV) = ZERO
 
 C XSAVE
@@ -3729,6 +3762,7 @@ C-----------------------------------------------
       USE MESSAGE_MOD
       USE FRONT_MOD
       USE INTBUFDEF_MOD 
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -3769,7 +3803,8 @@ C-----------------------------------------------
       INTEGER, DIMENSION(:,:),ALLOCATABLE :: ITRI
 
 C ----------------------------------------
-      ALLOCATE(IBUF_E(MULTIMP*NCONT),IBUF_N(MULTIMP*NCONT))
+      call my_alloc(IBUF_E, MULTIMP*NCONT, "IBUF_E")
+      call my_alloc(IBUF_N, MULTIMP*NCONT, "IBUF_N")
       IBUF_E(1:MULTIMP*NCONT) = 0
       IBUF_N(1:MULTIMP*NCONT) = 0
 
@@ -3777,15 +3812,15 @@ C ----------------------------------------
 
       IF(INACTI==5.OR.INACTI==6.OR.INACTI==7) THEN 
         IF(NRTS>0) THEN
-          ALLOCATE(NRTSLOCAL(NRTS))
-          ALLOCATE(CPULOCAL(NRTS))
-          ALLOCATE(CANDR(NRTS))
+          call my_alloc(NRTSLOCAL, NRTS, "NRTSLOCAL")
+          call my_alloc(CPULOCAL, NRTS, "CPULOCAL")
+          call my_alloc(CANDR, NRTS, "CANDR")
         END IF
 
         NUMP(1:NSPMD) = 0
 
 ! optimize loop with PLIST tool
-        ALLOCATE(PLIST(NSPMD)) 
+        call my_alloc(PLIST, NSPMD, "PLIST")
         PLIST(1:NSPMD) = -1
 
         DO K=1,NRTS
@@ -3834,8 +3869,8 @@ C
 C Sorting remote candidates by proc and by ascending local nsv
 C
         IF(C_NRTSR>0) THEN
-          ALLOCATE(INDEX(2*C_NRTSR))
-          ALLOCATE(ITRI(2,C_NRTSR))
+          call my_alloc(INDEX, 2*C_NRTSR, "INDEX")
+          call my_alloc(ITRI, 2, C_NRTSR, "ITRI")
         END IF
         DO I = 1, C_NRTSR
           N = CANDR(I)
@@ -4311,6 +4346,7 @@ C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
       USE INTBUFDEF_MOD 
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -4328,7 +4364,7 @@ C-----------------------------------------------
 
       my_real, DIMENSION(:),ALLOCATABLE :: RBUF
 C ----------------------------------------
-      ALLOCATE(RBUF(DIM1*DIM2))
+      call my_alloc(RBUF, DIM1*DIM2, "RBUF")
       DO I=1, DIM1
         K=TAG_SEG(I)
         DO J=1,DIM2
@@ -4353,6 +4389,7 @@ C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
       USE INTBUFDEF_MOD 
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -4367,7 +4404,7 @@ C-----------------------------------------------
       INTEGER I,J,K,N
       INTEGER, DIMENSION(:),ALLOCATABLE :: IBUF
 C ----------------------------------------
-      ALLOCATE(IBUF(DIM1*DIM2))
+      call my_alloc(IBUF, DIM1*DIM2, "IBUF")
       DO I=1, DIM1
         K=TAG(I)
         DO J=1,DIM2   
@@ -4394,6 +4431,7 @@ C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
       USE INTBUFDEF_MOD 
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -4408,7 +4446,7 @@ C-----------------------------------------------
       INTEGER I,K
       INTEGER, DIMENSION(:),ALLOCATABLE :: IBUF
 C ----------------------------------------
-      ALLOCATE(IBUF(DIM1))
+      call my_alloc(IBUF, DIM1, "IBUF")
       DO I=1, DIM1
         K=TAG_SEG(I)
         IBUF(I) = TAG_NLG(K)
@@ -4479,6 +4517,7 @@ C   M o d u l e s
 C-----------------------------------------------
       USE MESSAGE_MOD
       USE INTBUFDEF_MOD 
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -4517,7 +4556,8 @@ C-----------------------------------------------
 
       INTEGER, DIMENSION(:,:),ALLOCATABLE :: ITRI
 C ----------------------------------------
-      ALLOCATE(IBUF_E(MULTIMP*NCONT),IBUF_N(MULTIMP*NCONT))
+      call my_alloc(IBUF_E, MULTIMP*NCONT, "IBUF_E")
+      call my_alloc(IBUF_N, MULTIMP*NCONT, "IBUF_N")
 
       IBUF_E(1:MULTIMP*NCONT) = 0
       IBUF_N(1:MULTIMP*NCONT) = 0
@@ -4525,14 +4565,14 @@ C ----------------------------------------
 
       IF(INACTI==5.OR.INACTI==6.OR.INACTI==7) THEN 
         IF(NSN>0) THEN
-          ALLOCATE(NSNLOCAL(NSN))
-          ALLOCATE(CPULOCAL(NSN))
-          ALLOCATE(CANDR(NSN))
+          call my_alloc(NSNLOCAL, NSN, "NSNLOCAL")
+          call my_alloc(CPULOCAL, NSN, "CPULOCAL")
+          call my_alloc(CANDR, NSN, "CANDR")
         END IF
 
         NUMP(1:NSPMD) = 0
 
-        ALLOCATE(PLIST(NSPMD)) 
+        call my_alloc(PLIST, NSPMD, "PLIST")
         PLIST(1:NSPMD) = -1
         NINDX_SCRT=0
         DO K=1,NSN
@@ -4599,8 +4639,8 @@ C
 C Sorting remote candidates by proc and by ascending local nsv
 C
         IF(C_NSNR>0) THEN
-          ALLOCATE(INDEX(2*C_NSNR))
-          ALLOCATE(ITRI(2,C_NSNR))
+          call my_alloc(INDEX, 2*C_NSNR, "INDEX")
+          call my_alloc(ITRI, 2, C_NSNR, "ITRI")
         END IF
         DO I = 1, C_NSNR
           N = CANDR(I)
@@ -4703,6 +4743,7 @@ C   M o d u l e s
 C-----------------------------------------------
       USE MESSAGE_MOD
       USE INTBUFDEF_MOD 
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -4741,16 +4782,17 @@ C-----------------------------------------------
 
       INTEGER, DIMENSION(:,:),ALLOCATABLE :: ITRI
 C ----------------------------------------
-      ALLOCATE(IBUF_E(MULTIMP*NCONTE),IBUF_N(MULTIMP*NCONTE))
+      call my_alloc(IBUF_E, MULTIMP*NCONTE, "IBUF_E")
+      call my_alloc(IBUF_N, MULTIMP*NCONTE, "IBUF_N")
       IBUF_E(1:MULTIMP*NCONTE) = 0
       IBUF_N(1:MULTIMP*NCONTE) = 0
       II_STOKE_L = 0 !mandatory in case of inacti ne 5,6,7 
 
       IF(INACTI==5.OR.INACTI==6.OR.INACTI==7) THEN 
         IF(NLINS>0) THEN
-          ALLOCATE(NRTSLOCAL(NLINS))
-          ALLOCATE(CPULOCAL(NLINS))
-          ALLOCATE(CANDR(NLINS))
+          call my_alloc(NRTSLOCAL, NLINS, "NRTSLOCAL")
+          call my_alloc(CPULOCAL, NLINS, "CPULOCAL")
+          call my_alloc(CANDR, NLINS, "CANDR")
         END IF
 
         NUMP(1:NSPMD) = 0
@@ -4814,8 +4856,8 @@ C
 C Sorting remote candidates by proc and by ascending local nsv
 C
         IF(C_NLINSR>0) THEN
-          ALLOCATE(INDEX(2*C_NLINSR))
-          ALLOCATE(ITRI(2,C_NLINSR))
+          call my_alloc(INDEX, 2*C_NLINSR, "INDEX")
+          call my_alloc(ITRI, 2, C_NLINSR, "ITRI")
         END IF
         DO I = 1, C_NLINSR
           N = CANDR(I)
@@ -4912,6 +4954,7 @@ C   M o d u l e s
 C-----------------------------------------------
       USE INTBUFDEF_MOD 
       USE FRONT_MOD
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -5015,7 +5058,7 @@ C ----------------------------------------
         NINDX_SCRT = 0
 
       !PREPARE MNDD TAB FOR main TEMPERATURE COMMUNICATION
-      ALLOCATE(PLIST(NSPMD)) 
+      call my_alloc(PLIST, NSPMD, "PLIST")
       PLIST(1:NSPMD) = -1
       IF (INTTH == 2.OR.FLAGLOADP > 0) THEN
         DO K=1,NMNG
@@ -5058,6 +5101,7 @@ C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
       USE INTBUFDEF_MOD 
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -5073,7 +5117,7 @@ C-----------------------------------------------
       INTEGER I,J,K
       INTEGER, DIMENSION(:),ALLOCATABLE :: IBUF
 C ----------------------------------------
-      ALLOCATE(IBUF(DIM1*DIM2))
+      call my_alloc(IBUF, DIM1*DIM2, "IBUF")
       IBUF(1:DIM1*DIM2) = 0
 
       DO I=1,II_STOK_L
@@ -5102,6 +5146,7 @@ C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
       USE INTBUFDEF_MOD 
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -5117,7 +5162,7 @@ C-----------------------------------------------
       INTEGER I,K,N
       INTEGER, DIMENSION(:),ALLOCATABLE :: IBUF
 C ----------------------------------------
-      ALLOCATE(IBUF(DIM1))
+      call my_alloc(IBUF, DIM1, "IBUF")
       IBUF(1:DIM1) = 0
 
       DO I=1,II_STOK_L
@@ -5430,6 +5475,7 @@ C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
       USE INTBUFDEF_MOD 
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -5444,7 +5490,7 @@ C-----------------------------------------------
       INTEGER I,K,N
       INTEGER, DIMENSION(:),ALLOCATABLE :: IBUF
 C ----------------------------------------
-      ALLOCATE(IBUF(DIM1))
+      call my_alloc(IBUF, DIM1, "IBUF")
 
       DO I=1, DIM1
         K=TAG(I)
@@ -5475,6 +5521,7 @@ C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
       USE INTBUFDEF_MOD 
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -5489,7 +5536,7 @@ C-----------------------------------------------
       INTEGER I,J,K,N
       INTEGER, DIMENSION(:),ALLOCATABLE :: IBUF
 C ----------------------------------------
-      ALLOCATE(IBUF(DIM1*DIM2))
+      call my_alloc(IBUF, DIM1*DIM2, "IBUF")
       DO I=1, DIM1
         K=TAG_SEG(I)
         DO J=1,DIM2
@@ -5521,6 +5568,7 @@ C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
       USE INTBUFDEF_MOD 
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -5535,7 +5583,7 @@ C-----------------------------------------------
       INTEGER I,K,N1,N2,N3,N4,NI
       INTEGER, DIMENSION(:,:),ALLOCATABLE :: IBUF
 C ----------------------------------------
-      ALLOCATE(IBUF(5,DIM1))
+      call my_alloc(IBUF, 5, DIM1, "IBUF")
       DO I=1, DIM1
         K=TAG_SEG(I)
         N1 = TAB(1,K)
@@ -5579,6 +5627,7 @@ C-----------------------------------------------
       USE MESSAGE_MOD
       USE INTBUFDEF_MOD 
       USE FRONT_MOD
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -5638,20 +5687,21 @@ C-----------------------------------------------
 C ----------------------------------------
 C       w to be done :modif w/ edge
 C ----------------------------------------
-      ALLOCATE(IBUF_E(MULTIMP*NCONT),IBUF_N(MULTIMP*NCONT))
+      call my_alloc(IBUF_E, MULTIMP*NCONT, "IBUF_E")
+      call my_alloc(IBUF_N, MULTIMP*NCONT, "IBUF_N")
       IBUF_E(1:MULTIMP*NCONT) = 0
       IBUF_N(1:MULTIMP*NCONT) = 0
       II_STOK_L = 0 !mandatory in case of inacti ne 5,6,7 
 
         IF(NSN>0) THEN
-          ALLOCATE(NSNLOCAL(NSN))
-          ALLOCATE(CPULOCAL(NSN))
-          ALLOCATE(CANDR(NSN))
+          call my_alloc(NSNLOCAL, NSN, "NSNLOCAL")
+          call my_alloc(CPULOCAL, NSN, "CPULOCAL")
+          call my_alloc(CANDR, NSN, "CANDR")
         END IF
 
         NUMP(1:NSPMD) = 0
 
-        ALLOCATE(PLIST(NSPMD)) 
+        call my_alloc(PLIST, NSPMD, "PLIST")
         PLIST(1:NSPMD) = -1
         DO K=1,NSN
           N = INTBUF_TAB%NSV(K)
@@ -5740,8 +5790,8 @@ C
 C Sorting remote candidates by proc and by ascending local nsv
 C
         IF(C_NSNR>0) THEN
-          ALLOCATE(INDEX(2*C_NSNR))
-          ALLOCATE(ITRI(2,C_NSNR))
+          call my_alloc(INDEX, 2*C_NSNR, "INDEX")
+          call my_alloc(ITRI, 2, C_NSNR, "ITRI")
         END IF
         DO I = 1, C_NSNR
           N = CANDR(I)
@@ -5843,6 +5893,7 @@ C
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
@@ -5854,7 +5905,7 @@ C-----------------------------------------------
       INTEGER I,SEG,SE1,SE2,NI
       INTEGER, DIMENSION(:,:),ALLOCATABLE :: IBUF
 C-----------------------------------------------
-      ALLOCATE(IBUF(2,NSNE_L))
+      call my_alloc(IBUF, 2, NSNE_L, "IBUF")
       DO I=1,NSNE_L
          SEG=TAG_NSNE(I)
          SE1 = IS2SE(1,SEG)
@@ -5895,6 +5946,7 @@ C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
       USE INTBUFDEF_MOD 
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -5909,7 +5961,7 @@ C-----------------------------------------------
       INTEGER I,K,N
       INTEGER, DIMENSION(:),ALLOCATABLE :: IBUF
 C ----------------------------------------
-      ALLOCATE(IBUF(DIMN))
+      call my_alloc(IBUF, DIMN, "IBUF")
 
       DO I=1, DIMN
         K=TAG(I)
@@ -6159,6 +6211,7 @@ C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
       USE INTBUFDEF_MOD 
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -6194,7 +6247,7 @@ C-----------------------------------------------
       INTEGER :: NB_BOUNDARY_EDGES_REMOTE ! boundary edges treated by the other domain 
       INTEGER :: IAS,JAS,IS,N1,N2,I1,I2
 C ----------------------------------------
-      ALLOCATE(IBUF(NLEDGE*NEDGE_L))
+      call my_alloc(IBUF, NLEDGE*NEDGE_L, "IBUF")
 
       CMPT=0
       ID = 1
@@ -6666,6 +6719,7 @@ C   M o d u l e s
 C-----------------------------------------------
       USE MESSAGE_MOD
       USE INTBUFDEF_MOD 
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -6705,20 +6759,21 @@ C-----------------------------------------------
 C ----------------------------------------
 C       w to be done :modif w/ edge
 C ----------------------------------------
-      ALLOCATE(IBUF_E(MULTIMP*NCONT),IBUF_N(MULTIMP*NCONT))
+      call my_alloc(IBUF_E, MULTIMP*NCONT, "IBUF_E")
+      call my_alloc(IBUF_N, MULTIMP*NCONT, "IBUF_N")
       IBUF_E(1:MULTIMP*NCONT) = 0
       IBUF_N(1:MULTIMP*NCONT) = 0
       II_STOK_L = 0 !mandatory in case of inacti ne 5,6,7 
 
         IF(NSN>0) THEN
-          ALLOCATE(NSNLOCAL(NSN))
-          ALLOCATE(CPULOCAL(NSN))
-          ALLOCATE(CANDR(NSN))
+          call my_alloc(NSNLOCAL, NSN, "NSNLOCAL")
+          call my_alloc(CPULOCAL, NSN, "CPULOCAL")
+          call my_alloc(CANDR, NSN, "CANDR")
         END IF
 
         NUMP(1:NSPMD) = 0
 
-        ALLOCATE(PLIST(NSPMD)) 
+        call my_alloc(PLIST, NSPMD, "PLIST")
         PLIST(1:NSPMD) = -1
         DO K=1,NSN
           N = INTBUF_TAB%NSV(K)
@@ -6785,8 +6840,8 @@ C
 C Sorting remote candidates by proc and by ascending local nsv
 C
 C       IF(C_NSNR>0) THEN
-          ALLOCATE(INDEX(2*C_NSNR))
-          ALLOCATE(ITRI(2,C_NSNR))
+          call my_alloc(INDEX, 2*C_NSNR, "INDEX")
+          call my_alloc(ITRI, 2, C_NSNR, "ITRI")
 C       END IF
         DO I = 1, C_NSNR
           N = CANDR(I)
@@ -6888,6 +6943,7 @@ C   M o d u l e s
 C-----------------------------------------------
       USE INTBUFDEF_MOD 
       USE FRONT_MOD
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -6904,7 +6960,9 @@ C-----------------------------------------------
       INTEGER I,J,K,IS,ISL
       INTEGER, DIMENSION(:),ALLOCATABLE :: ADSKYN_L,IADNOR_L, TAG_MS
 C ----------------------------------------
-      ALLOCATE(ADSKYN_L(NADMSR_L+1),IADNOR_L(4*NRTM_L),TAG_MS(NADMSR_L))
+      call my_alloc(ADSKYN_L, NADMSR_L+1, "ADSKYN_L")
+      call my_alloc(IADNOR_L, 4*NRTM_L, "IADNOR_L")
+      call my_alloc(TAG_MS, NADMSR_L, "TAG_MS")
 
       TAG_MS(1:NADMSR_L)=0
       DO I=1, NADMSR
@@ -6947,6 +7005,7 @@ C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
       USE INTBUFDEF_MOD 
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -6961,7 +7020,7 @@ C-----------------------------------------------
       INTEGER I,K
       INTEGER, DIMENSION(:),ALLOCATABLE :: IBUF, TAG_MS
 C ----------------------------------------
-      ALLOCATE(TAG_MS(NADMSR_L))
+      call my_alloc(TAG_MS, NADMSR_L, "TAG_MS")
 
       TAG_MS(1:NADMSR_L)=0
       DO I=1, NADMSR
@@ -6969,7 +7028,7 @@ C ----------------------------------------
         IF(K /= 0) TAG_MS(K) = I
       END DO 
 C ----------------------------------------
-      ALLOCATE(IBUF(NADMSR_L))
+      call my_alloc(IBUF, NADMSR_L, "IBUF")
 
       DO I=1, NADMSR_L
         K=TAG_MS(I)
@@ -7002,6 +7061,7 @@ C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
       USE INTBUFDEF_MOD 
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -7017,7 +7077,7 @@ C-----------------------------------------------
       INTEGER I,J,K,SN,FICT_SN
       INTEGER, DIMENSION(:),ALLOCATABLE :: IBUF
 C ----------------------------------------
-      ALLOCATE(IBUF(NSN_L))
+      call my_alloc(IBUF, NSN_L, "IBUF")
 
       DO I=1, NSN_L
         K=TAG_NODE_2RY(I)
@@ -7065,6 +7125,7 @@ C-----------------------------------------------
       USE MESSAGE_MOD
       USE INTBUFDEF_MOD 
       USE FRONT_MOD
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -7097,10 +7158,12 @@ C-----------------------------------------------
       INTEGER, DIMENSION(:),ALLOCATABLE :: 
      .  IBUF1,IBUF2,NODDEL,NODDELREMOTE
 C ----------------------------------------
-      ALLOCATE(SIZ_TMP(NRTM),NODDEL(NUMNOD+NSNE),
-     .         NODDELREMOTE(NUMNOD+NSNE))
+      call my_alloc(SIZ_TMP, NRTM, "SIZ_TMP")
+      call my_alloc(NODDEL, NUMNOD+NSNE, "NODDEL")
+      call my_alloc(NODDELREMOTE, NUMNOD+NSNE, "NODDELREMOTE")
 
-      ALLOCATE(IBUF1(2*(NRTM_L + 1)), IBUF2(NREMNODE))
+      call my_alloc(IBUF1, 2*(NRTM_L + 1), "IBUF1")
+      call my_alloc(IBUF2, NREMNODE, "IBUF2")
       IBUF1(1:2*(NRTM_L+1)) = 0
       IBUF2(1:NREMNODE) = 0
 
@@ -7208,6 +7271,7 @@ C   M o d u l e s
 C-----------------------------------------------
       USE MESSAGE_MOD
       USE INTBUFDEF_MOD 
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -7237,7 +7301,8 @@ C-----------------------------------------------
 C ----------------------------------------
 C
 C
-      ALLOCATE(IBUF1(2*(NRTM_L + 1)), IBUF2(NREMNODE_L))
+      call my_alloc(IBUF1, 2*(NRTM_L + 1), "IBUF1")
+      call my_alloc(IBUF2, NREMNODE_L, "IBUF2")
       IBUF1(1:2*(NRTM_L+1)) = 0
       IBUF2(1:NREMNODE_L) = 0
 C
@@ -7321,6 +7386,7 @@ C   M o d u l e s
 C-----------------------------------------------
       USE MESSAGE_MOD
       USE INTBUFDEF_MOD 
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -7357,7 +7423,8 @@ C-----------------------------------------------
 C ----------------------------------------
 C
 C
-      ALLOCATE(IBUF1(2*(NEDGE_L + 1)), IBUF2(NREMNODE_EDG_L))
+      call my_alloc(IBUF1, 2*(NEDGE_L + 1), "IBUF1")
+      call my_alloc(IBUF2, NREMNODE_EDG_L, "IBUF2")
       IBUF1(1:2*(NEDGE_L+1)) = 0
       IBUF2(1:NREMNODE_EDG_L) = 0
 C
@@ -7508,6 +7575,7 @@ C   M o d u l e s
 C-----------------------------------------------
       USE MESSAGE_MOD
       USE INTBUFDEF_MOD 
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -7542,7 +7610,8 @@ C-----------------------------------------------
 C ----------------------------------------
 C
 C
-      ALLOCATE(IBUF1(2*(NRTM_L + 1)), IBUF2(NREMNODE_E2S_L))
+      call my_alloc(IBUF1, 2*(NRTM_L + 1), "IBUF1")
+      call my_alloc(IBUF2, NREMNODE_E2S_L, "IBUF2")
       IBUF1(1:2*(NRTM_L+1)) = 0
       IBUF2(1:NREMNODE_E2S_L) = 0
 C

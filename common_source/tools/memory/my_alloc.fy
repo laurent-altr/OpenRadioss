@@ -319,7 +319,11 @@
 !||    my_alloc_check   ../common_source/tools/memory/my_alloc.F90
 !||====================================================================
         subroutine ${SUB_NAME}$(a, ${', '.join(DIM_VARS)}$, msg, stat)
-          ${FTYPE}$, dimension(${', '.join([':'] * RANK)}$), ${MEM_ATTR}$, target, intent(inout) :: a !< The allocated array
+  #:if MEM_ATTR == 'allocatable'
+          ${FTYPE}$, dimension(${', '.join([':'] * RANK)}$), allocatable, target, intent(inout) :: a !< The allocated array
+  #:else
+          ${FTYPE}$, dimension(${', '.join([':'] * RANK)}$), pointer, intent(inout) :: a !< The allocated array
+  #:endif
   #:for I, DV in enumerate(DIM_VARS)
     #:if RANK == 1
           ${IDX_TYPE}$, intent(in) :: ${DV}$ !< The size of the array
@@ -376,6 +380,7 @@
 
         public :: report_alloc
         public :: record_dealloc_addr
+        private :: build_msg, my_alloc_check, record_alloc_addr
 
 #:for IDX_TYPE, IDX_PREFIX in IDX_KINDS
   #:for MEM_ATTR, MEM_PREFIX in MEM_KINDS

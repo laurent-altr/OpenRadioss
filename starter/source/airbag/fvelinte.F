@@ -42,6 +42,7 @@ C   M o d u l e s
 C-----------------------------------------------
       USE FVBAG_MOD
       use element_mod , only : nixc,nixtg
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -70,9 +71,9 @@ C-----------------------------------------------
       INTEGER, DIMENSION(:), ALLOCATABLE :: ITAG,ITAGC,ITAGTG
 
 
-      ALLOCATE(ITAG(NB_NODE))
-      ALLOCATE(ITAGC(NUMELC))
-      ALLOCATE(ITAGTG(NUMELTG))
+      call my_alloc(ITAG, NB_NODE, "ITAG")
+      call my_alloc(ITAGC, NUMELC, "ITAGC")
+      call my_alloc(ITAGTG, NUMELTG, "ITAGTG")
 C
       DO I=1,NB_NODE
          ITAG(I)=0
@@ -106,7 +107,7 @@ C     Build connectivity
          ITAG(N2) = 0
          ITAG(N3) = 0
       ENDDO
-      ALLOCATE(CNS(NB_NODE,1+ICMAX*2))
+      call my_alloc(CNS, NB_NODE, 1+ICMAX*2, "CNS")
       DO I=1,NB_NODE
          CNS(I, 1)=0
       ENDDO
@@ -195,7 +196,7 @@ C TAG elements of internal surface
          ICMAX=MAX(ICMAX,ITAG(I))
       ENDDO
 
-      ALLOCATE(CNS(NB_NODE,1+ICMAX*2))
+      call my_alloc(CNS, NB_NODE, 1+ICMAX*2, "CNS")
       DO I=1,NB_NODE
          CNS(I,1)=0
       ENDDO

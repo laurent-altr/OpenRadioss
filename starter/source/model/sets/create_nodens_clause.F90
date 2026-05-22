@@ -122,7 +122,7 @@
             clause%nodens(i) = nodens_read_tmp(i)
           end do
 !
-          call my_dealloc(nodens_read_tmp, "nodens_read_tmp")
+          call my_dealloc(nodens_read_tmp)
 ! ----------------------------------------------------------------------------------------------------------------------
         end subroutine create_nodens_clause
       end module create_nodens_clause_mod

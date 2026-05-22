@@ -37,6 +37,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
@@ -61,8 +62,8 @@ C-----------------------------------------------
       INTEGER,DIMENSION(:), ALLOCATABLE :: MAIN_NODES,TAG,PLIST
 
 C-----------------------------------------------
-      ALLOCATE(MAIN_NODES(NRBE2))
-      ALLOCATE(TAG(NUMNOD))
+      call my_alloc(MAIN_NODES, NRBE2, "MAIN_NODES")
+      call my_alloc(TAG, NUMNOD, "TAG")
       ALLOCATE(PLIST(NSPMD))
 ! ------------------------
 C

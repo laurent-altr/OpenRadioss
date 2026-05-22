@@ -429,9 +429,9 @@
             end if
           end do
 !-----------
-          call my_dealloc(ksysusrs, "ksysusrs")
-          call my_dealloc(indexs, "indexs")
-          call my_dealloc(itris, "itris")
+          call my_dealloc(ksysusrs)
+          call my_dealloc(indexs)
+          call my_dealloc(itris)
 !---
 
         end subroutine initag_preload_a

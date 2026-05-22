@@ -294,7 +294,8 @@ c
 c///////////////////////////////////
 c OUTPUT
 c///////////////////////////////////
-      ALLOCATE(SUM_WARN(CPTWARN*10),SUM_ERR(CPTERR*10))
+      allocate(SUM_WARN(CPTWARN*10))
+      allocate(SUM_ERR(CPTERR*10))
       IF( IERR + IWARN /= 0 ) THEN
 c
             IF(CPTWARN /= 0) THEN 

@@ -230,35 +230,35 @@ C
       IF(NPT_ALL == 0) NPT_ALL = NLAY
       IF (IPARG(6) == 0.OR.NPT==0) MPT=0
       IF((IGTYP == 51 .OR. IGTYP == 52) .AND. IDRAPE > 0) THEN
-         ALLOCATE(DIR_A(NPT_ALL*NEL*2))
-         ALLOCATE(DIR_B(NPT_ALL*NEL*2))
+         call my_alloc(DIR_A, NPT_ALL*NEL*2, "DIR_A")
+         call my_alloc(DIR_B, NPT_ALL*NEL*2, "DIR_B")
          DIR_A = ZERO
          DIR_B = ZERO 
-         ALLOCATE(PHI1(MVSIZ*NPT_ALL))
-         ALLOCATE(PHI2(NVSIZ*NPT_ALL))
+         call my_alloc(PHI1, MVSIZ*NPT_ALL, "PHI1")
+         call my_alloc(PHI2, NVSIZ*NPT_ALL, "PHI2")
          PHI1  = ZERO
          PHI2  = ZERO
-         ALLOCATE(COOR1(NPT_ALL*MVSIZ))
-         ALLOCATE(COOR2(NPT_ALL*MVSIZ))
-         ALLOCATE(COOR3(NPT_ALL*MVSIZ))
-         ALLOCATE(COOR4(NPT_ALL*MVSIZ))
+         call my_alloc(COOR1, NPT_ALL*MVSIZ, "COOR1")
+         call my_alloc(COOR2, NPT_ALL*MVSIZ, "COOR2")
+         call my_alloc(COOR3, NPT_ALL*MVSIZ, "COOR3")
+         call my_alloc(COOR4, NPT_ALL*MVSIZ, "COOR4")
          COOR1 = ZERO
          COOR2 = ZERO
          COOR3 = ZERO
          COOR4 = ZERO
       ELSE
-         ALLOCATE(DIR_A(NLAY*NEL*2))
-         ALLOCATE(DIR_B(NLAY*NEL*2))
+         call my_alloc(DIR_A, NLAY*NEL*2, "DIR_A")
+         call my_alloc(DIR_B, NLAY*NEL*2, "DIR_B")
          DIR_A = ZERO
          DIR_B = ZERO  
-         ALLOCATE(PHI1(NLAY*MVSIZ))
-         ALLOCATE(PHI2(NLAY*MVSIZ))
+         call my_alloc(PHI1, NLAY*MVSIZ, "PHI1")
+         call my_alloc(PHI2, NLAY*MVSIZ, "PHI2")
          PHI1  = ZERO
          PHI2  = ZERO
-         ALLOCATE(COOR1(NLAY*MVSIZ))
-         ALLOCATE(COOR2(NLAY*MVSIZ))
-         ALLOCATE(COOR3(NLAY*MVSIZ))
-         ALLOCATE(COOR4(NLAY*MVSIZ))
+         call my_alloc(COOR1, NLAY*MVSIZ, "COOR1")
+         call my_alloc(COOR2, NLAY*MVSIZ, "COOR2")
+         call my_alloc(COOR3, NLAY*MVSIZ, "COOR3")
+         call my_alloc(COOR4, NLAY*MVSIZ, "COOR4")
          COOR1 = ZERO
          COOR2 = ZERO
          COOR3 = ZERO
@@ -313,11 +313,11 @@ C-----------------------------------------------------------------------
       END IF
 C------------
       IF(IDRAPE > 0 ) THEN
-        ALLOCATE(INDX(NUMELTG))
+        call my_alloc(INDX, NUMELTG, "INDX")
         INDX = 0
         INDX(1:NUMELTG) = DRAPEG%INDX(NUMELC + 1 : NUMELC + NUMELTG)
       ELSE
-        ALLOCATE(INDX(0))
+        call my_alloc(INDX, 0, "INDX")
       ENDIF  
       CALL C3INMAS(X,XREFTG(1,1,NFT+1),IXTG,GEO,PM,XMAS,IN,THK,
      .             PARTSAV,V,IPART(NFT+1),MSTG(NFT+1),INTG(NFT+1),

@@ -160,7 +160,7 @@
           ! -> Uni-directional lamina model
           if (imodel == 1) then
             fail%nmod = 5
-            allocate (fail%mode(fail%nmod))
+            allocate(fail%mode(fail%nmod))
             fail%mode(1) = "Tensile/Shear fiber"
             fail%mode(2) = "Compression fiber"
             fail%mode(3) = "Crush"
@@ -169,7 +169,7 @@
             ! -> Fabric lamina model
           else
             fail%nmod = 7
-            allocate (fail%mode(fail%nmod))
+            allocate(fail%mode(fail%nmod))
             fail%mode(1) = "Tensile/Shear fiber 1"
             fail%mode(2) = "Tensile/Shear fiber 2"
             fail%mode(3) = "Compression fiber 1"

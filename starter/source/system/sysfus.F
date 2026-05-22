@@ -557,6 +557,7 @@ C      TEST FOR DUPLICATE NODES
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
@@ -583,7 +584,7 @@ C-----------------------------------------------
       INTEGER I
       IF (NLIST>=2)THEN
 #if CPP_comp == f90
-         ALLOCATE(INDEX(3*NLIST))
+         call my_alloc(INDEX, 3*NLIST, "INDEX")
 #else
         CALL MY_ALLOC(IINDEX,3*NLIST,0,"IINDEX")
 #endif
@@ -607,6 +608,7 @@ C      TEST FOR DUPLICATE NODES
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
@@ -632,7 +634,7 @@ C-----------------------------------------------
       INTEGER I
       IF (NLIST>=2)THEN
 #if CPP_comp == f90
-         ALLOCATE(INDEX(3*NLIST))
+         call my_alloc(INDEX, 3*NLIST, "INDEX")
 #else
         CALL MY_ALLOC(IINDEX,3*NLIST,0,"IINDEX")
 #endif
@@ -726,6 +728,7 @@ C      TEST FOR DUPLICATE NODES IN LISTS OF NODE OR ELEMENT IDs, ETC.
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
@@ -749,7 +752,7 @@ C-----------------------------------------------
 #endif
       IF (INVERS>=40.AND.NLIST>=2)THEN
 #if CPP_comp == f90
-         ALLOCATE(INDEX(3*NLIST))
+         call my_alloc(INDEX, 3*NLIST, "INDEX")
 #else
         CALL MY_ALLOC(IINDEX,3*NLIST,0,"IINDEX")
 #endif
@@ -853,6 +856,7 @@ C      TEST LES N0 DOUBLES , TOUS FORMATS, ERREUR
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
@@ -875,7 +879,7 @@ C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
       INTEGER I
 #if CPP_comp == f90
-         ALLOCATE(INDEX(3*NLIST))
+         call my_alloc(INDEX, 3*NLIST, "INDEX")
 #else
         CALL MY_ALLOC(IINDEX,3*NLIST,0,"IINDEX")
 #endif
@@ -958,6 +962,7 @@ C      TEST FOR DUPLICATE NODES
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
@@ -984,7 +989,7 @@ C-----------------------------------------------
       INTEGER I
       IF (NLIST>=2)THEN
 #if CPP_comp == f90
-         ALLOCATE(INDEX(3*NLIST))
+         call my_alloc(INDEX, 3*NLIST, "INDEX")
 #else
         CALL MY_ALLOC(IINDEX,3*NLIST,0,"IINDEX")
 #endif
@@ -1069,6 +1074,7 @@ C      TEST FOR DUPLICATE NODES
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
@@ -1095,7 +1101,7 @@ C-----------------------------------------------
       INTEGER I
       IF (NLIST>=2)THEN
 #if CPP_comp == f90
-         ALLOCATE(INDEX(3*NLIST))
+         call my_alloc(INDEX, 3*NLIST, "INDEX")
 #else
         CALL MY_ALLOC(IINDEX,3*NLIST,0,"IINDEX")
 #endif
@@ -1189,6 +1195,7 @@ C      TEST FOR DUPLICATE NODES
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
@@ -1215,7 +1222,7 @@ C-----------------------------------------------
       INTEGER I
       IF (NLIST>=2)THEN
 #if CPP_comp == f90
-         ALLOCATE(INDEX(3*NLIST))
+         call my_alloc(INDEX, 3*NLIST, "INDEX")
 #else
         CALL MY_ALLOC(IINDEX,3*NLIST,0,"IINDEX")
 #endif
@@ -1239,6 +1246,7 @@ C      TEST FOR DUPLICATE NODES
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
@@ -1265,7 +1273,7 @@ C-----------------------------------------------
       INTEGER I
       IF (NLIST>=2)THEN
 #if CPP_comp == f90
-         ALLOCATE(INDEX(3*NLIST))
+         call my_alloc(INDEX, 3*NLIST, "INDEX")
 #else
         CALL MY_ALLOC(IINDEX,3*NLIST,0,"IINDEX")
 #endif

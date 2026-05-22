@@ -75,6 +75,7 @@ C-----------------------------------------------
         USE NAMES_AND_TITLES_MOD , ONLY : NCHARTITLE, NCHARKEY, NCHARFIELD
         USE READER_OLD_MOD , ONLY : KINTER, KCUR, LINE, NSLASH
         use element_mod , only : nixc
+        use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -284,7 +285,7 @@ C-------------------------------------------------------------------------------
 
           CALL HM_OPTION_START('/GAUGE')
 
-          ALLOCATE(TAGGAU(NBGAUGE))
+          call my_alloc(TAGGAU, NBGAUGE, "TAGGAU")
           TAGGAU(:)=0
 
           DO I=1,NBGAUGE
@@ -358,7 +359,7 @@ C------Prereading and tag of MONVOL---------------------------------------------
 C----------------------------------------------------------------------------------C
 
           NI=0
-          ALLOCATE(TAGMON(NMONVOL + NVOLU))
+          call my_alloc(TAGMON, NMONVOL + NVOLU, "TAGMON")
           TAGMON(:)=0
 
 C-------------------------------------------------------------------C
@@ -650,7 +651,7 @@ C--------------------------------------------------------------------C
           CALL HM_GET_INTV('dependentnode',N1,IS_AVAILABLE,LSUBMODEL)
           CALL HM_GET_INTV('nset',VAL,IS_AVAILABLE,LSUBMODEL)
 
-          ALLOCATE(BUF_TEMP(VAL))
+          call my_alloc(BUF_TEMP, VAL, "BUF_TEMP")
           N2 = USR2SYS(N1,ITABM1,MESS,ID_RBE3)
 C-----Reading of groups------------------------------------------
           DO L=1,VAL

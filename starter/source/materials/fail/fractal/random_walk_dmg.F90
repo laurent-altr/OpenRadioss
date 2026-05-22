@@ -132,7 +132,7 @@
             call my_alloc(a_seed,i_seed,"a_seed")
             a_seed = seed
             call random_seed(put=a_seed)
-            call my_dealloc(a_seed, "a_seed")
+            call my_dealloc(a_seed)
           end if
 ! ----------------------------------------------------------------------------------------------------------------------
 !     create element - edge connectivity for all elements in material
@@ -323,7 +323,7 @@
             end if
           end do
 !
-          if (allocated(start_group)) call my_dealloc(start_group, "start_group")
+          if (allocated(start_group)) call my_dealloc(start_group)
 ! ----------------------------------------------------------------------------------------------------------------------
           return
         end subroutine random_walk_dmg

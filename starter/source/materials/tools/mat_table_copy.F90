@@ -211,7 +211,7 @@
             end if   ! ndim
           end do     ! nfunc
 !
-          call my_dealloc(ifunc, "ifunc")
+          call my_dealloc(ifunc)
 !------------------------------
           return
         end subroutine mat_table_copy

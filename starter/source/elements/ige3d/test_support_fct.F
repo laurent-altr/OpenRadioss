@@ -40,6 +40,7 @@ C----------------------------------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
@@ -87,8 +88,8 @@ c  Do not treat the same function twice
 C----------------------------------------------------------------------
 c
       SIZ_LIST_FCTTOT = L_TAB_ELCUT*KXIG3D(3,TAB_ELCUT(1))
-      ALLOCATE(LIST_FCTTOT(SIZ_LIST_FCTTOT))
-      ALLOCATE(LIST_FCTTRI(SIZ_LIST_FCTTOT))
+      call my_alloc(LIST_FCTTOT, SIZ_LIST_FCTTOT, "LIST_FCTTOT")
+      call my_alloc(LIST_FCTTRI, SIZ_LIST_FCTTOT, "LIST_FCTTRI")
       LIST_FCTTOT(:) = EP06
 c
       DO I=1,L_TAB_ELCUT
@@ -98,7 +99,7 @@ c
         ENDDO
       ENDDO
 c
-      ALLOCATE(INDEX(2*SIZ_LIST_FCTTOT))
+      call my_alloc(INDEX, 2*SIZ_LIST_FCTTOT, "INDEX")
       CALL MY_ORDERS(0, WORK, LIST_FCTTOT, INDEX, SIZ_LIST_FCTTOT , 1)
 c
       DO I=1,SIZ_LIST_FCTTOT

@@ -41,6 +41,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
      .                    IPARG            ,IXS          ,IXQ        ,IXTG           ,
      .                    CELL             ,CELL_POSITION,NODAL_PHASE,NB_BOX_LIMIT)
         use element_mod , only :nixs,nixq,nixtg
+        use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -83,7 +84,7 @@ C-----------------------------------------------
        IF(SURF_TYPE == 101) GOTO 951   ! case of ellipsoid
 C
        IX2 = 0
-       ALLOCATE( ID_X2_TAGN(NUMNOD) )
+       call my_alloc(ID_X2_TAGN, NUMNOD, "ID_X2_TAGN")
        ID_X2_TAGN = 0
 !
 !    SWIFTSURF ---> tag for each container surface, continuously the total nb of 
@@ -190,7 +191,7 @@ C------------------------------------
         ! the phase of each cell without any nodes of the surface is found
         ! then the cell's phase is applied to the nodes belonging to the cell 
         SIZE_X2 = IX2
-        ALLOCATE( CLOSEST_NODE_ID(NUMNOD) )
+        call my_alloc(CLOSEST_NODE_ID, NUMNOD, "CLOSEST_NODE_ID")
         CLOSEST_NODE_ID(1:NUMNOD) = -1
         CALL PHASE_DETECTION(NPARG,NGROUP,NUMELS,NUMELQ,NUMELTG,NUMNOD,NSURF,N2D,
      .                       LEADING_DIMENSION,NB_CELL_X,NB_CELL_Y,NB_CELL_Z,NB_BOX_LIMIT,

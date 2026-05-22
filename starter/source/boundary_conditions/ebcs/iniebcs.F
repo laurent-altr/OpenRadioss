@@ -47,6 +47,7 @@ C-----------------------------------------------
       USE SENSOR_MOD
       use element_mod , only : nixs,nixc,nixq,nixtg
       USE EBCS_CYCLIC_SURFACE_MATCHING_MOD, ONLY : EBCS_CYCLIC_SURFACE_MATCHING
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -93,7 +94,7 @@ C=======================================================================
       ICELL = 0
       IF (N2D == 0) THEN
          LENMWA = NUMNOD+2+8*NUMELS
-         ALLOCATE(MWA(LENMWA),  STAT=ERR)
+         call my_alloc(MWA, LENMWA, "MWA", stat=ERR)
          IF(ERR /= 0) THEN
             CALL ANCMSG(MSGID=268,ANMODE=ANINFO,MSGTYPE=MSGERROR,C1='EBCS')
          ENDIF      
@@ -103,7 +104,7 @@ C=======================================================================
           NELEM = NUMELS
       ELSEIF (NUMELQ /= 0) THEN
          LENMWA = NUMNOD + 2 + 4 * NUMELQ
-         ALLOCATE(MWA(LENMWA), STAT=ERR)
+         call my_alloc(MWA, LENMWA, "MWA", stat=ERR)
          IF(ERR /= 0) THEN
             CALL ANCMSG(MSGID=268,ANMODE=ANINFO,MSGTYPE=MSGERROR,C1='EBCS')
          ENDIF      
@@ -113,7 +114,7 @@ C=======================================================================
          NELEM = NUMELQ
       ELSEIF (NUMELTG /= 0 .AND. MULTI_FVM_IS_USED) THEN
          LENMWA = NUMNOD + 2 + 3 * NUMELTG
-         ALLOCATE(MWA(LENMWA), STAT=ERR)
+         call my_alloc(MWA, LENMWA, "MWA", stat=ERR)
          IF(ERR /= 0) THEN
             CALL ANCMSG(MSGID=268,ANMODE=ANINFO,MSGTYPE=MSGERROR,C1='EBCS')
          ENDIF      

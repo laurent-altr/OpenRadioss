@@ -73,6 +73,7 @@ C-----------------------------------------------
       USE ALE_CONNECTIVITY_MOD
       USE MATPARAM_DEF_MOD
       use element_mod , only : nixs,nixc,nixq,nixtg
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -151,7 +152,7 @@ C-----------------------------------------------
         !READING GRPART DATA
         IF(IGRP/=0)THEN
          NPART_IN_GROUP = IGRPART(IGRP)%NENTITY
-         ALLOCATE(IP(NPART_IN_GROUP),STAT=IERROR)
+         call my_alloc(IP, NPART_IN_GROUP, "IP", stat=IERROR)
          IF(IERROR/=0)CALL ANCMSG(MSGID   = 268,
      .                            ANMODE  = ANINFO,
      .                            MSGTYPE = MSGERROR,
@@ -172,7 +173,10 @@ C-----------------------------------------------
           l_USER_SURF=.TRUE.
           NSEG = IGRSURF(ISURF)%NSEG
           !STORING DATA FROM USER SURFACE (BOX,NORMAL,CENTROID)
-          ALLOCATE(MAX_COOR(3,NSEG),MIN_COOR(3,NSEG),N_SURF(3,NSEG),ZF(3,NSEG))
+          call my_alloc(MAX_COOR, 3, NSEG, "MAX_COOR")
+          call my_alloc(MIN_COOR, 3, NSEG, "MIN_COOR")
+          call my_alloc(N_SURF, 3, NSEG, "N_SURF")
+          call my_alloc(ZF, 3, NSEG, "ZF")
           DO ISEG=1,NSEG
             lTRIA=.FALSE.
             IF(IGRSURF(ISURF)%NODES(ISEG,4)==0)lTRIA=.TRUE.

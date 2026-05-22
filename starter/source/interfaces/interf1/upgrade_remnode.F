@@ -35,6 +35,7 @@ C   M o d u l e s
 C-----------------------------------------------
       USE INTBUFMOD
       USE INTBUFDEF_MOD
+      use my_alloc_mod
 C-------------------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -56,7 +57,7 @@ C Set the new NREMNODE parameter for the given Interface
       IPARI(62) = NREMNODE
       
       OLD_SIZE = INTBUF_TAB%S_REMNODE
-      ALLOCATE (OLD_TAB(OLD_SIZE))
+      call my_alloc(OLD_TAB, OLD_SIZE, "OLD_TAB")
       !save values
       DO I=1,OLD_SIZE
         OLD_TAB(I)=INTBUF_TAB%REMNODE(I)
@@ -65,7 +66,7 @@ C Set the new NREMNODE parameter for the given Interface
 
       !reallocate with new size and copy saved values
       INTBUF_TAB%S_REMNODE = NREMNODE
-      ALLOCATE(INTBUF_TAB%REMNODE(INTBUF_TAB%S_REMNODE))
+      call my_alloc(INTBUF_TAB%REMNODE, INTBUF_TAB%S_REMNODE, "INTBUF_TAB%REMNODE")
       INTBUF_TAB%REMNODE(1:INTBUF_TAB%S_REMNODE)=0
       DO I=1,OLD_SIZE
         INTBUF_TAB%REMNODE(I) = OLD_TAB(I)
@@ -78,7 +79,7 @@ C
         INTBUF_TAB%KREMNOR(1:INTBUF_TAB%S_KREMNOR)=0
 
         OLD_SIZE = INTBUF_TAB%S_REMNOR
-        ALLOCATE (OLD_TAB(OLD_SIZE))
+        call my_alloc(OLD_TAB, OLD_SIZE, "OLD_TAB")
         !save values
         DO I=1,OLD_SIZE
           OLD_TAB(I)=INTBUF_TAB%REMNOR(I)
@@ -88,7 +89,7 @@ C
         INTBUF_TAB%S_REMNOR = NREMNODE
         IPARI(81) = NREMNODE
     
-        ALLOCATE(INTBUF_TAB%REMNOR(INTBUF_TAB%S_REMNOR))
+        call my_alloc(INTBUF_TAB%REMNOR, INTBUF_TAB%S_REMNOR, "INTBUF_TAB%REMNOR")
         INTBUF_TAB%REMNOR(1:INTBUF_TAB%S_REMNOR)=0
         DO I=1,OLD_SIZE
           INTBUF_TAB%REMNOR(I) = OLD_TAB(I)
@@ -115,6 +116,7 @@ C-----------------------------------------------
       USE RESTMOD
       USE INTBUFMOD
       USE INTBUFDEF_MOD
+      use my_alloc_mod
 C-------------------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -145,7 +147,7 @@ C Set the new NREMNODE parameter for the given Interface
 
       !save old size and values for KREMNODE array
       OLD_SIZE = INTBUF_TAB%S_KREMNODE
-      ALLOCATE (OLD_TAB(OLD_SIZE))
+      call my_alloc(OLD_TAB, OLD_SIZE, "OLD_TAB")
       !save values
       DO I=1,OLD_SIZE
         OLD_TAB(I)=INTBUF_TAB%KREMNODE(I)
@@ -154,7 +156,7 @@ C Set the new NREMNODE parameter for the given Interface
 
       !reallocate with new size and copy saved values for KREMNODE array
       INTBUF_TAB%S_KREMNODE = 2*(NRTM + 1)
-      ALLOCATE(INTBUF_TAB%KREMNODE(INTBUF_TAB%S_KREMNODE))
+      call my_alloc(INTBUF_TAB%KREMNODE, INTBUF_TAB%S_KREMNODE, "INTBUF_TAB%KREMNODE")
       INTBUF_TAB%KREMNODE(1:INTBUF_TAB%S_KREMNODE)=0
       DO I=1,OLD_SIZE
         INTBUF_TAB%KREMNODE(I) = OLD_TAB(I)
@@ -163,7 +165,7 @@ C Set the new NREMNODE parameter for the given Interface
 
       !save old size and values for REMNODE array
       OLD_SIZE = INTBUF_TAB%S_REMNODE
-      ALLOCATE (OLD_TAB(OLD_SIZE))
+      call my_alloc(OLD_TAB, OLD_SIZE, "OLD_TAB")
       !save values
       DO I=1,OLD_SIZE
         OLD_TAB(I)=INTBUF_TAB%REMNODE(I)
@@ -172,7 +174,7 @@ C Set the new NREMNODE parameter for the given Interface
 
       !reallocate with new size and copy saved values for REMNODE array
       INTBUF_TAB%S_REMNODE = NREMNODE
-      ALLOCATE(INTBUF_TAB%REMNODE(INTBUF_TAB%S_REMNODE))
+      call my_alloc(INTBUF_TAB%REMNODE, INTBUF_TAB%S_REMNODE, "INTBUF_TAB%REMNODE")
       INTBUF_TAB%REMNODE(1:INTBUF_TAB%S_REMNODE)=0
       DO I=1,OLD_SIZE
         INTBUF_TAB%REMNODE(I) = OLD_TAB(I)
@@ -186,26 +188,26 @@ C
         DEALLOCATE(INTBUF_TAB%KREMNOR)
         !reallocate with new size and initialize
         INTBUF_TAB%S_KREMNOR = NSN + 1
-        ALLOCATE(INTBUF_TAB%KREMNOR(INTBUF_TAB%S_KREMNOR))
+        call my_alloc(INTBUF_TAB%KREMNOR, INTBUF_TAB%S_KREMNOR, "INTBUF_TAB%KREMNOR")
         INTBUF_TAB%KREMNOR(1:INTBUF_TAB%S_KREMNOR)=0
 
         DEALLOCATE(INTBUF_TAB%REMNOR)
         !reallocate with new size and initialize
         INTBUF_TAB%S_REMNOR = NREMNODE
-        ALLOCATE(INTBUF_TAB%REMNOR(INTBUF_TAB%S_REMNOR))
+        call my_alloc(INTBUF_TAB%REMNOR, INTBUF_TAB%S_REMNOR, "INTBUF_TAB%REMNOR")
         INTBUF_TAB%REMNOR(1:INTBUF_TAB%S_REMNOR)=0
 
         IF(IPARI(NPARI*(NI-1)+58) > 0.AND.INTBUF_TAB%S_KREMNODE_EDG ==0 ) THEN
            NEDGE = IPARI(NPARI*(NI-1)+68)
            DEALLOCATE(INTBUF_TAB%KREMNODE_EDG)
            INTBUF_TAB%S_KREMNODE_EDG = 2*(NEDGE + 1)
-           ALLOCATE(INTBUF_TAB%KREMNODE_EDG(INTBUF_TAB%S_KREMNODE_EDG))
+           call my_alloc(INTBUF_TAB%KREMNODE_EDG, INTBUF_TAB%S_KREMNODE_EDG, "INTBUF_TAB%KREMNODE_EDG")
            INTBUF_TAB%KREMNODE_EDG(1:INTBUF_TAB%S_KREMNODE_EDG)=0
         ENDIF
         IF(IPARI(NPARI*(NI-1)+58) > 0.AND.INTBUF_TAB%S_KREMNODE_E2S ==0 ) THEN
            DEALLOCATE(INTBUF_TAB%KREMNODE_E2S)
            INTBUF_TAB%S_KREMNODE_E2S= 2*(NRTM + 1)
-           ALLOCATE(INTBUF_TAB%KREMNODE_E2S(INTBUF_TAB%S_KREMNODE_E2S))
+           call my_alloc(INTBUF_TAB%KREMNODE_E2S, INTBUF_TAB%S_KREMNODE_E2S, "INTBUF_TAB%KREMNODE_E2S")
            INTBUF_TAB%KREMNODE_E2S(1:INTBUF_TAB%S_KREMNODE_E2S)=0
         ENDIF 
 
@@ -227,6 +229,7 @@ C   M o d u l e s
 C-----------------------------------------------
       USE INTBUFMOD
       USE INTBUFDEF_MOD
+      use my_alloc_mod
 C-------------------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -248,7 +251,7 @@ C Set the new NREMNODE parameter for the given Interface
       IPARI(94) = NREMNODE
 
       OLD_SIZE = INTBUF_TAB%S_REMNODE_EDG
-      ALLOCATE (OLD_TAB(OLD_SIZE))
+      call my_alloc(OLD_TAB, OLD_SIZE, "OLD_TAB")
       !save values
       DO I=1,OLD_SIZE
         OLD_TAB(I)=INTBUF_TAB%REMNODE_EDG(I)
@@ -257,7 +260,7 @@ C Set the new NREMNODE parameter for the given Interface
 
       !reallocate with new size and copy saved values
       INTBUF_TAB%S_REMNODE_EDG = NREMNODE
-      ALLOCATE(INTBUF_TAB%REMNODE_EDG(INTBUF_TAB%S_REMNODE_EDG))
+      call my_alloc(INTBUF_TAB%REMNODE_EDG, INTBUF_TAB%S_REMNODE_EDG, "INTBUF_TAB%REMNODE_EDG")
       INTBUF_TAB%REMNODE_EDG(1:INTBUF_TAB%S_REMNODE_EDG)=0
       DO I=1,MIN(OLD_SIZE,NREMNODE)
         INTBUF_TAB%REMNODE_EDG(I) = OLD_TAB(I)
@@ -282,6 +285,7 @@ C   M o d u l e s
 C-----------------------------------------------
       USE INTBUFMOD
       USE INTBUFDEF_MOD
+      use my_alloc_mod
 C-------------------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -312,11 +316,11 @@ C Set the new NREMNODE parameter for the given Interface
 
       !reallocate with new size and copy saved values for KREMNODE array
       INTBUF_TAB%S_KREMNODE_EDG = 2*(NEDGE + 1)
-      ALLOCATE(INTBUF_TAB%KREMNODE_EDG(INTBUF_TAB%S_KREMNODE_EDG))
+      call my_alloc(INTBUF_TAB%KREMNODE_EDG, INTBUF_TAB%S_KREMNODE_EDG, "INTBUF_TAB%KREMNODE_EDG")
       INTBUF_TAB%KREMNODE_EDG(1:INTBUF_TAB%S_KREMNODE_EDG)=0
 
       OLD_SIZE = INTBUF_TAB%S_REMNODE_EDG
-      ALLOCATE (OLD_TAB(OLD_SIZE))
+      call my_alloc(OLD_TAB, OLD_SIZE, "OLD_TAB")
       !save values
       DO I=1,OLD_SIZE
         OLD_TAB(I)=INTBUF_TAB%REMNODE_EDG(I)
@@ -325,7 +329,7 @@ C Set the new NREMNODE parameter for the given Interface
 
       !reallocate with new size and copy saved values
       INTBUF_TAB%S_REMNODE_EDG = NREMNODE
-      ALLOCATE(INTBUF_TAB%REMNODE_EDG(INTBUF_TAB%S_REMNODE_EDG))
+      call my_alloc(INTBUF_TAB%REMNODE_EDG, INTBUF_TAB%S_REMNODE_EDG, "INTBUF_TAB%REMNODE_EDG")
       INTBUF_TAB%REMNODE_EDG(1:INTBUF_TAB%S_REMNODE_EDG)=0
       DO I=1,MIN(OLD_SIZE,NREMNODE)
         INTBUF_TAB%REMNODE_EDG(I) = OLD_TAB(I)
@@ -349,6 +353,7 @@ C   M o d u l e s
 C-----------------------------------------------
       USE INTBUFMOD
       USE INTBUFDEF_MOD
+      use my_alloc_mod
 C-------------------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -379,13 +384,13 @@ C Set the new NREMNODE parameter for the given Interface
 
       !reallocate with new size and copy saved values for KREMNODE array
       INTBUF_TAB%S_KREMNODE_E2S = 2*(NRTM + 1)
-      ALLOCATE(INTBUF_TAB%KREMNODE_E2S(INTBUF_TAB%S_KREMNODE_E2S))
+      call my_alloc(INTBUF_TAB%KREMNODE_E2S, INTBUF_TAB%S_KREMNODE_E2S, "INTBUF_TAB%KREMNODE_E2S")
       INTBUF_TAB%KREMNODE_E2S(1:INTBUF_TAB%S_KREMNODE_E2S)=0
 
       OLD_SIZE = INTBUF_TAB%S_REMNODE_E2S
       INTBUF_TAB%S_REMNODE_E2S = NREMNODE
       IF(OLD_SIZE < INTBUF_TAB%S_REMNODE_E2S) THEN
-        ALLOCATE (OLD_TAB(OLD_SIZE))
+        call my_alloc(OLD_TAB, OLD_SIZE, "OLD_TAB")
         !save values
         DO I=1,OLD_SIZE
           OLD_TAB(I)=INTBUF_TAB%REMNODE_E2S(I)
@@ -393,7 +398,7 @@ C Set the new NREMNODE parameter for the given Interface
         DEALLOCATE(INTBUF_TAB%REMNODE_E2S)
 
         !reallocate with new size and copy saved values
-        ALLOCATE(INTBUF_TAB%REMNODE_E2S(INTBUF_TAB%S_REMNODE_E2S))
+        call my_alloc(INTBUF_TAB%REMNODE_E2S, INTBUF_TAB%S_REMNODE_E2S, "INTBUF_TAB%REMNODE_E2S")
         INTBUF_TAB%REMNODE_E2S(1:INTBUF_TAB%S_REMNODE_E2S)=0
         DO I=1,MIN(OLD_SIZE,NREMNODE)
           INTBUF_TAB%REMNODE_E2S(I) = OLD_TAB(I)

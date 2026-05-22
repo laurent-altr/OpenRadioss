@@ -307,7 +307,7 @@
 !||    record_dealloc_addr   ../common_source/tools/memory/my_dealloc.F90
 !||====================================================================
         subroutine my_dealloc_preal_1d(a)
-          real, dimension(:), pointer, target, intent(inout) :: a
+          real, dimension(:), pointer, intent(inout) :: a
           if (associated(a)) then
             call record_dealloc_addr(c_loc(a(lbound(a,1))))
             deallocate(a)
@@ -322,7 +322,7 @@
 !||    record_dealloc_addr   ../common_source/tools/memory/my_dealloc.F90
 !||====================================================================
         subroutine my_dealloc_preal_2d(a)
-          real, dimension(:, :), pointer, target, intent(inout) :: a
+          real, dimension(:, :), pointer, intent(inout) :: a
           if (associated(a)) then
             call record_dealloc_addr(c_loc(a(lbound(a,1), lbound(a,2))))
             deallocate(a)
@@ -337,7 +337,7 @@
 !||    record_dealloc_addr   ../common_source/tools/memory/my_dealloc.F90
 !||====================================================================
         subroutine my_dealloc_preal_3d(a)
-          real, dimension(:, :, :), pointer, target, intent(inout) :: a
+          real, dimension(:, :, :), pointer, intent(inout) :: a
           if (associated(a)) then
             call record_dealloc_addr(c_loc(a(lbound(a,1), lbound(a,2), lbound(a,3))))
             deallocate(a)
@@ -352,7 +352,7 @@
 !||    record_dealloc_addr   ../common_source/tools/memory/my_dealloc.F90
 !||====================================================================
         subroutine my_dealloc_pdouble_1d(a)
-          double precision, dimension(:), pointer, target, intent(inout) :: a
+          double precision, dimension(:), pointer, intent(inout) :: a
           if (associated(a)) then
             call record_dealloc_addr(c_loc(a(lbound(a,1))))
             deallocate(a)
@@ -367,7 +367,7 @@
 !||    record_dealloc_addr   ../common_source/tools/memory/my_dealloc.F90
 !||====================================================================
         subroutine my_dealloc_pdouble_2d(a)
-          double precision, dimension(:, :), pointer, target, intent(inout) :: a
+          double precision, dimension(:, :), pointer, intent(inout) :: a
           if (associated(a)) then
             call record_dealloc_addr(c_loc(a(lbound(a,1), lbound(a,2))))
             deallocate(a)
@@ -382,7 +382,7 @@
 !||    record_dealloc_addr   ../common_source/tools/memory/my_dealloc.F90
 !||====================================================================
         subroutine my_dealloc_pdouble_3d(a)
-          double precision, dimension(:, :, :), pointer, target, intent(inout) :: a
+          double precision, dimension(:, :, :), pointer, intent(inout) :: a
           if (associated(a)) then
             call record_dealloc_addr(c_loc(a(lbound(a,1), lbound(a,2), lbound(a,3))))
             deallocate(a)
@@ -397,7 +397,7 @@
 !||    record_dealloc_addr   ../common_source/tools/memory/my_dealloc.F90
 !||====================================================================
         subroutine my_dealloc_pinteger_1d(a)
-          integer, dimension(:), pointer, target, intent(inout) :: a
+          integer, dimension(:), pointer, intent(inout) :: a
           if (associated(a)) then
             call record_dealloc_addr(c_loc(a(lbound(a,1))))
             deallocate(a)
@@ -412,7 +412,7 @@
 !||    record_dealloc_addr   ../common_source/tools/memory/my_dealloc.F90
 !||====================================================================
         subroutine my_dealloc_pinteger_2d(a)
-          integer, dimension(:, :), pointer, target, intent(inout) :: a
+          integer, dimension(:, :), pointer, intent(inout) :: a
           if (associated(a)) then
             call record_dealloc_addr(c_loc(a(lbound(a,1), lbound(a,2))))
             deallocate(a)
@@ -427,7 +427,7 @@
 !||    record_dealloc_addr   ../common_source/tools/memory/my_dealloc.F90
 !||====================================================================
         subroutine my_dealloc_pinteger_3d(a)
-          integer, dimension(:, :, :), pointer, target, intent(inout) :: a
+          integer, dimension(:, :, :), pointer, intent(inout) :: a
           if (associated(a)) then
             call record_dealloc_addr(c_loc(a(lbound(a,1), lbound(a,2), lbound(a,3))))
             deallocate(a)
@@ -442,7 +442,7 @@
 !||    record_dealloc_addr   ../common_source/tools/memory/my_dealloc.F90
 !||====================================================================
         subroutine my_dealloc_plogical_1d(a)
-          logical, dimension(:), pointer, target, intent(inout) :: a
+          logical, dimension(:), pointer, intent(inout) :: a
           if (associated(a)) then
             call record_dealloc_addr(c_loc(a(lbound(a,1))))
             deallocate(a)
@@ -457,7 +457,7 @@
 !||    record_dealloc_addr   ../common_source/tools/memory/my_dealloc.F90
 !||====================================================================
         subroutine my_dealloc_plogical_2d(a)
-          logical, dimension(:, :), pointer, target, intent(inout) :: a
+          logical, dimension(:, :), pointer, intent(inout) :: a
           if (associated(a)) then
             call record_dealloc_addr(c_loc(a(lbound(a,1), lbound(a,2))))
             deallocate(a)
@@ -472,7 +472,7 @@
 !||    record_dealloc_addr   ../common_source/tools/memory/my_dealloc.F90
 !||====================================================================
         subroutine my_dealloc_plogical_3d(a)
-          logical, dimension(:, :, :), pointer, target, intent(inout) :: a
+          logical, dimension(:, :, :), pointer, intent(inout) :: a
           if (associated(a)) then
             call record_dealloc_addr(c_loc(a(lbound(a,1), lbound(a,2), lbound(a,3))))
             deallocate(a)

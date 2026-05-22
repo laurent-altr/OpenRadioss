@@ -119,6 +119,7 @@ C-----------------------------------------------
       USE UNITAB_MOD
       USE NAMES_AND_TITLES_MOD , ONLY : NCHARTITLE
       use element_mod , only : nixc,nixtg
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -179,7 +180,8 @@ C======================================================================|
       NUMELC_DRAPE = 0
       NUMELTG_DRAPE = 0
 C
-      ALLOCATE(TAGSH(NUMELC+NUMELTG), INDX_TMP(NUMELC + NUMELTG))
+      call my_alloc(TAGSH, NUMELC+NUMELTG, "TAGSH")
+      call my_alloc(INDX_TMP, NUMELC + NUMELTG, "INDX_TMP")
       INDX_TMP = 0
 C
       !====================================================================================
@@ -215,10 +217,18 @@ C
            SLICELISTMAX= MAX(SLICELISTMAX,SLICELIST)
         ENDDO  
         !!
-        ALLOCATE(ISH4N(LISTMAX,SLICELISTMAX,2) ,ISH4N_GR(LISTMAX,SLICELISTMAX,2),
-     .           ISH3N(LISTMAX,SLICELISTMAX,2) ,ISH3N_GR(LISTMAX,SLICELISTMAX,2),
-     .           ISH4N_DRP(LISTMAX,3),IGRSH4N_DRP(LISTMAX,3),ISH3N_DRP(LISTMAX,3),IGRSH3N_DRP(LISTMAX,3),
-     .           ITMP_SH4N(2,LISTMAX),ITMP_SH3N(2,LISTMAX),ITMP_GRSH4N(2,LISTMAX),ITMP_GRSH3N(2,LISTMAX))
+        call my_alloc(ISH4N, LISTMAX, SLICELISTMAX, 2, "ISH4N")
+        call my_alloc(ISH4N_GR, LISTMAX, SLICELISTMAX, 2, "ISH4N_GR")
+        call my_alloc(ISH3N, LISTMAX, SLICELISTMAX, 2, "ISH3N")
+        call my_alloc(ISH3N_GR, LISTMAX, SLICELISTMAX, 2, "ISH3N_GR")
+        call my_alloc(ISH4N_DRP, LISTMAX, 3, "ISH4N_DRP")
+        call my_alloc(IGRSH4N_DRP, LISTMAX, 3, "IGRSH4N_DRP")
+        call my_alloc(ISH3N_DRP, LISTMAX, 3, "ISH3N_DRP")
+        call my_alloc(IGRSH3N_DRP, LISTMAX, 3, "IGRSH3N_DRP")
+        call my_alloc(ITMP_SH4N, 2, LISTMAX, "ITMP_SH4N")
+        call my_alloc(ITMP_SH3N, 2, LISTMAX, "ITMP_SH3N")
+        call my_alloc(ITMP_GRSH4N, 2, LISTMAX, "ITMP_GRSH4N")
+        call my_alloc(ITMP_GRSH3N, 2, LISTMAX, "ITMP_GRSH3N")
         ISH4N = 0
         ISH3N = 0
         ISH4N_GR = 0
@@ -231,8 +241,10 @@ C
         ITMP_SH3N =0
         ITMP_GRSH4N = 0
         ITMP_GRSH3N = 0
-        ALLOCATE(RSH4N(LISTMAX,SLICELISTMAX,2),RSH3N(LISTMAX,SLICELISTMAX,2),RSH4N_GR(LISTMAX,SLICELISTMAX,2),
-     .             RSH3N_GR(LISTMAX, SLICELISTMAX,2))
+        call my_alloc(RSH4N, LISTMAX, SLICELISTMAX, 2, "RSH4N")
+        call my_alloc(RSH3N, LISTMAX, SLICELISTMAX, 2, "RSH3N")
+        call my_alloc(RSH4N_GR, LISTMAX, SLICELISTMAX, 2, "RSH4N_GR")
+        call my_alloc(RSH3N_GR, LISTMAX, SLICELISTMAX, 2, "RSH3N_GR")
          RSH4N = ZERO
          RSH3N = ZERO
          RSH4N_GR = ZERO
@@ -542,7 +554,7 @@ c tag of sh4n to check doubles within  the DRAPE
                   TAGSH(IE) = ISH
                   NIS = 0
                   IF (.NOT.ALLOCATED(DRAPE_WRK(IE)%DRAPE_PLY)) THEN
-                     ALLOCATE(DRAPE_WRK(IE)%DRAPE_PLY(NPT))
+                     allocate(DRAPE_WRK(IE)%DRAPE_PLY(NPT))
                      NUMELC_DRAPE = NUMELC_DRAPE + 1
                      INDX_TMP(IE) = NUMELC_DRAPE
                      DRAPE_WRK(IE)%NPLY_DRAPE = 0 
@@ -554,7 +566,7 @@ C
                   IF (IGTYP == 17 ) THEN
                     IPPID = 2
                    IF (.NOT.ALLOCATED(DRAPE_WRK(IE)%INDX_PLY)) THEN
-                         ALLOCATE(DRAPE_WRK(IE)%INDX_PLY(NPT)  )
+                         call my_alloc(DRAPE_WRK(IE)%INDX_PLY, NPT, "DRAPE_WRK(IE)%INDX_PLY")
                          DRAPE_WRK(IE)%INDX_PLY = 0 
                     ENDIF
                     NPT_DRP = DRAPE_WRK(IE)%NPLY_DRAPE
@@ -564,8 +576,8 @@ c                            IGEO(1, JPID)       ! ply pid ID
                       IF (JPID > 0) THEN
                         JDRP = IGEO(48,JPID)
                         IF (IDRP == JDRP)THEN
-                             ALLOCATE(DRAPE_WRK(IE)%DRAPE_PLY(IP)%RDRAPE(NSLICE,2))
-                             ALLOCATE(DRAPE_WRK(IE)%DRAPE_PLY(IP)%IDRAPE(NSLICE,2))
+                             call my_alloc(DRAPE_WRK(IE)%DRAPE_PLY(IP)%RDRAPE, NSLICE, 2, "DRAPE_WRK(IE)%DRAPE_PLY(IP)%RDRAPE")
+                             call my_alloc(DRAPE_WRK(IE)%DRAPE_PLY(IP)%IDRAPE, NSLICE, 2, "DRAPE_WRK(IE)%DRAPE_PLY(IP)%IDRAPE")
                              DRAPE_WRK(IE)%DRAPE_PLY(IP)%RDRAPE = ZERO
                              DRAPE_WRK(IE)%DRAPE_PLY(IP)%IDRAPE = 0
                              DRAPE_WRK(IE)%DRAPE_PLY(IP)%NSLICE = NSLICE
@@ -587,7 +599,7 @@ check if SH4N of the DRAPE is inside any plys
                  ELSEIF (IGTYP == 51) THEN
                     IPPID = 2
                     IF (.NOT.ALLOCATED(DRAPE_WRK(IE)%INDX_PLY)) THEN
-                         ALLOCATE(DRAPE_WRK(IE)%INDX_PLY(NPT)  )
+                         call my_alloc(DRAPE_WRK(IE)%INDX_PLY, NPT, "DRAPE_WRK(IE)%INDX_PLY")
                          DRAPE_WRK(IE)%INDX_PLY = 0 
                     ENDIF
                     NPT_DRP = DRAPE_WRK(IE)%NPLY_DRAPE
@@ -602,8 +614,8 @@ c                            IGEO(1, JPID)       ! ply pid ID
                         IF (JPID > 0) THEN
                            JDRP = IGEO(48,JPID)
                            IF (IDRP == JDRP)THEN
-                             ALLOCATE(DRAPE_WRK(IE)%DRAPE_PLY(IP)%RDRAPE(NSLICE,2))
-                             ALLOCATE(DRAPE_WRK(IE)%DRAPE_PLY(IP)%IDRAPE(NSLICE,2))
+                             call my_alloc(DRAPE_WRK(IE)%DRAPE_PLY(IP)%RDRAPE, NSLICE, 2, "DRAPE_WRK(IE)%DRAPE_PLY(IP)%RDRAPE")
+                             call my_alloc(DRAPE_WRK(IE)%DRAPE_PLY(IP)%IDRAPE, NSLICE, 2, "DRAPE_WRK(IE)%DRAPE_PLY(IP)%IDRAPE")
                              DRAPE_WRK(IE)%DRAPE_PLY(IP)%RDRAPE = ZERO
                              DRAPE_WRK(IE)%DRAPE_PLY(IP)%IDRAPE = 0
                              DRAPE_WRK(IE)%DRAPE_PLY(IP)%NSLICE = NSLICE
@@ -625,7 +637,7 @@ check if SH4N of the DRAPE is inside any plys
                   ELSEIF (IGTYP == 52) THEN
                      IPPID = 2
                      IF (.NOT.ALLOCATED(DRAPE_WRK(IE)%INDX_PLY)) THEN
-                         ALLOCATE(DRAPE_WRK(IE)%INDX_PLY(NPT)  )
+                         call my_alloc(DRAPE_WRK(IE)%INDX_PLY, NPT, "DRAPE_WRK(IE)%INDX_PLY")
                          DRAPE_WRK(IE)%INDX_PLY = 0 
                      ENDIF
                      NPT_DRP = DRAPE_WRK(IE)%NPLY_DRAPE
@@ -639,8 +651,8 @@ c                                   IGEO(1, JPID)       ! ply pid ID
                         IF (JPID > 0) THEN
                           JDRP = IGEO_STACK(48,JPID)
                           IF (IDRP==JDRP)THEN
-                             ALLOCATE(DRAPE_WRK(IE)%DRAPE_PLY(IP)%RDRAPE(NSLICE,2)       )
-                             ALLOCATE(DRAPE_WRK(IE)%DRAPE_PLY(IP)%IDRAPE(NSLICE,2)       )
+                             call my_alloc(DRAPE_WRK(IE)%DRAPE_PLY(IP)%RDRAPE, NSLICE, 2, "DRAPE_WRK(IE)%DRAPE_PLY(IP)%RDRAPE")
+                             call my_alloc(DRAPE_WRK(IE)%DRAPE_PLY(IP)%IDRAPE, NSLICE, 2, "DRAPE_WRK(IE)%DRAPE_PLY(IP)%IDRAPE")
                               DRAPE_WRK(IE)%DRAPE_PLY(IP)%RDRAPE = ZERO
                              DRAPE_WRK(IE)%DRAPE_PLY(IP)%IDRAPE = 0
                              DRAPE_WRK(IE)%DRAPE_PLY(IP)%NSLICE = NSLICE
@@ -733,7 +745,7 @@ C element type Q4
                       TAGSH(IDSHEL) = IDSHEL  
                       NIS = 0
                       IF (.NOT.ALLOCATED(DRAPE_WRK(IDSHEL)%DRAPE_PLY)) THEN
-                          ALLOCATE(DRAPE_WRK(IDSHEL)%DRAPE_PLY(NPT))
+                          allocate(DRAPE_WRK(IDSHEL)%DRAPE_PLY(NPT))
                           NUMELC_DRAPE = NUMELC_DRAPE + 1
                           INDX_TMP(IDSHEL) = NUMELC_DRAPE
                           DRAPE_WRK(IDSHEL)%NPLY_DRAPE = 0 
@@ -744,7 +756,7 @@ C  count DRAPE entities for printing out
                       IPPID = 2
                       IF (IGTYP == 17 ) THEN
                        IF (.NOT.ALLOCATED(DRAPE_WRK(IDSHEL)%INDX_PLY)) THEN
-                          ALLOCATE(DRAPE_WRK(IDSHEL)%INDX_PLY(NPT)       )
+                          call my_alloc(DRAPE_WRK(IDSHEL)%INDX_PLY, NPT, "DRAPE_WRK(IDSHEL)%INDX_PLY")
                           DRAPE_WRK(IDSHEL)%INDX_PLY = 0 
                         ENDIF 
                         NPT_DRP = DRAPE_WRK(IDSHEL)%NPLY_DRAPE    
@@ -754,8 +766,8 @@ c                           IGEO(1, JPID)       ! ply pid ID
                           IF (JPID > 0) THEN
                             JDRP = IGEO(48,JPID)
                             IF (IDRP==JDRP)THEN
-                             ALLOCATE(DRAPE_WRK(IDSHEL)%DRAPE_PLY(IP)%RDRAPE(NSLICE,2)       )
-                             ALLOCATE(DRAPE_WRK(IDSHEL)%DRAPE_PLY(IP)%IDRAPE(NSLICE,2)       )
+                             call my_alloc(DRAPE_WRK(IDSHEL)%DRAPE_PLY(IP)%RDRAPE, NSLICE, 2, "DRAPE_WRK(IDSHEL)%DRAPE_PLY(IP)%RDRAPE")
+                             call my_alloc(DRAPE_WRK(IDSHEL)%DRAPE_PLY(IP)%IDRAPE, NSLICE, 2, "DRAPE_WRK(IDSHEL)%DRAPE_PLY(IP)%IDRAPE")
                              DRAPE_WRK(IDSHEL)%DRAPE_PLY(IP)%IDRAPE = 0
                              DRAPE_WRK(IDSHEL)%DRAPE_PLY(IP)%RDRAPE = ZERO
                              DRAPE_WRK(IDSHEL)%DRAPE_PLY(IP)%NSLICE = NSLICE
@@ -780,7 +792,7 @@ check if SH4N of grshel of the DRAPE is inside any plys
                         ENDDO
                       ELSEIF(IGTYP == 51) THEN
                          IF (.NOT.ALLOCATED(DRAPE_WRK(IDSHEL)%INDX_PLY)) THEN
-                          ALLOCATE(DRAPE_WRK(IDSHEL)%INDX_PLY(NPT)       )
+                          call my_alloc(DRAPE_WRK(IDSHEL)%INDX_PLY, NPT, "DRAPE_WRK(IDSHEL)%INDX_PLY")
                           DRAPE_WRK(IDSHEL)%INDX_PLY = 0 
                         ENDIF 
                         NPT_DRP = DRAPE_WRK(IDSHEL)%NPLY_DRAPE   
@@ -794,8 +806,8 @@ c                          IGEO(1, JPID)       ! ply pid ID
                            IF (JPID > 0) THEN
                             JDRP = IGEO(48,JPID)
                             IF (IDRP==JDRP)THEN
-                             ALLOCATE(DRAPE_WRK(IDSHEL)%DRAPE_PLY(IP)%RDRAPE(NSLICE,2)       )
-                             ALLOCATE(DRAPE_WRK(IDSHEL)%DRAPE_PLY(IP)%IDRAPE(NSLICE,2)       )
+                             call my_alloc(DRAPE_WRK(IDSHEL)%DRAPE_PLY(IP)%RDRAPE, NSLICE, 2, "DRAPE_WRK(IDSHEL)%DRAPE_PLY(IP)%RDRAPE")
+                             call my_alloc(DRAPE_WRK(IDSHEL)%DRAPE_PLY(IP)%IDRAPE, NSLICE, 2, "DRAPE_WRK(IDSHEL)%DRAPE_PLY(IP)%IDRAPE")
                              DRAPE_WRK(IDSHEL)%DRAPE_PLY(IP)%IDRAPE = 0
                              DRAPE_WRK(IDSHEL)%DRAPE_PLY(IP)%RDRAPE = ZERO
                              DRAPE_WRK(IDSHEL)%DRAPE_PLY(IP)%NSLICE = NSLICE
@@ -820,7 +832,7 @@ check if SH4N of grshel of the DRAPE is inside any plys
                         ENDDO
                       ELSEIF (IGTYP == 52) THEN
                           IF (.NOT.ALLOCATED(DRAPE_WRK(IDSHEL)%INDX_PLY)) THEN
-                                 ALLOCATE(DRAPE_WRK(IDSHEL)%INDX_PLY(NPT)       )
+                                 call my_alloc(DRAPE_WRK(IDSHEL)%INDX_PLY, NPT, "DRAPE_WRK(IDSHEL)%INDX_PLY")
                                  DRAPE_WRK(IDSHEL)%INDX_PLY = 0 
                                  DRAPE_WRK(IDSHEL)%NPLY_DRAPE = 0
                           ENDIF 
@@ -835,8 +847,8 @@ check if SH4N of grshel of the DRAPE is inside any plys
                             IF (JPID > 0) THEN
                               JDRP = IGEO_STACK(48,JPID)
                               IF (IDRP==JDRP)THEN
-                               ALLOCATE(DRAPE_WRK(IDSHEL)%DRAPE_PLY(IP)%RDRAPE(NSLICE,2)       )
-                               ALLOCATE(DRAPE_WRK(IDSHEL)%DRAPE_PLY(IP)%IDRAPE(NSLICE,2)       )
+                               call my_alloc(DRAPE_WRK(IDSHEL)%DRAPE_PLY(IP)%RDRAPE, NSLICE, 2, "DRAPE_WRK(IDSHEL)%DRAPE_PLY(IP)%RDRAPE")
+                               call my_alloc(DRAPE_WRK(IDSHEL)%DRAPE_PLY(IP)%IDRAPE, NSLICE, 2, "DRAPE_WRK(IDSHEL)%DRAPE_PLY(IP)%IDRAPE")
                                DRAPE_WRK(IDSHEL)%DRAPE_PLY(IP)%RDRAPE = ZERO
                                DRAPE_WRK(IDSHEL)%DRAPE_PLY(IP)%IDRAPE = 0
                                DRAPE_WRK(IDSHEL)%DRAPE_PLY(IP)%NSLICE = NSLICE
@@ -926,7 +938,7 @@ c   tag of SH3N to check doubles within grshel of the DRAPE
                   TAGSH(IE+NUMELC) = ISH
                   NIS = 0
                   IF (.NOT.ALLOCATED(DRAPE_WRK(NUMELC + IE)%DRAPE_PLY)) THEN
-                     ALLOCATE(DRAPE_WRK(NUMELC + IE)%DRAPE_PLY(NPT))
+                     allocate(DRAPE_WRK(NUMELC + IE)%DRAPE_PLY(NPT))
                      NUMELTG_DRAPE = NUMELTG_DRAPE + 1
                      INDX_TMP(NUMELC + IE) = NUMELTG_DRAPE
                      DRAPE_WRK(IE + NUMELC)%NPLY_DRAPE = 0 
@@ -936,7 +948,7 @@ C  count DRAPE entities for printing out
                   IPPID = 2
                   IF (IGTYP == 17 ) THEN
                     IF (.NOT.ALLOCATED(DRAPE_WRK(NUMELC + IE)%INDX_PLY)) THEN
-                         ALLOCATE(DRAPE_WRK(NUMELC + IE)%INDX_PLY(NPT)       )
+                         call my_alloc(DRAPE_WRK(NUMELC + IE)%INDX_PLY, NPT, "DRAPE_WRK(NUMELC + IE)%INDX_PLY")
                            DRAPE_WRK(NUMELC + IE)%INDX_PLY = 0 
                     ENDIF 
                     NPT_DRP = DRAPE_WRK(NUMELC + IE)%NPLY_DRAPE  
@@ -946,8 +958,8 @@ c                            IGEO(1, JPID)       ! ply pid ID
                       IF (JPID > 0) THEN
                         JDRP = IGEO(48,JPID)
                         IF (IDRP==JDRP)THEN
-                               ALLOCATE(DRAPE_WRK(IE+NUMELC)%DRAPE_PLY(IP)%RDRAPE(NSLICE,2)       )
-                               ALLOCATE(DRAPE_WRK(IE+NUMELC)%DRAPE_PLY(IP)%IDRAPE(NSLICE,2)       )
+                               call my_alloc(DRAPE_WRK(IE+NUMELC)%DRAPE_PLY(IP)%RDRAPE, NSLICE, 2, "DRAPE_WRK(IE+NUMELC)%DRAPE_PLY(IP)%RDRAPE")
+                               call my_alloc(DRAPE_WRK(IE+NUMELC)%DRAPE_PLY(IP)%IDRAPE, NSLICE, 2, "DRAPE_WRK(IE+NUMELC)%DRAPE_PLY(IP)%IDRAPE")
                                DRAPE_WRK(IE+NUMELC)%DRAPE_PLY(IP)%RDRAPE = ZERO
                                DRAPE_WRK(IE+NUMELC)%DRAPE_PLY(IP)%IDRAPE = 0
                                DRAPE_WRK(IE+NUMELC)%DRAPE_PLY(IP)%NSLICE = NSLICE
@@ -972,7 +984,7 @@ check if SH3N of grshel of the DRAPE is inside any plys
                     ENDDO ! DO IP=1,NPT
                   ELSEIF (IGTYP == 51) THEN
                     IF (.NOT.ALLOCATED(DRAPE_WRK(NUMELC + IE)%INDX_PLY)) THEN
-                         ALLOCATE(DRAPE_WRK(NUMELC + IE)%INDX_PLY(NPT)       )
+                         call my_alloc(DRAPE_WRK(NUMELC + IE)%INDX_PLY, NPT, "DRAPE_WRK(NUMELC + IE)%INDX_PLY")
                            DRAPE_WRK(NUMELC + IE)%INDX_PLY = 0 
                     ENDIF 
                     NPT_DRP = DRAPE_WRK(NUMELC + IE)%NPLY_DRAPE  
@@ -986,8 +998,8 @@ c                            IGEO(1, JPID)       ! ply pid ID
                       IF (JPID > 0) THEN
                         JDRP = IGEO(48,JPID)
                         IF (IDRP==JDRP)THEN
-                               ALLOCATE(DRAPE_WRK(IE+NUMELC)%DRAPE_PLY(IP)%RDRAPE(NSLICE,2)       )
-                               ALLOCATE(DRAPE_WRK(IE+NUMELC)%DRAPE_PLY(IP)%IDRAPE(NSLICE,2)       )
+                               call my_alloc(DRAPE_WRK(IE+NUMELC)%DRAPE_PLY(IP)%RDRAPE, NSLICE, 2, "DRAPE_WRK(IE+NUMELC)%DRAPE_PLY(IP)%RDRAPE")
+                               call my_alloc(DRAPE_WRK(IE+NUMELC)%DRAPE_PLY(IP)%IDRAPE, NSLICE, 2, "DRAPE_WRK(IE+NUMELC)%DRAPE_PLY(IP)%IDRAPE")
                                DRAPE_WRK(IE+NUMELC)%DRAPE_PLY(IP)%RDRAPE = ZERO
                                DRAPE_WRK(IE+NUMELC)%DRAPE_PLY(IP)%IDRAPE = 0
                                DRAPE_WRK(IE+NUMELC)%DRAPE_PLY(IP)%NSLICE = NSLICE
@@ -1012,7 +1024,7 @@ check if SH3N of grshel of the DRAPE is inside any plys
                    ENDDO ! DO IP=1,NPT 
                   ELSEIF (IGTYP == 52) THEN
                     IF (.NOT.ALLOCATED(DRAPE_WRK(NUMELC + IE)%INDX_PLY)) THEN
-                         ALLOCATE(DRAPE_WRK(NUMELC + IE)%INDX_PLY(NPT)       )
+                         call my_alloc(DRAPE_WRK(NUMELC + IE)%INDX_PLY, NPT, "DRAPE_WRK(NUMELC + IE)%INDX_PLY")
                           DRAPE_WRK(NUMELC + IE)%INDX_PLY = 0 
                     ENDIF 
                     NPT_DRP = DRAPE_WRK(NUMELC + IE)%NPLY_DRAPE 
@@ -1026,8 +1038,8 @@ c                              IGEO(1, JPID)       ! ply pid ID
                         IF (JPID > 0) THEN
                           JDRP = IGEO_STACK(48,JPID)
                           IF (IDRP==JDRP)THEN
-                           ALLOCATE(DRAPE_WRK(NUMELC + IE)%DRAPE_PLY(IP)%RDRAPE(NSLICE,2)       )
-                           ALLOCATE(DRAPE_WRK(NUMELC + IE)%DRAPE_PLY(IP)%IDRAPE(NSLICE,2)       )
+                           call my_alloc(DRAPE_WRK(NUMELC + IE)%DRAPE_PLY(IP)%RDRAPE, NSLICE, 2, "DRAPE_WRK(NUMELC + IE)%DRAPE_PLY(IP)%RDRAPE")
+                           call my_alloc(DRAPE_WRK(NUMELC + IE)%DRAPE_PLY(IP)%IDRAPE, NSLICE, 2, "DRAPE_WRK(NUMELC + IE)%DRAPE_PLY(IP)%IDRAPE")
                            DRAPE_WRK(NUMELC + IE)%DRAPE_PLY(IP)%NSLICE = NSLICE                                  
                            NPT_DRP = NPT_DRP + 1
                            DRAPE_WRK(NUMELC + IE)%NPLY_DRAPE = NPT_DRP
@@ -1115,7 +1127,7 @@ C element type T3
                      TAGSH(IDSHEL) =  IXTG(NIXTG,IDSH3N)
                      NIS = 0
                      IF (.NOT.ALLOCATED(DRAPE_WRK(IDSHEL)%DRAPE_PLY)) THEN
-                      ALLOCATE(DRAPE_WRK(IDSHEL)%DRAPE_PLY(NPT))
+                      allocate(DRAPE_WRK(IDSHEL)%DRAPE_PLY(NPT))
                       NUMELTG_DRAPE = NUMELTG_DRAPE + 1
                       INDX_TMP(IDSHEL) = NUMELTG_DRAPE
                       DRAPE_WRK(IDSHEL)%NPLY_DRAPE = 0
@@ -1126,7 +1138,7 @@ C  count DRAPE entities for printing out
                        IPPID = 2
                        IF (IGTYP == 17 ) THEN
                         IF (.NOT.ALLOCATED(DRAPE_WRK(IDSHEL)%INDX_PLY)) THEN
-                         ALLOCATE(DRAPE_WRK(IDSHEL)%INDX_PLY(NPT)       )
+                         call my_alloc(DRAPE_WRK(IDSHEL)%INDX_PLY, NPT, "DRAPE_WRK(IDSHEL)%INDX_PLY")
                            DRAPE_WRK(IDSHEL)%INDX_PLY = 0 
                         ENDIF 
                         NPT_DRP = DRAPE_WRK(IDSHEL)%NPLY_DRAPE                          
@@ -1136,8 +1148,8 @@ c                           IGEO(1, JPID)       ! ply pid ID
                           IF (JPID > 0) THEN
                             JDRP = IGEO(48,JPID)
                             IF (IDRP==JDRP)THEN
-                              ALLOCATE(DRAPE_WRK(IDSHEL)%DRAPE_PLY(IP)%RDRAPE(NSLICE,2))
-                              ALLOCATE(DRAPE_WRK(IDSHEL)%DRAPE_PLY(IP)%IDRAPE(NSLICE,2))
+                              call my_alloc(DRAPE_WRK(IDSHEL)%DRAPE_PLY(IP)%RDRAPE, NSLICE, 2, "DRAPE_WRK(IDSHEL)%DRAPE_PLY(IP)%RDRAPE")
+                              call my_alloc(DRAPE_WRK(IDSHEL)%DRAPE_PLY(IP)%IDRAPE, NSLICE, 2, "DRAPE_WRK(IDSHEL)%DRAPE_PLY(IP)%IDRAPE")
                               DRAPE_WRK(IDSHEL)%DRAPE_PLY(IP)%RDRAPE = ZERO
                               DRAPE_WRK(IDSHEL)%DRAPE_PLY(IP)%IDRAPE = 0
                               DRAPE_WRK(IDSHEL)%DRAPE_PLY(IP)%NSLICE = NSLICE
@@ -1160,7 +1172,7 @@ check if SH3N of grshel of the DRAPE is inside any plys
                         ENDDO ! DO IP=1,N1
                       ELSEIF (IGTYP == 51) THEN
                         IF (.NOT.ALLOCATED(DRAPE_WRK(IDSHEL)%INDX_PLY)) THEN
-                         ALLOCATE(DRAPE_WRK(IDSHEL)%INDX_PLY(NPT)       )
+                         call my_alloc(DRAPE_WRK(IDSHEL)%INDX_PLY, NPT, "DRAPE_WRK(IDSHEL)%INDX_PLY")
                            DRAPE_WRK(IDSHEL)%INDX_PLY = 0 
                         ENDIF 
                         NPT_DRP = DRAPE_WRK(IDSHEL)%NPLY_DRAPE    
@@ -1174,8 +1186,8 @@ c                           IGEO(1, JPID)       ! ply pid ID
                           IF (JPID > 0) THEN
                             JDRP = IGEO(48,JPID)
                             IF (IDRP==JDRP)THEN
-                              ALLOCATE(DRAPE_WRK(IDSHEL)%DRAPE_PLY(IP)%RDRAPE(NSLICE,2))
-                              ALLOCATE(DRAPE_WRK(IDSHEL)%DRAPE_PLY(IP)%IDRAPE(NSLICE,2))
+                              call my_alloc(DRAPE_WRK(IDSHEL)%DRAPE_PLY(IP)%RDRAPE, NSLICE, 2, "DRAPE_WRK(IDSHEL)%DRAPE_PLY(IP)%RDRAPE")
+                              call my_alloc(DRAPE_WRK(IDSHEL)%DRAPE_PLY(IP)%IDRAPE, NSLICE, 2, "DRAPE_WRK(IDSHEL)%DRAPE_PLY(IP)%IDRAPE")
                               DRAPE_WRK(IDSHEL)%DRAPE_PLY(IP)%RDRAPE = ZERO
                               DRAPE_WRK(IDSHEL)%DRAPE_PLY(IP)%IDRAPE = 0
                               DRAPE_WRK(IDSHEL)%DRAPE_PLY(IP)%NSLICE = NSLICE
@@ -1198,7 +1210,7 @@ check if SH3N of grshel of the DRAPE is inside any plys
                        ENDDO ! DO IP=1,N1   
                       ELSEIF (IGTYP == 52) THEN
                           IF (.NOT.ALLOCATED(DRAPE_WRK(IDSHEL)%INDX_PLY)) THEN
-                           ALLOCATE(DRAPE_WRK(IDSHEL)%INDX_PLY(NPT)       )
+                           call my_alloc(DRAPE_WRK(IDSHEL)%INDX_PLY, NPT, "DRAPE_WRK(IDSHEL)%INDX_PLY")
                            DRAPE_WRK(IDSHEL)%INDX_PLY = 0 
                           ENDIF 
                           NPT_DRP = DRAPE_WRK(IDSHEL)%NPLY_DRAPE  
@@ -1212,8 +1224,8 @@ c                             IGEO(1, JPID)       ! ply pid ID
                              IF (JPID > 0) THEN
                               JDRP = IGEO_STACK(48,JPID)
                               IF (IDRP==JDRP)THEN
-                              ALLOCATE(DRAPE_WRK(IDSHEL)%DRAPE_PLY(IP)%RDRAPE(NSLICE,2)       )
-                              ALLOCATE(DRAPE_WRK(IDSHEL)%DRAPE_PLY(IP)%IDRAPE(NSLICE,2)       )
+                              call my_alloc(DRAPE_WRK(IDSHEL)%DRAPE_PLY(IP)%RDRAPE, NSLICE, 2, "DRAPE_WRK(IDSHEL)%DRAPE_PLY(IP)%RDRAPE")
+                              call my_alloc(DRAPE_WRK(IDSHEL)%DRAPE_PLY(IP)%IDRAPE, NSLICE, 2, "DRAPE_WRK(IDSHEL)%DRAPE_PLY(IP)%IDRAPE")
                               DRAPE_WRK(IDSHEL)%DRAPE_PLY(IP)%RDRAPE = ZERO
                               DRAPE_WRK(IDSHEL)%DRAPE_PLY(IP)%IDRAPE = 0
                               DRAPE_WRK(IDSHEL)%DRAPE_PLY(IP)%NSLICE = NSLICE 

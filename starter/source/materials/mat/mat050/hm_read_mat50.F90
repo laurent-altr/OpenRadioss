@@ -318,7 +318,7 @@
           ! create local function table from tabulated yield curves
 ! ----------------------------------------------------------------------------------------------------------------------
           mat_param%ntable = 6
-          allocate (mat_param%table(mat_param%ntable))
+          allocate(mat_param%table(mat_param%ntable))
 !
           mat_param%table(1)%notable = n11
           mat_param%table(2)%notable = n22

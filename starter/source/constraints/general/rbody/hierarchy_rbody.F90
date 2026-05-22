@@ -197,13 +197,13 @@
               nom_opt(1:lnopt1,j) = titre_copy(1:lnopt1,i)
             end do
             write(iout,1000) nhier
-            call my_dealloc(npby_copy, "npby_copy")
-            call my_dealloc(lpby_copy, "lpby_copy")
-            call my_dealloc(rby_copy, "rby_copy")
-            call my_dealloc(titre_copy, "titre_copy")
+            call my_dealloc(npby_copy)
+            call my_dealloc(lpby_copy)
+            call my_dealloc(rby_copy)
+            call my_dealloc(titre_copy)
           end if !(is_hier) then
 
-          call my_dealloc(itag, "itag")
+          call my_dealloc(itag)
 1000      FORMAT(/10X,'RIGID BODY HIERARCHY LEVEL. . . . . . . . . . . :',I10        &
             /10X,'RIGID BODY IS REORDERED  ')
 
@@ -279,7 +279,7 @@
                 end if
               end do
             end do
-            call my_dealloc(itag, "itag")
+            call my_dealloc(itag)
           end if
 !
         end subroutine hierarchy_rbody_ddm

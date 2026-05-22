@@ -218,7 +218,7 @@
           end do     ! nfunc
           !end if       ! ierr
 !
-          call my_dealloc(ifunc, "ifunc")
+          call my_dealloc(ifunc)
 !------------------------------
           return
         end subroutine eos_table_copy

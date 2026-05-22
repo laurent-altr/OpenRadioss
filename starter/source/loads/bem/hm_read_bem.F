@@ -278,6 +278,7 @@ C-----------------------------------------------
       USE SUBMODEL_MOD
       USE HM_OPTION_READ_MOD
       USE NAMES_AND_TITLES_MOD , ONLY : NCHARTITLE, NCHARKEY
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -1155,7 +1156,7 @@ C-------------------------------------------------------------------------------
             CALL INIT_QD(IFLOW(II1), IFLOW(II2), IFLOW(II3), X, XS, YS, ZS, XD, YD, ZD,
      .           RFLOW(IR1), RFLOW(IR2), RFLOW(IR3), RFLOW(IR4), RFLOW(IR5), RFLOW(IR6))
             IF(NEL < NELMAX) THEN
-               ALLOCATE(CBEM(NEL,NEL))
+               call my_alloc(CBEM, NEL, NEL, "CBEM")
                CALL MASS_FLUID_QD(NNO, NEL, IFLOW(II1), IFLOW(II2), IFLOW(II3), X,
      .              RFLOW(IR2), RFLOW(IR4), RFLOW(IR7), CBEM, RHO,IRESP)
                DEALLOCATE(CBEM)

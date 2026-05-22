@@ -159,10 +159,10 @@ C         functions are stored in table and in case  of null slope a small slope
               NPT=(NPC(RETRACTOR(I)%IFUNC(J)+1)-NPC(RETRACTOR(I)%IFUNC(J)))/2
               RETRACTOR(I)%S_TABLE(J) = NPT
               RETRACTOR(I)%TABLE(J)%NDIM = 1 
-              ALLOCATE (RETRACTOR(I)%TABLE(J)%X(1),STAT=stat)  
-              ALLOCATE (RETRACTOR(I)%TABLE(J)%X(1)%VALUES(NPT),STAT=stat) 
+              allocate(RETRACTOR(I)%TABLE(J)%X(1), stat=stat)
+              call my_alloc(RETRACTOR(I)%TABLE(J)%X(1)%VALUES, NPT, "RETRACTOR(I)%TABLE(J)%X(1)%VALUES", stat=stat)
               ALLOCATE (RETRACTOR(I)%TABLE(J)%Y,STAT=stat) 
-              ALLOCATE (RETRACTOR(I)%TABLE(J)%Y%VALUES(NPT),STAT=stat) 
+              call my_alloc(RETRACTOR(I)%TABLE(J)%Y%VALUES, NPT, "RETRACTOR(I)%TABLE(J)%Y%VALUES", stat=stat)
 C             first pass to find minimum slope 
               MIN_SLOPE = EP20
               MIN_SLOPE_ABS = EP20
@@ -631,8 +631,8 @@ C       Couting number of 1D elements not tagged - possible number of loops
             ENDIF
           ENDIF  
         ENDDO   
-        ALLOCATE(TAG_LOOP_SEATBELT(NB_ELEM_1D_NOT_TAGED)) 
-        ALLOCATE(NNOD_LOOP_SEATBELT(NB_ELEM_1D_NOT_TAGED))
+        call my_alloc(TAG_LOOP_SEATBELT, NB_ELEM_1D_NOT_TAGED, "TAG_LOOP_SEATBELT")
+        call my_alloc(NNOD_LOOP_SEATBELT, NB_ELEM_1D_NOT_TAGED, "NNOD_LOOP_SEATBELT")
         NLOOP_1D = 0
         DO I=1,NUMELR
           MID = IXR(5,I)
@@ -698,7 +698,7 @@ C       SEATBELT_TAB reallocation for iddlevel=1 - needed for loop (order change
           DEALLOCATE(SEATBELT_TAB)
         ENDIF
 C        
-        ALLOCATE(SEATBELT_TAB(N_SEATBELT))
+        allocate(SEATBELT_TAB(N_SEATBELT))
         CALL MY_ALLOC(TAG_MAT_2D,NUMMAT,"TAG_MAT_2D")
         TAG_MAT_2D(1:NUMMAT) = 0
         IF (NB_2D_SEATBELT > 0) THEN

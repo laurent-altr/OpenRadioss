@@ -122,7 +122,7 @@ C-----------------------------------------------
      *                             CLAUSE_OPERATOR)
 
             IF (ALLOCATED(SET%NODE)) DEALLOCATE (SET%NODE)
-            ALLOCATE(SET%NODE(NEW_SIZE))
+            call my_alloc(SET%NODE, NEW_SIZE, "SET%NODE")
 
             SET%NODE(1:NEW_SIZE) = RESULT(1:NEW_SIZE)
             SET%NB_NODE=NEW_SIZE
@@ -133,7 +133,7 @@ C-----------------------------------------------
 
             IF ( CLAUSE_OPERATOR == SET_ADD) THEN 
                IF (ALLOCATED(SET%NODE)) DEALLOCATE (SET%NODE)
-               ALLOCATE(SET%NODE(CLAUSE%NB_NODE) )
+               call my_alloc(SET%NODE, CLAUSE%NB_NODE, "SET%NODE")
 
                SET%NB_NODE=CLAUSE%NB_NODE
                SET%NODE(1:CLAUSE%NB_NODE)=CLAUSE%NODE(1:CLAUSE%NB_NODE)
@@ -164,7 +164,7 @@ C-----------------------------------------------
      *                             CLAUSE_OPERATOR)
 
           IF (ALLOCATED(SET%NODENS)) DEALLOCATE (SET%NODENS)
-          ALLOCATE(SET%NODENS(NEW_SIZE))
+          call my_alloc(SET%NODENS, NEW_SIZE, "SET%NODENS")
 
           SET%NODENS(1:NEW_SIZE) = RESULT(1:NEW_SIZE)
           SET%NB_NODENS=NEW_SIZE
@@ -175,7 +175,7 @@ C-----------------------------------------------
 
           IF ( CLAUSE_OPERATOR == SET_ADD) THEN 
             IF (ALLOCATED(SET%NODENS)) DEALLOCATE (SET%NODENS)
-            ALLOCATE(SET%NODENS(CLAUSE%NB_NODENS) )
+            call my_alloc(SET%NODENS, CLAUSE%NB_NODENS, "SET%NODENS")
 
             SET%NB_NODENS=CLAUSE%NB_NODENS
             SET%NODENS(1:CLAUSE%NB_NODENS)=CLAUSE%NODENS(1:CLAUSE%NB_NODENS)
@@ -206,7 +206,7 @@ C-----------------------------------------------
      *                             CLAUSE_OPERATOR             )
          
             IF (ALLOCATED(SET%PART)) DEALLOCATE (SET%PART)
-            ALLOCATE(SET%PART(NEW_SIZE))
+            call my_alloc(SET%PART, NEW_SIZE, "SET%PART")
 
             SET%PART(1:NEW_SIZE) = RESULT(1:NEW_SIZE)
             SET%NB_PART=NEW_SIZE
@@ -216,7 +216,7 @@ C-----------------------------------------------
          ELSE   ! SET is empty fill it with clause when ADD
             IF ( CLAUSE_OPERATOR == SET_ADD) THEN 
                IF (ALLOCATED(SET%PART)) DEALLOCATE (SET%PART)
-               ALLOCATE(SET%PART(CLAUSE%NB_PART) )
+               call my_alloc(SET%PART, CLAUSE%NB_PART, "SET%PART")
 
                SET%NB_PART=CLAUSE%NB_PART
                SET%PART(1:SET%NB_PART)=CLAUSE%PART(1:SET%NB_PART)
@@ -247,7 +247,7 @@ C-----------------------------------------------
      *                             CLAUSE_OPERATOR)
          
             IF (ALLOCATED(SET%SOLID)) DEALLOCATE (SET%SOLID)
-            ALLOCATE(SET%SOLID(NEW_SIZE))
+            call my_alloc(SET%SOLID, NEW_SIZE, "SET%SOLID")
 
             SET%SOLID(1:NEW_SIZE) = RESULT(1:NEW_SIZE)
             SET%NB_SOLID=NEW_SIZE
@@ -258,7 +258,7 @@ C-----------------------------------------------
 
             IF ( CLAUSE_OPERATOR == SET_ADD) THEN 
                IF (ALLOCATED(SET%SOLID)) DEALLOCATE (SET%SOLID)
-               ALLOCATE(SET%SOLID(CLAUSE%NB_SOLID) )
+               call my_alloc(SET%SOLID, CLAUSE%NB_SOLID, "SET%SOLID")
 
                SET%NB_SOLID=CLAUSE%NB_SOLID
                SET%SOLID(1:CLAUSE%NB_SOLID)=CLAUSE%SOLID(1:CLAUSE%NB_SOLID)
@@ -289,7 +289,7 @@ C-----------------------------------------------
      *                             CLAUSE_OPERATOR)
 
             IF (ALLOCATED(SET%SH4N)) DEALLOCATE (SET%SH4N)
-            ALLOCATE(SET%SH4N(NEW_SIZE))
+            call my_alloc(SET%SH4N, NEW_SIZE, "SET%SH4N")
 
             SET%SH4N(1:NEW_SIZE) = RESULT(1:NEW_SIZE)
             SET%NB_SH4N=NEW_SIZE
@@ -300,7 +300,7 @@ C-----------------------------------------------
 
             IF ( CLAUSE_OPERATOR == SET_ADD) THEN 
                IF (ALLOCATED(SET%SH4N)) DEALLOCATE (SET%SH4N)
-               ALLOCATE(SET%SH4N(CLAUSE%NB_SH4N) )
+               call my_alloc(SET%SH4N, CLAUSE%NB_SH4N, "SET%SH4N")
 
                SET%NB_SH4N=CLAUSE%NB_SH4N
                SET%SH4N(1:CLAUSE%NB_SH4N)=CLAUSE%SH4N(1:CLAUSE%NB_SH4N)
@@ -331,7 +331,7 @@ C-----------------------------------------------
      *                             CLAUSE_OPERATOR)
 
             IF (ALLOCATED(SET%SH3N)) DEALLOCATE (SET%SH3N)
-            ALLOCATE(SET%SH3N(NEW_SIZE))
+            call my_alloc(SET%SH3N, NEW_SIZE, "SET%SH3N")
 
             SET%SH3N(1:NEW_SIZE) = RESULT(1:NEW_SIZE)
             SET%NB_SH3N=NEW_SIZE
@@ -342,7 +342,7 @@ C-----------------------------------------------
 
             IF ( CLAUSE_OPERATOR == SET_ADD) THEN 
                IF (ALLOCATED(SET%SH3N)) DEALLOCATE (SET%SH3N)
-               ALLOCATE(SET%SH3N(CLAUSE%NB_SH3N) )
+               call my_alloc(SET%SH3N, CLAUSE%NB_SH3N, "SET%SH3N")
 
                SET%NB_SH3N=CLAUSE%NB_SH3N
                SET%SH3N(1:CLAUSE%NB_SH3N) = CLAUSE%SH3N(1:CLAUSE%NB_SH3N)
@@ -373,7 +373,7 @@ C-----------------------------------------------
      *                             CLAUSE_OPERATOR)
 
             IF (ALLOCATED(SET%QUAD)) DEALLOCATE (SET%QUAD)
-            ALLOCATE(SET%QUAD(NEW_SIZE))
+            call my_alloc(SET%QUAD, NEW_SIZE, "SET%QUAD")
 
             SET%QUAD(1:NEW_SIZE) = RESULT(1:NEW_SIZE)
             SET%NB_QUAD=NEW_SIZE
@@ -384,7 +384,7 @@ C-----------------------------------------------
 
             IF ( CLAUSE_OPERATOR == SET_ADD) THEN 
                IF (ALLOCATED(SET%QUAD)) DEALLOCATE (SET%QUAD)
-               ALLOCATE(SET%QUAD(CLAUSE%NB_QUAD) )
+               call my_alloc(SET%QUAD, CLAUSE%NB_QUAD, "SET%QUAD")
 
                SET%NB_QUAD=CLAUSE%NB_QUAD
                SET%QUAD(1:CLAUSE%NB_QUAD)=CLAUSE%QUAD(1:CLAUSE%NB_QUAD)
@@ -415,7 +415,7 @@ C-----------------------------------------------
      *                             CLAUSE_OPERATOR)
 
             IF (ALLOCATED(SET%TRIA)) DEALLOCATE (SET%TRIA)
-            ALLOCATE(SET%TRIA(NEW_SIZE))
+            call my_alloc(SET%TRIA, NEW_SIZE, "SET%TRIA")
 
             SET%TRIA(1:NEW_SIZE) = RESULT(1:NEW_SIZE)
             SET%NB_TRIA=NEW_SIZE
@@ -426,7 +426,7 @@ C-----------------------------------------------
 
             IF ( CLAUSE_OPERATOR == SET_ADD) THEN 
                IF (ALLOCATED(SET%TRIA)) DEALLOCATE (SET%TRIA)
-               ALLOCATE(SET%TRIA(CLAUSE%NB_TRIA) )
+               call my_alloc(SET%TRIA, CLAUSE%NB_TRIA, "SET%TRIA")
 
                SET%NB_TRIA=CLAUSE%NB_TRIA
                SET%TRIA(1:CLAUSE%NB_TRIA) = CLAUSE%TRIA(1:CLAUSE%NB_TRIA)
@@ -457,7 +457,7 @@ C-----------------------------------------------
      *                             CLAUSE_OPERATOR)
 
             IF (ALLOCATED(SET%BEAM)) DEALLOCATE (SET%BEAM)
-            ALLOCATE(SET%BEAM(NEW_SIZE))
+            call my_alloc(SET%BEAM, NEW_SIZE, "SET%BEAM")
 
             SET%BEAM(1:NEW_SIZE) = RESULT(1:NEW_SIZE)
             SET%NB_BEAM=NEW_SIZE
@@ -468,7 +468,7 @@ C-----------------------------------------------
 
             IF ( CLAUSE_OPERATOR == SET_ADD) THEN 
                IF (ALLOCATED(SET%BEAM)) DEALLOCATE (SET%BEAM)
-               ALLOCATE(SET%BEAM(CLAUSE%NB_BEAM) )
+               call my_alloc(SET%BEAM, CLAUSE%NB_BEAM, "SET%BEAM")
 
                SET%NB_BEAM=CLAUSE%NB_BEAM
                SET%BEAM(1:CLAUSE%NB_BEAM) = CLAUSE%BEAM(1:CLAUSE%NB_BEAM) 
@@ -498,7 +498,7 @@ C-----------------------------------------------
      *                             CLAUSE_OPERATOR)
 
             IF (ALLOCATED(SET%TRUSS)) DEALLOCATE (SET%TRUSS)
-            ALLOCATE(SET%TRUSS(NEW_SIZE))
+            call my_alloc(SET%TRUSS, NEW_SIZE, "SET%TRUSS")
 
             SET%TRUSS(1:NEW_SIZE) = RESULT(1:NEW_SIZE)
             SET%NB_TRUSS=NEW_SIZE
@@ -509,7 +509,7 @@ C-----------------------------------------------
 
             IF ( CLAUSE_OPERATOR == SET_ADD) THEN 
                IF (ALLOCATED(SET%TRUSS)) DEALLOCATE (SET%TRUSS)
-               ALLOCATE(SET%TRUSS(CLAUSE%NB_TRUSS) )
+               call my_alloc(SET%TRUSS, CLAUSE%NB_TRUSS, "SET%TRUSS")
 
                SET%NB_TRUSS=CLAUSE%NB_TRUSS
                SET%TRUSS(1:CLAUSE%NB_TRUSS) = CLAUSE%TRUSS(1:CLAUSE%NB_TRUSS)
@@ -540,7 +540,7 @@ C-----------------------------------------------
      *                             CLAUSE_OPERATOR)
 
             IF (ALLOCATED(SET%SPRING)) DEALLOCATE (SET%SPRING)
-            ALLOCATE(SET%SPRING(NEW_SIZE))
+            call my_alloc(SET%SPRING, NEW_SIZE, "SET%SPRING")
 
             SET%SPRING(1:NEW_SIZE) = RESULT(1:NEW_SIZE)
             SET%NB_SPRING=NEW_SIZE
@@ -551,7 +551,7 @@ C-----------------------------------------------
 
             IF ( CLAUSE_OPERATOR == SET_ADD) THEN 
                IF (ALLOCATED(SET%SPRING)) DEALLOCATE (SET%SPRING)
-               ALLOCATE(SET%SPRING(CLAUSE%NB_SPRING) )
+               call my_alloc(SET%SPRING, CLAUSE%NB_SPRING, "SET%SPRING")
 
                SET%NB_SPRING=CLAUSE%NB_SPRING
                SET%SPRING(1:CLAUSE%NB_SPRING)=CLAUSE%SPRING(1:CLAUSE%NB_SPRING)

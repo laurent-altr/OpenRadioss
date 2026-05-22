@@ -466,6 +466,7 @@ c
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
@@ -482,8 +483,8 @@ C-----------------------------------------------
       INTEGER :: I,error
 
 C-----------------------------------------------
-       ALLOCATE(X_copy(3,n))
-       ALLOCATE(RKEY(n))
+       call my_alloc(X_copy, 3, n, "X_copy")
+       call my_alloc(RKEY, n, "RKEY")
 
 
        X_copy(1:3,1:n) = X(1:3,1:n) 

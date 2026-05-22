@@ -38,6 +38,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
@@ -68,11 +69,11 @@ C-----------------------------------------------
       my_real    , DIMENSION(:),ALLOCATABLE :: RWPEN1_L,RW_PEN_L
 C
       IF(NRWALL>0) THEN
-        ALLOCATE(RWL_L(NRWLP,NRWALL))
+        call my_alloc(RWL_L, NRWLP, NRWALL, "RWL_L")
         IF(LWSAV_L>0) ALLOCATE(RWSAV_L(3*LWSAV_L))
         IF(LRW_PEN_L>0) THEN 
-          ALLOCATE(RWPEN1_L(NRW_PEN_L))
-          ALLOCATE(RW_PEN_L(4*LRW_PEN_L))
+          call my_alloc(RWPEN1_L, NRW_PEN_L, "RWPEN1_L")
+          call my_alloc(RW_PEN_L, 4*LRW_PEN_L, "RW_PEN_L")
         ENDIF
         K = 0
         KSAV = 0

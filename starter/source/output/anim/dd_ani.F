@@ -39,6 +39,7 @@ C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
       USE INOUTFILE_MOD
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -93,12 +94,10 @@ C Compact hexagonal mesh => 12 neighbors + close
 C---------- -------------------------------------
 C   INIT SPECIAL STARTER
 C-----------------------------------------------
-      ALLOCATE(XNORM(3,NUMNOD))
-      ALLOCATE(D(3,NUMNOD))
-      ALLOCATE(
-     &  INVERT(NUMELC+NUMELTG+NUMELQ+6*NUMELS+NUMELT+NUMELP+NUMELR+
-     &         NBCSPH))
-      ALLOCATE(IAD(NSPMD+1))
+      call my_alloc(XNORM, 3, NUMNOD, "XNORM")
+      call my_alloc(D, 3, NUMNOD, "D")
+      call my_alloc(INVERT, NUMELC+NUMELTG+NUMELQ+6*NUMELS+NUMELT+NUMELP+NUMELR+ NBCSPH, "INVERT")
+      call my_alloc(IAD, NSPMD+1, "IAD")
       DO I=1,3
         DO J=1,NUMNOD
           D(I,J) = ZERO

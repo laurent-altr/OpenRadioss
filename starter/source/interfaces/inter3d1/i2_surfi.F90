@@ -289,10 +289,10 @@
 !    if (nsn/=ns) print *,'***error dimensionning: nsn,ns',nsn,ns
 !    if (nsn/=nmn) print *,'***error dimensionning: nsn,nmn',nsn,nmn
           msr(1:nsn) = nsv(1:nsn)
-          call my_dealloc(itags1, "itags1")
-          call my_dealloc(itags2, "itags2")
-          call my_dealloc(itagn, "itagn")
-          call my_dealloc(igrelem, "igrelem")
+          call my_dealloc(itags1)
+          call my_dealloc(itags2)
+          call my_dealloc(itagn)
+          call my_dealloc(igrelem)
 1000      FORMAT(/1X,"SURFACE 1: Number of remain seg and % = ",I10,F10.1)
 2000      FORMAT(/1X,"SURFACE 2: Number of remain seg and % = ",I10,F10.1)
 

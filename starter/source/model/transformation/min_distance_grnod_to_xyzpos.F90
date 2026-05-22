@@ -234,7 +234,7 @@
             end do
           end if
 
-          if(allocated(xn)) call my_dealloc(xn, "xn")
+          if(allocated(xn)) call my_dealloc(xn)
 ! ----------------------------------------------------------------------------------------------------------------------
         end subroutine min_dist_grnod_to_xyzpos
       end module min_dist_grnod_to_xyzpos_mod

@@ -43,6 +43,7 @@ C-----------------------------------------------
       USE INTBUFDEF_MOD  
       USE MULTI_FVM_MOD
       USE GROUPDEF_MOD
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -121,7 +122,7 @@ C-----------------------------------------------
 !         ALLOCATE(INDEX0(NUMNOD+I24MAXNSNE))
 !         TAG(1:NUMNOD+I24MAXNSNE) = 0
 !      ENDIF
-      ALLOCATE(TAGI2(NUMNOD))
+      call my_alloc(TAGI2, NUMNOD, "TAGI2")
       ALLOCATE(TAGG(NUMNOD))
 C-----------------------------------------------
 C Construction of iPari_L - Initial copy
@@ -178,7 +179,7 @@ C calculation IMAXIMP_L according to interface
           NMN    = IPARI(6,NI)
           ILEV   = IPARI(20,NI)
 
-          ALLOCATE(TAGE(NRTM))
+          call my_alloc(TAGE, NRTM, "TAGE")
           DO I = 1, NRTM
             TAGE(I) = 0
           ENDDO
@@ -315,7 +316,7 @@ C
             NMN_FE = NMN
           ENDIF
 C
-          ALLOCATE(TAGE(NRTM))
+          call my_alloc(TAGE, NRTM, "TAGE")
 C
           DO K=1,NRTM
 C Flag tage used for inactive
@@ -648,7 +649,7 @@ C compute IPARI_L(42,NI) = NRTM_SH_L
             ENDDO
             IPARI_L(42,NI)= NRTM_SH_L
 
-            ALLOCATE(TAG_SM(NADMSR))
+            call my_alloc(TAG_SM, NADMSR, "TAG_SM")
             TAG_SM(1:NADMSR)=0
             DO K=1,NRTM
               IF(INTERCEP(1,NI)%P(K)==PROC+1)THEN
@@ -1028,7 +1029,7 @@ C
             ENDIF
           ENDDO
 C
-          ALLOCATE(TAGE(NRTM))
+          call my_alloc(TAGE, NRTM, "TAGE")
 C
           DO K=1,NRTM
 C Flag tage used for inactive
@@ -1245,7 +1246,7 @@ C
             TAGG(I) = 0
           END DO
 C
-          ALLOCATE(TAGE(NRTM))
+          call my_alloc(TAGE, NRTM, "TAGE")
 
           DO K=1,NRTM
             TAGE(K) = 0
@@ -1398,7 +1399,7 @@ C
             ENDIF
           ENDDO
 C
-          ALLOCATE(TAGE2(NLINM))
+          call my_alloc(TAGE2, NLINM, "TAGE2")
 C
           NLINMA_L= 0
           NINDEX0 = 0

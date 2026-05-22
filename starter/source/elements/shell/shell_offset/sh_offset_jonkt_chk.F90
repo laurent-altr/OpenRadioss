@@ -277,10 +277,10 @@
             do j=1,nshel
               if (icmore(j)==1.and.ichange(j)>0) ichange(j) = -ichange(j)
             end do
-            call my_dealloc(icmore, "icmore")
+            call my_dealloc(icmore)
           end if !(nl_max>=3) then
-          call my_dealloc(index, "index")
-          call my_dealloc(lineix, "lineix")
+          call my_dealloc(index)
+          call my_dealloc(lineix)
 !
         end subroutine sh_offset_jonct_chk
       end module sh_offset_jonct_chk_mod

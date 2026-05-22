@@ -46,6 +46,7 @@ C-----------------------------------------------
       USE INTBUFDEF_MOD
       USE USER_WINDOWS_MOD  
       USE NLOCAL_REG_MOD
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -278,7 +279,8 @@ C ---------------------
           NRTM  =IPARI(4,NI)
           NADMSR=IPARI(67,NI)
 
-          ALLOCATE(TAG_SM(NADMSR),TAG_MS(NADMSR))
+          call my_alloc(TAG_SM, NADMSR, "TAG_SM")
+          call my_alloc(TAG_MS, NADMSR, "TAG_MS")
           TAG_SM(1:NADMSR)=0
 
           NADMSR_L=0
@@ -364,7 +366,8 @@ C ---------------------
 
           NRTM  =IPARI(4,NI)
 
-          ALLOCATE(TAG_SM(NRTM),TAG_MS(NRTM))
+          call my_alloc(TAG_SM, NRTM, "TAG_SM")
+          call my_alloc(TAG_MS, NRTM, "TAG_MS")
           TAG_SM(1:NRTM)=0
 
           NRTM_L=0

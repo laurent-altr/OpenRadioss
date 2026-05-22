@@ -66,6 +66,7 @@ C-----------------------------------------------
       USE QA_OUT_MOD
       USE FILL_SURF_PLANE_MOD
       USE file_descriptor_mod
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -137,7 +138,7 @@ C
                   IF(CARTE(1:1) == '/') THEN 
                     BACKSPACE(tmp_engine)
                   ELSE IF(CARTE(1:1) /= '#' .AND. CARTE(1:1) /= '$') THEN
-                    ALLOCATE(GRPART_TMP(NVAR(CARTE)))
+                    call my_alloc(GRPART_TMP, NVAR(CARTE), "GRPART_TMP")
                     READ(CARTE, FMT=*) GRPART_TMP
                     DO J=1,NVAR(CARTE)
                       IF(GRPART_TMP(J) < 0)  NB_GRPART = NB_GRPART + 1
@@ -242,7 +243,7 @@ C
                   IF(CARTE(1:1) == '/') THEN 
                     BACKSPACE(tmp_engine)
                   ELSE IF(CARTE(1:1) /= '#' .AND. CARTE(1:1) /= '$') THEN
-                    ALLOCATE(GRPART_TMP(NVAR(CARTE)))
+                    call my_alloc(GRPART_TMP, NVAR(CARTE), "GRPART_TMP")
                     READ(CARTE, FMT=*) GRPART_TMP
                     DO J=1,NVAR(CARTE)
                       IF(GRPART_TMP(J) < 0)  THEN 

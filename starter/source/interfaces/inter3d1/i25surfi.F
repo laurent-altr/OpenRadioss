@@ -55,6 +55,7 @@ C-----------------------------------------------
       USE PARAMETERS_MOD
       USE FORMAT_MOD , ONLY : FMW_10I, FMW_4I
       use element_mod , only :nixs,nixc,nixtg
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -191,7 +192,8 @@ C-----attention: ISU2=ISU1 /=0
       ENDIF
 
 c-----------------------------------------------------------------
-      ALLOCATE(INDEX(2*NRTM),IRECTMP(6,NRTM),STAT=stat)
+      call my_alloc(INDEX, 2*NRTM, "INDEX", stat=stat)
+      call my_alloc(IRECTMP, 6, NRTM, "IRECTMP", stat=stat)
       IF (STAT /= 0) CALL ANCMSG(MSGID=268,ANMODE=ANINFO,
      .                           MSGTYPE=MSGERROR,
      .                           C1='IRECTSAV')
@@ -241,7 +243,7 @@ C=======================================================================
 c     Filtre
       NRTMP=NRTM
 C
-      ALLOCATE(IRECTMP_SAV(6,NRTM),STAT=stat)
+      call my_alloc(IRECTMP_SAV, 6, NRTM, "IRECTMP_SAV", stat=stat)
 
         
       IRECTMP_SAV(1:6,1:NRTM) =  IRECTMP(1:6,1:NRTM)
@@ -449,7 +451,8 @@ c     NODES C===================================================================
 c-----------------------------------------------------------------
 c     tag nodes surfaces S1 S2; 1,2 on S1,S2, 3 on both (ILEV=1)
 c-----------------------------------------------------------------
-      ALLOCATE(TAG(NUMNOD),TAGS(NUMNOD))
+      call my_alloc(TAG, NUMNOD, "TAG")
+      call my_alloc(TAGS, NUMNOD, "TAGS")
       DO I=1,NUMNOD
         TAG(I)=0 ! initialisation
         TAGS(I)=0 ! initialisation

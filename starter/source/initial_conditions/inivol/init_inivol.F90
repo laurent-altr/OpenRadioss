@@ -323,7 +323,7 @@
                   leading_dimension,size_cell)
                 ! -----------------
                 ! coloration of cell with nodes of surface
-                allocate( cell(nb_container) )
+                allocate(cell(nb_container))
 
                 call ale_box_coloration(nsurf,numnod,&
                   nb_cell_x,nb_cell_y,nb_cell_z,nb_container,               &
@@ -331,7 +331,7 @@
                   ale_node_number,list_ale_node)
                 ! -----------------
 
-                allocate( nodal_phase(nb_container) )
+                allocate(nodal_phase(nb_container))
                 nodal_phase(1:nb_container)%size_int_array_1d = numnod
                 itagsurf(1:nsurf) = 0
                 nseg_swift_surf = 0

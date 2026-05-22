@@ -55,6 +55,7 @@ C-----------------------------------------------
       USE MESSAGE_MOD
       USE NAMES_AND_TITLES_MOD , ONLY : NCHARTITLE
       use element_mod , only : nixc,nixtg
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -104,10 +105,10 @@ C
       my_real,DIMENSION(:,:),ALLOCATABLE :: BETA
 C=======================================================================
       ITG = 1+NUMELC
-      ALLOCATE (ELCUT(NUMELC+NUMELTG))  
-      ALLOCATE (BETA(2,NUMELC+NUMELTG)) 
-      ALLOCATE (EDGEC(4,NUMELC))        
-      ALLOCATE (EDGETG(3,NUMELTG))      
+      call my_alloc(ELCUT, NUMELC+NUMELTG, "ELCUT")
+      call my_alloc(BETA, 2, NUMELC+NUMELTG, "BETA")
+      call my_alloc(EDGEC, 4, NUMELC, "EDGEC")
+      call my_alloc(EDGETG, 3, NUMELTG, "EDGETG")
       ELCUT  = 0                         
       BETA   = 0                          
       EDGEC  = 0                         

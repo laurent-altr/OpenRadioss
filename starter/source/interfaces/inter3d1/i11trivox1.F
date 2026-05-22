@@ -48,6 +48,7 @@ C-----------------------------------------------
       USE REALLOC_MOD
       USE TRI7BOX
       USE TRI11
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -142,13 +143,19 @@ C-----------------------------------------------
       my_real, dimension(:), ALLOCATABLE :: XMAX_EDGM, XMIN_EDGM, YMAX_EDGM, YMIN_EDGM, ZMAX_EDGM, ZMIN_EDGM
       INTEGER, DIMENSION(:), ALLOCATABLE ::  TAGREMLINE    
 C-----------------------------------------------C
-       ALLOCATE(XMAX_EDGS(NRTS), XMIN_EDGS(NRTS), YMAX_EDGS(NRTS))
-       ALLOCATE(YMIN_EDGS(NRTS), ZMAX_EDGS(NRTS), ZMIN_EDGS(NRTS))
-       ALLOCATE(XMAX_EDGM(NRTM), XMIN_EDGM(NRTM), YMAX_EDGM(NRTM))
+       call my_alloc(XMAX_EDGS, NRTS, "XMAX_EDGS")
+       call my_alloc(XMIN_EDGS, NRTS, "XMIN_EDGS")
+       call my_alloc(YMAX_EDGS, NRTS, "YMAX_EDGS")
+       call my_alloc(YMIN_EDGS, NRTS, "YMIN_EDGS")
+       call my_alloc(ZMAX_EDGS, NRTS, "ZMAX_EDGS")
+       call my_alloc(ZMIN_EDGS, NRTS, "ZMIN_EDGS")
+       call my_alloc(XMAX_EDGM, NRTM, "XMAX_EDGM")
+       call my_alloc(XMIN_EDGM, NRTM, "XMIN_EDGM")
+       call my_alloc(YMAX_EDGM, NRTM, "YMAX_EDGM")
        ALLOCATE(YMIN_EDGM(NRTM), ZMAX_EDGM(NRTM), ZMIN_EDGM(NRTM))
 C--- IREMGAP - array for tag of deactivated lines
       IF(FLAGREMNODE==2)THEN
-        ALLOCATE(TAGREMLINE(NRTS))
+        call my_alloc(TAGREMLINE, NRTS, "TAGREMLINE")
         TAGREMLINE(1:NRTS) = 0
       ENDIF  
 C
@@ -165,9 +172,9 @@ C
       ! allocation of the chain arrays
       !---------------------------------------------------------!
       MAX_ADD = max(1,4*(NRTS))
-      ALLOCATE(LCHAIN_ELEM(1:MAX_ADD))
-      ALLOCATE(LCHAIN_NEXT(1:MAX_ADD))
-      ALLOCATE(LCHAIN_LAST(1:MAX_ADD))
+      call my_alloc(LCHAIN_ELEM, MAX_ADD, "LCHAIN_ELEM")
+      call my_alloc(LCHAIN_NEXT, MAX_ADD, "LCHAIN_NEXT")
+      call my_alloc(LCHAIN_LAST, MAX_ADD, "LCHAIN_LAST")
       
 
       IF(NRTM==0.OR.NRTS==0)THEN

@@ -332,7 +332,7 @@
           call my_alloc(mat_param%uparam, mat_param%nuparam, "mat_param%uparam")
           call my_alloc(mat_param%iparam, mat_param%niparam, "mat_param%iparam")
 !      allocate(mat_param%ifunc (mat_param%nfunc))
-          allocate(mat_param%table (mat_param%ntable))
+          allocate(mat_param%table(mat_param%ntable))
 !
 ! ----------------------------------------------------------------------------------------------------------------------
           ! material parameters used in the law

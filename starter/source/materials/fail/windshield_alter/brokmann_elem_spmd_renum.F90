@@ -138,10 +138,10 @@
               fail_brokmann%brokmann(ifail)%brokmann_elem(i)%random(5) = tag_rand(i,5)
               fail_brokmann%brokmann(ifail)%brokmann_elem(i)%random(6) = tag_rand(i,6)
             end do
-            call my_dealloc(tag_rand, "tag_rand")
-            call my_dealloc(tag_id, "tag_id")
-            call my_dealloc(tag_nix, "tag_nix")
-            call my_dealloc(tag_elem, "tag_elem")
+            call my_dealloc(tag_rand)
+            call my_dealloc(tag_id)
+            call my_dealloc(tag_nix)
+            call my_dealloc(tag_elem)
           end do
 ! ----------------------------------------------------------------------------------------------------------------------
           return

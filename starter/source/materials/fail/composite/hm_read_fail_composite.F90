@@ -152,7 +152,7 @@
 !
           ! Modes of failure
           fail_tag%lf_dammx = fail_tag%lf_dammx + fail%nmod
-          allocate (fail%mode(fail%nmod))
+          allocate(fail%mode(fail%nmod))
           fail%mode(1) = "Tensile index in dir. 1"
           fail%mode(2) = "Compression index in dir. 1"
           fail%mode(3) = "Tensile index in dir. 2"

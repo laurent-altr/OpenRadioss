@@ -149,12 +149,12 @@
                     call my_alloc(itmp,2,isize)
                     itmp(1,1:isize) = bcs%iworking_array(1,1:isize)
                     itmp(2,1:isize) = bcs%iworking_array(2,1:isize)
-                    call my_dealloc(bcs%iworking_array, "bcs%iworking_array")
+                    call my_dealloc(bcs%iworking_array)
                     isize=isize+numnod
                     call my_alloc(bcs%iworking_array,2,isize)
                     bcs%iworking_array(1,1:isize/2)=itmp(1,1:isize/2)
                     bcs%iworking_array(2,1:isize/2)=itmp(2,1:isize/2)
-                    call my_dealloc(itmp, "itmp")
+                    call my_dealloc(itmp)
                   end if
                   !test binary codes to identify blocked faces
                   kk = 0 !number of identified faces
@@ -188,12 +188,12 @@
                     call my_alloc(itmp,2,isize)
                     itmp(1,1:isize) = bcs%iworking_array(1,1:isize)
                     itmp(2,1:isize) = bcs%iworking_array(2,1:isize)
-                    call my_dealloc(bcs%iworking_array, "bcs%iworking_array")
+                    call my_dealloc(bcs%iworking_array)
                     isize=isize+numnod
                     call my_alloc(bcs%iworking_array,2,isize)
                     bcs%iworking_array(1,1:isize-numnod)=itmp(1,1:isize-numnod)
                     bcs%iworking_array(2,1:isize-numnod)=itmp(2,1:isize-numnod)
-                    call my_dealloc(itmp, "itmp")
+                    call my_dealloc(itmp)
                   end if
                   !test binary codes to identify blocked faces
                   kk = 0 !number of identified faces
@@ -224,12 +224,12 @@
                     call my_alloc(itmp,2,isize)
                     itmp(1,1:isize) = bcs%iworking_array(1,1:isize)
                     itmp(2,1:isize) = bcs%iworking_array(2,1:isize)
-                    call my_dealloc(bcs%iworking_array, "bcs%iworking_array")
+                    call my_dealloc(bcs%iworking_array)
                     isize=isize+numnod
                     call my_alloc(bcs%iworking_array,2,isize)
                     bcs%iworking_array(1,1:isize-numnod)=itmp(1,1:isize-numnod)
                     bcs%iworking_array(2,1:isize-numnod)=itmp(2,1:isize-numnod)
-                    call my_dealloc(itmp, "itmp")
+                    call my_dealloc(itmp)
                   end if
                   !test binary codes to identify blocked faces
                   if(03 == IAND(icode,03))then; kk=kk+1 ; bcs%iworking_array(2,nseg+kk) = 1 ; end if
@@ -257,12 +257,12 @@
                     call my_alloc(itmp,2,isize)
                     itmp(1,1:isize) = bcs%iworking_array(1,1:isize)
                     itmp(2,1:isize) = bcs%iworking_array(2,1:isize)
-                    call my_dealloc(bcs%iworking_array, "bcs%iworking_array")
+                    call my_dealloc(bcs%iworking_array)
                     isize=isize+numnod
                     call my_alloc(bcs%iworking_array,2,isize)
                     bcs%iworking_array(1,1:isize-numnod)=itmp(1,1:isize-numnod)
                     bcs%iworking_array(2,1:isize-numnod)=itmp(2,1:isize-numnod)
-                    call my_dealloc(itmp, "itmp")
+                    call my_dealloc(itmp)
                   end if
                   !test binary codes to identify blocked faces
                   if(3 == IAND(icode,3))then; kk=kk+1 ; bcs%iworking_array(2,nseg+kk) = 1 ; end if
@@ -337,8 +337,8 @@
               end if
             end if
 
-            call my_dealloc(adjacent_elem, "adjacent_elem")
-            call my_dealloc(bcs%iworking_array, "bcs%iworking_array")
+            call my_dealloc(adjacent_elem)
+            call my_dealloc(bcs%iworking_array)
 
           end do !next ii
 

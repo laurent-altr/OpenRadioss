@@ -42,6 +42,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 C============================================================================
       USE TRI7BOX
       use array_mod 
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -116,8 +117,8 @@ C
       if(local_i_stok+k_stok>local_cand_n%size_int_array_1d) then
         my_old_size = local_cand_n%size_int_array_1d
         my_size = (my_old_size+k_stok) * 1.25
-        allocate( tmp_array_1( my_size ) )
-        allocate( tmp_array_2( my_size ) )
+        call my_alloc(tmp_array_1, my_size, "tmp_array_1")
+        call my_alloc(tmp_array_2, my_size, "tmp_array_2")
         tmp_array_1(1:my_old_size) = local_cand_n%int_array_1d(1:my_old_size)
         tmp_array_2(1:my_old_size) = local_cand_e%int_array_1d(1:my_old_size)
         call dealloc_1d_array(local_cand_n)

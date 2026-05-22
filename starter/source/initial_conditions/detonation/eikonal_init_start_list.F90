@@ -359,15 +359,15 @@
             start_elem_list(ii) = int_tmp_array(indx(ii))
             start_elem_tdet(ii) = real_tmp_array(indx(ii))
           end do
-          call my_dealloc(int_tmp_array, "int_tmp_array")
-          call my_dealloc(real_tmp_array, "real_tmp_array")
-          call my_dealloc(indx, "indx")
-          call my_dealloc(start_elem_uid, "start_elem_uid")
+          call my_dealloc(int_tmp_array)
+          call my_dealloc(real_tmp_array)
+          call my_dealloc(indx)
+          call my_dealloc(start_elem_uid)
 
           !remaing deallocate
-          call my_dealloc(itag_elem, "itag_elem")
-          call my_dealloc(tmp_tdet, "tmp_tdet")
-          call my_dealloc(adjacent_elem, "adjacent_elem")
+          call my_dealloc(itag_elem)
+          call my_dealloc(tmp_tdet)
+          call my_dealloc(adjacent_elem)
 
         end subroutine eikonal_init_start_list
 ! ----------------------------------------------------------------------------------------------------------------------

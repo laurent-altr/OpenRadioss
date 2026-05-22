@@ -390,17 +390,17 @@
             endif
           endif ! if (userl_avail==1)then
 !
-          call my_dealloc(mas, "mas")
-          call my_dealloc(inn, "inn")
-          call my_dealloc(xx, "xx")
-          call my_dealloc(yy, "yy")
-          call my_dealloc(zz, "zz")
-          call my_dealloc(vx, "vx")
-          call my_dealloc(vy, "vy")
-          call my_dealloc(vz, "vz")
-          call my_dealloc(vrx, "vrx")
-          call my_dealloc(vry, "vry")
-          call my_dealloc(vrz, "vrz")
+          call my_dealloc(mas)
+          call my_dealloc(inn)
+          call my_dealloc(xx)
+          call my_dealloc(yy)
+          call my_dealloc(zz)
+          call my_dealloc(vx)
+          call my_dealloc(vy)
+          call my_dealloc(vz)
+          call my_dealloc(vrx)
+          call my_dealloc(vry)
+          call my_dealloc(vrz)
 
         end subroutine ush_init
 !

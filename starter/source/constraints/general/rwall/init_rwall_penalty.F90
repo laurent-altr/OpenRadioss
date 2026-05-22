@@ -460,9 +460,9 @@
             end do
           end if !(is_found) then
 !
-          call my_dealloc(imnt, "imnt")
-          call my_dealloc(itag, "itag")
-          call my_dealloc(noda_l, "noda_l")
+          call my_dealloc(imnt)
+          call my_dealloc(itag)
+          call my_dealloc(noda_l)
 !
         end subroutine init_rwall_penalty
 !

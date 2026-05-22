@@ -71,6 +71,7 @@ C-----------------------------------------------
       USE READER_OLD_MOD , ONLY : LINE
       USE USER_ID_MOD , ONLY : ID_LIMIT
       use element_mod , only : nixtg
+      use my_alloc_mod
 C--------------------------------------------------------
 C     READING DES ELEMENTS COQUES TRIANGULAIRE
 C--------------------------------------------------------
@@ -130,17 +131,17 @@ C--------------------------------------------------
 C      ALLOCS & INITS
 c      use NUMELTG0 IN PLACE OF NUMELTG ( NBADMESH routine is modifying NUMELTG )
 C--------------------------------------------------
-      ALLOCATE (SUB_SH3N(NUMELTG0),STAT=stat)
+      call my_alloc(SUB_SH3N, NUMELTG0, "SUB_SH3N", stat=stat)
       IF (STAT /= 0) CALL ANCMSG(MSGID=268,ANMODE=ANINFO,MSGTYPE=MSGERROR,C1='SUB_SH3N')
-      ALLOCATE (UID_SH3N(NUMELTG0),STAT=stat)
+      call my_alloc(UID_SH3N, NUMELTG0, "UID_SH3N", stat=stat)
       IF (STAT /= 0) CALL ANCMSG(MSGID=268,ANMODE=ANINFO,MSGTYPE=MSGERROR,C1='UID_SH3N')
-      ALLOCATE (HM_THK(NUMELTG0),STAT=stat)
+      call my_alloc(HM_THK, NUMELTG0, "HM_THK", stat=stat)
       IF (STAT /= 0) CALL ANCMSG(MSGID=268,ANMODE=ANINFO,MSGTYPE=MSGERROR,C1='HM_THK')
-      ALLOCATE (HM_ANGLE(NUMELTG0),STAT=stat)
+      call my_alloc(HM_ANGLE, NUMELTG0, "HM_ANGLE", stat=stat)
       IF (STAT /= 0) CALL ANCMSG(MSGID=268,ANMODE=ANINFO,MSGTYPE=MSGERROR,C1='HM_ANGLE')
-      ALLOCATE (TMP_IXTG(NIXTG,NUMELTG0),STAT=stat)
+      call my_alloc(TMP_IXTG, NIXTG, NUMELTG0, "TMP_IXTG", stat=stat)
       IF (STAT /= 0) CALL ANCMSG(MSGID=268,ANMODE=ANINFO,MSGTYPE=MSGERROR,C1='TMP_IXTG')
-      ALLOCATE (TMP_IPARTTG(NUMELTG0),STAT=stat)
+      call my_alloc(TMP_IPARTTG, NUMELTG0, "TMP_IPARTTG", stat=stat)
       IF (STAT /= 0) CALL ANCMSG(MSGID=268,ANMODE=ANINFO,MSGTYPE=MSGERROR,C1='TMP_IPARTTG')
       SUB_SH3N(1:NUMELTG0) = 0
       UID_SH3N(1:NUMELTG0) = 0

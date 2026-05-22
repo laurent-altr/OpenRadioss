@@ -159,7 +159,7 @@ C=======================================================================
       IT6 = 0
       IT7 = 0
       TITR1='ELEMENT GROUP'
-      ALLOCATE(BUFTMP(MAX(NUMEL*5,NPART)),STAT=stat)
+      call my_alloc(BUFTMP, MAX(NUMEL*5,NPART), "BUFTMP", stat=stat)
         IF (STAT /= 0) THEN
           CALL ANCMSG(MSGID=268,ANMODE=ANINFO,MSGTYPE=MSGERROR,C1='BUFTMP')
         ENDIF
@@ -471,10 +471,10 @@ C-------------------------
 C---
 C
         IF (FLAG == 0) THEN
-          ALLOCATE(BUFBOX(1))
+          call my_alloc(BUFBOX, 1, "BUFBOX")
           BUFBOX = 0
         ELSEIF (FLAG == 1) THEN
-          ALLOCATE(BUFBOX(IADBOXMAX))
+          call my_alloc(BUFBOX, IADBOXMAX, "BUFBOX")
           BUFBOX(1:IADBOXMAX) = 0
         ENDIF
 !

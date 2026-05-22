@@ -201,7 +201,7 @@
             end if
           end do
 !
-          call my_dealloc(itag, "itag")
+          call my_dealloc(itag)
 !
         end subroutine stifint_icontrol
 !

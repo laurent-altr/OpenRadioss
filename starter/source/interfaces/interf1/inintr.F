@@ -180,7 +180,7 @@ C
       I_MEM = 0
       RESORT = 0
       NREMNODE = 0
-      ALLOCATE(IKINE1(3*NUMNOD))
+      call my_alloc(IKINE1, 3*NUMNOD, "IKINE1")
       DO I=1,3*NUMNOD
         IKINE1(I) = 0
       ENDDO
@@ -204,7 +204,7 @@ C-----------------------------------------------
 
 C----------------------Treatment for TYPE2 spt27/28 compatibility  check - computation of size and allocation of array
        IF (NSN_MULTI_CONNEC > 0) THEN
-         ALLOCATE (T2_ADD_CONNEC(NUMNOD))
+         call my_alloc(T2_ADD_CONNEC, NUMNOD, "T2_ADD_CONNEC")
          T2_ADD_CONNEC(1:NUMNOD) = 0
          ST2_CONNEC = 0
          T2_ADD_CONNEC(1) = 1
@@ -216,15 +216,16 @@ C--
            ST2_CONNEC = ST2_CONNEC + 1 + 5*T2_NB_CONNEC(I)
            T2_ADD_CONNEC(I) = T2_ADD_CONNEC(I-1) + 1 + 5*T2_NB_CONNEC(I-1)
          ENDDO
-         ALLOCATE (T2_CONNEC(ST2_CONNEC))
+         call my_alloc(T2_CONNEC, ST2_CONNEC, "T2_CONNEC")
          T2_CONNEC(1:ST2_CONNEC) = 0
        ELSE
          ST2_CONNEC = 0
-         ALLOCATE (T2_ADD_CONNEC(0),T2_CONNEC(0))
+         call my_alloc(T2_ADD_CONNEC, 0, "T2_ADD_CONNEC")
+         call my_alloc(T2_CONNEC, 0, "T2_CONNEC")
        ENDIF
 
 C-----------------------------------------------     
-        ALLOCATE( ELEM_LINKED_TO_SEGMENT(NUMELS) )
+        call my_alloc(ELEM_LINKED_TO_SEGMENT, NUMELS, "ELEM_LINKED_TO_SEGMENT")
         ! ----------------
         ! loop over the interfaces
         ! interface type 24 & 25 must be treated at the end
@@ -448,7 +449,7 @@ C significantly different velocities between second and main
 
         CONDITION(1:NINTER) = .FALSE.
         avg_stiff(1:NINTER) = HUGE(1.0D0)
-        ALLOCATE(TAG(NUMNOD))
+        call my_alloc(TAG, NUMNOD, "TAG")
         TAG(1:NUMNOD) = 0
         DO N=1,NINTER
           NTY=IPARI(7,N)

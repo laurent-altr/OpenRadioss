@@ -49,6 +49,7 @@ C-----------------------------------------------
       USE HM_OPTION_READ_MOD
       USE NAMES_AND_TITLES_MOD , ONLY : NCHARTITLE
       use element_mod , only : nixs,nixc,nixt,nixp,nixr,nixtg
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -94,7 +95,7 @@ C   E x t e r n a l   F u n c t i o n s
 C-----------------------------------------------
       INTEGER USR2SYS
 C=====================================================================  
-      ALLOCATE (ITAG(NUMNOD))
+      call my_alloc(ITAG, NUMNOD, "ITAG")
 C
       LENMAT = 0
       ADRNOD = 1

@@ -164,7 +164,7 @@
           !< Allocation of material parameters tables
           call my_alloc(matparam%iparam, matparam%niparam, "matparam%iparam")
           call my_alloc(matparam%uparam, matparam%nuparam, "matparam%uparam")
-          allocate(matparam%table (matparam%ntable ))
+          allocate(matparam%table(matparam%ntable))
 !
           !< Integer material parameter
           matparam%iparam(1)  = ncycle

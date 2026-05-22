@@ -48,6 +48,7 @@ C-----------------------------------------------
       USE DRAPE_MOD
       USE NAMES_AND_TITLES_MOD , ONLY : NCHARTITLE
       use element_mod , only : nixc,nixtg
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -178,9 +179,11 @@ C-----------------------------------------------
        NS_STACK = 0
        NPT_STACK = 0
 C
-       ALLOCATE (INDX_SH(NUMELC+NUMELTG),PID_SH(NUMELC+NUMELTG),
-     .            ISUBSTACK(NUMGEO+NUMSTACK),
-     .            IPTPLY(NUMGEO+NUMPLY), WORK(70000) )
+       call my_alloc(INDX_SH, NUMELC+NUMELTG, "INDX_SH")
+       call my_alloc(PID_SH, NUMELC+NUMELTG, "PID_SH")
+       call my_alloc(ISUBSTACK, NUMGEO+NUMSTACK, "ISUBSTACK")
+       call my_alloc(IPTPLY, NUMGEO+NUMPLY, "IPTPLY")
+       call my_alloc(WORK, 70000, "WORK")
          
        WORK = 0       
        INDX_SH = 0    
@@ -224,7 +227,7 @@ C #####################################################"
            IREST = MOD(NPLY,NBIT)
            NKEY = NPLY / NBIT
            IF(IREST > 0) NKEY = NKEY + 1
-           ALLOCATE( ACTIV_PLY(NUMELC+NUMELTG,NKEY))
+           call my_alloc(ACTIV_PLY, NUMELC+NUMELTG, NKEY, "ACTIV_PLY")
            IF(NUMELC + NUMELTG > 0)ACTIV_PLY = 0
            !!
            DO I=1,NSH
@@ -235,7 +238,7 @@ C #####################################################"
              IE_DRP = DRAPEG%INDX(II)
              IF(IGTYP == 17) THEN
               IF(NPT > 0) THEN
-                 ALLOCATE(IWORK_T(II)%NPT_PLY(NPT))
+                 call my_alloc(IWORK_T(II)%NPT_PLY, NPT, "IWORK_T(II)%NPT_PLY")
                  IWORK_T(II)%NPT_PLY = 0
                  DO J=1,NPT
                    N_PLY = IWORK_T(II)%PLYNUM(J)
@@ -249,7 +252,7 @@ C #####################################################"
                  ENDDO
               ENDIF 
              ELSEIF(IGTYP == 51) THEN
-              ALLOCATE(IWORK_T(II)%NPT_PLY(NPT))
+              call my_alloc(IWORK_T(II)%NPT_PLY, NPT, "IWORK_T(II)%NPT_PLY")
               IWORK_T(II)%NPT_PLY = 0
               IF(IE_DRP > 0 .AND. NPT > 0) THEN
                 DO J=1,NPT
@@ -290,9 +293,13 @@ C #####################################################"
               ENDIF ! IGTYP   
              ENDDO
 !!###########################################################"  
-         ALLOCATE(INDX(2*NSH),ITRI(2 + NKEY,NSH),INDX_TOTAL(NSH))
-         ALLOCATE (NFIRST(NSH) ,NLAST(NSH),
-     .             NFIRST1(NSH) ,NLAST1(NSH))
+         call my_alloc(INDX, 2*NSH, "INDX")
+         call my_alloc(ITRI, 2 + NKEY, NSH, "ITRI")
+         call my_alloc(INDX_TOTAL, NSH, "INDX_TOTAL")
+         call my_alloc(NFIRST, NSH, "NFIRST")
+         call my_alloc(NLAST, NSH, "NLAST")
+         call my_alloc(NFIRST1, NSH, "NFIRST1")
+         call my_alloc(NLAST1, NSH, "NLAST1")
          IF(NSH > 0) THEN
            INDX       = 0  
            ITRI       = 0
@@ -347,7 +354,9 @@ C
                NKEY  = IWORKSH(1,II)
                IF(IGTYP == 51) THEN
                    NSH = NLAST1(IS) - NFIRST1(IS) + 1
-                   ALLOCATE(INDX1(2*NSH),ITRI(NKEY,NSH),INDX_SUB(NSH))
+                   call my_alloc(INDX1, 2*NSH, "INDX1")
+                   call my_alloc(ITRI, NKEY, NSH, "ITRI")
+                   call my_alloc(INDX_SUB, NSH, "INDX_SUB")
                    INDX1 = 0
                    ITRI = 0
                    I1 = 0
@@ -363,7 +372,8 @@ C
                    ENDDO
                    MODE = 0
                    CALL MY_ORDERS(MODE, WORK, ITRI, INDX1, NSH , NKEY)
-                   ALLOCATE (NFIRST2(NSH) ,NLAST2(NSH))
+                   call my_alloc(NFIRST2, NSH, "NFIRST2")
+                   call my_alloc(NLAST2, NSH, "NLAST2")
                    NS_SUB = 1 
                    NFIRST2(1) = 1
                    NLAST2(1)  = 1    
@@ -415,8 +425,8 @@ C
             NPT_STACK = MAX(NPT_STACK,NPT)
           ENDDO   
 C allocation  
-          ALLOCATE(IWORKS%IGEO(4*NPT_STACK+2,NS_STACK))
-          ALLOCATE(IWORKS%GEO(6*NPT_STACK+1,NS_STACK))
+          call my_alloc(IWORKS%IGEO, 4*NPT_STACK+2, NS_STACK, "IWORKS%IGEO")
+          call my_alloc(IWORKS%GEO, 6*NPT_STACK+1, NS_STACK, "IWORKS%GEO")
 C         
           IWORKS%IGEO = 0
           IWORKS%GEO = ZERO
@@ -572,13 +582,13 @@ C #####################################################"
            IREST = MOD(NPLY,NBIT)
            NKEY = NPLY / NBIT
            IF(IREST > 0) NKEY = NKEY + 1
-           ALLOCATE( ACTIV_PLY(NUMELC+NUMELTG,NKEY))
+           call my_alloc(ACTIV_PLY, NUMELC+NUMELTG, NKEY, "ACTIV_PLY")
            IF(NUMELC + NUMELTG > 0)ACTIV_PLY = 0
            DO I=1,NSH
              II = INDX_SH(I) 
              NPT = IWORKSH(1,II)
              IE_DRP = DRAPEG%INDX(II)             
-             ALLOCATE(IWORK_T(II)%NPT_PLY(NPT))
+             call my_alloc(IWORK_T(II)%NPT_PLY, NPT, "IWORK_T(II)%NPT_PLY")
              IWORK_T(II)%NPT_PLY = 0
              IF(IE_DRP > 0 .AND. NPT > 0) THEN
                DO J=1,NPT
@@ -618,9 +628,13 @@ C #####################################################"
              ENDIF   
             ENDDO  
 !!###########################################################"  
-         ALLOCATE(INDX(2*NSH),ITRI(2 + NKEY,NSH),INDX_TOTAL(NSH))
-         ALLOCATE (NFIRST(NSH) ,NLAST(NSH),
-     .             NFIRST1(NSH) ,NLAST1(NSH))
+         call my_alloc(INDX, 2*NSH, "INDX")
+         call my_alloc(ITRI, 2 + NKEY, NSH, "ITRI")
+         call my_alloc(INDX_TOTAL, NSH, "INDX_TOTAL")
+         call my_alloc(NFIRST, NSH, "NFIRST")
+         call my_alloc(NLAST, NSH, "NLAST")
+         call my_alloc(NFIRST1, NSH, "NFIRST1")
+         call my_alloc(NLAST1, NSH, "NLAST1")
          IF(NSH > 0) THEN
            INDX       = 0  
            ITRI       = 0
@@ -676,7 +690,9 @@ C
                IGTYP = IGEO(11,PID)
                NKEY  = IWORKSH(1,II)
                NSH = NLAST1(IS) - NFIRST1(IS) + 1
-               ALLOCATE(INDX1(2*NSH),ITRI(NKEY,NSH),INDX_SUB(NSH))
+               call my_alloc(INDX1, 2*NSH, "INDX1")
+               call my_alloc(ITRI, NKEY, NSH, "ITRI")
+               call my_alloc(INDX_SUB, NSH, "INDX_SUB")
                INDX1 = 0
                ITRI = 0
                I1 = 0
@@ -692,7 +708,8 @@ C
                ENDDO
                MODE = 0
                CALL MY_ORDERS(MODE, WORK, ITRI, INDX1, NSH , NKEY)
-               ALLOCATE (NFIRST2(NSH) ,NLAST2(NSH))
+               call my_alloc(NFIRST2, NSH, "NFIRST2")
+               call my_alloc(NLAST2, NSH, "NLAST2")
                NS_SUB = 1
                NFIRST2(1) = 1
                NLAST2(1)  = 1
@@ -726,7 +743,7 @@ C
 C
 C  sous stack 
 C    
-           ALLOCATE(IDSTACK(NS_TOTAL))
+           call my_alloc(IDSTACK, NS_TOTAL, "IDSTACK")
            IDSTACK = 0
            NS_STACK = NS_STACK + NS_TOTAL 
            DO IS = 1,NS_TOTAL
@@ -742,9 +759,9 @@ C
 C        
 C allocation
 C  
-           ALLOCATE(STACK%IGEO(4*NPT_STACK+2,NS_STACK))
-           ALLOCATE(STACK%GEO(6*NPT_STACK+1,NS_STACK))
-           ALLOCATE(STACK%PM(20,NS_STACK))
+           call my_alloc(STACK%IGEO, 4*NPT_STACK+2, NS_STACK, "STACK%IGEO")
+           call my_alloc(STACK%GEO, 6*NPT_STACK+1, NS_STACK, "STACK%GEO")
+           call my_alloc(STACK%PM, 20, NS_STACK, "STACK%PM")
 C           
            STACK%IGEO = 0
            STACK%GEO = ZERO
@@ -885,9 +902,9 @@ C
        ENDDO
        IF(IPART_STACK > 0) THEN  
          IF(IPART_PCOMPP == 0) THEN
-            ALLOCATE(STACK%IGEO(4*NPT_STACK0+2,NS_STACK0))
-            ALLOCATE(STACK%GEO(6*NPT_STACK0+1,NS_STACK0))
-            ALLOCATE(STACK%PM(20,NS_STACK0))
+            call my_alloc(STACK%IGEO, 4*NPT_STACK0+2, NS_STACK0, "STACK%IGEO")
+            call my_alloc(STACK%GEO, 6*NPT_STACK0+1, NS_STACK0, "STACK%GEO")
+            call my_alloc(STACK%PM, 20, NS_STACK0, "STACK%PM")
             STACK%IGEO = 0
             STACK%GEO = ZERO
             STACK%PM = ZERO 

@@ -1077,8 +1077,8 @@ C        ALLOCATE
                   DEALLOCATE(EBCS_TAB_LOC%tab(NEBCS_FVM)%poly%dp0)
                ENDIF
                EBCS_TAB_LOC%tab(NEBCS_FVM)%poly%nb_elem = IEBCS_NELEM_L(II)
-               ALLOCATE(EBCS_TAB_LOC%tab(NEBCS_FVM)%poly%ielem(IEBCS_NELEM_L(II)))
-               ALLOCATE(EBCS_TAB_LOC%tab(NEBCS_FVM)%poly%iface(IEBCS_NELEM_L(II)))
+               call my_alloc(EBCS_TAB_LOC%tab(NEBCS_FVM)%poly%ielem, IEBCS_NELEM_L(II), "EBCS_TAB_LOC%tab(NEBCS_FVM)%poly%ielem")
+               call my_alloc(EBCS_TAB_LOC%tab(NEBCS_FVM)%poly%iface, IEBCS_NELEM_L(II), "EBCS_TAB_LOC%tab(NEBCS_FVM)%poly%iface")
                IF(EBCS_TAB_LOC%tab(NEBCS_FVM)%poly%has_dp0)
      .           ALLOCATE(EBCS_TAB_LOC%tab(NEBCS_FVM)%poly%dp0(IEBCS_NELEM_L(II)))
                DO JJ = 1, IEBCS_NELEM_L(II)
@@ -1098,7 +1098,7 @@ C        ALLOCATE
                        DEALLOCATE(EBCS_TAB_LOC_2%tab(NEBCS_PARALLEL)%poly%iface)
                     ENDIF
                     EBCS_TAB_LOC_2%tab(NEBCS_PARALLEL)%poly%nb_elem = IEBCS_NELEM_L(II)
-                    ALLOCATE(EBCS_TAB_LOC_2%tab(NEBCS_PARALLEL)%poly%iface(IEBCS_NELEM_L(II)))
+                    call my_alloc(EBCS_TAB_LOC_2%tab(NEBCS_PARALLEL)%poly%iface, IEBCS_NELEM_L(II), "EBCS_TAB_LOC_2%tab(NEBCS_PARALLEL)%poly%iface")
                     DO JJ = 1, IEBCS_NELEM_L(II)
                        EBCS_TAB_LOC_2%tab(NEBCS_PARALLEL)%poly%ielem(JJ) = IEBCS_LISTELEM_L(IPT)
                        EBCS_TAB_LOC_2%tab(NEBCS_PARALLEL)%poly%iface(JJ) = IEBCS_LISTFAC_L(IPT)
@@ -1119,8 +1119,8 @@ C        ALLOCATE
                   DEALLOCATE(EBCS_TAB%tab(II)%poly%iface)
                ENDIF
                EBCS_TAB%tab(II)%poly%nb_elem = IEBCS_NELEM_L(II)
-               ALLOCATE(EBCS_TAB%tab(II)%poly%ielem(IEBCS_NELEM_L(II)))
-               ALLOCATE(EBCS_TAB%tab(II)%poly%iface(IEBCS_NELEM_L(II)))
+               call my_alloc(EBCS_TAB%tab(II)%poly%ielem, IEBCS_NELEM_L(II), "EBCS_TAB%tab(II)%poly%ielem")
+               call my_alloc(EBCS_TAB%tab(II)%poly%iface, IEBCS_NELEM_L(II), "EBCS_TAB%tab(II)%poly%iface")
                DO JJ = 1, IEBCS_NELEM_L(II)
                   EBCS_TAB%tab(II)%poly%ielem(JJ) = IEBCS_LISTELEM_L(IPT)
                   EBCS_TAB%tab(II)%poly%iface(JJ) = IEBCS_LISTFAC_L(IPT)
@@ -2473,7 +2473,7 @@ c       start CPU timer for INTBUF_INI
         CALL STARTIME(6,1)
 
         !allocate local structure INTBUF_TAB_L to stock local sizes for interfaces
-        ALLOCATE(INTBUF_TAB_L(NINTER))
+        allocate(INTBUF_TAB_L(NINTER))
 
 c       start CPU timer for INTBUF_INI
         CALL STARTIME(6,1)

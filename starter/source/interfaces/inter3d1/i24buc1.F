@@ -68,6 +68,7 @@ C-----------------------------------------------
       USE MESSAGE_MOD
 #endif
       USE NAMES_AND_TITLES_MOD , ONLY : NCHARTITLE
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -143,7 +144,7 @@ C     REAL
      .         DIMENSION(:,:),ALLOCATABLE :: XTEN
       INTEGER, DIMENSION(:), ALLOCATABLE :: TAG_REMOVED_NODE
 C    
-      ALLOCATE( TAG_REMOVED_NODE(NUMNOD) )
+      call my_alloc(TAG_REMOVED_NODE, NUMNOD, "TAG_REMOVED_NODE")
       TAG_REMOVED_NODE(1:NUMNOD) = 0
       GAPMAX=EP30
       GAPMIN=ZERO
@@ -151,7 +152,7 @@ C----edge fictive nodes-----
       NSN0 = NSN - NSNE 
       IF (NSNE >0) THEN
        NUMNODT =NUMNOD+NSNE
-       ALLOCATE(XTEN(3,NUMNODT))
+       call my_alloc(XTEN, 3, NUMNODT, "XTEN")
        XTEN=ZERO
        XTEN(1:3,1:NUMNOD) = X(1:3,1:NUMNOD)
        NPT_E = 3
@@ -167,7 +168,7 @@ C      IP21= IP2+2*MAXSIZ
        IP31= IP22+NUMNODT
 C------don't use no more MWA which is not sufficient; I_ADD<=1000   
        LWORK = IP31 + 2000
-       ALLOCATE(IWORK(LWORK))
+       call my_alloc(IWORK, LWORK, "IWORK")
       END IF
 C-------use temporarily GAP_N(1,*)=V/A; MVOISN(1,*)-> MTYPE(solid),MVOISN(2,*)-> E_id
 C

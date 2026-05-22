@@ -53,6 +53,7 @@ C   M o d u l e s
 C-----------------------------------------------
       USE R2R_MOD
       USE NAMES_AND_TITLES_MOD , ONLY : NCHARTITLE
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -100,8 +101,8 @@ C
       NSL = NPBY(2,NRB) ! Nombre total de noeuds SECONDARY 
       LSN => LPBY(NPBY(11,NRB)+1:NPBY(11,NRB)+NSL) ! List of SECONDARY nodes
       RBLEVEL = NPBY(12,NRB)
-      ALLOCATE (MS_LOC(NSL))
-      ALLOCATE (IN_LOC(NSL))
+      call my_alloc(MS_LOC, NSL, "MS_LOC")
+      call my_alloc(IN_LOC, NSL, "IN_LOC")
 C
 C------------------------------------------------------------------------------------------------------
       FLAG = 0
@@ -616,8 +617,8 @@ C----------------------------------------------
           DEALLOCATE(IN_LOC)
           NSL = NPBY(2,NRB) ! Liste totale des noeuds SECONDARY
           LSN => LPBY(NPBY(11,NRB)+1:NPBY(11,NRB)+NSL)
-          ALLOCATE (MS_LOC(NSL))
-          ALLOCATE (IN_LOC(NSL))
+          call my_alloc(MS_LOC, NSL, "MS_LOC")
+          call my_alloc(IN_LOC, NSL, "IN_LOC")
 C
 C-----------Multidomaines : on ne compte l'ajout de masse et d'inertie uniquement d'1 cote-------------
           IF ((NSUBDOM>0).AND.(IPID==0)) THEN

@@ -52,6 +52,7 @@ C-----------------------------------------------
       USE DRAPE_MOD
       USE NAMES_AND_TITLES_MOD , ONLY : NCHARTITLE
       use element_mod , only : nixtg
+      use my_alloc_mod
 C----------------------------------------------
 C     INITIALIZATION OF NODAL MASSES AND INERTIAS
 C-----------------------------------------------
@@ -177,12 +178,15 @@ C=======================================================================
           DO ILAY=1,NLAY   !  NPT  
               MAX_NPTT = MAX(MAX_NPTT ,ELBUF_STR%BUFLY(ILAY)%NPTT)
           ENDDO 
-          ALLOCATE(THK_IT(MAX_NPTT),POS_IT(MAX_NPTT))
+          call my_alloc(THK_IT, MAX_NPTT, "THK_IT")
+          call my_alloc(POS_IT, MAX_NPTT, "POS_IT")
        ELSE
-          ALLOCATE(THK_IT(0),POS_IT(0))    
+          call my_alloc(THK_IT, 0, "THK_IT")
+          call my_alloc(POS_IT, 0, "POS_IT")
        ENDIF 
        NLAY_MAX = MAX(NLAY, NPT)
-       ALLOCATE( LAYPOS(NLAY_MAX*MAX_NPTT,MVSIZ),RATIO_THKLY(NLAY_MAX*MAX_NPTT,MVSIZ) ) 
+       call my_alloc(LAYPOS, NLAY_MAX*MAX_NPTT, MVSIZ, "LAYPOS")
+       call my_alloc(RATIO_THKLY, NLAY_MAX*MAX_NPTT, MVSIZ, "RATIO_THKLY")
       IF ((IGTYP == 17 .OR. IGTYP == 51) .AND. IGMAT < 0) THEN
         DO I=LFT,LLT
           IF (NDRAPE == 0) THEN

@@ -2046,6 +2046,7 @@ C-----------------------------------------------
       USE EBCS_MOD
       USE LOADS_MOD
       use element_mod , only : nixs,nixq,nixc,nixp,nixt,nixr,nixtg
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -2104,8 +2105,8 @@ C-----------------------------------------------
 C   CALCULATION OF CNE ADDCNE
 C-----------------------------------------------
       ALLOCATE(ADSKY(0:NUMNOD+1))
-      ALLOCATE(ITRI(ILEN))
-      ALLOCATE(INDEX(2*ILEN))
+      call my_alloc(ITRI, ILEN, "ITRI")
+      call my_alloc(INDEX, 2*ILEN, "INDEX")
       DO I = 0, NUMNOD+1
         ADSKY(I) = ADDCNE(I)
       ENDDO
@@ -2904,6 +2905,7 @@ C
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
@@ -2957,8 +2959,8 @@ C-----------------------------------------------
 C Double of float to Bytes conversion
 C In double precision : one double = 8 bytes
 C In single precision : one float  = 4 bytes
-      ALLOCATE( AVERAGE(NACTIVE) )
-      ALLOCATE( DEVIATION(NACTIVE) ) 
+      call my_alloc(AVERAGE, NACTIVE, "AVERAGE")
+      call my_alloc(DEVIATION, NACTIVE, "DEVIATION")
       MBYTE=1024*1024
       IF (IRESP==1) THEN
          RTOBYTES = 4
@@ -3174,6 +3176,7 @@ C
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
+      use my_alloc_mod
 #include      "implicit_f.inc"
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
@@ -3196,7 +3199,8 @@ C-----------------------------------------------
       INTEGER, DIMENSION(:), ALLOCATABLE :: TAGI,NNF
 C-----------------------------------------------
 !     TAGI->N: NNF(N)=MAX_NF
-      ALLOCATE( TAGI(NUMNOD),NNF(NS10E) )
+      call my_alloc(TAGI, NUMNOD, "TAGI")
+      call my_alloc(NNF, NS10E, "NNF")
       TAGI(1:NUMNOD) = 0 
       NNF(1:NS10E) = 1 
       IPLUS = 0

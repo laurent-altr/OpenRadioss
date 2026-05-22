@@ -70,6 +70,7 @@ C-----------------------------------------------
       USE FORMAT_MOD , ONLY : FMT_I_3F
       USE USER_ID_MOD , ONLY : ID_LIMIT
       USE SPH_MOD, ONLY : XI_RES, YI_RES, ZI_RES
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -130,13 +131,13 @@ C--------------------------------------------------
 C      ALLOCS & INITS
 C--------------------------------------------------
       CALL CPP_NODES_COUNT(NUMNUSR1,NUMNUSR2)
-      ALLOCATE (SUB_NOD(NUMNUSR1),STAT=stat)
+      call my_alloc(SUB_NOD, NUMNUSR1, "SUB_NOD", stat=stat)
       IF (STAT /= 0) CALL ANCMSG(MSGID=268,ANMODE=ANINFO,MSGTYPE=MSGERROR,C1='SUB_NOD')
-      ALLOCATE (UID_NOD(NUMNUSR1),STAT=stat)
+      call my_alloc(UID_NOD, NUMNUSR1, "UID_NOD", stat=stat)
       IF (STAT /= 0) CALL ANCMSG(MSGID=268,ANMODE=ANINFO,MSGTYPE=MSGERROR,C1='UID_NOD')
-      ALLOCATE (HM_X(3,NUMNUSR1),STAT=stat)
+      call my_alloc(HM_X, 3, NUMNUSR1, "HM_X", stat=stat)
       IF (STAT /= 0) CALL ANCMSG(MSGID=268,ANMODE=ANINFO,MSGTYPE=MSGERROR,C1='HM_X')
-      ALLOCATE (DMERGE(NUMNUSR2),STAT=stat)
+      call my_alloc(DMERGE, NUMNUSR2, "DMERGE", stat=stat)
       IF (STAT /= 0) CALL ANCMSG(MSGID=268,ANMODE=ANINFO,MSGTYPE=MSGERROR,C1='DMERGE')
       SUB_NOD(1:NUMNUSR1) = 0
       UID_NOD(1:NUMNUSR1) = 0
@@ -197,11 +198,11 @@ C----------------------------------------------------
       ELSE ! IF(IS_DYNA==0)THEN
 C
 C       Possible nodes merging!
-        ALLOCATE (ITAB_TMP(NUMNUSR1),STAT=stat)
+        call my_alloc(ITAB_TMP, NUMNUSR1, "ITAB_TMP", stat=stat)
         IF (STAT /= 0) CALL ANCMSG(MSGID=268,ANMODE=ANINFO,MSGTYPE=MSGERROR,C1='ITAB_TMP')
-        ALLOCATE (ITABM1_TMP(2*NUMNUSR1),STAT=stat)
+        call my_alloc(ITABM1_TMP, 2*NUMNUSR1, "ITABM1_TMP", stat=stat)
         IF (STAT /= 0) CALL ANCMSG(MSGID=268,ANMODE=ANINFO,MSGTYPE=MSGERROR,C1='ITABM1_TMP')
-        ALLOCATE (X_TMP(3,NUMNUSR1),STAT=stat)
+        call my_alloc(X_TMP, 3, NUMNUSR1, "X_TMP", stat=stat)
         IF (STAT /= 0) CALL ANCMSG(MSGID=268,ANMODE=ANINFO,MSGTYPE=MSGERROR,C1='X_TMP')
 C--------------------------------------------------
 C        READING NODES INPUTS IN HM STRUCTURE
@@ -284,13 +285,13 @@ C        READING CNODES INPUTS IN HM STRUCTURE
 C--------------------------------------------------
 C
       IF(NUMNUSR2 /= 0) THEN
-        ALLOCATE (ITAB_TMP(NUMNUSR2),STAT=stat)
+        call my_alloc(ITAB_TMP, NUMNUSR2, "ITAB_TMP", stat=stat)
         IF (STAT /= 0) CALL ANCMSG(MSGID=268,ANMODE=ANINFO,MSGTYPE=MSGERROR,C1='ITAB_TMP')
-        ALLOCATE (SUB_NOD(NUMNUSR2),STAT=stat)
+        call my_alloc(SUB_NOD, NUMNUSR2, "SUB_NOD", stat=stat)
         IF (STAT /= 0) CALL ANCMSG(MSGID=268,ANMODE=ANINFO,MSGTYPE=MSGERROR,C1='SUB_NOD')
-        ALLOCATE (UID_NOD(NUMNUSR2),STAT=stat)
+        call my_alloc(UID_NOD, NUMNUSR2, "UID_NOD", stat=stat)
         IF (STAT /= 0) CALL ANCMSG(MSGID=268,ANMODE=ANINFO,MSGTYPE=MSGERROR,C1='UID_NOD')
-        ALLOCATE (HM_X(3,NUMNUSR2),STAT=stat)
+        call my_alloc(HM_X, 3, NUMNUSR2, "HM_X", stat=stat)
         IF (STAT /= 0) CALL ANCMSG(MSGID=268,ANMODE=ANINFO,MSGTYPE=MSGERROR,C1='HM_X')
 
         ITAB_TMP(1:NUMNUSR2) = 0

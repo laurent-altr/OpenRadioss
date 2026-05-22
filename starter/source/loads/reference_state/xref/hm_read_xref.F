@@ -53,6 +53,7 @@ C-----------------------------------------------
       USE HM_OPTION_READ_MOD
       USE NAMES_AND_TITLES_MOD , ONLY : NCHARTITLE
       use element_mod , only : nixs,nixc,nixtg
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -105,8 +106,11 @@ C-----------------------------------------------
       INTEGER USR2SYS,R2R_SYS
 C=======================================================================
       IS_AVAILABLE = .FALSE.
-      ALLOCATE(TAGELC(NUMELC),TAGELTG(NUMELTG),TAGELS(NUMELS),TAGNOD(NUMNOD))
-      ALLOCATE(XTMP(3,NUMNOD))
+      call my_alloc(TAGELC, NUMELC, "TAGELC")
+      call my_alloc(TAGELTG, NUMELTG, "TAGELTG")
+      call my_alloc(TAGELS, NUMELS, "TAGELS")
+      call my_alloc(TAGNOD, NUMNOD, "TAGNOD")
+      call my_alloc(XTMP, 3, NUMNOD, "XTMP")
 
 C
       DO IE=1,NUMELC                          
@@ -254,7 +258,10 @@ C
           IF (ALLOCATED(XX)) DEALLOCATE(XX)
           IF (ALLOCATED(YY)) DEALLOCATE(YY)
           IF (ALLOCATED(ZZ)) DEALLOCATE(ZZ)
-          ALLOCATE(XX(NNOD),YY(NNOD),ZZ(NNOD),ID(NNOD))
+          call my_alloc(XX, NNOD, "XX")
+          call my_alloc(YY, NNOD, "YY")
+          call my_alloc(ZZ, NNOD, "ZZ")
+          call my_alloc(ID, NNOD, "ID")
 C          
           ! Loop over nodes
           DO J = 1,NNOD

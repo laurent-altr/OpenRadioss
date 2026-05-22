@@ -129,6 +129,7 @@ C-----------------------------------------------
       USE SUBMODEL_MOD
       USE MESSAGE_MOD
       USE HM_OPTION_READ_MOD
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -158,10 +159,10 @@ C=======================================================================
 
       CALL HM_GET_INT_ARRAY_INDEX('idsmax' ,IDS_MAX ,JCLAUSE,IS_AVAILABLE,LSUBMODEL)
 
-      ALLOCATE(SET_READ_TMP(IDS_MAX))
+      call my_alloc(SET_READ_TMP, IDS_MAX, "SET_READ_TMP")
       SET_READ_TMP(1:IDS_MAX) = 0
 
-      ALLOCATE(INDEX(2*IDS_MAX))
+      call my_alloc(INDEX, 2*IDS_MAX, "INDEX")
       INDEX = 0
 
       NINDX = 0
@@ -254,6 +255,7 @@ C-----------------------------------------------
       USE SUBMODEL_MOD
       USE MESSAGE_MOD
       USE HM_OPTION_READ_MOD
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -280,9 +282,9 @@ C
 C=======================================================================
       CALL HM_GET_INT_ARRAY_INDEX('genemax' ,GENE_MAX ,JCLAUSE,IS_AVAILABLE,LSUBMODEL)
 
-      ALLOCATE(SET_READ_TMP(NSETS))
-      ALLOCATE(SET_READ_ONE(NSETS))
-      ALLOCATE(RESULT(NSETS))
+      call my_alloc(SET_READ_TMP, NSETS, "SET_READ_TMP")
+      call my_alloc(SET_READ_ONE, NSETS, "SET_READ_ONE")
+      call my_alloc(RESULT, NSETS, "RESULT")
 
       STACK=0
 

@@ -63,6 +63,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
       use stack_mod , only : stack_ply
       use i2trivox_mod , only : i2trivox
       use file_descriptor_mod , only : iout
+      use my_alloc_mod
 C============================================================================
 C  this routine is called by: inint3(/inter3d1/inint3.f)
 C----------------------------------------------------------------------------
@@ -140,7 +141,7 @@ C
 C=======================================================================
 ! 1-CALCULATION TAILLE DES ZONES INFLUENCES
 c
-      allocate(segment_data(nrtm,2))
+      call my_alloc(segment_data, nrtm, 2, "segment_data")
       segment_data(1:nrtm,1:2) = zero
       DD = ZERO
       DSEARCH = TZINF05

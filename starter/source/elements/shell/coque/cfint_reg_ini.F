@@ -41,6 +41,7 @@ C-----------------------------------------------
       USE MESSAGE_MOD
       USE NLOCAL_REG_MOD
       use element_mod , only : nixc
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -192,10 +193,10 @@ C=======================================================================
          ! Allocation of the velocities predictor
          IF (NDOF>1) THEN
            IF (NDOF > 2) THEN 
-             ALLOCATE(VPRED(NEL,NDOF+1))
+             call my_alloc(VPRED, NEL, NDOF+1, "VPRED")
              NDNOD = NDOF + 1
            ELSE
-             ALLOCATE(VPRED(NEL,NDOF))
+             call my_alloc(VPRED, NEL, NDOF, "VPRED")
              NDNOD = NDOF
            ENDIF
          ENDIF

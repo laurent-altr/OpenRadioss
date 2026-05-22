@@ -43,6 +43,7 @@ C-----------------------------------------------
       USE MATPARAM_DEF_MOD, ONLY : MATPARAM_STRUCT_
       USE ELBUFTAG_MOD , ONLY : MLAW_TAG_
       use mat51_associate_eos_mod , only : mat51_associate_eos
+      use my_alloc_mod
 C-----------------------------------------------
 C   D e s c r i p t i o n
 C-----------------------------------------------
@@ -328,7 +329,7 @@ C-----------------------------------------------
                    !associate linear eos by default
                    MAT_PARAM(INTERNAL_ID)%MULTIMAT%pEOS(I)%EOS%TITLE = 'Default Linear EoS'
                    MAT_PARAM(INTERNAL_ID)%MULTIMAT%pEOS(I)%EOS%NUPARAM = 2
-                   ALLOCATE(MAT_PARAM(INTERNAL_ID)%MULTIMAT%pEOS(I)%EOS%UPARAM(2))
+                   call my_alloc(MAT_PARAM(INTERNAL_ID)%MULTIMAT%pEOS(I)%EOS%UPARAM, 2, "MAT_PARAM(INTERNAL_ID)%MULTIMAT%pEOS(I)%EOS%UPARAM")
                    MAT_PARAM(INTERNAL_ID)%MULTIMAT%pEOS(I)%EOS%UPARAM(1) = PM_(104) !P0
                    MAT_PARAM(INTERNAL_ID)%MULTIMAT%pEOS(I)%EOS%UPARAM(2) = PM_(32)  !bulk modulus
                  ENDIF

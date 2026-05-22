@@ -112,7 +112,8 @@ C-----------------------------------------------
 C-----------------------------------------------
       DATA MESS/'RIGID BODY MERGE DEFINITION             '/
 C-----------------------------------------------
-      ALLOCATE(ITAG(NUMNOD),WORK(NUMNOD))
+      call my_alloc(ITAG, NUMNOD, "ITAG")
+      call my_alloc(WORK, NUMNOD, "WORK")
       CALL MY_ALLOC(TABRB,NRBYKIN,2,"TABRB")
       CALL MY_ALLOC(NB_MAIN,NRBYKIN,"NB_MAIN")
       CALL MY_ALLOC(NSECONDARY,NRBYKIN,"NSECONDARY")
@@ -167,12 +168,12 @@ C
         ENDDO
       ENDDO
 C
-      ALLOCATE (RBMERGE(NRBYKIN))
+      allocate(RBMERGE(NRBYKIN))
       DO I=1,NRBYKIN
-        ALLOCATE (RBMERGE(I)%IDSECONDARY(NRBYKIN))
+        call my_alloc(RBMERGE(I)%IDSECONDARY, NRBYKIN, "RBMERGE(I)%IDSECONDARY")
         RBMERGE(I)%NBSECONDARY=0
-        ALLOCATE (RBMERGE(I)%NODE(NXTRA_NODE))
-        ALLOCATE (RBMERGE(I)%FLAG_NODE(NXTRA_NODE))
+        call my_alloc(RBMERGE(I)%NODE, NXTRA_NODE, "RBMERGE(I)%NODE")
+        call my_alloc(RBMERGE(I)%FLAG_NODE, NXTRA_NODE, "RBMERGE(I)%FLAG_NODE")
         RBMERGE(I)%NNODE=0
         RBMERGE(I)%LEVEL=0
         RBMERGE(I)%FLAG_MAIN = 0
@@ -423,9 +424,9 @@ C SORTING OF XTRA_NODES BY INCREASING FLAGS
 C------------------------------------
       DO I=1,NRBYKIN
         IF(RBMERGE(I)%NNODE > 0) THEN
-          ALLOCATE(INDEX(2*RBMERGE(I)%NNODE))
+          call my_alloc(INDEX, 2*RBMERGE(I)%NNODE, "INDEX")
           INDEX(1:2*RBMERGE(I)%NNODE) = 0
-          ALLOCATE(INUM(RBMERGE(I)%NNODE,2))
+          call my_alloc(INUM, RBMERGE(I)%NNODE, 2, "INUM")
           DO J=1,RBMERGE(I)%NNODE
             INDEX(J) = J
             INUM(J,1) = RBMERGE(I)%FLAG_NODE(J)
@@ -758,7 +759,7 @@ C-----------------------------------------------
       CALL MY_ALLOC(NOM_OPT_TMP,LNOPT1,NRBYKIN,"NOM_OPT_TMP")
       CALL MY_ALLOC(RBY_TMP,NRBY,NRBYKIN,"RBY_TMP")
 
-      ALLOCATE(ITAG(NUMNOD))
+      call my_alloc(ITAG, NUMNOD, "ITAG")
       INDEX(1:NRBYKIN) = 0
       OFFSET = 0
       OFFSETID = 0

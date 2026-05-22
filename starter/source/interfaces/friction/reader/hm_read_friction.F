@@ -54,6 +54,7 @@ C-----------------------------------------------
       USE SUBMODEL_MOD
       USE HM_OPTION_READ_MOD
       USE NAMES_AND_TITLES_MOD , ONLY : NCHARTITLE
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -106,11 +107,11 @@ C=======================================================================
 
        IS_AVAILABLE = .FALSE.
 
-       ALLOCATE (TRIGRPT(LENG),STAT=stat) 
-       ALLOCATE (INDEX(2*LENG),STAT=stat) 
-       ALLOCATE (NEWGRP(LENG+1),STAT=stat) 
-       ALLOCATE (TAGG1(LENG),STAT=stat) 
-       ALLOCATE (TAGG2(LENG),STAT=stat) 
+       call my_alloc(TRIGRPT, LENG, "TRIGRPT", stat=stat)
+       call my_alloc(INDEX, 2*LENG, "INDEX", stat=stat)
+       call my_alloc(NEWGRP, LENG+1, "NEWGRP", stat=stat)
+       call my_alloc(TAGG1, LENG, "TAGG1", stat=stat)
+       call my_alloc(TAGG2, LENG, "TAGG2", stat=stat)
 
        CALL FRETITL(TITR,NOM_OPT(LNOPT1-LTITR+1,NIF),LTITR) 
 C

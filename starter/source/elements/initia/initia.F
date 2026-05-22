@@ -247,6 +247,7 @@ C-----------------------------------------------
       use ush_init_mod , only : ush_init
       use ini_guided_cable_mod, ONLY : ini_guided_cable 
       use rini135_rb_mod
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -494,18 +495,18 @@ C=======================================================================
       STAT = 0
 
       IF(IPARI0==3)THEN
-        ALLOCATE (I8MI(6,NUMNOD)                   ,STAT=stat)
+        allocate(I8MI(6, NUMNOD), stat=stat)
       ELSE
-        ALLOCATE (I8MI(6,1)                        ,STAT=stat)
+        allocate(I8MI(6, 1), stat=stat)
       ENDIF
 
-      ALLOCATE (PARTSAV(20*NPART)                  ,STAT=stat)
+      call my_alloc(PARTSAV, 20*NPART, "PARTSAV", stat=stat)
 
       STIFR => STIFN(NUMNOD+1:NUMNOD*2)
-      ALLOCATE (PARTSAV1_PON(NPART)                ,STAT=stat)
+      call my_alloc(PARTSAV1_PON, NPART, "PARTSAV1_PON", stat=stat)
 C
       IF(NPRELOAD > 0) THEN
-        ALLOCATE (VPRELOAD(7*NUMELS)               ,STAT=stat)
+        call my_alloc(VPRELOAD, 7*NUMELS, "VPRELOAD", stat=stat)
       ENDIF       
 C
       IF (NPART   > 0) PARTSAV= ZERO
@@ -540,30 +541,31 @@ C xfem
 C ---
       IF(IRIGID_MAT > 0 ) THEN
         NELEMR = NUMELC + NUMELS10 + NUMELS8 + NUMELTG
-        ALLOCATE(IRIG_NODE(NUMNOD))
-        ALLOCATE(CONNEC(NELEMR*10))
+        call my_alloc(IRIG_NODE, NUMNOD, "IRIG_NODE")
+        call my_alloc(CONNEC, NELEMR*10, "CONNEC")
           IRIG_NODE = 0
           CONNEC = 0
       ELSE
-          ALLOCATE(CONNEC(0),IRIG_NODE(0))
+          call my_alloc(CONNEC, 0, "CONNEC")
+          call my_alloc(IRIG_NODE, 0, "IRIG_NODE")
       ENDIF
 C
 C  ply xfem
 C
       IF(IPLYXFEM> 0 ) THEN
-        ALLOCATE(MS_LAYERC(NPLYMAX*NUMELC))
-        ALLOCATE(ZI_LAYERC(NPLYMAX*NUMELC))
-        ALLOCATE(MSZ2C(NUMELC))
-        ALLOCATE(ZPLY(NPLYMAX))
+        call my_alloc(MS_LAYERC, NPLYMAX*NUMELC, "MS_LAYERC")
+        call my_alloc(ZI_LAYERC, NPLYMAX*NUMELC, "ZI_LAYERC")
+        call my_alloc(MSZ2C, NUMELC, "MSZ2C")
+        call my_alloc(ZPLY, NPLYMAX, "ZPLY")
         MS_LAYERC = ZERO
         ZI_LAYERC = ZERO
         MSZ2C = ZERO
         ZPLY = ZERO
        ELSE
-        ALLOCATE(MS_LAYERC(0))
-        ALLOCATE(ZI_LAYERC(0))
-        ALLOCATE(MSZ2C(0))
-        ALLOCATE(ZPLY(0))
+        call my_alloc(MS_LAYERC, 0, "MS_LAYERC")
+        call my_alloc(ZI_LAYERC, 0, "ZI_LAYERC")
+        call my_alloc(MSZ2C, 0, "MSZ2C")
+        call my_alloc(ZPLY, 0, "ZPLY")
       ENDIF
 C-------------------------------------
 C     MASS + INERTIA IPARITH = 4
@@ -866,25 +868,28 @@ C
 C  for heat transfer
 C
       IF (GLOB_THERM%ITHERM_FE > 0 ) THEN
-        ALLOCATE(MCPS(8*NUMELS))
+        call my_alloc(MCPS, 8*NUMELS, "MCPS")
         MCPS = ZERO
         IF(NUMELS10 > 0.OR.NUMELS16 > 0 .OR.NUMELS20 > 0)THEN
-         ALLOCATE(MCPSX(12*NUMELS))
+         call my_alloc(MCPSX, 12*NUMELS, "MCPSX")
          MCPSX = ZERO
         ENDIF
-         ALLOCATE(MCPP(NUMELP))
+         call my_alloc(MCPP, NUMELP, "MCPP")
         MCPP = ZERO
       ELSE
-        ALLOCATE(MCPSX(0), MCPS(0), MCPP(0))  
+        call my_alloc(MCPSX, 0, "MCPSX")
+        call my_alloc(MCPS, 0, "MCPS")
+        call my_alloc(MCPP, 0, "MCPP")
       ENDIF
 C---
       IF ((IMASADD > 0).OR.(NLOC_DMG%IMOD > 0)) THEN
-        ALLOCATE(PART_AREA(NPART)      ,STAT=stat)
+        call my_alloc(PART_AREA, NPART, "PART_AREA", stat=stat)
         PART_AREA(1:NPART)  = ZERO
-        ALLOCATE(ELE_AREA(NUMELC+NUMELTG)      ,STAT=stat)
+        call my_alloc(ELE_AREA, NUMELC+NUMELTG, "ELE_AREA", stat=stat)
         ELE_AREA(1:NUMELC+NUMELTG)  = ZERO
       ELSE
-        ALLOCATE(PART_AREA(1),ELE_AREA(1))
+        call my_alloc(PART_AREA, 1, "PART_AREA")
+        call my_alloc(ELE_AREA, 1, "ELE_AREA")
       END IF
 C---
       WRITE(IOUT,'(//)')
@@ -2000,7 +2005,8 @@ C
      .                   ITAB, X ,MS, IN, FXB_MATRIX,
      .                   FXB_MATRIX_ADD,FXB_LAST_ADRESS,ICODE,NOM_OPT(1,PTR_NOPT_FXB+1))
 C
-         ALLOCATE(MBUFEL_TMP(LBUFEL), MDEPL_TMP(3*NUMNOD))
+         call my_alloc(MBUFEL_TMP, LBUFEL, "MBUFEL_TMP")
+         call my_alloc(MDEPL_TMP, 3*NUMNOD, "MDEPL_TMP")
 C
          NMANI=0
          DO I=1,LENVAR

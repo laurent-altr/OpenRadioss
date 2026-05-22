@@ -284,19 +284,19 @@
 
           if(nstart == 0)then
             !DEALLOCATE
-            if(allocated(start_elem_list))call my_dealloc(start_elem_list, "start_elem_list")
-            if(allocated(start_elem_tdet))call my_dealloc(start_elem_tdet, "start_elem_tdet")
-            if(allocated(uelem_list))call my_dealloc(uelem_list, "uelem_list")
-            if(allocated(elem_list))call my_dealloc(elem_list, "elem_list")
-            if(allocated(idx_ng))call my_dealloc(idx_ng, "idx_ng")
-            if(allocated(idx_i))call my_dealloc(idx_i, "idx_i")
-            if(allocated(updown))call my_dealloc(updown, "updown")
-            if(allocated(tdet))call my_dealloc(tdet, "tdet")
-            if(allocated(vel))call my_dealloc(vel, "vel")
-            if(allocated(Xel))call my_dealloc(Xel, "Xel")
-            if(allocated(priority_queue_id))call my_dealloc(priority_queue_id, "priority_queue_id")
-            if(allocated(priority_queue_tt))call my_dealloc(priority_queue_tt, "priority_queue_tt")
-            if(allocated(elem_list_bij))call my_dealloc(elem_list_bij, "elem_list_bij")
+            if(allocated(start_elem_list))call my_dealloc(start_elem_list)
+            if(allocated(start_elem_tdet))call my_dealloc(start_elem_tdet)
+            if(allocated(uelem_list))call my_dealloc(uelem_list)
+            if(allocated(elem_list))call my_dealloc(elem_list)
+            if(allocated(idx_ng))call my_dealloc(idx_ng)
+            if(allocated(idx_i))call my_dealloc(idx_i)
+            if(allocated(updown))call my_dealloc(updown)
+            if(allocated(tdet))call my_dealloc(tdet)
+            if(allocated(vel))call my_dealloc(vel)
+            if(allocated(Xel))call my_dealloc(Xel)
+            if(allocated(priority_queue_id))call my_dealloc(priority_queue_id)
+            if(allocated(priority_queue_tt))call my_dealloc(priority_queue_tt)
+            if(allocated(elem_list_bij))call my_dealloc(elem_list_bij)
             return
           end if
 
@@ -384,19 +384,19 @@
           end do
 
           !DEALLOCATE
-          if(allocated(start_elem_list))call my_dealloc(start_elem_list, "start_elem_list")
-          if(allocated(start_elem_tdet))call my_dealloc(start_elem_tdet, "start_elem_tdet")
-          if(allocated(elem_list))call my_dealloc(elem_list, "elem_list")
-          if(allocated(idx_ng))call my_dealloc(idx_ng, "idx_ng")
-          if(allocated(idx_i))call my_dealloc(idx_i, "idx_i")
-          if(allocated(updown))call my_dealloc(updown, "updown")
-          if(allocated(tdet))call my_dealloc(tdet, "tdet")
-          if(allocated(vel))call my_dealloc(vel, "vel")
-          if(allocated(Xel))call my_dealloc(Xel, "Xel")
-          if(allocated(priority_queue_id))call my_dealloc(priority_queue_id, "priority_queue_id")
-          if(allocated(priority_queue_tt))call my_dealloc(priority_queue_tt, "priority_queue_tt")
-          if(allocated(elem_list_bij))call my_dealloc(elem_list_bij, "elem_list_bij")
-          if(allocated(itag_boundFaces))call my_dealloc(itag_boundFaces, "itag_boundFaces")
+          if(allocated(start_elem_list))call my_dealloc(start_elem_list)
+          if(allocated(start_elem_tdet))call my_dealloc(start_elem_tdet)
+          if(allocated(elem_list))call my_dealloc(elem_list)
+          if(allocated(idx_ng))call my_dealloc(idx_ng)
+          if(allocated(idx_i))call my_dealloc(idx_i)
+          if(allocated(updown))call my_dealloc(updown)
+          if(allocated(tdet))call my_dealloc(tdet)
+          if(allocated(vel))call my_dealloc(vel)
+          if(allocated(Xel))call my_dealloc(Xel)
+          if(allocated(priority_queue_id))call my_dealloc(priority_queue_id)
+          if(allocated(priority_queue_tt))call my_dealloc(priority_queue_tt)
+          if(allocated(elem_list_bij))call my_dealloc(elem_list_bij)
+          if(allocated(itag_boundFaces))call my_dealloc(itag_boundFaces)
 
         end subroutine eikonal_fast_marching_method
 ! ----------------------------------------------------------------------------------------------------------------------

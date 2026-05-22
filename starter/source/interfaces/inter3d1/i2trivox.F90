@@ -340,10 +340,10 @@
                 lc2,lc3,lc4,s,t)
             endif
           endif
-          call my_dealloc(cell_pointer, "cell_pointer")
-          call my_dealloc(cell_id, "cell_id")
-          call my_dealloc(s_bucket, "s_bucket")
-          call my_dealloc(s_node_nb, "s_node_nb")
+          call my_dealloc(cell_pointer)
+          call my_dealloc(cell_id)
+          call my_dealloc(s_bucket)
+          call my_dealloc(s_node_nb)
 
           return
 ! ----------------------------------------------------------------------------------------------------------------------

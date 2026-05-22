@@ -52,6 +52,7 @@ C-----------------------------------------------
       USE NAMES_AND_TITLES_MOD , ONLY : NCHARTITLE, NCHARFIELD
       use simple_checksum_mod
       use myqsort_d_mod
+      use my_alloc_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -119,7 +120,7 @@ C-----------------------------------------------
         ITAB = ITAB + 1
         TABLE(ITAB)%NOTABLE = TABLE_ID
         TABLE(ITAB)%NDIM    = NDIM
-        ALLOCATE(TABLE(ITAB)%X(NDIM),STAT=stat)
+        allocate(TABLE(ITAB)%X(NDIM), stat=stat)
         IF (STAT/=0) CALL ANCMSG(MSGID=268,ANMODE=ANINFO,MSGTYPE=MSGERROR,C1='TABLE')
 
         CALL HM_GET_INTV('curverows', NFUN, IS_AVAILABLE, LSUBMODEL) !number of functions
@@ -128,18 +129,18 @@ C-----------------------------------------------
      .                       I1=TABLE_ID, C1=TITR, I2=NFUN)
         END IF
 !       
-        allocate (idfun(nfun))
-        allocate (idxtab(nfun))
-        allocate (xx2(nfun))
-        allocate (xx3(nfun))
-        allocate (xx4(nfun))
-        allocate (yfac(nfun))
-        allocate (hash(nfun))
-        allocate (lenx(nfun))
-        allocate (jperm2(nfun))
-        allocate (nv1(nfun))
-        allocate (nv2(nfun))
-        allocate (nv3(nfun))
+        call my_alloc(idfun, nfun, "idfun")
+        call my_alloc(idxtab, nfun, "idxtab")
+        call my_alloc(xx2, nfun, "xx2")
+        call my_alloc(xx3, nfun, "xx3")
+        call my_alloc(xx4, nfun, "xx4")
+        call my_alloc(yfac, nfun, "yfac")
+        call my_alloc(hash, nfun, "hash")
+        call my_alloc(lenx, nfun, "lenx")
+        call my_alloc(jperm2, nfun, "jperm2")
+        call my_alloc(nv1, nfun, "nv1")
+        call my_alloc(nv2, nfun, "nv2")
+        call my_alloc(nv3, nfun, "nv3")
 !       
         ! check function IDs   
         ! count sum of all X abscissa values for all functions
@@ -304,8 +305,8 @@ C-----------------------------------------------
 !----------------------------------------------------------------------------
         !< create common principal abscissa vector for all input functions
 !----------------------------------------------------------------------------
-        allocate (xx1(nx1))
-        allocate (jperm1(nx1))
+        call my_alloc(xx1, nx1, "xx1")
+        call my_alloc(jperm1, nx1, "jperm1")
 !
         XMIN =  EP20                                                                
         XMAX = -EP20                                                                
@@ -338,7 +339,7 @@ C-----------------------------------------------
 !----------------------------------------------------------------------------
         !< ALLOCATE AND FILL TABLE ABSCISSA AND VALUES
 !----------------------------------------------------------------------------
-        allocate(table(itab)%x(1)%values(nx1),STAT=stat)
+        call my_alloc(table(itab)%x(1)%values, nx1, "table(itab)%x(1)%values", stat=stat)
         if (stat /= 0) CALL ANCMSG(MSGID=268,ANMODE=ANSTOP, MSGTYPE=MSGERROR)           
         allocate(table(itab)%y,STAT=stat)
         if (stat /= 0) CALL ANCMSG(MSGID=268,ANMODE=ANSTOP, MSGTYPE=MSGERROR)           
@@ -348,26 +349,26 @@ C-----------------------------------------------
 !
         if (ndim > 1) then
           ny = ny * nx2
-          allocate(table(itab)%x(2)%values(nx2))
+          call my_alloc(table(itab)%x(2)%values, nx2, "table(itab)%x(2)%values")
           table(itab)%x(2)%values(1:nx2) = xx2(1:nx2)
         end if
         if (ndim > 2) then
           ny = ny * nx3
-          allocate(table(itab)%x(3)%values(nx3))
+          call my_alloc(table(itab)%x(3)%values, nx3, "table(itab)%x(3)%values")
           table(itab)%x(3)%values(1:nx3) = xx3(1:nx3)
         end if
         if (ndim > 3) then
           ny = ny * nx4
-          allocate(table(itab)%x(4)%values(nx4))
+          call my_alloc(table(itab)%x(4)%values, nx4, "table(itab)%x(4)%values")
           table(itab)%x(4)%values(1:nx4) = xx4(1:nx4)
         end if
 !
-        allocate(table(itab)%y%values(ny),STAT=stat)
+        call my_alloc(table(itab)%y%values, ny, "table(itab)%y%values", stat=stat)
         IF (stat /= 0) CALL ANCMSG(MSGID=268,ANMODE=ANINFO, MSGTYPE=MSGERROR, C1='TABLE')
 !-----------------------------------------------------------------------------------------
         !< Calculate table values for full grid of abscissa in all directions
 !-----------------------------------------------------------------------------------------
-        ALLOCATE(ITAG(nx1,NX2*MAX(1,NX3)*MAX(1,NX4)), STAT=stat)                                     
+        call my_alloc(ITAG, nx1, NX2*MAX(1,NX3)*MAX(1,NX4), "ITAG", stat=stat)
         IF (STAT /= 0) CALL ANCMSG(MSGID=268,ANMODE=ANINFO, MSGTYPE=MSGERROR, C1='ITAG')                          
         ITAG(:,:) = 0                                                   
         nx(1) = nx1
