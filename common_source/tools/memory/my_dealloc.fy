@@ -81,7 +81,7 @@
           ${FTYPE}$, dimension(${', '.join([':'] * RANK)}$), pointer, intent(inout) :: a
   #:endif
           if (${GUARD}$) then
-            call record_dealloc_addr(c_loc(${FIRST_ELEM}$))
+            if (size(a) > 0) call record_dealloc_addr(c_loc(${FIRST_ELEM}$))
             deallocate(a)
   #:if MEM_ATTR == 'pointer'
             nullify(a)

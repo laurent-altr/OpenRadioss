@@ -49,6 +49,7 @@ C============================================================================
 C   M o d u l e s
 C-----------------------------------------------
       USE MY_ALLOC_MOD
+      USE MY_DEALLOC_MOD, ONLY : MY_DEALLOC
       USE TRI7BOX
       USE NAMES_AND_TITLES_MOD , ONLY : NCHARTITLE
       use inter_save_candidate_mod , only : inter_save_candidate
@@ -585,9 +586,9 @@ c    underestimation of the distance**2 for candidate elimination
       do i=1,my_size
         intbuf_tab%cand_e(my_address+i) = save_array(2,my_index(i))
       enddo
-      deallocate(my_index)
-      deallocate(sort_array)
-      deallocate(save_array)
+      call my_dealloc(my_index)
+      call my_dealloc(sort_array)
+      call my_dealloc(save_array)
       ! ------------
 !$OMP END SINGLE    
 
@@ -600,8 +601,10 @@ c    underestimation of the distance**2 for candidate elimination
 !$OMP END DO
 
 !$OMP SINGLE
-      deallocate( cand_n_size,cand_e_size )
-      deallocate( address_cand_n,address_cand_e )
+      call my_dealloc(cand_n_size)
+      call my_dealloc(cand_e_size)
+      call my_dealloc(address_cand_n)
+      call my_dealloc(address_cand_e)
 !$OMP END SINGLE
 
       RETURN

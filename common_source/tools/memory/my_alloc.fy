@@ -335,7 +335,7 @@
           integer, optional, intent(out) :: stat !< The error code returned by the allocation
           integer :: ierr
           allocate(a(${', '.join(DIM_VARS)}$), stat=ierr)
-          if (ierr == 0 .and. present(msg)) &
+          if (ierr == 0 .and. present(msg) .and. size(a) > 0) &
             call record_alloc_addr(c_loc(${FIRST_ELEM}$), msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
@@ -437,7 +437,7 @@
           integer, intent(in) :: stat
           character(len=len_error_message), optional,  intent(in) :: msg
           if (stat /= 0) then
-            write(6, "(a,i10,a)") "Error in memory allocation"
+            write(6, "(a,i10)") "Error in memory allocation, stat=", stat
             if(present(msg)) then
               write(6, "(a)") msg
             end if

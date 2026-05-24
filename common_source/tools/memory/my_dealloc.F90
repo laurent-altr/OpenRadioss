@@ -141,7 +141,7 @@
         subroutine my_dealloc_real_1d(a)
           real, dimension(:), allocatable, target, intent(inout) :: a
           if (allocated(a)) then
-            call record_dealloc_addr(c_loc(a(lbound(a,1))))
+            if (size(a) > 0) call record_dealloc_addr(c_loc(a(lbound(a,1))))
             deallocate(a)
           end if
         end subroutine my_dealloc_real_1d
@@ -155,7 +155,7 @@
         subroutine my_dealloc_real_2d(a)
           real, dimension(:, :), allocatable, target, intent(inout) :: a
           if (allocated(a)) then
-            call record_dealloc_addr(c_loc(a(lbound(a,1), lbound(a,2))))
+            if (size(a) > 0) call record_dealloc_addr(c_loc(a(lbound(a,1), lbound(a,2))))
             deallocate(a)
           end if
         end subroutine my_dealloc_real_2d
@@ -169,7 +169,7 @@
         subroutine my_dealloc_real_3d(a)
           real, dimension(:, :, :), allocatable, target, intent(inout) :: a
           if (allocated(a)) then
-            call record_dealloc_addr(c_loc(a(lbound(a,1), lbound(a,2), lbound(a,3))))
+            if (size(a) > 0) call record_dealloc_addr(c_loc(a(lbound(a,1), lbound(a,2), lbound(a,3))))
             deallocate(a)
           end if
         end subroutine my_dealloc_real_3d
@@ -183,7 +183,7 @@
         subroutine my_dealloc_double_1d(a)
           double precision, dimension(:), allocatable, target, intent(inout) :: a
           if (allocated(a)) then
-            call record_dealloc_addr(c_loc(a(lbound(a,1))))
+            if (size(a) > 0) call record_dealloc_addr(c_loc(a(lbound(a,1))))
             deallocate(a)
           end if
         end subroutine my_dealloc_double_1d
@@ -197,7 +197,7 @@
         subroutine my_dealloc_double_2d(a)
           double precision, dimension(:, :), allocatable, target, intent(inout) :: a
           if (allocated(a)) then
-            call record_dealloc_addr(c_loc(a(lbound(a,1), lbound(a,2))))
+            if (size(a) > 0) call record_dealloc_addr(c_loc(a(lbound(a,1), lbound(a,2))))
             deallocate(a)
           end if
         end subroutine my_dealloc_double_2d
@@ -211,7 +211,7 @@
         subroutine my_dealloc_double_3d(a)
           double precision, dimension(:, :, :), allocatable, target, intent(inout) :: a
           if (allocated(a)) then
-            call record_dealloc_addr(c_loc(a(lbound(a,1), lbound(a,2), lbound(a,3))))
+            if (size(a) > 0) call record_dealloc_addr(c_loc(a(lbound(a,1), lbound(a,2), lbound(a,3))))
             deallocate(a)
           end if
         end subroutine my_dealloc_double_3d
@@ -225,7 +225,7 @@
         subroutine my_dealloc_integer_1d(a)
           integer, dimension(:), allocatable, target, intent(inout) :: a
           if (allocated(a)) then
-            call record_dealloc_addr(c_loc(a(lbound(a,1))))
+            if (size(a) > 0) call record_dealloc_addr(c_loc(a(lbound(a,1))))
             deallocate(a)
           end if
         end subroutine my_dealloc_integer_1d
@@ -239,7 +239,7 @@
         subroutine my_dealloc_integer_2d(a)
           integer, dimension(:, :), allocatable, target, intent(inout) :: a
           if (allocated(a)) then
-            call record_dealloc_addr(c_loc(a(lbound(a,1), lbound(a,2))))
+            if (size(a) > 0) call record_dealloc_addr(c_loc(a(lbound(a,1), lbound(a,2))))
             deallocate(a)
           end if
         end subroutine my_dealloc_integer_2d
@@ -253,7 +253,7 @@
         subroutine my_dealloc_integer_3d(a)
           integer, dimension(:, :, :), allocatable, target, intent(inout) :: a
           if (allocated(a)) then
-            call record_dealloc_addr(c_loc(a(lbound(a,1), lbound(a,2), lbound(a,3))))
+            if (size(a) > 0) call record_dealloc_addr(c_loc(a(lbound(a,1), lbound(a,2), lbound(a,3))))
             deallocate(a)
           end if
         end subroutine my_dealloc_integer_3d
@@ -267,7 +267,7 @@
         subroutine my_dealloc_logical_1d(a)
           logical, dimension(:), allocatable, target, intent(inout) :: a
           if (allocated(a)) then
-            call record_dealloc_addr(c_loc(a(lbound(a,1))))
+            if (size(a) > 0) call record_dealloc_addr(c_loc(a(lbound(a,1))))
             deallocate(a)
           end if
         end subroutine my_dealloc_logical_1d
@@ -281,7 +281,7 @@
         subroutine my_dealloc_logical_2d(a)
           logical, dimension(:, :), allocatable, target, intent(inout) :: a
           if (allocated(a)) then
-            call record_dealloc_addr(c_loc(a(lbound(a,1), lbound(a,2))))
+            if (size(a) > 0) call record_dealloc_addr(c_loc(a(lbound(a,1), lbound(a,2))))
             deallocate(a)
           end if
         end subroutine my_dealloc_logical_2d
@@ -295,7 +295,7 @@
         subroutine my_dealloc_logical_3d(a)
           logical, dimension(:, :, :), allocatable, target, intent(inout) :: a
           if (allocated(a)) then
-            call record_dealloc_addr(c_loc(a(lbound(a,1), lbound(a,2), lbound(a,3))))
+            if (size(a) > 0) call record_dealloc_addr(c_loc(a(lbound(a,1), lbound(a,2), lbound(a,3))))
             deallocate(a)
           end if
         end subroutine my_dealloc_logical_3d
@@ -309,7 +309,7 @@
         subroutine my_dealloc_preal_1d(a)
           real, dimension(:), pointer, intent(inout) :: a
           if (associated(a)) then
-            call record_dealloc_addr(c_loc(a(lbound(a,1))))
+            if (size(a) > 0) call record_dealloc_addr(c_loc(a(lbound(a,1))))
             deallocate(a)
             nullify(a)
           end if
@@ -324,7 +324,7 @@
         subroutine my_dealloc_preal_2d(a)
           real, dimension(:, :), pointer, intent(inout) :: a
           if (associated(a)) then
-            call record_dealloc_addr(c_loc(a(lbound(a,1), lbound(a,2))))
+            if (size(a) > 0) call record_dealloc_addr(c_loc(a(lbound(a,1), lbound(a,2))))
             deallocate(a)
             nullify(a)
           end if
@@ -339,7 +339,7 @@
         subroutine my_dealloc_preal_3d(a)
           real, dimension(:, :, :), pointer, intent(inout) :: a
           if (associated(a)) then
-            call record_dealloc_addr(c_loc(a(lbound(a,1), lbound(a,2), lbound(a,3))))
+            if (size(a) > 0) call record_dealloc_addr(c_loc(a(lbound(a,1), lbound(a,2), lbound(a,3))))
             deallocate(a)
             nullify(a)
           end if
@@ -354,7 +354,7 @@
         subroutine my_dealloc_pdouble_1d(a)
           double precision, dimension(:), pointer, intent(inout) :: a
           if (associated(a)) then
-            call record_dealloc_addr(c_loc(a(lbound(a,1))))
+            if (size(a) > 0) call record_dealloc_addr(c_loc(a(lbound(a,1))))
             deallocate(a)
             nullify(a)
           end if
@@ -369,7 +369,7 @@
         subroutine my_dealloc_pdouble_2d(a)
           double precision, dimension(:, :), pointer, intent(inout) :: a
           if (associated(a)) then
-            call record_dealloc_addr(c_loc(a(lbound(a,1), lbound(a,2))))
+            if (size(a) > 0) call record_dealloc_addr(c_loc(a(lbound(a,1), lbound(a,2))))
             deallocate(a)
             nullify(a)
           end if
@@ -384,7 +384,7 @@
         subroutine my_dealloc_pdouble_3d(a)
           double precision, dimension(:, :, :), pointer, intent(inout) :: a
           if (associated(a)) then
-            call record_dealloc_addr(c_loc(a(lbound(a,1), lbound(a,2), lbound(a,3))))
+            if (size(a) > 0) call record_dealloc_addr(c_loc(a(lbound(a,1), lbound(a,2), lbound(a,3))))
             deallocate(a)
             nullify(a)
           end if
@@ -399,7 +399,7 @@
         subroutine my_dealloc_pinteger_1d(a)
           integer, dimension(:), pointer, intent(inout) :: a
           if (associated(a)) then
-            call record_dealloc_addr(c_loc(a(lbound(a,1))))
+            if (size(a) > 0) call record_dealloc_addr(c_loc(a(lbound(a,1))))
             deallocate(a)
             nullify(a)
           end if
@@ -414,7 +414,7 @@
         subroutine my_dealloc_pinteger_2d(a)
           integer, dimension(:, :), pointer, intent(inout) :: a
           if (associated(a)) then
-            call record_dealloc_addr(c_loc(a(lbound(a,1), lbound(a,2))))
+            if (size(a) > 0) call record_dealloc_addr(c_loc(a(lbound(a,1), lbound(a,2))))
             deallocate(a)
             nullify(a)
           end if
@@ -429,7 +429,7 @@
         subroutine my_dealloc_pinteger_3d(a)
           integer, dimension(:, :, :), pointer, intent(inout) :: a
           if (associated(a)) then
-            call record_dealloc_addr(c_loc(a(lbound(a,1), lbound(a,2), lbound(a,3))))
+            if (size(a) > 0) call record_dealloc_addr(c_loc(a(lbound(a,1), lbound(a,2), lbound(a,3))))
             deallocate(a)
             nullify(a)
           end if
@@ -444,7 +444,7 @@
         subroutine my_dealloc_plogical_1d(a)
           logical, dimension(:), pointer, intent(inout) :: a
           if (associated(a)) then
-            call record_dealloc_addr(c_loc(a(lbound(a,1))))
+            if (size(a) > 0) call record_dealloc_addr(c_loc(a(lbound(a,1))))
             deallocate(a)
             nullify(a)
           end if
@@ -459,7 +459,7 @@
         subroutine my_dealloc_plogical_2d(a)
           logical, dimension(:, :), pointer, intent(inout) :: a
           if (associated(a)) then
-            call record_dealloc_addr(c_loc(a(lbound(a,1), lbound(a,2))))
+            if (size(a) > 0) call record_dealloc_addr(c_loc(a(lbound(a,1), lbound(a,2))))
             deallocate(a)
             nullify(a)
           end if
@@ -474,7 +474,7 @@
         subroutine my_dealloc_plogical_3d(a)
           logical, dimension(:, :, :), pointer, intent(inout) :: a
           if (associated(a)) then
-            call record_dealloc_addr(c_loc(a(lbound(a,1), lbound(a,2), lbound(a,3))))
+            if (size(a) > 0) call record_dealloc_addr(c_loc(a(lbound(a,1), lbound(a,2), lbound(a,3))))
             deallocate(a)
             nullify(a)
           end if
