@@ -464,7 +464,7 @@
           integer, intent(in) :: stat
           character(len=len_error_message), optional,  intent(in) :: msg
           if (stat /= 0) then
-            write(6, "(a,i10,a)") "Error in memory allocation"
+            write(6, "(a,i10)") "Error in memory allocation, stat=", stat
             if(present(msg)) then
               write(6, "(a)") msg
             end if
@@ -514,7 +514,7 @@
           integer, optional, intent(out) :: stat !< The error code returned by the allocation
           integer :: ierr
           allocate(a(n), stat=ierr)
-          if (ierr == 0 .and. present(msg)) &
+          if (ierr == 0 .and. present(msg) .and. size(a) > 0) &
             call record_alloc_addr(c_loc(a(lbound(a,1))), msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
@@ -540,7 +540,7 @@
           integer, optional, intent(out) :: stat !< The error code returned by the allocation
           integer :: ierr
           allocate(a(n, m), stat=ierr)
-          if (ierr == 0 .and. present(msg)) &
+          if (ierr == 0 .and. present(msg) .and. size(a) > 0) &
             call record_alloc_addr(c_loc(a(lbound(a,1), lbound(a,2))), msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
@@ -567,7 +567,7 @@
           integer, optional, intent(out) :: stat !< The error code returned by the allocation
           integer :: ierr
           allocate(a(l, m, n), stat=ierr)
-          if (ierr == 0 .and. present(msg)) &
+          if (ierr == 0 .and. present(msg) .and. size(a) > 0) &
             call record_alloc_addr(c_loc(a(lbound(a,1), lbound(a,2), lbound(a,3))), msg, int(storage_size(a), kind=8) / 8_8 *&
                 & size(a, kind=8))
           if(.not. present(stat)) then
@@ -593,7 +593,7 @@
           integer, optional, intent(out) :: stat !< The error code returned by the allocation
           integer :: ierr
           allocate(a(n), stat=ierr)
-          if (ierr == 0 .and. present(msg)) &
+          if (ierr == 0 .and. present(msg) .and. size(a) > 0) &
             call record_alloc_addr(c_loc(a(lbound(a,1))), msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
@@ -619,7 +619,7 @@
           integer, optional, intent(out) :: stat !< The error code returned by the allocation
           integer :: ierr
           allocate(a(n, m), stat=ierr)
-          if (ierr == 0 .and. present(msg)) &
+          if (ierr == 0 .and. present(msg) .and. size(a) > 0) &
             call record_alloc_addr(c_loc(a(lbound(a,1), lbound(a,2))), msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
@@ -646,7 +646,7 @@
           integer, optional, intent(out) :: stat !< The error code returned by the allocation
           integer :: ierr
           allocate(a(l, m, n), stat=ierr)
-          if (ierr == 0 .and. present(msg)) &
+          if (ierr == 0 .and. present(msg) .and. size(a) > 0) &
             call record_alloc_addr(c_loc(a(lbound(a,1), lbound(a,2), lbound(a,3))), msg, int(storage_size(a), kind=8) / 8_8 *&
                 & size(a, kind=8))
           if(.not. present(stat)) then
@@ -672,7 +672,7 @@
           integer, optional, intent(out) :: stat !< The error code returned by the allocation
           integer :: ierr
           allocate(a(n), stat=ierr)
-          if (ierr == 0 .and. present(msg)) &
+          if (ierr == 0 .and. present(msg) .and. size(a) > 0) &
             call record_alloc_addr(c_loc(a(lbound(a,1))), msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
@@ -698,7 +698,7 @@
           integer, optional, intent(out) :: stat !< The error code returned by the allocation
           integer :: ierr
           allocate(a(n, m), stat=ierr)
-          if (ierr == 0 .and. present(msg)) &
+          if (ierr == 0 .and. present(msg) .and. size(a) > 0) &
             call record_alloc_addr(c_loc(a(lbound(a,1), lbound(a,2))), msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
@@ -725,7 +725,7 @@
           integer, optional, intent(out) :: stat !< The error code returned by the allocation
           integer :: ierr
           allocate(a(l, m, n), stat=ierr)
-          if (ierr == 0 .and. present(msg)) &
+          if (ierr == 0 .and. present(msg) .and. size(a) > 0) &
             call record_alloc_addr(c_loc(a(lbound(a,1), lbound(a,2), lbound(a,3))), msg, int(storage_size(a), kind=8) / 8_8 *&
                 & size(a, kind=8))
           if(.not. present(stat)) then
@@ -751,7 +751,7 @@
           integer, optional, intent(out) :: stat !< The error code returned by the allocation
           integer :: ierr
           allocate(a(n), stat=ierr)
-          if (ierr == 0 .and. present(msg)) &
+          if (ierr == 0 .and. present(msg) .and. size(a) > 0) &
             call record_alloc_addr(c_loc(a(lbound(a,1))), msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
@@ -777,7 +777,7 @@
           integer, optional, intent(out) :: stat !< The error code returned by the allocation
           integer :: ierr
           allocate(a(n, m), stat=ierr)
-          if (ierr == 0 .and. present(msg)) &
+          if (ierr == 0 .and. present(msg) .and. size(a) > 0) &
             call record_alloc_addr(c_loc(a(lbound(a,1), lbound(a,2))), msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
@@ -804,7 +804,7 @@
           integer, optional, intent(out) :: stat !< The error code returned by the allocation
           integer :: ierr
           allocate(a(l, m, n), stat=ierr)
-          if (ierr == 0 .and. present(msg)) &
+          if (ierr == 0 .and. present(msg) .and. size(a) > 0) &
             call record_alloc_addr(c_loc(a(lbound(a,1), lbound(a,2), lbound(a,3))), msg, int(storage_size(a), kind=8) / 8_8 *&
                 & size(a, kind=8))
           if(.not. present(stat)) then
@@ -830,7 +830,7 @@
           integer, optional, intent(out) :: stat !< The error code returned by the allocation
           integer :: ierr
           allocate(a(n), stat=ierr)
-          if (ierr == 0 .and. present(msg)) &
+          if (ierr == 0 .and. present(msg) .and. size(a) > 0) &
             call record_alloc_addr(c_loc(a(lbound(a,1))), msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
@@ -856,7 +856,7 @@
           integer, optional, intent(out) :: stat !< The error code returned by the allocation
           integer :: ierr
           allocate(a(n, m), stat=ierr)
-          if (ierr == 0 .and. present(msg)) &
+          if (ierr == 0 .and. present(msg) .and. size(a) > 0) &
             call record_alloc_addr(c_loc(a(lbound(a,1), lbound(a,2))), msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
@@ -883,7 +883,7 @@
           integer, optional, intent(out) :: stat !< The error code returned by the allocation
           integer :: ierr
           allocate(a(l, m, n), stat=ierr)
-          if (ierr == 0 .and. present(msg)) &
+          if (ierr == 0 .and. present(msg) .and. size(a) > 0) &
             call record_alloc_addr(c_loc(a(lbound(a,1), lbound(a,2), lbound(a,3))), msg, int(storage_size(a), kind=8) / 8_8 *&
                 & size(a, kind=8))
           if(.not. present(stat)) then
@@ -909,7 +909,7 @@
           integer, optional, intent(out) :: stat !< The error code returned by the allocation
           integer :: ierr
           allocate(a(n), stat=ierr)
-          if (ierr == 0 .and. present(msg)) &
+          if (ierr == 0 .and. present(msg) .and. size(a) > 0) &
             call record_alloc_addr(c_loc(a(lbound(a,1))), msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
@@ -935,7 +935,7 @@
           integer, optional, intent(out) :: stat !< The error code returned by the allocation
           integer :: ierr
           allocate(a(n, m), stat=ierr)
-          if (ierr == 0 .and. present(msg)) &
+          if (ierr == 0 .and. present(msg) .and. size(a) > 0) &
             call record_alloc_addr(c_loc(a(lbound(a,1), lbound(a,2))), msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
@@ -962,7 +962,7 @@
           integer, optional, intent(out) :: stat !< The error code returned by the allocation
           integer :: ierr
           allocate(a(l, m, n), stat=ierr)
-          if (ierr == 0 .and. present(msg)) &
+          if (ierr == 0 .and. present(msg) .and. size(a) > 0) &
             call record_alloc_addr(c_loc(a(lbound(a,1), lbound(a,2), lbound(a,3))), msg, int(storage_size(a), kind=8) / 8_8 *&
                 & size(a, kind=8))
           if(.not. present(stat)) then
@@ -988,7 +988,7 @@
           integer, optional, intent(out) :: stat !< The error code returned by the allocation
           integer :: ierr
           allocate(a(n), stat=ierr)
-          if (ierr == 0 .and. present(msg)) &
+          if (ierr == 0 .and. present(msg) .and. size(a) > 0) &
             call record_alloc_addr(c_loc(a(lbound(a,1))), msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
@@ -1014,7 +1014,7 @@
           integer, optional, intent(out) :: stat !< The error code returned by the allocation
           integer :: ierr
           allocate(a(n, m), stat=ierr)
-          if (ierr == 0 .and. present(msg)) &
+          if (ierr == 0 .and. present(msg) .and. size(a) > 0) &
             call record_alloc_addr(c_loc(a(lbound(a,1), lbound(a,2))), msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
@@ -1041,7 +1041,7 @@
           integer, optional, intent(out) :: stat !< The error code returned by the allocation
           integer :: ierr
           allocate(a(l, m, n), stat=ierr)
-          if (ierr == 0 .and. present(msg)) &
+          if (ierr == 0 .and. present(msg) .and. size(a) > 0) &
             call record_alloc_addr(c_loc(a(lbound(a,1), lbound(a,2), lbound(a,3))), msg, int(storage_size(a), kind=8) / 8_8 *&
                 & size(a, kind=8))
           if(.not. present(stat)) then
@@ -1067,7 +1067,7 @@
           integer, optional, intent(out) :: stat !< The error code returned by the allocation
           integer :: ierr
           allocate(a(n), stat=ierr)
-          if (ierr == 0 .and. present(msg)) &
+          if (ierr == 0 .and. present(msg) .and. size(a) > 0) &
             call record_alloc_addr(c_loc(a(lbound(a,1))), msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
@@ -1093,7 +1093,7 @@
           integer, optional, intent(out) :: stat !< The error code returned by the allocation
           integer :: ierr
           allocate(a(n, m), stat=ierr)
-          if (ierr == 0 .and. present(msg)) &
+          if (ierr == 0 .and. present(msg) .and. size(a) > 0) &
             call record_alloc_addr(c_loc(a(lbound(a,1), lbound(a,2))), msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
@@ -1120,7 +1120,7 @@
           integer, optional, intent(out) :: stat !< The error code returned by the allocation
           integer :: ierr
           allocate(a(l, m, n), stat=ierr)
-          if (ierr == 0 .and. present(msg)) &
+          if (ierr == 0 .and. present(msg) .and. size(a) > 0) &
             call record_alloc_addr(c_loc(a(lbound(a,1), lbound(a,2), lbound(a,3))), msg, int(storage_size(a), kind=8) / 8_8 *&
                 & size(a, kind=8))
           if(.not. present(stat)) then
@@ -1146,7 +1146,7 @@
           integer, optional, intent(out) :: stat !< The error code returned by the allocation
           integer :: ierr
           allocate(a(n), stat=ierr)
-          if (ierr == 0 .and. present(msg)) &
+          if (ierr == 0 .and. present(msg) .and. size(a) > 0) &
             call record_alloc_addr(c_loc(a(lbound(a,1))), msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
@@ -1172,7 +1172,7 @@
           integer, optional, intent(out) :: stat !< The error code returned by the allocation
           integer :: ierr
           allocate(a(n, m), stat=ierr)
-          if (ierr == 0 .and. present(msg)) &
+          if (ierr == 0 .and. present(msg) .and. size(a) > 0) &
             call record_alloc_addr(c_loc(a(lbound(a,1), lbound(a,2))), msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
@@ -1199,7 +1199,7 @@
           integer, optional, intent(out) :: stat !< The error code returned by the allocation
           integer :: ierr
           allocate(a(l, m, n), stat=ierr)
-          if (ierr == 0 .and. present(msg)) &
+          if (ierr == 0 .and. present(msg) .and. size(a) > 0) &
             call record_alloc_addr(c_loc(a(lbound(a,1), lbound(a,2), lbound(a,3))), msg, int(storage_size(a), kind=8) / 8_8 *&
                 & size(a, kind=8))
           if(.not. present(stat)) then
@@ -1225,7 +1225,7 @@
           integer, optional, intent(out) :: stat !< The error code returned by the allocation
           integer :: ierr
           allocate(a(n), stat=ierr)
-          if (ierr == 0 .and. present(msg)) &
+          if (ierr == 0 .and. present(msg) .and. size(a) > 0) &
             call record_alloc_addr(c_loc(a(lbound(a,1))), msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
@@ -1251,7 +1251,7 @@
           integer, optional, intent(out) :: stat !< The error code returned by the allocation
           integer :: ierr
           allocate(a(n, m), stat=ierr)
-          if (ierr == 0 .and. present(msg)) &
+          if (ierr == 0 .and. present(msg) .and. size(a) > 0) &
             call record_alloc_addr(c_loc(a(lbound(a,1), lbound(a,2))), msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
@@ -1278,7 +1278,7 @@
           integer, optional, intent(out) :: stat !< The error code returned by the allocation
           integer :: ierr
           allocate(a(l, m, n), stat=ierr)
-          if (ierr == 0 .and. present(msg)) &
+          if (ierr == 0 .and. present(msg) .and. size(a) > 0) &
             call record_alloc_addr(c_loc(a(lbound(a,1), lbound(a,2), lbound(a,3))), msg, int(storage_size(a), kind=8) / 8_8 *&
                 & size(a, kind=8))
           if(.not. present(stat)) then
@@ -1304,7 +1304,7 @@
           integer, optional, intent(out) :: stat !< The error code returned by the allocation
           integer :: ierr
           allocate(a(n), stat=ierr)
-          if (ierr == 0 .and. present(msg)) &
+          if (ierr == 0 .and. present(msg) .and. size(a) > 0) &
             call record_alloc_addr(c_loc(a(lbound(a,1))), msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
@@ -1330,7 +1330,7 @@
           integer, optional, intent(out) :: stat !< The error code returned by the allocation
           integer :: ierr
           allocate(a(n, m), stat=ierr)
-          if (ierr == 0 .and. present(msg)) &
+          if (ierr == 0 .and. present(msg) .and. size(a) > 0) &
             call record_alloc_addr(c_loc(a(lbound(a,1), lbound(a,2))), msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
@@ -1357,7 +1357,7 @@
           integer, optional, intent(out) :: stat !< The error code returned by the allocation
           integer :: ierr
           allocate(a(l, m, n), stat=ierr)
-          if (ierr == 0 .and. present(msg)) &
+          if (ierr == 0 .and. present(msg) .and. size(a) > 0) &
             call record_alloc_addr(c_loc(a(lbound(a,1), lbound(a,2), lbound(a,3))), msg, int(storage_size(a), kind=8) / 8_8 *&
                 & size(a, kind=8))
           if(.not. present(stat)) then
@@ -1383,7 +1383,7 @@
           integer, optional, intent(out) :: stat !< The error code returned by the allocation
           integer :: ierr
           allocate(a(n), stat=ierr)
-          if (ierr == 0 .and. present(msg)) &
+          if (ierr == 0 .and. present(msg) .and. size(a) > 0) &
             call record_alloc_addr(c_loc(a(lbound(a,1))), msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
@@ -1409,7 +1409,7 @@
           integer, optional, intent(out) :: stat !< The error code returned by the allocation
           integer :: ierr
           allocate(a(n, m), stat=ierr)
-          if (ierr == 0 .and. present(msg)) &
+          if (ierr == 0 .and. present(msg) .and. size(a) > 0) &
             call record_alloc_addr(c_loc(a(lbound(a,1), lbound(a,2))), msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
@@ -1436,7 +1436,7 @@
           integer, optional, intent(out) :: stat !< The error code returned by the allocation
           integer :: ierr
           allocate(a(l, m, n), stat=ierr)
-          if (ierr == 0 .and. present(msg)) &
+          if (ierr == 0 .and. present(msg) .and. size(a) > 0) &
             call record_alloc_addr(c_loc(a(lbound(a,1), lbound(a,2), lbound(a,3))), msg, int(storage_size(a), kind=8) / 8_8 *&
                 & size(a, kind=8))
           if(.not. present(stat)) then
@@ -1462,7 +1462,7 @@
           integer, optional, intent(out) :: stat !< The error code returned by the allocation
           integer :: ierr
           allocate(a(n), stat=ierr)
-          if (ierr == 0 .and. present(msg)) &
+          if (ierr == 0 .and. present(msg) .and. size(a) > 0) &
             call record_alloc_addr(c_loc(a(lbound(a,1))), msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
@@ -1488,7 +1488,7 @@
           integer, optional, intent(out) :: stat !< The error code returned by the allocation
           integer :: ierr
           allocate(a(n, m), stat=ierr)
-          if (ierr == 0 .and. present(msg)) &
+          if (ierr == 0 .and. present(msg) .and. size(a) > 0) &
             call record_alloc_addr(c_loc(a(lbound(a,1), lbound(a,2))), msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
@@ -1515,7 +1515,7 @@
           integer, optional, intent(out) :: stat !< The error code returned by the allocation
           integer :: ierr
           allocate(a(l, m, n), stat=ierr)
-          if (ierr == 0 .and. present(msg)) &
+          if (ierr == 0 .and. present(msg) .and. size(a) > 0) &
             call record_alloc_addr(c_loc(a(lbound(a,1), lbound(a,2), lbound(a,3))), msg, int(storage_size(a), kind=8) / 8_8 *&
                 & size(a, kind=8))
           if(.not. present(stat)) then
@@ -1541,7 +1541,7 @@
           integer, optional, intent(out) :: stat !< The error code returned by the allocation
           integer :: ierr
           allocate(a(n), stat=ierr)
-          if (ierr == 0 .and. present(msg)) &
+          if (ierr == 0 .and. present(msg) .and. size(a) > 0) &
             call record_alloc_addr(c_loc(a(lbound(a,1))), msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
@@ -1567,7 +1567,7 @@
           integer, optional, intent(out) :: stat !< The error code returned by the allocation
           integer :: ierr
           allocate(a(n, m), stat=ierr)
-          if (ierr == 0 .and. present(msg)) &
+          if (ierr == 0 .and. present(msg) .and. size(a) > 0) &
             call record_alloc_addr(c_loc(a(lbound(a,1), lbound(a,2))), msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
@@ -1594,7 +1594,7 @@
           integer, optional, intent(out) :: stat !< The error code returned by the allocation
           integer :: ierr
           allocate(a(l, m, n), stat=ierr)
-          if (ierr == 0 .and. present(msg)) &
+          if (ierr == 0 .and. present(msg) .and. size(a) > 0) &
             call record_alloc_addr(c_loc(a(lbound(a,1), lbound(a,2), lbound(a,3))), msg, int(storage_size(a), kind=8) / 8_8 *&
                 & size(a, kind=8))
           if(.not. present(stat)) then
@@ -1620,7 +1620,7 @@
           integer, optional, intent(out) :: stat !< The error code returned by the allocation
           integer :: ierr
           allocate(a(n), stat=ierr)
-          if (ierr == 0 .and. present(msg)) &
+          if (ierr == 0 .and. present(msg) .and. size(a) > 0) &
             call record_alloc_addr(c_loc(a(lbound(a,1))), msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
@@ -1646,7 +1646,7 @@
           integer, optional, intent(out) :: stat !< The error code returned by the allocation
           integer :: ierr
           allocate(a(n, m), stat=ierr)
-          if (ierr == 0 .and. present(msg)) &
+          if (ierr == 0 .and. present(msg) .and. size(a) > 0) &
             call record_alloc_addr(c_loc(a(lbound(a,1), lbound(a,2))), msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
@@ -1673,7 +1673,7 @@
           integer, optional, intent(out) :: stat !< The error code returned by the allocation
           integer :: ierr
           allocate(a(l, m, n), stat=ierr)
-          if (ierr == 0 .and. present(msg)) &
+          if (ierr == 0 .and. present(msg) .and. size(a) > 0) &
             call record_alloc_addr(c_loc(a(lbound(a,1), lbound(a,2), lbound(a,3))), msg, int(storage_size(a), kind=8) / 8_8 *&
                 & size(a, kind=8))
           if(.not. present(stat)) then
@@ -1699,7 +1699,7 @@
           integer, optional, intent(out) :: stat !< The error code returned by the allocation
           integer :: ierr
           allocate(a(n), stat=ierr)
-          if (ierr == 0 .and. present(msg)) &
+          if (ierr == 0 .and. present(msg) .and. size(a) > 0) &
             call record_alloc_addr(c_loc(a(lbound(a,1))), msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
@@ -1725,7 +1725,7 @@
           integer, optional, intent(out) :: stat !< The error code returned by the allocation
           integer :: ierr
           allocate(a(n, m), stat=ierr)
-          if (ierr == 0 .and. present(msg)) &
+          if (ierr == 0 .and. present(msg) .and. size(a) > 0) &
             call record_alloc_addr(c_loc(a(lbound(a,1), lbound(a,2))), msg, int(storage_size(a), kind=8) / 8_8 * size(a, kind=8))
           if(.not. present(stat)) then
             if(present(msg)) then
@@ -1752,7 +1752,7 @@
           integer, optional, intent(out) :: stat !< The error code returned by the allocation
           integer :: ierr
           allocate(a(l, m, n), stat=ierr)
-          if (ierr == 0 .and. present(msg)) &
+          if (ierr == 0 .and. present(msg) .and. size(a) > 0) &
             call record_alloc_addr(c_loc(a(lbound(a,1), lbound(a,2), lbound(a,3))), msg, int(storage_size(a), kind=8) / 8_8 *&
                 & size(a, kind=8))
           if(.not. present(stat)) then

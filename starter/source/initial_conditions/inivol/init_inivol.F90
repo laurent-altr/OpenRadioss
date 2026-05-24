@@ -82,6 +82,7 @@
           use glob_therm_mod
           use precision_mod, only : WP
           use MY_ALLOC_MOD, only : my_alloc
+          use MY_DEALLOC_MOD, only : my_dealloc
           use init_inivol_2d_polygons_mod , only : init_inivol_2d_polygons
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Implicit none
@@ -359,7 +360,7 @@
                       iparg                   ,ixs                 ,ixq          ,ixtg           ,&
                       cell(idc)%int_array_3d  ,cell_position       ,nodal_phase(idc)%int_array_1d,nb_box_limit)
                   end if
-                  deallocate(tagn)
+                  call my_dealloc(tagn)
                   call dealloc_1d_array(nodal_phase(idc))
                   call dealloc_3d_array(cell(idc))
                 end do ! do idc=1,nb_container
@@ -419,7 +420,7 @@
                     nuvar =  elbuf_tab(ng)%bufly(1)%nvar_mat
                     nf1   =  nft+1
                   end do ! do idc=1,nb_container
-                  deallocate(inphase)
+                  call my_dealloc(inphase)
                 end do ! next ng=1,ngroup
 !---
               end if ! (n2d == 0)
@@ -472,22 +473,22 @@
               end if
 !-------------
 
-              if(allocated(iphase))   deallocate(iphase)
-              if(allocated(nbip))     deallocate(nbip)
-              if(allocated(itagnsol)) deallocate(itagnsol)
-              if(allocated(knod2surf))deallocate(knod2surf)
-              if(allocated(part_fill))deallocate(part_fill)
-              if(allocated(ivolsurf)) deallocate(ivolsurf)
-              if(allocated(swiftsurf))deallocate(swiftsurf)
-              if(allocated(nsoltosf)) deallocate(nsoltosf)
-              if(allocated(inod2surf))deallocate(inod2surf)
-              if(allocated(dis))      deallocate(dis)
-              if(allocated(nod_norm)) deallocate(nod_norm)
-              if(allocated(segtosurf))deallocate(segtosurf)
+              call my_dealloc(iphase)
+              call my_dealloc(nbip)
+              call my_dealloc(itagnsol)
+              call my_dealloc(knod2surf)
+              call my_dealloc(part_fill)
+              call my_dealloc(ivolsurf)
+              call my_dealloc(swiftsurf)
+              call my_dealloc(nsoltosf)
+              call my_dealloc(inod2surf)
+              call my_dealloc(dis)
+              call my_dealloc(nod_norm)
+              call my_dealloc(segtosurf)
 !---
             end do ! next ii=1,num_inivol
-            if(allocated(cell_position))deallocate( cell_position )
-            if(allocated(list_ale_node))deallocate( list_ale_node )
+            call my_dealloc(cell_position)
+            call my_dealloc(list_ale_node)
 
           end if ! if (num_inivol > 0)
 

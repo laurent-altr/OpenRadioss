@@ -53,6 +53,7 @@ C-----------------------------------------------
       use simple_checksum_mod
       use myqsort_d_mod
       use my_alloc_mod
+      use my_dealloc_mod, only : my_dealloc
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -510,21 +511,21 @@ c error  (function 1 pt)
           END IF                              
         END DO    ! KK
 !-----------------------------------------------------------------------------------------
-        deallocate(itag)
-        deallocate (xx1)      
-        deallocate (xx2)      
-        deallocate (xx3)      
-        deallocate (xx4)      
-        deallocate (hash)     
-        deallocate (lenx)     
-        deallocate (yfac)     
-        deallocate (jperm1)   
-        deallocate (jperm2)   
-        deallocate (nv1)      
-        deallocate (nv2)      
-        deallocate (nv3)      
-        deallocate (idxtab)   
-        deallocate (idfun)
+        call my_dealloc(ITAG)
+        call my_dealloc(xx1)
+        call my_dealloc(xx2)
+        call my_dealloc(xx3)
+        call my_dealloc(xx4)
+        call my_dealloc(hash)
+        call my_dealloc(lenx)
+        call my_dealloc(yfac)
+        call my_dealloc(jperm1)
+        call my_dealloc(jperm2)
+        call my_dealloc(nv1)
+        call my_dealloc(nv2)
+        call my_dealloc(nv3)
+        call my_dealloc(idxtab)
+        call my_dealloc(idfun)
 !-----------------------------------------------------------------
 !       OUTPUT OF TABLE VALUES
 !-----------------------------------------------------------------

@@ -560,6 +560,7 @@ C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
       USE MY_ALLOC_MOD
+      USE MY_DEALLOC_MOD, ONLY : MY_DEALLOC
       USE DSGRAPH_MOD
       USE FVBAG_MOD
       USE RESTMOD
@@ -10995,8 +10996,8 @@ C
          CLOSE(IFXM)
          CLOSE(IFXS) 
       ENDIF
-      if(allocated(isolnod0)) deallocate(isolnod0)
-      if(allocated(ishell3nod0)) deallocate(ishell3nod0)
+      call my_dealloc(isolnod0)
+      call my_dealloc(ishell3nod0)
 
       IF(ALLOCATED( DGAPINT ))  DEALLOCATE(DGAPINT)
 

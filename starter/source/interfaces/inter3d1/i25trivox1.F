@@ -50,6 +50,7 @@ C-----------------------------------------------
       use array_mod 
       use intbufdef_mod 
       use my_alloc_mod
+      use my_dealloc_mod, only : my_dealloc
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -604,9 +605,9 @@ C=======================================================================
       do i=1,my_size
         intbuf_tab%cand_e(my_address+i) = save_array(2,my_index(i))
       enddo
-      deallocate(my_index)
-      deallocate(sort_array)
-      deallocate(save_array)
+      call my_dealloc(my_index)
+      call my_dealloc(sort_array)
+      call my_dealloc(save_array)
       ! ------------
 !$OMP END SINGLE    
 
@@ -620,11 +621,13 @@ C=======================================================================
 !$OMP END DO
 C
 !$OMP MASTER
-      DEALLOCATE(LAST_NOD)
-      deallocate( cand_n_size,cand_e_size )
-      deallocate( address_cand_n,address_cand_e )
+      call my_dealloc(LAST_NOD)
+      call my_dealloc(cand_n_size)
+      call my_dealloc(cand_e_size)
+      call my_dealloc(address_cand_n)
+      call my_dealloc(address_cand_e)
 !$OMP END MASTER
-      DEALLOCATE(TAGNOD)
+      call my_dealloc(TAGNOD)
 
 
       RETURN
