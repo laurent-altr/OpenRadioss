@@ -233,6 +233,13 @@
 !   either the GPU fill_voxel path or the existing CPU fill_voxel path
 !   – both produce equivalent voxel/next_nod arrays.
 !
+!   IMPORTANT – SPMD / MPI limitation:
+!   The GPU broad phase only processes LOCAL slave nodes (indices 1..nsn
+!   in NSV).  Remote slave nodes from other MPI ranks (NSNR > 0) are NOT
+!   submitted to the GPU broad phase and will be silently missed.
+!   The caller must detect NSNR > 0 and supplement or replace the GPU
+!   path with the CPU INTER7_CANDIDATE_PAIRS for remote-node contacts.
+!
 !   The KREMNODE/REMNOD arrays are converted to 0-based CSR offsets
 !   before use (see inter7_gpu_convert_kremnod_csr).
 !

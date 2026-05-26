@@ -49,8 +49,10 @@ Copyright>        along with this program.  If not, see <https://www.gnu.org/lic
  *
  * Step 3  PxBroadPhase::update()  (GPU, inside PhysX)
  *   Objects are submitted via PxBroadPhaseUpdateData with handle-indexed
- *   mBounds and mGroups arrays.  PhysX Sort-and-Prune on the GPU finds all
- *   overlapping (slave, master) AABB pairs.
+ *   mBounds and mGroups arrays (capacity = nsn + nrtm).
+ *   Handle assignment: slave i → handle i; segment ne → handle nsn+ne.
+ *   PhysX Sort-and-Prune on the GPU finds all overlapping (slave, master)
+ *   AABB pairs.
  *
  * Step 4  postfilter_pairs  (CUDA kernel, one thread per PhysX pair)
  *   For each pair (slave_idx, segment_idx) returned by PhysX, apply:
@@ -78,12 +80,20 @@ Copyright>        along with this program.  If not, see <https://www.gnu.org/lic
  * - We rebuild all objects every timestep (remove-then-add) so that
  *   fetchResults().mCreatedPairs contains all current overlaps.
  *   An incremental update-only approach would miss pre-existing contacts.
+ *
+ * SPMD / MPI limitation
+ * =====================
+ * The GPU path only processes local slave nodes (indices 1..nsn in NSV).
+ * Remote slave nodes from other MPI ranks (nsnr > 0) are not submitted
+ * to the GPU broad phase.  The caller is responsible for handling remote
+ * nodes via the CPU fallback path when nsnr > 0.
  */
 
 #include "inter7_gpu_broadphase.h"
 
 #include <PxPhysicsAPI.h>
 #include <cuda_runtime.h>
+#include <algorithm>
 #include <stdio.h>
 #include <string.h>
 
@@ -108,8 +118,14 @@ using namespace physx;
 
 /* ------------------------------------------------------------------ */
 /* Buffer helpers                                                      */
+/*                                                                     */
+/* IMPORTANT: every device pointer must have its OWN dedicated size    */
+/* tracker.  Sharing a size tracker between two pointers of the same   */
+/* size causes the second ensure_* call to skip allocation, leaving    */
+/* the second pointer null.                                            */
 /* ------------------------------------------------------------------ */
-/* Device buffers */
+
+/* Device buffers – each gets its own size counter */
 static void ensure_device_int(int** p, int* sz, int n)
 {
     if (n > *sz) {
@@ -161,30 +177,34 @@ static PxCudaContextManager*    g_cudaCtxMgr = nullptr;
 static PxBroadPhase*            g_broadPhase = nullptr;  /* eGPU */
 static bool                     g_initialised = false;
 
-/* Device buffers (persistent across calls, grown on demand) */
-static my_real_gpu* d_x        = nullptr;  static int g_sz_numnod  = 0;
-static int*         d_nsv      = nullptr;  static int g_sz_nsn     = 0;
-static my_real_gpu* d_stfn     = nullptr;  /* slave stiffness, shares g_sz_nsn */
-static my_real_gpu* d_gap_s    = nullptr;  /* slave gap, shares g_sz_nsn */
-static int*         d_irect    = nullptr;  static int g_sz_nrtm    = 0;
-static my_real_gpu* d_stf      = nullptr;  /* segment stiffness, shares g_sz_nrtm */
-static my_real_gpu* d_gap_m    = nullptr;  /* segment gap, shares g_sz_nrtm */
-static my_real_gpu* d_curv_max = nullptr;  /* curvature, shares g_sz_nrtm */
-static int*         d_kremnod  = nullptr;  static int g_sz_kremnod = 0;
-static int*         d_remnod   = nullptr;  static int g_sz_remnod  = 0;
-static int*         d_cand_n   = nullptr;  static int g_sz_cand    = 0;
-static int*         d_cand_e   = nullptr;
+/*
+ * Device buffers – persistent, grown on demand.
+ * Each pointer has its OWN dedicated size tracker to avoid the shared-
+ * tracker aliasing bug (see ensure_device_* note above).
+ */
+static my_real_gpu* d_x        = nullptr;  static int g_sz_x        = 0;
+static int*         d_nsv      = nullptr;  static int g_sz_nsv      = 0;
+static my_real_gpu* d_stfn     = nullptr;  static int g_sz_stfn     = 0;
+static my_real_gpu* d_gap_s    = nullptr;  static int g_sz_gap_s    = 0;
+static int*         d_irect    = nullptr;  static int g_sz_irect    = 0;
+static my_real_gpu* d_stf      = nullptr;  static int g_sz_stf      = 0;
+static my_real_gpu* d_gap_m    = nullptr;  static int g_sz_gap_m    = 0;
+static my_real_gpu* d_curv_max = nullptr;  static int g_sz_curv_max = 0;
+static int*         d_kremnod  = nullptr;  static int g_sz_kremnod  = 0;
+static int*         d_remnod   = nullptr;  static int g_sz_remnod   = 0;
+static int*         d_cand_n   = nullptr;  static int g_sz_cand_n   = 0;
+static int*         d_cand_e   = nullptr;  static int g_sz_cand_e   = 0;
 static int*         d_counter  = nullptr;
 
 /* GPU AABB arrays */
-static AabbEntry*   d_slave_aabbs   = nullptr;  static int g_sz_slave_aabbs   = 0;
-static AabbEntry*   d_segment_aabbs = nullptr;  static int g_sz_segment_aabbs = 0;
-static int*         d_slave_active  = nullptr;  static int g_sz_slave_act     = 0;
-static int*         d_seg_active    = nullptr;  static int g_sz_seg_act       = 0;
+static AabbEntry*   d_slave_aabbs   = nullptr;  static int g_sz_slave_aabbs = 0;
+static AabbEntry*   d_segment_aabbs = nullptr;  static int g_sz_seg_aabbs   = 0;
+static int*         d_slave_active  = nullptr;  static int g_sz_slave_act   = 0;
+static int*         d_seg_active    = nullptr;  static int g_sz_seg_act     = 0;
 
-/* GPU pair arrays (post PhysX) */
-static int*         d_pair_slave    = nullptr;  static int g_sz_pairs_d       = 0;
-static int*         d_pair_seg      = nullptr;
+/* GPU pair arrays (post PhysX, pre post-filter) */
+static int*         d_pair_slave    = nullptr;  static int g_sz_pair_slave  = 0;
+static int*         d_pair_seg      = nullptr;  static int g_sz_pair_seg    = 0;
 
 /* ---- Host arrays ---- */
 
@@ -411,6 +431,8 @@ int inter7_gpu_broadphase_init_(void)
                                                PxGetProfilerCallback());
     if (!g_cudaCtxMgr || !g_cudaCtxMgr->contextIsValid()) {
         fprintf(stderr, "[GPU BPH] CUDA context init failed.\n");
+        /* Release everything allocated so far before returning */
+        if (g_cudaCtxMgr) { g_cudaCtxMgr->release(); g_cudaCtxMgr = nullptr; }
         g_foundation->release(); g_foundation = nullptr;
         return 1;
     }
@@ -520,19 +542,21 @@ void inter7_gpu_candidate_pairs_(
 
     if (h_nsn == 0 || h_nrtm == 0) { *ii_stok = 0; return; }
 
-    /* ---- upload geometry to device ---- */
-    ensure_device_real(&d_x,        &g_sz_numnod, 3 * h_numnod);
-    ensure_device_int (&d_nsv,      &g_sz_nsn,    h_nsn);
-    ensure_device_real(&d_stfn,     &g_sz_nsn,    h_nsn);
-    ensure_device_real(&d_gap_s,    &g_sz_nsn,    h_nsn);
-    ensure_device_int (&d_irect,    &g_sz_nrtm,   4 * h_nrtm);
-    ensure_device_real(&d_stf,      &g_sz_nrtm,   h_nrtm);
-    ensure_device_real(&d_gap_m,    &g_sz_nrtm,   h_nrtm);
-    ensure_device_real(&d_curv_max, &g_sz_nrtm,   h_nrtm);
-    ensure_device_int (&d_kremnod,  &g_sz_kremnod, max(*s_kremnod, 1));
-    ensure_device_int (&d_remnod,   &g_sz_remnod,  max(*s_remnod,  1));
-    ensure_device_int (&d_cand_n,   &g_sz_cand,   h_mulnsn);
-    ensure_device_int (&d_cand_e,   &g_sz_cand,   h_mulnsn);
+    /* ---- upload geometry to device ----
+     * Each pointer uses its OWN size tracker so that ensure_device_* always
+     * allocates correctly even when multiple buffers have the same element count. */
+    ensure_device_real(&d_x,        &g_sz_x,        3 * h_numnod);
+    ensure_device_int (&d_nsv,      &g_sz_nsv,      h_nsn);
+    ensure_device_real(&d_stfn,     &g_sz_stfn,     h_nsn);
+    ensure_device_real(&d_gap_s,    &g_sz_gap_s,    h_nsn);
+    ensure_device_int (&d_irect,    &g_sz_irect,    4 * h_nrtm);
+    ensure_device_real(&d_stf,      &g_sz_stf,      h_nrtm);
+    ensure_device_real(&d_gap_m,    &g_sz_gap_m,    h_nrtm);
+    ensure_device_real(&d_curv_max, &g_sz_curv_max, h_nrtm);
+    ensure_device_int (&d_kremnod,  &g_sz_kremnod,  (*s_kremnod > 0 ? *s_kremnod : 1));
+    ensure_device_int (&d_remnod,   &g_sz_remnod,   (*s_remnod  > 0 ? *s_remnod  : 1));
+    ensure_device_int (&d_cand_n,   &g_sz_cand_n,   h_mulnsn);
+    ensure_device_int (&d_cand_e,   &g_sz_cand_e,   h_mulnsn);
 
     CUDA_CHECK(cudaMemcpy(d_x,        x,        3*h_numnod*sizeof(my_real_gpu), cudaMemcpyHostToDevice));
     CUDA_CHECK(cudaMemcpy(d_nsv,      nsv,      h_nsn    *sizeof(int),          cudaMemcpyHostToDevice));
@@ -558,8 +582,8 @@ void inter7_gpu_candidate_pairs_(
     }
 
     /* ---- Step 2: segment inflated AABBs ---- */
-    ensure_device_aabb(&d_segment_aabbs, &g_sz_segment_aabbs, h_nrtm);
-    ensure_device_int (&d_seg_active,    &g_sz_seg_act,       h_nrtm);
+    ensure_device_aabb(&d_segment_aabbs, &g_sz_seg_aabbs, h_nrtm);
+    ensure_device_int (&d_seg_active,    &g_sz_seg_act,   h_nrtm);
     {
         int threads = 256, blocks = (h_nrtm + threads-1)/threads;
         kernel_build_segment_aabbs<<<blocks, threads>>>(
@@ -588,14 +612,13 @@ void inter7_gpu_candidate_pairs_(
      *   listed in mCreated[].
      *
      * Handle assignment:
-     *   slave i   → handle = i          (0 .. nsn-1)
-     *   segment ne → handle = nsn + ne  (nsn .. nsn+nrtm-1)
+     *   slave i    → handle = i          (0 .. nsn-1)
+     *   segment ne → handle = nsn + ne   (nsn .. nsn+nrtm-1)
      *
      * Capacity = nsn + nrtm (one past the last handle).
      */
     int total_objs = h_nsn + h_nrtm;
 
-    /* Handle-indexed arrays, capacity = total_objs */
     ensure_host_raw((void**)&h_bounds,  &h_sz_bnd_bytes, total_objs * (int)sizeof(AabbEntry));
     ensure_host_raw((void**)&h_groups,  &h_sz_grp_bytes, total_objs * (int)sizeof(PxU32));
     ensure_host_raw((void**)&h_created, &h_sz_cr_bytes,  total_objs * (int)sizeof(PxU32));
@@ -621,8 +644,8 @@ void inter7_gpu_candidate_pairs_(
 
     /* PhysX 5.x PxBroadPhaseUpdateData constructor:
      *   (created, nbCreated, updated, nbUpdated, removed, nbRemoved,
-     *    bounds, groups, distances=NULL, capacity=0)
-     * mBounds is cast from AabbEntry* because AabbEntry == PxBounds3 layout. */
+     *    bounds, groups, distances=NULL, capacity)
+     * mBounds cast from AabbEntry* because AabbEntry == PxBounds3 layout. */
     PxBroadPhaseUpdateData addData(
         h_created, n_created,
         nullptr,   0,
@@ -638,99 +661,80 @@ void inter7_gpu_candidate_pairs_(
     g_broadPhase->fetchResults(results);
 
     PxU32 npairs = results.mNbCreatedPairs;
+
+    /* Prepare cleanup update data (used whether or not there are pairs) */
+    ensure_host_raw((void**)&h_removed, &h_sz_rm_bytes, (int)n_created * (int)sizeof(PxU32));
+    memcpy(h_removed, h_created, n_created * sizeof(PxU32));
+    PxBroadPhaseUpdateData removeData(
+        nullptr,   0,
+        nullptr,   0,
+        h_removed, n_created,
+        reinterpret_cast<const PxBounds3*>(h_bounds),
+        h_groups,
+        nullptr,
+        (PxU32)total_objs
+    );
+
     if (npairs == 0) {
-        /* Remove objects so handles are free for the next call */
-        goto remove_and_return_zero;
+        *ii_stok = 0;
+        g_broadPhase->update(removeData);
+        PxBroadPhaseResults dummy; g_broadPhase->fetchResults(dummy);
+        return;
     }
 
     /* ---- Unpack PhysX pairs ---- */
     ensure_host_raw((void**)&h_pair_slave, &h_sz_ps_bytes, (int)npairs * (int)sizeof(int));
     ensure_host_raw((void**)&h_pair_seg,   &h_sz_pe_bytes, (int)npairs * (int)sizeof(int));
 
-    {
-        PxU32 valid = 0;
-        for (PxU32 k = 0; k < npairs; k++) {
-            PxU32 h0 = results.mCreatedPairs[k].mID0;
-            PxU32 h1 = results.mCreatedPairs[k].mID1;
-            /* Identify slave vs segment by handle range */
-            PxU32 slave_handle, seg_handle;
-            if (h0 < (PxU32)h_nsn) { slave_handle = h0; seg_handle = h1; }
-            else                    { slave_handle = h1; seg_handle = h0; }
-            if (seg_handle < (PxU32)h_nsn ||
-                seg_handle >= (PxU32)(h_nsn + h_nrtm)) continue;
-            h_pair_slave[valid] = (int)slave_handle;
-            h_pair_seg[valid]   = (int)(seg_handle - h_nsn);
-            valid++;
-        }
-
-        if (valid == 0) goto remove_and_return_zero;
-
-        ensure_device_int(&d_pair_slave, &g_sz_pairs_d, (int)valid);
-        ensure_device_int(&d_pair_seg,   &g_sz_pairs_d, (int)valid);
-        CUDA_CHECK(cudaMemcpy(d_pair_slave, h_pair_slave, valid*sizeof(int), cudaMemcpyHostToDevice));
-        CUDA_CHECK(cudaMemcpy(d_pair_seg,   h_pair_seg,   valid*sizeof(int), cudaMemcpyHostToDevice));
-        CUDA_CHECK(cudaMemset(d_counter, 0, sizeof(int)));
-
-        /* ---- Step 4: post-filter on GPU ---- */
-        {
-            int threads = 256, blocks = ((int)valid + threads - 1) / threads;
-            kernel_postfilter_pairs<<<blocks, threads>>>(
-                (int)valid,
-                d_pair_slave, d_pair_seg,
-                h_nrtm, d_irect, d_x, d_nsv,
-                *igap, *marge, *gapmin, *gapmax, *dgapload, *drad,
-                d_gap_s, d_gap_m, d_curv_max,
-                *flagremnode, d_kremnod, d_remnod,
-                d_cand_n, d_cand_e, d_counter, h_mulnsn);
-            CUDA_CHECK(cudaGetLastError());
-            CUDA_CHECK(cudaDeviceSynchronize());
-        }
-
-        int h_count = 0;
-        CUDA_CHECK(cudaMemcpy(&h_count, d_counter, sizeof(int), cudaMemcpyDeviceToHost));
-        h_count = min(h_count, h_mulnsn);
-        if (h_count > 0) {
-            CUDA_CHECK(cudaMemcpy(cand_n, d_cand_n, h_count*sizeof(int), cudaMemcpyDeviceToHost));
-            CUDA_CHECK(cudaMemcpy(cand_e, d_cand_e, h_count*sizeof(int), cudaMemcpyDeviceToHost));
-        }
-        *ii_stok = h_count;
+    PxU32 valid = 0;
+    for (PxU32 k = 0; k < npairs; k++) {
+        PxU32 h0 = results.mCreatedPairs[k].mID0;
+        PxU32 h1 = results.mCreatedPairs[k].mID1;
+        PxU32 slave_handle, seg_handle;
+        if (h0 < (PxU32)h_nsn) { slave_handle = h0; seg_handle = h1; }
+        else                    { slave_handle = h1; seg_handle = h0; }
+        if (seg_handle < (PxU32)h_nsn ||
+            seg_handle >= (PxU32)(h_nsn + h_nrtm)) continue;
+        h_pair_slave[valid] = (int)slave_handle;
+        h_pair_seg[valid]   = (int)(seg_handle - h_nsn);
+        valid++;
     }
 
-    /* ---- Remove all objects so handles are free for the next call ---- */
-    {
-        ensure_host_raw((void**)&h_removed, &h_sz_rm_bytes, (int)n_created * (int)sizeof(PxU32));
-        memcpy(h_removed, h_created, n_created * sizeof(PxU32));
-        PxBroadPhaseUpdateData removeData(
-            nullptr,   0,
-            nullptr,   0,
-            h_removed, n_created,
-            reinterpret_cast<const PxBounds3*>(h_bounds),
-            h_groups,
-            nullptr,
-            (PxU32)total_objs
-        );
-        g_broadPhase->update(removeData);
-        PxBroadPhaseResults dummy;
-        g_broadPhase->fetchResults(dummy);
-    }
-    return;
+    /* Remove objects before the post-filter so the GPU SAP is clean
+     * regardless of whether post-filter finds any valid pairs. */
+    g_broadPhase->update(removeData);
+    PxBroadPhaseResults dummy; g_broadPhase->fetchResults(dummy);
 
-remove_and_return_zero:
-    *ii_stok = 0;
+    if (valid == 0) { *ii_stok = 0; return; }
+
+    ensure_device_int(&d_pair_slave, &g_sz_pair_slave, (int)valid);
+    ensure_device_int(&d_pair_seg,   &g_sz_pair_seg,   (int)valid);
+    CUDA_CHECK(cudaMemcpy(d_pair_slave, h_pair_slave, valid*sizeof(int), cudaMemcpyHostToDevice));
+    CUDA_CHECK(cudaMemcpy(d_pair_seg,   h_pair_seg,   valid*sizeof(int), cudaMemcpyHostToDevice));
+    CUDA_CHECK(cudaMemset(d_counter, 0, sizeof(int)));
+
+    /* ---- Step 4: post-filter on GPU ---- */
     {
-        ensure_host_raw((void**)&h_removed, &h_sz_rm_bytes, (int)n_created * (int)sizeof(PxU32));
-        memcpy(h_removed, h_created, n_created * sizeof(PxU32));
-        PxBroadPhaseUpdateData removeData(
-            nullptr,   0,
-            nullptr,   0,
-            h_removed, n_created,
-            reinterpret_cast<const PxBounds3*>(h_bounds),
-            h_groups,
-            nullptr,
-            (PxU32)total_objs
-        );
-        g_broadPhase->update(removeData);
-        PxBroadPhaseResults dummy;
-        g_broadPhase->fetchResults(dummy);
+        int threads = 256, blocks = ((int)valid + threads - 1) / threads;
+        kernel_postfilter_pairs<<<blocks, threads>>>(
+            (int)valid,
+            d_pair_slave, d_pair_seg,
+            h_nrtm, d_irect, d_x, d_nsv,
+            *igap, *marge, *gapmin, *gapmax, *dgapload, *drad,
+            d_gap_s, d_gap_m, d_curv_max,
+            *flagremnode, d_kremnod, d_remnod,
+            d_cand_n, d_cand_e, d_counter, h_mulnsn);
+        CUDA_CHECK(cudaGetLastError());
+        CUDA_CHECK(cudaDeviceSynchronize());
     }
+
+    int h_count = 0;
+    CUDA_CHECK(cudaMemcpy(&h_count, d_counter, sizeof(int), cudaMemcpyDeviceToHost));
+    /* Use std::min – host code cannot use CUDA device intrinsic min() */
+    h_count = std::min(h_count, h_mulnsn);
+    if (h_count > 0) {
+        CUDA_CHECK(cudaMemcpy(cand_n, d_cand_n, h_count*sizeof(int), cudaMemcpyDeviceToHost));
+        CUDA_CHECK(cudaMemcpy(cand_e, d_cand_e, h_count*sizeof(int), cudaMemcpyDeviceToHost));
+    }
+    *ii_stok = h_count;
 }
