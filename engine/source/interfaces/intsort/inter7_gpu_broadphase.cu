@@ -17,76 +17,93 @@ Copyright>        along with this program.  If not, see <https://www.gnu.org/lic
 /*
  * inter7_gpu_broadphase.cu
  *
- * GPU broad-phase collision detection using PhysX 5.x PxBroadPhase (eGPU).
+ * GPU broad-phase collision detection using PhysX 5.x PxAABBManager (eGPU).
  *
- * Why PxBroadPhase instead of a custom CUDA voxel kernel
- * =======================================================
- * PhysX ships a GPU-accelerated Sort-and-Prune (SAP) broad phase
- * (PxBroadPhaseType::eGPU) that:
- *   - runs entirely on the GPU via CUDA
- *   - supports incremental updates (only re-sorts objects that moved)
- *   - handles filter groups natively (master/slave asymmetry is free)
- *   - is heavily optimised and validated by NVIDIA
+ * Are our primitives "deformable" in the PhysX sense?
+ * ====================================================
+ * No.  "Deformable" in PhysX refers to PhysX-managed FEM soft bodies, cloth,
+ * or fluid where PhysX owns the vertex positions and updates them internally.
+ * Our slave nodes and master segments are USER-MANAGED AABBs: we compute the
+ * bounding boxes ourselves each timestep and hand them to PhysX.  That is
+ * exactly the purpose of PxAABBManager – it manages a collection of
+ * user-provided AABBs and finds overlaps via the GPU Sort-and-Prune broad
+ * phase.  Nodes whose positions change every FEM timestep are updated via
+ * addObject (in our remove-then-re-add scheme, detailed below).
+ *
+ * Why PxAABBManager instead of PxBroadPhase directly?
+ * ====================================================
+ * PxAABBManager provides a clean object-level API:
+ *   addObject(bounds, filterGroup) → handle
+ *   removeObject(handle)
+ *   update()            ← triggers GPU SAP internally; no data argument
+ *   fetchResults(out)   ← overlap pairs
+ *
+ * PxBroadPhase::update() requires a fully assembled PxBroadPhaseUpdateData
+ * with handle-indexed arrays built on the caller side.  PxAABBManager hides
+ * that bookkeeping.
  *
  * Architecture
  * ============
  *
  * Step 1  build_slave_aabbs  (CUDA kernel, N threads for N slave nodes)
- *   Each slave node i becomes a point AABB [x,x]×[y,y]×[z,z].
+ *   Point AABB [x,x]×[y,y]×[z,z] for each active slave node.
  *   filterGroup = FILTER_SLAVE (0x1)
- *   PhysX suppresses pairs when (A.group & B.group) != 0, so slave–slave
- *   pairs are suppressed and only slave–master pairs are produced.
  *
- * Step 2  build_segment_aabbs  (CUDA kernel, N threads for N segments)
- *   Each master segment ne becomes an inflated AABB:
- *     [xmine - AAA, xmaxe + AAA] in each dimension
- *   where AAA is computed with bgapsmx (overestimation of gap_s).
+ * Step 2  build_segment_aabbs  (CUDA kernel, N threads for N master segments)
+ *   Inflated AABB for each active segment; inflation uses bgapsmx
+ *   (overestimation of gap_s) so the box is conservative (no false negatives).
  *   filterGroup = FILTER_MASTER (0x2)
  *
- *   Using bgapsmx makes the AABB conservative: guaranteed to contain any
- *   slave node that would pass the per-node AABB test (no false negatives).
- *   False positives are removed by the post-filter (Step 4).
- *
- * Step 3  PxBroadPhase::update()  (GPU, inside PhysX)
- *   Objects are submitted via PxBroadPhaseUpdateData with handle-indexed
- *   mBounds and mGroups arrays (capacity = nsn + nrtm).
- *   Handle assignment: slave i → handle i; segment ne → handle nsn+ne.
- *   PhysX Sort-and-Prune on the GPU finds all overlapping (slave, master)
- *   AABB pairs.
+ * Step 3  PxAABBManager add + update  (CPU loop → GPU SAP inside PhysX)
+ *   AABBs are downloaded to host and submitted via addObject().
+ *   update() triggers the GPU Sort-and-Prune.  Only slave–master pairs are
+ *   produced because of the filter groups.
  *
  * Step 4  postfilter_pairs  (CUDA kernel, one thread per PhysX pair)
- *   For each pair (slave_idx, segment_idx) returned by PhysX, apply:
- *   (a) Corner self-pair: node global ID == M1/M2/M3/M4  → reject
- *   (b) KREMNODE forbidden pair: linear scan over per-segment list → reject
- *   (c) Per-node expanded AABB with actual gap_s[slave_idx]         → reject
- *   (d) Plane-distance underestimation (same formula as CPU)        → reject
- *   Valid pairs are written to output arrays via atomicAdd.
+ *   (a) Corner self-pair                                           → reject
+ *   (b) KREMNODE forbidden pair (linear scan, no sort required)    → reject
+ *   (c) Per-node AABB with actual gap_s (not the conservative bgapsmx) → reject
+ *   (d) Plane-distance underestimation (same formula as CPU)       → reject
+ *   Valid pairs written via atomicAdd.
  *
- * Master-surface vs slave-node asymmetry
- * =======================================
- * PhysX filter-group semantics: pair (A,B) suppressed iff (A.group & B.group) != 0.
+ * Filter-group semantics (PhysX)
+ * ================================
+ * Pair (A,B) suppressed iff (A.group & B.group) != 0.
  *   FILTER_SLAVE  = 0x1:  (0x1 & 0x1)=1 → slave-slave suppressed  ✓
  *   FILTER_MASTER = 0x2:  (0x2 & 0x2)=2 → master-master suppressed ✓
  *   slave-master:         (0x1 & 0x2)=0 → pair generated           ✓
  *
- * PxBroadPhaseUpdateData API notes (PhysX 5.x)
- * =============================================
- * - mBounds and mGroups are handle-indexed arrays of capacity mCapacity.
- *   If handle h is in mCreated, then mBounds[h] and mGroups[h] are read.
- *   The arrays must remain valid until fetchResults() returns.
- * - There is no mEnvIDs field; mCapacity is the array capacity.
- * - We use PxBroadPhase directly (not PxAABBManager) because
- *   PxAABBManager::update() does not accept PxBroadPhaseUpdateData.
- * - We rebuild all objects every timestep (remove-then-add) so that
- *   fetchResults().mCreatedPairs contains all current overlaps.
- *   An incremental update-only approach would miss pre-existing contacts.
+ * Remove-then-re-add invariant
+ * ============================
+ * To get ALL currently overlapping pairs (not just newly started overlaps),
+ * we rebuild the manager's object set every timestep:
+ *
+ *   [start-of-call invariant: manager is empty]
+ *   addObject() for each active slave / segment
+ *   update()         ← GPU SAP; all current overlaps appear as "created"
+ *   fetchResults()
+ *   removeObject() for each added handle
+ *   update() + fetchResults() ← flush pending removes; manager empty again
+ *   [end-of-call invariant: manager is empty]
+ *
+ * An incremental updateObject() approach would miss pre-existing contacts
+ * (they would only appear in mCreatedPairs the first timestep they occur).
+ *
+ * Handle decode table
+ * ===================
+ * addObject() returns opaque PxU32 handles.  We maintain a flat host array
+ * h_decode[] indexed by handle value:
+ *   h_decode[h] > 0  →  slave  with local index (h_decode[h] - 1)
+ *   h_decode[h] < 0  →  segment with local index (-h_decode[h] - 1)
+ * With a fresh (empty) manager and no fragmentation, handles are dense
+ * in [0, n_active).  The table is sized to NSN+NRTM and handles beyond
+ * that range are silently skipped.
  *
  * SPMD / MPI limitation
  * =====================
- * The GPU path only processes local slave nodes (indices 1..nsn in NSV).
- * Remote slave nodes from other MPI ranks (nsnr > 0) are not submitted
- * to the GPU broad phase.  The caller is responsible for handling remote
- * nodes via the CPU fallback path when nsnr > 0.
+ * Only local slave nodes (indices 1..nsn in NSV) are processed.
+ * Remote slave nodes from other MPI ranks (nsnr > 0) are not submitted.
+ * The caller must use the CPU path to cover remote-node contacts.
  */
 
 #include "inter7_gpu_broadphase.h"
@@ -118,14 +135,9 @@ using namespace physx;
 
 /* ------------------------------------------------------------------ */
 /* Buffer helpers                                                      */
-/*                                                                     */
-/* IMPORTANT: every device pointer must have its OWN dedicated size    */
-/* tracker.  Sharing a size tracker between two pointers of the same   */
-/* size causes the second ensure_* call to skip allocation, leaving    */
-/* the second pointer null.                                            */
+/* Each pointer must have its own size tracker – sharing trackers      */
+/* causes the second ensure_* call to skip allocation (n <= *sz).      */
 /* ------------------------------------------------------------------ */
-
-/* Device buffers – each gets its own size counter */
 static void ensure_device_int(int** p, int* sz, int n)
 {
     if (n > *sz) {
@@ -142,8 +154,6 @@ static void ensure_device_real(my_real_gpu** p, int* sz, int n)
         *sz = n;
     }
 }
-
-/* Host buffers – raw bytes, separate size per pointer */
 static void ensure_host_raw(void** p, int* sz_bytes, int nbytes)
 {
     if (nbytes > *sz_bytes) {
@@ -153,9 +163,7 @@ static void ensure_host_raw(void** p, int* sz_bytes, int nbytes)
     }
 }
 
-/* ------------------------------------------------------------------ */
-/* AabbEntry: same memory layout as PxBounds3 (2 × PxVec3 of floats) */
-/* ------------------------------------------------------------------ */
+/* AabbEntry: same memory layout as PxBounds3 */
 struct AabbEntry { float lo[3]; float hi[3]; };
 
 static void ensure_device_aabb(AabbEntry** p, int* sz, int n)
@@ -174,14 +182,11 @@ static PxDefaultAllocator       g_alloc;
 static PxDefaultErrorCallback   g_errcb;
 static PxFoundation*            g_foundation = nullptr;
 static PxCudaContextManager*    g_cudaCtxMgr = nullptr;
-static PxBroadPhase*            g_broadPhase = nullptr;  /* eGPU */
+static PxBroadPhase*            g_broadPhase = nullptr;
+static PxAABBManager*           g_aabbMgr    = nullptr;  /* sits on top of g_broadPhase */
 static bool                     g_initialised = false;
 
-/*
- * Device buffers – persistent, grown on demand.
- * Each pointer has its OWN dedicated size tracker to avoid the shared-
- * tracker aliasing bug (see ensure_device_* note above).
- */
+/* Device buffers (persistent, grown on demand, one size tracker each) */
 static my_real_gpu* d_x        = nullptr;  static int g_sz_x        = 0;
 static int*         d_nsv      = nullptr;  static int g_sz_nsv      = 0;
 static my_real_gpu* d_stfn     = nullptr;  static int g_sz_stfn     = 0;
@@ -202,36 +207,35 @@ static AabbEntry*   d_segment_aabbs = nullptr;  static int g_sz_seg_aabbs   = 0;
 static int*         d_slave_active  = nullptr;  static int g_sz_slave_act   = 0;
 static int*         d_seg_active    = nullptr;  static int g_sz_seg_act     = 0;
 
-/* GPU pair arrays (post PhysX, pre post-filter) */
+/* Post-PhysX pair arrays (device) */
 static int*         d_pair_slave    = nullptr;  static int g_sz_pair_slave  = 0;
 static int*         d_pair_seg      = nullptr;  static int g_sz_pair_seg    = 0;
 
-/* ---- Host arrays ---- */
-
-/* AABB and active masks downloaded from GPU */
+/* Host arrays downloaded from GPU */
 static AabbEntry*   h_slave_aabbs   = nullptr;  static int h_sz_sa_bytes    = 0;
 static AabbEntry*   h_segment_aabbs = nullptr;  static int h_sz_seg_bytes   = 0;
 static int*         h_slave_active  = nullptr;  static int h_sz_sact_bytes  = 0;
 static int*         h_seg_active    = nullptr;  static int h_sz_seact_bytes = 0;
 
 /*
- * PhysX update arrays – HANDLE-INDEXED.
- * h_bounds[handle] and h_groups[handle] must be filled for every handle
- * in h_created[].  Capacity = total_objs = nsn + nrtm.
- * h_bounds has the same memory layout as PxBounds3 (cast is safe).
+ * PxAABBManager handle tracking.
+ * h_added_handles[] stores the handles returned by addObject() this frame.
+ * h_decode[handle]  maps each handle to its primitive:
+ *   > 0  →  slave  index (h_decode[h] - 1)
+ *   < 0  →  segment index (-h_decode[h] - 1)
+ *   = 0  →  unused slot
+ * The table is cleared by zeroing used slots before each remove pass.
  */
-static AabbEntry*   h_bounds  = nullptr;  static int h_sz_bnd_bytes = 0;
-static PxU32*       h_groups  = nullptr;  static int h_sz_grp_bytes = 0;
-static PxU32*       h_created = nullptr;  static int h_sz_cr_bytes  = 0;
-static PxU32*       h_removed = nullptr;  static int h_sz_rm_bytes  = 0;
+static PxU32*  h_added_handles = nullptr;  static int h_sz_ah_bytes  = 0;
+static int*    h_decode        = nullptr;  static int h_sz_dec_bytes = 0;
+static int     h_n_added       = 0;        /* number of objects added this frame */
 
-/* Pair host buffers */
-static int*         h_pair_slave = nullptr;  static int h_sz_ps_bytes = 0;
-static int*         h_pair_seg   = nullptr;  static int h_sz_pe_bytes = 0;
+/* Host pair decode buffers */
+static int*    h_pair_slave    = nullptr;  static int h_sz_ps_bytes  = 0;
+static int*    h_pair_seg      = nullptr;  static int h_sz_pe_bytes  = 0;
 
 /* ================================================================== */
-/* Step 1: build slave-node AABBs                                     */
-/* Point AABB at the node position; inactive if stfn==0.             */
+/* Step 1: build slave-node point AABBs                               */
 /* ================================================================== */
 __global__ void kernel_build_slave_aabbs(
     int                        nsn,
@@ -255,8 +259,7 @@ __global__ void kernel_build_slave_aabbs(
 }
 
 /* ================================================================== */
-/* Step 2: build master-segment AABBs                                 */
-/* Inflated by AAA computed with bgapsmx so the box is conservative. */
+/* Step 2: build master-segment inflated AABBs                        */
 /* ================================================================== */
 __global__ void kernel_build_segment_aabbs(
     int                         nrtm,
@@ -278,7 +281,7 @@ __global__ void kernel_build_segment_aabbs(
     if (stf[ne] == (my_real_gpu)0) { active[ne] = 0; return; }
     active[ne] = 1;
 
-    /* IRECT(4,NRTM) column-major: IRECT(k,ne+1) = irect[ne*4 + k] (0-based k) */
+    /* IRECT(4,NRTM) column-major: IRECT(k,ne+1) = irect[ne*4+k] (0-based k) */
     int m0 = irect[ne*4 + 0] - 1;
     int m1 = irect[ne*4 + 1] - 1;
     int m2 = irect[ne*4 + 2] - 1;
@@ -313,7 +316,7 @@ __global__ void kernel_build_segment_aabbs(
 }
 
 /* ================================================================== */
-/* Step 4: post-filter PhysX pairs                                    */
+/* Step 4: post-filter PhysX pairs on the GPU                         */
 /* ================================================================== */
 __global__ void kernel_postfilter_pairs(
     int                          npairs,
@@ -331,7 +334,7 @@ __global__ void kernel_postfilter_pairs(
     const my_real_gpu* __restrict__ gap_m,
     const my_real_gpu* __restrict__ curv_max,
     int                          flagremnode,
-    const int* __restrict__      kremnod,  /* CSR ptr [2*nrtm]: [start,end) */
+    const int* __restrict__      kremnod,
     const int* __restrict__      remnod,
     int*                         cand_n,
     int*                         cand_e,
@@ -344,65 +347,54 @@ __global__ void kernel_postfilter_pairs(
 
     int slave_idx = pair_slave[tid];
     int ne        = pair_seg[tid];
-
-    int nn = nsv[slave_idx];   /* global node ID (1-based Fortran) */
+    int nn = nsv[slave_idx];
 
     /* (a) Corner self-pair */
-    int m0 = irect[ne*4 + 0];
-    int m1 = irect[ne*4 + 1];
-    int m2 = irect[ne*4 + 2];
-    int m3 = irect[ne*4 + 3];
+    int m0 = irect[ne*4 + 0], m1 = irect[ne*4 + 1];
+    int m2 = irect[ne*4 + 2], m3 = irect[ne*4 + 3];
     if (nn == m0 || nn == m1 || nn == m2 || nn == m3) return;
 
-    /* (b) KREMNODE linear scan (no sort requirement) */
+    /* (b) KREMNODE linear scan */
     if (flagremnode == 2) {
-        int lo = kremnod[2 * ne];
-        int hi = kremnod[2 * ne + 1];
-        for (int k = lo; k < hi; k++) {
-            if (remnod[k] == nn) return;
-        }
+        int lo = kremnod[2*ne], hi = kremnod[2*ne + 1];
+        for (int k = lo; k < hi; k++) if (remnod[k] == nn) return;
     }
 
     int jg = nn - 1;
-    my_real_gpu xs = x[3*jg + 0];
-    my_real_gpu ys = x[3*jg + 1];
-    my_real_gpu zs = x[3*jg + 2];
+    my_real_gpu xs=x[3*jg], ys=x[3*jg+1], zs=x[3*jg+2];
 
-    int jm0 = m0-1, jm1 = m1-1, jm2 = m2-1, jm3 = m3-1;
+    int jm0=m0-1, jm1=m1-1, jm2=m2-1, jm3=m3-1;
     my_real_gpu xx0=x[3*jm0],xx1=x[3*jm1],xx2=x[3*jm2],xx3=x[3*jm3];
     my_real_gpu yy0=x[3*jm0+1],yy1=x[3*jm1+1],yy2=x[3*jm2+1],yy3=x[3*jm3+1];
     my_real_gpu zz0=x[3*jm0+2],zz1=x[3*jm1+2],zz2=x[3*jm2+2],zz3=x[3*jm3+2];
 
-    my_real_gpu xmine = min(min(xx0,xx1),min(xx2,xx3));
-    my_real_gpu xmaxe = max(max(xx0,xx1),max(xx2,xx3));
-    my_real_gpu ymine = min(min(yy0,yy1),min(yy2,yy3));
-    my_real_gpu ymaxe = max(max(yy0,yy1),max(yy2,yy3));
-    my_real_gpu zmine = min(min(zz0,zz1),min(zz2,zz3));
-    my_real_gpu zmaxe = max(max(zz0,zz1),max(zz2,zz3));
+    my_real_gpu xmine=min(min(xx0,xx1),min(xx2,xx3));
+    my_real_gpu xmaxe=max(max(xx0,xx1),max(xx2,xx3));
+    my_real_gpu ymine=min(min(yy0,yy1),min(yy2,yy3));
+    my_real_gpu ymaxe=max(max(yy0,yy1),max(yy2,yy3));
+    my_real_gpu zmine=min(min(zz0,zz1),min(zz2,zz3));
+    my_real_gpu zmaxe=max(max(zz0,zz1),max(zz2,zz3));
 
-    /* (c) Per-node AABB with actual gap_s (igap!=0 only) */
+    /* (c) Per-node AABB with actual gap_s */
     my_real_gpu aaa = (my_real_gpu)0;
     if (igap != 0) {
-        my_real_gpu g = min(gapmax, max(gapmin, gap_s[slave_idx] + gap_m[ne])) + dgapload;
+        my_real_gpu g = min(gapmax, max(gapmin, gap_s[slave_idx]+gap_m[ne])) + dgapload;
         aaa = marge + curv_max[ne] + max(g, drad);
-        if (xs <= xmine - aaa || xs >= xmaxe + aaa ||
-            ys <= ymine - aaa || ys >= ymaxe + aaa ||
-            zs <= zmine - aaa || zs >= zmaxe + aaa) return;
+        if (xs<=xmine-aaa || xs>=xmaxe+aaa ||
+            ys<=ymine-aaa || ys>=ymaxe+aaa ||
+            zs<=zmine-aaa || zs>=zmaxe+aaa) return;
     }
 
     /* (d) Plane-distance underestimation */
-    my_real_gpu sx = (yy2-yy0)*(zz3-zz1) - (zz2-zz0)*(yy3-yy1);
-    my_real_gpu sy = (zz2-zz0)*(xx3-xx1) - (xx2-xx0)*(zz3-zz1);
-    my_real_gpu sz = (xx2-xx0)*(yy3-yy1) - (yy2-yy0)*(xx3-xx1);
-    my_real_gpu s2 = sx*sx + sy*sy + sz*sz;
-    my_real_gpu d1x=xs-xx0, d1y=ys-yy0, d1z=zs-zz0;
-    my_real_gpu d2x=xs-xx1, d2y=ys-yy1, d2z=zs-zz1;
-    my_real_gpu dd1=d1x*sx+d1y*sy+d1z*sz;
-    my_real_gpu dd2=d2x*sx+d2y*sy+d2z*sz;
+    my_real_gpu sx=(yy2-yy0)*(zz3-zz1)-(zz2-zz0)*(yy3-yy1);
+    my_real_gpu sy=(zz2-zz0)*(xx3-xx1)-(xx2-xx0)*(zz3-zz1);
+    my_real_gpu sz=(xx2-xx0)*(yy3-yy1)-(yy2-yy0)*(xx3-xx1);
+    my_real_gpu s2=sx*sx+sy*sy+sz*sz;
+    my_real_gpu dd1=(xs-xx0)*sx+(ys-yy0)*sy+(zs-zz0)*sz;
+    my_real_gpu dd2=(xs-xx1)*sx+(ys-yy1)*sy+(zs-zz1)*sz;
     if (dd1*dd2 > (my_real_gpu)0) {
         my_real_gpu d2 = min(dd1*dd1, dd2*dd2);
-        my_real_gpu a2 = aaa*aaa*s2;
-        if (d2 > a2) return;
+        if (d2 > aaa*aaa*s2) return;
     }
 
     int slot = atomicAdd(g_counter, 1);
@@ -431,7 +423,6 @@ int inter7_gpu_broadphase_init_(void)
                                                PxGetProfilerCallback());
     if (!g_cudaCtxMgr || !g_cudaCtxMgr->contextIsValid()) {
         fprintf(stderr, "[GPU BPH] CUDA context init failed.\n");
-        /* Release everything allocated so far before returning */
         if (g_cudaCtxMgr) { g_cudaCtxMgr->release(); g_cudaCtxMgr = nullptr; }
         g_foundation->release(); g_foundation = nullptr;
         return 1;
@@ -447,9 +438,18 @@ int inter7_gpu_broadphase_init_(void)
         return 1;
     }
 
+    g_aabbMgr = PxCreateAABBManager(*g_broadPhase);
+    if (!g_aabbMgr) {
+        fprintf(stderr, "[GPU BPH] PxCreateAABBManager failed.\n");
+        g_broadPhase->release(); g_broadPhase = nullptr;
+        g_cudaCtxMgr->release(); g_cudaCtxMgr = nullptr;
+        g_foundation->release(); g_foundation = nullptr;
+        return 1;
+    }
+
     CUDA_CHECK(cudaMalloc(&d_counter, sizeof(int)));
     g_initialised = true;
-    fprintf(stderr, "[GPU BPH] PhysX eGPU broad phase ready.\n");
+    fprintf(stderr, "[GPU BPH] PhysX eGPU broad phase ready (PxAABBManager).\n");
     return 0;
 }
 
@@ -457,9 +457,10 @@ void inter7_gpu_broadphase_destroy_(void)
 {
     if (!g_initialised) return;
 
-    if (g_broadPhase) { g_broadPhase->release(); g_broadPhase = nullptr; }
-    if (g_cudaCtxMgr) { g_cudaCtxMgr->release(); g_cudaCtxMgr = nullptr; }
-    if (g_foundation)  { g_foundation->release(); g_foundation  = nullptr; }
+    if (g_aabbMgr)   { g_aabbMgr->release();   g_aabbMgr   = nullptr; }
+    if (g_broadPhase){ g_broadPhase->release(); g_broadPhase= nullptr; }
+    if (g_cudaCtxMgr){ g_cudaCtxMgr->release(); g_cudaCtxMgr= nullptr; }
+    if (g_foundation) { g_foundation->release(); g_foundation= nullptr; }
 
     auto cfree = [](void* p){ if(p) cudaFree(p); };
     cfree(d_x);      cfree(d_nsv);      cfree(d_stfn);     cfree(d_gap_s);
@@ -468,12 +469,11 @@ void inter7_gpu_broadphase_destroy_(void)
     cfree(d_counter);
     cfree(d_slave_aabbs); cfree(d_segment_aabbs);
     cfree(d_slave_active); cfree(d_seg_active);
-    cfree(d_pair_slave);  cfree(d_pair_seg);
+    cfree(d_pair_slave);   cfree(d_pair_seg);
 
     free(h_slave_aabbs);   free(h_segment_aabbs);
     free(h_slave_active);  free(h_seg_active);
-    free(h_bounds);        free(h_groups);
-    free(h_created);       free(h_removed);
+    free(h_added_handles); free(h_decode);
     free(h_pair_slave);    free(h_pair_seg);
 
     g_initialised = false;
@@ -481,9 +481,6 @@ void inter7_gpu_broadphase_destroy_(void)
 
 int inter7_gpu_available_(void) { return g_initialised ? 1 : 0; }
 
-/* ------------------------------------------------------------------ */
-/* fill_voxel stub: not used in the PhysX path                        */
-/* ------------------------------------------------------------------ */
 void inter7_gpu_fill_voxel_(
     const int* nsn, const int* nsnr,
     const int* nbx, const int* nby, const int* nbz,
@@ -503,7 +500,7 @@ void inter7_gpu_candidate_pairs_(
     const int*         nsv,
     const int*         irect,
     const my_real_gpu* x,
-    const my_real_gpu* stfn,      /* slave node stiffness [nsn] */
+    const my_real_gpu* stfn,
     const my_real_gpu* stf,
     const my_real_gpu* xyzm,
     const int*         voxel,
@@ -542,9 +539,7 @@ void inter7_gpu_candidate_pairs_(
 
     if (h_nsn == 0 || h_nrtm == 0) { *ii_stok = 0; return; }
 
-    /* ---- upload geometry to device ----
-     * Each pointer uses its OWN size tracker so that ensure_device_* always
-     * allocates correctly even when multiple buffers have the same element count. */
+    /* ---- upload geometry to device ---- */
     ensure_device_real(&d_x,        &g_sz_x,        3 * h_numnod);
     ensure_device_int (&d_nsv,      &g_sz_nsv,      h_nsn);
     ensure_device_real(&d_stfn,     &g_sz_stfn,     h_nsn);
@@ -571,7 +566,7 @@ void inter7_gpu_candidate_pairs_(
     if (*s_remnod > 0)
         CUDA_CHECK(cudaMemcpy(d_remnod,  remnod,  (*s_remnod) *sizeof(int), cudaMemcpyHostToDevice));
 
-    /* ---- Step 1: slave point AABBs ---- */
+    /* ---- Step 1 & 2: build AABBs on GPU ---- */
     ensure_device_aabb(&d_slave_aabbs,  &g_sz_slave_aabbs, h_nsn);
     ensure_device_int (&d_slave_active, &g_sz_slave_act,   h_nsn);
     {
@@ -581,7 +576,6 @@ void inter7_gpu_candidate_pairs_(
         CUDA_CHECK(cudaGetLastError());
     }
 
-    /* ---- Step 2: segment inflated AABBs ---- */
     ensure_device_aabb(&d_segment_aabbs, &g_sz_seg_aabbs, h_nrtm);
     ensure_device_int (&d_seg_active,    &g_sz_seg_act,   h_nrtm);
     {
@@ -594,131 +588,109 @@ void inter7_gpu_candidate_pairs_(
     }
     CUDA_CHECK(cudaDeviceSynchronize());
 
-    /* ---- Download AABB data to host for PhysX submission ---- */
+    /* ---- Download to host ---- */
     ensure_host_raw((void**)&h_slave_aabbs,   &h_sz_sa_bytes,    h_nsn  *sizeof(AabbEntry));
     ensure_host_raw((void**)&h_segment_aabbs, &h_sz_seg_bytes,   h_nrtm *sizeof(AabbEntry));
     ensure_host_raw((void**)&h_slave_active,  &h_sz_sact_bytes,  h_nsn  *sizeof(int));
     ensure_host_raw((void**)&h_seg_active,    &h_sz_seact_bytes, h_nrtm *sizeof(int));
-
     CUDA_CHECK(cudaMemcpy(h_slave_aabbs,   d_slave_aabbs,   h_nsn *sizeof(AabbEntry), cudaMemcpyDeviceToHost));
     CUDA_CHECK(cudaMemcpy(h_segment_aabbs, d_segment_aabbs, h_nrtm*sizeof(AabbEntry), cudaMemcpyDeviceToHost));
     CUDA_CHECK(cudaMemcpy(h_slave_active,  d_slave_active,  h_nsn *sizeof(int),       cudaMemcpyDeviceToHost));
     CUDA_CHECK(cudaMemcpy(h_seg_active,    d_seg_active,    h_nrtm*sizeof(int),       cudaMemcpyDeviceToHost));
 
-    /* ---- Step 3: submit to PhysX GPU broad phase ----
+    /* ---- Step 3: submit objects to PxAABBManager ----
      *
-     * PxBroadPhaseUpdateData uses HANDLE-INDEXED arrays:
-     *   mBounds[handle] and mGroups[handle] are accessed for each handle
-     *   listed in mCreated[].
+     * Invariant on entry: manager is empty (all objects were removed at the
+     * end of the previous call and flushed by the cleanup update() there).
      *
-     * Handle assignment:
-     *   slave i    → handle = i          (0 .. nsn-1)
-     *   segment ne → handle = nsn + ne   (nsn .. nsn+nrtm-1)
+     * We register every active object via addObject(bounds, filterGroup).
+     * The returned handle is stored in h_added_handles[] and the decode
+     * table h_decode[handle] is populated for pair resolution.
      *
-     * Capacity = nsn + nrtm (one past the last handle).
+     * Decode encoding:
+     *   h_decode[h] = (slave_local_idx + 1)   for slaves
+     *   h_decode[h] = -(seg_local_idx + 1)    for segments
+     *   h_decode[h] = 0                        unused
+     *
+     * With a fresh, empty manager the internal handle pool starts at 0, so
+     * all handles will be in [0, total_active).  We size the table to
+     * nsn + nrtm as an upper bound and skip any pair whose handles fall
+     * outside that range (which would indicate an unexpected internal state).
      */
     int total_objs = h_nsn + h_nrtm;
-
-    ensure_host_raw((void**)&h_bounds,  &h_sz_bnd_bytes, total_objs * (int)sizeof(AabbEntry));
-    ensure_host_raw((void**)&h_groups,  &h_sz_grp_bytes, total_objs * (int)sizeof(PxU32));
-    ensure_host_raw((void**)&h_created, &h_sz_cr_bytes,  total_objs * (int)sizeof(PxU32));
-
-    PxU32 n_created = 0;
+    ensure_host_raw((void**)&h_added_handles, &h_sz_ah_bytes,  total_objs * (int)sizeof(PxU32));
+    ensure_host_raw((void**)&h_decode,        &h_sz_dec_bytes, total_objs * (int)sizeof(int));
+    memset(h_decode, 0, (size_t)total_objs * sizeof(int));
+    h_n_added = 0;
 
     for (int i = 0; i < h_nsn; i++) {
         if (!h_slave_active[i]) continue;
-        PxU32 handle = (PxU32)i;
-        h_bounds[handle] = h_slave_aabbs[i];
-        h_groups[handle] = FILTER_SLAVE;
-        h_created[n_created++] = handle;
+        PxBounds3 b(
+            PxVec3(h_slave_aabbs[i].lo[0], h_slave_aabbs[i].lo[1], h_slave_aabbs[i].lo[2]),
+            PxVec3(h_slave_aabbs[i].hi[0], h_slave_aabbs[i].hi[1], h_slave_aabbs[i].hi[2]));
+        PxU32 h = g_aabbMgr->addObject(b, FILTER_SLAVE);
+        h_added_handles[h_n_added++] = h;
+        if ((int)h < total_objs) h_decode[h] = i + 1;   /* positive → slave */
     }
     for (int ne = 0; ne < h_nrtm; ne++) {
         if (!h_seg_active[ne]) continue;
-        PxU32 handle = (PxU32)(h_nsn + ne);
-        h_bounds[handle] = h_segment_aabbs[ne];
-        h_groups[handle] = FILTER_MASTER;
-        h_created[n_created++] = handle;
+        PxBounds3 b(
+            PxVec3(h_segment_aabbs[ne].lo[0], h_segment_aabbs[ne].lo[1], h_segment_aabbs[ne].lo[2]),
+            PxVec3(h_segment_aabbs[ne].hi[0], h_segment_aabbs[ne].hi[1], h_segment_aabbs[ne].hi[2]));
+        PxU32 h = g_aabbMgr->addObject(b, FILTER_MASTER);
+        h_added_handles[h_n_added++] = h;
+        if ((int)h < total_objs) h_decode[h] = -(ne + 1);  /* negative → segment */
     }
 
-    if (n_created == 0) { *ii_stok = 0; return; }
+    if (h_n_added == 0) { *ii_stok = 0; return; }
 
-    /* PhysX 5.x PxBroadPhaseUpdateData constructor:
-     *   (created, nbCreated, updated, nbUpdated, removed, nbRemoved,
-     *    bounds, groups, distances=NULL, capacity)
-     * mBounds cast from AabbEntry* because AabbEntry == PxBounds3 layout. */
-    PxBroadPhaseUpdateData addData(
-        h_created, n_created,
-        nullptr,   0,
-        nullptr,   0,
-        reinterpret_cast<const PxBounds3*>(h_bounds),
-        h_groups,
-        nullptr,
-        (PxU32)total_objs
-    );
-    g_broadPhase->update(addData);
-
+    /* ---- Run GPU Sort-and-Prune ---- */
+    g_aabbMgr->update();          /* triggers the GPU SAP internally */
     PxBroadPhaseResults results;
-    g_broadPhase->fetchResults(results);
+    g_aabbMgr->fetchResults(results);
 
     PxU32 npairs = results.mNbCreatedPairs;
 
-    /* Prepare cleanup update data (used whether or not there are pairs) */
-    ensure_host_raw((void**)&h_removed, &h_sz_rm_bytes, (int)n_created * (int)sizeof(PxU32));
-    memcpy(h_removed, h_created, n_created * sizeof(PxU32));
-    PxBroadPhaseUpdateData removeData(
-        nullptr,   0,
-        nullptr,   0,
-        h_removed, n_created,
-        reinterpret_cast<const PxBounds3*>(h_bounds),
-        h_groups,
-        nullptr,
-        (PxU32)total_objs
-    );
-
-    if (npairs == 0) {
-        *ii_stok = 0;
-        g_broadPhase->update(removeData);
-        PxBroadPhaseResults dummy; g_broadPhase->fetchResults(dummy);
-        return;
-    }
-
-    /* ---- Unpack PhysX pairs ---- */
-    ensure_host_raw((void**)&h_pair_slave, &h_sz_ps_bytes, (int)npairs * (int)sizeof(int));
-    ensure_host_raw((void**)&h_pair_seg,   &h_sz_pe_bytes, (int)npairs * (int)sizeof(int));
-
+    /* ---- Decode pairs on CPU ---- */
     PxU32 valid = 0;
-    for (PxU32 k = 0; k < npairs; k++) {
-        PxU32 h0 = results.mCreatedPairs[k].mID0;
-        PxU32 h1 = results.mCreatedPairs[k].mID1;
-        PxU32 slave_handle, seg_handle;
-        if (h0 < (PxU32)h_nsn) { slave_handle = h0; seg_handle = h1; }
-        else                    { slave_handle = h1; seg_handle = h0; }
-        if (seg_handle < (PxU32)h_nsn ||
-            seg_handle >= (PxU32)(h_nsn + h_nrtm)) continue;
-        h_pair_slave[valid] = (int)slave_handle;
-        h_pair_seg[valid]   = (int)(seg_handle - h_nsn);
-        valid++;
+    if (npairs > 0) {
+        ensure_host_raw((void**)&h_pair_slave, &h_sz_ps_bytes, (int)npairs*(int)sizeof(int));
+        ensure_host_raw((void**)&h_pair_seg,   &h_sz_pe_bytes, (int)npairs*(int)sizeof(int));
+
+        for (PxU32 k = 0; k < npairs; k++) {
+            PxU32 ha = results.mCreatedPairs[k].mID0;
+            PxU32 hb = results.mCreatedPairs[k].mID1;
+            if ((int)ha >= total_objs || (int)hb >= total_objs) continue;
+            int da = h_decode[ha], db = h_decode[hb];
+            int slave_idx, seg_idx;
+            if      (da > 0 && db < 0) { slave_idx = da-1; seg_idx = -db-1; }
+            else if (da < 0 && db > 0) { slave_idx = db-1; seg_idx = -da-1; }
+            else continue;
+            h_pair_slave[valid] = slave_idx;
+            h_pair_seg[valid]   = seg_idx;
+            valid++;
+        }
     }
 
-    /* Remove objects before the post-filter so the GPU SAP is clean
-     * regardless of whether post-filter finds any valid pairs. */
-    g_broadPhase->update(removeData);
-    PxBroadPhaseResults dummy; g_broadPhase->fetchResults(dummy);
+    /* ---- Remove all objects; flush via update so manager is empty again ---- */
+    for (int k = 0; k < h_n_added; k++)
+        g_aabbMgr->removeObject(h_added_handles[k]);
+    g_aabbMgr->update();
+    PxBroadPhaseResults dummy; g_aabbMgr->fetchResults(dummy);
 
     if (valid == 0) { *ii_stok = 0; return; }
 
+    /* ---- Step 4: post-filter pairs on GPU ---- */
     ensure_device_int(&d_pair_slave, &g_sz_pair_slave, (int)valid);
     ensure_device_int(&d_pair_seg,   &g_sz_pair_seg,   (int)valid);
     CUDA_CHECK(cudaMemcpy(d_pair_slave, h_pair_slave, valid*sizeof(int), cudaMemcpyHostToDevice));
     CUDA_CHECK(cudaMemcpy(d_pair_seg,   h_pair_seg,   valid*sizeof(int), cudaMemcpyHostToDevice));
     CUDA_CHECK(cudaMemset(d_counter, 0, sizeof(int)));
 
-    /* ---- Step 4: post-filter on GPU ---- */
     {
         int threads = 256, blocks = ((int)valid + threads - 1) / threads;
         kernel_postfilter_pairs<<<blocks, threads>>>(
-            (int)valid,
-            d_pair_slave, d_pair_seg,
+            (int)valid, d_pair_slave, d_pair_seg,
             h_nrtm, d_irect, d_x, d_nsv,
             *igap, *marge, *gapmin, *gapmax, *dgapload, *drad,
             d_gap_s, d_gap_m, d_curv_max,
@@ -730,7 +702,6 @@ void inter7_gpu_candidate_pairs_(
 
     int h_count = 0;
     CUDA_CHECK(cudaMemcpy(&h_count, d_counter, sizeof(int), cudaMemcpyDeviceToHost));
-    /* Use std::min – host code cannot use CUDA device intrinsic min() */
     h_count = std::min(h_count, h_mulnsn);
     if (h_count > 0) {
         CUDA_CHECK(cudaMemcpy(cand_n, d_cand_n, h_count*sizeof(int), cudaMemcpyDeviceToHost));
