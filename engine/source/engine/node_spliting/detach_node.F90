@@ -611,15 +611,19 @@
 !||--- calls      -----------------------------------------------------
 !||    detach_node_from_interfaces   ../engine/source/engine/node_spliting/detach_node.F90
 !||    detach_node_from_shells       ../engine/source/engine/node_spliting/detach_node.F90
+!||    detach_node_nloc              ../engine/source/engine/node_spliting/detach_node_nloc.F90
 !||    extend_nodal_arrays           ../common_source/modules/nodal_arrays.F90
 !||    set_new_node_values           ../engine/source/engine/node_spliting/detach_node.F90
 !||--- uses       -----------------------------------------------------
 !||    connectivity_mod              ../common_source/modules/connectivity.F90
 !||    constant_mod                  ../common_source/modules/constant_mod.F
+!||    detach_node_nloc_mod          ../engine/source/engine/node_spliting/detach_node_nloc.F90
 !||    interfaces_mod                ../common_source/modules/interfaces/interfaces_mod.F90
+!||    nlocal_reg_mod                ../common_source/modules/nlocal_reg_mod.F
 !||    nodal_arrays_mod              ../common_source/modules/nodal_arrays.F90
 !||====================================================================
-        subroutine detach_node(nodes, node_id ,elements,shell_list,list_size,npari,ninter, ipari, interf)
+        subroutine detach_node(nodes, node_id, elements, shell_list, list_size, &
+          npari, ninter, ipari, interf, nloc_dmg, nthread)
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Modules
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -627,19 +631,23 @@
           USE connectivity_mod
           USE nodal_arrays_mod
           USE interfaces_mod
+          use nlocal_reg_mod
+          use detach_node_nloc_mod
           implicit none
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Arguments
 ! ----------------------------------------------------------------------------------------------------------------------
-          type(nodal_arrays_), intent(inout) :: nodes !< nodal arrays
-          type(connectivity_), intent(inout) :: elements !< connectivity of elements
-          integer, intent(in) :: node_id                 !< id of the node to detach
-          integer, intent(in) :: list_size               !< size of the shell list
-          integer, intent(in) :: shell_list(list_size)   !< list of local ids of shells to detach from the node
-          type(interfaces_), intent(inout) :: interf !< interf structure
-          integer, intent(in) :: npari                   !< number of parameters
-          integer, intent(in) :: ninter                  !< number of interf
-          integer, intent(inout) :: ipari(npari,ninter)    !< parameters of the interf
+          type(nodal_arrays_), intent(inout) :: nodes        !< nodal arrays
+          type(connectivity_), intent(inout) :: elements     !< connectivity of elements
+          integer,             intent(in)    :: node_id      !< local id of the node to detach
+          integer,             intent(in)    :: list_size    !< size of the shell list
+          integer,             intent(in)    :: shell_list(list_size) !< local ids of shells to detach
+          type(interfaces_),   intent(inout) :: interf       !< interface structure
+          integer,             intent(in)    :: npari        !< number of interface parameters
+          integer,             intent(in)    :: ninter       !< number of interfaces
+          integer,             intent(inout) :: ipari(npari, ninter) !< interface parameters
+          type(nlocal_str_),   intent(inout) :: nloc_dmg     !< non-local damage structure
+          integer,             intent(in)    :: nthread      !< number of OpenMP threads
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Local variables
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -657,15 +665,21 @@
           old_uid = nodes%itab(node_id)
           numnod = nodes%numnod
           new_local_id = nodes%numnod + 1
-          call detach_node_from_interfaces(nodes, node_id,npari,ninter, ipari, interf, elements, shell_list,list_size)
+          call detach_node_from_interfaces(nodes, node_id, npari, ninter, ipari, interf, &
+            elements, shell_list, list_size)
 
-          call extend_nodal_arrays(nodes,numnod+1) !increments nodes%numnod
+          call extend_nodal_arrays(nodes, numnod + 1) !increments nodes%numnod
 
           i = node_id
-          call set_new_node_values(nodes,i)
+          call set_new_node_values(nodes, i)
 
+          call detach_node_from_shells(nodes, node_id, elements, shell_list, list_size)
 
-          call detach_node_from_shells(nodes, node_id ,elements,shell_list,list_size)
+          ! Update non-local damage structure for the new node
+          if (nloc_dmg%imod > 0) then
+            call detach_node_nloc(nloc_dmg, node_id, new_local_id, &
+              elements, shell_list, list_size, numnod, nthread)
+          end if
 
           nodes%numnod = nodes%numnod + 1
 
@@ -687,13 +701,14 @@
 !||    extend_array_mod             ../common_source/tools/memory/extend_array.F90
 !||    ghost_shells_mod             ../engine/source/engine/node_spliting/ghost_shells.F90
 !||    interfaces_mod               ../common_source/modules/interfaces/interfaces_mod.F90
+!||    nlocal_reg_mod               ../common_source/modules/nlocal_reg_mod.F
 !||    nodal_arrays_mod             ../common_source/modules/nodal_arrays.F90
 !||    precision_mod                ../common_source/modules/precision_mod.F90
 !||    spmd_mod                     ../engine/source/mpi/spmd_mod.F90
 !||====================================================================
         subroutine test_jc_shell_detach(nodes, element, interf, npari, ninter, ipari, numnod, &
           numnodg, elbuf, ngroup, ngrouc, nparg, iparg, igrouc, numelc, ispmd, nspmd, &
-          new_crack)
+          new_crack, nloc_dmg, nthread)
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Modules
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -706,6 +721,7 @@
           USE interfaces_mod
           USE elbufdef_mod
           use extend_array_mod
+          use nlocal_reg_mod
           implicit none
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Arguments
@@ -727,6 +743,8 @@
           integer, intent(in) :: ispmd !< rank of the processor (MPI)
           integer, intent(in) :: nspmd !< number of processors (MPI)
           integer, intent(out) :: new_crack !< flag to indicate if a new crack is created
+          type(nlocal_str_), intent(inout) :: nloc_dmg  !< non-local damage structure
+          integer,           intent(in)    :: nthread   !< number of OpenMP threads
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Local variables
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -910,7 +928,7 @@
                 write(6,*) "DETACH NODE",nodes%itab(crack(1)),"damage",nodal_damage(crack(1)), &
                   "ratio",distance / element%shell%dist_to_center(i)
 
-                call detach_node(nodes,crack(1),element,shell_list,shells_to_detach,npari,ninter, ipari, interf)
+                call detach_node(nodes,crack(1),element,shell_list,shells_to_detach,npari,ninter, ipari, interf, nloc_dmg, nthread)
                 numnod = numnod + 1
                 if(ispmd == 0) numnodg = numnodg + 1
               end if

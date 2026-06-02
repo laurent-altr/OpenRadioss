@@ -5237,7 +5237,7 @@ C            numnod_old = numnod
 C            numnodm_old = numnodm
 C            call test_jc_shell_detach(nodes, element, interfaces, npari, ninter, ipari, numnod,
 C    .                numnodg, elbuf_tab, ngroup, ngrouc, nparg, iparg, igrouc, numelc, ispmd, nspmd,
-C    .                new_crack)
+C    .                new_crack, nloc_dmg, nthread)
 
 
 C            if(new_crack > 0) then
@@ -5279,6 +5279,11 @@ C    5              ADDTMPL    ,IPARG     )
 C              ENDIF
 C              CALL ALLOCATE_OUTPUT_DATA(OUTPUT,NUMNOD)
 C              LCNE0 = SIZE(ELEMENT%PON%PROCNE)
+C              ! Rebuild non-local SPMD boundary arrays (ISENDSP, IRECSP, etc.)
+C              ! after the skyline topology changed due to node split.
+C              IF(IPARIT /= 0 .AND. NSPMD > 1 .AND. NLOC_DMG%IMOD > 0) THEN
+C                CALL SPMD_EXCH_SUB_PON(NLOC_DMG)
+C              ENDIF
 C            endif
 
 C========================================================================================
