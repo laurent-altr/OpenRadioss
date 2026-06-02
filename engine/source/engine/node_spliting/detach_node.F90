@@ -444,6 +444,124 @@
           end do
 
         end subroutine detach_node_from_interfaces
+
+!! \brief Register split nodes with rigid-wall secondary-node lists.
+!!
+!! \details When a node is split, the new node must be added to every rigid wall
+!!          that already tracks the parent node as a secondary node.  The rigid-wall
+!!          force loop (rwall_fpen) iterates only over the pre-built lprw list, so
+!!          new nodes would otherwise never receive wall forces and could penetrate
+!!          the rigid surface indefinitely.
+!!
+!!          Called from resol.F in the new_crack > 0 block, after nloc_shell_detach.
+!!          Handles no-friction walls fully.  For friction walls (ifq > 0) the rwsav
+!!          extension is skipped; add it here when friction + node splitting is needed.
+!||====================================================================
+!||    detach_node_from_rwalls      ../engine/source/engine/node_spliting/detach_node.F90
+!||--- called by ------------------------------------------------------
+!||    resol                        ../engine/source/engine/resol.F
+!||--- uses       -----------------------------------------------------
+!||    extend_array_mod             ../common_source/tools/memory/extend_array.F90
+!||    nodal_arrays_mod             ../common_source/modules/nodal_arrays.F90
+!||    rwall_mod                    ../common_source/modules/constraints/rwall_mod.F90
+!||====================================================================
+        subroutine detach_node_from_rwalls(nodes, numnod_old, numnod_new, rwall)
+! ----------------------------------------------------------------------------------------------------------------------
+!                                                   Modules
+! ----------------------------------------------------------------------------------------------------------------------
+          use nodal_arrays_mod
+          use rwall_mod
+          use extend_array_mod
+          implicit none
+! ----------------------------------------------------------------------------------------------------------------------
+!                                                   Arguments
+! ----------------------------------------------------------------------------------------------------------------------
+          type(nodal_arrays_), intent(in)    :: nodes         !< nodal arrays (for parent_node lookup)
+          integer,             intent(in)    :: numnod_old    !< node count before splits
+          integer,             intent(in)    :: numnod_new    !< node count after splits
+          type(rwall_),        intent(inout) :: rwall         !< rigid wall structure
+! ----------------------------------------------------------------------------------------------------------------------
+!                                                   Local variables
+! ----------------------------------------------------------------------------------------------------------------------
+          integer        :: inew, parent_id
+          integer        :: irw, j, k_start, nsn, ipen, insert_pos, n_p_start, n_p_insert
+          integer        :: old_sz, old_lnspen
+          real(kind=WP)  :: ZERO
+          parameter      (ZERO = 0.0_WP)
+! ----------------------------------------------------------------------------------------------------------------------
+!                                                   Body
+! ----------------------------------------------------------------------------------------------------------------------
+          if (rwall%nrwall == 0) return
+
+          do inew = numnod_old + 1, numnod_new
+            parent_id = nodes%parent_node(inew)
+
+            ! Walk wall-by-wall through lprw; track penalty offset n_p_start independently.
+            k_start   = 1
+            n_p_start = 1
+            do irw = 1, rwall%nrwall
+              nsn  = rwall%nprw(irw, 1)
+              ipen = rwall%nprw(irw, 9)
+
+              ! Search parent in this wall's secondary-node block.
+              insert_pos = 0
+              do j = k_start, k_start + nsn - 1
+                if (rwall%lprw(j) == parent_id) then
+                  insert_pos = k_start + nsn  ! append after last node of this wall
+                  exit
+                end if
+              end do
+
+              if (insert_pos > 0) then
+                ! ---- Extend lprw and shift subsequent walls' entries right by 1 ----
+                old_sz = rwall%sz_lprw
+                call extend_array(rwall%lprw, old_sz, old_sz + 1)
+                if (insert_pos <= old_sz) then
+                  rwall%lprw(insert_pos + 1 : old_sz + 1) = rwall%lprw(insert_pos : old_sz)
+                end if
+                rwall%lprw(insert_pos) = inew
+                rwall%nprw(irw, 1)    = nsn + 1
+                rwall%sz_lprw         = old_sz + 1
+
+                ! ---- Extend penalty arrays if this wall uses penalty ---------------
+                if (ipen > 0 .and. allocated(rwall%pen%pen_old)) then
+                  n_p_insert = n_p_start + nsn   ! append after this wall's penalty block
+                  old_lnspen = rwall%pen%lnspen
+
+                  call extend_array(rwall%pen%pen_old, old_lnspen, old_lnspen + 1)
+                  if (n_p_insert <= old_lnspen) then
+                    rwall%pen%pen_old(n_p_insert + 1 : old_lnspen + 1) = &
+                      rwall%pen%pen_old(n_p_insert : old_lnspen)
+                  end if
+                  rwall%pen%pen_old(n_p_insert) = ZERO
+
+                  call extend_array(rwall%pen%stif, old_lnspen, old_lnspen + 1)
+                  if (n_p_insert <= old_lnspen) then
+                    rwall%pen%stif(n_p_insert + 1 : old_lnspen + 1) = &
+                      rwall%pen%stif(n_p_insert : old_lnspen)
+                  end if
+                  rwall%pen%stif(n_p_insert) = ZERO
+
+                  call extend_array(rwall%pen%ft, 3, old_lnspen, 3, old_lnspen + 1)
+                  if (n_p_insert <= old_lnspen) then
+                    rwall%pen%ft(:, n_p_insert + 1 : old_lnspen + 1) = &
+                      rwall%pen%ft(:, n_p_insert : old_lnspen)
+                  end if
+                  rwall%pen%ft(:, n_p_insert) = ZERO
+
+                  rwall%pen%lnspen = old_lnspen + 1
+                end if
+                ! Note: rwsav (friction saved positions) is not extended here because
+                ! the current model has no friction (fric=0 → ifq=0 → rwsav unused).
+                ! Extend rwsav(3*nsn_new) when friction + node splitting is required.
+              end if
+
+              k_start = k_start + nsn
+              if (ipen > 0) n_p_start = n_p_start + nsn
+            end do
+          end do
+
+        end subroutine detach_node_from_rwalls
         !\brief This subroutine sets the values of the new node using the values of the old node
 !||====================================================================
 !||    set_new_node_values   ../engine/source/engine/node_spliting/detach_node.F90
@@ -458,7 +576,7 @@
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Modules
 ! ----------------------------------------------------------------------------------------------------------------------
-          USE constant_mod, only : TWO
+          USE constant_mod, only : TWO, EM20
           USE connectivity_mod
           USE nodal_arrays_mod
           implicit none
@@ -501,9 +619,9 @@
             nodes%DR(1:3,numnod+1) = nodes%DR(1:3,i)
           end if
           nodes%MS(numnod+1) = nodes%MS(i)  / TWO
-!         nodes%MS(i) = nodes%MS(i)  / TWO
-          nodes%MS0(numnod+1) = nodes%MS0(i)   /TWO
-!         nodes%MS0(i) = nodes%MS0(i)  /TWO
+          nodes%MS(i)        = nodes%MS(i)  / TWO
+          nodes%MS0(numnod+1) = nodes%MS0(i) / TWO
+          nodes%MS0(i)        = nodes%MS0(i) / TWO
 
 #ifdef MYREAL4
           nodes%DDP(1:3,numnod+1) = nodes%DDP(1:3,i)
@@ -520,15 +638,15 @@
           if(nodes%iparith == 0) then
             nodes%A(1:3,numnod+1) = nodes%A(1:3,i)
             nodes%AR(1:3,numnod+1) = nodes%AR(1:3,i)
-            if(nodes%iroddl > 0) nodes%STIFR(numnod+1) = nodes%STIFR(i)
+            if(nodes%iroddl > 0) nodes%STIFR(numnod+1) = EM20
             nodes%VISCN(numnod+1) = nodes%VISCN(i)
-            nodes%STIFN(numnod+1) = nodes%STIFN(i)
+            nodes%STIFN(numnod+1) = EM20  ! will be reaccumulated from elements next cycle
           else
             nodes%A(1:3,numnod+1) = nodes%A(1:3,i)
             nodes%AR(1:3,numnod+1) = nodes%AR(1:3,i)
-            nodes%STIFR(numnod+1) = nodes%STIFR(i)
+            nodes%STIFR(numnod+1) = EM20
             nodes%VISCN(numnod+1) = nodes%VISCN(i)
-            nodes%STIFN(numnod+1) = nodes%STIFN(i)
+            nodes%STIFN(numnod+1) = EM20  ! will be reaccumulated from elements next cycle
           end if
           p = i
           nodes%parent_node(numnod+1) = i
@@ -536,7 +654,7 @@
             p = nodes%parent_node(p)
           end do
           nodes%parent_node(numnod+1) = p
-!         nodes%nchilds(p) = nodes%nchilds(p) + 1
+          nodes%nchilds(p) = nodes%nchilds(p) + 1
 
           nodes%ITABM1(numnod+1) = nodes%max_uid !-nodes%itab(numnod+1)
           nodes%ITABM1(2*(numnod+1)) = numnod + 1
@@ -611,15 +729,20 @@
 !||--- calls      -----------------------------------------------------
 !||    detach_node_from_interfaces   ../engine/source/engine/node_spliting/detach_node.F90
 !||    detach_node_from_shells       ../engine/source/engine/node_spliting/detach_node.F90
+!||    detach_node_nloc              ../engine/source/engine/node_spliting/detach_node_nloc.F90
 !||    extend_nodal_arrays           ../common_source/modules/nodal_arrays.F90
+!||    extend_boundary_for_split     ../common_source/modules/nodal_arrays.F90
 !||    set_new_node_values           ../engine/source/engine/node_spliting/detach_node.F90
 !||--- uses       -----------------------------------------------------
 !||    connectivity_mod              ../common_source/modules/connectivity.F90
 !||    constant_mod                  ../common_source/modules/constant_mod.F
+!||    detach_node_nloc_mod          ../engine/source/engine/node_spliting/detach_node_nloc.F90
 !||    interfaces_mod                ../common_source/modules/interfaces/interfaces_mod.F90
+!||    nlocal_reg_mod                ../common_source/modules/nlocal_reg_mod.F
 !||    nodal_arrays_mod              ../common_source/modules/nodal_arrays.F90
 !||====================================================================
-        subroutine detach_node(nodes, node_id ,elements,shell_list,list_size,npari,ninter, ipari, interf)
+        subroutine detach_node(nodes, node_id, elements, shell_list, list_size, &
+          npari, ninter, ipari, interf, nloc_dmg, nthread, nspmd, ispmd)
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Modules
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -627,19 +750,25 @@
           USE connectivity_mod
           USE nodal_arrays_mod
           USE interfaces_mod
+          use nlocal_reg_mod
+          use detach_node_nloc_mod
           implicit none
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Arguments
 ! ----------------------------------------------------------------------------------------------------------------------
-          type(nodal_arrays_), intent(inout) :: nodes !< nodal arrays
-          type(connectivity_), intent(inout) :: elements !< connectivity of elements
-          integer, intent(in) :: node_id                 !< id of the node to detach
-          integer, intent(in) :: list_size               !< size of the shell list
-          integer, intent(in) :: shell_list(list_size)   !< list of local ids of shells to detach from the node
-          type(interfaces_), intent(inout) :: interf !< interf structure
-          integer, intent(in) :: npari                   !< number of parameters
-          integer, intent(in) :: ninter                  !< number of interf
-          integer, intent(inout) :: ipari(npari,ninter)    !< parameters of the interf
+          type(nodal_arrays_), intent(inout) :: nodes        !< nodal arrays
+          type(connectivity_), intent(inout) :: elements     !< connectivity of elements
+          integer,             intent(in)    :: node_id      !< local id of the node to detach
+          integer,             intent(in)    :: list_size    !< size of the shell list
+          integer,             intent(in)    :: shell_list(list_size) !< local ids of shells to detach
+          type(interfaces_),   intent(inout) :: interf       !< interface structure
+          integer,             intent(in)    :: npari        !< number of interface parameters
+          integer,             intent(in)    :: ninter       !< number of interfaces
+          integer,             intent(inout) :: ipari(npari, ninter) !< interface parameters
+          type(nlocal_str_),   intent(inout) :: nloc_dmg     !< non-local damage structure
+          integer,             intent(in)    :: nthread      !< number of OpenMP threads
+          integer,             intent(in)    :: nspmd        !< number of MPI domains
+          integer,             intent(in)    :: ispmd        !< local MPI rank (0-based)
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Local variables
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -657,15 +786,26 @@
           old_uid = nodes%itab(node_id)
           numnod = nodes%numnod
           new_local_id = nodes%numnod + 1
-          call detach_node_from_interfaces(nodes, node_id,npari,ninter, ipari, interf, elements, shell_list,list_size)
+          call detach_node_from_interfaces(nodes, node_id, npari, ninter, ipari, interf, &
+            elements, shell_list, list_size)
 
-          call extend_nodal_arrays(nodes,numnod+1) !increments nodes%numnod
+          call extend_nodal_arrays(nodes, numnod + 1) ! allocates space for one more node (does not increment nodes%numnod)
+
+          ! Extend MPI domain-boundary list if the parent node was a boundary node
+          if (nspmd > 1) then
+            call extend_boundary_for_split(nodes, node_id, new_local_id, nspmd)
+          end if
 
           i = node_id
-          call set_new_node_values(nodes,i)
+          call set_new_node_values(nodes, i)
 
+          call detach_node_from_shells(nodes, node_id, elements, shell_list, list_size)
 
-          call detach_node_from_shells(nodes, node_id ,elements,shell_list,list_size)
+          ! Update non-local damage structure for the new node
+          if (nloc_dmg%imod > 0) then
+            call detach_node_nloc(nloc_dmg, node_id, new_local_id, &
+              elements, shell_list, list_size, numnod, nthread, ispmd)
+          end if
 
           nodes%numnod = nodes%numnod + 1
 
@@ -687,13 +827,14 @@
 !||    extend_array_mod             ../common_source/tools/memory/extend_array.F90
 !||    ghost_shells_mod             ../engine/source/engine/node_spliting/ghost_shells.F90
 !||    interfaces_mod               ../common_source/modules/interfaces/interfaces_mod.F90
+!||    nlocal_reg_mod               ../common_source/modules/nlocal_reg_mod.F
 !||    nodal_arrays_mod             ../common_source/modules/nodal_arrays.F90
 !||    precision_mod                ../common_source/modules/precision_mod.F90
 !||    spmd_mod                     ../engine/source/mpi/spmd_mod.F90
 !||====================================================================
         subroutine test_jc_shell_detach(nodes, element, interf, npari, ninter, ipari, numnod, &
           numnodg, elbuf, ngroup, ngrouc, nparg, iparg, igrouc, numelc, ispmd, nspmd, &
-          new_crack)
+          new_crack, nloc_dmg, nthread)
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Modules
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -706,6 +847,7 @@
           USE interfaces_mod
           USE elbufdef_mod
           use extend_array_mod
+          use nlocal_reg_mod
           implicit none
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Arguments
@@ -727,6 +869,8 @@
           integer, intent(in) :: ispmd !< rank of the processor (MPI)
           integer, intent(in) :: nspmd !< number of processors (MPI)
           integer, intent(out) :: new_crack !< flag to indicate if a new crack is created
+          type(nlocal_str_), intent(inout) :: nloc_dmg  !< non-local damage structure
+          integer,           intent(in)    :: nthread   !< number of OpenMP threads
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Local variables
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -910,7 +1054,7 @@
                 write(6,*) "DETACH NODE",nodes%itab(crack(1)),"damage",nodal_damage(crack(1)), &
                   "ratio",distance / element%shell%dist_to_center(i)
 
-                call detach_node(nodes,crack(1),element,shell_list,shells_to_detach,npari,ninter, ipari, interf)
+                call detach_node(nodes,crack(1),element,shell_list,shells_to_detach,npari,ninter, ipari, interf, nloc_dmg, nthread, nspmd, ispmd)
                 numnod = numnod + 1
                 if(ispmd == 0) numnodg = numnodg + 1
               end if

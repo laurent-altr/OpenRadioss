@@ -668,6 +668,7 @@ C-----------------------------------------------
               USE CONNECTIVITY_MOD
               USE NODAL_ARRAYS_MOD
               USE detach_node_mod
+              USE nloc_shell_detach_mod
               USE DSGRAPH_MOD
               USE ERROR_MOD
               USE RESOLSAV_MOD
@@ -5231,55 +5232,65 @@ C Init var parallel SMP
 
 c ========================================================================================
 C                                     node splitting
-C  uncomment the following code for an example of node splitting (using non-physical deformation critera)
 
-C            numnod_old = numnod
-C            numnodm_old = numnodm
-C            call test_jc_shell_detach(nodes, element, interfaces, npari, ninter, ipari, numnod,
-C    .                numnodg, elbuf_tab, ngroup, ngrouc, nparg, iparg, igrouc, numelc, ispmd, nspmd,
-C    .                new_crack)
-
-
-C            if(new_crack > 0) then
-C              ! if at least 1 node has been detached, some data must be re-initialized
-C              numnodm = numnodm_old + new_crack
-C              CALL INIT_NODAL_STATE( IPARI,SHOOT_STRUCT,INTERFACES%INTBUF_TAB,NODES%BOUNDARY_ADD,NODES%BOUNDARY,
-C    .                              NODES%ITAB,NODES,GEO,ADDCNEL,CNEL,
-C    .                              IXS,ELEMENT%SHELL%IXC,IXT,IXP,IXR,IXTG,
-C    .                              SIZE_ADDCNEL,SIZE_CNEL ,
-C    .                              numelsg,numelqg,numelcg,numeltrg,numelpg,
-C    .                              numelrg,numeltgg , IXS(L1))
+             numnod_old = numnod
+             numnodm_old = numnodm
+             call nloc_shell_detach(nodes, element, interfaces, npari, ninter, ipari, numnod,
+     .                numnodg, numelc, ispmd, nspmd,
+     .                new_crack, nloc_dmg, nthread)
 
 
-C              IF(IDEL7NG>0.OR.IRAD2R>0.OR.ALEMUSCL_Param%IALEMUSCL>0.OR.PDEL>0) THEN
-C                SIZE_ADDCNEL = NUMNOD+1
-C                SIZE_CNEL = LCNEL
-C                NELEML = NUMELS+NUMELQ+NUMELC+NUMELT+NUMELP+NUMELR+NUMELTG
-C                S_ELEM_STATE = NELEML
-C                DEALLOCATE(CNEL)
-C                ALLOCATE(CNEL(0:SIZE_CNEL))
-C                DEALLOCATE(ADDCNEL)
-C                ALLOCATE(ADDCNEL(0:SIZE_ADDCNEL))
-C                DEALLOCATE(ADDTMPL)
-C                ALLOCATE(ADDTMPL(0:NUMNOD+1))
-C                NELEML = NUMELS+NUMELQ+NUMELC+NUMELT+NUMELP+NUMELR+NUMELTG
-C                ALEMUSCL_Buffer%pCNEL => CNEL
-C                ALEMUSCL_Buffer%pADDCNEL => ADDCNEL
-C                ALEMUSCL_Buffer%pADDTMPL => ADDTMPL
-C                L1 = 1+NIXS*NUMELS + NSVOIS*NIXS
-C                L2 = L1+6*NUMELS10
-C                L3 = L2+12*NUMELS20
+             if(new_crack > 0) then
+               ! if at least 1 node has been detached, some data must be re-initialized
+               numnodm = numnodm_old + new_crack
+               CALL INIT_NODAL_STATE( IPARI,SHOOT_STRUCT,INTERFACES%INTBUF_TAB,NODES%BOUNDARY_ADD,NODES%BOUNDARY,
+     .                              NODES%ITAB,NODES,GEO,ADDCNEL,CNEL,
+     .                              IXS,ELEMENT%SHELL%IXC,IXT,IXP,IXR,IXTG,
+     .                              SIZE_ADDCNEL,SIZE_CNEL ,
+     .                              numelsg,numelqg,numelcg,numeltrg,numelpg,
+     .                              numelrg,numeltgg , IXS(L1))
 
-C                CALL CHKINIT(
-C    2              IXS        ,IXQ       ,ELEMENT%SHELL%IXC       ,IXT         ,IXP       ,
-C    3              IXR        ,IXTG      ,IXS(L1)       ,IXS(L2)     ,
-C    4              IXS(L3)      ,IXTG1     ,GEO       ,ADDCNEL     ,CNEL      ,
-C    5              ADDTMPL    ,IPARG     )
 
-C              ENDIF
-C              CALL ALLOCATE_OUTPUT_DATA(OUTPUT,NUMNOD)
-C              LCNE0 = SIZE(ELEMENT%PON%PROCNE)
-C            endif
+               IF(IDEL7NG>0.OR.IRAD2R>0.OR.ALEMUSCL_Param%IALEMUSCL>0.OR.PDEL>0) THEN
+                 SIZE_ADDCNEL = NUMNOD+1
+                 SIZE_CNEL = LCNEL
+                 NELEML = NUMELS+NUMELQ+NUMELC+NUMELT+NUMELP+NUMELR+NUMELTG
+                 S_ELEM_STATE = NELEML
+                 DEALLOCATE(CNEL)
+                 ALLOCATE(CNEL(0:SIZE_CNEL))
+                 DEALLOCATE(ADDCNEL)
+                 ALLOCATE(ADDCNEL(0:SIZE_ADDCNEL))
+                 DEALLOCATE(ADDTMPL)
+                 ALLOCATE(ADDTMPL(0:NUMNOD+1))
+                 NELEML = NUMELS+NUMELQ+NUMELC+NUMELT+NUMELP+NUMELR+NUMELTG
+                 ALEMUSCL_Buffer%pCNEL => CNEL
+                 ALEMUSCL_Buffer%pADDCNEL => ADDCNEL
+                 ALEMUSCL_Buffer%pADDTMPL => ADDTMPL
+                 L1 = 1+NIXS*NUMELS + NSVOIS*NIXS
+                 L2 = L1+6*NUMELS10
+                 L3 = L2+12*NUMELS20
+
+                 CALL CHKINIT(
+     2              IXS        ,IXQ       ,ELEMENT%SHELL%IXC       ,IXT         ,IXP       ,
+     3              IXR        ,IXTG      ,IXS(L1)       ,IXS(L2)     ,
+     4              IXS(L3)      ,IXTG1     ,GEO       ,ADDCNEL     ,CNEL      ,
+     5              ADDTMPL    ,IPARG     )
+
+               ENDIF
+               CALL ALLOCATE_OUTPUT_DATA(OUTPUT,NUMNOD)
+               LCNE0 = SIZE(ELEMENT%PON%PROCNE)
+               ! Reallocate skyline arrays after node split (NUMNOD has increased).
+               ! ADSKYI is dimensioned (0:NUMNOD+1) but was sized for the old NUMNOD.
+               IF(IPARIT > 0) THEN
+                 IF(SIZE(INTERFACES%PON%ADSKYI,1) < NUMNOD+2) THEN
+                   DEALLOCATE(INTERFACES%PON%ADSKYI)
+                   ALLOCATE(INTERFACES%PON%ADSKYI(0:NUMNOD+1))
+                 ENDIF
+               ENDIF
+               IF(RWALL%NRWALL > 0) THEN
+                 CALL DETACH_NODE_FROM_RWALLS(NODES, NUMNOD_OLD, NUMNOD, RWALL)
+               ENDIF
+             endif
 
 C========================================================================================
 C                                     NON PARALLEL SECTION (SMP)
