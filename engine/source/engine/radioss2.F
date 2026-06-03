@@ -204,6 +204,7 @@ C-----------------------------------------------
       use rwall_mod
       use sfem_mod
       use init_h3d_engine_mod
+      USE scr_fac_mod , ONLY : scr_fac_t
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -237,7 +238,6 @@ C-----------------------------------------------
 #include      "scr18_c.inc"
 #include      "scr20_c.inc"
 #include      "scr23_c.inc"
-#include      "scr_fac_c.inc"
 #include      "chara_c.inc"
 #include      "task_c.inc"
 #include      "spmd_c.inc"
@@ -289,6 +289,7 @@ C-----------------------------------------------
       DATA ABC/'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z'/
   
       INTEGER LHEADER, LVARINT, LVARREA
+      type(scr_fac_t) :: scr_fac
       INTEGER PRADIOS,PRESFIL
       INTEGER I15A,I15B,I15C,I15D,I15E,I15F,I15G,I15H,I15I,I15J,
      .        I15ATH,ITHFLAG
@@ -916,7 +917,7 @@ C      CALL TRACE_OUT(19)
 
       CALL TRACE_IN(17,1,ZERO)
 C end init rdresa after call xtime0
-      CALL INIRESA(OUTPUT,H3D_DATA,PINCH_DATA,GLOB_THERM)
+      CALL INIRESA(OUTPUT,H3D_DATA,PINCH_DATA,GLOB_THERM,scr_fac)
       CALL TRACE_OUT(17)
 
 
@@ -981,8 +982,8 @@ C
       IPM = 0
 
       ! IAF, AF: Fluid, Noise
-      IF(IFIF>0)ALLOCATE (IAF(IFIF),STAT=IADIF)
-      IF(MFIF>0)ALLOCATE (AF(MFIF),STAT=IADRF)
+      IF(scr_fac%ifif>0)ALLOCATE (IAF(scr_fac%ifif),STAT=IADIF)
+      IF(scr_fac%mfif>0)ALLOCATE (AF(scr_fac%mfif),STAT=IADRF)
       IF(IADRF/=0.OR.IADIF/=0)THEN
         CALL ANCMSG(MSGID=20,ANMODE=ANINFO)
         CALL ARRET(2)
@@ -1062,8 +1063,7 @@ C
      .            FORNEQS        ,UNITAB     ,DT            ,DTFAC1           ,
      .            STACK          ,DRAPE_SH4N ,DRAPE_SH3N    ,DRAPEG           ,NDRAPE ,
      .            GLOB_THERM     ,PBLAST     ,ELEMENT       ,NODES            ,RBE3     ,
-     .            RWALL          ,SFEM       )
-      ! Close restart file
+     .            RWALL          ,SFEM       ,scr_fac)
        CALL CLOSE_C
  
        ! --------------------------------------------------------------------------------------------
@@ -1477,7 +1477,7 @@ C------------------------------------------------
      3              NODES%ITAB ,   NODES%ITABM1  ,NPC,     IPARG,    IGRV ,
      4              LGRAV   ,IPARI,
      5              NPBY ,   LPBY    ,ILINK,   LLINK  ,LINALE ,
-     6              NEFLSW , NNFLSW , ICUT ,   IAF(IF01),
+     6              NEFLSW , NNFLSW , ICUT ,   IAF(scr_fac%if01),
      7              NODES%X  ,NODES%V,  NODES%VR, NODES%MS   ,NODES%IN  ,
      8              SKEWS%SKEW  ,TF       ,RBY  ,
      9              WA  ,CRFLSW  ,XCUT  ,DAMPR  ,
@@ -2224,7 +2224,7 @@ C---------------------------------------------------------------------
      .                   DIFFUSION    ,SEGVAR          ,DYNAIN_DATA     ,DRAPEG     ,USER_WINDOWS    ,
      .                   OUTPUT       ,INTERFACES      ,DT              ,LOADS      ,MAT_ELEM  , PYTHON,
      .                   NAMES_AND_TITLES, UNITAB ,SKEWS,LIFLOW         ,LRFLOW     ,glob_therm,PBLAST,
-     .                   RBE3, coupling,RWALL     ,SFEM)
+     .                   RBE3, coupling,RWALL     ,SFEM   ,scr_fac)
 C---------------------------------------------------------------------
       CURRENT_RUN = GLOBAL_COMP_TIME%RUN_NBR
       CALL SPMD_REDUCE_DB(GLOBAL_COMP_TIME%ENGINE_TIME(CURRENT_RUN),RESULT,1,0,"MAX ")

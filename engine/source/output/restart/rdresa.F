@@ -220,7 +220,7 @@ C
 !||    output_mod             ../common_source/modules/output/output_mod.F90
 !||    pinchtype_mod          ../common_source/modules/pinchtype_mod.F
 !||====================================================================
-      SUBROUTINE INIRESA(OUTPUT, H3D_DATA,PINCH_DATA,GLOB_THERM)
+      SUBROUTINE INIRESA(OUTPUT, H3D_DATA,PINCH_DATA,GLOB_THERM,scr_fac)
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
@@ -231,6 +231,7 @@ C-----------------------------------------------
       USE ALEANIM_MOD
       USE glob_therm_mod
       use output_mod
+      USE scr_fac_mod , ONLY : scr_fac_t
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -257,7 +258,6 @@ C-----------------------------------------------
 #include      "scrnoi_c.inc"
 #include      "scrfs_c.inc"
 #include      "scrcut_c.inc"
-#include      "scr_fac_c.inc"    
 #include      "sphcom.inc"
 #include      "spmd_c.inc"
 #include      "tabsiz_c.inc"
@@ -270,6 +270,7 @@ C-----------------------------------------------
       TYPE(H3D_DATABASE) :: H3D_DATA
       TYPE(PINCH) :: PINCH_DATA
       type (glob_therm_)    ,intent(inout)   :: GLOB_THERM
+      type(scr_fac_t)       ,intent(inout)   :: scr_fac
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
@@ -623,15 +624,15 @@ C---------------------------------------------------------
          IF((NOISEV+NOISEA+NOISEP)==0) NOISEV = 1
          NVAR=3*NOISEV+3*NOISEA+NOISEP
       ENDIF
-      IF01=1
-      MF01=1
-      IFIF=IF01
-      MFIF=MF01
+      scr_fac%if01=1
+      scr_fac%mf01=1
+      scr_fac%ifif=scr_fac%if01
+      scr_fac%mfif=scr_fac%mf01
       SINOISE = 0
       SFNOISE = 0
       IF(NNOISE>0)THEN
-       IFIF = (2*NNOISE+10)
-       MFIF = (6*NVAR*NNOISE+1)
+       scr_fac%ifif = (2*NNOISE+10)
+       scr_fac%mfif = (6*NVAR*NNOISE+1)
        SINOISE = 2*NNOISE+10
        SFNOISE = 6*NVAR*NNOISE+1
       ENDIF

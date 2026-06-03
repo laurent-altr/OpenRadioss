@@ -166,7 +166,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
      .                   IMPBUF_TAB ,IMPL_S          ,IMPL_S0    ,MCP         ,TEMP             ,
      .                   FORNEQS    ,UNITAB          ,STACK      ,NDRAPE      ,DRAPE_SH3N       ,
      .                   DRAPE_SH4N ,DRAPEG          ,RESTSIZE   ,SKEWS       ,GLOB_THERM       ,
-     .                   PBLAST     ,RBE3            ,RWALL      ,SFEM )
+     .                   PBLAST     ,RBE3            ,RWALL      ,SFEM ,scr_fac)
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
@@ -226,6 +226,7 @@ C-----------------------------------------------
       use rwall_mod
       use restart_rwallpen_mod, only : write_rrwallpen
       use sfem_mod
+      USE scr_fac_mod , ONLY : scr_fac_t
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -278,6 +279,7 @@ c     TYPE (CLUSTER_) ,DIMENSION(NCLUSTER) :: CLUSTER
       TYPE(RBE3_)      ,INTENT(INOUT) :: RBE3
       TYPE(RWALL_)     ,INTENT(INOUT) :: RWALL
       TYPE(global_sfem_),INTENT(IN  ) :: SFEM
+      type(scr_fac_t)   ,intent(in  ) :: scr_fac
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
 C-----------------------------------------------
@@ -299,7 +301,6 @@ C-----------------------------------------------
 #include      "scrcut_c.inc"
 #include      "scrfs_c.inc"
 #include      "scrnoi_c.inc"
-#include      "scr_fac_c.inc"
 #include      "sms_c.inc"
 #include      "spmd_c.inc"
 #include      "tabsiz_c.inc"
@@ -1329,8 +1330,8 @@ C   bring PARTSAV back to the proc and set the others to zero
           CALL WRITE_DB(PARTSAV,NPSAV*NPART)
       ENDIF
       IF(NNOISE>0)THEN
-        CALL WRITE_I_C (IAF(IF01),2*NNOISE+10)
-        CALL WRITE_DB(AF(MF01),6*NCNOIS*NNOISE+1)
+        CALL WRITE_I_C (IAF(scr_fac%if01),2*NNOISE+10)
+        CALL WRITE_DB(AF(scr_fac%mf01),6*NCNOIS*NNOISE+1)
       ENDIF
 C-----
 C  Save A, AR to Restart RAD2MD

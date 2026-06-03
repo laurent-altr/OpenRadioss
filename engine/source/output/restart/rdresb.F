@@ -164,7 +164,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
      .                   FORNEQS          ,UNITAB     ,DT           ,DTFAC1           ,
      .                   STACK            ,DRAPE_SH4N ,DRAPE_SH3N   ,DRAPEG           ,NDRAPE     ,
      .                   GLOB_THERM       ,PBLAST     ,ELEMENT      ,NODES            ,RBE3       ,
-     .                   RWALL            ,SFEM       )
+     .                   RWALL            ,SFEM       ,scr_fac  )
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
@@ -218,6 +218,7 @@ C-----------------------------------------------
       use rwall_mod
       use restart_rwallpen_mod, only : get_nrwallpen_l,read_rrwallpen
       use sfem_mod
+      USE scr_fac_mod , ONLY : scr_fac_t
       use dt_mod , only : dt_
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
@@ -248,7 +249,6 @@ C-----------------------------------------------
 #include      "scrcut_c.inc"
 #include      "scrfs_c.inc"
 #include      "scrnoi_c.inc"
-#include      "scr_fac_c.inc"
 #include      "sms_c.inc"
 #include      "sphcom.inc"
 #include      "spmd_c.inc"
@@ -285,6 +285,7 @@ C-----------------------------------------------
       TYPE(RBE3_)           ,INTENT(INOUT)                 :: RBE3
       TYPE(RWALL_)          ,INTENT(INOUT)                 :: RWALL
       TYPE(global_sfem_)    ,INTENT(INOUT)                 :: SFEM
+      type(scr_fac_t)       ,intent(in)                    :: scr_fac
       TYPE(DT_)             ,INTENT(INOUT)                 :: DT
       INTEGER, INTENT(IN) :: LIFLOW
       INTEGER, INTENT(IN) :: LRFLOW
@@ -1233,8 +1234,8 @@ C--------------------------------------
 
       IF(NNOISE>0.AND. (IRUNN>1 .OR. MCHECK/=0))THEN
 c      IF(NNOISE>0.AND.IRUNN>1)THEN
-          CALL READ_I_C (IAF(IF01),SINOISE)
-          CALL READ_DB(AF(MF01),SFNOISE)
+          CALL READ_I_C (IAF(scr_fac%if01),SINOISE)
+          CALL READ_DB(AF(scr_fac%mf01),SFNOISE)
       ENDIF
 
        IF (IRESP == 1) THEN

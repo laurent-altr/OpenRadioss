@@ -85,7 +85,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
      .           OUTPUT      ,INTERFACES  ,DT             ,LOADS      ,MAT_ELEM        ,
      .           PYTHON      ,NAMES_AND_TITLES, UNITAB    ,SKEWS      ,LIFLOW          ,
      .           LRFLOW      ,glob_therm ,PBLAST          ,RBE3       ,coupling        ,
-     .           RWALL       ,SFEM   )
+     .           RWALL       ,SFEM   ,scr_fac)
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
@@ -131,6 +131,7 @@ C-----------------------------------------------
       use coupling_adapter_mod 
       use rwall_mod
       use sfem_mod
+      USE scr_fac_mod , ONLY : scr_fac_t
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -138,7 +139,6 @@ C-----------------------------------------------
 C------------------------------------------------
 #include      "com01_c.inc"
 #include      "com04_c.inc"
-#include      "scr_fac_c.inc"
 #include      "scr01_c.inc"
 #include      "task_c.inc"
 #include      "com_xfem1.inc"
@@ -202,6 +202,7 @@ C     REAL
       type (rbe3_) ,intent(inout)             :: RBE3
       type (rwall_), intent(inout)            :: RWALL
       type (global_sfem_), intent(inout) :: SFEM
+      type(scr_fac_t), intent(in)        :: scr_fac
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
@@ -234,7 +235,7 @@ C
      8  LPBY            ,LRIVET         ,NSTRF          ,LJOINT         ,NODPOR         ,MONVOL      ,
      9  ILINK     ,
      A  LLINK           ,LINALE         ,NEFLSW         ,NNFLSW         ,ICUT           ,CLUSTER     ,
-     B  ITASK           ,IAF(IF01)      ,
+     B  ITASK           ,IAF(scr_fac%if01)      ,
      C  THKE        ,DAMP               ,
      D  PM             ,SKEWS          ,GEO            ,EANI           ,BUFMAT      ,BUFGEO           ,BUFSF     ,
      E  W               ,VEUL           ,FILL           ,DFILL          ,ALPH           ,WB          ,DSAVE            ,ASAVE     ,
@@ -244,7 +245,7 @@ C
      H  RBY             ,RIVET          ,SECBUF         ,VOLMON         ,LAMBDA      ,
      I  WA              ,FV             ,PARTSAV          ,
      J  UWA             ,VAL2           ,PHI            ,SEGVAR         ,R              ,CRFLSW      ,
-     K  FLSW            ,XCUT           ,TANI           ,SECFCUM     ,AF(MF01),
+     K  FLSW            ,XCUT           ,TANI           ,SECFCUM     ,AF(scr_fac%mf01),
      L  IDATA           ,RDATA          ,
      M  IFRAME          ,KXSP           ,IXSP           ,NOD2SP         ,ISPSYM         ,ISPCOND     ,
      N  XFRAME          ,SPBUF          ,XSPSYM         ,VSPSYM         ,PV             ,
@@ -305,7 +306,7 @@ C
      N  KLOADPINTER     ,LOADPINTER     ,DGAPLOADINT    ,DRAPEG         ,USER_WINDOWS ,OUTPUT          ,INTERFACES,
      O  DT              ,LOADS          ,PYTHON         ,DPL0CLD        ,VEL0CLD        ,
      P  NDAMP_VREL      ,ID_DAMP_VREL   ,FR_DAMP_VREL   ,NDAMP_VREL_RBYG,NAMES_AND_TITLES,UNITAB,LIFLOW,LRFLOW,
-     R  GLOB_THERM      ,PBLAST         ,RBE3           ,RWALL          ,SFEM   )
+     R  GLOB_THERM      ,PBLAST         ,RBE3           ,RWALL          ,SFEM   ,scr_fac)
 C
       CALL TRACE_OUT(2)
 C
