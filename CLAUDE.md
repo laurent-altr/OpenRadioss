@@ -198,8 +198,22 @@ A pre-push hook (`scripts/pre-push`) warns if the last commit author differs fro
 - Indentation of new `.F`/`.F90` files is checked via `scripts/check_indentation.sh` (uses `wfindent -i2`)
 
 
-For more detailed documentation about individual directory, files, variables, look for .md files.
-For instance, if you want to know about the variable PYTHON, search for ./doc/PYTHON.md and use "grep -i PYTHON" to see if it is referenced in any other file.
+## Documentation Index
+
+The repository carries a Claude-readable documentation layer so that knowledge does not need to be rebuilt from source:
+
+- **Per-directory `CLAUDE.md` files** exist throughout `common_source/` and `engine/source/` (purpose, file tables, key types, dependencies). Before working in a directory, read its `CLAUDE.md` (and its parent's) first.
+- **Deep-dive documents** in `doc/` cover cross-cutting data structures and mechanisms:
+
+| Topic | Document |
+|-------|----------|
+| Element buffers (`ELBUF_TAB` / `ELBUF_STRUCT_`): layout, global/layer/integration-point buffers, addressing | `doc/ELBUF_TAB_documentation.md` |
+| Engine main time loop: `radioss2` → `resol` call tree, element force loop, assembly, time integration | `doc/ENGINE_TIME_LOOP_documentation.md` |
+| Element groups (`IPARG`/`NGROUP`/`MVSIZ`), connectivity arrays (`IXS`,`IXC`,`IXT`,`IXP`,`IXR`,`IXQ`), nodal arrays (`X`,`V`,`A`,`MS`) | `doc/GROUPS_AND_CONNECTIVITY_documentation.md` |
+| SPMD/MPI parallelism: domain decomposition, boundary exchange, Parith/ON | `doc/SPMD_documentation.md` |
+| Non-local damage regularization (`NLOCAL_STR_`) | `doc/NLOCAL_STR_documentation.md` |
+
+When investigating an unfamiliar variable or structure, also `grep -ri <name> doc/ --include='*.md'` to check whether it is already documented.
 
 
 
