@@ -632,3 +632,383 @@ non-local time step stays above the mechanical one in the target mesh-size range
 | MPI | `engine/source/mpi/spmd_exch_sub.F`, `engine/source/mpi/output/spmd_collect_nlocal.F`, `engine/source/mpi/r2r/spmd_exch_r2r_nl.F` |
 | Main loop | `engine/source/engine/resol.F`, `resol_init.F` |
 | ELBUF definitions | `common_source/modules/mat_elem/elbufdef_mod.F90` (`PLANL`, `EPSDNL`, `BUF_NLOC_`, `BUF_NLOCTS_`), `starter/source/elements/elbuf_init/elbuf_ini.F`, `allocbuf_auto.F` |
+| Node splitting | `engine/source/engine/node_spliting/detach_node.F90`, `engine/source/engine/node_spliting/detach_node_nloc.F90`, `engine/source/engine/node_spliting/nloc_shell_detach.F90` |
+
+---
+
+## 11. Array Size Quick Reference
+
+```
+NNOD        : number of non-local nodes  (subset of all nodes)
+L_NLOC      : sum of NDDL over all non-local nodes
+NDDL(n)     : through-thickness DOF count of node n (= NPTT for shells, 1 for solids)
+NDDMAX      : max(NDDL)
+
+POSI        : size NNOD+1          (CSR offsets into L_NLOC space)
+INDX        : size NNOD            (non-local rank → node local id)
+IDXI        : size NUMNOD          (node local id → non-local rank, 0 if not NL)
+
+MASS, MASS0, UNL, VNL, VNL_OLD, DNL : size L_NLOC
+FNL, STIFNL : size L_NLOC × NTHREAD
+
+ADDCNE      : size NNOD+2          (skyline CSR offsets, PARITH/ON only)
+FSKY, STSKY : size ADDCNE(NNOD+1) × NDDMAX
+IADC        : size 4 × NUMELC_NL   (quad-shell back-pointers)
+IADS        : size 8 × NUMELS_NL   (solid back-pointers)
+IADTG       : size 3 × NUMELTG_NL  (triangle-shell back-pointers)
+```
+
+---
+
+## 12. Node Splitting Support
+
+When a fracture propagates through a mesh via node-splitting, the `NLOCAL_STR_`
+structure must be extended to accommodate the new (duplicated) node and its non-local
+degrees of freedom.
+
+### 12.1 What is already handled at the split
+
+`update_pon_shells` (called from `detach_node_from_shells`) handles the **mechanical
+PARITH/ON skyline** stored in `elements%pon` (`parith_on_mod.F90`):
+
+| Updated field | Type |
+|---|---|
+| `elements%pon%adsky` | CSR row offsets for the mechanical force skyline |
+| `elements%pon%iadc` | Per-shell FSKY row indices (mechanical) |
+| `elements%pon%fsky` | Mechanical skyline force buffer |
+
+### 12.2 What `detach_node_nloc` must additionally handle
+
+The **non-local damage structure `NLOCAL_STR_`** (`NLOC_DMG`) has its own independent
+skyline and DOF arrays — completely separate from `elements%pon` and not touched by the
+existing mechanical node-splitting code. The following tables summarise every field that
+must be patched.
+
+**Index tables (change on split):**
+
+| Array | Dim | Meaning | Change on split |
+|-------|-----|---------|----------------|
+| `INDX` | `(NNOD)` | Non-local rank → local node id | Append new local id |
+| `POSI` | `(NNOD+1)` | CSR DOF offsets | Append new entry; last entry = new `L_NLOC` |
+| `IDXI` | `(NUMNOD)` | Local node id → non-local rank | Extend by 1; set `IDXI(new_id) = new_NNOD` |
+
+**DOF-space state vectors (all sized `L_NLOC` or `L_NLOC × NTHREAD`):**
+
+| Array | Meaning | Initialise new DOFs |
+|-------|---------|---------------------|
+| `MASS` / `MASS0` | Non-local mass (current / reference) | Copy from parent, then split both 50/50 |
+| `VNL`, `VNL_OLD`, `DNL`, `UNL` | Velocity, previous velocity, increment, cumulated variable | Copy from parent |
+| `FNL`, `STIFNL` | Force / stiffness accumulator | Zero |
+
+**Skyline connectivity (PARITH/ON only):**
+
+| Array | Meaning | Change on split |
+|-------|---------|----------------|
+| `ADDCNE` | CSR row offsets into FSKY for each non-local node | Extend by 1 for new node |
+| `PROCNE` | MPI rank of each element contribution | Append for new contributions |
+| `FSKY` / `STSKY` | Skyline force / stiffness accumulator | Extend; new entries zero |
+| `IADC` | Per-shell FSKY row indices | Update for shells in `shell_list` |
+
+### 12.3 Integration in `resol.F` — activating node splitting (~line 5236)
+
+The node-splitting block in `resol.F` calls, in order:
+
+1. `test_jc_shell_detach` — detect and perform splits (calls `detach_node` → `detach_node_nloc`)
+2. `INIT_NODAL_STATE` — re-initialise nodal boundary/state arrays for the new node
+3. `CHKINIT` (gated on ALE/deletion flags) — rebuild element-to-node connectivity skyline
+4. `ALLOCATE_OUTPUT_DATA` — extend output arrays for the new node
+5. `SPMD_SUB_BOUNDARIES(NLOC_DMG, NODES%BOUNDARY_ADD, NODES%BOUNDARY)` (gated on
+   `NSPMD > 1`) — rebuild the non-local MPI boundary tables after the split
+
+The post-processing block in `resol.F` (~line 5285) now contains:
+
+```fortran
+! Rebuild non-local SPMD boundary arrays (ISENDSP, IRECSP, etc.)
+! after the skyline topology changed due to node split.
+IF (NSPMD > 1 .AND. NLOC_DMG%IMOD > 0) THEN
+  CALL SPMD_SUB_BOUNDARIES(NLOC_DMG, NODES%BOUNDARY_ADD, NODES%BOUNDARY)
+ENDIF
+```
+
+This rebuilds `NLOC_DMG%IAD_ELEM`, `NLOC_DMG%IAD_SIZE`, and `NLOC_DMG%FR_ELEM` from
+the updated nodal boundary tables, so the non-local MPI state stays valid after the split.
+
+### 12.4 `detach_node_nloc` — step-by-step implementation
+
+File: `engine/source/engine/node_spliting/detach_node_nloc.F90`.
+Called from `detach_node` immediately after `detach_node_from_shells`, before
+`nodes%numnod` is incremented.
+
+**Signature:**
+
+```fortran
+subroutine detach_node_nloc(nloc_dmg, old_local_id, new_local_id, &
+                             shell_list, list_size)
+  use nlocal_reg_mod
+  use my_alloc_mod
+  use extend_array_mod
+  implicit none
+  type(nlocal_str_), intent(inout) :: nloc_dmg
+  integer,           intent(in)    :: old_local_id   ! local id of the split node
+  integer,           intent(in)    :: new_local_id   ! local id of the new node (= old numnod + 1)
+  integer,           intent(in)    :: list_size
+  integer,           intent(in)    :: shell_list(list_size)
+```
+
+**Step-by-step logic:**
+
+```
+Step 1 — Early exit
+  nl_idx = nloc_dmg%idxi(old_local_id)
+  if (nl_idx == 0) return   ! parent is not a non-local node
+
+Step 2 — DOF layout of the parent
+  old_pos = nloc_dmg%posi(nl_idx)
+  nddl    = nloc_dmg%posi(nl_idx+1) - old_pos   ! DOF count
+
+Step 3 — Extend IDXI (size NUMNOD → NUMNOD+1)
+  call extend_array(nloc_dmg%idxi, old_numnod, new_local_id)
+  nloc_dmg%idxi(new_local_id) = nloc_dmg%nnod + 1
+
+Step 4 — Extend INDX (size NNOD → NNOD+1)
+  call extend_array(nloc_dmg%indx, nloc_dmg%nnod, nloc_dmg%nnod+1)
+  nloc_dmg%indx(nloc_dmg%nnod+1) = new_local_id
+
+Step 5 — Extend POSI (size NNOD+1 → NNOD+2)
+  call extend_array(nloc_dmg%posi, nloc_dmg%nnod+1, nloc_dmg%nnod+2)
+  nloc_dmg%posi(nloc_dmg%nnod+2) = nloc_dmg%l_nloc + nddl + 1
+
+Step 6 — Extend DOF-space vectors by nddl
+  new_pos = nloc_dmg%l_nloc + 1
+  For each of MASS, MASS0, VNL, VNL_OLD, DNL, UNL:
+    call extend_array(array, nloc_dmg%l_nloc, nloc_dmg%l_nloc + nddl)
+    array(new_pos : new_pos+nddl-1) = array(old_pos : old_pos+nddl-1)
+  ! Split mass equally (conserves total non-local mass)
+  nloc_dmg%mass (new_pos:new_pos+nddl-1) = nloc_dmg%mass (old_pos:old_pos+nddl-1) * HALF
+  nloc_dmg%mass0(new_pos:new_pos+nddl-1) = nloc_dmg%mass0(old_pos:old_pos+nddl-1) * HALF
+  nloc_dmg%mass (old_pos:old_pos+nddl-1) = nloc_dmg%mass (old_pos:old_pos+nddl-1) * HALF
+  nloc_dmg%mass0(old_pos:old_pos+nddl-1) = nloc_dmg%mass0(old_pos:old_pos+nddl-1) * HALF
+  For FNL (l_nloc, nthread) and STIFNL (l_nloc, nthread):
+    call extend_array_2d(array, nloc_dmg%l_nloc, nthread, nloc_dmg%l_nloc+nddl, nthread)
+    array(new_pos:new_pos+nddl-1, 1:nthread) = ZERO
+
+Step 7 — Commit scalar counters
+  nloc_dmg%nnod   = nloc_dmg%nnod + 1
+  nloc_dmg%l_nloc = nloc_dmg%l_nloc + nddl
+
+Step 8 — Skyline update (PARITH/ON only, if ADDCNE is allocated)
+  new_nnod = nloc_dmg%nnod   ! already incremented
+  Count n_contrib = number of (shell, corner) pairs in shell_list where the
+  corner was old_local_id (now replaced by new_local_id in element connectivity).
+
+  8a — Extend ADDCNE by 1:
+    call extend_array(nloc_dmg%addcne, new_nnod, new_nnod+1)
+    nloc_dmg%addcne(new_nnod+1) = nloc_dmg%addcne(new_nnod) + n_contrib
+
+  8b — Extend PROCNE by n_contrib and append entries:
+    old_lcne = nloc_dmg%lcne_nl
+    call extend_array(nloc_dmg%procne, old_lcne, old_lcne + n_contrib)
+    k = old_lcne + 1
+    do i = 1, list_size
+      shell_id = shell_list(i)
+      do j = 1, 4
+        if elements%shell%nodes(j, shell_id) == new_local_id:
+          nloc_dmg%procne(k) = ISPMD   ! local domain rank
+          k = k + 1
+      end do
+    end do
+    nloc_dmg%lcne_nl = old_lcne + n_contrib
+    ! NOTE: CNE is always size 0 and unused; do NOT extend it.
+
+  8c — Extend FSKY and STSKY rows by n_contrib, zeroing new entries:
+    old_fsky_rows = nloc_dmg%addcne(new_nnod)
+    new_fsky_rows = nloc_dmg%addcne(new_nnod+1)
+    call extend_array_2d(nloc_dmg%fsky,  old_fsky_rows, nddmax, new_fsky_rows, nddmax)
+    call extend_array_2d(nloc_dmg%stsky, old_fsky_rows, nddmax, new_fsky_rows, nddmax)
+    nloc_dmg%fsky (old_fsky_rows+1:new_fsky_rows, 1:nddmax) = ZERO
+    nloc_dmg%stsky(old_fsky_rows+1:new_fsky_rows, 1:nddmax) = ZERO
+
+  8d — Update IADC back-pointers for shells in shell_list:
+    For each shell_id in shell_list, for each corner j = 1..4:
+      if elements%shell%nodes(j, shell_id) == new_local_id:
+        nloc_dmg%iadc(j, shell_id) = <new FSKY row assigned in 8c>
+    The assignment must use the same ordering as used when filling PROCNE in 8b.
+```
+
+### 12.5 SPMD boundary arrays after a split
+
+The arrays `ISENDSP`, `IRECSP`, `IADSDP`, `IADRCP`, `FR_NBCC`, `FR_ELEM_S`,
+`FR_ELEM_R` are built by `SPMD_SUB_BOUNDARIES` / `SPMD_EXCH_SUB_PON` from `ADDCNE`,
+`PROCNE`, `IAD_ELEM`, `FR_ELEM`, and `POSI`. They must be **fully rebuilt** after the
+split because the send/receive patterns depend on the global topology:
+
+```fortran
+if (nloc_dmg%imod > 0 .and. nspmd > 1) then
+  call spmd_sub_boundaries(nloc_dmg, nodes%boundary_add, nodes%boundary)
+end if
+```
+
+This call is placed in `resol.F` alongside the mechanical PON rebuild that happens after
+all node splits in a cycle (see commented block near line 5238). Localised patching is
+not feasible because the patterns depend on the global non-local node layout across all
+MPI domains.
+
+### 12.6 Restart compatibility after a split
+
+`write_nloc_struct.F` and `read_nloc_struct.F` write/read `NNOD`, `L_NLOC`, `LCNE_NL`,
+`NUMELS_NL`, `NUMELC_NL`, `NUMELTG_NL`, `NDDMAX` as a header, then all arrays
+sequentially. After a node split the sizes change; no extra work is needed beyond ensuring
+the write happens after the split update so that the checkpoint captures the new state.
+
+---
+
+## 13. Deriving Crack Node and Crack Direction from `UNL`
+
+The non-local field `UNL` is exactly the information needed to drive node-splitting: the
+**highest-damage node** and **the orientation of the damage gradient** (perpendicular to
+the crack plane) are both directly accessible from `NLOC_DMG`.
+
+### 13.1 Identifying the crack node
+
+For each structural node `i` belonging to non-local elements:
+
+```fortran
+nl_idx = nloc_dmg%idxi(i)
+if (nl_idx == 0) cycle          ! node not non-local
+pos  = nloc_dmg%posi(nl_idx)
+nddl = nloc_dmg%posi(nl_idx+1) - pos
+unl_node = maxval(nloc_dmg%unl(pos : pos+nddl-1))
+```
+
+`unl_node` is the peak regularised strain at node `i` across the thickness.  The node
+to split is the one maximising `unl_node` among all candidate nodes (e.g. nodes shared
+by at least two heavily loaded elements), subject to the condition that the value exceeds
+the failure threshold of the material.
+
+For shells with `NDDL > 1`, the through-thickness DOF index `k` that achieves the
+maximum indicates **which layer** is most damaged (useful for progressive delamination
+detection).
+
+### 13.2 Deriving the crack direction
+
+The implicit-gradient regularisation means that `UNL` is smooth. The **crack plane
+normal** is parallel to `∇UNL` evaluated at the crack node: the crack grows
+perpendicular to the direction of maximum gradient.
+
+**Practical computation** using the nodal values already stored in `UNL`:
+
+For a quad shell, the gradient within element `e` at its centroid is:
+
+```
+∇UNL_e ≈ (1/A_e) * SUM_{corner i} [UNL_i * outward_normal_of_opposite_edge * edge_length_i]
+```
+
+or equivalently using the `BTB` geometry matrices already computed inside `cfint_reg`:
+
+```
+grad_x_e(k) = (1/V_e) * (BTB11 * (UNL_1 - UNL_3) + BTB12 * (UNL_2 - UNL_4))
+grad_y_e(k) = (1/V_e) * (BTB12 * (UNL_1 - UNL_3) + BTB22 * (UNL_2 - UNL_4))
+```
+
+The **crack normal** at the target node is the weighted average of `∇UNL_e` over the
+elements sharing that node:
+
+```
+n_crack = NORMALIZE( SUM_e [ vol_e * ∇UNL_e ] )
+```
+
+The **crack plane** passes through the node and is perpendicular to `n_crack`.  The
+**edge to split** between two adjacent nodes `A` and `B` is the one most parallel to
+`n_crack` (i.e. maximising `|dot(AB, n_crack)|`).
+
+### 13.3 Implementation sketch
+
+```fortran
+! 1. Find the highest-damage non-local node
+unl_max = 0.0_wp
+split_node = 0
+do i = 1, numnod
+  nl_idx = nloc_dmg%idxi(i)
+  if (nl_idx == 0) cycle
+  pos  = nloc_dmg%posi(nl_idx)
+  nddl = nloc_dmg%posi(nl_idx+1) - pos
+  val  = maxval(nloc_dmg%unl(pos:pos+nddl-1))
+  if (val > unl_threshold .and. val > unl_max) then
+    unl_max    = val
+    split_node = i
+  end if
+end do
+
+! 2. Compute ∇UNL at split_node from attached element DOFs
+crack_normal = 0.0_wp
+total_weight = 0.0_wp
+do ie = 1, n_elems_attached_to_split_node
+  e = attached_elem(ie)
+  do j = 1, 4
+    inod  = ixc(j+1, e)
+    nl_j  = nloc_dmg%idxi(inod)
+    pos_j = nloc_dmg%posi(nl_j)
+    unl_corner(j) = nloc_dmg%unl(pos_j)   ! DOF k=1 for simplicity
+  end do
+  grad(1) = (unl_corner(1) - unl_corner(3)) / dx_e
+  grad(2) = (unl_corner(2) - unl_corner(4)) / dy_e
+  weight   = element_area(e)
+  crack_normal = crack_normal + weight * grad
+  total_weight = total_weight + weight
+end do
+crack_normal = crack_normal / total_weight
+crack_normal = crack_normal / norm2(crack_normal)   ! unit normal
+
+! 3. Pick the element edge most aligned with the crack plane (perpendicular to n_crack)
+!    to guide which elements go to the new node
+```
+
+### 13.4 Relationship with `nloc_shell_detach`
+
+The current implementation in `nloc_shell_detach.F90` already uses the **non-local
+field** `UNL` directly to build the shell damage indicator, instead of the older
+`dammx` / `OFF` path:
+
+| Criterion | Source | When available |
+|---|---|---|
+| `dammx` / `OFF` | Local failure flag in element buffer | After failure criterion is met (post-peak) |
+| `UNL` | Non-local regularised variable | From the onset of inelastic strains |
+
+This means the split trigger is now aligned with the regularised damage field, so node
+splitting can happen **before** the element actually fails. That better captures the
+damage-band geometry and avoids relying only on element deletion.
+
+What is still not derived from `UNL` is the **crack direction / split plane normal**: the
+current implementation still uses the shell-geometry eccentricity heuristic to choose
+which corner to detach. Section 13.2 above describes how to use `∇UNL` instead.
+
+---
+
+## 14. Known Limitations / Open Points
+
+| Scenario | Status |
+|---|---|
+| Single domain (`NSPMD = 1`) | ✅ Fully functional — all MPI-gated calls are skipped |
+| Multi-domain, PARITH/OFF | ✅ Boundary tables are rebuilt after split |
+| Multi-domain, PARITH/ON | ✅ Boundary tables are rebuilt after split |
+
+### Individual issues
+
+1. **Mass splitting is 50/50.**  `detach_node_nloc` splits the non-local mass equally
+   between the parent and the new node.  A more physically consistent approach would
+   weight the split by the volume fraction of elements remaining attached to each node
+   after the split.
+
+2. **`CNE` array is never extended.**  `CNE` (element connectivity in skyline format) is
+   always kept at size 0.  If any future code path reads `CNE` for the non-local nodes
+   added by splitting, it will access out-of-bounds memory.
+
+3. **Only quad-shell elements are split.**  `detach_node_nloc` handles the `IADC`
+   back-pointer update for quad shells only.  Support for triangle shells (`IADTG`) and
+   solids (`IADS`) needs to be added when node splitting is extended to those element
+   types.
+
+4. **Crack direction is not yet derived from `UNL`.**  The current `nloc_shell_detach`
+   implementation uses `UNL` to trigger splitting, but it still selects the corner to
+   detach from shell geometry rather than from a gradient of `UNL`.  Section 13 above
+   describes how to use `∇UNL` instead.
