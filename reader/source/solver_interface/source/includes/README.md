@@ -1,16 +1,16 @@
 # Solver Interface — Includes (`reader/source/solver_interface/source/includes/`)
 
-Shared headers used across all `solver_interface/source/` subdirectories.
+Shared headers included by all solver-interface translation units.
 
 ## Key Files
 
 | File | Role |
 |------|------|
-| `GlobalModelSDI.h` | Declares global `g_pModelViewSDI` singleton, `Get_ModelViewSDI()` accessor, and all `GlobalModelSDI*` Fortran-callable C functions |
-| `buildmapping.h` | Declares `BuildMapping()` — drives the LS-DYNA→Radioss rule-based conversion using `sdiConvert::Convert` |
-| `dll_settings.h` | `CDECL` and DLL-export macros for cross-platform symbol visibility |
+| `GlobalModelSDI.h` | Declares `g_pModelViewSDI` global pointer and the `GlobalModelSDI*` accessor / mutator functions used by every wrapper |
+| `buildmapping.h` | `BuildMapping` entry point: builds the LS-DYNA → Radioss entity-ID mapping table using `dyna2rad` converter and Boost `unordered_map` |
+| `dll_settings.h` | `CDECL` macro and DLL export settings for Windows |
 
 ## Related Documentation
 
 - `reader/source/solver_interface/source/README.md` — parent directory
-- `reader/source/sdi/interface/README.md` — `ModelViewEdit` type used by `g_pModelViewSDI`
+- `reader/source/sdi/interface/README.md` — `ModelViewEdit` type
