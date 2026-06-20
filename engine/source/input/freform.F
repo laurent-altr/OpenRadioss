@@ -84,7 +84,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    viper_mod                ../engine/source/coupling/viper/viper_interface_mod.F90
 !||====================================================================
       SUBROUTINE FREFORM(IRUNN,IRFL,IRFE,H3D_DATA,FLAG_CST_AMS,DYNAIN_DATA,
-     .                   SENSORS,DT,OUTPUT,GLOB_THERM)
+     .                   SENSORS,DT,OUTPUT,GLOB_THERM,SCRFS)
 C-----------------------------------------------
 C   D e s c r i p t i o n
 C-----------------------------------------------
@@ -108,6 +108,7 @@ C-----------------------------------------------
       USE NAMES_AND_TITLES_MOD, ONLY: NCHARLINE100,NCHARKEY
       use glob_therm_mod
       USE VIPER_MOD
+      USE SCR_DATA_MOD
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -122,6 +123,7 @@ C-----------------------------------------------
       TYPE (DT_), INTENT(INOUT) :: DT
       TYPE(OUTPUT_), INTENT(INOUT) :: OUTPUT !< output structure
       type (glob_therm_) ,intent(inout)   :: glob_therm
+      TYPE(SCRFS_), INTENT(INOUT) :: SCRFS
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
 C-----------------------------------------------
@@ -140,7 +142,6 @@ C-----------------------------------------------
 #include      "cong1_c.inc"
 #include      "cong2_c.inc"
 #include      "chara_c.inc"
-#include      "scrfs_c.inc"
 #include      "parit_c.inc"
 #include      "couple_c.inc"
 #include      "rad2r_c.inc"
@@ -595,26 +596,26 @@ C--------------------
 C--------------------
 C     /FLSEC
 C--------------------
-      NSFLSW=0
+      SCRFS%NSFLSW=0
       IKEY=KFLSEC
       IF(IKAD(IKEY)/=IKAD(IKEY+1))THEN
        K=0
  110   READ(IUSC1,REC=IKAD(IKEY)+K,FMT='(49X,I10)',ERR=9990)NBC
        K=K+NBC+1
-       NSFLSW=NSFLSW+1
+       SCRFS%NSFLSW=SCRFS%NSFLSW+1
        IF(IKAD(IKEY)+K/=IKAD(IKEY+1))GO TO 110
       ENDIF
 C--------------------
 C     /FUNCT
 C--------------------
-      NFCT=0
+      SCRFS%NFCT=0
       IKEY=KFUNC
       IF(IKAD(IKEY)/=IKAD(IKEY+1))THEN
        K=0
  140   READ(IUSC1,REC=IKAD(IKEY)+K,FMT='(49X,I10)',
      .      ERR=9990)NBC
        K=K+NBC+1
-       NFCT=NFCT+1
+       SCRFS%NFCT=SCRFS%NFCT+1
        IF(IKAD(IKEY)+K/=IKAD(IKEY+1))GO TO 140
       ENDIF
 C-----------------------
@@ -2491,10 +2492,10 @@ C--------------------
 C--------------------
 C     /FLSEC (FLOW SECTIONS,OBSOLETE)
 C--------------------
-      NTFLSW=0
-      IF(NSFLSW/=0)CALL FREFLW(IKAD(0),KEY0,KFLSEC,NSFLSW,NTFLSW)
+      SCRFS%NTFLSW=0
+      IF(SCRFS%NSFLSW/=0)CALL FREFLW(IKAD(0),KEY0,KFLSEC,SCRFS%NSFLSW,SCRFS%NTFLSW)
       !not compatible SPMD
-      IF (NSFLSW>0) THEN
+      IF (SCRFS%NSFLSW>0) THEN
        CALL ANCMSG(MSGID=201,ANMODE=ANINFO)
        IERR=IERR+1
       ENDIF
@@ -2502,7 +2503,7 @@ C--------------------
 C--------------------
 C     /FUNCT (FUNCTION UPDATES)
 C--------------------
-      CALL FREFUNC(IKAD(0),KEY0,KFUNC,NFCT)
+      CALL FREFUNC(IKAD(0),KEY0,KFUNC,SCRFS%NFCT)
       
 C--------------------
 C     /INIV (VELOCITY INITIALIZATIONS)

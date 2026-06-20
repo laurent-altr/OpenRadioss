@@ -46,7 +46,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
      3                 SUBSET,ITHGRP,ITHBUF,IGEO ,
      4                 IPM  ,IPARTH ,NPARTH ,NVPARTH ,
      5                 NVSUBTH ,ITTYP,ITHFLAG,ITHVAR,IFILTITL,
-     6                 SITHBUF,NAMES_AND_TITLES)
+     6                 SITHBUF,NAMES_AND_TITLES,SCRFS)
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
@@ -54,6 +54,7 @@ C-----------------------------------------------
       USE INOUTFILE_MOD
       USE TH_MOD
       USE NAMES_AND_TITLES_MOD, only:NAMES_AND_TITLES_,LTITLE
+      USE SCR_DATA_MOD
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -66,7 +67,6 @@ C-----------------------------------------------
 #include      "param_c.inc"
 #include      "scr05_c.inc"
 #include      "scr13_c.inc"
-#include      "scrfs_c.inc"
 #include      "chara_c.inc"
 #include      "titr_c.inc"
 #include      "scr07_c.inc"
@@ -91,6 +91,7 @@ C     REAL
       CHARACTER FILNAM*100
       TYPE (SUBSET_) , DIMENSION(NSUBS) :: SUBSET
       TYPE(NAMES_AND_TITLES_),INTENT(IN) :: NAMES_AND_TITLES  !< NAMES_AND_TITLES host the input deck names and titles for outputs
+      TYPE(SCRFS_),           INTENT(IN) :: SCRFS
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
@@ -291,7 +292,7 @@ C-------HIERARCHY INFO------------
       IWA(3)=NUMGEO
       IWA(4)=NSUBS
       IWA(5)=NTHGRP2 
-      IF(NSECT==0.AND.NSFLSW/=0) IWA(5)=NTHGRP2+1
+      IF(NSECT==0.AND.SCRFS%NSFLSW/=0) IWA(5)=NTHGRP2+1
       NGLOBTH=22
       IF (IUNIT /= IUHIS) THEN
         IWA(6)= 0
@@ -596,28 +597,28 @@ C (nstrands elements are treated as a spring group)
 C-------TH GROUP + 1 section fluide------------
       IF(ALLOCATED(IWA)) DEALLOCATE(IWA)
       ALLOCATE(IWA(6))
-      IF(NSECT==0.AND.NSFLSW/=0) THEN
+      IF(NSECT==0.AND.SCRFS%NSFLSW/=0) THEN
         NVAR=6
         TITL='FLUID SECTION'
         IF(ITTYP==0)THEN
             IF(LTITL==40)THEN
               READ(TITL,'(10A4)')TIT40
              WRITE(IUNIT)104,104,
-     .               1,NSFLSW,NVAR,TIT40
+     .               1,SCRFS%NSFLSW,NVAR,TIT40
             ELSE IF(LTITL==80)THEN
               READ(TITL,'(20A4)')TIT80
               WRITE(IUNIT)104,104,
-     .               1,NSFLSW,NVAR,TIT80
+     .               1,SCRFS%NSFLSW,NVAR,TIT80
             ELSE
               READ(TITL,'(25A4)')TIT100
               WRITE(IUNIT)104,104,
-     .               1,NSFLSW,NVAR,TIT100
+     .               1,SCRFS%NSFLSW,NVAR,TIT100
             ENDIF
         ELSEIF(ITTYP==1)THEN
         ELSEIF(ITTYP==2)THEN
           WRITE(IUNIT,'(A,I5,A,I5,A)')EOR,5,'I',LTITL,'C'
           WRITE(IUNIT,'(5I10,A)')104,104,
-     .               1,NSFLSW,ITHGRP(6,N),TITL(1:LTITL)
+     .               1,SCRFS%NSFLSW,ITHGRP(6,N),TITL(1:LTITL)
         ELSEIF(ITTYP==3)THEN
          DO I=1,LTITL
           ITITLE(I)=ICHAR(TITL(I:I))
@@ -626,12 +627,12 @@ C-------TH GROUP + 1 section fluide------------
          CALL WRITE_I_C(104,1)
          CALL WRITE_I_C(104,1)
          CALL WRITE_I_C(1,1)
-         CALL WRITE_I_C(NSFLSW,1)
+         CALL WRITE_I_C(SCRFS%NSFLSW,1)
          CALL WRITE_I_C(NVAR,1)
          CALL WRITE_C_C(ITITLE,LTITL)
          CALL EOR_C(20+LTITL)
         ENDIF
-        DO J=1,NSFLSW
+        DO J=1,SCRFS%NSFLSW
           IF(ITTYP==0)THEN
             IF(LTITL==40)THEN
               WRITE(IUNIT)J,TIT40

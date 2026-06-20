@@ -56,7 +56,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||====================================================================
       SUBROUTINE RDCOMI(OUTPUT,TABVINT,MULTI_FVM,H3D_DATA,DYNAIN_DATA,
      .                  INTER_PARAMETERS,SENSORS,LOADS ,MAT_ELEM,SKEWS,
-     .                  GLOB_THERM,PBLAST,RBE3 ,RWALL,SFEM)
+     .                  GLOB_THERM,PBLAST,RBE3 ,RWALL,SFEM,SCRFS)
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
@@ -86,6 +86,7 @@ C-----------------------------------------------
       USE RWALL_MOD
       USE SFEM_MOD
       USE SEATBELT_MOD , ONLY : NGUIDED_CABLE,NGUIDED_CABLE_G
+      USE SCR_DATA_MOD
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -105,6 +106,7 @@ C-----------------------------------------------
       TYPE (RBE3_)          ,INTENT(INOUT) :: RBE3
       TYPE (RWALL_)         ,INTENT(INOUT) :: RWALL
       TYPE (global_sfem_), INTENT(INOUT) :: SFEM
+      TYPE(SCRFS_),        INTENT(INOUT) :: SCRFS
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
 C-----------------------------------------------
@@ -125,7 +127,6 @@ C-----------------------------------------------
 #include      "cong1_c.inc"
 #include      "task_c.inc"
 #include      "scrnoi_c.inc"
-#include      "scrfs_c.inc"
 #include      "scrcut_c.inc"
 #include      "warn_c.inc"
 #include      "couple_c.inc"
@@ -731,8 +732,8 @@ C No more used        TABVINT(NEXT + 22 )
         ALE%UPWIND%UPWM = TABVINT(NEXT + 41 )
         IDDW      = TABVINT(NEXT + 43 )
         IPREAD    = TABVINT(NEXT + 44 )
-        NSFLSW    = TABVINT(NEXT + 45 )
-        NTFLSW    = TABVINT(NEXT + 46 )
+        SCRFS%NSFLSW    = TABVINT(NEXT + 45 )
+        SCRFS%NTFLSW    = TABVINT(NEXT + 46 )
        ! IUSERW    = TABVINT(NEXT + 47 )
        ! NUSERW    = TABVINT(NEXT + 48 )
         IRAD2R    = TABVINT(NEXT + 49 )

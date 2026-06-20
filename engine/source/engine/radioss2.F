@@ -203,6 +203,7 @@ C-----------------------------------------------
       USE ANIM_MOD
       use rwall_mod
       use sfem_mod
+      USE SCR_DATA_MOD
       use init_h3d_engine_mod
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
@@ -362,6 +363,7 @@ C-------------------------------------------------------------------------------
       TYPE(coupling_type) :: coupling
       TYPE(rwall_) :: rwall
       TYPE(global_sfem_)  :: sfem
+      TYPE(SCRFS_)        :: SCRFS
 C------------------------------------------------------------------
 C to build a IBM PARALLEL version
 C In starter : define install parameter nspmd 
@@ -376,6 +378,7 @@ C     Init Timer (from beginning of radioss2 (reading timer)
 C------------------------------------------------    
       ISTDO=6
       coupling%active = .false.
+      SCRFS = SCRFS_(0, 0, 0)
       CALL INI_MSG()
       CALL BUILD_MSG()
     
@@ -665,7 +668,7 @@ C------------------------------------------------
 C     Standard input reading
 C------------------------------------------------
       CALL LECINP(IRUNN,IRFL,IRFE,H3D_DATA,FLAG_CST_AMS,DYNAIN_DATA,
-     .            SENSORS,DT,OUTPUT,GLOB_THERM)
+     .            SENSORS,DT,OUTPUT,GLOB_THERM,SCRFS)
 
        NFSKYI=5
 
@@ -871,7 +874,7 @@ C------------------------------------------------
      .            PRESFIL, MULTI_FVM, H3D_DATA,
      .            PINCH_DATA,DYNAIN_DATA,INTERFACES,SENSORS,LOADS,
      .            MAT_ELEM,NAMES_AND_TITLES,SKEWS ,GLOB_THERM,PBLAST,
-     .            RBE3,RWALL,SFEM)
+     .            RBE3,RWALL,SFEM,SCRFS)
 
 C------------------------------------------------
 C     Test of .rst file compatibility
@@ -916,7 +919,7 @@ C      CALL TRACE_OUT(19)
 
       CALL TRACE_IN(17,1,ZERO)
 C end init rdresa after call xtime0
-      CALL INIRESA(OUTPUT,H3D_DATA,PINCH_DATA,GLOB_THERM)
+      CALL INIRESA(OUTPUT,H3D_DATA,PINCH_DATA,GLOB_THERM,SCRFS)
       CALL TRACE_OUT(17)
 
 
@@ -1054,7 +1057,7 @@ C
       ! ---------------------------------------------------------------------------------------------
       !      .rst file reading 2
       ! ---------------------------------------------------------------------------------------------
-      CALL RDRESB(AF             ,IAF        ,LVARREA       ,IRUNN     , 
+      CALL RDRESB(AF             ,IAF        ,LVARREA       ,IRUNN     ,
      .            MULTI_FVM      ,H3D_DATA   ,PINCH_DATA    ,ALE_CONNECTIVITY ,T_MONVOL  ,
      .            SENSORS        ,EBCS_TAB   ,DYNAIN_DATA   ,USER_WINDOWS     ,OUTPUT    ,
      .            INTERFACES     ,LOADS      ,MAT_ELEM      ,PYTHON           ,IFLOW     ,
@@ -1062,7 +1065,7 @@ C
      .            FORNEQS        ,UNITAB     ,DT            ,DTFAC1           ,
      .            STACK          ,DRAPE_SH4N ,DRAPE_SH3N    ,DRAPEG           ,NDRAPE ,
      .            GLOB_THERM     ,PBLAST     ,ELEMENT       ,NODES            ,RBE3     ,
-     .            RWALL          ,SFEM       )
+     .            RWALL          ,SFEM       ,SCRFS         )
       ! Close restart file
        CALL CLOSE_C
  
@@ -1490,7 +1493,7 @@ C------------------------------------------------
      G              MDS_NMAT,
      H              SENSORS,MAT_ELEM,
      I              DYNAIN_DATA,DT ,OUTPUT,NAMES_AND_TITLES,
-     J              GLOB_THERM)
+     J              GLOB_THERM,SCRFS)
 C------------------------------------------------
 C Close & Delete scratch file
       CLOSE (UNIT=IIN)
@@ -1633,7 +1636,7 @@ C------------------------------------------------
      3                 SUBSETS ,OUTPUT%TH%ITHGRP  ,OUTPUT%TH%ITHBUF  ,IGEO,
      4                 IPM     ,IPART   ,LIPART1  ,8,
      5                 12      ,ITFORM  ,ITHFLAG ,ITHVAR,
-     6                 IFILTITL,OUTPUT%TH%SITHBUF ,NAMES_AND_TITLES)
+     6                 IFILTITL,OUTPUT%TH%SITHBUF ,NAMES_AND_TITLES,SCRFS)
           WA(1:SWA) = ZERO
           ! Store filename for eventuel checksum computation
           OUTPUT%TH%TH_FILENAME(1:LEN_TRIM(FILNAMTH))=FILNAMTH(1:LEN_TRIM(FILNAMTH))
@@ -1659,7 +1662,7 @@ C   Multiple th files
      3                    SUBSETS  ,OUTPUT%TH%ITHGRPA ,OUTPUT%TH%ITHBUFA ,IGEO ,
      4                    IPM      ,IPART(1+LIPART1*(NPART+NTHPART)) ,2  ,1    ,
      5                    1       ,AFORM(1)           ,ITHFLAG       ,ITHVAR,
-     6                    IFILTITL,OUTPUT%TH%SITHBUFA ,NAMES_AND_TITLES)
+     6                    IFILTITL,OUTPUT%TH%SITHBUFA ,NAMES_AND_TITLES,SCRFS)
             END IF
 
             IF(NTHGRP01(2)/=0)THEN
@@ -1682,7 +1685,7 @@ C   Multiple th files
      3                   SUBSETS ,OUTPUT%TH%ITHGRPB ,OUTPUT%TH%ITHBUFB ,IGEO ,
      4                   IPM     ,IPART(1+LIPART1*(NPART+NTHPART)+2*(NPART+NTHPART)),2,1,
      5                   1       ,AFORM(2)          ,ITHFLAG          ,ITHVAR,
-     6                   IFILTITL,OUTPUT%TH%SITHBUFB,NAMES_AND_TITLES)
+     6                   IFILTITL,OUTPUT%TH%SITHBUFB,NAMES_AND_TITLES,SCRFS)
             END IF
 
             IF(NTHGRP01(3)/=0)THEN
@@ -1705,7 +1708,7 @@ C   Multiple th files
      3                   SUBSETS ,OUTPUT%TH%ITHGRPC ,OUTPUT%TH%ITHBUFC ,IGEO ,
      4                   IPM     ,IPART(1+LIPART1*(NPART+NTHPART)+4*(NPART+NTHPART)) ,2 ,1,
      5                   1       ,AFORM(3)          ,ITHFLAG           ,ITHVAR,
-     6                   IFILTITL,OUTPUT%TH%SITHBUFC,NAMES_AND_TITLES)
+     6                   IFILTITL,OUTPUT%TH%SITHBUFC,NAMES_AND_TITLES,SCRFS)
             END IF
 
             IF(NTHGRP01(4)/=0)THEN
@@ -1728,7 +1731,7 @@ C   Multiple th files
      3                   SUBSETS ,OUTPUT%TH%ITHGRPD ,OUTPUT%TH%ITHBUFD ,IGEO,
      4                   IPM     ,IPART(1+LIPART1*(NPART+NTHPART)+6*(NPART+NTHPART)) ,2 ,1,
      5                   1       ,AFORM(4)          ,ITHFLAG           ,ITHVAR,
-     6                   IFILTITL ,OUTPUT%TH%SITHBUFD,NAMES_AND_TITLES)
+     6                   IFILTITL ,OUTPUT%TH%SITHBUFD,NAMES_AND_TITLES,SCRFS)
             END IF
 
             IF(NTHGRP01(5)/=0)THEN
@@ -1751,7 +1754,7 @@ C   Multiple th files
      3                   SUBSETS ,OUTPUT%TH%ITHGRPE ,OUTPUT%TH%ITHBUFE ,IGEO,
      4                   IPM     ,IPART(1+LIPART1*(NPART+NTHPART)+8*(NPART+NTHPART)),2,1,
      5                   1       ,AFORM(5)          ,ITHFLAG           ,ITHVAR,
-     6                   IFILTITL,OUTPUT%TH%SITHBUFE,NAMES_AND_TITLES)
+     6                   IFILTITL,OUTPUT%TH%SITHBUFE,NAMES_AND_TITLES,SCRFS)
             END IF
 
             IF(NTHGRP01(6)/=0)THEN
@@ -1774,7 +1777,7 @@ C   Multiple th files
      3                   SUBSETS ,OUTPUT%TH%ITHGRPF ,OUTPUT%TH%ITHBUFF ,IGEO ,
      4                   IPM     ,IPART(1+LIPART1*(NPART+NTHPART)+10*(NPART+NTHPART)),2,1,
      5                   1       ,AFORM(6)          ,ITHFLAG           ,ITHVAR,
-     6                   IFILTITL,OUTPUT%TH%SITHBUFF,NAMES_AND_TITLES)
+     6                   IFILTITL,OUTPUT%TH%SITHBUFF,NAMES_AND_TITLES,SCRFS)
             END IF
 
             IF(NTHGRP01(7)/=0)THEN
@@ -1797,7 +1800,7 @@ C   Multiple th files
      3                   SUBSETS ,OUTPUT%TH%ITHGRPG ,OUTPUT%TH%ITHBUFG ,IGEO ,
      4                   IPM,IPART(1+LIPART1*(NPART+NTHPART)+12*(NPART+NTHPART)),2,1,
      5                   1       ,AFORM(7)          ,ITHFLAG           ,ITHVAR,
-     6                   IFILTITL,OUTPUT%TH%SITHBUFG ,NAMES_AND_TITLES)
+     6                   IFILTITL,OUTPUT%TH%SITHBUFG ,NAMES_AND_TITLES,SCRFS)
             END IF
 
             IF(NTHGRP01(8)/=0)THEN
@@ -1820,7 +1823,7 @@ C   Multiple th files
      3                   SUBSETS  ,OUTPUT%TH%ITHGRPH ,OUTPUT%TH%ITHBUFH ,IGEO,
      4                   IPM      ,IPART(1+LIPART1*(NPART+NTHPART)+14*(NPART+NTHPART)),2,1,
      5                   1       ,AFORM(8)           ,ITHFLAG           ,ITHVAR,
-     6                   IFILTITL,OUTPUT%TH%SITHBUFH,NAMES_AND_TITLES)
+     6                   IFILTITL,OUTPUT%TH%SITHBUFH,NAMES_AND_TITLES,SCRFS)
             END IF
 
             IF(NTHGRP01(9)/=0)THEN
@@ -1843,7 +1846,7 @@ C   Multiple th files
      3                   SUBSETS ,OUTPUT%TH%ITHGRPI ,OUTPUT%TH%ITHBUFI ,IGEO,
      4                   IPM     ,IPART(1+LIPART1*(NPART+NTHPART)+16*(NPART+NTHPART)),2,1,
      5                   1       ,AFORM(9)          ,ITHFLAG           ,ITHVAR,
-     6                   IFILTITL,OUTPUT%TH%SITHBUFI,NAMES_AND_TITLES)
+     6                   IFILTITL,OUTPUT%TH%SITHBUFI,NAMES_AND_TITLES,SCRFS)
             END IF
         ELSE
           WRITE(CHR_OLD,'(I2.2)')IRUNN
@@ -1851,7 +1854,7 @@ C   Multiple th files
      1           IPARG ,IXS ,IXQ ,ELEMENT%SHELL%IXC ,IXT ,
      2           IXP ,IXR ,NODES%ITAB ,PM  ,
      3           NPBYL ,IXTG ,IRFE    ,LACCELM ,
-     4           IPARI ,IPART ,OUTPUT%TH%ITHGRP ,OUTPUT%TH%ITHBUF ,CHR_OLD,NAMES_AND_TITLES)
+     4           IPARI ,IPART ,OUTPUT%TH%ITHGRP ,OUTPUT%TH%ITHBUF ,CHR_OLD,NAMES_AND_TITLES,SCRFS)
         ENDIF
 
         IF(NABFILE /= 0) THEN
@@ -2224,7 +2227,7 @@ C---------------------------------------------------------------------
      .                   DIFFUSION    ,SEGVAR          ,DYNAIN_DATA     ,DRAPEG     ,USER_WINDOWS    ,
      .                   OUTPUT       ,INTERFACES      ,DT              ,LOADS      ,MAT_ELEM  , PYTHON,
      .                   NAMES_AND_TITLES, UNITAB ,SKEWS,LIFLOW         ,LRFLOW     ,glob_therm,PBLAST,
-     .                   RBE3, coupling,RWALL     ,SFEM)
+     .                   RBE3, coupling,RWALL     ,SFEM,SCRFS)
 C---------------------------------------------------------------------
       CURRENT_RUN = GLOBAL_COMP_TIME%RUN_NBR
       CALL SPMD_REDUCE_DB(GLOBAL_COMP_TIME%ENGINE_TIME(CURRENT_RUN),RESULT,1,0,"MAX ")

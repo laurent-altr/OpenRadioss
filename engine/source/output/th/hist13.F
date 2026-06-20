@@ -39,13 +39,14 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
       SUBROUTINE HIST13(IPARG ,IXS  ,IXQ  ,IXC    ,IXT    ,
      2                  IXP   ,IXR  ,ITAB   ,PM     ,
      3                  NPBY  ,IXTG ,IRFE ,LACCELM,
-     4                  IPARI ,IPART,ITHGRP ,ITHBUF,CHRUN_OLD,NAMES_AND_TITLES)
+     4                  IPARI ,IPART,ITHGRP ,ITHBUF,CHRUN_OLD,NAMES_AND_TITLES,SCRFS)
 C=======================================================================
 C   OLD TH V3 RADIOSS INPUT V3 or V4
 C=======================================================================
       USE INOUTFILE_MOD
       USE NAMES_AND_TITLES_MOD,only:NAMES_AND_TITLES_,LTITLE
       use element_mod , only : nixs,nixq,nixc,nixp,nixr,nixt,nixtg
+      USE SCR_DATA_MOD
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -61,7 +62,6 @@ C-----------------------------------------------
 #include      "scr12_c.inc"
 #include      "scr13_c.inc"
 #include      "scr17_c.inc"
-#include      "scrfs_c.inc"
 #include      "chara_c.inc"
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
@@ -76,6 +76,7 @@ C-----------------------------------------------
       my_real PM(NPROPM,NUMMAT)
       CHARACTER CHRUN_OLD*2
       TYPE(NAMES_AND_TITLES_),INTENT(IN) :: NAMES_AND_TITLES   !< NAMES_AND_TITLES host the input deck names and titles for outputs+
+      TYPE(SCRFS_),           INTENT(IN) :: SCRFS
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
@@ -233,7 +234,7 @@ C
       IWA(22)=NSRBY
       IWA(23)=NRBV
       IWA(24)=NSECT
-      IF (NSECT ==0 ) IWA(24)=NSFLSW
+      IF (NSECT ==0 ) IWA(24)=SCRFS%NSFLSW
       IWA(25)=NSCV
       IWA(26)=NJOINT
       IWA(27)=NJOINV
@@ -343,15 +344,15 @@ C
             IWA(II)=II
         ENDDO
         CALL WRTDES(IWA,IWA,NSECT,ITFORM,0)
-       ELSEIF(NSFLSW/=0) THEN
+       ELSEIF(SCRFS%NSFLSW/=0) THEN
         IF(ALLOCATED(IWA)) DEALLOCATE(IWA)
-        ALLOCATE(IWA(NSFLSW))
+        ALLOCATE(IWA(SCRFS%NSFLSW))
         II=0
-        DO I=1,NSFLSW
+        DO I=1,SCRFS%NSFLSW
             II=II+1
             IWA(II)=II
         ENDDO
-        CALL WRTDES(IWA,IWA,NSFLSW,ITFORM,0)
+        CALL WRTDES(IWA,IWA,SCRFS%NSFLSW,ITFORM,0)
        ENDIF
 C
        IF(NJOINT/=0) THEN

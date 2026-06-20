@@ -164,7 +164,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
      .                   FORNEQS          ,UNITAB     ,DT           ,DTFAC1           ,
      .                   STACK            ,DRAPE_SH4N ,DRAPE_SH3N   ,DRAPEG           ,NDRAPE     ,
      .                   GLOB_THERM       ,PBLAST     ,ELEMENT      ,NODES            ,RBE3       ,
-     .                   RWALL            ,SFEM       )
+     .                   RWALL            ,SFEM       ,SCRFS      )
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
@@ -219,6 +219,7 @@ C-----------------------------------------------
       use restart_rwallpen_mod, only : get_nrwallpen_l,read_rrwallpen
       use sfem_mod
       use dt_mod , only : dt_
+      USE SCR_DATA_MOD
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -246,7 +247,6 @@ C-----------------------------------------------
 #include      "scr16_c.inc"
 #include      "scr19_c.inc"
 #include      "scrcut_c.inc"
-#include      "scrfs_c.inc"
 #include      "scrnoi_c.inc"
 #include      "scr_fac_c.inc"
 #include      "sms_c.inc"
@@ -286,6 +286,7 @@ C-----------------------------------------------
       TYPE(RWALL_)          ,INTENT(INOUT)                 :: RWALL
       TYPE(global_sfem_)    ,INTENT(INOUT)                 :: SFEM
       TYPE(DT_)             ,INTENT(INOUT)                 :: DT
+      TYPE(SCRFS_)          ,INTENT(INOUT)                 :: SCRFS
       INTEGER, INTENT(IN) :: LIFLOW
       INTEGER, INTENT(IN) :: LRFLOW
       my_real, INTENT(INOUT) :: FORNEQS(3,NUMNOD)
@@ -1271,10 +1272,10 @@ C     used for checkpoint restarts.
           CALL READ_I_C(LLINK,LLLINK)
           CALL READ_I_C(IADRL,MIN(1,IPARIT)*LLLINK)
           !CALL READ_I_C(LINALE,LLINAL)
-          CALL READ_I_C(NEFLSW,NSFLSW)
-          CALL READ_I_C(NNFLSW,8*NTFLSW)
+          CALL READ_I_C(NEFLSW,SCRFS%NSFLSW)
+          CALL READ_I_C(NNFLSW,8*SCRFS%NTFLSW)
           CALL READ_I_C(ICUT,44*NCUTS)
-          CALL READ_DB(CRFLSW,9*NSFLSW)
+          CALL READ_DB(CRFLSW,9*SCRFS%NSFLSW)
           CALL READ_DB(XCUT,7*NCUTS)
         ENDIF
        ELSE

@@ -166,7 +166,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
      .                   IMPBUF_TAB ,IMPL_S          ,IMPL_S0    ,MCP         ,TEMP             ,
      .                   FORNEQS    ,UNITAB          ,STACK      ,NDRAPE      ,DRAPE_SH3N       ,
      .                   DRAPE_SH4N ,DRAPEG          ,RESTSIZE   ,SKEWS       ,GLOB_THERM       ,
-     .                   PBLAST     ,RBE3            ,RWALL      ,SFEM )
+     .                   PBLAST     ,RBE3            ,RWALL      ,SFEM ,SCRFS)
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
@@ -226,6 +226,7 @@ C-----------------------------------------------
       use rwall_mod
       use restart_rwallpen_mod, only : write_rrwallpen
       use sfem_mod
+      USE SCR_DATA_MOD
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -278,6 +279,7 @@ c     TYPE (CLUSTER_) ,DIMENSION(NCLUSTER) :: CLUSTER
       TYPE(RBE3_)      ,INTENT(INOUT) :: RBE3
       TYPE(RWALL_)     ,INTENT(INOUT) :: RWALL
       TYPE(global_sfem_),INTENT(IN  ) :: SFEM
+      TYPE(SCRFS_)      ,INTENT(IN  ) :: SCRFS
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
 C-----------------------------------------------
@@ -297,7 +299,6 @@ C-----------------------------------------------
 #include      "scr16_c.inc"
 #include      "scr19_c.inc"
 #include      "scrcut_c.inc"
-#include      "scrfs_c.inc"
 #include      "scrnoi_c.inc"
 #include      "scr_fac_c.inc"
 #include      "sms_c.inc"
@@ -356,7 +357,7 @@ C--------------------------------------
       SFR_ELEM = SIZE(NODES%BOUNDARY,1)
       SIAD_ELEM = SIZE(NODES%BOUNDARY_ADD,1) * SIZE(NODES%BOUNDARY_ADD,2)
       CALL WRCOMI(OUTPUT,LMXVINT,LVARINT,TABVINT,1,MULTI_FVM,H3D_DATA,DYNAIN_DATA,
-     .     INTERFACES%PARAMETERS,SENSORS,LOADS,GLOB_THERM,PBLAST,SFEM)
+     .     INTERFACES%PARAMETERS,SENSORS,LOADS,GLOB_THERM,PBLAST,SFEM,SCRFS)
 C
       ENTMP(1) = OUTPUT%TH%WFEXT
       ENTMP(2) = EHOUR
@@ -1349,9 +1350,9 @@ C needed for check restart
 C needed because the restarts are the same as the check restart
         MY_ILEN = 4*NRLINK+NRLINK*(NSPMD+2)
      .           +LLLINK+LLLINK*MIN(1,IPARIT)
-     .           +NSFLSW+8*NTFLSW+44*NCUTS !+LLINAL
+     .           +SCRFS%NSFLSW+8*SCRFS%NTFLSW+44*NCUTS !+LLINAL
         CALL WRITE_I_C (MY_ILEN,1)
-        MY_RLEN = 9*NSFLSW+7*NCUTS
+        MY_RLEN = 9*SCRFS%NSFLSW+7*NCUTS
         CALL WRITE_I_C (MY_RLEN,1)
         CALL WRITE_I_C (ILINK,4*NRLINK)
         CALL WRITE_I_C (FR_RL,NRLINK*(NSPMD+2))
@@ -1359,10 +1360,10 @@ C needed because the restarts are the same as the check restart
         CALL WRITE_I_C (IADRL,LLLINK*MIN(1,IPARIT))
         !CALL WRITE_I_C (LINALE,LLINAL)
 C       section
-        CALL WRITE_I_C(NEFLSW,NSFLSW)
-        CALL WRITE_I_C(NNFLSW,8*NTFLSW)
+        CALL WRITE_I_C(NEFLSW,SCRFS%NSFLSW)
+        CALL WRITE_I_C(NNFLSW,8*SCRFS%NTFLSW)
         CALL WRITE_I_C(ICUT,44*NCUTS)
-        CALL WRITE_DB (CRFLSW,9*NSFLSW)
+        CALL WRITE_DB (CRFLSW,9*SCRFS%NSFLSW)
         CALL WRITE_DB (XCUT,7*NCUTS)
 C--------------------------------------
         IF(NADMESH /= 0 .OR. IREST_MSELT /= 0)THEN

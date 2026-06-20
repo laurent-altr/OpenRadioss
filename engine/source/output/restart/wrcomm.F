@@ -51,7 +51,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    th_mod           ../engine/share/modules/th_mod.F
 !||====================================================================
       SUBROUTINE WRCOMI(OUTPUT,LMXVINT,LVARINT,TABVINT,ISP,MULTI_FVM,H3D_DATA,DYNAIN_DATA,
-     .           INTER_PARAMETERS,SENSORS,LOADS,GLOB_THERM,PBLAST,SFEM)
+     .           INTER_PARAMETERS,SENSORS,LOADS,GLOB_THERM,PBLAST,SFEM,SCRFS)
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
@@ -77,6 +77,7 @@ C-----------------------------------------------
       use element_mod , only : nixs,nixq,nixc,nixt,nixr,nixp,nixtg
       use sfem_mod
       USE SEATBELT_MOD , ONLY : NGUIDED_CABLE,NGUIDED_CABLE_G
+      USE SCR_DATA_MOD
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -95,6 +96,7 @@ C-----------------------------------------------
       type (glob_therm_)     ,intent(in) :: GLOB_THERM
       type (PBLAST_)         ,intent(in) :: PBLAST
       type (global_sfem_)    ,intent(in) :: SFEM
+      TYPE(SCRFS_)           ,INTENT(IN) :: SCRFS
 C-----------------------------------------------
 C   C o m m o n   B l o c k s
 C-----------------------------------------------
@@ -124,7 +126,6 @@ C-----------------------------------------------
 #include      "scr17_c.inc"
 #include      "rad2r_c.inc"
 #include      "warn_c.inc"
-#include      "scrfs_c.inc"
 #include      "spmd_c.inc"
 #include      "fxbcom.inc"
 #include      "eigcom.inc"
@@ -688,8 +689,8 @@ C No more used      TABVINT(LVARINT + 16 )
       TABVINT(LVARINT + 41 ) = ALE%UPWIND%UPWM
       TABVINT(LVARINT + 43 ) = IDDW
       TABVINT(LVARINT + 44 ) = IPREAD
-      TABVINT(LVARINT + 45 ) = NSFLSW
-      TABVINT(LVARINT + 46 ) = NTFLSW
+      TABVINT(LVARINT + 45 ) = SCRFS%NSFLSW
+      TABVINT(LVARINT + 46 ) = SCRFS%NTFLSW
       TABVINT(LVARINT + 47 ) = 0 !IUSERW
       TABVINT(LVARINT + 48 ) = 0 !NUSERW
       TABVINT(LVARINT + 49 ) = IRAD2R

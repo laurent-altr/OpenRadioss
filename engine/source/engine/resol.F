@@ -658,7 +658,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
      N        KLOADPINTER,LOADPINTER,DGAPLOADINT,DRAPEG,USER_WINDOWS,OUTPUT,INTERFACES,
      O        DT        ,LOADS     , PYTHON, DPL0CLD,VEL0CLD,
      P        NDAMP_VREL,ID_DAMP_VREL,FR_DAMP_VREL,NDAMP_VREL_RBYG,NAMES_AND_TITLES,UNITAB,LIFLOW,LRFLOW ,
-     R        GLOB_THERM ,PBLAST,RBE3,RWALL,SFEM)
+     R        GLOB_THERM ,PBLAST,RBE3,RWALL,SFEM,SCRFS)
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
@@ -782,6 +782,7 @@ C-----------------------------------------------
               use init_ale_mod , only : init_ale
               use sfem_mod
               use init_global_boundary_list_mod , only : init_global_boundary_list
+              USE SCR_DATA_MOD
               use sfem_init_mod , only : sfem_init
               use shell_internal_forces_mod
               use shell_gpu_mod
@@ -1014,7 +1015,8 @@ c
               type (PBLAST_) ,intent(inout)                      :: PBLAST
               type (rbe3_) ,intent(inout)                        :: RBE3
               type (rwall_) ,intent(inout)                       :: RWALL
-              type (global_sfem_) ,intent(inout) :: SFEM  
+              type (global_sfem_) ,intent(inout) :: SFEM
+              TYPE(SCRFS_)        ,intent(inout) :: SCRFS
 C
               INTEGER ,INTENT(IN) :: NDAMP_VREL,NDAMP_VREL_RBYG
               INTEGER ,INTENT(IN) :: ID_DAMP_VREL(NDAMP_VREL),FR_DAMP_VREL(NSPMD+2,NDAMP_VREL)
@@ -8341,7 +8343,7 @@ C Regular animation
      t          USER_WINDOWS  ,OUTPUT         ,DT             ,OUTPUT%TH%TH_SURF%CHANNELS        ,
      u          TABLE         ,LOADS          ,SFANI          ,IPARIT             ,ptrX_offset   ,
      v          SZ_NPCONT2    ,NPCONT2        ,GLOB_THERM     ,PBLAST             ,OUTPUT%TH%WFEXT,
-     w          MASS0_START)
+     w          MASS0_START   ,SCRFS         )
 
                 IF((MSTOP == 1 .AND. ICTLSTOP == 0) .OR. MSTOP == 2 .OR. DT2<=ZERO)THEN
                   CALL SORTIE_ERROR(
@@ -9289,7 +9291,7 @@ C--- //0 ----------------
      .                       IMPBUF_TAB ,IMPL_S          ,IMPL_S0        ,NODES%MCP             ,NODES%TEMP             ,
      .                       FORNEQS    ,UNITAB          ,STACK          ,NDRAPE          ,DRAPE_SH3N       ,
      .                       DRAPE_SH4N ,DRAPEG          ,RESTSIZE       ,SKEWS           ,GLOB_THERM       ,
-     .                       PBLAST     ,RBE3            ,RWALL          ,SFEM )
+     .                       PBLAST     ,RBE3            ,RWALL          ,SFEM   ,SCRFS )
 
                 ! Restart file size
                 IF (MULTIREST >0)THEN

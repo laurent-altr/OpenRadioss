@@ -99,7 +99,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
      G                  MDS_NMAT,
      H                  SENSORS,MAT_ELEM,
      I                  DYNAIN_DATA,DT ,OUTPUT,NAMES_AND_TITLES,
-     J                  GLOB_THERM)
+     J                  GLOB_THERM,SCRFS)
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
@@ -127,6 +127,7 @@ C-----------------------------------------------
       USE ELBUFDEF_MOD
       USE glob_therm_mod
       USE PBLAST_MOD
+      USE SCR_DATA_MOD
       USE PRELECH3D_MOD
       use element_mod , only : nixs,nixq,nixc,nixt,nixp,nixr,nixtg
 C-----------------------------------------------
@@ -154,7 +155,6 @@ C-----------------------------------------------
 #include      "scr18_c.inc"
 #include      "cong1_c.inc"
 #include      "cong2_c.inc"
-#include      "scrfs_c.inc"
 #include      "stati_c.inc"
 #include      "statr_c.inc"
 #include      "units_c.inc"
@@ -210,6 +210,7 @@ C-----------------------------------------------
       TYPE(OUTPUT_), INTENT(INOUT) :: OUTPUT !< output structure
       TYPE(NAMES_AND_TITLES_),INTENT(INOUT) :: NAMES_AND_TITLES  !< NAMES_AND_TITLES host the input deck names and titles for outputs
       type (glob_therm_) ,intent(inout)       :: glob_therm
+      TYPE(SCRFS_), INTENT(IN) :: SCRFS
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
@@ -2482,14 +2483,14 @@ C
 C---------------------------------------------------------
 C     READING DATA FOR FLUX & ROTATION
 C---------------------------------------------------------
-      IF (NSFLSW  /= 0.AND.MCHECK == 0) THEN
-        CALL LECFLSW (NSFLSW,NTFLSW,NEFLSW,NNFLSW,CRFLSW,X,IXS,IPARG,WA)
+      IF (SCRFS%NSFLSW  /= 0.AND.MCHECK == 0) THEN
+        CALL LECFLSW (SCRFS%NSFLSW,SCRFS%NTFLSW,NEFLSW,NNFLSW,CRFLSW,X,IXS,IPARG,WA)
       ENDIF
 C-------------------------------------------------
 C     MODIFICATION OF TIME FUNCTIONS
 C-------------------------------------------------
-      IF (NFCT  /=  0) THEN
-        CALL LECFUN (NPC, PLD, NFCT, NPTS, TABLE)
+      IF (SCRFS%NFCT  /=  0) THEN
+        CALL LECFUN (NPC, PLD, SCRFS%NFCT, NPTS, TABLE)
       END IF
 C-------------------------------------------------
 C     RESET VELOCITIES

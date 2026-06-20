@@ -102,7 +102,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
      M                 RTHBUF  ,THKE      ,STACK    ,ISPHIO      ,VSPHIO    ,
      N                 ITHFLAG ,PINCH_DATA,MULTI_FVM,W           ,SITHBUF   ,
      Q                 FSAVSURF,NEED_TO_REINIT_FSAV ,GLOB_THERM  ,OUTPUT    ,
-     P                 MASS0_START)
+     P                 MASS0_START,SCRFS            )
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
@@ -120,6 +120,7 @@ C-----------------------------------------------
       USE TH_SURF_MOD , only : TH_SURF_NUM_CHANNEL
       use glob_therm_mod
       USE OUTPUT_MOD , ONLY : OUTPUT_
+      USE SCR_DATA_MOD
       use thsechecksum_mod
       use element_mod , only : nixs,nixq,nixc,nixp,nixr,nixt,nixtg
       USE SEATBELT_MOD , only : NGUIDED_CABLE_G
@@ -144,7 +145,6 @@ C-----------------------------------------------
 #include      "scr13_c.inc"
 #include      "scr17_c.inc"
 #include      "scr23_c.inc"
-#include      "scrfs_c.inc"
 #include      "task_c.inc"
 #include      "impl1_c.inc"
 #include      "rad2r_c.inc"
@@ -176,6 +176,7 @@ C-----------------------------------------------
      .   TEMP(*),FTHREAC(*),GRESAV(NPSAV,*), GAUGE(LLGAUGE,NBGAUGE),RTHBUF(*),
      .   VSPHIO(*), W(3,NUMNOD)
       my_real, INTENT(IN   ) :: MASS0_START
+      TYPE(SCRFS_),INTENT(IN) :: SCRFS
       REAL(KIND=8), INTENT(INOUT) :: THIS0, DTHIS0
       INTEGER, DIMENSION(NIXP,NUMELP) ,INTENT(IN):: IXP
       TYPE (ELBUF_STRUCT_), DIMENSION(NGROUP) :: ELBUF_TAB
@@ -1407,10 +1408,10 @@ c----
 C-------------------------------------------------------
 C     SECTIONS OF FLUIDS
 C-------------------------------------------------------
-       IF (NSFLSW> 0 .AND. NABFILE==0)THEN
-         IF (NSPMD > 1)CALL SPMD_GLOB_DSUM9(FLSW,9*NSFLSW)
+       IF (SCRFS%NSFLSW> 0 .AND. NABFILE==0)THEN
+         IF (NSPMD > 1)CALL SPMD_GLOB_DSUM9(FLSW,9*SCRFS%NSFLSW)
          IF (ISPMD/=0) THEN
-             DO I=1,NSFLSW
+             DO I=1,SCRFS%NSFLSW
                FLSW(1,I) = ZERO
                FLSW(2,I) = ZERO
                FLSW(3,I) = ZERO
@@ -1422,7 +1423,7 @@ C-------------------------------------------------------
                FLSW(9,I) = ZERO
              ENDDO
          ELSE
-           DO I=1,NSFLSW
+           DO I=1,SCRFS%NSFLSW
              WA(II+1)=FLSW(1,I)
              WA(II+2)=FLSW(2,I)
              WA(II+3)=FLSW(3,I)
@@ -1434,7 +1435,7 @@ C-------------------------------------------------------
              WA(II+9)=FLSW(9,I)
              II=II+9
            ENDDO
-           CALL WRTDES(WA,WA,9*NSFLSW,ITTYP,1)
+           CALL WRTDES(WA,WA,9*SCRFS%NSFLSW,ITTYP,1)
          END IF
        ENDIF
 C---------------------------------------

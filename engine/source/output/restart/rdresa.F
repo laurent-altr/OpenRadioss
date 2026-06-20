@@ -53,7 +53,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
      .                  PRESFIL,MULTI_FVM,H3D_DATA,
      .                  PINCH_DATA,DYNAIN_DATA,INTERFACES,SENSORS,LOADS,
      .                  MAT_ELEM, NAMES_AND_TITLES,SKEWS ,GLOB_THERM,PBLAST,
-     .                  RBE3,RWALL,SFEM)
+     .                  RBE3,RWALL,SFEM,SCRFS)
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
@@ -75,6 +75,7 @@ C-----------------------------------------------
       use RWALL_MOD                    !< RWALL type
       use output_mod
       use sfem_mod
+      USE SCR_DATA_MOD
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -110,6 +111,7 @@ C-----------------------------------------------
       TYPE (RBE3_)          ,INTENT(INOUT)   :: RBE3
       TYPE (RWALL_)         ,INTENT(INOUT)   :: RWALL
       TYPE (global_sfem_)          ,INTENT(INOUT)   :: SFEM
+      TYPE(SCRFS_),                 INTENT(INOUT)   :: SCRFS
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
@@ -189,7 +191,7 @@ C----------------------------
       CALL READ_I_C(TABVINT,LVARINT)
       CALL RDCOMI(output,TABVINT,MULTI_FVM,H3D_DATA,DYNAIN_DATA,
      .            INTERFACES%PARAMETERS,SENSORS,LOADS  ,MAT_ELEM,SKEWS,
-     .            GLOB_THERM,PBLAST,RBE3 ,RWALL,SFEM)
+     .            GLOB_THERM,PBLAST,RBE3 ,RWALL,SFEM,SCRFS)
 
 C
       IF(ANIM_PLY > 0 .AND.IPLYXFEM == 0) THEN
@@ -220,7 +222,7 @@ C
 !||    output_mod             ../common_source/modules/output/output_mod.F90
 !||    pinchtype_mod          ../common_source/modules/pinchtype_mod.F
 !||====================================================================
-      SUBROUTINE INIRESA(OUTPUT, H3D_DATA,PINCH_DATA,GLOB_THERM)
+      SUBROUTINE INIRESA(OUTPUT, H3D_DATA,PINCH_DATA,GLOB_THERM,SCRFS)
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
@@ -231,6 +233,7 @@ C-----------------------------------------------
       USE ALEANIM_MOD
       USE glob_therm_mod
       use output_mod
+      USE SCR_DATA_MOD
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -255,7 +258,6 @@ C-----------------------------------------------
 #include      "parit_c.inc"
 #include      "task_c.inc"
 #include      "scrnoi_c.inc"
-#include      "scrfs_c.inc"
 #include      "scrcut_c.inc"
 #include      "scr_fac_c.inc"    
 #include      "sphcom.inc"
@@ -270,6 +272,7 @@ C-----------------------------------------------
       TYPE(H3D_DATABASE) :: H3D_DATA
       TYPE(PINCH) :: PINCH_DATA
       type (glob_therm_)    ,intent(inout)   :: GLOB_THERM
+      TYPE(SCRFS_)          ,INTENT(IN)      :: SCRFS
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
@@ -517,10 +520,10 @@ C-------------------------------------------
 C---------------------------------------------------------
 C     /FLSEC (FLOW SECTION, obsolete option)
 C---------------------------------------------------------
-      SCRFLSW = 9*NSFLSW
-      SFLSW   = 6*NSFLSW
-      SNEFLSW = 1*NSFLSW
-      SNNFLSW = 8*NTFLSW
+      SCRFLSW = 9*SCRFS%NSFLSW
+      SFLSW   = 6*SCRFS%NSFLSW
+      SNEFLSW = 1*SCRFS%NSFLSW
+      SNNFLSW = 8*SCRFS%NTFLSW
 C---------------------------------------------------------
 C     ANIMATION (vectors for CONTACT,INTERNAL FORCES, EXTERNAL FORCES)
 C     CUTS NOISE 

@@ -85,7 +85,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
      .           OUTPUT      ,INTERFACES  ,DT             ,LOADS      ,MAT_ELEM        ,
      .           PYTHON      ,NAMES_AND_TITLES, UNITAB    ,SKEWS      ,LIFLOW          ,
      .           LRFLOW      ,glob_therm ,PBLAST          ,RBE3       ,coupling        ,
-     .           RWALL       ,SFEM   )
+     .           RWALL       ,SFEM   ,SCRFS  )
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
@@ -131,6 +131,7 @@ C-----------------------------------------------
       use coupling_adapter_mod 
       use rwall_mod
       use sfem_mod
+      USE SCR_DATA_MOD
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -202,6 +203,7 @@ C     REAL
       type (rbe3_) ,intent(inout)             :: RBE3
       type (rwall_), intent(inout)            :: RWALL
       type (global_sfem_), intent(inout) :: SFEM
+      TYPE(SCRFS_),        INTENT(INOUT) :: SCRFS
 C-----------------------------------------------
 C   L o c a l   V a r i a b l e s
 C-----------------------------------------------
@@ -305,7 +307,7 @@ C
      N  KLOADPINTER     ,LOADPINTER     ,DGAPLOADINT    ,DRAPEG         ,USER_WINDOWS ,OUTPUT          ,INTERFACES,
      O  DT              ,LOADS          ,PYTHON         ,DPL0CLD        ,VEL0CLD        ,
      P  NDAMP_VREL      ,ID_DAMP_VREL   ,FR_DAMP_VREL   ,NDAMP_VREL_RBYG,NAMES_AND_TITLES,UNITAB,LIFLOW,LRFLOW,
-     R  GLOB_THERM      ,PBLAST         ,RBE3           ,RWALL          ,SFEM   )
+     R  GLOB_THERM      ,PBLAST         ,RBE3           ,RWALL          ,SFEM   ,SCRFS  )
 C
       CALL TRACE_OUT(2)
 C
