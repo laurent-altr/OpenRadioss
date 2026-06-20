@@ -45,13 +45,14 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
      8    NELTST    ,ITYPTST   ,IPART     ,IPARTS    ,ITAB      ,
      9    FSKYI     ,BUFGEO    ,KXX       ,IXX       ,ISKY      ,
      A    IPARTX    ,GRESAV    ,GRTH      ,
-     B    IGRTH     ,ELBUF_TAB )
+     B    IGRTH     ,ELBUF_TAB ,SCR23)
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
       USE INITBUF_MOD
       USE ELBUFDEF_MOD
       use element_mod , only : nixs
+      USE SCR_DATA_MOD
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -65,13 +66,13 @@ C-----------------------------------------------
 #include      "scr17_c.inc"
 #include      "task_c.inc"
 #include      "parit_c.inc"
-#include      "scr23_c.inc"
 C-----------------------------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
+      TYPE(SCR23_), INTENT(IN) :: SCR23
       INTEGER IXS(NIXS,*),IPART(LIPART1,*) ,IPARTS(*) ,
      .   NPC(*), IPARG(NPARG,*),IADS(8,*),NELTST,ITYPTST,
-     .   KXX(NIXX,*),I XX(*), ITAB(*),
+     .   KXX(SCR23%NIXX,*),IXX(*), ITAB(*),
      .   IPARTX(*), ISKY(*),GRTH(*),IGRTH(*)
 C     REAL
       my_real
@@ -127,7 +128,7 @@ C           but Multi-purpose element is not supposed to be vectorized ..
      6   STIFR,        MS,           IN,           FSKYI,
      7   ISKY,         PARTSAV,      IPARTX,       BUFMAT,
      8   BUFGEO,       GRESAV,       GRTH,         IGRTH,
-     9   ELBUF_TAB(NG),IGRE)
+     9   ELBUF_TAB(NG),IGRE,         SCR23)
             IF (IDDW>0) CALL STOPTIMEG(NG)
          END DO
  240  CONTINUE

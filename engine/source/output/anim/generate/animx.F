@@ -43,10 +43,11 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
      .           UIX      ,XUSR     ,NFACPTX  ,IXEDGE   ,IXFACET,
      .           IXSOLID  ,INUMX1   ,INUMX2   ,INUMX3   ,IOFFX1 ,
      .           IOFFX2   ,IOFFX3   ,XMASS1   ,XMASS2   ,XMASS3 ,
-     .           XFUNC1   ,XFUNC2   ,XFUNC3   ,NANIM1D_L)
+     .           XFUNC1   ,XFUNC2   ,XFUNC3   ,NANIM1D_L,SCR23)
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
+      USE SCR_DATA_MOD
       USE MESSAGE_MOD
       USE ELBUFDEF_MOD
 C-----------------------------------------------
@@ -58,13 +59,13 @@ C   C o m m o n   B l o c k s
 C-----------------------------------------------
 #include      "com01_c.inc"
 #include      "com04_c.inc"
-#include      "scr23_c.inc"
 #include      "param_c.inc"
 #include      "units_c.inc"
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
-      INTEGER KXX(NIXX,*),IXX(*),
+      TYPE(SCR23_), INTENT(IN) :: SCR23
+      INTEGER KXX(SCR23%NIXX,*),IXX(*),
      .   IPARTX(*), UIX(*), NFACPTX(3,*),
      .   IPARG(NPARG,*), ITAB(*),
      .   INUMX1(*), INUMX2(*), INUMX3(*),
@@ -131,7 +132,7 @@ C
 C-------
 C           FILL COORDINATES.
             CALL XCOOR3(X   ,KXX(1,J) ,IXX  ,ITAB ,NX ,
-     2                  UID ,UIX ,XUSR )
+     2                  UID ,UIX ,XUSR ,SCR23)
             IADNOD=KXX(4,J)
             DO K=1,NX
              UIX(NX+K)=IXX(IADNOD+K-1)
@@ -202,14 +203,14 @@ C--------
             DO L=1,NEDGE
               IOFFX1(NAX1D+L)=NINT(MIN(GBUF%OFF(I),ONE))
 cc              IOFFX1(NAX1D+L)=NINT(MIN(ELBUF(NB1),ONE))
-              INUMX1(NAX1D+L)=KXX(NIXX,J)
+              INUMX1(NAX1D+L)=KXX(SCR23%NIXX,J)
               IXEDGE(1,NAX1D+L)=IXX(IADNOD+IXEDGE(1,NAX1D+L)-1)
               IXEDGE(2,NAX1D+L)=IXX(IADNOD+IXEDGE(2,NAX1D+L)-1)
             ENDDO
             DO L=1,NFACET
               IOFFX2(NAX2D+L)=NINT(MIN(GBUF%OFF(I),ONE))
 cc              IOFFX2(NAX2D+L)=NINT(MIN(ELBUF(NB1),ONE))
-              INUMX2(NAX2D+L)=KXX(NIXX,J)
+              INUMX2(NAX2D+L)=KXX(SCR23%NIXX,J)
               IXFACET(1,NAX2D+L)=IXX(IADNOD+IXFACET(1,NAX2D+L)-1)
               IXFACET(2,NAX2D+L)=IXX(IADNOD+IXFACET(2,NAX2D+L)-1)
               IXFACET(3,NAX2D+L)=IXX(IADNOD+IXFACET(3,NAX2D+L)-1)
@@ -219,7 +220,7 @@ C             if 3 nodes facet : node 4 should be equal to node 3.
             DO L=1,NSOLID
               IOFFX3(NAX3D+L)=NINT(MIN(GBUF%OFF(I),ONE))
 cc              IOFFX3(NAX3D+L)=NINT(MIN(ELBUF(NB1),ONE))
-              INUMX3(NAX3D+L)=KXX(NIXX,J)
+              INUMX3(NAX3D+L)=KXX(SCR23%NIXX,J)
               IXSOLID(1,NAX3D+L)=IXX(IADNOD+IXSOLID(1,NAX3D+L)-1)
               IXSOLID(2,NAX3D+L)=IXX(IADNOD+IXSOLID(2,NAX3D+L)-1)
               IXSOLID(3,NAX3D+L)=IXX(IADNOD+IXSOLID(3,NAX3D+L)-1)
@@ -235,8 +236,8 @@ C--------
             NAX3D=NAX3D+NSOLID
             NANIM1D_L = NAX1D
 C123456789C123456789C123456789C123456789C123456789C123456789C123456789C1
-            IF (NAX1D > NANIM1D .OR. NAX2D > NANIM2D .OR.
-     .          NAX3D > NANIM3D) THEN
+            IF (NAX1D > NANIM1D .OR. NAX2D > SCR23%NANIM2D .OR.
+     .          NAX3D > SCR23%NANIM3D) THEN
               CALL ANCMSG(MSGID=28,ANMODE=ANINFO)
               CALL ARRET(2)
             ENDIF

@@ -48,11 +48,12 @@ C calculation of forces on a group of multi-purpose elements
      6   STIFR,    MS,       IN,       FSKYI,
      7   ISKY,     PARTSAV,  IPARTX,   BUFMAT,
      8   BUFGEO,   GRESAV,   GRTH,     IGRTH,
-     9   ELBUF_STR,IGRE)
+     9   ELBUF_STR,IGRE,     SCR23)
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
       USE ELBUFDEF_MOD
+      USE SCR_DATA_MOD
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -65,12 +66,12 @@ C-----------------------------------------------
 #include      "param_c.inc"
 #include      "parit_c.inc"
 #include      "units_c.inc"
-#include      "scr23_c.inc"
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
       INTEGER, INTENT(IN) :: IGRE
-      INTEGER NFT,NEL,KXX(NIXX,*),IXX(*), NPC(*),ISKY(*),
+      TYPE(SCR23_), INTENT(IN) :: SCR23
+      INTEGER NFT,NEL,KXX(SCR23%NIXX,*),IXX(*), NPC(*),ISKY(*),
      .        IPARTX(*),NELTST ,ITYPTST,
      .        ITAB(*),GRTH(*),IGRTH(*)
 C     REAL
@@ -92,11 +93,13 @@ C     REAL
      .         UID,
      .   IGTYP,NUVAR,NUVARN,
      .   NISKYL,KEUSR,
-     .   UIX(MAXNX),KVAR,KVARN
+     .   UIX(SCR23%MAXNX),KVAR,KVARN
        my_real
-     .   XUSR(3,MAXNX),VUSR(3,MAXNX),VRUSR(3,MAXNX),UMASS(MAXNX),
-     .   UFORC(3,MAXNX),USTIFM(MAXNX), USTIFR(MAXNX), UVISR(MAXNX),
-     .   UMOMT(3,MAXNX),UVISM(MAXNX),UINER(MAXNX)
+     .   XUSR(3,SCR23%MAXNX),VUSR(3,SCR23%MAXNX),
+     .   VRUSR(3,SCR23%MAXNX),UMASS(SCR23%MAXNX),
+     .   UFORC(3,SCR23%MAXNX),USTIFM(SCR23%MAXNX),
+     .   USTIFR(SCR23%MAXNX), UVISR(SCR23%MAXNX),
+     .   UMOMT(3,SCR23%MAXNX),UVISM(SCR23%MAXNX),UINER(SCR23%MAXNX)
 C
       TYPE(G_BUFEL_),POINTER :: GBUF
 C-----------------------------------------------
@@ -135,11 +138,11 @@ C
 C-------
 C       FILL COORDINATES.
         CALL XCOOR3(X   ,KXX(1,J) ,IXX  ,ITAB ,NX ,
-     2               UID ,UIX      ,XUSR )
+     2               UID ,UIX      ,XUSR ,SCR23)
 C-------
 C       FILL VELOCITIES.
         CALL XDEFO3(V    ,VR    ,KXX(1,J) ,IXX  ,NX   ,
-     2               VUSR ,VRUSR )
+     2               VUSR ,VRUSR ,SCR23)
 C-------
         CALL SAV_BUF_POINT(PM,1)
         CALL SAV_BUF_POINT(BUFMAT,2)
@@ -259,14 +262,14 @@ C-------
      2   V,           VR,          UMASS,       UINER,
      3   UFORC,       UMOMT,       KEUSR,       EUSR,
      4   GBUF%EINT(I),PARTSAV,     IPARTX(J),   GRESAV,
-     5   GRTH,        IGRTH(J),    IGRE)
+     5   GRTH,        IGRTH(J),    IGRE,        SCR23)
 C-------
         IF (IPARIT == 0) THEN
           CALL XCUM3(NX,KXX(1,J),IXX,UFORC ,USTIFM,
-     2               UVISM,MS, F, STIFN )
+     2               UVISM,MS, F, STIFN ,SCR23)
         ELSE
           CALL XCUM3P(NX,KXX(1,J),IXX,UFORC ,USTIFM,
-     2                UVISM, MS, NISKYL, FSKYI ,ISKY)
+     2                UVISM, MS, NISKYL, FSKYI ,ISKY,SCR23)
         ENDIF
       ENDDO ! DO I=1,NEL
 C-----------------------------------------------

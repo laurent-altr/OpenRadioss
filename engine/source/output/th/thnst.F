@@ -30,11 +30,12 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    elbufdef_mod   ../common_source/modules/mat_elem/elbufdef_mod.F90
 !||====================================================================
       SUBROUTINE THNST(ELBUF_TAB,IPARG,NTHGRP2, ITHGRP,ITHBUF,
-     .                 GEO ,KXX, WA  )
+     .                 GEO ,KXX, WA  ,SCR23)
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
       USE ELBUFDEF_MOD
+      USE SCR_DATA_MOD
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -45,11 +46,11 @@ C-----------------------------------------------
 #include      "com01_c.inc"
 #include      "task_c.inc"
 #include      "param_c.inc"
-#include      "scr23_c.inc"
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
-      INTEGER IPARG(NPARG,*),ITHBUF(*),KXX(NIXX,*)
+      TYPE(SCR23_), INTENT(IN) :: SCR23
+      INTEGER IPARG(NPARG,*),ITHBUF(*),KXX(SCR23%NIXX,*)
       INTEGER, INTENT(in) :: NTHGRP2
       INTEGER, DIMENSION(NITHGR,*), INTENT(in) :: ITHGRP
       my_real

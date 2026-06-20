@@ -30,7 +30,11 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
      2   V,       VR,      UMASS,   UINER,
      3   FORC,    TORQ,    KEUSR,   EUSR,
      4   EINT,    PARTSAV, IPART,   GRESAV,
-     5   GRTH,    IGRTH,   IGRE)
+     5   GRTH,    IGRTH,   IGRE,    SCR23)
+C-----------------------------------------------
+C   M o d u l e s
+C-----------------------------------------------
+      USE SCR_DATA_MOD
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -40,12 +44,12 @@ C   C o m m o n   B l o c k s
 C-----------------------------------------------
 #include      "com08_c.inc"
 #include      "param_c.inc"
-#include      "scr23_c.inc"
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
       INTEGER, INTENT(IN) :: IGRE
-      INTEGER KXX(NIXX),IXX(*),NX,KEUSR,IPART,GRTH(*),IGRTH(*)
+      TYPE(SCR23_), INTENT(IN) :: SCR23
+      INTEGER KXX(SCR23%NIXX),IXX(*),NX,KEUSR,IPART,GRTH(*),IGRTH(*)
 C     REAL
       my_real
      .   X(3,*),V(3,*),VR(3,*),UMASS(*), UINER(*),FORC(3,*),

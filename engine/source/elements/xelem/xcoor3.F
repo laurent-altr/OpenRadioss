@@ -27,19 +27,20 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    xforc3   ../engine/source/elements/xelem/xforc3.F
 !||====================================================================
       SUBROUTINE XCOOR3(X   ,KXX  ,IXX   ,ITAB  ,NX   ,
-     2                  UID ,UIX  ,XUSR  )
+     2                  UID ,UIX  ,XUSR  ,SCR23)
+C-----------------------------------------------
+C   M o d u l e s
+C-----------------------------------------------
+      USE SCR_DATA_MOD
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
 #include      "implicit_f.inc"
 C-----------------------------------------------
-C   C o m m o n   B l o c k s
-C-----------------------------------------------
-#include      "scr23_c.inc"
-C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
-      INTEGER KXX(NIXX),IXX(*),NX,ITAB(*),UIX(NX),UID
+      TYPE(SCR23_), INTENT(IN) :: SCR23
+      INTEGER KXX(SCR23%NIXX),IXX(*),NX,ITAB(*),UIX(NX),UID
 C     REAL
       my_real
      .   X(3,*),XUSR(3,NX)

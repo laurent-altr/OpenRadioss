@@ -658,7 +658,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
      N        KLOADPINTER,LOADPINTER,DGAPLOADINT,DRAPEG,USER_WINDOWS,OUTPUT,INTERFACES,
      O        DT        ,LOADS     , PYTHON, DPL0CLD,VEL0CLD,
      P        NDAMP_VREL,ID_DAMP_VREL,FR_DAMP_VREL,NDAMP_VREL_RBYG,NAMES_AND_TITLES,UNITAB,LIFLOW,LRFLOW ,
-     R        GLOB_THERM ,PBLAST,RBE3,RWALL,SFEM,SCRFS)
+     R        GLOB_THERM ,PBLAST,RBE3,RWALL,SFEM,SCRFS,SCR23)
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
@@ -818,7 +818,6 @@ C-----------------------------------------------
 #include      "scr16_c.inc"
 #include      "scr17_c.inc"
 #include      "scr18_c.inc"
-#include      "scr23_c.inc"
 #include      "units_c.inc"
 #include      "stati_c.inc"
 #include      "statr_c.inc"
@@ -864,7 +863,7 @@ C-----------------------------------------------
      .           LACCELM(3,*),DD_IAD(NSPMD+1,*),
      .           IAD_RBY(*),FR_RBY(*),NNLINK(10,*),LNLINK(*),
      .           IAF(*),IGRV(*),
-     .           KXX(NIXX,*),IXX(*),IEXLNK(NR2R,*),
+     .           KXX(SCR23%NIXX,*),IXX(*),IEXLNK(NR2R,*),
      .           IFRAME(LISKN,*),KXSP(NISP,*),IXSP(*),NOD2SP(*),
      .           ISPCOND(NISPCOND,*),ISPSYM(NSPCOND,*),IBVEL(NBVELP,*),LBVEL(*),
      .           ISPHIO(NISPHIO,*),LPRTSPH(*),LONFSPH(*),LAGBUF(*),IBCSLAG(*),
@@ -1017,6 +1016,7 @@ c
               type (rwall_) ,intent(inout)                       :: RWALL
               type (global_sfem_) ,intent(inout) :: SFEM
               TYPE(SCRFS_)        ,intent(inout) :: SCRFS
+              TYPE(SCR23_)        ,intent(inout) :: SCR23
 C
               INTEGER ,INTENT(IN) :: NDAMP_VREL,NDAMP_VREL_RBYG
               INTEGER ,INTENT(IN) :: ID_DAMP_VREL(NDAMP_VREL),FR_DAMP_VREL(NSPMD+2,NDAMP_VREL)
@@ -1701,7 +1701,7 @@ C
      6         NODES%TAG_S_RBY,NFNCA2  ,NFTCA2  ,NODES%IN0 ,SORT_COMM,STACK,OUTPUT,
      7         THKE   ,NODES%BOUNDARY_SIZE  ,SH_OFFSET_TAB,
      8         NEED_COMM_INT25_SOLID_EROSION,COMM_INT25_SOLID_EROSION ,
-     9         ISKWN  ,IFRAME  ,LOADS ,GLOB_THERM,PBLAST,RBE3,NHIER_RBY)
+     9         ISKWN  ,IFRAME  ,LOADS ,GLOB_THERM,PBLAST,RBE3,NHIER_RBY,SCR23)
 
 !$OMP END PARALLEL
 C     End Initialisations //     
@@ -3555,7 +3555,7 @@ C----------------------------------
      8          NELTST    ,ITYPTST   ,IPART     ,IPART(K1) ,NODES%ITAB      ,
      9          INTERFACES%PON%FSKYI     ,BUFGEO    ,KXX       ,IXX       ,INTERFACES%PON%ISKY      ,
      A          IPART(K9) ,GRESAV    ,GRTH      ,
-     B          IGRTH     ,ELBUF_TAB )
+     B          IGRTH     ,ELBUF_TAB ,SCR23)
               IF (IMONM > 0) CALL STOPTIME(TIMERS,51)
               IF (IMON>0) CALL STOPTIME(TIMERS,6)
 
@@ -8343,7 +8343,7 @@ C Regular animation
      t          USER_WINDOWS  ,OUTPUT         ,DT             ,OUTPUT%TH%TH_SURF%CHANNELS        ,
      u          TABLE         ,LOADS          ,SFANI          ,IPARIT             ,ptrX_offset   ,
      v          SZ_NPCONT2    ,NPCONT2        ,GLOB_THERM     ,PBLAST             ,OUTPUT%TH%WFEXT,
-     w          MASS0_START   ,SCRFS         )
+     w          MASS0_START   ,SCRFS,SCR23   )
 
                 IF((MSTOP == 1 .AND. ICTLSTOP == 0) .OR. MSTOP == 2 .OR. DT2<=ZERO)THEN
                   CALL SORTIE_ERROR(
@@ -8613,7 +8613,7 @@ C
      Y            XEDGE3N        ,SPH2SOL        ,STIFN_TMP  ,STIFR_TMP ,     DRAPE_SH4N ,
      Z            DRAPE_SH3N     ,H3D_DATA       ,SUBSETS    ,IGRNOD    ,     FCONT_MAX,
      A            OUTPUT%DATA%VECT_PCONT2,OUTPUT%DATA%VECT_PCONT2_2,NDDL0    ,NNZK0     ,IMPBUF_TAB ,
-     B            DRAPEG         ,MAT_ELEM%MAT_PARAM  ,GLOB_THERM, OUTPUT )
+     B            DRAPEG         ,MAT_ELEM%MAT_PARAM  ,GLOB_THERM, OUTPUT ,SCR23)
 #else
                   WRITE(6,*) __LINE__,"Fatal error: MUMPS required"
                   CALL FLUSH(6)

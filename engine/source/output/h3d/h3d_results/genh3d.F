@@ -209,10 +209,12 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
      4                  LLOADP   ,FAC      ,SENSORS     ,TAGNCONT    ,LOADP_HYD_INTER,
      5                  XFRAME   ,FORC     ,AR          ,CSEFRIC     ,CSEFRICG  ,
      6                  CSEFRIC_STAMP,CSEFRICG_STAMP    ,TABLE       ,IFRAME    ,LOADS,
-     7                  DRAPE_SH4N, DRAPE_SH3N, DRAPEG  ,X_C         ,GLOB_THERM,PBLAST)
+     7                  DRAPE_SH4N, DRAPE_SH3N, DRAPEG  ,X_C         ,GLOB_THERM,PBLAST,
+     8                  SCR23)
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
+        USE SCR_DATA_MOD
         USE TIMER_MOD
         USE FVBAG_MOD , only:FVBAG_DATA, FVDATA, NFVBAG, AIRBAGS_TOTAL_FVM_IN_H3D, FVSPMD
         USE H3D_ONED_SCALAR_MOD, ONLY: H3D_ONED_SCALAR
@@ -264,7 +266,6 @@ C-----------------------------------------------
 #include      "scr14_c.inc"
 #include      "scr16_c.inc"
 #include      "scr17_c.inc"
-#include      "scr23_c.inc"
 #include      "chara_c.inc"
 #include      "task_c.inc"
 #include      "spmd_c.inc"
@@ -280,6 +281,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
+        TYPE(SCR23_), INTENT(IN) :: SCR23
         TYPE(OUTPUT_), INTENT(INOUT) :: OUTPUT ! Output structure
         TYPE(TIMER_), INTENT(INOUT) :: TIMERS ! Timers for /MON
         INTEGER SWAFT,SMAS,SXNORM,SIAD,SINVERT,SMATER,SEL2FA,SWA4,
@@ -316,7 +318,7 @@ C-----------------------------------------------
      .          WEIGHT(*),IPART(LIPART1,*),IPARTS(*),IPARTQ(*),IPARTC(*),
      .          IPARTT(*),IPARTP(*),IPARTR(*),IPARTUR(*),IPARTTG(*),
      .          NOM_OPT(*),
-     .          IDATA(*),KXX(NIXX,*), IXX(*), IPARTX(*),
+     .          IDATA(*),KXX(SCR23%NIXX,*), IXX(*), IPARTX(*),
      .          KXSP(NISP,*), IXSP(KVOISPH,*), NOD2SP(*), IPARTSP(*),
      .          NODGLOB(*),IAD_ELEM(2,*),FR_ELEM(*),FR_WALL(*), IFLOW(*),
      .          IPARI(NPARI,*),IRBE2(NRBE2L,*),IRBE3(NRBE3L,*),

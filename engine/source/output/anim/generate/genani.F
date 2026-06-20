@@ -236,10 +236,11 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
      Z                  STACK    ,SPH2SOL  ,STIFN       ,STIFR       ,IGRNOD    ,
      1                  H3D_DATA ,SUBSET   ,MULTI_FVM   ,KNOTLOCPC   ,KNOTLOCEL ,
      2                  FCONT_MAX,FNCONTP2 ,FTCONTP2    ,GLOB_THERM  ,
-     .                  DRAPE_SH4N, DRAPE_SH3N, DRAPEG,OUTPUT    )
+     .                  DRAPE_SH4N, DRAPE_SH3N, DRAPEG,OUTPUT    ,SCR23)
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
+        USE SCR_DATA_MOD
         USE checksum_output_option_mod
         USE FVBAG_MOD
         USE PLYXFEM_MOD
@@ -281,7 +282,6 @@ C-----------------------------------------------
 #include      "scr14_c.inc"
 #include      "scr16_c.inc"
 #include      "scr17_c.inc"
-#include      "scr23_c.inc"
 #include      "scr25_c.inc"
 #include      "chara_c.inc"
 #include      "scrcut_c.inc"
@@ -295,6 +295,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
+        TYPE(SCR23_), INTENT(IN) :: SCR23
         INTEGER SWAFT,SMAS,SXNORM,SIAD,SINVERT,SMATER,SEL2FA,SWA4,
      .          SIADG,NERCVOIS(*),NESDVOIS(*),LERCVOIS(*),
      .          LESDVOIS(*),SPH2SOL(*)
@@ -329,7 +330,7 @@ C-----------------------------------------------
      .          WEIGHT(*),IPART(LIPART1,*),IPARTS(*),IPARTQ(*),IPARTC(*),
      .          IPARTT(*),IPARTP(*),IPARTR(*),IPARTUR(*),IPARTTG(*),
      .          NOM_OPT(*),
-     .          IDATA(*),KXX(NIXX,*), IXX(*), IPARTX(*),
+     .          IDATA(*),KXX(SCR23%NIXX,*), IXX(*), IPARTX(*),
      .          KXSP(NISP,*), IXSP(KVOISPH,*), NOD2SP(*), IPARTSP(*),
      .          NODGLOB(*),IAD_ELEM(2,*),FR_ELEM(*),FR_WALL(*), IFLOW(*),
      .          IPARI(NPARI,*),IRBE2(NRBE2L,*),IRBE3(NRBE3L,*),
@@ -647,7 +648,7 @@ C    NFACPTX must not be accessed to if NUMELX==0.
      .               UIX      ,XUSR     ,NFACPTX  ,IXEDGE   ,IXFACET,
      .               IXSOLID  ,INUMX1   ,INUMX2   ,INUMX3   ,IOFFX1 ,
      .               IOFFX2   ,IOFFX3   ,XMASS1   ,XMASS2   ,XMASS3 ,
-     .               XFUNC1   ,XFUNC2   ,XFUNC3   ,NANIM1D_L)
+     .               XFUNC1   ,XFUNC2   ,XFUNC3   ,NANIM1D_L,SCR23)
         ENDIF
 C-----------------------------------------------
 C ISO GEO ELEMS __1.

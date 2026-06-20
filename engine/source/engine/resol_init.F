@@ -167,10 +167,11 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
      6  TAGSLV_RBY,NFNCA2 ,NFTCA2  ,IN0  ,SORT_COMM,STACK,OUTPUT,
      7  THKE ,SFR_ELEM ,SH_OFFSET_TAB,
      8  NEED_COMM_INT25_SOLID_EROSION,COMM_INT25_SOLID_EROSION,
-     9  ISKWN ,IFRAME, LOADS ,GLOB_THERM,PBLAST,RBE3,NHIER_RBY)
+     9  ISKWN ,IFRAME, LOADS ,GLOB_THERM,PBLAST,RBE3,NHIER_RBY,SCR23)
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
+      USE SCR_DATA_MOD
       USE PLYXFEM_MOD
       USE ELBUFDEF_MOD    
       USE INTBUFDEF_MOD            
@@ -219,7 +220,6 @@ C-----------------------------------------------
 #include      "scr14_c.inc"
 #include      "scr16_c.inc"
 #include      "scr17_c.inc"
-#include      "scr23_c.inc"
 #include      "units_c.inc"
 #include      "cong2_c.inc"
 #include      "task_c.inc"
@@ -238,6 +238,7 @@ C-----------------------------------------------
 C-----------------------------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
+      TYPE(SCR23_), INTENT(INOUT) :: SCR23
       TYPE(element_pon_) :: PON
       INTEGER ITASK, NBINTC, NODFT, NODLT, LINDIDEL, LBUFIDEL,
      .        NUMNTHREAD, NDTASK, NFIA, NFEA, NFOA ,NDMA, NFNCA, NFTCA,
@@ -260,7 +261,7 @@ C-----------------------------------------------
      .        ITAB(*), IPARG(NPARG,*), IPARI(NPARI,*),
      .        IEXLNK(NR2R,*),
      .        WEIGHT(*), NSTRF(*), IB(NIBCLD,*), ITABM1(*),
-     .        MONVOL(*),KXX(NIXX,*),ISENDTO(NINTER+1,NSPMD+1),
+     .        MONVOL(*),KXX(SCR23%NIXX,*),ISENDTO(NINTER+1,NSPMD+1),
      .        FR_NBCC(2,NSPMD+1), IAD_ELEM(2,NSPMD+1) ,FR_ELEM(*),
      .        IRCVFROM(NINTER+1,NSPMD+1), INTLIST(NINTER), PROCNE(*),
      .        NISKYFI(*),ADDCNI2(*),PROCNI2(*),IAD_I2M(*),FR_I2M(*),
@@ -570,9 +571,9 @@ C
 C        I87O = I87N + 4 * GLOB_THERM%NFXFLUX
 C
 C---------------------------- 
-        MAXNX=0
+        SCR23%MAXNX=0
         DO I=1,NUMELX
-          IF (KXX(3,I)>MAXNX) MAXNX=KXX(3,I)
+          IF (KXX(3,I)>SCR23%MAXNX) SCR23%MAXNX=KXX(3,I)
         ENDDO
 C---------------------------- 
         DO I=1,NPART

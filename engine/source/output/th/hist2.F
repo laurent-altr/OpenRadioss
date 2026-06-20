@@ -102,7 +102,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
      M                 RTHBUF  ,THKE      ,STACK    ,ISPHIO      ,VSPHIO    ,
      N                 ITHFLAG ,PINCH_DATA,MULTI_FVM,W           ,SITHBUF   ,
      Q                 FSAVSURF,NEED_TO_REINIT_FSAV ,GLOB_THERM  ,OUTPUT    ,
-     P                 MASS0_START,SCRFS            )
+     P                 MASS0_START,SCRFS,SCR23       )
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
@@ -144,7 +144,6 @@ C-----------------------------------------------
 #include      "scr12_c.inc"
 #include      "scr13_c.inc"
 #include      "scr17_c.inc"
-#include      "scr23_c.inc"
 #include      "task_c.inc"
 #include      "impl1_c.inc"
 #include      "rad2r_c.inc"
@@ -164,7 +163,7 @@ C-----------------------------------------------
      .   IXTG(NIXTG,*),IFIL,NTHGRP2,IPARTL(*),IACCP(*),
      .   NACCP(*),NPARTH,IPARTH(NPARTH,*),NVPARTH,
      .   MONVOL(*), FR_MV(*),INOD(*),
-     .   NODREAC(*),KXX(NIXX,*),IGAUP(*),NGAUP(*),ITTYP,
+     .   NODREAC(*),KXX(SCR23%NIXX,*),IGAUP(*),NGAUP(*),ITTYP,
      .   SIZE_MES,ISPHIO(NISPHIO,*),ITHFLAG
       my_real
      .   PM(NPROPM,NUMMAT), D(3,NUMNOD), X(3,NUMNOD), V(3,NUMNOD), A(3,NUMNOD), BUFEL(*), WA(*),
@@ -177,6 +176,7 @@ C-----------------------------------------------
      .   VSPHIO(*), W(3,NUMNOD)
       my_real, INTENT(IN   ) :: MASS0_START
       TYPE(SCRFS_),INTENT(IN) :: SCRFS
+      TYPE(SCR23_),INTENT(IN) :: SCR23
       REAL(KIND=8), INTENT(INOUT) :: THIS0, DTHIS0
       INTEGER, DIMENSION(NIXP,NUMELP) ,INTENT(IN):: IXP
       TYPE (ELBUF_STRUCT_), DIMENSION(NGROUP) :: ELBUF_TAB
@@ -944,7 +944,7 @@ C-------------------------------------------------------
         !   initialization of local array
         WA_NST(ID_HIST)%WA_REAL( 1:WA_NST_SIZE(ID_HIST) ) = ZERO
         CALL THNST(ELBUF_TAB,IPARG,NTHGRP2, ITHGRP,ITHBUF,
-     .                 GEO ,KXX,WA_NST(ID_HIST)%WA_REAL)
+     .                 GEO ,KXX,WA_NST(ID_HIST)%WA_REAL,SCR23)
         !   send WA_NST to PROC0
         IF(NSPMD>1) THEN
             CALL SPMD_GATHERV(WA_NST(ID_HIST)%WA_REAL,WA_NST_P0(ID_HIST)%WA_REAL,0,

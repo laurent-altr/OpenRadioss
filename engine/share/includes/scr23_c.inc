@@ -20,12 +20,6 @@ Copyright>
 Copyright>        As an alternative to this open-source version, Altair also offers Altair Radioss 
 Copyright>        software under a commercial license.  Contact Altair to discuss further if the 
 Copyright>        commercial version may interest you: https://www.altair.com/radioss/.    
-C.../SCR23/
-      COMMON /SCR23/ NIXX,MAXNX,NANIM2D,NANIM3D
-      INTEGER NIXX,MAXNX,NANIM2D,NANIM3D
-C-----------------------------------------------------------------
-C      (to be sent from starter to engine).
-C      /PARAM/ .. NIXX
-C      /COM04/ .. MAXNX
-C      /COM04/ .. NANIM2D, NANIM3D
+! COMMON /SCR23/ has been replaced by TYPE(SCR23_) in SCR_DATA_MOD.
+! Do not include this file -- pass SCR23 as a subroutine argument.
 

@@ -26,19 +26,20 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    xforc3   ../engine/source/elements/xelem/xforc3.F
 !||====================================================================
       SUBROUTINE XDEFO3(V  ,VR   ,KXX   ,IXX   ,NX   ,
-     2                 VUSR ,VRUSR )
+     2                 VUSR ,VRUSR ,SCR23)
+C-----------------------------------------------
+C   M o d u l e s
+C-----------------------------------------------
+      USE SCR_DATA_MOD
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
 #include      "implicit_f.inc"
 C-----------------------------------------------
-C   C o m m o n   B l o c k s
-C-----------------------------------------------
-#include      "scr23_c.inc"
-C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
-      INTEGER KXX(NIXX),IXX(*),NX
+      TYPE(SCR23_), INTENT(IN) :: SCR23
+      INTEGER KXX(SCR23%NIXX),IXX(*),NX
 C     REAL
       my_real
      .   V(3,*),VR(3,*),VUSR(3,NX),VRUSR(3,NX)

@@ -102,10 +102,11 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
      Y                    XEDGE3N     ,SPH2SOL      ,STIFN     ,STIFR     ,DRAPE_SH4N   ,
      Z                    DRAPE_SH3N    ,H3D_DATA     ,SUBSET    ,IGRNOD    ,FCONT_MAX  ,
      a                    FNCONTP2    ,FTCONTP2     ,NDDL0     ,NNZK0     ,IMPBUF_TAB ,
-     b                    DRAPEG      ,MATPARAM_TAB ,GLOB_THERM,OUTPUT)
+     b                    DRAPEG      ,MATPARAM_TAB ,GLOB_THERM,OUTPUT,SCR23)
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
+      USE SCR_DATA_MOD
       USE DSGRAPH_MOD
       USE IMP_WORKG
       USE MESSAGE_MOD
@@ -142,7 +143,6 @@ C-----------------------------------------------
 #include      "scr05_c.inc"
 #include      "scr14_c.inc"
 #include      "scr17_c.inc"
-#include      "scr23_c.inc"
 #include      "param_c.inc"
 #include      "units_c.inc"
 #include      "chara_c.inc"
@@ -156,6 +156,7 @@ C-----------------------------------------------
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
+      TYPE(SCR23_), INTENT(IN) :: SCR23
       INTEGER ,INTENT(IN) :: NSENSOR
       INTEGER NDDL0, NNZK0,  IPM(NPROPMI,*),IGEO(NPROPGI,*),
      .        IXS(*), IXQ(NIXQ,*), IXC(NIXC,*), IXT(NIXT,*),
@@ -165,7 +166,7 @@ C-----------------------------------------------
      .        LPBY(*), NPBY(NNPBY,*), ITAB(*),
      .        WEIGHT(*),IPARI(NPARI,*),ITASK, ICUT(*), NSTRF(*), NPRW(*),
      .        DD_IAD(NSPMD+1,*), IPART(*),
-     .        NOM_OPT(LNOPT1,*), IDATA(*),KXX(NIXX,*),
+     .        NOM_OPT(LNOPT1,*), IDATA(*),KXX(SCR23%NIXX,*),
      .        IXX(*), KXSP(NISP,*), IXSP(KVOISPH,*), NOD2SP(*),
      .        IXS10(6,*), IXS20(12,*), IXS16(8,*), MONVOL(*),
      .        NODGLOB(*), IAD_ELEM(2,*), FR_ELEM(*),
@@ -743,24 +744,24 @@ C
       N7 = N6 + NPART
       N8 = N7 + NEL + 1
       IF (NUMELX>0) THEN
-         SKUIX = 2*MAXNX
-         SKXUSR = 3*MAXNX
+         SKUIX = 2*SCR23%MAXNX
+         SKXUSR = 3*SCR23%MAXNX
          SKFACPTX = NPART
          SKXEDGE = 2*NANIM1D
-         SKXFACET = 4*NANIM2D
-         SKXSOLID = 8*NANIM3D
+         SKXFACET = 4*SCR23%NANIM2D
+         SKXSOLID = 8*SCR23%NANIM3D
          SKNUMX1 = NANIM1D
-         SKNUMX2 = NANIM2D
-         SKNUMX3 = NANIM3D
+         SKNUMX2 = SCR23%NANIM2D
+         SKNUMX3 = SCR23%NANIM3D
          SKOFFX1 = NANIM1D
-         SKOFFX2 = NANIM2D
-         SKOFFX3 = NANIM3D
+         SKOFFX2 = SCR23%NANIM2D
+         SKOFFX3 = SCR23%NANIM3D
          SKMASS1 = NANIM1D
-         SKMASS2 = NANIM2D
-         SKMASS3 = NANIM3D
+         SKMASS2 = SCR23%NANIM2D
+         SKMASS3 = SCR23%NANIM3D
          SKFUNC1 = 10*NANIM1D
-         SKFUNC2 = 10*NANIM2D
-         SKFUNC3 = 10*NANIM3D
+         SKFUNC2 = 10*SCR23%NANIM2D
+         SKFUNC3 = 10*SCR23%NANIM3D
       ELSE
          SKUIX = 1
          SKXUSR = 1
@@ -891,7 +892,7 @@ C
      Z             STACK      ,SPH2SOL   ,STIFN      ,STIFR       ,IGRNOD    ,
      1             H3D_DATA   ,SUBSET    ,MULTI_FVM  ,RRBID       ,RRBID     ,
      2             FCONT_MAX  ,FNCONTP2  ,FTCONTP2   ,GLOB_THERM  ,
-     .             DRAPE_SH4N ,DRAPE_SH3N,DRAPEG     ,OUTPUT)
+     .             DRAPE_SH4N ,DRAPE_SH3N,DRAPEG     ,OUTPUT,SCR23)
          ENDIF
 C
          IF (DTOUTP>ZERO) THEN

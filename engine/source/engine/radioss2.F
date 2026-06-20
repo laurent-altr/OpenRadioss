@@ -237,7 +237,6 @@ C-----------------------------------------------
 #include      "scr17_c.inc"
 #include      "scr18_c.inc"
 #include      "scr20_c.inc"
-#include      "scr23_c.inc"
 #include      "scr_fac_c.inc"
 #include      "chara_c.inc"
 #include      "task_c.inc"
@@ -364,6 +363,7 @@ C-------------------------------------------------------------------------------
       TYPE(rwall_) :: rwall
       TYPE(global_sfem_)  :: sfem
       TYPE(SCRFS_)        :: SCRFS
+      TYPE(SCR23_)        :: SCR23
 C------------------------------------------------------------------
 C to build a IBM PARALLEL version
 C In starter : define install parameter nspmd 
@@ -379,6 +379,7 @@ C------------------------------------------------
       ISTDO=6
       coupling%active = .false.
       SCRFS = SCRFS_(0, 0, 0)
+      SCR23 = SCR23_(5, 0, 0, 0)
       CALL INI_MSG()
       CALL BUILD_MSG()
     
@@ -485,10 +486,7 @@ C------------------------------------------------------------------
       IDBG8=68
       NODADT=0
       IFICDS=103
-      NIXX=5
       NIXIG3D=15
-      NANIM2D=0
-      NANIM3D=0
       NRWLP = 26
       NBVELP = 6
       NRVOLU=24
@@ -2227,7 +2225,7 @@ C---------------------------------------------------------------------
      .                   DIFFUSION    ,SEGVAR          ,DYNAIN_DATA     ,DRAPEG     ,USER_WINDOWS    ,
      .                   OUTPUT       ,INTERFACES      ,DT              ,LOADS      ,MAT_ELEM  , PYTHON,
      .                   NAMES_AND_TITLES, UNITAB ,SKEWS,LIFLOW         ,LRFLOW     ,glob_therm,PBLAST,
-     .                   RBE3, coupling,RWALL     ,SFEM,SCRFS)
+     .                   RBE3, coupling,RWALL     ,SFEM,SCRFS,SCR23)
 C---------------------------------------------------------------------
       CURRENT_RUN = GLOBAL_COMP_TIME%RUN_NBR
       CALL SPMD_REDUCE_DB(GLOBAL_COMP_TIME%ENGINE_TIME(CURRENT_RUN),RESULT,1,0,"MAX ")

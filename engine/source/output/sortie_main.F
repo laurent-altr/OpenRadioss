@@ -140,7 +140,7 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
      t            OUTPUT    ,DT          ,FSAVSURF    ,TABLE    ,
      u            LOADS     ,SFANI       ,IPARIT      ,X_C      ,
      v            SZ_NPCONT2,NPCONT2     ,GLOB_THERM  ,PBLAST   ,WFEXT    ,
-     w            MASS0_START,SCRFS      )
+     w            MASS0_START,SCRFS,SCR23 )
 C-----------------------------------------------
 C   M o d u l e s
 C-----------------------------------------------
@@ -202,7 +202,6 @@ C-----------------------------------------------
 #include      "scr14_c.inc"
 #include      "scr16_c.inc"
 #include      "scr20_c.inc"
-#include      "scr23_c.inc"
 #include      "param_c.inc"
 #include      "task_c.inc"
 #include      "scr13_c.inc"
@@ -230,7 +229,7 @@ C-----------------------------------------------
      .   DD_IAD(NSPMD+1,*), IACCP(*), NACCP(*),
      .   IPARI(NPARI,*),WEIGHT(*),
      .   NOM_OPT(LNOPT1,*),
-     .   IDATA(*),KXX(NIXX,*),IXX(*),
+     .   IDATA(*),KXX(SCR23%NIXX,*),IXX(*),
      .   KXSP(NISP,*),IXSP(KVOISPH,*),NOD2SP(*),
      .   NPARTSAV,IXRI(4,*),
      .   ISKWN(LISKN,*),IFRAME(LISKN,*),IPM(*), IGEO(*),FXBIPM(NBIPM,*),
@@ -273,6 +272,7 @@ C-----------------------------------------------
       my_real :: LOADP(LFACCLD,*),FORC(*)
       my_real, INTENT(IN) :: MASS0_START
       TYPE(SCRFS_), INTENT(IN) :: SCRFS
+      TYPE(SCR23_), INTENT(IN) :: SCR23
 
       INTEGER, DIMENSION(*), INTENT(IN) :: ISKWP
       INTEGER, INTENT(IN) :: SZ_NPCONT2
@@ -569,24 +569,24 @@ C
          N8 = N7 + NEL + 1
           IF  ((NUMELX>0) .OR. (NUMELXG>0)) THEN
 
-            SKUIX = 2*MAXNX
-            SKXUSR = 3*MAXNX
+            SKUIX = 2*SCR23%MAXNX
+            SKXUSR = 3*SCR23%MAXNX
             SKFACPTX = NPART
             SKXEDGE = 2*NANIM1D
-            SKXFACET = 4*NANIM2D
-            SKXSOLID = 8*NANIM3D
+            SKXFACET = 4*SCR23%NANIM2D
+            SKXSOLID = 8*SCR23%NANIM3D
             SKNUMX1 = NANIM1D
-            SKNUMX2 = NANIM2D
-            SKNUMX3 = NANIM3D
+            SKNUMX2 = SCR23%NANIM2D
+            SKNUMX3 = SCR23%NANIM3D
             SKOFFX1 = NANIM1D
-            SKOFFX2 = NANIM2D
-            SKOFFX3 = NANIM3D
+            SKOFFX2 = SCR23%NANIM2D
+            SKOFFX3 = SCR23%NANIM3D
             SKMASS1 = NANIM1D
-            SKMASS2 = NANIM2D
-            SKMASS3 = NANIM3D
+            SKMASS2 = SCR23%NANIM2D
+            SKMASS3 = SCR23%NANIM3D
             SKFUNC1 = 10*NANIM1D
-            SKFUNC2 = 10*NANIM2D
-            SKFUNC3 = 10*NANIM3D
+            SKFUNC2 = 10*SCR23%NANIM2D
+            SKFUNC3 = 10*SCR23%NANIM3D
           ELSE
             SKUIX = 1
             SKXUSR = 1
@@ -663,7 +663,7 @@ c
      Z         STACK      ,SPH2SOL   ,STIFN       ,STIFR       ,IGRNOD    ,
      1         H3D_DATA   ,SUBSET    ,MULTI_FVM   ,KNOTLOCPC   ,KNOTLOCEL ,
      2         FCONT_MAX  ,OUTPUT%DATA%VECT_PCONT2  ,OUTPUT%DATA%VECT_PCONT2_2    ,GLOB_THERM  ,
-     .         DRAPE_SH4N, DRAPE_SH3N, DRAPEG,OUTPUT    )
+     .         DRAPE_SH4N, DRAPE_SH3N, DRAPEG,OUTPUT,SCR23)
 c
        ENDIF
        IF(OUTPUT%DTANIM_FCT_ID > 0) THEN
@@ -715,24 +715,24 @@ C
          N8 = N7 + NEL + 1
           IF  ( (NUMELX>0) .OR.(NUMELXG>0) ) THEN
 
-            SKUIX = 2*MAXNX
-            SKXUSR = 3*MAXNX
+            SKUIX = 2*SCR23%MAXNX
+            SKXUSR = 3*SCR23%MAXNX
             SKFACPTX = NPART
             SKXEDGE = 2*NANIM1D
-            SKXFACET = 4*NANIM2D
-            SKXSOLID = 8*NANIM3D
+            SKXFACET = 4*SCR23%NANIM2D
+            SKXSOLID = 8*SCR23%NANIM3D
             SKNUMX1 = NANIM1D
-            SKNUMX2 = NANIM2D
-            SKNUMX3 = NANIM3D
+            SKNUMX2 = SCR23%NANIM2D
+            SKNUMX3 = SCR23%NANIM3D
             SKOFFX1 = NANIM1D
-            SKOFFX2 = NANIM2D
-            SKOFFX3 = NANIM3D
+            SKOFFX2 = SCR23%NANIM2D
+            SKOFFX3 = SCR23%NANIM3D
             SKMASS1 = NANIM1D
-            SKMASS2 = NANIM2D
-            SKMASS3 = NANIM3D
+            SKMASS2 = SCR23%NANIM2D
+            SKMASS3 = SCR23%NANIM3D
             SKFUNC1 = 10*NANIM1D
-            SKFUNC2 = 10*NANIM2D
-            SKFUNC3 = 10*NANIM3D
+            SKFUNC2 = 10*SCR23%NANIM2D
+            SKFUNC3 = 10*SCR23%NANIM3D
           ELSE
             SKUIX = 1
             SKXUSR = 1
@@ -813,7 +813,8 @@ c
      4             LLOADP     ,LOADP     ,SENSORS     ,TAGNCONT    ,LOADP_HYD_INTER,
      5             XFRAME     ,FORC      ,AR          ,CSEFRIC     ,CSEFRICG  ,
      6             CSEFRIC_STAMP,CSEFRICG_STAMP,TABLE ,IFRAME      ,LOADS   ,
-     7             DRAPE_SH4N, DRAPE_SH3N, DRAPEG     ,X_C         ,GLOB_THERM,PBLAST)
+     7             DRAPE_SH4N, DRAPE_SH3N, DRAPEG     ,X_C         ,GLOB_THERM,PBLAST,
+     8             SCR23)
       ENDIF
       IF(ALLOCATED(CSEFRIC)) DEALLOCATE(CSEFRIC)
       IF(ALLOCATED(CSEFRICG)) DEALLOCATE(CSEFRICG)
@@ -1058,7 +1059,7 @@ C         To have double points
      L                 IGAUP  ,NGAUP ,AFORM(1),SIZE_MES,
      M                 RTHBUF ,THKE ,STACK ,ISPHIO  ,VSPHIO,
      N                 ITHFLAG,PINCH_DATA,MULTI_FVM,W,OUTPUT%TH%SITHBUFA,
-     Q                 FSAVSURF,NEED_TO_REINIT_FSAV,GLOB_THERM,OUTPUT,MASS0_START,SCRFS)
+     Q                 FSAVSURF,NEED_TO_REINIT_FSAV,GLOB_THERM,OUTPUT,MASS0_START,SCRFS,SCR23)
 
             IF (SIZE_MES==1 .AND.AFORM(1)==3 .AND.ISPMD==0 ) 
      *          CALL file_size(MULTITHFILESIZE(1))
@@ -1153,7 +1154,7 @@ C
      L                 IGAUP  ,NGAUP, AFORM(2),SIZE_MES,
      M                 RTHBUF ,THKE ,STACK,ISPHIO  ,VSPHIO,
      N                 ITHFLAG,PINCH_DATA,MULTI_FVM,W,OUTPUT%TH%SITHBUFB,
-     Q                 FSAVSURF,NEED_TO_REINIT_FSAV,GLOB_THERM,OUTPUT,MASS0_START,SCRFS)
+     Q                 FSAVSURF,NEED_TO_REINIT_FSAV,GLOB_THERM,OUTPUT,MASS0_START,SCRFS,SCR23)
 
             IF (SIZE_MES==1 .AND.AFORM(2)==3 .AND.ISPMD==0 )
      *        CALL file_size(MULTITHFILESIZE(2))
@@ -1248,7 +1249,7 @@ C
      L                 IGAUP  ,NGAUP ,AFORM(3),SIZE_MES,
      M                 RTHBUF ,THKE ,STACK ,ISPHIO  ,VSPHIO,
      n                 ITHFLAG,PINCH_DATA,MULTI_FVM,W,OUTPUT%TH%SITHBUFC,
-     Q                 FSAVSURF,NEED_TO_REINIT_FSAV,GLOB_THERM,OUTPUT,MASS0_START,SCRFS)
+     Q                 FSAVSURF,NEED_TO_REINIT_FSAV,GLOB_THERM,OUTPUT,MASS0_START,SCRFS,SCR23)
 
         IF(SIZE_MES==1 .AND.
      *     AFORM(3)==3   .AND.
@@ -1339,7 +1340,7 @@ C
      L                 IGAUP  ,NGAUP ,AFORM(4),SIZE_MES,
      M                 RTHBUF ,THKE ,STACK ,ISPHIO  ,VSPHIO,
      N                 ITHFLAG,PINCH_DATA,MULTI_FVM,W,OUTPUT%TH%SITHBUFD,
-     Q                 FSAVSURF,NEED_TO_REINIT_FSAV,GLOB_THERM,OUTPUT,MASS0_START,SCRFS)
+     Q                 FSAVSURF,NEED_TO_REINIT_FSAV,GLOB_THERM,OUTPUT,MASS0_START,SCRFS,SCR23)
 
          IF(SIZE_MES==1 .AND.
      *     AFORM(4)==3   .AND.
@@ -1431,7 +1432,7 @@ C
      L                IGAUP  ,NGAUP ,AFORM(5),SIZE_MES,
      M                RTHBUF  ,THKE ,STACK  ,ISPHIO  ,VSPHIO,
      N                ITHFLAG,PINCH_DATA,MULTI_FVM,W,OUTPUT%TH%SITHBUFE,
-     Q                FSAVSURF,NEED_TO_REINIT_FSAV,GLOB_THERM,OUTPUT,MASS0_START,SCRFS)
+     Q                FSAVSURF,NEED_TO_REINIT_FSAV,GLOB_THERM,OUTPUT,MASS0_START,SCRFS,SCR23)
 
         IF(SIZE_MES==1 .AND.
      *     AFORM(5)==3   .AND.
@@ -1522,7 +1523,7 @@ C
      L                IGAUP,NGAUP ,AFORM(6),SIZE_MES,
      M                RTHBUF,THKE ,STACK  ,ISPHIO  ,VSPHIO,
      N                ITHFLAG,PINCH_DATA,MULTI_FVM,W,OUTPUT%TH%SITHBUFF,
-     Q                FSAVSURF,NEED_TO_REINIT_FSAV,GLOB_THERM,OUTPUT,MASS0_START,SCRFS)
+     Q                FSAVSURF,NEED_TO_REINIT_FSAV,GLOB_THERM,OUTPUT,MASS0_START,SCRFS,SCR23)
 
         IF(SIZE_MES==1 .AND.
      *     AFORM(6)==3   .AND.
@@ -1614,7 +1615,7 @@ C
      L                IGAUP,NGAUP ,AFORM(7),SIZE_MES,
      M                RTHBUF,THKE ,STACK  ,ISPHIO  ,VSPHIO,
      N                ITHFLAG,PINCH_DATA,MULTI_FVM,W,OUTPUT%TH%SITHBUFG,
-     Q                FSAVSURF,NEED_TO_REINIT_FSAV,GLOB_THERM,OUTPUT,MASS0_START,SCRFS)
+     Q                FSAVSURF,NEED_TO_REINIT_FSAV,GLOB_THERM,OUTPUT,MASS0_START,SCRFS,SCR23)
 
         IF(SIZE_MES==1 .AND.
      *     AFORM(7)==3   .AND.
@@ -1706,7 +1707,7 @@ C
      L                IGAUP  ,NGAUP ,AFORM(8),SIZE_MES,
      M                RTHBUF ,THKE ,STACK ,ISPHIO  ,VSPHIO,
      N                ITHFLAG,PINCH_DATA,MULTI_FVM,W,OUTPUT%TH%SITHBUFH,
-     Q                FSAVSURF,NEED_TO_REINIT_FSAV,GLOB_THERM,OUTPUT,MASS0_START,SCRFS)
+     Q                FSAVSURF,NEED_TO_REINIT_FSAV,GLOB_THERM,OUTPUT,MASS0_START,SCRFS,SCR23)
 
         IF(SIZE_MES==1 .AND. AFORM(8)==3 .AND.ISPMD==0 ) CALL file_size(MULTITHFILESIZE(8))
 
@@ -1793,7 +1794,7 @@ C
      L                IGAUP,NGAUP ,AFORM(9),SIZE_MES,
      M                RTHBUF ,THKE ,STACK ,ISPHIO  ,VSPHIO,
      N                ITHFLAG,PINCH_DATA,MULTI_FVM,W,OUTPUT%TH%SITHBUFI,
-     Q                FSAVSURF,NEED_TO_REINIT_FSAV,GLOB_THERM,OUTPUT,MASS0_START,SCRFS)
+     Q                FSAVSURF,NEED_TO_REINIT_FSAV,GLOB_THERM,OUTPUT,MASS0_START,SCRFS,SCR23)
 
         IF(SIZE_MES==1 .AND. AFORM(9)==3 .AND. ISPMD==0 ) CALL file_size(MULTITHFILESIZE(9))
             IF(ABFILE(10) /= 0) THEN
@@ -1880,7 +1881,7 @@ C
      L                IGAUP,NGAUP,ITFORM,SIZE_MES,
      M                RTHBUF ,THKE ,STACK,ISPHIO  ,VSPHIO,
      N                ITHFLAG,PINCH_DATA,MULTI_FVM,W,OUTPUT%TH%SITHBUF,
-     Q                FSAVSURF,NEED_TO_REINIT_FSAV,GLOB_THERM,OUTPUT,MASS0_START,SCRFS)
+     Q                FSAVSURF,NEED_TO_REINIT_FSAV,GLOB_THERM,OUTPUT,MASS0_START,SCRFS,SCR23)
 
         IF(SIZE_MES==1 .AND. ITFORM==3 .AND. ISPMD==0 )CALL file_size(THFILESIZE)
 

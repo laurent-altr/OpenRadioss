@@ -26,19 +26,20 @@ Copyright>        commercial version may interest you: https://www.altair.com/ra
 !||    xforc3   ../engine/source/elements/xelem/xforc3.F
 !||====================================================================
       SUBROUTINE XCUM3(NX,KXX,IXX,UFORC,USTIFM,
-     2                 UVISCM,MS,F,STIFN)
+     2                 UVISCM,MS,F,STIFN,SCR23)
+C-----------------------------------------------
+C   M o d u l e s
+C-----------------------------------------------
+      USE SCR_DATA_MOD
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
 #include      "implicit_f.inc"
 C-----------------------------------------------
-C   G l o b a l   P a r a m e t e r s
-C-----------------------------------------------
-#include      "scr23_c.inc"
-C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
-      INTEGER NX,KXX(NIXX),IXX(*)
+      TYPE(SCR23_), INTENT(IN) :: SCR23
+      INTEGER NX,KXX(SCR23%NIXX),IXX(*)
 C     REAL
       my_real
      .   UFORC(3,*) ,USTIFM(*) , UVISCM(*),
@@ -87,7 +88,11 @@ C-----
 !||    xforc3   ../engine/source/elements/xelem/xforc3.F
 !||====================================================================
       SUBROUTINE XCUM3P(NX,KXX,IXX,UFORC,USTIFM,
-     2                  UVISCM,MS,NISKYL,FSKYI,ISKY)
+     2                  UVISCM,MS,NISKYL,FSKYI,ISKY,SCR23)
+C-----------------------------------------------
+C   M o d u l e s
+C-----------------------------------------------
+      USE SCR_DATA_MOD
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -96,12 +101,12 @@ C-----------------------------------------------
 C   G l o b a l   P a r a m e t e r s
 C-----------------------------------------------
 #include      "parit_c.inc"
-#include      "scr23_c.inc"
 #include      "scr18_c.inc"
 C-----------------------------------------------
 C   D u m m y   A r g u m e n t s
 C-----------------------------------------------
-      INTEGER NX,KXX(NIXX),IXX(*),NISKYL,ISKY(*)
+      TYPE(SCR23_), INTENT(IN) :: SCR23
+      INTEGER NX,KXX(SCR23%NIXX),IXX(*),NISKYL,ISKY(*)
 C     REAL
       my_real
      .   UFORC(3,*), USTIFM(*), UVISCM(*),
