@@ -721,6 +721,76 @@
 
 
         end subroutine detach_node_from_shells
+
+!||====================================================================
+!||    mirror_node_split              ../engine/source/engine/node_spliting/detach_node.F90
+!||--- called by ------------------------------------------------------
+!||    apply_crack                    ../engine/source/engine/node_spliting/apply_crack.F90
+!||--- calls      -----------------------------------------------------
+!||    detach_node_from_shells        ../engine/source/engine/node_spliting/detach_node.F90
+!||    detach_node_nloc               ../engine/source/engine/node_spliting/detach_node_nloc.F90
+!||    extend_nodal_arrays            ../common_source/modules/nodal_arrays.F90
+!||    set_new_node_values            ../engine/source/engine/node_spliting/detach_node.F90
+!||--- uses       -----------------------------------------------------
+!||    connectivity_mod               ../common_source/modules/connectivity.F90
+!||    detach_node_nloc_mod           ../engine/source/engine/node_spliting/detach_node_nloc.F90
+!||    nlocal_reg_mod                 ../common_source/modules/nlocal_reg_mod.F
+!||    nodal_arrays_mod               ../common_source/modules/nodal_arrays.F90
+!||====================================================================
+!! \brief Create a ghost copy of a split node on a non-owning MPI rank.
+!! \details Called on a rank that has local shells going to the new node N' but does not own N'.
+!!          Equivalent to detach_node but skips interface duplication and sets MAIN_PROC to
+!!          owning_rank instead of copying from the parent. The UID is assigned later in the
+!!          global uid-sync phase of apply_crack.
+        subroutine mirror_node_split(nodes, node_id, elements, shell_list, list_size, &
+          nloc_dmg, nthread, ispmd, owning_rank)
+! ----------------------------------------------------------------------------------------------------------------------
+!                                                   Modules
+! ----------------------------------------------------------------------------------------------------------------------
+          USE connectivity_mod
+          USE nodal_arrays_mod
+          use nlocal_reg_mod
+          use detach_node_nloc_mod
+          implicit none
+! ----------------------------------------------------------------------------------------------------------------------
+!                                                   Arguments
+! ----------------------------------------------------------------------------------------------------------------------
+          type(nodal_arrays_), intent(inout) :: nodes        !< nodal arrays
+          type(connectivity_), intent(inout) :: elements     !< element connectivity
+          integer,             intent(in)    :: node_id      !< local id of the parent node
+          integer,             intent(in)    :: list_size    !< number of local shells to reconnect
+          integer,             intent(in)    :: shell_list(list_size) !< local shell ids (positive only)
+          type(nlocal_str_),   intent(inout) :: nloc_dmg     !< non-local damage structure
+          integer,             intent(in)    :: nthread      !< number of OpenMP threads
+          integer,             intent(in)    :: ispmd        !< local MPI rank (0-based)
+          integer,             intent(in)    :: owning_rank  !< rank that owns the new node (0-based)
+! ----------------------------------------------------------------------------------------------------------------------
+!                                                   Local variables
+! ----------------------------------------------------------------------------------------------------------------------
+          integer :: numnod
+          integer :: new_local_id
+! ----------------------------------------------------------------------------------------------------------------------
+!                                                   Body
+! ----------------------------------------------------------------------------------------------------------------------
+          numnod = nodes%numnod
+          new_local_id = numnod + 1
+
+          call extend_nodal_arrays(nodes, numnod + 1)
+          call set_new_node_values(nodes, node_id)
+          ! Override: the new node is owned by owning_rank, not by this rank
+          nodes%MAIN_PROC(new_local_id) = owning_rank
+
+          call detach_node_from_shells(nodes, node_id, elements, shell_list, list_size)
+
+          if (nloc_dmg%imod > 0) then
+            call detach_node_nloc(nloc_dmg, node_id, new_local_id, &
+              elements, shell_list, list_size, numnod, nthread, ispmd)
+          end if
+
+          nodes%numnod = nodes%numnod + 1
+
+        end subroutine mirror_node_split
+
         !\brief This subroutine detaches a node from a list of shells
 !||====================================================================
 !||    detach_node                   ../engine/source/engine/node_spliting/detach_node.F90

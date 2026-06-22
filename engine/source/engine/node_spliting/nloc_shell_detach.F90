@@ -202,43 +202,6 @@
               if (nlocal_shell > 0) then
                 allocate(crack_info_list(i)%shell_uids(nlocal_shell))
                 crack_info_list(i)%shell_uids = local_shell_list(1:nlocal_shell)
-                ! The MPI rank owning the shell with the smallest uid, will be the owner of the new node, this is a simple heuristic to avoid conflicts between MPI ranks
-                ! in other words, current rank will be the owner of the new node, if there are no ghost shells attached to this node, with a smaller uid than the local shells attached to this node
-!               minuid = huge(0)
-!               min_ghost_k = 0
-!               locally_owned_shell = .false.
-!               do j = 1, nlocal_shell
-!                 if (crack_info_list(i)%shell_uids(j) < 0) then
-!                   ! This is a ghost shell, check if its uid is smaller than the local shells
-!                   if (element%ghost_shell%uid(-crack_info_list(i)%shell_uids(j)) < minuid) then
-!                     minuid = element%ghost_shell%uid(-crack_info_list(i)%shell_uids(j))
-!                     min_ghost_k = -crack_info_list(i)%shell_uids(j)
-!                     locally_owned_shell = .false.
-!                   end if
-!                 else if (crack_info_list(i)%shell_uids(j) > 0) then
-!                   ! This is a local shell, check if its uid is smaller than the current minuid
-!                   if (element%shell%user_id(crack_info_list(i)%shell_uids(j)) < minuid) then
-!                     minuid = element%shell%user_id(crack_info_list(i)%shell_uids(j))
-!                     locally_owned_shell = .true.
-!                   end if
-!                 end if
-!               end do
-!               if(locally_owned_shell) then
-!                 crack_info_list(i)%weight = 1
-!                 crack_info_list(i)%owning_rank = ispmd
-!               else
-!                 crack_info_list(i)%weight = 0
-!                 ! Determine owning rank from ghost_shell%offset:
-!                 ! ghost shells from rank p-1 (0-based) are at offset(p)..offset(p+1)-1
-!                 crack_info_list(i)%owning_rank = -1
-!                 do p = 1, nspmd
-!                   if (min_ghost_k >= element%ghost_shell%offset(p) .and. &
-!                       min_ghost_k <  element%ghost_shell%offset(p+1)) then
-!                     crack_info_list(i)%owning_rank = p - 1
-!                     exit
-!                   end if
-!                 end do
-!               end if
               else
                 allocate(crack_info_list(i)%shell_uids(0))
               end if
