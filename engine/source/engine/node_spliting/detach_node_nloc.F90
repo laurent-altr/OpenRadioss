@@ -98,9 +98,15 @@
           integer :: new_fsky_rows   ! number of FSKY rows after extension
           integer :: fsky_ncol, stsky_ncol
           integer :: fnl_ncol, stifnl_ncol
-          integer :: i, j, k
+          integer :: i, j, k, i_el
           integer :: shell_id
+          integer :: n_remain        ! corner count remaining on parent after split
+          integer :: n_total         ! total corner count before split (n_remain + n_contrib)
+          integer :: numelc          ! total number of shell elements
+          real(kind=wp) :: f_retain  ! fraction of element corners retained by parent
+          real(kind=wp) :: f_detach  ! fraction of element corners detached to child
           real(kind=wp), parameter   :: ZERO = 0._wp
+          logical,       parameter   :: debug_detach_monitor = .false.  !! set .true. to print pre-split state
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Body
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -163,52 +169,93 @@
           ! DNL is overwritten by NLOCAL_INCR (DNL := DT2*VNL) before it is next read
           ! by the element-force loop, so its value at split time is also irrelevant.
 
-          ! Debug: print VNL/DNL/UNL of parent before reset so the split impact is visible
-!          write(6,'(a,i8,a,i8)') ' SPLIT_NLOC parent_local=', old_local_id, &
-!            ' new_local=', new_local_id
-!          write(6,'(a,i4,a)') '   nddl=', nddl, ' DOFs:'
-          do i = 1, nddl
-            write(6,'(a,i3,4(a,1pe12.4))') '   dof=', i, &
-              '  UNL=', nloc_dmg%unl    (old_pos+i-1), &
-              '  VNL=', nloc_dmg%vnl    (old_pos+i-1), &
-              '  VNL_OLD=', nloc_dmg%vnl_old(old_pos+i-1), &
-              '  DNL=', nloc_dmg%dnl    (old_pos+i-1)
-          end do
-
-          nloc_dmg%unl    (new_pos:new_pos+nddl-1) = nloc_dmg%unl    (old_pos:old_pos+nddl-1)
-          nloc_dmg%vnl    (new_pos:new_pos+nddl-1) = ZERO
-          nloc_dmg%vnl_old(new_pos:new_pos+nddl-1) = ZERO
-          nloc_dmg%dnl    (new_pos:new_pos+nddl-1) = ZERO
-
-          ! Also zero the parent's VNL: its pre-split value was assembled from all
-          ! elements including the ones now detached, and is no longer valid.
-          nloc_dmg%vnl    (old_pos:old_pos+nddl-1) = ZERO
-          nloc_dmg%vnl_old(old_pos:old_pos+nddl-1) = ZERO
-
-          ! Count corners reassigned to the new node — needed for ADDCNE/PROCNE/IADC update
-          ! in Step 8 (PARITH/ON path).  This is separate from mass handling.
+          ! --- Counting block -------------------------------------------------------
+          ! Count element corners: detached (→ new_local_id) and retained (→ old_local_id).
+          ! The connectivity was already updated by detach_node_from_shells before this
+          ! call, so scanning elements%shell%nodes gives the post-split distribution.
+          ! n_contrib also serves the PARITH/ON skyline update in Step 8.
+          numelc    = size(elements%shell%nodes, 2)
           n_contrib = 0
-          if (allocated(nloc_dmg%addcne)) then
-            do i = 1, list_size
-              shell_id = shell_list(i)
-              do j = 1, 4
-                if (elements%shell%nodes(j, shell_id) == new_local_id) then
-                  n_contrib = n_contrib + 1
-                end if
-              end do
+          do i = 1, list_size
+            shell_id = shell_list(i)
+            do j = 1, 4
+              if (elements%shell%nodes(j, shell_id) == new_local_id) n_contrib = n_contrib + 1
             end do
+          end do
+          n_remain = 0
+          do i_el = 1, numelc
+            do j = 1, 4
+              if (elements%shell%nodes(j, i_el) == old_local_id) n_remain = n_remain + 1
+            end do
+          end do
+          n_total = n_remain + n_contrib
+          ! Safety: degenerate case — no corners on either node; fall back to equal share.
+          if (n_total == 0) then
+            f_retain = 0.5_wp
+            f_detach = 0.5_wp
+          else
+            f_retain = real(n_remain,  wp) / real(n_total, wp)
+            f_detach = real(n_contrib, wp) / real(n_total, wp)
           end if
 
-          nloc_dmg%mass (new_pos:new_pos+nddl-1) = nloc_dmg%mass (old_pos:old_pos+nddl-1)
-          nloc_dmg%mass0(new_pos:new_pos+nddl-1) = nloc_dmg%mass0(old_pos:old_pos+nddl-1)
-          ! Parent mass stays unchanged: the 50/50 split that was here previously reduced
-          ! each node's mass by half, lowering the non-local critical time step by sqrt(2)
-          ! below the original value.  Since the mechanical DT was calibrated against the
-          ! full MASS (via CSTA/CDAMP), halving the mass causes the mechanical DT to exceed
-          ! the non-local critical DT → exponential VNL divergence (~×1.10/cycle observed).
-          ! Giving both parent and new node the full original mass keeps omega_max = sqrt(K/M)
-          ! at or below its pre-split value (K is roughly halved per node since elements split
-          ! between them), so the stability condition DT < 2/omega_max is preserved.
+          ! Debug: print state before modification so the split impact is visible.
+          if (debug_detach_monitor) then
+            write(6,'(a,i8,a,i8)') ' SPLIT_NLOC parent_local=', old_local_id, &
+              ' new_local=', new_local_id
+            write(6,'(a,i4,a)') '   nddl=', nddl, ' DOFs:'
+            do i = 1, nddl
+              write(6,'(a,i3,4(a,1pe12.4))') '   dof=', i, &
+                '  UNL=', nloc_dmg%unl    (old_pos+i-1), &
+                '  VNL=', nloc_dmg%vnl    (old_pos+i-1), &
+                '  VNL_OLD=', nloc_dmg%vnl_old(old_pos+i-1), &
+                '  DNL=', nloc_dmg%dnl    (old_pos+i-1)
+            end do
+            write(6,'(a,f6.3,a,f6.3,a,i0,a,i0,a)') &
+              '   f_retain=', f_retain, '  f_detach=', f_detach, &
+              '  (n_remain=', n_remain, ', n_contrib=', n_contrib, ')'
+          end if
+
+          ! UNL: both sides of the crack start with the same value — copy it.
+          nloc_dmg%unl    (new_pos:new_pos+nddl-1) = nloc_dmg%unl    (old_pos:old_pos+nddl-1)
+          ! DNL is overwritten by NLOCAL_INCR (DNL := DT2*VNL) before it is next read.
+          nloc_dmg%dnl    (new_pos:new_pos+nddl-1) = ZERO
+
+          ! Scale VNL/VNL_OLD proportionally to retained element corners.
+          !
+          ! Pre-split VNL was assembled from ALL elements attached to the parent node.
+          ! After the split the parent retains a fraction f_retain of those corners and
+          ! the new (child) node receives fraction f_detach = 1 - f_retain.  Scaling each
+          ! node's VNL by its corner fraction preserves both dissipation mechanisms used
+          ! in cfint_reg:
+          !   - NTN_VNL damping:  F ∝ ξ·(VNL₁+VNL₂+VNL₃+VNL₄)/NTN  (alive elements)
+          !   - absorbing BC:     F ∝ SSPNL·(VNL+VNL_OLD)/2           (dead elements)
+          ! Zeroing VNL (the previous behaviour) silenced both mechanisms for 1–2 cycles,
+          ! allowing unabsorbed non-local wave reflections to drive UNL overshoot at t > 0.
+          ! At t = 0 all fields are zero so that effect is absent — consistent with the
+          ! observed t = 0 / t > 0 asymmetry.
+          nloc_dmg%vnl    (new_pos:new_pos+nddl-1) = nloc_dmg%vnl    (old_pos:old_pos+nddl-1) * f_detach
+          nloc_dmg%vnl_old(new_pos:new_pos+nddl-1) = nloc_dmg%vnl_old(old_pos:old_pos+nddl-1) * f_detach
+          nloc_dmg%vnl    (old_pos:old_pos+nddl-1) = nloc_dmg%vnl    (old_pos:old_pos+nddl-1) * f_retain
+          nloc_dmg%vnl_old(old_pos:old_pos+nddl-1) = nloc_dmg%vnl_old(old_pos:old_pos+nddl-1) * f_retain
+
+          ! Proportional MASS/MASS0 split.
+          !
+          ! Giving both nodes the full original mass (the previous behaviour) made the
+          ! total non-local mass grow by M_orig at every split.  After N consecutive splits
+          ! the effective natural frequency per node dropped as 1/sqrt(N), making the
+          ! non-local field progressively slower at tracking DEFP.
+          !
+          ! A proportional split MASS_child = MASS * f_detach approximately conserves the
+          ! total non-local mass.  MASS_child >= MASS0 * f_detach is automatically
+          ! satisfied (MASS >= MASS0 always: NODADT never reduces mass below the geometric
+          ! mass).  The NODADT added-mass mechanism will top up either node on the next
+          ! cycle if the proportional mass falls below the stability threshold.
+          !
+          ! Note: assign child first (uses pre-scale parent value), then scale parent.
+          nloc_dmg%mass (new_pos:new_pos+nddl-1) = nloc_dmg%mass (old_pos:old_pos+nddl-1) * f_detach
+          nloc_dmg%mass0(new_pos:new_pos+nddl-1) = nloc_dmg%mass0(old_pos:old_pos+nddl-1) * f_detach
+          nloc_dmg%mass (old_pos:old_pos+nddl-1) = nloc_dmg%mass (old_pos:old_pos+nddl-1) * f_retain
+          nloc_dmg%mass0(old_pos:old_pos+nddl-1) = nloc_dmg%mass0(old_pos:old_pos+nddl-1) * f_retain
 
           ! Extend multithreaded accumulators; use actual allocated column counts
           ! (can be 1 in PARITH/ON, nthread in PARITH/OFF).

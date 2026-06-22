@@ -669,6 +669,7 @@ C-----------------------------------------------
               USE NODAL_ARRAYS_MOD
               USE detach_node_mod
               USE nloc_shell_detach_mod
+              USE spmd_rebuild_boundary_mod
               USE DSGRAPH_MOD
               USE ERROR_MOD
               USE RESOLSAV_MOD
@@ -1348,7 +1349,7 @@ C-------------------------------------------------------------------------------
               INTEGER STOP_OR_ADD_CYCLE  !< Check if additional cycle must be done after restart at termination
               INTEGER, PARAMETER :: MAXFUNC = 100
               INTEGER :: GLOB_IDEL7NOK, RQ_SHOOTING_NODE
-              integer :: numnod_old,numnodm_old
+              integer :: numnod_old,numnodm_old,nloc_nnod_old
               integer :: new_crack,nsect_offset
               TYPE(FR_WAVE_) :: FR_WAVE_BUF
 C-----------------------------------------------------------------------------------
@@ -5232,65 +5233,83 @@ C Init var parallel SMP
 
 c ========================================================================================
 C                                     node splitting
-
-             numnod_old = numnod
-             numnodm_old = numnodm
-             call nloc_shell_detach(nodes, element, interfaces, npari, ninter, ipari, numnod,
-     .                numnodg, numelc, ispmd, nspmd,
-     .                new_crack, nloc_dmg, nthread)
-
-
-             if(new_crack > 0) then
-               ! if at least 1 node has been detached, some data must be re-initialized
-               numnodm = numnodm_old + new_crack
-               CALL INIT_NODAL_STATE( IPARI,SHOOT_STRUCT,INTERFACES%INTBUF_TAB,NODES%BOUNDARY_ADD,NODES%BOUNDARY,
-     .                              NODES%ITAB,NODES,GEO,ADDCNEL,CNEL,
-     .                              IXS,ELEMENT%SHELL%IXC,IXT,IXP,IXR,IXTG,
-     .                              SIZE_ADDCNEL,SIZE_CNEL ,
-     .                              numelsg,numelqg,numelcg,numeltrg,numelpg,
-     .                              numelrg,numeltgg , IXS(L1))
+             IF(NLOC_DMG%IMOD>0) THEN
+               numnod_old = numnod
+               numnodm_old = numnodm
+               nloc_nnod_old = NLOC_DMG%NNOD
+               call nloc_shell_detach(nodes, element, interfaces, npari, ninter, ipari, numnod,
+     .                  numnodg, numelc, ispmd, nspmd,
+     .                  new_crack, nloc_dmg, nthread)
 
 
-               IF(IDEL7NG>0.OR.IRAD2R>0.OR.ALEMUSCL_Param%IALEMUSCL>0.OR.PDEL>0) THEN
-                 SIZE_ADDCNEL = NUMNOD+1
-                 SIZE_CNEL = LCNEL
-                 NELEML = NUMELS+NUMELQ+NUMELC+NUMELT+NUMELP+NUMELR+NUMELTG
-                 S_ELEM_STATE = NELEML
-                 DEALLOCATE(CNEL)
-                 ALLOCATE(CNEL(0:SIZE_CNEL))
-                 DEALLOCATE(ADDCNEL)
-                 ALLOCATE(ADDCNEL(0:SIZE_ADDCNEL))
-                 DEALLOCATE(ADDTMPL)
-                 ALLOCATE(ADDTMPL(0:NUMNOD+1))
-                 NELEML = NUMELS+NUMELQ+NUMELC+NUMELT+NUMELP+NUMELR+NUMELTG
-                 ALEMUSCL_Buffer%pCNEL => CNEL
-                 ALEMUSCL_Buffer%pADDCNEL => ADDCNEL
-                 ALEMUSCL_Buffer%pADDTMPL => ADDTMPL
-                 L1 = 1+NIXS*NUMELS + NSVOIS*NIXS
-                 L2 = L1+6*NUMELS10
-                 L3 = L2+12*NUMELS20
+               if(new_crack > 0) then
+                 ! if at least 1 node has been detached, some data must be re-initialized
+                 numnodm = numnodm_old + new_crack
+#ifdef MPI
+                 ! Rebuild BOUNDARY and BOUNDARY_ADD from scratch using updated ownership.
+                 ! This replaces the per-split extend_boundary_for_split incremental updates.
+                 IF (NSPMD > 1) THEN
+                   CALL spmd_rebuild_boundary(NUMNOD, NSPMD, ISPMD, 
+     .               NODES%MAIN_PROC, NODES%ITAB, 
+     .               NODES%BOUNDARY, NODES%BOUNDARY_ADD, NODES%BOUNDARY_SIZE)
+                   ! Rebuild non-local MPI boundary tables only when at least one
+                   ! non-local node was split (NLOC_DMG%NNOD increased on this rank).
+                   ! No non-local splits => IDXI/POSI unchanged => tables still valid.
+                   IF (NLOC_DMG%IMOD > 0 .AND. NLOC_DMG%NNOD > nloc_nnod_old) THEN
+                     CALL SPMD_SUB_BOUNDARIES(NLOC_DMG,NODES%BOUNDARY_ADD,
+     .                 NODES%BOUNDARY)
+                   END IF
+                 END IF
+#endif
+                 CALL INIT_NODAL_STATE( IPARI,SHOOT_STRUCT,INTERFACES%INTBUF_TAB,NODES%BOUNDARY_ADD,NODES%BOUNDARY,
+     .                                NODES%ITAB,NODES,GEO,ADDCNEL,CNEL,
+     .                                IXS,ELEMENT%SHELL%IXC,IXT,IXP,IXR,IXTG,
+     .                                SIZE_ADDCNEL,SIZE_CNEL ,
+     .                                numelsg,numelqg,numelcg,numeltrg,numelpg,
+     .                                numelrg,numeltgg , IXS(L1))
 
-                 CALL CHKINIT(
-     2              IXS        ,IXQ       ,ELEMENT%SHELL%IXC       ,IXT         ,IXP       ,
-     3              IXR        ,IXTG      ,IXS(L1)       ,IXS(L2)     ,
-     4              IXS(L3)      ,IXTG1     ,GEO       ,ADDCNEL     ,CNEL      ,
-     5              ADDTMPL    ,IPARG     )
 
-               ENDIF
-               CALL ALLOCATE_OUTPUT_DATA(OUTPUT,NUMNOD)
-               LCNE0 = SIZE(ELEMENT%PON%PROCNE)
-               ! Reallocate skyline arrays after node split (NUMNOD has increased).
-               ! ADSKYI is dimensioned (0:NUMNOD+1) but was sized for the old NUMNOD.
-               IF(IPARIT > 0) THEN
-                 IF(SIZE(INTERFACES%PON%ADSKYI,1) < NUMNOD+2) THEN
-                   DEALLOCATE(INTERFACES%PON%ADSKYI)
-                   ALLOCATE(INTERFACES%PON%ADSKYI(0:NUMNOD+1))
+                 IF(IDEL7NG>0.OR.IRAD2R>0.OR.ALEMUSCL_Param%IALEMUSCL>0.OR.PDEL>0) THEN
+                   SIZE_ADDCNEL = NUMNOD+1
+                   SIZE_CNEL = LCNEL
+                   NELEML = NUMELS+NUMELQ+NUMELC+NUMELT+NUMELP+NUMELR+NUMELTG
+                   S_ELEM_STATE = NELEML
+                   DEALLOCATE(CNEL)
+                   ALLOCATE(CNEL(0:SIZE_CNEL))
+                   DEALLOCATE(ADDCNEL)
+                   ALLOCATE(ADDCNEL(0:SIZE_ADDCNEL))
+                   DEALLOCATE(ADDTMPL)
+                   ALLOCATE(ADDTMPL(0:NUMNOD+1))
+                   NELEML = NUMELS+NUMELQ+NUMELC+NUMELT+NUMELP+NUMELR+NUMELTG
+                   ALEMUSCL_Buffer%pCNEL => CNEL
+                   ALEMUSCL_Buffer%pADDCNEL => ADDCNEL
+                   ALEMUSCL_Buffer%pADDTMPL => ADDTMPL
+                   L1 = 1+NIXS*NUMELS + NSVOIS*NIXS
+                   L2 = L1+6*NUMELS10
+                   L3 = L2+12*NUMELS20
+
+                   CALL CHKINIT(
+     2                IXS        ,IXQ       ,ELEMENT%SHELL%IXC       ,IXT         ,IXP       ,
+     3                IXR        ,IXTG      ,IXS(L1)       ,IXS(L2)     ,
+     4                IXS(L3)      ,IXTG1     ,GEO       ,ADDCNEL     ,CNEL      ,
+     5                ADDTMPL    ,IPARG     )
+
                  ENDIF
-               ENDIF
-               IF(RWALL%NRWALL > 0) THEN
-                 CALL DETACH_NODE_FROM_RWALLS(NODES, NUMNOD_OLD, NUMNOD, RWALL)
-               ENDIF
-             endif
+                 CALL ALLOCATE_OUTPUT_DATA(OUTPUT,NUMNOD)
+                 LCNE0 = SIZE(ELEMENT%PON%PROCNE)
+                 ! Reallocate skyline arrays after node split (NUMNOD has increased).
+                 ! ADSKYI is dimensioned (0:NUMNOD+1) but was sized for the old NUMNOD.
+                 IF(IPARIT > 0) THEN
+                   IF(SIZE(INTERFACES%PON%ADSKYI,1) < NUMNOD+2) THEN
+                     DEALLOCATE(INTERFACES%PON%ADSKYI)
+                     ALLOCATE(INTERFACES%PON%ADSKYI(0:NUMNOD+1))
+                   ENDIF
+                 ENDIF
+                 IF(RWALL%NRWALL > 0) THEN
+                   CALL DETACH_NODE_FROM_RWALLS(NODES, NUMNOD_OLD, NUMNOD, RWALL)
+                 ENDIF
+               endif
+              endif
 
 C========================================================================================
 C                                     NON PARALLEL SECTION (SMP)

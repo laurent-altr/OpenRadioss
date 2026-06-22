@@ -631,7 +631,7 @@
           end if
 
 #endif
-          nodes%WEIGHT(numnod+1) = 1 ! nodes%WEIGHT(i)
+          nodes%WEIGHT(numnod+1) = 1! nodes%WEIGHT(i)
           nodes%WEIGHT_MD(numnod+1) = nodes%WEIGHT_MD(i)
           nodes%MAIN_PROC(numnod+1) = nodes%MAIN_PROC(i)
 
@@ -731,7 +731,6 @@
 !||    detach_node_from_shells       ../engine/source/engine/node_spliting/detach_node.F90
 !||    detach_node_nloc              ../engine/source/engine/node_spliting/detach_node_nloc.F90
 !||    extend_nodal_arrays           ../common_source/modules/nodal_arrays.F90
-!||    extend_boundary_for_split     ../common_source/modules/nodal_arrays.F90
 !||    set_new_node_values           ../engine/source/engine/node_spliting/detach_node.F90
 !||--- uses       -----------------------------------------------------
 !||    connectivity_mod              ../common_source/modules/connectivity.F90
@@ -783,6 +782,7 @@
           !call flush(6)
 !         new_uid = nodes%max_uid + 1
 !         nodes%max_uid = new_uid
+          if(nspmd == 0) write(6,*) 'error'
           old_uid = nodes%itab(node_id)
           numnod = nodes%numnod
           new_local_id = nodes%numnod + 1
@@ -790,11 +790,6 @@
             elements, shell_list, list_size)
 
           call extend_nodal_arrays(nodes, numnod + 1) ! allocates space for one more node (does not increment nodes%numnod)
-
-          ! Extend MPI domain-boundary list if the parent node was a boundary node
-          if (nspmd > 1) then
-            call extend_boundary_for_split(nodes, node_id, new_local_id, nspmd)
-          end if
 
           i = node_id
           call set_new_node_values(nodes, i)
