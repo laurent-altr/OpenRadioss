@@ -5012,20 +5012,20 @@ C---------------------------------------------------------------------
 C---------------------------------------------------------------------
 C DEBUG OUTPUT ACCELERATION
 C---------------------------------------------------------------------
-              IF (DEBUG(MACRO_DEBUG_ACC)==1) THEN
-                IF (NCYCLE>=DEBSTART .AND.MOD(NCYCLE-DEBSTART,RSTFREQ)==0) THEN
-                  IF(NSPMD > 1) THEN
-                    IF (ISPMD==0) THEN
-                      SIZ = NUMNODG
-                    ELSE
-                      SIZ = 0
-                    END IF
-                    CALL SPMD_COLLECT(NODES%A,NODES%ITAB,NODES%WEIGHT,NODES%NODGLOB,SIZ)
-                  ELSE
-                    CALL COLLECT(NODES%A,NODES%ITAB,NODES%WEIGHT,NODES%NODGLOB)
-                  END IF
-                END IF
-              END IF
+!             IF (DEBUG(MACRO_DEBUG_ACC)==1) THEN
+!               IF (NCYCLE>=DEBSTART .AND.MOD(NCYCLE-DEBSTART,RSTFREQ)==0) THEN
+!                 IF(NSPMD > 1) THEN
+!                   IF (ISPMD==0) THEN
+!                     SIZ = NUMNODG
+!                   ELSE
+!                     SIZ = 0
+!                   END IF
+!                   CALL SPMD_COLLECT(NODES%A,NODES%ITAB,NODES%WEIGHT,NODES%NODGLOB,SIZ)
+!                 ELSE
+!                   CALL COLLECT(NODES%A,NODES%ITAB,NODES%WEIGHT,NODES%NODGLOB)
+!                 END IF
+!               END IF
+!             END IF
 
 C-----------------------------------------------
 C       COMMUNICATION BETWEEN BOUNDARY ELEMENTS AFTER ASSEMBLY
@@ -5252,13 +5252,17 @@ C                                     node splitting
                    CALL spmd_rebuild_boundary(NUMNOD, NSPMD, ISPMD, 
      .               NODES%MAIN_PROC, NODES%ITAB, 
      .               NODES%BOUNDARY, NODES%BOUNDARY_ADD, NODES%BOUNDARY_SIZE)
-                   ! Rebuild non-local MPI boundary tables only when at least one
-                   ! non-local node was split (NLOC_DMG%NNOD increased on this rank).
-                   ! No non-local splits => IDXI/POSI unchanged => tables still valid.
-                   IF (NLOC_DMG%IMOD > 0 .AND. NLOC_DMG%NNOD > nloc_nnod_old) THEN
+                   ! Rebuild non-local MPI boundary tables on ALL ranks because the
+                   ! global BOUNDARY changed (even ranks with no local splits now have
+                   ! stale FR_NBCC exchange counts due to mirror-node boundary changes).
+                   IF (NLOC_DMG%IMOD > 0) THEN
                      CALL SPMD_SUB_BOUNDARIES(NLOC_DMG,NODES%BOUNDARY_ADD,
      .                 NODES%BOUNDARY)
                    END IF
+                   ! Rebuild ghost shell communication tables (shells_to_send and offset)
+                   ! now that BOUNDARY/BOUNDARY_ADD reflect the new node ownership.
+                   CALL init_ghost_shells(NODES, ELEMENT, ISPMD, NSPMD,
+     .               NODES%BOUNDARY_ADD, NODES%BOUNDARY_SIZE, NODES%BOUNDARY)
                  END IF
 #endif
                  CALL INIT_NODAL_STATE( IPARI,SHOOT_STRUCT,INTERFACES%INTBUF_TAB,NODES%BOUNDARY_ADD,NODES%BOUNDARY,
@@ -8309,6 +8313,22 @@ C Regular animation
      .                                    NODES%WEIGHT,  NODES%NODGLOB)
                   ENDIF
                 ENDIF
+              IF (DEBUG(MACRO_DEBUG_ACC)==1) THEN
+                IF (NCYCLE>=DEBSTART .AND.MOD(NCYCLE-DEBSTART,RSTFREQ)==0) THEN
+                  IF(NSPMD > 1) THEN
+                    IF (ISPMD==0) THEN
+                      SIZ = NUMNODG
+                    ELSE
+                      SIZ = 0
+                    END IF
+                    CALL SPMD_COLLECT(NODES%A,NODES%ITAB,NODES%WEIGHT,NODES%NODGLOB,SIZ)
+                  ELSE
+                    CALL COLLECT(NODES%A,NODES%ITAB,NODES%WEIGHT,NODES%NODGLOB)
+                  END IF
+                END IF
+              END IF
+
+
 
                 IF(SH_OFFSET_TAB%NNSH_OSET > 0) THEN
                   CALL ASSIGN_PTR(PTRX, NODES%X,3,NUMNOD)
@@ -8864,6 +8884,22 @@ C
 C
 !$OMP END PARALLEL
                   CALL PYTHON_END_OPENMP(PYTHON)
+
+C--- [NLOC_DBG] Print VNL/UNL max per rank: early cycles + every 200 + near divergence
+                  IF (NLOC_DMG%IMOD > 0) THEN
+                    IF (NCYCLE <= 10 .OR.
+     .                  MOD(NCYCLE,200) == 0 .OR.
+     .                  (NCYCLE >= 1770 .AND. NCYCLE <= 1785)) THEN
+                      WRITE(*,'(A,I6,A,E14.6,A,E14.6,A,I6,A,I2)')
+     .                  '[NLOC_DBG] cy=', NCYCLE,
+     .                  ' VNLmax=',
+     .                  MAXVAL(ABS(NLOC_DMG%VNL(1:NLOC_DMG%L_NLOC))),
+     .                  ' UNLmax=',
+     .                  MAXVAL(ABS(NLOC_DMG%UNL(1:NLOC_DMG%L_NLOC))),
+     .                  ' nnod=', NLOC_DMG%NNOD,
+     .                  ' r=', ISPMD
+                    ENDIF
+                  ENDIF
 
                   IF(IMON>0) CALL STOPTIME(TIMERS,TIMER_INTEG)
 C

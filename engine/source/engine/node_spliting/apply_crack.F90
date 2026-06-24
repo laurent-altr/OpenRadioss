@@ -96,6 +96,8 @@
           use interfaces_mod
           use nlocal_reg_mod
           use detach_node_mod
+          use extend_array_mod
+          use update_pon_mod, only : update_pon_shells
           use spmd_mod
           use precision_mod, only: wp
           implicit none
@@ -119,12 +121,13 @@
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Local variables
 ! ----------------------------------------------------------------------------------------------------------------------
-          integer :: i, j, ii, k, p, minuid, min_ghost_k
+          integer :: i, j, ii, k, p, minuid, min_ghost_k, n_owner_contrib
           logical :: locally_owned_shell, this_rank_created
           integer :: numnod0, numnodg0, old_max_uid
           integer :: local_new_count, total_new_nodes, local_n
           integer :: current_parent, current_owning_rank
           integer :: displ_arr(nspmd)
+          integer :: empty_shells(0)
           integer, allocatable :: local_shells(:)
           integer, allocatable :: detached_nodes_local(:)
           integer, allocatable :: owning_ranks_local(:)
@@ -132,6 +135,7 @@
           integer, allocatable :: owning_ranks_global(:)
           integer, allocatable :: nb_detached_nodes(:), nb_detached_nodes_global(:)
           integer, allocatable :: permutation(:), processor(:), local_pos(:)
+          logical, allocatable :: is_boundary_split(:)
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Body
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -215,7 +219,47 @@
               if (crack_info_list(i)%shell_uids(j) > 0) local_n = local_n + 1
             end do
 
-            if (local_n == 0) cycle  ! no local shells; ms-halving handled in Phase 4
+            if (local_n == 0) then
+              ! No local shells on this rank for this node.
+              ! If the parent is locally known and the owning rank is determined,
+              ! create a ghost placeholder for N' so that after init_ghost_shells,
+              ! ghost shells from the owning rank that reference the new UID can
+              ! be resolved locally (positive local ID -> included in cnel for
+              ! non-local damage). Without this placeholder, the new UID would be
+              ! stored as a negative ID and excluded from the non-local neighbourhood,
+              ! causing slowly-diverging physics in MPI vs 1-rank runs.
+              if (crack_info_list(i)%parent_id > 0 .and. &
+                crack_info_list(i)%owning_rank /= -1) then
+                call extend_nodal_arrays(nodes, nodes%numnod + 1)
+                call set_new_node_values(nodes, crack_info_list(i)%parent_id)
+                nodes%MAIN_PROC(nodes%numnod + 1) = crack_info_list(i)%owning_rank
+                nodes%WEIGHT(nodes%numnod + 1) = 0
+                nodes%numnod = nodes%numnod + 1
+                numnod = nodes%numnod
+                ! Keep elements%pon%sadsky in sync with nodes%numnod so that
+                ! subsequent update_pon_shells calls do not read adsky out of bounds.
+                ! The ghost placeholder has 0 shells, so we pass an empty list.
+                if (nodes%iparith > 0) then
+                  call update_pon_shells(element, 0, empty_shells, numnod)
+                end if
+                ! Extend nloc_dmg%idxi to cover the ghost placeholder so that
+                ! subsequent detach_node calls find size(idxi) == nodes%numnod.
+                if (nloc_dmg%imod > 0) then
+                  call extend_array(nloc_dmg%idxi, numnod - 1, numnod)
+                  nloc_dmg%idxi(numnod) = 0
+                end if
+                local_new_count = local_new_count + 1
+                detached_nodes_local(local_new_count) = crack_info_list(i)%parent_uid
+                owning_ranks_local(local_new_count)   = crack_info_list(i)%owning_rank
+                write(*,'(a,i0,a,i0,a,i0,a,f12.6)') &
+                  '[SPLIT][rank ', ispmd, '] PHASE2_GHOST: parent_uid=', &
+                  crack_info_list(i)%parent_uid, ' owning_rank=', &
+                  crack_info_list(i)%owning_rank, &
+                  ' ms_placeholder=', real(nodes%ms(nodes%numnod))
+                flush(6)
+              end if
+              cycle
+            end if
 
             ! Build local-only shell list
             allocate(local_shells(local_n))
@@ -228,14 +272,44 @@
             end do
 
             if (crack_info_list(i)%weight == 1) then
+              ! Count ghost shells moving to N' (negative UIDs) for f_detach correction.
+              n_owner_contrib = 0
+              do j = 1, size(crack_info_list(i)%shell_uids)
+                if (crack_info_list(i)%shell_uids(j) < 0) n_owner_contrib = n_owner_contrib + 1
+              end do
               call detach_node(nodes, crack_info_list(i)%parent_id, element, &
                 local_shells, local_n, &
-                npari, ninter, ipari, interf, nloc_dmg, nthread, nspmd, ispmd)
+                npari, ninter, ipari, interf, nloc_dmg, nthread, nspmd, ispmd, &
+                n_ghost_contrib=n_owner_contrib)
             else
+              ! Count owner-side shells (negative shell_uids = ghost copies of owner shells).
+              ! This equals the number of local ADDCNE entries owner N' will have,
+              ! so that N'_ghost can be given the same number of remote ADDCNE slots.
+              n_owner_contrib = 0
+              do j = 1, size(crack_info_list(i)%shell_uids)
+                if (crack_info_list(i)%shell_uids(j) < 0) n_owner_contrib = n_owner_contrib + 1
+              end do
               call mirror_node_split(nodes, crack_info_list(i)%parent_id, element, &
                 local_shells, local_n, &
-                nloc_dmg, nthread, ispmd, crack_info_list(i)%owning_rank)
+                nloc_dmg, nthread, ispmd, crack_info_list(i)%owning_rank, n_owner_contrib)
             end if
+
+            ! Debug Phase 2: print what this rank did and the resulting masses.
+            if (crack_info_list(i)%weight == 1) then
+              write(*,'(a,i0,a,i0,a,i0,a,f12.6,a,f12.6)') &
+                '[SPLIT][rank ', ispmd, '] PHASE2_DETACH: parent_uid=', &
+                crack_info_list(i)%parent_uid, ' local_shells=', local_n, &
+                ' ms_parent=', real(nodes%ms(crack_info_list(i)%parent_id)), &
+                ' ms_new=', real(nodes%ms(nodes%numnod))
+            else
+              write(*,'(a,i0,a,i0,a,i0,a,i0,a,f12.6,a,f12.6)') &
+                '[SPLIT][rank ', ispmd, '] PHASE2_MIRROR: parent_uid=', &
+                crack_info_list(i)%parent_uid, ' local_shells=', local_n, &
+                ' owning_rank=', crack_info_list(i)%owning_rank, &
+                ' ms_parent=', real(nodes%ms(crack_info_list(i)%parent_id)), &
+                ' ms_new=', real(nodes%ms(nodes%numnod))
+            end if
+            flush(6)
 
             numnod = nodes%numnod
             local_new_count = local_new_count + 1
@@ -305,6 +379,7 @@
             k = total_new_nodes
             allocate(processor(k))
             allocate(local_pos(k))
+            allocate(is_boundary_split(k))
             k = 0
             do p = 1, nspmd
               do i = 1, nb_detached_nodes_global(p)
@@ -329,6 +404,16 @@
             !   permutation(ii)     = original index of that entry
             !   owning_ranks_global not sorted; access as owning_ranks_global(permutation(ii))
 
+            ! Pre-pass: mark entries that share a parent_uid with another rank.
+            ! Adjacent equal values in the sorted array mean a boundary-node split.
+            is_boundary_split = .false.
+            do ii = 1, k - 1
+              if (detached_nodes(ii) == detached_nodes(ii + 1)) then
+                is_boundary_split(ii)     = .true.
+                is_boundary_split(ii + 1) = .true.
+              end if
+            end do
+
             current_parent      = -1
             current_owning_rank = -1
             this_rank_created   = .false.
@@ -345,6 +430,7 @@
                     nodes%ms0(j) = nodes%ms0(j) / 2.0_wp
                     nodes%nchilds(nodes%parent_node(j)) = &
                       nodes%nchilds(nodes%parent_node(j)) + 1
+
                   end if
                 end if
                 ! Open a new group
@@ -364,11 +450,11 @@
                 nodes%itab(numnod0 + j)         = old_max_uid
                 nodes%itabm1(numnod0 + j)        = old_max_uid
                 nodes%itabm1(2*(numnod0 + j))    = numnod0 + j
-                ! nodglob is only meaningful on the owning rank
-                if (owning_ranks_global(i) == ispmd) then
-                  nodes%nodglob(numnod0 + j) = numnodg0
-                end if
+                ! nodglob is meaningful on every rank that holds N'
+                ! (same global index regardless of ownership)
+                nodes%nodglob(numnod0 + j) = numnodg0
                 nodes%main_proc(numnod0 + j) = current_owning_rank
+
               end if
             end do
 
@@ -380,16 +466,24 @@
                 nodes%ms0(j) = nodes%ms0(j) / 2.0_wp
                 nodes%nchilds(nodes%parent_node(j)) = &
                   nodes%nchilds(nodes%parent_node(j)) + 1
+
               end if
             end if
 
             nodes%max_uid = old_max_uid
             numnodg = numnodg0
 
-            if (allocated(permutation)) deallocate(permutation)
-            if (allocated(processor))   deallocate(processor)
-            if (allocated(local_pos))   deallocate(local_pos)
+            if (allocated(permutation))       deallocate(permutation)
+            if (allocated(processor))         deallocate(processor)
+            if (allocated(local_pos))         deallocate(local_pos)
+            if (allocated(is_boundary_split)) deallocate(is_boundary_split)
           end if
+
+          ! Debug summary
+          write(*,'(a,i0,a,i0,a,i0,a,i0)') &
+            '[SPLIT][rank ', ispmd, '] DONE: new_crack=', new_crack, &
+            ' numnod=', numnod, ' numnodg=', numnodg
+          flush(6)
 
           if (allocated(nb_detached_nodes))        deallocate(nb_detached_nodes)
           if (allocated(nb_detached_nodes_global))  deallocate(nb_detached_nodes_global)

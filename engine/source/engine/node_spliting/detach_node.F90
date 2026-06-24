@@ -743,7 +743,7 @@
 !!          owning_rank instead of copying from the parent. The UID is assigned later in the
 !!          global uid-sync phase of apply_crack.
         subroutine mirror_node_split(nodes, node_id, elements, shell_list, list_size, &
-          nloc_dmg, nthread, ispmd, owning_rank)
+          nloc_dmg, nthread, ispmd, owning_rank, n_owner_contrib)
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Modules
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -764,6 +764,7 @@
           integer,             intent(in)    :: nthread      !< number of OpenMP threads
           integer,             intent(in)    :: ispmd        !< local MPI rank (0-based)
           integer,             intent(in)    :: owning_rank  !< rank that owns the new node (0-based)
+          integer,             intent(in)    :: n_owner_contrib !< number of owner N' local corners (= N'_ghost remote slots needed)
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Local variables
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -774,20 +775,34 @@
 ! ----------------------------------------------------------------------------------------------------------------------
           numnod = nodes%numnod
           new_local_id = numnod + 1
+          write(*,'(a,i0,a,i0,a,i0,a,i0,a,f12.4,a,3f14.6)') &
+            '[SPLIT][rank ', ispmd, '] MIRROR_PRE: parent_uid=', nodes%itab(node_id), &
+            ' parent_id=', node_id, ' owning_rank=', owning_rank, &
+            ' ms=', real(nodes%ms(node_id)), &
+            ' X=', nodes%X(1,node_id), nodes%X(2,node_id), nodes%X(3,node_id)
+          flush(6)
 
           call extend_nodal_arrays(nodes, numnod + 1)
           call set_new_node_values(nodes, node_id)
           ! Override: the new node is owned by owning_rank, not by this rank
           nodes%MAIN_PROC(new_local_id) = owning_rank
+          ! Mirror nodes are ghost copies; mark as not owned so output routines skip them
+          nodes%WEIGHT(new_local_id) = 0
 
           call detach_node_from_shells(nodes, node_id, elements, shell_list, list_size)
 
           if (nloc_dmg%imod > 0) then
             call detach_node_nloc(nloc_dmg, node_id, new_local_id, &
-              elements, shell_list, list_size, numnod, nthread, ispmd)
+              elements, shell_list, list_size, numnod, nthread, ispmd, is_mirror=.true., &
+              n_owner_contrib=n_owner_contrib, node_uid=nodes%itab(node_id))
           end if
 
           nodes%numnod = nodes%numnod + 1
+          write(*,'(a,i0,a,i0,a,f12.4,a,f12.4)') &
+            '[SPLIT][rank ', ispmd, '] MIRROR_POST: parent_uid=', nodes%itab(node_id), &
+            ' ms_parent=', real(nodes%ms(node_id)), &
+            ' ms_new=', real(nodes%ms(new_local_id))
+          flush(6)
 
         end subroutine mirror_node_split
 
@@ -811,7 +826,7 @@
 !||    nodal_arrays_mod              ../common_source/modules/nodal_arrays.F90
 !||====================================================================
         subroutine detach_node(nodes, node_id, elements, shell_list, list_size, &
-          npari, ninter, ipari, interf, nloc_dmg, nthread, nspmd, ispmd)
+          npari, ninter, ipari, interf, nloc_dmg, nthread, nspmd, ispmd, n_ghost_contrib)
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Modules
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -838,6 +853,7 @@
           integer,             intent(in)    :: nthread      !< number of OpenMP threads
           integer,             intent(in)    :: nspmd        !< number of MPI domains
           integer,             intent(in)    :: ispmd        !< local MPI rank (0-based)
+          integer,             intent(in), optional :: n_ghost_contrib !< ghost shells moving to N' (for f_detach correction in PARITH/ON)
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Local variables
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -856,6 +872,11 @@
           old_uid = nodes%itab(node_id)
           numnod = nodes%numnod
           new_local_id = nodes%numnod + 1
+          write(*,'(a,i0,a,i0,a,i0,a,f12.4,a,3f14.6)') &
+            '[SPLIT][rank ', ispmd, '] DETACH_PRE: parent_uid=', old_uid, &
+            ' parent_id=', node_id, ' ms=', real(nodes%ms(node_id)), &
+            ' X=', nodes%X(1,node_id), nodes%X(2,node_id), nodes%X(3,node_id)
+          flush(6)
           call detach_node_from_interfaces(nodes, node_id, npari, ninter, ipari, interf, &
             elements, shell_list, list_size)
 
@@ -868,11 +889,23 @@
 
           ! Update non-local damage structure for the new node
           if (nloc_dmg%imod > 0) then
-            call detach_node_nloc(nloc_dmg, node_id, new_local_id, &
-              elements, shell_list, list_size, numnod, nthread, ispmd)
+            if (present(n_ghost_contrib)) then
+              call detach_node_nloc(nloc_dmg, node_id, new_local_id, &
+                elements, shell_list, list_size, numnod, nthread, ispmd, &
+                n_ghost_contrib=n_ghost_contrib, node_uid=old_uid)
+            else
+              call detach_node_nloc(nloc_dmg, node_id, new_local_id, &
+                elements, shell_list, list_size, numnod, nthread, ispmd, &
+                node_uid=old_uid)
+            end if
           end if
 
           nodes%numnod = nodes%numnod + 1
+          write(*,'(a,i0,a,i0,a,f12.4,a,f12.4)') &
+            '[SPLIT][rank ', ispmd, '] DETACH_POST: parent_uid=', old_uid, &
+            ' ms_parent=', real(nodes%ms(node_id)), &
+            ' ms_new=', real(nodes%ms(new_local_id))
+          flush(6)
 
         end subroutine detach_node
 

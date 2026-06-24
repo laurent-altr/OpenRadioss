@@ -125,93 +125,110 @@
 
           ! Accumulate nodal damage: max detach_shell of all connected shells
           deallocate(ghostshelldamage)
-
+          if(diag_call_count == 0) then
+            diag_call_count = diag_call_count + 1
 !         ! test  PUNCH_NLOCAL, fill the crack_info_list with a list of nodes and shells to detach, should be replaced by a physical criterion based on the non-local damage field
-          ! THIS IS THE CODE SNIPPET TO REPLACE WITH A PHYSICAL CRITERION BASED ON THE NON-LOCAL DAMAGE FIELD
-          block  ! example on how to detach a list of nodes and shells, should be replaced by a physical criterion based on the non-local damage field
-            !detach nodes :
-            !Nodes 10682 10683 10684 .. 10722
-            ! from list
-            !Elements 12963 12966 12967 12987 13044 13047 13048 13053 13054 13055 13071 13074 13075 13089 13092 13093 12891 12894 12895 12984 12912 129113 12981 12985
-            ! 13323 13326 13327 13341 13344 13345 13395 13398 13399 13413 13416 13417 13623 13626 13627 13644 13695 13698 13699 13716 13717 13722 13723
-            integer  :: node_list(41), local_node_list(41)
-            integer :: shell_list(48), local_shell_list(48)
-            integer :: i,j, minuid, min_ghost_k,p
-            integer :: nlocal_shell, nlocal_node, nghost_shell
-            logical :: locally_owned_shell
-            ! example of filling the crack_info_list based on the above lists, should be replaced by a physical criterion based on the non-local damage field
+            ! THIS IS THE CODE SNIPPET TO REPLACE WITH A PHYSICAL CRITERION BASED ON THE NON-LOCAL DAMAGE FIELD
+            block  ! example on how to detach a list of nodes and shells, should be replaced by a physical criterion based on the non-local damage field
+              !detach nodes :
+              !Nodes 10682 10683 10684 .. 10722
+              ! from list
+              !Elements 12963 12966 12967 12987 13044 13047 13048 13053 13054 13055 13071 13074 13075 13089 13092 13093 12891 12894 12895 12984 12912 129113 12981 12985
+              ! 13323 13326 13327 13341 13344 13345 13395 13398 13399 13413 13416 13417 13623 13626 13627 13644 13695 13698 13699 13716 13717 13722 13723
+              integer  :: node_list(41), local_node_list(41)
+              integer :: shell_list(48), local_shell_list(48)
+              integer :: i,j, minuid, min_ghost_k,p
+              integer :: nlocal_shell, nlocal_node, nghost_shell
+              logical :: locally_owned_shell
+              ! example of filling the crack_info_list based on the above lists, should be replaced by a physical criterion based on the non-local damage field
 
-            node_list = [10682, 10683, 10684, 10685, 10686, 10687, 10688, 10689, 10690, 10691, 10692, 10693, &
-              10694, 10695, 10696, 10697, 10698, 10699, 10700, 10701, 10702, 10703, 10704, 10705, 10706, 10707, &
-              10708, 10709, 10710, 10711, 10712, 10713, 10714, 10715, 10716, 10717, 10718, 10719, 10720, 10721, 10722]
+              node_list = [10682, 10683, 10684, 10685, 10686, 10687, 10688, 10689, 10690, 10691, 10692, 10693, &
+                10694, 10695, 10696, 10697, 10698, 10699, 10700, 10701, 10702, 10703, 10704, 10705, 10706, 10707, &
+                10708, 10709, 10710, 10711, 10712, 10713, 10714, 10715, 10716, 10717, 10718, 10719, 10720, 10721, 10722]
 
-            shell_list = [12963, 12966, 12967, 12987, 13044, 13047, 13048, 13053, 13054, 13055, 13071, 13074, 13075, 12984, &
-              13089, 13092, 13093, 12891, 12894, 12895, 12909, 12912, 12913, 12981, 12985, 13323, 13326, 13327, 13341, 13344, 13345, &
-              13395, 13398, 13399, 13413, 13416, 13417, 13623, 13626, 13627, 13644, 13695, 13698, 13699, 13716, 13717, 13722, 13723]
+              shell_list = [12963, 12966, 12967, 12987, 13044, 13047, 13048, 13053, 13054, 13055, 13071, 13074, 13075, 12984, &
+                13089, 13092, 13093, 12891, 12894, 12895, 12909, 12912, 12913, 12981, 12985, 13323, 13326, 13327, 13341, 13344, 13345, &
+                13395, 13398, 13399, 13413, 13416, 13417, 13623, 13626, 13627, 13644, 13695, 13698, 13699, 13716, 13717, 13722, 13723]
 
-            nlocal_shell = 0
-            nlocal_node = 0
-
-            ! for this demonstration, we set the same lists on all MPI domains, so we need to filter the lists to only keep the local nodes and shells on each MPI domain
-            do i = 1, 41
-              j = get_local_node_id(nodes, node_list(i))
-              if (j > 0)  then
-                nlocal_node = nlocal_node + 1
-                local_node_list(nlocal_node) = j
-              end if
-            end do
-
-            !fill crackinfo_list with only the local nodes and the shells to detach for each local node
-            allocate(crack_info_list(nlocal_node))
-            ! fill the crack_info_list with ids
-            do i = 1, nlocal_node
-              crack_info_list(i)%parent_id = local_node_list(i)
-              crack_info_list(i)%parent_uid = nodes%itab(local_node_list(i))
-            end do
-
-
-            do i = 1, nlocal_node
               nlocal_shell = 0
-              ! count the number of shells to detach for this node and fill the shell_uids list in the crack_info structure, should be replaced by a physical criterion based on the non-local damage field
-              do j = 1, size(shell_list)
-                k = get_local_shell_id(element%shell, shell_list(j))
-                if(k == 0) then ! loop over ghost shells to find the local node
-                  k = get_value_umap(element%ghost_shell%glob2loc, shell_list(j), 0)
-                  if (k > 0) then
-                    ! The shell is a ghost shell, check if the local node is connected to it
-                    if (any(element%ghost_shell%nodes(k, :) == local_node_list(i))) then
-                      ! The node is connected to the ghost shell, mark it for detachment
-                      nlocal_shell = nlocal_shell + 1
-                      local_shell_list(nlocal_shell) = -k ! mark ghost shells with negative index
-                    end if
-                  end if
-                elseif(k > 0) then ! search in element shell connectivity for the local node
-                  if (any(element%shell%nodes(local_shell_list(j), :) == local_node_list(i))) then
-                    ! The node is connected to the local shell, mark it for detachment
-                    nlocal_shell = nlocal_shell + 1
-                    local_shell_list(nlocal_shell) = k
-                  end if
-                else
-                  ! This should not happen, but handle it just in case
-                  !print *, "Warning: local_shell_list contains zero index for node ", local_node_list(i)
+              nlocal_node = 0
+
+              ! for this demonstration, we set the same lists on all MPI domains, so we need to filter the lists to only keep the local nodes and shells on each MPI domain
+              do i = 1, 41
+                j = get_local_node_id(nodes, node_list(i))
+                if (j > 0)  then
+                  nlocal_node = nlocal_node + 1
+                  local_node_list(nlocal_node) = j
                 end if
               end do
 
+              !fill crackinfo_list with only the local nodes and the shells to detach for each local node
+              allocate(crack_info_list(nlocal_node))
+              ! fill the crack_info_list with ids
+              do i = 1, nlocal_node
+                crack_info_list(i)%parent_id = local_node_list(i)
+                crack_info_list(i)%parent_uid = nodes%itab(local_node_list(i))
+              end do
 
-              ! allocate and fill crack_info_list(i)%shell_uids with the shells to detach for this node
-              if (nlocal_shell > 0) then
-                allocate(crack_info_list(i)%shell_uids(nlocal_shell))
-                crack_info_list(i)%shell_uids = local_shell_list(1:nlocal_shell)
-              else
-                allocate(crack_info_list(i)%shell_uids(0))
-              end if
-            end do
-          end block
-          ! END OF THE CODE SNIPPET TO REPLACE WITH A PHYSICAL CRITERION BASED ON THE NON-LOCAL DAMAGE FIELD
+
+              do i = 1, nlocal_node
+                nlocal_shell = 0
+                ! count the number of shells to detach for this node and fill the shell_uids list in the crack_info structure, should be replaced by a physical criterion based on the non-local damage field
+                do j = 1, size(shell_list)
+                  k = get_local_shell_id(element%shell, shell_list(j))
+                  if(k == 0) then ! loop over ghost shells to find the local node
+                    k = get_value_umap(element%ghost_shell%glob2loc, shell_list(j), 0)
+                    if (k > 0) then
+                      ! The shell is a ghost shell, check if the local node is connected to it
+                      if (any(element%ghost_shell%nodes(:, k) == local_node_list(i))) then
+                        ! The node is connected to the ghost shell, mark it for detachment
+                        nlocal_shell = nlocal_shell + 1
+                        local_shell_list(nlocal_shell) = -k ! mark ghost shells with negative index
+                      end if
+                    end if
+                  elseif(k > 0) then ! search in element shell connectivity for the local node
+                    if (any(element%shell%nodes(:, k) == local_node_list(i))) then
+                      ! The node is connected to the local shell, mark it for detachment
+                      nlocal_shell = nlocal_shell + 1
+                      local_shell_list(nlocal_shell) = k
+                    end if
+                  else
+                    ! This should not happen, but handle it just in case
+                    !print *, "Warning: local_shell_list contains zero index for node ", local_node_list(i)
+                  end if
+                end do
+
+
+                ! allocate and fill crack_info_list(i)%shell_uids with the shells to detach for this node
+                if (nlocal_shell > 0) then
+                  allocate(crack_info_list(i)%shell_uids(nlocal_shell))
+                  crack_info_list(i)%shell_uids = local_shell_list(1:nlocal_shell)
+                else
+                  allocate(crack_info_list(i)%shell_uids(0))
+                end if
+              end do
+            end block
+            ! END OF THE CODE SNIPPET TO REPLACE WITH A PHYSICAL CRITERION BASED ON THE NON-LOCAL DAMAGE FIELD
 !
 
-          call apply_crack(nodes, element, interf, npari, ninter, ipari, numnod, numnodg, &
-            ispmd, nspmd, nloc_dmg, nthread, new_crack, crack_info_list)
+            ! Debug: print every crack candidate submitted to apply_crack so 1-rank vs 8-rank
+            ! runs can be compared.  Format: [SPLIT][rank R] CANDIDATE: ...
+            do i = 1, size(crack_info_list)
+              write(*,'(a,i0,a,i0,a,f12.4,a)',advance='no') &
+                '[SPLIT][rank ', ispmd, '] CANDIDATE: parent_uid=', crack_info_list(i)%parent_uid, &
+                ' ms=', real(nodes%ms(crack_info_list(i)%parent_id)), ' shells='
+              if (allocated(crack_info_list(i)%shell_uids)) then
+                do j = 1, size(crack_info_list(i)%shell_uids)
+                  write(*,'(i0,a)',advance='no') crack_info_list(i)%shell_uids(j), ' '
+                end do
+              end if
+              write(*,*)
+              flush(6)
+            end do
+
+            call apply_crack(nodes, element, interf, npari, ninter, ipari, numnod, numnodg, &
+              ispmd, nspmd, nloc_dmg, nthread, new_crack, crack_info_list)
+          endif
 
           if (allocated(detach_shell))           deallocate(detach_shell)
 !         if (allocated(shell_list))             deallocate(shell_list)

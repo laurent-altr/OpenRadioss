@@ -61,7 +61,7 @@
 !||    precision_mod             ../common_source/modules/precision_mod.F90
 !||====================================================================
         subroutine detach_node_nloc(nloc_dmg, old_local_id, new_local_id, &
-          elements, shell_list, list_size, old_numnod, nthread, ispmd)
+          elements, shell_list, list_size, old_numnod, nthread, ispmd, is_mirror, n_owner_contrib, n_ghost_contrib, node_uid)
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Modules
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -82,6 +82,10 @@
           integer,             intent(in)    :: old_numnod    !< total node count before the split
           integer,             intent(in)    :: nthread       !< number of threads (second dim of FNL/STIFNL)
           integer,             intent(in)    :: ispmd         !< local MPI rank (0-based); PROCNE uses 1-based ranks
+          logical,             intent(in), optional :: is_mirror  !< .true. when called from mirror_node_split
+          integer,             intent(in), optional :: n_owner_contrib !< ghost rank: number of owner N' local corners (= N'_ghost remote slots needed)
+          integer,             intent(in), optional :: n_ghost_contrib !< owner rank: number of ghost shells moving to N' (for f_detach correction)
+          integer,             intent(in), optional :: node_uid       !< global UID of the split node (for diagnostics)
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Local variables
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -103,15 +107,39 @@
           integer :: n_remain        ! corner count remaining on parent after split
           integer :: n_total         ! total corner count before split (n_remain + n_contrib)
           integer :: numelc          ! total number of shell elements
+          integer :: n_remote        ! remote PROCNE entries (PROCNE ≠ ispmd+1) counted for diagnostic
+          integer :: cc              ! loop counter over ADDCNE/IADC entries
+          integer :: parent_start    ! first FSKY row of parent node's ADDCNE range
+          integer :: parent_end      ! last  FSKY row of parent node's ADDCNE range
+          integer :: parent_total    ! total entries in parent's ADDCNE (local + remote)
+          integer :: new_start       ! first FSKY row of new node's ADDCNE range
           real(kind=wp) :: f_retain  ! fraction of element corners retained by parent
           real(kind=wp) :: f_detach  ! fraction of element corners detached to child
           real(kind=wp), parameter   :: ZERO = 0._wp
           logical,       parameter   :: debug_detach_monitor = .false.  !! set .true. to print pre-split state
+          logical :: l_is_mirror              ! local copy of is_mirror flag
+          integer :: n_owner_contrib_local   ! local copy of n_owner_contrib (0 if not present)
+          integer :: owner_proc              ! PROCNE of ghost parent's remote entries (= owner_rank + 1)
+          integer :: n_ghost_contrib_local   ! local copy of n_ghost_contrib (0 if not present)
+          integer :: n_contrib_global        ! n_contrib + n_ghost_contrib (all shells moving to N')
+          integer :: n_total_global          ! parent_total from ADDCNE (all shells around parent)
+          integer :: node_uid_local          ! local copy of node_uid (-1 if not present)
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Body
 ! ----------------------------------------------------------------------------------------------------------------------
+          parent_start = 0
+          parent_end   = 0
           !Nodes 1682 - 1728
-          ! Step 1 — Early exit if the parent node has no non-local DOFs
+          ! Step 1 — Extend IDXI to cover new_local_id regardless of whether the parent
+          !          has non-local DOFs.  This must happen before the early-exit check so
+          !          that idxi is always sized to at least new_local_id; if we returned
+          !          early without extending, the next split would call
+          !          extend_array(idxi, numnod+1, numnod+2) with oldsize > size(idxi),
+          !          causing a heap-buffer-overflow in the copy inside extend_array.
+          call extend_array(nloc_dmg%idxi, old_numnod, new_local_id)
+          ! The new node inherits no non-local DOFs by default (entry = 0).
+          nloc_dmg%idxi(new_local_id) = 0
+
           nl_idx = nloc_dmg%idxi(old_local_id)
           if (nl_idx == 0) return
 
@@ -120,8 +148,7 @@
           nddl    = nloc_dmg%posi(nl_idx + 1) - old_pos
           new_pos = nloc_dmg%l_nloc + 1
 
-          ! Step 3 — Extend IDXI (size old_numnod → new_local_id)
-          call extend_array(nloc_dmg%idxi, old_numnod, new_local_id)
+          ! Step 3 — Set IDXI for the new node (extend_array already called in Step 1)
           nloc_dmg%idxi(new_local_id) = nloc_dmg%nnod + 1
 
           ! Step 4 — Extend INDX (size NNOD → NNOD+1)
@@ -198,6 +225,46 @@
             f_detach = real(n_contrib, wp) / real(n_total, wp)
           end if
 
+          ! On MPI runs (PARITH/ON): correct f_detach/f_retain using the global corner count from
+          ! ADDCNE so the VNL/mass scaling matches the 1-MPI result.  parent_total from ADDCNE
+          ! counts ALL corners (local + remote).  The correction fires whenever remote entries
+          ! exist (parent_total > n_contrib + n_remain), regardless of how many go to N'.
+          l_is_mirror = .false.
+          if (present(is_mirror)) l_is_mirror = is_mirror
+          n_ghost_contrib_local = 0
+          if (present(n_ghost_contrib)) n_ghost_contrib_local = n_ghost_contrib
+          n_owner_contrib_local = 0
+          if (present(n_owner_contrib)) n_owner_contrib_local = n_owner_contrib
+          ! Owner rank: use global total when remote entries exist in parent's ADDCNE range
+          if (.not. l_is_mirror .and. allocated(nloc_dmg%addcne)) then
+            n_total_global   = nloc_dmg%addcne(nl_idx + 1) - nloc_dmg%addcne(nl_idx)
+            n_contrib_global = n_contrib + n_ghost_contrib_local
+            if (n_total_global > n_contrib + n_remain) then
+              ! Remote entries exist — use global total for correct f_detach/f_retain
+              f_detach = real(n_contrib_global, wp) / real(n_total_global, wp)
+              f_retain  = real(n_total_global - n_contrib_global, wp) / real(n_total_global, wp)
+            end if
+          end if
+          ! Ghost/mirror rank: correct f_detach/f_retain using owner shell count
+          ! n_owner_contrib_local = owner's local shells going to N' (= remote slots in N'_ghost)
+          if (l_is_mirror .and. allocated(nloc_dmg%addcne)) then
+            n_total_global   = nloc_dmg%addcne(nl_idx + 1) - nloc_dmg%addcne(nl_idx)
+            n_contrib_global = n_contrib + n_owner_contrib_local
+            if (n_total_global > n_contrib + n_remain) then
+              f_detach = real(n_contrib_global, wp) / real(n_total_global, wp)
+              f_retain  = real(n_total_global - n_contrib_global, wp) / real(n_total_global, wp)
+            end if
+          end if
+
+          node_uid_local = -1
+          if (present(node_uid)) node_uid_local = node_uid
+          write(6,'(a,i0,a,i0,a,i0,a,i0,a,i0,a,i0,a,i0,a,f6.3,a,f6.3)') &
+            '[SPLIT_VNL][rank ', ispmd, '] uid=', node_uid_local, ' old=', old_local_id, &
+            ' new=', new_local_id, ' n_contrib=', n_contrib, ' n_remain=', n_remain, &
+            ' n_ghost=', n_ghost_contrib_local, &
+            ' f_retain=', f_retain, ' f_detach=', f_detach
+          flush(6)
+
           ! Debug: print state before modification so the split impact is visible.
           if (debug_detach_monitor) then
             write(6,'(a,i8,a,i8)') ' SPLIT_NLOC parent_local=', old_local_id, &
@@ -220,42 +287,27 @@
           ! DNL is overwritten by NLOCAL_INCR (DNL := DT2*VNL) before it is next read.
           nloc_dmg%dnl    (new_pos:new_pos+nddl-1) = ZERO
 
-          ! Scale VNL/VNL_OLD proportionally to retained element corners.
+          ! VNL/MASS/FNL for PARENT: leave unchanged.
           !
-          ! Pre-split VNL was assembled from ALL elements attached to the parent node.
-          ! After the split the parent retains a fraction f_retain of those corners and
-          ! the new (child) node receives fraction f_detach = 1 - f_retain.  Scaling each
-          ! node's VNL by its corner fraction preserves both dissipation mechanisms used
-          ! in cfint_reg:
-          !   - NTN_VNL damping:  F ∝ ξ·(VNL₁+VNL₂+VNL₃+VNL₄)/NTN  (alive elements)
-          !   - absorbing BC:     F ∝ SSPNL·(VNL+VNL_OLD)/2           (dead elements)
-          ! Zeroing VNL (the previous behaviour) silenced both mechanisms for 1–2 cycles,
-          ! allowing unabsorbed non-local wave reflections to drive UNL overshoot at t > 0.
-          ! At t = 0 all fields are zero so that effect is absent — consistent with the
-          ! observed t = 0 / t > 0 asymmetry.
+          ! MPI consistency: in PARITH/ON the ghost copy of the parent node on remote
+          ! ranks has the same VNL/MASS as the owner and receives the same FNL via the
+          ! FSKY exchange.  NLOCAL_ACC and NLOCAL_VEL therefore compute identical VNL
+          ! updates on all ranks — no owner-only modification is needed.
+          !
+          ! Physical interpretation: the split takes effect for the NEXT cycle's FORINT
+          ! (via IADC/ADDCNE updates below).  In the CURRENT cycle FNL was assembled from
+          ! the pre-split connectivity and represents a valid force.  Using it unmodified
+          ! lets VNL evolve continuously without an artificial discontinuity.
+          !
+          ! Child node N': inherit a proportional share of VNL/MASS so that the split
+          ! preserves the amplitude of the non-local wave at the crack tip.
           nloc_dmg%vnl    (new_pos:new_pos+nddl-1) = nloc_dmg%vnl    (old_pos:old_pos+nddl-1) * f_detach
           nloc_dmg%vnl_old(new_pos:new_pos+nddl-1) = nloc_dmg%vnl_old(old_pos:old_pos+nddl-1) * f_detach
-          nloc_dmg%vnl    (old_pos:old_pos+nddl-1) = nloc_dmg%vnl    (old_pos:old_pos+nddl-1) * f_retain
-          nloc_dmg%vnl_old(old_pos:old_pos+nddl-1) = nloc_dmg%vnl_old(old_pos:old_pos+nddl-1) * f_retain
 
-          ! Proportional MASS/MASS0 split.
-          !
-          ! Giving both nodes the full original mass (the previous behaviour) made the
-          ! total non-local mass grow by M_orig at every split.  After N consecutive splits
-          ! the effective natural frequency per node dropped as 1/sqrt(N), making the
-          ! non-local field progressively slower at tracking DEFP.
-          !
-          ! A proportional split MASS_child = MASS * f_detach approximately conserves the
-          ! total non-local mass.  MASS_child >= MASS0 * f_detach is automatically
-          ! satisfied (MASS >= MASS0 always: NODADT never reduces mass below the geometric
-          ! mass).  The NODADT added-mass mechanism will top up either node on the next
-          ! cycle if the proportional mass falls below the stability threshold.
-          !
-          ! Note: assign child first (uses pre-scale parent value), then scale parent.
+          ! Child node gets a proportional share of the non-local mass so that the total
+          ! mass is approximately conserved (parent keeps its original mass).
           nloc_dmg%mass (new_pos:new_pos+nddl-1) = nloc_dmg%mass (old_pos:old_pos+nddl-1) * f_detach
           nloc_dmg%mass0(new_pos:new_pos+nddl-1) = nloc_dmg%mass0(old_pos:old_pos+nddl-1) * f_detach
-          nloc_dmg%mass (old_pos:old_pos+nddl-1) = nloc_dmg%mass (old_pos:old_pos+nddl-1) * f_retain
-          nloc_dmg%mass0(old_pos:old_pos+nddl-1) = nloc_dmg%mass0(old_pos:old_pos+nddl-1) * f_retain
 
           ! Extend multithreaded accumulators; use actual allocated column counts
           ! (can be 1 in PARITH/ON, nthread in PARITH/OFF).
@@ -270,44 +322,6 @@
             stifnl_ncol = nthread
           end if
 
-          ! Zero parent's FNL and STIFNL.
-          !
-          ! FNL for the parent node was assembled during the FORINT loop of THIS cycle,
-          ! BEFORE the split occurred.  It reflects contributions from ALL elements
-          ! previously connected to the parent (including the ones now detached to the
-          ! new node).  Retaining this stale FNL causes two compounding problems:
-          !
-          !  1. Mass amplification: after the 50/50 mass split MASS_parent = 0.5*M_orig,
-          !     so NLOCAL_ACC computes ACC = FNL_full / (0.5*M) = 2 × original.
-          !
-          !  2. DT-step amplification: if a tiny time-step (caused by the preceding
-          !     divergence) recovers sharply in the first cycle after the split, the
-          !     large DT multiplies the already-doubled ACC in NLOCAL_VEL, driving VNL
-          !     back to the pre-split magnitude (or beyond) in one step.
-          !
-          ! Zeroing FNL here ensures that NLOCAL_VEL computes VNL_parent += DT12 * 0 = 0
-          ! for this cycle.  NLOCAL_VEL also resets FNL to zero itself, so the next
-          ! FORINT cycle assembles cleanly from the post-split connectivity.
-          if (allocated(nloc_dmg%fnl)) then
-            nloc_dmg%fnl   (old_pos:old_pos+nddl-1, 1:fnl_ncol)    = ZERO
-          end if
-          if (allocated(nloc_dmg%stifnl)) then
-            nloc_dmg%stifnl(old_pos:old_pos+nddl-1, 1:stifnl_ncol) = ZERO
-          end if
-          ! PARITH/ON: also zero the parent's FSKY / STSKY rows.
-          ! nl_idx is still the parent's non-local rank; addcne has not yet been extended
-          ! for the new node (Step 8b does that), so addcne(nl_idx:nl_idx+1) is still valid.
-          if (allocated(nloc_dmg%fsky) .and. allocated(nloc_dmg%addcne)) then
-            j = nloc_dmg%addcne(nl_idx)
-            k = nloc_dmg%addcne(nl_idx + 1) - 1
-            if (k >= j) nloc_dmg%fsky (j:k, :) = ZERO
-          end if
-          if (allocated(nloc_dmg%stsky) .and. allocated(nloc_dmg%addcne)) then
-            j = nloc_dmg%addcne(nl_idx)
-            k = nloc_dmg%addcne(nl_idx + 1) - 1
-            if (k >= j) nloc_dmg%stsky(j:k, :) = ZERO
-          end if
-
           call extend_array(nloc_dmg%fnl,    nloc_dmg%l_nloc, fnl_ncol, new_l_nloc, fnl_ncol)
           call extend_array(nloc_dmg%stifnl, nloc_dmg%l_nloc, stifnl_ncol, new_l_nloc, stifnl_ncol)
           nloc_dmg%fnl   (new_pos:new_pos+nddl-1, 1:fnl_ncol) = ZERO
@@ -320,6 +334,8 @@
 
           ! Step 8 — Skyline update for PARITH/ON
           !          (only when FSKY/ADDCNE/PROCNE are allocated, i.e. PARITH/ON path)
+          ! (l_is_mirror already set above before f_detach correction block)
+
           if (.not. allocated(nloc_dmg%addcne)) return
 
           ! Warn when solid or triangle-shell non-local elements are present: their
@@ -335,36 +351,42 @@
               '    Non-local assembly may be incorrect for those element types.'
           end if
 
-          ! 8b — Extend ADDCNE (CSR row offsets) by one entry
+          ! Steps 8b-8f: skyline update strategy depends on whether parent is
+          ! globally dead (all shells everywhere go to N') or partially alive.
+
+          parent_start = nloc_dmg%addcne(nl_idx)
+          parent_end   = nloc_dmg%addcne(nl_idx + 1) - 1
+          parent_total = parent_end - parent_start + 1
+
+          ! 8b — Extend ADDCNE (CSR row offsets) by one entry for the new node.
           call extend_array(nloc_dmg%addcne, new_nnod, new_nnod + 1)
-          nloc_dmg%addcne(new_nnod + 1) = nloc_dmg%addcne(new_nnod) + n_contrib
+          new_start = nloc_dmg%addcne(new_nnod)   ! old phantom becomes N'_3's first FSKY row
 
-          ! 8c — Extend PROCNE and append MPI rank for each new contribution.
-          !      The detached shells all live on the local domain, so their rank in
-          !      PROCNE is ispmd+1 (PROCNE uses 1-based domain ranks throughout).
-          !      NOTE: CNE is always allocated at size 0 (it is a legacy array whose
-          !      role is now fully covered by FSKY/STSKY); it is intentionally not
-          !      extended here.
-          old_lcne = nloc_dmg%lcne_nl
-          if (n_contrib > 0) then
-            call extend_array(nloc_dmg%procne, old_lcne, old_lcne + n_contrib)
-            k = old_lcne + 1
-            do i = 1, list_size
-              shell_id = shell_list(i)
-              do j = 1, 4
-                if (elements%shell%nodes(j, shell_id) == new_local_id) then
-                  nloc_dmg%procne(k) = ispmd + 1  ! 1-based local domain rank
-                  k = k + 1
-                end if
-              end do
+          if (l_is_mirror) then
+
+            ! Ghost node: give N'_ghost n_owner_contrib_local REMOTE entries (PROCNE=owner_proc).
+            ! If n_owner_contrib_local == parent_n_remote (owner used INHERIT_CLEAR,
+            ! n_remain_owner==0), ghost parent's remote entries are also cleared so there
+            ! is no dangling IRECSP in SPMD_SUB_BOUNDARIES.
+            ! Ghost parent's local entries are compacted in-place because ordering is
+            ! arbitrary (local and remote entries may be interleaved).
+            n_owner_contrib_local = 0
+            if (present(n_owner_contrib)) n_owner_contrib_local = n_owner_contrib
+
+            ! Full scan: compute owner_proc and n_remote in a single pass (no early exit).
+            owner_proc = 0
+            n_remote = 0
+            do cc = parent_start, parent_end
+              if (nloc_dmg%procne(cc) /= ispmd + 1) then
+                if (owner_proc == 0) owner_proc = nloc_dmg%procne(cc)
+                n_remote = n_remote + 1
+              end if
             end do
-            nloc_dmg%lcne_nl = old_lcne + n_contrib
-          end if
 
-          ! 8d — Extend FSKY and STSKY, zeroing new rows
-          old_fsky_rows = nloc_dmg%addcne(new_nnod)     ! row count before new node's block
-          new_fsky_rows = nloc_dmg%addcne(new_nnod + 1)
-          if (n_contrib > 0) then
+            ! If ghost parent has no remote entries, no OTG exchange exists; force 0.
+            if (owner_proc == 0) n_owner_contrib_local = 0
+
+            ! Determine fsky/stsky column counts (needed for compaction and N' extension).
             if (allocated(nloc_dmg%fsky)) then
               fsky_ncol = size(nloc_dmg%fsky, 2)
             else
@@ -376,37 +398,266 @@
               stsky_ncol = nloc_dmg%nddmax
             end if
 
-            call extend_array(nloc_dmg%fsky,  old_fsky_rows, fsky_ncol, &
-              new_fsky_rows, fsky_ncol)
-            call extend_array(nloc_dmg%stsky, old_fsky_rows, stsky_ncol, &
-              new_fsky_rows, stsky_ncol)
-            ! Zero the new node's rows: old_fsky_rows is ADDCNE(new_nnod) = the old phantom
-            ! row that becomes the new node's FIRST CC row.  Rows old_fsky_rows+1..new_fsky_rows-1
-            ! are freshly allocated by extend_array (uninitialised).  new_fsky_rows itself is
-            ! the new phantom row and is never referenced by ASSPAR_SUB, so it need not be zeroed.
-            nloc_dmg%fsky (old_fsky_rows:new_fsky_rows-1, 1:fsky_ncol) = ZERO
-            nloc_dmg%stsky(old_fsky_rows:new_fsky_rows-1, 1:stsky_ncol) = ZERO
-          end if
+            ! When all owner shells moved to N' (n_owner_contrib_local == n_remote > 0),
+            ! the owner cleared its parent's ADDCNE (INHERIT_CLEAR).  Mirror that on the
+            ! ghost side: compact ghost parent's ADDCNE to contain only LOCAL entries.
+            ! Entries may be in arbitrary order; compact in-place, update IADC for moves.
+            if (n_owner_contrib_local == n_remote .and. n_remote > 0) then
+              k = parent_start
+              do cc = parent_start, parent_end
+                if (nloc_dmg%procne(cc) == ispmd + 1) then  ! local entry — keep it
+                  if (k /= cc) then
+                    nloc_dmg%procne(k) = nloc_dmg%procne(cc)
+                    nloc_dmg%fsky (k, 1:fsky_ncol)  = nloc_dmg%fsky (cc, 1:fsky_ncol)
+                    nloc_dmg%stsky(k, 1:stsky_ncol) = nloc_dmg%stsky(cc, 1:stsky_ncol)
+                    do i_el = 1, numelc
+                      do j = 1, 4
+                        if (nloc_dmg%iadc(j, i_el) == cc) nloc_dmg%iadc(j, i_el) = k
+                      end do
+                    end do
+                  end if
+                  k = k + 1
+                end if
+                ! Remote entries are dropped: overwritten by subsequent local entries or abandoned.
+              end do
+              nloc_dmg%addcne(nl_idx + 1) = k
+            end if
 
-          ! 8e — Update IADC back-pointers for detached quad shells.
-          !      The ordering must match the order used to fill PROCNE above.
-          !      IADTG (triangle shells) and IADS (solids) are NOT updated because
-          !      node splitting is currently restricted to quad shells only.  If a
-          !      split node is a corner of a non-local triangle shell or solid element,
-          !      those back-pointers will be stale.  Add equivalent loops here when
-          !      support for those element types is added to the node-splitting path.
-          ! Start at old_fsky_rows = ADDCNE(new_nnod): this is the first row in the new
-          ! node's ADDCNE range (the repurposed old phantom row, now first valid CC row).
-          k = old_fsky_rows
-          do i = 1, list_size
-            shell_id = shell_list(i)
-            do j = 1, 4
-              if (elements%shell%nodes(j, shell_id) == new_local_id) then
-                nloc_dmg%iadc(j, shell_id) = k
-                k = k + 1
-              end if
+            ! Extend ADDCNE for N'_ghost with n_owner_contrib_local REMOTE entries.
+            nloc_dmg%addcne(new_nnod + 1) = new_start + n_owner_contrib_local
+
+            old_lcne = nloc_dmg%lcne_nl
+            if (n_owner_contrib_local > 0) then
+              call extend_array(nloc_dmg%procne, old_lcne, old_lcne + n_owner_contrib_local)
+              do k = new_start, new_start + n_owner_contrib_local - 1
+                nloc_dmg%procne(k) = owner_proc
+              end do
+              nloc_dmg%lcne_nl = old_lcne + n_owner_contrib_local
+              old_fsky_rows = nloc_dmg%addcne(new_nnod)
+              new_fsky_rows = nloc_dmg%addcne(new_nnod + 1)
+              call extend_array(nloc_dmg%fsky,  old_fsky_rows, fsky_ncol, &
+                new_fsky_rows, fsky_ncol)
+              call extend_array(nloc_dmg%stsky, old_fsky_rows, stsky_ncol, &
+                new_fsky_rows, stsky_ncol)
+              nloc_dmg%fsky (old_fsky_rows:new_fsky_rows-1, 1:fsky_ncol)  = ZERO
+              nloc_dmg%stsky(old_fsky_rows:new_fsky_rows-1, 1:stsky_ncol) = ZERO
+            end if
+
+            ! Diagnostic.
+            write(6,'(a,i0,a,i0,a,i0,a,i0,a,i0,a,i0,a,i0)') &
+              '[NLOC][rank ', ispmd, '] GHOST_PARTIAL old=', old_local_id, &
+              ' new=', new_local_id, ' parent_total=', parent_total, &
+              ' parent_n_remote=', n_remote, ' N_prime_remote=', n_owner_contrib_local, &
+              ' owner_proc=', owner_proc
+            ! Dump GHOST_PARTIAL parent PROCNE after compaction
+            do cc = parent_start, nloc_dmg%addcne(nl_idx + 1) - 1
+              write(6,'(a,i0,a,i0,a,i0,a,i0)') &
+                '[NLOC_GHOST_PROCNE][rank ', ispmd, '] gparent=', old_local_id, &
+                ' cc=', cc, ' procne=', nloc_dmg%procne(cc)
             end do
-          end do
+            ! Dump ghost N' PROCNE
+            do cc = new_start, nloc_dmg%addcne(new_nnod + 1) - 1
+              write(6,'(a,i0,a,i0,a,i0,a,i0)') &
+                '[NLOC_GNEW_PROCNE][rank ', ispmd, '] gnew=', new_local_id, &
+                ' cc=', cc, ' procne=', nloc_dmg%procne(cc)
+            end do
+            flush(6)
+
+          else
+
+            ! Owner split: compute n_remote (count of PROCNE entries that belong to
+            ! other ranks) now that parent_start/parent_end are correctly set.
+            n_remote = 0
+            do cc = parent_start, parent_end
+              if (nloc_dmg%procne(cc) /= ispmd + 1) n_remote = n_remote + 1
+            end do
+
+            ! INHERIT_CLEAR: n_remain==0 AND n_ghost_contrib==n_remote (all global
+            !   shells go to N'; parent is globally dead).  N'_3 inherits all of
+            !   parent's ADDCNE; parent's ADDCNE is cleared.
+            ! PARTIAL: n_remain>0 OR n_ghost_contrib<n_remote (parent still has
+            !   retained shells on other ranks).  N'_3 gets only n_contrib LOCAL
+            !   entries; parent keeps its ADDCNE intact.  This matches 1-MPI behavior
+            !   where parent retains its full ADDCNE (including stale detached-shell
+            !   rows) so that FNL[parent] is non-zero at the split cycle.
+            if (n_remain == 0 .and. n_ghost_contrib_local == n_remote) then
+
+              ! INHERIT_CLEAR: N'_3 inherits the complete ADDCNE range from parent.
+              nloc_dmg%addcne(new_nnod + 1) = new_start + parent_total
+
+              old_lcne = nloc_dmg%lcne_nl
+              if (parent_total > 0) then
+                call extend_array(nloc_dmg%procne, old_lcne, old_lcne + parent_total)
+                nloc_dmg%procne(new_start:new_start + parent_total - 1) = &
+                  nloc_dmg%procne(parent_start:parent_end)
+                nloc_dmg%lcne_nl = old_lcne + parent_total
+              end if
+
+              old_fsky_rows = nloc_dmg%addcne(new_nnod)
+              new_fsky_rows = nloc_dmg%addcne(new_nnod + 1)
+              if (parent_total > 0) then
+                if (allocated(nloc_dmg%fsky)) then
+                  fsky_ncol = size(nloc_dmg%fsky, 2)
+                else
+                  fsky_ncol = nloc_dmg%nddmax
+                end if
+                if (allocated(nloc_dmg%stsky)) then
+                  stsky_ncol = size(nloc_dmg%stsky, 2)
+                else
+                  stsky_ncol = nloc_dmg%nddmax
+                end if
+                call extend_array(nloc_dmg%fsky,  old_fsky_rows, fsky_ncol, &
+                  new_fsky_rows, fsky_ncol)
+                call extend_array(nloc_dmg%stsky, old_fsky_rows, stsky_ncol, &
+                  new_fsky_rows, stsky_ncol)
+                nloc_dmg%fsky (old_fsky_rows:new_fsky_rows-1, 1:fsky_ncol)  = ZERO
+                nloc_dmg%stsky(old_fsky_rows:new_fsky_rows-1, 1:stsky_ncol) = ZERO
+              end if
+
+              ! Redirect ALL IADC in [parent_start, parent_end] to N'_3's range.
+              ! Offset is preserved: cc → new_start + (cc - parent_start).
+              do i_el = 1, numelc
+                do j = 1, 4
+                  cc = nloc_dmg%iadc(j, i_el)
+                  if (cc >= parent_start .and. cc <= parent_end) then
+                    nloc_dmg%iadc(j, i_el) = new_start + (cc - parent_start)
+                  end if
+                end do
+              end do
+
+              ! Clear parent's ADDCNE: set end = start → 0 entries.
+              ! Parent stays alive (IDXI unchanged) for other options (trusses, etc.).
+              nloc_dmg%addcne(nl_idx + 1) = nloc_dmg%addcne(nl_idx)
+
+              ! Diagnostic. n_remote already computed above.
+              write(6,'(a,i0,a,i0,a,i0,a,i0,a,i0,a,i0)') &
+                '[NLOC][rank ', ispmd, '] INHERIT_CLEAR old=', old_local_id, &
+                ' new=', new_local_id, ' parent_total=', parent_total, &
+                ' n_contrib=', n_contrib, ' parent_n_remote=', n_remote
+              ! Dump all PROCNE values for parent's ADDCNE range
+              do cc = parent_start, parent_end
+                write(6,'(a,i0,a,i0,a,i0,a,i0,a,i0)') &
+                  '[NLOC_PROCNE][rank ', ispmd, '] parent=', old_local_id, &
+                  ' cc=', cc, ' procne=', nloc_dmg%procne(cc), &
+                  ' iadc_used=', 0
+              end do
+              ! Dump N' PROCNE values
+              do cc = new_start, new_start + parent_total - 1
+                write(6,'(a,i0,a,i0,a,i0,a,i0)') &
+                  '[NLOC_PROCNE_NEW][rank ', ispmd, '] new=', new_local_id, &
+                  ' cc=', cc, ' procne=', nloc_dmg%procne(cc)
+              end do
+              flush(6)
+
+            else
+
+              ! PARTIAL: n_remain > 0 — N'_3 gets only n_contrib LOCAL entries.
+              ! Parent always keeps its ADDCNE intact and is never deactivated,
+              ! so it can continue serving other options (trusses, springs, etc.).
+              nloc_dmg%addcne(new_nnod + 1) = new_start + n_contrib
+
+              ! 8c — Extend PROCNE and append local-domain rank for each new contribution.
+              !      All detached shells live on this domain, so PROCNE = ispmd+1.
+              !      CNE is always size 0 (legacy) and is intentionally not extended here.
+              old_lcne = nloc_dmg%lcne_nl
+              if (n_contrib > 0) then
+                call extend_array(nloc_dmg%procne, old_lcne, old_lcne + n_contrib)
+                k = new_start
+                do i = 1, list_size
+                  shell_id = shell_list(i)
+                  do j = 1, 4
+                    if (elements%shell%nodes(j, shell_id) == new_local_id) then
+                      nloc_dmg%procne(k) = ispmd + 1  ! 1-based local domain rank
+                      k = k + 1
+                    end if
+                  end do
+                end do
+                nloc_dmg%lcne_nl = old_lcne + n_contrib
+              end if
+
+              ! 8d — Extend FSKY and STSKY, zeroing new rows.
+              old_fsky_rows = nloc_dmg%addcne(new_nnod)     ! old phantom = N'_3's first row
+              new_fsky_rows = nloc_dmg%addcne(new_nnod + 1) ! = old_fsky_rows + n_contrib
+              if (n_contrib > 0) then
+                if (allocated(nloc_dmg%fsky)) then
+                  fsky_ncol = size(nloc_dmg%fsky, 2)
+                else
+                  fsky_ncol = nloc_dmg%nddmax
+                end if
+                if (allocated(nloc_dmg%stsky)) then
+                  stsky_ncol = size(nloc_dmg%stsky, 2)
+                else
+                  stsky_ncol = nloc_dmg%nddmax
+                end if
+                call extend_array(nloc_dmg%fsky,  old_fsky_rows, fsky_ncol, &
+                  new_fsky_rows, fsky_ncol)
+                call extend_array(nloc_dmg%stsky, old_fsky_rows, stsky_ncol, &
+                  new_fsky_rows, stsky_ncol)
+                nloc_dmg%fsky (old_fsky_rows:new_fsky_rows-1, 1:fsky_ncol)  = ZERO
+                nloc_dmg%stsky(old_fsky_rows:new_fsky_rows-1, 1:stsky_ncol) = ZERO
+              end if
+
+              ! 8e — Update IADC for detached shells only (ordering matches PROCNE loop).
+              !      IADTG / IADS not updated: node splitting is restricted to quad shells.
+              !      If a split node is a corner of a non-local triangle shell or solid,
+              !      add equivalent loops here for IADTG (3 corners) and IADS (8 corners).
+              k = old_fsky_rows
+              do i = 1, list_size
+                shell_id = shell_list(i)
+                do j = 1, 4
+                  if (elements%shell%nodes(j, shell_id) == new_local_id) then
+                    nloc_dmg%iadc(j, shell_id) = k
+                    k = k + 1
+                  end if
+                end do
+              end do
+
+              ! 8g — Diagnostic: partial split stats plus parent's full ADDCNE breakdown.
+              !      'parent_total' shows how many FSKY rows existed for parent BEFORE
+              !      the split (local+remote), of which n_contrib go to N' and n_remain
+              !      stay with parent.  The remote-entry counts reveal what this rank
+              !      will SEND to the owner rank, so we can compare with the owner's
+              !      INHERIT_CC 'from_rank' count for this rank.
+              n_remote = 0
+              do cc = parent_start, parent_end
+                if (nloc_dmg%procne(cc) /= ispmd + 1) n_remote = n_remote + 1
+              end do
+              write(6,'(a,i0,a,i0,a,i0,a,i0,a,i0,a,i0,a,i0)') &
+                '[NLOC][rank ', ispmd, '] PARTIAL old=', old_local_id, &
+                ' new=', new_local_id, ' parent_total=', parent_total, &
+                ' n_contrib=', n_contrib, ' n_remain=', n_remain, &
+                ' parent_n_remote=', n_remote
+              do cc = parent_start, parent_end
+                if (nloc_dmg%procne(cc) /= ispmd + 1) then
+                  write(6,'(a,i0,a,i0,a,i0)') &
+                    '[NLOC][rank ', ispmd, '] PARTIAL_CC from_rank=', &
+                    nloc_dmg%procne(cc)-1, ' CC=', cc
+                end if
+              end do
+              ! Balance diagnostic: TOTAL_SEND = parent_local + n_contrib.
+              ! parent_local  = local entries kept by parent (= parent_total - n_remote)
+              ! n_contrib      = new local entries for N'.
+              ! On the owner rank, INHERIT prints TOTAL_RECV = n_remote.
+              ! TOTAL_SEND (here) must equal TOTAL_RECV (on owner) for this rank pair.
+              write(6,'(a,i0,a,i0,a,i0,a,i0,a,i0)') &
+                '[NLOC_BAL][rank ', ispmd, '] PARTIAL old=', old_local_id, &
+                ' new=', new_local_id, ' parent_local=', parent_total - n_remote, &
+                ' n_contrib=', n_contrib, ' TOTAL_SEND=', parent_total - n_remote + n_contrib
+              ! Owner-to-ghost (OTG) direction check.
+              ! Owner N' has n_contrib LOCAL entries (PROCNE=ispmd+1).
+              ! SPMD_SUB_BOUNDARIES will create ISENDSP entries: owner N' SENDS n_contrib
+              ! values to the ghost rank for ghost N'_ghost.
+              ! Ghost N'_ghost (GHOST_EMPTY) has 0 remote entries → RECVS 0 from owner.
+              ! Those sends land in ghost PARENT's remote slots (misrouted when n_remain_owner>0).
+              ! MISMATCH = n_contrib (owner N' OTG sends that ghost N'_ghost cannot receive).
+              write(6,'(a,i0,a,i0,a,i0,a,i0)') &
+                '[NLOC_OTG][rank ', ispmd, '] PARTIAL old=', old_local_id, &
+                ' new=', new_local_id, ' N_PRIME_OTG_SEND=', n_contrib
+              flush(6)
+
+            end if  ! n_remain == 0
+
+          end if  ! l_is_mirror
 
         end subroutine detach_node_nloc
 

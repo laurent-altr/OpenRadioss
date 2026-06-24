@@ -195,8 +195,10 @@
             do k = ghost_displs(j) + 1, ghost_displs(j + 1)    ! rank J-1's ghost list
               gid  = all_ghost(k)
               lidx = g2l(gid)
-              if (lidx > 0 .and. main_proc(lidx) == ispmd) &   ! I own this node
-                send_cnt(j) = send_cnt(j) + 1
+              if (lidx > 0) then                                ! guard: gid must be local
+                if (main_proc(lidx) == ispmd) &                 ! I own this node
+                  send_cnt(j) = send_cnt(j) + 1
+              end if
             end do
           end do
 
@@ -214,9 +216,11 @@
             do k = ghost_displs(j) + 1, ghost_displs(j + 1)
               gid  = all_ghost(k)
               lidx = g2l(gid)
-              if (lidx > 0 .and. main_proc(lidx) == ispmd) then
-                pos = pos + 1
-                send_buf(pos) = gid
+              if (lidx > 0) then                                ! guard: gid must be local
+                if (main_proc(lidx) == ispmd) then              ! I own this node
+                  pos = pos + 1
+                  send_buf(pos) = gid
+                end if
               end if
             end do
           end do
