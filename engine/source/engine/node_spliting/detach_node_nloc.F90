@@ -452,6 +452,21 @@
               ' parent_n_remote=', n_remote, ' N_prime_remote=', n_owner_contrib_local, &
               ' owner_proc=', owner_proc
             flush(6)
+            ! Dump ADDCNE + PROCNE for parent and N' on this ghost rank.
+            write(6,'(a,i0,a,i0,a,i0,a,i0,a,i0)') &
+              '[NLOC_ROWS][rank ', ispmd, '] GHOST parent nl_idx=', nl_idx, &
+              ' rows=', nloc_dmg%addcne(nl_idx+1)-nloc_dmg%addcne(nl_idx), &
+              ' N_prime new_nnod=', new_nnod, &
+              ' rows=', nloc_dmg%addcne(new_nnod+1)-nloc_dmg%addcne(new_nnod)
+            block
+              integer :: cc_
+              do cc_ = nloc_dmg%addcne(new_nnod)+1, nloc_dmg%addcne(new_nnod+1)
+                write(6,'(a,i0,a,i0,a,i0)') &
+                  '[NLOC_PROCNE][rank ', ispmd, '] N_prime row ', cc_, &
+                  ' proc=', nloc_dmg%procne(cc_)
+              end do
+            end block
+            flush(6)
 
             ! 8e_ghost — Add LOCAL entries to ghost N' for ghost rank's own shells
             !            going to N', and update IADC so those shells fill ghost N's FSKY.
@@ -475,7 +490,7 @@
 
                 old_lcne = nloc_dmg%lcne_nl
                 call extend_array(nloc_dmg%procne, old_lcne, old_lcne + n_ghost_local_contrib)
-                k = old_lcne
+                k = old_lcne + 1
                 do i = 1, list_size
                   shell_id = shell_list(i)
                   do j = 1, 4
@@ -487,8 +502,8 @@
                 end do
                 nloc_dmg%lcne_nl = old_lcne + n_ghost_local_contrib
 
-                old_fsky_rows = old_lcne
-                new_fsky_rows = nloc_dmg%lcne_nl
+                old_fsky_rows = old_lcne + 1
+                new_fsky_rows = nloc_dmg%lcne_nl + 1
                 call extend_array(nloc_dmg%fsky,  old_fsky_rows, fsky_ncol, &
                   new_fsky_rows, fsky_ncol)
                 call extend_array(nloc_dmg%stsky, old_fsky_rows, stsky_ncol, &
@@ -631,6 +646,16 @@
                 else
                   stsky_ncol = nloc_dmg%nddmax
                 end if
+                ! Defensive: verify old_fsky_rows matches actual allocation
+                if (allocated(nloc_dmg%fsky) .and. &
+                  old_fsky_rows /= size(nloc_dmg%fsky, 1)) then
+                  write(6,'(a,i0,a,i0,a,i0,a,i0,a,i0)') &
+                    '[NLOC_BUG] rank=', ispmd, &
+                    ' 8d fsky mismatch: old_fsky_rows=', old_fsky_rows, &
+                    ' size(fsky,1)=', size(nloc_dmg%fsky, 1), &
+                    ' new_nnod=', new_nnod, ' lcne_nl=', nloc_dmg%lcne_nl
+                  flush(6)
+                end if
                 call extend_array(nloc_dmg%fsky,  old_fsky_rows, fsky_ncol, &
                   new_fsky_rows, fsky_ncol)
                 call extend_array(nloc_dmg%stsky, old_fsky_rows, stsky_ncol, &
@@ -670,15 +695,15 @@
                   old_lcne = nloc_dmg%lcne_nl
                   call extend_array(nloc_dmg%procne, old_lcne, &
                     old_lcne + n_ghost_contrib_local)
-                  do k = old_lcne, old_lcne + n_ghost_contrib_local - 1
+                  do k = old_lcne + 1, old_lcne + n_ghost_contrib_local
                     nloc_dmg%procne(k) = ghost_proc
                   end do
                   nloc_dmg%lcne_nl = old_lcne + n_ghost_contrib_local
                   nloc_dmg%addcne(new_nnod + 1) = &
                     nloc_dmg%addcne(new_nnod + 1) + n_ghost_contrib_local
 
-                  old_fsky_rows = old_lcne
-                  new_fsky_rows = nloc_dmg%lcne_nl
+                  old_fsky_rows = old_lcne + 1
+                  new_fsky_rows = nloc_dmg%lcne_nl + 1
                   call extend_array(nloc_dmg%fsky,  old_fsky_rows, fsky_ncol, &
                     new_fsky_rows, fsky_ncol)
                   call extend_array(nloc_dmg%stsky, old_fsky_rows, stsky_ncol, &
@@ -698,6 +723,26 @@
                 ' new=', new_local_id, ' parent_total=', parent_total, &
                 ' n_contrib=', n_contrib, ' n_remain=', n_remain, &
                 ' parent_n_remote=', n_remote
+              flush(6)
+              ! Dump ADDCNE + PROCNE for parent and N' on this owner rank.
+              write(6,'(a,i0,a,i0,a,i0,a,i0,a,i0)') &
+                '[NLOC_ROWS][rank ', ispmd, '] OWNER parent nl_idx=', nl_idx, &
+                ' rows=', nloc_dmg%addcne(nl_idx+1)-nloc_dmg%addcne(nl_idx), &
+                ' N_prime new_nnod=', new_nnod, &
+                ' rows=', nloc_dmg%addcne(new_nnod+1)-nloc_dmg%addcne(new_nnod)
+              block
+                integer :: cc_
+                do cc_ = nloc_dmg%addcne(new_nnod)+1, nloc_dmg%addcne(new_nnod+1)
+                  write(6,'(a,i0,a,i0,a,i0)') &
+                    '[NLOC_PROCNE][rank ', ispmd, '] N_prime row ', cc_, &
+                    ' proc=', nloc_dmg%procne(cc_)
+                end do
+                do cc_ = nloc_dmg%addcne(nl_idx)+1, nloc_dmg%addcne(nl_idx+1)
+                  write(6,'(a,i0,a,i0,a,i0)') &
+                    '[NLOC_PROCNE][rank ', ispmd, '] parent row ', cc_, &
+                    ' proc=', nloc_dmg%procne(cc_)
+                end do
+              end block
               flush(6)
 
             end if  ! n_remain == 0
