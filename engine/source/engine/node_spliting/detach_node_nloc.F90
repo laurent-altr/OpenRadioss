@@ -108,6 +108,8 @@
           integer :: n_total         ! total corner count before split (n_remain + n_contrib)
           integer :: numelc          ! total number of shell elements
           integer :: n_remote        ! remote PROCNE entries (PROCNE ≠ ispmd+1) counted for diagnostic
+          integer :: ghost_proc              ! first remote PROCNE rank in PARTIAL path (= ghost_rank + 1)
+          integer :: n_ghost_local_contrib   ! ghost path: corners of ghost-rank shells going to N'
           integer :: cc              ! loop counter over ADDCNE/IADC entries
           integer :: parent_start    ! first FSKY row of parent node's ADDCNE range
           integer :: parent_end      ! last  FSKY row of parent node's ADDCNE range
@@ -449,19 +451,72 @@
               ' new=', new_local_id, ' parent_total=', parent_total, &
               ' parent_n_remote=', n_remote, ' N_prime_remote=', n_owner_contrib_local, &
               ' owner_proc=', owner_proc
-            ! Dump GHOST_PARTIAL parent PROCNE after compaction
-            do cc = parent_start, nloc_dmg%addcne(nl_idx + 1) - 1
-              write(6,'(a,i0,a,i0,a,i0,a,i0)') &
-                '[NLOC_GHOST_PROCNE][rank ', ispmd, '] gparent=', old_local_id, &
-                ' cc=', cc, ' procne=', nloc_dmg%procne(cc)
-            end do
-            ! Dump ghost N' PROCNE
-            do cc = new_start, nloc_dmg%addcne(new_nnod + 1) - 1
-              write(6,'(a,i0,a,i0,a,i0,a,i0)') &
-                '[NLOC_GNEW_PROCNE][rank ', ispmd, '] gnew=', new_local_id, &
-                ' cc=', cc, ' procne=', nloc_dmg%procne(cc)
-            end do
             flush(6)
+
+            ! 8e_ghost — Add LOCAL entries to ghost N' for ghost rank's own shells
+            !            going to N', and update IADC so those shells fill ghost N's FSKY.
+            !            Without this, ghost rank's local shells' contributions to N' are
+            !            never routed: IADC still points at ghost_parent's rows (which may
+            !            be dead), and owner N' has no REMOTE receive slot for them.
+            if (list_size > 0) then
+              n_ghost_local_contrib = 0
+              do i = 1, list_size
+                shell_id = shell_list(i)
+                do j = 1, 4
+                  if (elements%shell%nodes(j, shell_id) == new_local_id) then
+                    n_ghost_local_contrib = n_ghost_local_contrib + 1
+                  end if
+                end do
+              end do
+
+              if (n_ghost_local_contrib > 0) then
+                nloc_dmg%addcne(new_nnod + 1) = &
+                  nloc_dmg%addcne(new_nnod + 1) + n_ghost_local_contrib
+
+                old_lcne = nloc_dmg%lcne_nl
+                call extend_array(nloc_dmg%procne, old_lcne, old_lcne + n_ghost_local_contrib)
+                k = old_lcne
+                do i = 1, list_size
+                  shell_id = shell_list(i)
+                  do j = 1, 4
+                    if (elements%shell%nodes(j, shell_id) == new_local_id) then
+                      nloc_dmg%procne(k) = ispmd + 1  ! local rank (1-based)
+                      k = k + 1
+                    end if
+                  end do
+                end do
+                nloc_dmg%lcne_nl = old_lcne + n_ghost_local_contrib
+
+                old_fsky_rows = old_lcne
+                new_fsky_rows = nloc_dmg%lcne_nl
+                call extend_array(nloc_dmg%fsky,  old_fsky_rows, fsky_ncol, &
+                  new_fsky_rows, fsky_ncol)
+                call extend_array(nloc_dmg%stsky, old_fsky_rows, stsky_ncol, &
+                  new_fsky_rows, stsky_ncol)
+                nloc_dmg%fsky (old_fsky_rows:new_fsky_rows-1, 1:fsky_ncol)  = ZERO
+                nloc_dmg%stsky(old_fsky_rows:new_fsky_rows-1, 1:stsky_ncol) = ZERO
+
+                ! Update IADC: ghost shells going to N' now point to ghost N's LOCAL rows.
+                k = old_fsky_rows  ! first LOCAL row in ghost N' = new_start + n_owner_contrib_local
+                do i = 1, list_size
+                  shell_id = shell_list(i)
+                  do j = 1, 4
+                    if (elements%shell%nodes(j, shell_id) == new_local_id) then
+                      nloc_dmg%iadc(j, shell_id) = k
+                      k = k + 1
+                    end if
+                  end do
+                end do
+
+                ! INHERIT_CLEAR: owner cleared parent's ADDCNE; ghost must mirror it.
+                ! Ghost parent's compacted LOCAL entries are now routed to ghost N'
+                ! via the IADC redirect above; clear ghost parent's ADDCNE so that
+                ! SPMD_SUB_BOUNDARIES sees 0 entries (matching owner's cleared parent).
+                if (n_owner_contrib_local == n_remote .and. n_remote > 0) then
+                  nloc_dmg%addcne(nl_idx + 1) = nloc_dmg%addcne(nl_idx)
+                end if
+              end if
+            end if
 
           else
 
@@ -529,24 +584,11 @@
               ! Parent stays alive (IDXI unchanged) for other options (trusses, etc.).
               nloc_dmg%addcne(nl_idx + 1) = nloc_dmg%addcne(nl_idx)
 
-              ! Diagnostic. n_remote already computed above.
+              ! Diagnostic.
               write(6,'(a,i0,a,i0,a,i0,a,i0,a,i0,a,i0)') &
                 '[NLOC][rank ', ispmd, '] INHERIT_CLEAR old=', old_local_id, &
                 ' new=', new_local_id, ' parent_total=', parent_total, &
                 ' n_contrib=', n_contrib, ' parent_n_remote=', n_remote
-              ! Dump all PROCNE values for parent's ADDCNE range
-              do cc = parent_start, parent_end
-                write(6,'(a,i0,a,i0,a,i0,a,i0,a,i0)') &
-                  '[NLOC_PROCNE][rank ', ispmd, '] parent=', old_local_id, &
-                  ' cc=', cc, ' procne=', nloc_dmg%procne(cc), &
-                  ' iadc_used=', 0
-              end do
-              ! Dump N' PROCNE values
-              do cc = new_start, new_start + parent_total - 1
-                write(6,'(a,i0,a,i0,a,i0,a,i0)') &
-                  '[NLOC_PROCNE_NEW][rank ', ispmd, '] new=', new_local_id, &
-                  ' cc=', cc, ' procne=', nloc_dmg%procne(cc)
-              end do
               flush(6)
 
             else
@@ -612,12 +654,41 @@
                 end do
               end do
 
-              ! 8g — Diagnostic: partial split stats plus parent's full ADDCNE breakdown.
-              !      'parent_total' shows how many FSKY rows existed for parent BEFORE
-              !      the split (local+remote), of which n_contrib go to N' and n_remain
-              !      stay with parent.  The remote-entry counts reveal what this rank
-              !      will SEND to the owner rank, so we can compare with the owner's
-              !      INHERIT_CC 'from_rank' count for this rank.
+              ! 8f — PARTIAL + ghost shells going to N': add REMOTE entries to N' so that
+              !      SPMD_EXCH can receive the ghost rank's FSKY contribution for N'.
+              !      N' entries: n_contrib LOCAL (owner's shells) + n_ghost_contrib REMOTE (ghost's shells).
+              if (n_ghost_contrib_local > 0) then
+                ghost_proc = 0
+                do cc = parent_start, parent_end
+                  if (nloc_dmg%procne(cc) /= ispmd + 1) then
+                    ghost_proc = nloc_dmg%procne(cc)
+                    exit
+                  end if
+                end do
+
+                if (ghost_proc > 0) then
+                  old_lcne = nloc_dmg%lcne_nl
+                  call extend_array(nloc_dmg%procne, old_lcne, &
+                    old_lcne + n_ghost_contrib_local)
+                  do k = old_lcne, old_lcne + n_ghost_contrib_local - 1
+                    nloc_dmg%procne(k) = ghost_proc
+                  end do
+                  nloc_dmg%lcne_nl = old_lcne + n_ghost_contrib_local
+                  nloc_dmg%addcne(new_nnod + 1) = &
+                    nloc_dmg%addcne(new_nnod + 1) + n_ghost_contrib_local
+
+                  old_fsky_rows = old_lcne
+                  new_fsky_rows = nloc_dmg%lcne_nl
+                  call extend_array(nloc_dmg%fsky,  old_fsky_rows, fsky_ncol, &
+                    new_fsky_rows, fsky_ncol)
+                  call extend_array(nloc_dmg%stsky, old_fsky_rows, stsky_ncol, &
+                    new_fsky_rows, stsky_ncol)
+                  nloc_dmg%fsky (old_fsky_rows:new_fsky_rows-1, 1:fsky_ncol)  = ZERO
+                  nloc_dmg%stsky(old_fsky_rows:new_fsky_rows-1, 1:stsky_ncol) = ZERO
+                end if
+              end if
+
+              ! 8g — Diagnostic: partial split stats.
               n_remote = 0
               do cc = parent_start, parent_end
                 if (nloc_dmg%procne(cc) /= ispmd + 1) n_remote = n_remote + 1
@@ -627,32 +698,6 @@
                 ' new=', new_local_id, ' parent_total=', parent_total, &
                 ' n_contrib=', n_contrib, ' n_remain=', n_remain, &
                 ' parent_n_remote=', n_remote
-              do cc = parent_start, parent_end
-                if (nloc_dmg%procne(cc) /= ispmd + 1) then
-                  write(6,'(a,i0,a,i0,a,i0)') &
-                    '[NLOC][rank ', ispmd, '] PARTIAL_CC from_rank=', &
-                    nloc_dmg%procne(cc)-1, ' CC=', cc
-                end if
-              end do
-              ! Balance diagnostic: TOTAL_SEND = parent_local + n_contrib.
-              ! parent_local  = local entries kept by parent (= parent_total - n_remote)
-              ! n_contrib      = new local entries for N'.
-              ! On the owner rank, INHERIT prints TOTAL_RECV = n_remote.
-              ! TOTAL_SEND (here) must equal TOTAL_RECV (on owner) for this rank pair.
-              write(6,'(a,i0,a,i0,a,i0,a,i0,a,i0)') &
-                '[NLOC_BAL][rank ', ispmd, '] PARTIAL old=', old_local_id, &
-                ' new=', new_local_id, ' parent_local=', parent_total - n_remote, &
-                ' n_contrib=', n_contrib, ' TOTAL_SEND=', parent_total - n_remote + n_contrib
-              ! Owner-to-ghost (OTG) direction check.
-              ! Owner N' has n_contrib LOCAL entries (PROCNE=ispmd+1).
-              ! SPMD_SUB_BOUNDARIES will create ISENDSP entries: owner N' SENDS n_contrib
-              ! values to the ghost rank for ghost N'_ghost.
-              ! Ghost N'_ghost (GHOST_EMPTY) has 0 remote entries → RECVS 0 from owner.
-              ! Those sends land in ghost PARENT's remote slots (misrouted when n_remain_owner>0).
-              ! MISMATCH = n_contrib (owner N' OTG sends that ghost N'_ghost cannot receive).
-              write(6,'(a,i0,a,i0,a,i0,a,i0)') &
-                '[NLOC_OTG][rank ', ispmd, '] PARTIAL old=', old_local_id, &
-                ' new=', new_local_id, ' N_PRIME_OTG_SEND=', n_contrib
               flush(6)
 
             end if  ! n_remain == 0
