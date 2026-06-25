@@ -678,7 +678,8 @@
 !||    nodal_arrays_mod          ../common_source/modules/nodal_arrays.F90
 !||    update_pon_mod            ../engine/source/engine/node_spliting/update_pon.F90
 !||====================================================================
-        subroutine detach_node_from_shells(nodes, node_id ,elements,shell_list,list_size)
+        subroutine detach_node_from_shells(nodes, node_id, elements, shell_list, list_size, &
+            ispmd, n_recv, recv_procne)
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Modules
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -695,6 +696,9 @@
           integer, intent(in) :: node_id                 !< id of the node to detach
           integer, intent(in) :: list_size               !< size of the shell list
           integer, intent(in) :: shell_list(list_size)   !< list of local ids of shells to detach from the node
+          integer, intent(in) :: ispmd                   !< 0-based local MPI rank
+          integer, intent(in) :: n_recv                  !< number of RECV rows for N' (0 on ghost ranks)
+          integer, intent(in) :: recv_procne(n_recv)     !< PROCNE value for each RECV row
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Local variables
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -716,7 +720,8 @@
           end do
 
           if(nodes%iparith > 0) then! /PARITH/ON
-            call update_pon_shells(elements,list_size,shell_list,new_local_id)
+            call update_pon_shells(elements, list_size, shell_list, new_local_id, &
+                ispmd, n_recv, recv_procne)
           end if
 
 
@@ -771,6 +776,7 @@
 ! ----------------------------------------------------------------------------------------------------------------------
           integer :: numnod
           integer :: new_local_id
+          integer :: empty_pon_recv(0)
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Body
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -790,7 +796,8 @@
           ! Mirror nodes are ghost copies; mark as not owned so output routines skip them
           nodes%WEIGHT(new_local_id) = 0
 
-          call detach_node_from_shells(nodes, node_id, elements, shell_list, list_size)
+          call detach_node_from_shells(nodes, node_id, elements, shell_list, list_size, &
+              ispmd, 0, empty_pon_recv)
 
           if (nloc_dmg%imod > 0) then
             call detach_node_nloc(nloc_dmg, node_id, new_local_id, &
@@ -863,6 +870,9 @@
           integer :: old_uid
           integer :: new_local_id
           integer :: numnod
+          integer :: n_pon_recv, r_idx, j_pon
+          integer, allocatable :: pon_recv_procne(:)
+          integer :: empty_pon_recv(0)
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Body
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -887,7 +897,23 @@
           i = node_id
           call set_new_node_values(nodes, i)
 
-          call detach_node_from_shells(nodes, node_id, elements, shell_list, list_size)
+          if (present(ghost_contrib_per_rank)) then
+            n_pon_recv = sum(ghost_contrib_per_rank)
+            allocate(pon_recv_procne(n_pon_recv))
+            j_pon = 0
+            do r_idx = 0, nspmd-1
+              do i = 1, ghost_contrib_per_rank(r_idx)
+                j_pon = j_pon + 1
+                pon_recv_procne(j_pon) = r_idx + 1
+              end do
+            end do
+            call detach_node_from_shells(nodes, node_id, elements, shell_list, list_size, &
+                ispmd, n_pon_recv, pon_recv_procne)
+            deallocate(pon_recv_procne)
+          else
+            call detach_node_from_shells(nodes, node_id, elements, shell_list, list_size, &
+                ispmd, 0, empty_pon_recv)
+          end if
 
           ! Update non-local damage structure for the new node
           if (nloc_dmg%imod > 0) then

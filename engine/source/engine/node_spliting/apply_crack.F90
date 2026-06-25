@@ -129,6 +129,7 @@
           integer :: current_parent, current_owning_rank
           integer :: displ_arr(nspmd)
           integer :: empty_shells(0)
+          integer :: empty_recv(0)
           integer, allocatable :: local_shells(:)
           integer, allocatable :: detached_nodes_local(:)
           integer, allocatable :: owning_ranks_local(:)
@@ -241,7 +242,7 @@
                 ! subsequent update_pon_shells calls do not read adsky out of bounds.
                 ! The ghost placeholder has 0 shells, so we pass an empty list.
                 if (nodes%iparith > 0) then
-                  call update_pon_shells(element, 0, empty_shells, numnod)
+                  call update_pon_shells(element, 0, empty_shells, numnod, ispmd, 0, empty_recv)
                 end if
                 ! Extend nloc_dmg%idxi to cover the ghost placeholder so that
                 ! subsequent detach_node calls find size(idxi) == nodes%numnod.
