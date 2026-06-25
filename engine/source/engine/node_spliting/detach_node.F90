@@ -743,7 +743,7 @@
 !!          owning_rank instead of copying from the parent. The UID is assigned later in the
 !!          global uid-sync phase of apply_crack.
         subroutine mirror_node_split(nodes, node_id, elements, shell_list, list_size, &
-          nloc_dmg, nthread, ispmd, owning_rank, n_owner_contrib)
+          nloc_dmg, nthread, ispmd, nspmd, owning_rank, n_owner_contrib)
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Modules
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -763,6 +763,7 @@
           type(nlocal_str_),   intent(inout) :: nloc_dmg     !< non-local damage structure
           integer,             intent(in)    :: nthread      !< number of OpenMP threads
           integer,             intent(in)    :: ispmd        !< local MPI rank (0-based)
+          integer,             intent(in)    :: nspmd        !< number of MPI ranks
           integer,             intent(in)    :: owning_rank  !< rank that owns the new node (0-based)
           integer,             intent(in)    :: n_owner_contrib !< number of owner N' local corners (= N'_ghost remote slots needed)
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -793,8 +794,8 @@
 
           if (nloc_dmg%imod > 0) then
             call detach_node_nloc(nloc_dmg, node_id, new_local_id, &
-              elements, shell_list, list_size, numnod, nthread, ispmd, is_mirror=.true., &
-              n_owner_contrib=n_owner_contrib, node_uid=nodes%itab(node_id))
+              elements, shell_list, list_size, numnod, nthread, ispmd, nspmd, &
+              is_mirror=.true., n_owner_contrib=n_owner_contrib, node_uid=nodes%itab(node_id))
           end if
 
           nodes%numnod = nodes%numnod + 1
@@ -854,6 +855,7 @@
           integer,             intent(in)    :: nspmd        !< number of MPI domains
           integer,             intent(in)    :: ispmd        !< local MPI rank (0-based)
           integer,             intent(in), optional :: n_ghost_contrib !< ghost shells moving to N' (for f_detach correction in PARITH/ON)
+          integer,             intent(in), optional :: ghost_contrib_per_rank(0:nspmd-1) !< per-rank breakdown of n_ghost_contrib
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Local variables
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -889,13 +891,18 @@
 
           ! Update non-local damage structure for the new node
           if (nloc_dmg%imod > 0) then
-            if (present(n_ghost_contrib)) then
+            if (present(n_ghost_contrib) .and. present(ghost_contrib_per_rank)) then
               call detach_node_nloc(nloc_dmg, node_id, new_local_id, &
-                elements, shell_list, list_size, numnod, nthread, ispmd, &
+                elements, shell_list, list_size, numnod, nthread, ispmd, nspmd, &
+                n_ghost_contrib=n_ghost_contrib, &
+                ghost_contrib_per_rank=ghost_contrib_per_rank, node_uid=old_uid)
+            else if (present(n_ghost_contrib)) then
+              call detach_node_nloc(nloc_dmg, node_id, new_local_id, &
+                elements, shell_list, list_size, numnod, nthread, ispmd, nspmd, &
                 n_ghost_contrib=n_ghost_contrib, node_uid=old_uid)
             else
               call detach_node_nloc(nloc_dmg, node_id, new_local_id, &
-                elements, shell_list, list_size, numnod, nthread, ispmd, &
+                elements, shell_list, list_size, numnod, nthread, ispmd, nspmd, &
                 node_uid=old_uid)
             end if
           end if
