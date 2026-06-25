@@ -776,7 +776,7 @@
 ! ----------------------------------------------------------------------------------------------------------------------
           integer :: numnod
           integer :: new_local_id
-          integer :: empty_pon_recv(0)
+          integer, allocatable :: recv_procne_owner(:)
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Body
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -796,8 +796,15 @@
           ! Mirror nodes are ghost copies; mark as not owned so output routines skip them
           nodes%WEIGHT(new_local_id) = 0
 
+          ! Ghost N' needs n_owner_contrib RECV slots so REBUILD_PON_TABLES creates a
+          ! symmetric RECV on this rank matching the owner's SEND of its local N' rows.
+          ! Without these slots, owner sends but ghost expects 0 bytes → MPI truncation
+          ! and wrong F(N') → wrong A/V/X on the ghost rank from the first post-split cycle.
+          allocate(recv_procne_owner(max(1, n_owner_contrib)))
+          recv_procne_owner = owning_rank + 1
           call detach_node_from_shells(nodes, node_id, elements, shell_list, list_size, &
-              ispmd, 0, empty_pon_recv)
+              ispmd, n_owner_contrib, recv_procne_owner)
+          deallocate(recv_procne_owner)
 
           if (nloc_dmg%imod > 0) then
             call detach_node_nloc(nloc_dmg, node_id, new_local_id, &
