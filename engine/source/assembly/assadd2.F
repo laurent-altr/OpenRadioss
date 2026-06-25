@@ -587,7 +587,7 @@ C
                    LRC = LRC + 1           ! exchange boundary length for receive
                  ENDIF
                ENDDO
-            ENDIF 
+            ENDIF
           ENDDO
          ENDIF
         ENDDO
@@ -596,6 +596,77 @@ C
       ELSE
         LISENDP = 0
         LIRECVP = 0
+      END IF
+C
+      RETURN
+      END
+C
+!||====================================================================
+!||    rebuild_pon_tables   ../engine/source/assembly/assadd2.F
+!||--- called by ------------------------------------------------------
+!||    resol                ../engine/source/engine/resol.F
+!||====================================================================
+      SUBROUTINE REBUILD_PON_TABLES(
+     .    ADDCNE, IAD_ELEM, FR_ELEM, PROCNE,
+     .    FR_NBCC, IADSDP, IADRCP, ISENDP, IRECVP)
+C-----------------------------------------------
+C   I m p l i c i t   T y p e s
+C-----------------------------------------------
+#include      "implicit_f.inc"
+C-----------------------------------------------
+C   C o m m o n   B l o c k s
+C-----------------------------------------------
+#include      "com01_c.inc"
+#include      "parit_c.inc"
+#include      "task_c.inc"
+C-----------------------------------------------
+C   D u m m y   A r g u m e n t s
+C-----------------------------------------------
+      INTEGER ADDCNE(*), IAD_ELEM(2,*), FR_ELEM(*), PROCNE(*)
+      INTEGER FR_NBCC(2,*), IADSDP(*), IADRCP(*), ISENDP(*), IRECVP(*)
+C-----------------------------------------------
+C   L o c a l   V a r i a b l e s
+C-----------------------------------------------
+      INTEGER I, J, NOD, CC, LOC_PROC, LSD, LRC
+C-----------------------------------------------
+C  Rebuild Parith/ON send/recv index tables after a topology change
+C  (node split). Mirrors the basic branch of ASSADD2 without zeroing
+C  FSKY — continuity of FSKY values across the split is intentional.
+C-----------------------------------------------
+      IF (NSPMD > 0 .AND. IPARIT > 0) THEN
+        LOC_PROC = ISPMD + 1
+        DO I = 1, NSPMD+1
+          FR_NBCC(1,I) = 0
+          FR_NBCC(2,I) = 0
+        ENDDO
+        LSD = 1
+        LRC = 1
+        DO I = 1, NSPMD
+          IADSDP(I) = LSD
+          IADRCP(I) = LRC
+          IF (I /= LOC_PROC) THEN
+            DO J = IAD_ELEM(1,I), IAD_ELEM(1,I+1)-1
+              NOD = FR_ELEM(J)
+              DO CC = ADDCNE(NOD), ADDCNE(NOD+1)-1
+                IF (PROCNE(CC) == LOC_PROC) THEN
+                  FR_NBCC(1,I) = FR_NBCC(1,I) + 1
+                  ISENDP(LSD)  = CC
+                  LSD = LSD + 1
+                ELSEIF (PROCNE(CC) == I) THEN
+                  FR_NBCC(2,I) = FR_NBCC(2,I) + 1
+                  IRECVP(LRC)  = CC
+                  LRC = LRC + 1
+                ENDIF
+              ENDDO
+            ENDDO
+          ENDIF
+        ENDDO
+        IADSDP(NSPMD+1) = LSD
+        IADRCP(NSPMD+1) = LRC
+        DO I = 1, NSPMD
+          FR_NBCC(1,NSPMD+1) = FR_NBCC(1,NSPMD+1) + FR_NBCC(1,I)
+          FR_NBCC(2,NSPMD+1) = FR_NBCC(2,NSPMD+1) + FR_NBCC(2,I)
+        ENDDO
       END IF
 C
       RETURN

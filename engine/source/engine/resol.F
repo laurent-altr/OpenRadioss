@@ -5320,6 +5320,27 @@ C                                     node splitting
                    ! now that BOUNDARY/BOUNDARY_ADD reflect the new node ownership.
                    CALL init_ghost_shells(NODES, ELEMENT, ISPMD, NSPMD,
      .               NODES%BOUNDARY_ADD, NODES%BOUNDARY_SIZE, NODES%BOUNDARY)
+                   ! Rebuild Parith/ON send/recv tables to include the new node.
+                   ! ASSADD2 runs only once pre-loop; ISENDP/IRECVP/FR_NBCC must be
+                   ! rebuilt here so SPMD_EXCH2_A_PON exchanges the new node FSKY rows.
+                   IF (IPARIT /= 0) THEN
+                     CALL ASSINIT(ELEMENT%PON%ADSKY,
+     .                 NODES%BOUNDARY_ADD, NODES%BOUNDARY,
+     .                 ELEMENT%PON%PROCNE, LISENDP, LIRECVP)
+                     IF (ALLOCATED(ELEMENT%PON%ISENDP))
+     .                 DEALLOCATE(ELEMENT%PON%ISENDP)
+                     IF (ALLOCATED(ELEMENT%PON%IRECVP))
+     .                 DEALLOCATE(ELEMENT%PON%IRECVP)
+                     ALLOCATE(ELEMENT%PON%ISENDP(
+     .                 MIN(LISENDP,1):LISENDP))
+                     ALLOCATE(ELEMENT%PON%IRECVP(
+     .                 MIN(LIRECVP,1):LIRECVP))
+                     CALL REBUILD_PON_TABLES(ELEMENT%PON%ADSKY,
+     .                 NODES%BOUNDARY_ADD, NODES%BOUNDARY,
+     .                 ELEMENT%PON%PROCNE, FR_NBCC,
+     .                 ELEMENT%PON%IADSDP, ELEMENT%PON%IADRCP,
+     .                 ELEMENT%PON%ISENDP, ELEMENT%PON%IRECVP)
+                   END IF
                  END IF
 #endif
                  CALL INIT_NODAL_STATE( IPARI,SHOOT_STRUCT,INTERFACES%INTBUF_TAB,NODES%BOUNDARY_ADD,NODES%BOUNDARY,
