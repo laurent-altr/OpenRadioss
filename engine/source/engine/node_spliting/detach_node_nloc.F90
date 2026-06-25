@@ -80,7 +80,8 @@
 !||    precision_mod             ../common_source/modules/precision_mod.F90
 !||====================================================================
         subroutine detach_node_nloc(nloc_dmg, old_local_id, new_local_id, &
-          elements, shell_list, list_size, old_numnod, nthread, ispmd, is_mirror, n_owner_contrib, n_ghost_contrib, node_uid)
+          elements, shell_list, list_size, old_numnod, nthread, ispmd, nspmd_in, &
+          is_mirror, n_owner_contrib, n_ghost_contrib, ghost_contrib_per_rank, node_uid)
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Modules
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -101,9 +102,11 @@
           integer,             intent(in)    :: old_numnod    !< total node count before the split
           integer,             intent(in)    :: nthread       !< number of threads (second dim of FNL/STIFNL)
           integer,             intent(in)    :: ispmd         !< local MPI rank (0-based); PROCNE uses 1-based ranks
+          integer,             intent(in)    :: nspmd_in      !< number of MPI ranks (needed to size ghost_contrib_per_rank)
           logical,             intent(in), optional :: is_mirror  !< .true. when called from mirror_node_split (ghost-node rank)
           integer,             intent(in), optional :: n_owner_contrib !< ghost rank: number of owner N' local corners (= N'_ghost remote slots needed)
           integer,             intent(in), optional :: n_ghost_contrib !< owner rank: number of ghost-node shells moving to N' (for f_detach correction)
+          integer,             intent(in), optional :: ghost_contrib_per_rank(0:nspmd_in-1) !< owner rank: per-rank breakdown of n_ghost_contrib
           integer,             intent(in), optional :: node_uid       !< global UID of the split node (for diagnostics)
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Local variables
@@ -121,7 +124,7 @@
           integer :: new_fsky_rows   ! number of FSKY rows after extension  (= one past last new row)
           integer :: fsky_ncol, stsky_ncol
           integer :: fnl_ncol, stifnl_ncol
-          integer :: i, j, k, i_el
+          integer :: i, j, k, r, i_el
           integer :: shell_id
           integer :: n_remain        ! corner count remaining on parent after split
           integer :: n_total         ! total corner count before split (n_remain + n_contrib)
@@ -636,41 +639,60 @@
             ! 8f — Add REMOTE recv entries to N' for ghost-node shells going to N'.
             !      SPMD_EXCH uses these to receive ghost-node FSKY contributions for N'.
             !      N' ADDCNE: n_contrib LOCAL (owner's shells) + n_ghost_contrib REMOTE.
-            !
-            !      Known limitation (Bug D): this loop assigns all n_ghost_contrib_local
-            !      remote entries to the FIRST ghost rank found in parent ADDCNE.  This is
-            !      correct when all ghost-node shells going to N' belong to a single rank
-            !      (the common case).  If shells going to N' come from multiple ghost-node
-            !      ranks, the extra entries are assigned the wrong PROCNE.  Fix: track
-            !      per-rank ghost contribution counts in apply_crack.F90 and pass them here.
+            !      ghost_contrib_per_rank(r) holds the count for each ghost rank r (0-based),
+            !      so each rank gets the right number of recv slots with the correct PROCNE.
             if (n_ghost_contrib_local > 0) then
-              ghost_proc = 0
-              do cc = parent_start, parent_end
-                if (nloc_dmg%procne(cc) /= ispmd + 1) then
-                  ghost_proc = nloc_dmg%procne(cc)
-                  exit
-                end if
-              end do
-
-              if (ghost_proc > 0) then
-                old_lcne = nloc_dmg%lcne_nl
-                call extend_array(nloc_dmg%procne, old_lcne, &
-                  old_lcne + n_ghost_contrib_local)
-                do k = old_lcne + 1, old_lcne + n_ghost_contrib_local
-                  nloc_dmg%procne(k) = ghost_proc
+              if (present(ghost_contrib_per_rank)) then
+                do r = 0, nspmd_in - 1
+                  if (ghost_contrib_per_rank(r) == 0) cycle
+                  old_lcne = nloc_dmg%lcne_nl
+                  call extend_array(nloc_dmg%procne, old_lcne, &
+                    old_lcne + ghost_contrib_per_rank(r))
+                  do k = old_lcne + 1, old_lcne + ghost_contrib_per_rank(r)
+                    nloc_dmg%procne(k) = r + 1
+                  end do
+                  nloc_dmg%lcne_nl = old_lcne + ghost_contrib_per_rank(r)
+                  nloc_dmg%addcne(new_nnod + 1) = &
+                    nloc_dmg%addcne(new_nnod + 1) + ghost_contrib_per_rank(r)
+                  old_fsky_rows = old_lcne + 1
+                  new_fsky_rows = nloc_dmg%lcne_nl + 1
+                  call extend_array(nloc_dmg%fsky,  old_fsky_rows, fsky_ncol, &
+                    new_fsky_rows, fsky_ncol)
+                  call extend_array(nloc_dmg%stsky, old_fsky_rows, stsky_ncol, &
+                    new_fsky_rows, stsky_ncol)
+                  nloc_dmg%fsky (old_fsky_rows:new_fsky_rows-1, 1:fsky_ncol)  = ZERO
+                  nloc_dmg%stsky(old_fsky_rows:new_fsky_rows-1, 1:stsky_ncol) = ZERO
                 end do
-                nloc_dmg%lcne_nl = old_lcne + n_ghost_contrib_local
-                nloc_dmg%addcne(new_nnod + 1) = &
-                  nloc_dmg%addcne(new_nnod + 1) + n_ghost_contrib_local
-
-                old_fsky_rows = old_lcne + 1
-                new_fsky_rows = nloc_dmg%lcne_nl + 1
-                call extend_array(nloc_dmg%fsky,  old_fsky_rows, fsky_ncol, &
-                  new_fsky_rows, fsky_ncol)
-                call extend_array(nloc_dmg%stsky, old_fsky_rows, stsky_ncol, &
-                  new_fsky_rows, stsky_ncol)
-                nloc_dmg%fsky (old_fsky_rows:new_fsky_rows-1, 1:fsky_ncol)  = ZERO
-                nloc_dmg%stsky(old_fsky_rows:new_fsky_rows-1, 1:stsky_ncol) = ZERO
+              else
+                ! Fallback when per-rank breakdown not provided: assign all entries to
+                ! the first ghost rank found in parent ADDCNE.  Correct only when all
+                ! ghost-node shells come from a single rank.
+                ghost_proc = 0
+                do cc = parent_start, parent_end
+                  if (nloc_dmg%procne(cc) /= ispmd + 1) then
+                    ghost_proc = nloc_dmg%procne(cc)
+                    exit
+                  end if
+                end do
+                if (ghost_proc > 0) then
+                  old_lcne = nloc_dmg%lcne_nl
+                  call extend_array(nloc_dmg%procne, old_lcne, &
+                    old_lcne + n_ghost_contrib_local)
+                  do k = old_lcne + 1, old_lcne + n_ghost_contrib_local
+                    nloc_dmg%procne(k) = ghost_proc
+                  end do
+                  nloc_dmg%lcne_nl = old_lcne + n_ghost_contrib_local
+                  nloc_dmg%addcne(new_nnod + 1) = &
+                    nloc_dmg%addcne(new_nnod + 1) + n_ghost_contrib_local
+                  old_fsky_rows = old_lcne + 1
+                  new_fsky_rows = nloc_dmg%lcne_nl + 1
+                  call extend_array(nloc_dmg%fsky,  old_fsky_rows, fsky_ncol, &
+                    new_fsky_rows, fsky_ncol)
+                  call extend_array(nloc_dmg%stsky, old_fsky_rows, stsky_ncol, &
+                    new_fsky_rows, stsky_ncol)
+                  nloc_dmg%fsky (old_fsky_rows:new_fsky_rows-1, 1:fsky_ncol)  = ZERO
+                  nloc_dmg%stsky(old_fsky_rows:new_fsky_rows-1, 1:stsky_ncol) = ZERO
+                end if
               end if
             end if
 

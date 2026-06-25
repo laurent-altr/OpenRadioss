@@ -122,6 +122,7 @@
 !                                                   Local variables
 ! ----------------------------------------------------------------------------------------------------------------------
           integer :: i, j, ii, k, p, minuid, min_ghost_k, n_owner_contrib
+          integer, allocatable :: ghost_contrib_per_rank(:)
           logical :: locally_owned_shell, this_rank_created
           integer :: numnod0, numnodg0, old_max_uid
           integer :: local_new_count, total_new_nodes, local_n
@@ -272,15 +273,30 @@
             end do
 
             if (crack_info_list(i)%weight == 1) then
-              ! Count ghost shells moving to N' (negative UIDs) for f_detach correction.
+              ! Count ghost shells per rank (negative UIDs) for f_detach correction and
+              ! per-rank ADDCNE recv-slot allocation in detach_node_nloc step 8f.
               n_owner_contrib = 0
+              allocate(ghost_contrib_per_rank(0:nspmd-1))
+              ghost_contrib_per_rank = 0
               do j = 1, size(crack_info_list(i)%shell_uids)
-                if (crack_info_list(i)%shell_uids(j) < 0) n_owner_contrib = n_owner_contrib + 1
+                if (crack_info_list(i)%shell_uids(j) < 0) then
+                  n_owner_contrib = n_owner_contrib + 1
+                  k = -crack_info_list(i)%shell_uids(j)
+                  do p = 1, nspmd
+                    if (k >= element%ghost_shell%offset(p) .and. &
+                        k <  element%ghost_shell%offset(p+1)) then
+                      ghost_contrib_per_rank(p-1) = ghost_contrib_per_rank(p-1) + 1
+                      exit
+                    end if
+                  end do
+                end if
               end do
               call detach_node(nodes, crack_info_list(i)%parent_id, element, &
                 local_shells, local_n, &
                 npari, ninter, ipari, interf, nloc_dmg, nthread, nspmd, ispmd, &
-                n_ghost_contrib=n_owner_contrib)
+                n_ghost_contrib=n_owner_contrib, &
+                ghost_contrib_per_rank=ghost_contrib_per_rank)
+              deallocate(ghost_contrib_per_rank)
             else
               ! Count owner-side shells (negative shell_uids = ghost copies of owner shells).
               ! This equals the number of local ADDCNE entries owner N' will have,
@@ -291,7 +307,7 @@
               end do
               call mirror_node_split(nodes, crack_info_list(i)%parent_id, element, &
                 local_shells, local_n, &
-                nloc_dmg, nthread, ispmd, crack_info_list(i)%owning_rank, n_owner_contrib)
+                nloc_dmg, nthread, ispmd, nspmd, crack_info_list(i)%owning_rank, n_owner_contrib)
             end if
 
             ! Debug Phase 2: print what this rank did and the resulting masses.
