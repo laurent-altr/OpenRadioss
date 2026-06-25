@@ -1115,6 +1115,7 @@ C----
               my_real, DIMENSION(:)  , POINTER :: FEXT_IMP,R_IMP
               my_real TTMP,DMCP(NUMGEO)
               data TTMP /0.0/
+              INTEGER IDBG_LID, IDBG_NLI, IDBG_CC, IDBG_I, IDBG_J
               INTEGER LWIBEM, LWRBEM, IERROR, IERROR2, INTER_ERRORS
               INTEGER, DIMENSION(:), ALLOCATABLE :: WIBEM
               my_real, DIMENSION(:), ALLOCATABLE :: WRBEM
@@ -4489,9 +4490,65 @@ C
  22           CONTINUE
 
 !   Mpi communication for Nlocal option : parith/off
+C --- Debug instrumentation: node UID 13550 before/after SPMD_EXCH_SUB_PON ---
+              IF(NLOC_DMG%IMOD > 0 .AND. NCYCLE >= 1775 .AND. NCYCLE <= 1782) THEN
+                IDBG_LID = 0
+                DO IDBG_I = 1, NUMNOD
+                  IF(NODES%ITAB(IDBG_I) == 13550) THEN
+                    IDBG_LID = IDBG_I
+                    EXIT
+                  END IF
+                END DO
+                IF(IDBG_LID > 0) THEN
+                  IDBG_NLI = NLOC_DMG%IDXI(IDBG_LID)
+                  WRITE(6,'(A,I6,A,I3,A,I6,A,I6)') '[DBG13550_PRE_EXCH] cyc=',
+     .              NCYCLE,' r=',ISPMD,' lid=',IDBG_LID,' nli=',IDBG_NLI
+                  IF(IDBG_NLI > 0) THEN
+                    WRITE(6,'(A,I6,A,I3,A,I7,A,I7)') '[DBG13550_PRE_EXCH] cyc=',
+     .                NCYCLE,' r=',ISPMD,' addcne_lo=',NLOC_DMG%ADDCNE(IDBG_NLI),
+     .                ' addcne_hi=',NLOC_DMG%ADDCNE(IDBG_NLI+1)-1
+                    DO IDBG_CC = NLOC_DMG%ADDCNE(IDBG_NLI),
+     .                            NLOC_DMG%ADDCNE(IDBG_NLI+1)-1
+                      WRITE(6,'(A,I6,A,I3,A,I7,A,I4)') '[DBG13550_PRE_EXCH] cyc=',
+     .                  NCYCLE,' r=',ISPMD,' cc=',IDBG_CC,
+     .                  ' proc=',NLOC_DMG%PROCNE(IDBG_CC)
+                      DO IDBG_J = 1, NLOC_DMG%NDDMAX
+                        WRITE(6,'(A,I6,A,I3,A,I7,A,I3,A,E14.6)')
+     .                    '[DBG13550_PRE_EXCH] cyc=',NCYCLE,' r=',ISPMD,
+     .                    ' cc=',IDBG_CC,' dof=',IDBG_J,
+     .                    ' fsky=',NLOC_DMG%FSKY(IDBG_CC,IDBG_J)
+                      END DO
+                    END DO
+                  END IF
+                END IF
+                CALL FLUSH(6)
+              END IF
               IF(IPARIT /= 0.AND.NSPMD > 1.AND. NLOC_DMG%IMOD > 0)THEN
                 CALL SPMD_EXCH_SUB_PON(NLOC_DMG)
               ENDIF
+              IF(NLOC_DMG%IMOD > 0 .AND. NCYCLE >= 1775 .AND. NCYCLE <= 1782) THEN
+                IF(IDBG_LID > 0) THEN
+                  IDBG_NLI = NLOC_DMG%IDXI(IDBG_LID)
+                  IF(IDBG_NLI > 0) THEN
+                    WRITE(6,'(A,I6,A,I3,A,I7,A,I7)') '[DBG13550_POST_EXCH] cyc=',
+     .                NCYCLE,' r=',ISPMD,' addcne_lo=',NLOC_DMG%ADDCNE(IDBG_NLI),
+     .                ' addcne_hi=',NLOC_DMG%ADDCNE(IDBG_NLI+1)-1
+                    DO IDBG_CC = NLOC_DMG%ADDCNE(IDBG_NLI),
+     .                            NLOC_DMG%ADDCNE(IDBG_NLI+1)-1
+                      WRITE(6,'(A,I6,A,I3,A,I7,A,I4)') '[DBG13550_POST_EXCH] cyc=',
+     .                  NCYCLE,' r=',ISPMD,' cc=',IDBG_CC,
+     .                  ' proc=',NLOC_DMG%PROCNE(IDBG_CC)
+                      DO IDBG_J = 1, NLOC_DMG%NDDMAX
+                        WRITE(6,'(A,I6,A,I3,A,I7,A,I3,A,E14.6)')
+     .                    '[DBG13550_POST_EXCH] cyc=',NCYCLE,' r=',ISPMD,
+     .                    ' cc=',IDBG_CC,' dof=',IDBG_J,
+     .                    ' fsky=',NLOC_DMG%FSKY(IDBG_CC,IDBG_J)
+                      END DO
+                    END DO
+                    CALL FLUSH(6)
+                  END IF
+                END IF
+              END IF
               IF(NSPMD > 1.AND. NINTLOADP > 0)THEN
                 LENR = NODES%BOUNDARY_ADD(1,NSPMD+1)-NODES%BOUNDARY_ADD(1,1)
                 CALL SPMD_EXCH_TAGNCONT(TAGNCONT,NODES%BOUNDARY_ADD ,NODES%BOUNDARY,LENR     )
@@ -6830,6 +6887,31 @@ C-----------------------------------------------
                 IF (GLOB_THERM%ITHERM_FE > 0 )
      .             CALL TEMPUR(NODES%TEMP ,NODES%MCP,FTHE,NODFTSK,NODLTSK,NODES%WEIGHT,MCP_OFF,GLOB_THERM%HEAT_STORED)
 !$OMP END PARALLEL
+C --- Debug instrumentation: node UID 13550 after NLOCAL_ACC ---
+              IF(NLOC_DMG%IMOD > 0 .AND. NCYCLE >= 1775 .AND. NCYCLE <= 1782) THEN
+                IF(IDBG_LID > 0) THEN
+                  IDBG_NLI = NLOC_DMG%IDXI(IDBG_LID)
+                  IF(IDBG_NLI > 0) THEN
+                    WRITE(6,'(A,I6,A,I3,A,I6,A,I6)') '[DBG13550_FNL] cyc=',
+     .                NCYCLE,' r=',ISPMD,' lid=',IDBG_LID,' nli=',IDBG_NLI
+                    DO IDBG_J = NLOC_DMG%POSI(IDBG_NLI),
+     .                           NLOC_DMG%POSI(IDBG_NLI+1)-1
+                      WRITE(6,'(A,I6,A,I3,A,I7,A,E14.6)') '[DBG13550_FNL] cyc=',
+     .                  NCYCLE,' r=',ISPMD,' pos=',IDBG_J,
+     .                  ' fnl=',NLOC_DMG%FNL(IDBG_J,1)
+                    END DO
+                  END IF
+                  WRITE(6,'(A,I6,A,I3,A,3E14.6)') '[DBG13550_ACC] cyc=',
+     .              NCYCLE,' r=',ISPMD,' acc=',
+     .              NODES%A(1,IDBG_LID),NODES%A(2,IDBG_LID),NODES%A(3,IDBG_LID)
+                  WRITE(6,'(A,I6,A,I3,A,3E14.6)') '[DBG13550_VEL] cyc=',
+     .              NCYCLE,' r=',ISPMD,' vel=',
+     .              NODES%V(1,IDBG_LID),NODES%V(2,IDBG_LID),NODES%V(3,IDBG_LID)
+                  WRITE(6,'(A,I6,A,I3,A,E14.6)') '[DBG13550_MS] cyc=',
+     .              NCYCLE,' r=',ISPMD,' ms=',NODES%MS(IDBG_LID)
+                  CALL FLUSH(6)
+                END IF
+              END IF
                 CALL PYTHON_END_OPENMP(PYTHON)
 
 C------------------------------------------
