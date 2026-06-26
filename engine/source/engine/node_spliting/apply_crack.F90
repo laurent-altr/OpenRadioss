@@ -253,12 +253,6 @@
                 local_new_count = local_new_count + 1
                 detached_nodes_local(local_new_count) = crack_info_list(i)%parent_uid
                 owning_ranks_local(local_new_count)   = crack_info_list(i)%owning_rank
-                write(*,'(a,i0,a,i0,a,i0,a,f12.6)') &
-                  '[SPLIT][rank ', ispmd, '] PHASE2_GHOST: parent_uid=', &
-                  crack_info_list(i)%parent_uid, ' owning_rank=', &
-                  crack_info_list(i)%owning_rank, &
-                  ' ms_placeholder=', real(nodes%ms(nodes%numnod))
-                flush(6)
               end if
               cycle
             end if
@@ -310,23 +304,6 @@
                 local_shells, local_n, &
                 nloc_dmg, nthread, ispmd, nspmd, crack_info_list(i)%owning_rank, n_owner_contrib)
             end if
-
-            ! Debug Phase 2: print what this rank did and the resulting masses.
-            if (crack_info_list(i)%weight == 1) then
-              write(*,'(a,i0,a,i0,a,i0,a,f12.6,a,f12.6)') &
-                '[SPLIT][rank ', ispmd, '] PHASE2_DETACH: parent_uid=', &
-                crack_info_list(i)%parent_uid, ' local_shells=', local_n, &
-                ' ms_parent=', real(nodes%ms(crack_info_list(i)%parent_id)), &
-                ' ms_new=', real(nodes%ms(nodes%numnod))
-            else
-              write(*,'(a,i0,a,i0,a,i0,a,i0,a,f12.6,a,f12.6)') &
-                '[SPLIT][rank ', ispmd, '] PHASE2_MIRROR: parent_uid=', &
-                crack_info_list(i)%parent_uid, ' local_shells=', local_n, &
-                ' owning_rank=', crack_info_list(i)%owning_rank, &
-                ' ms_parent=', real(nodes%ms(crack_info_list(i)%parent_id)), &
-                ' ms_new=', real(nodes%ms(nodes%numnod))
-            end if
-            flush(6)
 
             numnod = nodes%numnod
             local_new_count = local_new_count + 1
@@ -495,12 +472,6 @@
             if (allocated(local_pos))         deallocate(local_pos)
             if (allocated(is_boundary_split)) deallocate(is_boundary_split)
           end if
-
-          ! Debug summary
-          write(*,'(a,i0,a,i0,a,i0,a,i0)') &
-            '[SPLIT][rank ', ispmd, '] DONE: new_crack=', new_crack, &
-            ' numnod=', numnod, ' numnodg=', numnodg
-          flush(6)
 
           if (allocated(nb_detached_nodes))        deallocate(nb_detached_nodes)
           if (allocated(nb_detached_nodes_global))  deallocate(nb_detached_nodes_global)

@@ -782,12 +782,6 @@
 ! ----------------------------------------------------------------------------------------------------------------------
           numnod = nodes%numnod
           new_local_id = numnod + 1
-          write(*,'(a,i0,a,i0,a,i0,a,i0,a,f12.4,a,3f14.6)') &
-            '[SPLIT][rank ', ispmd, '] MIRROR_PRE: parent_uid=', nodes%itab(node_id), &
-            ' parent_id=', node_id, ' owning_rank=', owning_rank, &
-            ' ms=', real(nodes%ms(node_id)), &
-            ' X=', nodes%X(1,node_id), nodes%X(2,node_id), nodes%X(3,node_id)
-          flush(6)
 
           call extend_nodal_arrays(nodes, numnod + 1)
           call set_new_node_values(nodes, node_id)
@@ -813,11 +807,6 @@
           end if
 
           nodes%numnod = nodes%numnod + 1
-          write(*,'(a,i0,a,i0,a,f12.4,a,f12.4)') &
-            '[SPLIT][rank ', ispmd, '] MIRROR_POST: parent_uid=', nodes%itab(node_id), &
-            ' ms_parent=', real(nodes%ms(node_id)), &
-            ' ms_new=', real(nodes%ms(new_local_id))
-          flush(6)
 
         end subroutine mirror_node_split
 
@@ -891,11 +880,6 @@
           old_uid = nodes%itab(node_id)
           numnod = nodes%numnod
           new_local_id = nodes%numnod + 1
-          write(*,'(a,i0,a,i0,a,i0,a,f12.4,a,3f14.6)') &
-            '[SPLIT][rank ', ispmd, '] DETACH_PRE: parent_uid=', old_uid, &
-            ' parent_id=', node_id, ' ms=', real(nodes%ms(node_id)), &
-            ' X=', nodes%X(1,node_id), nodes%X(2,node_id), nodes%X(3,node_id)
-          flush(6)
           call detach_node_from_interfaces(nodes, node_id, npari, ninter, ipari, interf, &
             elements, shell_list, list_size)
 
@@ -941,11 +925,6 @@
           end if
 
           nodes%numnod = nodes%numnod + 1
-          write(*,'(a,i0,a,i0,a,f12.4,a,f12.4)') &
-            '[SPLIT][rank ', ispmd, '] DETACH_POST: parent_uid=', old_uid, &
-            ' ms_parent=', real(nodes%ms(node_id)), &
-            ' ms_new=', real(nodes%ms(new_local_id))
-          flush(6)
 
         end subroutine detach_node
 

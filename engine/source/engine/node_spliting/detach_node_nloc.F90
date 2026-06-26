@@ -129,7 +129,6 @@
           integer :: n_remain        ! corner count remaining on parent after split
           integer :: n_total         ! total corner count before split (n_remain + n_contrib)
           integer :: numelc          ! total number of shell elements
-          integer :: n_remote        ! remote PROCNE entries (PROCNE ≠ ispmd+1) in parent ADDCNE
           integer :: ghost_proc              ! first remote PROCNE rank in step 8f (= ghost_rank + 1)
           integer :: n_ghost_local_contrib   ! ghost path: corners of ghost-rank shells going to N'
           integer :: cc              ! loop counter over ADDCNE/IADC entries
@@ -140,14 +139,12 @@
           real(kind=wp) :: f_retain  ! fraction of element corners retained by parent
           real(kind=wp) :: f_detach  ! fraction of element corners detached to child
           real(kind=wp), parameter   :: ZERO = 0._wp
-          logical,       parameter   :: debug_detach_monitor = .false.  !! set .true. to print pre-split state
           logical :: l_is_mirror              ! local copy of is_mirror flag
           integer :: n_owner_contrib_local   ! local copy of n_owner_contrib (0 if not present)
           integer :: owner_proc              ! PROCNE of ghost parent's remote entries (= owner_rank + 1)
           integer :: n_ghost_contrib_local   ! local copy of n_ghost_contrib (0 if not present)
           integer :: n_contrib_global        ! n_contrib + n_ghost_contrib (all shells moving to N')
           integer :: n_total_global          ! parent_total from ADDCNE (all shells around parent)
-          integer :: node_uid_local          ! local copy of node_uid (-1 if not present)
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Body
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -194,31 +191,8 @@
           call extend_array(nloc_dmg%dnl,     nloc_dmg%l_nloc, new_l_nloc)
           call extend_array(nloc_dmg%unl,     nloc_dmg%l_nloc, new_l_nloc)
 
-          ! Copy the cumulated state to the new node; reset kinematic increments.
-          !
-          ! UNL is the accumulated non-local variable (damage level at time of split):
-          ! both sides of the crack start with the same value — copy it.
-          !
-          ! VNL is the "velocity" of the auxiliary explicit problem.  It was built up
-          ! from ALL elements attached to the parent node before the split.  After the
-          ! split the new node is an independent topological entity; inheriting the
-          ! parent's VNL would propagate a large DNL = DT2*VNL into the element-force
-          ! loop of the next cycle (dplanl >> 0 → dlam_nl huge → negative thickness).
-          ! The split is called AFTER FORINT but BEFORE NLOCAL_VEL/NLOCAL_INCR, so VNL
-          ! of the new node is consumed by NLOCAL_INCR in the same cycle: zeroing it
-          ! here ensures DNL_new ≈ 0 in the next cycle.
-          !
-          ! For the same reason the PARENT node's VNL is also zeroed: after the split
-          ! its connectivity changes (some elements moved to the new node), but its
-          ! pre-split VNL was built from ALL elements and is no longer valid.  Leaving
-          ! it non-zero propagates the same large-DNL artefact into the elements that
-          ! remain connected to the parent.
-          !
-          ! VNL_OLD is overwritten by NLOCAL_VEL (VNL_OLD := VNL) before it is next
-          ! read, so its value at split time is irrelevant — zero for clarity.
-          !
-          ! DNL is overwritten by NLOCAL_INCR (DNL := DT2*VNL) before it is next read
-          ! by the element-force loop, so its value at split time is also irrelevant.
+          ! Copy the accumulated damage state to the new node; set VNL/MASS proportional
+          ! to the detached fraction.  See inline comments below for the physics rationale.
 
           ! --- Counting block -------------------------------------------------------
           ! Count element corners: detached (→ new_local_id) and retained (→ old_local_id).
@@ -278,32 +252,6 @@
               f_detach = real(n_contrib_global, wp) / real(n_total_global, wp)
               f_retain  = real(n_total_global - n_contrib_global, wp) / real(n_total_global, wp)
             end if
-          end if
-
-          node_uid_local = -1
-          if (present(node_uid)) node_uid_local = node_uid
-          write(6,'(a,i0,a,i0,a,i0,a,i0,a,i0,a,i0,a,i0,a,f6.3,a,f6.3)') &
-            '[SPLIT_VNL][rank ', ispmd, '] uid=', node_uid_local, ' old=', old_local_id, &
-            ' new=', new_local_id, ' n_contrib=', n_contrib, ' n_remain=', n_remain, &
-            ' n_ghost=', n_ghost_contrib_local, &
-            ' f_retain=', f_retain, ' f_detach=', f_detach
-          flush(6)
-
-          ! Debug: print state before modification so the split impact is visible.
-          if (debug_detach_monitor) then
-            write(6,'(a,i8,a,i8)') ' SPLIT_NLOC parent_local=', old_local_id, &
-              ' new_local=', new_local_id
-            write(6,'(a,i4,a)') '   nddl=', nddl, ' DOFs:'
-            do i = 1, nddl
-              write(6,'(a,i3,4(a,1pe12.4))') '   dof=', i, &
-                '  UNL=', nloc_dmg%unl    (old_pos+i-1), &
-                '  VNL=', nloc_dmg%vnl    (old_pos+i-1), &
-                '  VNL_OLD=', nloc_dmg%vnl_old(old_pos+i-1), &
-                '  DNL=', nloc_dmg%dnl    (old_pos+i-1)
-            end do
-            write(6,'(a,f6.3,a,f6.3,a,i0,a,i0,a)') &
-              '   f_retain=', f_retain, '  f_detach=', f_detach, &
-              '  (n_remain=', n_remain, ', n_contrib=', n_contrib, ')'
           end if
 
           ! UNL: both sides of the crack start with the same value — copy it.
@@ -402,13 +350,11 @@
             n_owner_contrib_local = 0
             if (present(n_owner_contrib)) n_owner_contrib_local = n_owner_contrib
 
-            ! Full scan: compute owner_proc and n_remote in a single pass (no early exit).
+            ! Scan parent ADDCNE to find the owner's proc rank (first remote PROCNE entry).
             owner_proc = 0
-            n_remote = 0
             do cc = parent_start, parent_end
               if (nloc_dmg%procne(cc) /= ispmd + 1) then
                 if (owner_proc == 0) owner_proc = nloc_dmg%procne(cc)
-                n_remote = n_remote + 1
               end if
             end do
 
@@ -446,29 +392,6 @@
               nloc_dmg%fsky (old_fsky_rows:new_fsky_rows-1, 1:fsky_ncol)  = ZERO
               nloc_dmg%stsky(old_fsky_rows:new_fsky_rows-1, 1:stsky_ncol) = ZERO
             end if
-
-            ! Diagnostic.
-            write(6,'(a,i0,a,i0,a,i0,a,i0,a,i0,a,i0,a,i0)') &
-              '[NLOC][rank ', ispmd, '] GHOST old=', old_local_id, &
-              ' new=', new_local_id, ' parent_total=', parent_total, &
-              ' parent_n_remote=', n_remote, ' N_prime_remote=', n_owner_contrib_local, &
-              ' owner_proc=', owner_proc
-            flush(6)
-            ! Dump ADDCNE + PROCNE for parent and N' on this ghost rank.
-            write(6,'(a,i0,a,i0,a,i0,a,i0,a,i0)') &
-              '[NLOC_ROWS][rank ', ispmd, '] GHOST parent nl_idx=', nl_idx, &
-              ' rows=', nloc_dmg%addcne(nl_idx+1)-nloc_dmg%addcne(nl_idx), &
-              ' N_prime new_nnod=', new_nnod, &
-              ' rows=', nloc_dmg%addcne(new_nnod+1)-nloc_dmg%addcne(new_nnod)
-            block
-              integer :: cc_
-              do cc_ = nloc_dmg%addcne(new_nnod), nloc_dmg%addcne(new_nnod+1)-1
-                write(6,'(a,i0,a,i0,a,i0)') &
-                  '[NLOC_PROCNE][rank ', ispmd, '] N_prime row ', cc_, &
-                  ' proc=', nloc_dmg%procne(cc_)
-              end do
-            end block
-            flush(6)
 
             ! 8e_ghost — Add LOCAL entries to ghost N' for ghost rank's own shells
             !            going to N', and update IADC so those shells fill ghost N's FSKY.
@@ -545,11 +468,6 @@
           else
 
             ! Owner rank path.
-            ! Count remote entries in parent ADDCNE (for diagnostic and step 8f).
-            n_remote = 0
-            do cc = parent_start, parent_end
-              if (nloc_dmg%procne(cc) /= ispmd + 1) n_remote = n_remote + 1
-            end do
 
             ! N' ADDCNE is always built fresh.
             ! Parent ADDCNE is always kept intact; dead local rows are zeroed below.
@@ -587,16 +505,6 @@
                 stsky_ncol = size(nloc_dmg%stsky, 2)
               else
                 stsky_ncol = nloc_dmg%nddmax
-              end if
-              ! Defensive: verify old_fsky_rows matches actual allocation
-              if (allocated(nloc_dmg%fsky) .and. &
-                old_fsky_rows /= size(nloc_dmg%fsky, 1)) then
-                write(6,'(a,i0,a,i0,a,i0,a,i0,a,i0)') &
-                  '[NLOC_BUG] rank=', ispmd, &
-                  ' 8d fsky mismatch: old_fsky_rows=', old_fsky_rows, &
-                  ' size(fsky,1)=', size(nloc_dmg%fsky, 1), &
-                  ' new_nnod=', new_nnod, ' lcne_nl=', nloc_dmg%lcne_nl
-                flush(6)
               end if
               call extend_array(nloc_dmg%fsky,  old_fsky_rows, fsky_ncol, &
                 new_fsky_rows, fsky_ncol)
@@ -695,38 +603,6 @@
                 end if
               end if
             end if
-
-            ! 8g — Diagnostic.
-            n_remote = 0
-            do cc = parent_start, parent_end
-              if (nloc_dmg%procne(cc) /= ispmd + 1) n_remote = n_remote + 1
-            end do
-            write(6,'(a,i0,a,i0,a,i0,a,i0,a,i0,a,i0,a,i0)') &
-              '[NLOC][rank ', ispmd, '] DETACH old=', old_local_id, &
-              ' new=', new_local_id, ' parent_total=', parent_total, &
-              ' n_contrib=', n_contrib, ' n_remain=', n_remain, &
-              ' parent_n_remote=', n_remote
-            flush(6)
-            ! Dump ADDCNE + PROCNE for parent and N' on this owner rank.
-            write(6,'(a,i0,a,i0,a,i0,a,i0,a,i0)') &
-              '[NLOC_ROWS][rank ', ispmd, '] OWNER parent nl_idx=', nl_idx, &
-              ' rows=', nloc_dmg%addcne(nl_idx+1)-nloc_dmg%addcne(nl_idx), &
-              ' N_prime new_nnod=', new_nnod, &
-              ' rows=', nloc_dmg%addcne(new_nnod+1)-nloc_dmg%addcne(new_nnod)
-            block
-              integer :: cc_
-              do cc_ = nloc_dmg%addcne(new_nnod), nloc_dmg%addcne(new_nnod+1)-1
-                write(6,'(a,i0,a,i0,a,i0)') &
-                  '[NLOC_PROCNE][rank ', ispmd, '] N_prime row ', cc_, &
-                  ' proc=', nloc_dmg%procne(cc_)
-              end do
-              do cc_ = nloc_dmg%addcne(nl_idx), nloc_dmg%addcne(nl_idx+1)-1
-                write(6,'(a,i0,a,i0,a,i0)') &
-                  '[NLOC_PROCNE][rank ', ispmd, '] parent row ', cc_, &
-                  ' proc=', nloc_dmg%procne(cc_)
-              end do
-            end block
-            flush(6)
 
           end if  ! l_is_mirror
 
