@@ -119,14 +119,24 @@
           allocate(ghostshelldamage(nghostshells))
           ghostshelldamage = 0.0_wp
 
+          ! search for node 13550 in the local nodes and print its damage for debugging
+          do i = 1, nodes%numnod
+            if (nodes%itab(i) == 13550) then
+              write(*,'(a,i0,a,i0,a,i0)') '[SPLIT][rank ', ispmd, '] DEBUG: node ', i, &
+                ' itab=', nodes%itab(i), ' weight=', nodes%WEIGHT(i)
+              flush(6)
+            end if
+          end do
+
+
           ! The values in detach_shell are local to each MPI domain.
           ! in output, the ghostshelldamage array will contain the maximum detach_shell value for each ghost shell across all MPI domains.
           call spmd_exchange_ghost_shells(element, ispmd, nspmd, 1, detach_shell, ghostshelldamage)
 
           ! Accumulate nodal damage: max detach_shell of all connected shells
           deallocate(ghostshelldamage)
-          if(diag_call_count == 0) then
-            diag_call_count = diag_call_count + 1
+          diag_call_count = diag_call_count + 1
+          if(diag_call_count == 1) then
 !         ! test  PUNCH_NLOCAL, fill the crack_info_list with a list of nodes and shells to detach, should be replaced by a physical criterion based on the non-local damage field
             ! THIS IS THE CODE SNIPPET TO REPLACE WITH A PHYSICAL CRITERION BASED ON THE NON-LOCAL DAMAGE FIELD
             block  ! example on how to detach a list of nodes and shells, should be replaced by a physical criterion based on the non-local damage field

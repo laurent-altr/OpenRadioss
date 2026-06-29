@@ -106,7 +106,7 @@
           logical,             intent(in), optional :: is_mirror  !< .true. when called from mirror_node_split (ghost-node rank)
           integer,             intent(in), optional :: n_owner_contrib !< ghost rank: number of owner N' local corners (= N'_ghost remote slots needed)
           integer,             intent(in), optional :: n_ghost_contrib !< owner rank: number of ghost-node shells moving to N' (for f_detach correction)
-          integer,             intent(in), optional :: ghost_contrib_per_rank(0:nspmd_in-1) !< owner rank: per-rank breakdown of n_ghost_contrib
+          integer, dimension(0:nspmd_in-1), intent(in), optional :: ghost_contrib_per_rank !< owner rank: per-rank breakdown of n_ghost_contrib
           integer,             intent(in), optional :: node_uid       !< global UID of the split node (for diagnostics)
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Local variables

@@ -279,7 +279,7 @@
                   k = -crack_info_list(i)%shell_uids(j)
                   do p = 1, nspmd
                     if (k >= element%ghost_shell%offset(p) .and. &
-                        k <  element%ghost_shell%offset(p+1)) then
+                      k <  element%ghost_shell%offset(p+1)) then
                       ghost_contrib_per_rank(p-1) = ghost_contrib_per_rank(p-1) + 1
                       exit
                     end if
@@ -289,8 +289,8 @@
               call detach_node(nodes, crack_info_list(i)%parent_id, element, &
                 local_shells, local_n, &
                 npari, ninter, ipari, interf, nloc_dmg, nthread, nspmd, ispmd, &
-                n_ghost_contrib=n_owner_contrib, &
-                ghost_contrib_per_rank=ghost_contrib_per_rank)
+                n_owner_contrib, &
+                ghost_contrib_per_rank)
               deallocate(ghost_contrib_per_rank)
             else
               ! Count owner-side shells (negative shell_uids = ghost copies of owner shells).
@@ -438,6 +438,8 @@
 
               p = processor(i)
               if (p == ispmd + 1) then
+                write(6,*) 'New node created on rank ', ispmd, ' for parent_uid=', current_parent, &
+                  ' new_uid=', old_max_uid, ' owning_rank=', current_owning_rank
                 ! This rank created a local N' for this parent
                 this_rank_created = .true.
                 j = local_pos(i)
@@ -472,6 +474,12 @@
             if (allocated(local_pos))         deallocate(local_pos)
             if (allocated(is_boundary_split)) deallocate(is_boundary_split)
           end if
+
+          ! Debug summary
+          write(*,'(a,i0,a,i0,a,i0,a,i0)') &
+            '[SPLIT][rank ', ispmd, '] DONE: new_crack=', new_crack, &
+            ' numnod=', numnod, ' numnodg=', numnodg
+          flush(6)
 
           if (allocated(nb_detached_nodes))        deallocate(nb_detached_nodes)
           if (allocated(nb_detached_nodes_global))  deallocate(nb_detached_nodes_global)

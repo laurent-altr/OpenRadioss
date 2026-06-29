@@ -152,6 +152,23 @@ C-----------------------------------------------
           ADSKYI(N) = ADSKYI(N) + 1
         ENDDO
 !$OMP END SINGLE NOWAIT
+            write(6,*) "ASSPAR4 NUMNOD=",NUMNOD
+            call flush(6)
+            DO N = 1,NUMNOD
+              NCT = ADSKY(N)-1
+              NC = ADSKY(N+1)-ADSKY(N)
+              if(nodes%itab(N) == 13550 .or. nodes%ITAB(N) == 13551 .or. nodes%ITAB(N) == 19995 .or. nodes%ITAB(N) == 19996) then
+                !write NCT+1, NCT+NC, NC, N, nodes%itab(N), nodes%WEIGHT(N)
+                write(6,'(a,i0,a,i0,a,i0,a,i0)') '[ASSPAR4][rank ', ispmd, '] DEBUG: node ', N, 
+     .             ' itab=', nodes%itab(N), ' weight=', nodes%WEIGHT(N), 
+     .             ' NCT+1=', NCT+1, ' NCT+NC=', NCT+NC, ' NC=', NC
+                  DO K = NCT+1, NCT+NC
+        write(6,'(i10,a,i0,a,i10,a,3Z20)') nodes%itab(N),'[ASSPAR4][', ispmd,']: K=', K, 'FSKY=', FSKY(1,K),FSKY(2,K),FSKY(3,K)
+                    end do
+                flush(6)
+              end if
+            ENDDO
+ 
 
         ! ------------------------------
         IF(GLOB_THERM%ITHERM_FE == 0 ) THEN
