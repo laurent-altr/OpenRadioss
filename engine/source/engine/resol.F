@@ -5322,6 +5322,7 @@ C                                     node splitting
                  ENDIF
                  CALL ALLOCATE_OUTPUT_DATA(OUTPUT,NUMNOD)
                  LCNE0 = SIZE(ELEMENT%PON%PROCNE)
+                 LSKY  = LCNE0
                  ! Reallocate skyline arrays after node split (NUMNOD has increased).
                  ! ADSKYI is dimensioned (0:NUMNOD+1) but was sized for the old NUMNOD.
                  IF(IPARIT > 0) THEN
