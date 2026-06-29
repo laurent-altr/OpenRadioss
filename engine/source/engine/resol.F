@@ -1088,6 +1088,13 @@ C----
               SAVE DRETRI, XSEC, LISENDP, LIRECVP, ISENDP, IRECVP,
      .             CNEL, ADDCNEL, ADDTMPL, IPARTL, NPARTL, LINDIDEL, LBUFIDEL,
      .             LBUFSEGLO
+C--- Saved original BOUNDARY_ADD/BOUNDARY for NLOC exchange.
+C--- spmd_rebuild_boundary uses MAIN_PROC only, losing multi-section placements
+C--- set at startup from element connectivity.  SPMD_SUB_BOUNDARIES must use
+C--- the original startup boundary to keep the NLOC exchange sizes correct.
+              INTEGER, DIMENSION(:,:), ALLOCATABLE, SAVE :: NLOC_BND_ADD_ORIG
+              INTEGER, DIMENSION(:),   ALLOCATABLE, SAVE :: NLOC_BND_ORIG
+              INTEGER, SAVE :: NLOC_BND_NSPMD_SAVE = -1
               my_real DT2T,
      .                DT2SAVE,  MAS, BB, WFEXC,TREST,DTREST,
      .                DMAST, DINERT, FACTB,DAMPT,
@@ -5320,10 +5327,31 @@ C                                     node splitting
                  ! Rebuild BOUNDARY and BOUNDARY_ADD from scratch using updated ownership.
                  ! This replaces the per-split extend_boundary_for_split incremental updates.
                  IF (NSPMD > 1) THEN
+                   ! On the FIRST split: save the startup BOUNDARY so it can be merged with
+                   ! new-node entries after each subsequent rebuild.
+                   ! spmd_rebuild_boundary uses only MAIN_PROC ownership, which moves some
+                   ! pre-existing nodes out of sections where they were placed at startup
+                   ! based on element connectivity (e.g., a triple-rank node shared by ranks
+                   ! 0,3,4 ends up only in rank-0 section, losing the rank-3 exchange).
+                   ! The merge_boundary_with_split call below restores the correct sections
+                   ! for pre-existing nodes while adding the new split-node entries.
+                   IF (NLOC_BND_NSPMD_SAVE < 0) THEN
+                     NLOC_BND_NSPMD_SAVE = NODES%BOUNDARY_SIZE
+                     ALLOCATE(NLOC_BND_ADD_ORIG(2, NSPMD+1))
+                     ALLOCATE(NLOC_BND_ORIG(MAX(1, NLOC_BND_NSPMD_SAVE)))
+                     NLOC_BND_ADD_ORIG = NODES%BOUNDARY_ADD
+                     IF (NLOC_BND_NSPMD_SAVE > 0) THEN
+                       NLOC_BND_ORIG(1:NLOC_BND_NSPMD_SAVE) =
+     .                   NODES%BOUNDARY(1:NLOC_BND_NSPMD_SAVE)
+                     END IF
+                   END IF
                    CALL spmd_rebuild_boundary(NUMNOD, NSPMD, ISPMD,NODES) 
-                   ! Rebuild non-local MPI boundary tables on ALL ranks because the
-                   ! global BOUNDARY changed (even ranks with no local splits now have
-                   ! stale FR_NBCC exchange counts due to mirror-node boundary changes).
+                   ! Merge: keep startup sections for pre-existing nodes (local ID ≤ NUMNOD_OLD)
+                   ! and append new-node entries from the rebuilt boundary (local ID > NUMNOD_OLD).
+                   ! This ensures both Parith/ON mechanical and NLOC exchanges are correct.
+                   CALL merge_boundary_with_split(NODES, NUMNOD_OLD, NSPMD,
+     .               NLOC_BND_ADD_ORIG, NLOC_BND_ORIG, NLOC_BND_NSPMD_SAVE)
+                   ! Rebuild non-local MPI boundary tables with the merged boundary.
                    IF (NLOC_DMG%IMOD > 0) THEN
                      CALL SPMD_SUB_BOUNDARIES(NLOC_DMG,NODES%BOUNDARY_ADD,
      .                 NODES%BOUNDARY)
@@ -5402,6 +5430,20 @@ C                                     node splitting
                  ENDIF
                  IF(RWALL%NRWALL > 0) THEN
                    CALL DETACH_NODE_FROM_RWALLS(NODES, NUMNOD_OLD, NUMNOD, RWALL)
+                 ENDIF
+                 ! DEBUG: Print NLOC VNL for new split nodes so MPI vs MONO can be compared.
+                 IF(NLOC_DMG%IMOD > 0) THEN
+                   DO I=NUMNOD_OLD+1, NUMNOD
+                     IF(NLOC_DMG%IDXI(I) > 0) THEN
+                       WRITE(6,'(a,i0,a,i0,a,i0,a,g14.7,a,g14.7)')
+     .                   '[NLOC_NEWNODE] r=', ISPMD,
+     .                   ' itab=', NODES%ITAB(I),
+     .                   ' nl_idx=', NLOC_DMG%IDXI(I),
+     .                   ' vnl=', NLOC_DMG%VNL(NLOC_DMG%POSI(NLOC_DMG%IDXI(I))),
+     .                   ' mass=', NLOC_DMG%MASS(NLOC_DMG%POSI(NLOC_DMG%IDXI(I)))
+                     ENDIF
+                   ENDDO
+                   CALL FLUSH(6)
                  ENDIF
                endif
               endif
@@ -6921,6 +6963,23 @@ C-----------------------------------------------
                 IF (GLOB_THERM%ITHERM_FE > 0 )
      .             CALL TEMPUR(NODES%TEMP ,NODES%MCP,FTHE,NODFTSK,NODLTSK,NODES%WEIGHT,MCP_OFF,GLOB_THERM%HEAT_STORED)
 !$OMP END PARALLEL
+
+! DEBUG: Print node 20024 state to trace A=0 in MONO vs A≠0 in MPI
+              IF (NCYCLE >= 1800 .AND. NCYCLE <= 1810) THEN
+                DO I = 1, NUMNOD
+                  IF (NODES%ITAB(I) == 20024) THEN
+                    WRITE(6,'(a,I6,a,I2,a,I6,a,E12.5,a,I6,a,E12.5)')
+     .                '[DBG_20024] cy=',NCYCLE,' r=',ISPMD,
+     .                ' lid=',I,' in=',NODES%IN(I),
+     .                ' wt=',NODES%WEIGHT(I),' ms=',NODES%MS(I)
+                    WRITE(6,'(a,I6,a,I2,a,3E12.4)')
+     .                '[DBG_20024A] cy=',NCYCLE,' r=',ISPMD,
+     .                ' acc=',NODES%A(1,I),NODES%A(2,I),NODES%A(3,I)
+                    CALL FLUSH(6)
+                    EXIT
+                  END IF
+                END DO
+              END IF
 
 !C --- Debug instrumentation: node UID 13550 after NLOCAL_ACC ---
 !              IF(NLOC_DMG%IMOD > 0 .AND. NCYCLE >= 1775 .AND. NCYCLE <= 1782) THEN
@@ -9018,6 +9077,29 @@ C--- [NLOC_DBG] Print VNL/UNL max per rank: early cycles + every 200 + near dive
      .                  MAXVAL(ABS(NLOC_DMG%UNL(1:NLOC_DMG%L_NLOC))),
      .                  ' nnod=', NLOC_DMG%NNOD,
      .                  ' r=', ISPMD
+C--- Print VNL for specific nodes showing MPI vs MONO difference
+                      BLOCK
+                        INTEGER :: IDBG_UIDS(8), IDBG_UI, IDBG_I, IDBG_NLI
+                        IDBG_UIDS = (/10630,10631,10632,
+     .                                17470,17472,17473,17474,17475/)
+                        DO IDBG_UI = 1, 8
+                          DO IDBG_I = 1, NUMNOD
+                            IF(NODES%ITAB(IDBG_I) == IDBG_UIDS(IDBG_UI)) THEN
+                              IDBG_NLI = NLOC_DMG%IDXI(IDBG_I)
+                              IF(IDBG_NLI > 0) THEN
+                                WRITE(*,'(A,I6,A,I2,A,I6,A,E14.6,A,E14.6)')
+     .                            '[NLOC_NODE] cy=',NCYCLE,' r=',ISPMD,
+     .                            ' uid=',IDBG_UIDS(IDBG_UI),
+     .                            ' vnl=',NLOC_DMG%VNL(
+     .                              NLOC_DMG%POSI(IDBG_NLI)),
+     .                            ' unl=',NLOC_DMG%UNL(
+     .                              NLOC_DMG%POSI(IDBG_NLI))
+                              ENDIF
+                              EXIT
+                            ENDIF
+                          ENDDO
+                        ENDDO
+                      END BLOCK
                     ENDIF
                   ENDIF
 

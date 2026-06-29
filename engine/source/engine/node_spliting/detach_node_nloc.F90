@@ -282,6 +282,18 @@
           nloc_dmg%mass (new_pos:new_pos+nddl-1) = nloc_dmg%mass (old_pos:old_pos+nddl-1) * f_detach
           nloc_dmg%mass0(new_pos:new_pos+nddl-1) = nloc_dmg%mass0(old_pos:old_pos+nddl-1) * f_detach
 
+          ! DEBUG: print split state for tracing MPI vs MONO divergence.
+          write(6,'(a,i0,a,i0,a,l1,a,i0,a,i0,a,i0,a,i0,a,f8.5,a,f8.5,a,g13.6,a,g13.6,a,g13.6)') &
+            '[NLOC_SPLIT] ispmd=', ispmd, ' uid=', node_uid, &
+            ' mirror=', l_is_mirror, &
+            ' n_loc=', n_contrib, ' n_ghost=', n_ghost_contrib_local, &
+            ' n_owner=', n_owner_contrib_local, ' n_tot=', n_total_global, &
+            ' f_det=', f_detach, ' f_ret=', f_retain, &
+            ' vnl_par=', nloc_dmg%vnl(old_pos), &
+            ' vnl_chi=', nloc_dmg%vnl(new_pos), &
+            ' mass_chi=', nloc_dmg%mass(new_pos)
+          call flush(6)
+
           ! Extend multithreaded accumulators; use actual allocated column counts
           ! (can be 1 in PARITH/ON, nthread in PARITH/OFF).
           if (allocated(nloc_dmg%fnl)) then

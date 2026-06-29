@@ -813,7 +813,7 @@
           if (nloc_dmg%imod > 0) then
             call detach_node_nloc(nloc_dmg, node_id, new_local_id, &
               elements, shell_list, list_size, numnod, nthread, ispmd, nspmd, &
-              is_mirror=.true., n_owner_contrib=n_owner_contrib, node_uid=nodes%itab(node_id))
+              is_mirror=.true., n_owner_contrib=n_pon_recv, node_uid=nodes%itab(node_id))
           end if
 
           nodes%numnod = nodes%numnod + 1
@@ -938,17 +938,23 @@
               ispmd, 0, empty_pon_recv)
           end if
 
-          ! Update non-local damage structure for the new node
+          ! Update non-local damage structure for the new node.
+          ! When pon_ghost_contrib_per_rank is present (communicated corner counts),
+          ! use it for BOTH Parith/ON and NLOC so that the owner's NLOC ADDCNE recv
+          ! slots match what ghost ranks will actually send for N's NLOC DOF.
+          ! Without this, ghost_contrib_per_rank[R]=0 for ranks whose shells are not
+          ! ghost-copied → owner misses those contributions → FNL(N') too small.
           if (nloc_dmg%imod > 0) then
-            if (.true.) then
+            if (present(pon_ghost_contrib_per_rank)) then
+              call detach_node_nloc(nloc_dmg, node_id, new_local_id, &
+                elements, shell_list, list_size, numnod, nthread, ispmd, nspmd, &
+                n_ghost_contrib=sum(pon_ghost_contrib_per_rank), &
+                ghost_contrib_per_rank=pon_ghost_contrib_per_rank, node_uid=old_uid)
+            else if (present(ghost_contrib_per_rank)) then
               call detach_node_nloc(nloc_dmg, node_id, new_local_id, &
                 elements, shell_list, list_size, numnod, nthread, ispmd, nspmd, &
                 n_ghost_contrib=n_ghost_contrib, &
                 ghost_contrib_per_rank=ghost_contrib_per_rank, node_uid=old_uid)
-            else if (.true.) then
-              call detach_node_nloc(nloc_dmg, node_id, new_local_id, &
-                elements, shell_list, list_size, numnod, nthread, ispmd, nspmd, &
-                n_ghost_contrib=n_ghost_contrib, node_uid=old_uid)
             else
               call detach_node_nloc(nloc_dmg, node_id, new_local_id, &
                 elements, shell_list, list_size, numnod, nthread, ispmd, nspmd, &

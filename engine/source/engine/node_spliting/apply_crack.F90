@@ -96,6 +96,7 @@
           use interfaces_mod
           use nlocal_reg_mod
           use detach_node_mod
+          use detach_node_nloc_mod
           use extend_array_mod
           use update_pon_mod, only : update_pon_shells
           use spmd_mod
@@ -274,6 +275,15 @@
                   end if
                 end do
                 pon_n_local(kk) = qr
+                ! DEBUG: print Phase 1.5 contributions for key parents
+                if (crack_info_list(i)%parent_uid >= 10682 .and. &
+                  crack_info_list(i)%parent_uid <= 10695) then
+                  write(6,'(a,i0,a,i0,a,i0,a,i0)') &
+                    '[DBG_P15] r=', ispmd, &
+                    ' uid=', crack_info_list(i)%parent_uid, &
+                    ' local_n=', local_n, ' qr=', qr
+                  call flush(6)
+                end if
               end if
             end do
 
@@ -373,11 +383,17 @@
                     call update_pon_shells(element, 0, empty_shells, numnod, ispmd, 0, empty_recv)
                   end if
                 end if
-                ! Extend nloc_dmg%idxi to cover the ghost placeholder so that
-                ! subsequent detach_node calls find size(idxi) == nodes%numnod.
+                ! Update the non-local damage structure for the ghost placeholder node.
+                ! detach_node_nloc handles IDXI extension (Step 1) and — when the parent is
+                ! a NLOC node — creates a new non-local DOF entry for N'' with the correct
+                ! number of REMOTE recv rows (= n_owner_contrib_pon = owner's corner count).
+                ! This makes SPMD_SUB_BOUNDARIES give a symmetric NLOC exchange size so that
+                ! the owner's NLOC force contributions for N' are correctly received by rank R.
                 if (nloc_dmg%imod > 0) then
-                  call extend_array(nloc_dmg%idxi, numnod - 1, numnod)
-                  nloc_dmg%idxi(numnod) = 0
+                  call detach_node_nloc(nloc_dmg, crack_info_list(i)%parent_id, numnod, &
+                    element, empty_shells, 0, numnod - 1, nthread, ispmd, nspmd, &
+                    is_mirror=.true., n_owner_contrib=n_owner_contrib_pon, &
+                    node_uid=crack_info_list(i)%parent_uid)
                 end if
                 local_new_count = local_new_count + 1
                 detached_nodes_local(local_new_count) = crack_info_list(i)%parent_uid
@@ -394,6 +410,24 @@
                 local_n = local_n + 1
                 local_shells(local_n) = crack_info_list(i)%shell_uids(j)
               end if
+            end do
+            ! Sort local_shells by shell user_id (ascending) to ensure bitwise
+            ! Parith/ON reproducibility between MONO and MPI.
+            ! In MPI the owner rank's local shells are placed first (ADDCNE CC_0,
+            ! CC_1...) and remote contributions follow as RECV rows (step 8f).
+            ! The owner rank has the globally smallest user_id shell, so sorting
+            ! by user_id puts the owner's shells first, matching the MPI layout.
+            do j = 2, local_n
+              do k = j, 2, -1
+                if (element%shell%user_id(local_shells(k)) < &
+                  element%shell%user_id(local_shells(k-1))) then
+                  p = local_shells(k)
+                  local_shells(k) = local_shells(k-1)
+                  local_shells(k-1) = p
+                else
+                  exit
+                end if
+              end do
             end do
 
             if (crack_info_list(i)%weight == 1) then
@@ -427,6 +461,26 @@
                     pon_ghost_contrib_per_rank(pon_rank_global(kk)) = pon_n_global(kk)
                   end if
                 end do
+                ! DEBUG: print pon_ghost_contrib for key parents to trace n_ghost=0 issue
+                if (crack_info_list(i)%parent_uid >= 10682 .and. &
+                  crack_info_list(i)%parent_uid <= 10695) then
+                  write(6,'(a,i0,a,i0,a,i0,a,8i3)') &
+                    '[DBG_PON1] r=', ispmd, &
+                    ' uid=', crack_info_list(i)%parent_uid, &
+                    ' ntot=', n_pon_cracks_total, &
+                    ' pgc=', pon_ghost_contrib_per_rank(0:min(7,nspmd-1))
+                  do kk = 1, n_pon_cracks_total
+                    if (pon_uid_global(kk) == crack_info_list(i)%parent_uid) then
+                      write(6,'(a,i0,a,i0,a,i0,a,i0,a,i0)') &
+                        '[DBG_PON1_KK] r=', ispmd, &
+                        ' uid=', crack_info_list(i)%parent_uid, &
+                        ' kk=', kk, &
+                        ' pon_rank=', pon_rank_global(kk), &
+                        ' pon_n=', pon_n_global(kk)
+                    end if
+                  end do
+                  call flush(6)
+                end if
                 call detach_node(nodes, crack_info_list(i)%parent_id, element, &
                   local_shells, local_n, &
                   npari, ninter, ipari, interf, nloc_dmg, nthread, nspmd, ispmd, &

@@ -93,6 +93,11 @@ c
             COUNT(P) = COUNT(P) +1                   !   Updating the counter tables
             COUNT2(P)= COUNT2(P)+KK*NDDL
           ENDIF
+          ! DEBUG: trace local node 2601 (uid=17474) appearance in boundary
+          IF (ISPMD.EQ.4 .AND. NOD.EQ.2601) THEN
+            WRITE(6,9002) ISPMD,P-1,NOD,NN,NLOC_DMG%IDXI(NOD)
+            CALL FLUSH(6)
+          END IF
         ENDDO
         TOTAL_NODES = TOTAL_NODES + COUNT(P)         ! Total number of non-local d.o.fs at the boundaries
       ENDDO
@@ -149,10 +154,13 @@ C     -----------------------------
                 DO CC = NLOC_DMG%ADDCNE(NN),NLOC_DMG%ADDCNE(NN+1)-1
                   IF( NLOC_DMG%PROCNE(CC)==LOC_PROC)THEN                          
                     LSD=LSD+1
+                    IF((ISPMD.EQ.4.AND.P.EQ.4).OR.
+     .                 (ISPMD.EQ.3.AND.P.EQ.5))
+     .              WRITE(6,9001)ISPMD,P-1,NN,CC,NLOC_DMG%INDX(NN)
                   ELSEIF(NLOC_DMG%PROCNE(CC)==P) THEN
                     LRD=LRD+1
                   ENDIF
- 
+  
                ENDDO
            ENDDO
         ENDDO
@@ -238,11 +246,11 @@ C--- [NLOC_NBCC] Print send/receive sizes per rank-pair at cycle 0 (split cycle)
 
         NLOC_DMG%IADSDP(NSPMD+1)=LSD
         NLOC_DMG%IADRCP(NSPMD+1)=LRD
+ 9001   FORMAT('[DBG_SUB_SEND] r=',I2,' p=',I2,' nn=',I7,' cc=',I8,
+     .          ' uid=',I8)
+ 9002   FORMAT('[DBG_NOD2601] r=',I2,' p=',I2,' nod=',I6,' nn=',I7,' idxi=',I7)
       ENDIF
       END
-
-
-!||====================================================================
 !||    spmd_exch_sub_poff    ../engine/source/mpi/spmd_exch_sub.F
 !||--- called by ------------------------------------------------------
 !||    resol                 ../engine/source/engine/resol.F

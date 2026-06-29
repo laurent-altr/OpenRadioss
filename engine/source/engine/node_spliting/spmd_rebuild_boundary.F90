@@ -32,6 +32,7 @@
         implicit none
         private
         public :: spmd_rebuild_boundary
+        public :: merge_boundary_with_split
 
       contains
 
@@ -130,6 +131,15 @@
                 write(6,*) "spmd_rebuild_boundary:  found ghost node with global id 13550 at local index ", i, nodes%MAIN_PROC(i)-1
                 call flush(6)
               end if
+              ! DEBUG: track local node 2601 (owner rank 3) on rank 4
+              if (ispmd == 4 .and. i == 2601) then
+                write(6,'(a,i0,a,i0,a,i0,a,l1,a,i0)') &
+                  '[DBG_2601] ispmd=', ispmd, ' local=', i, &
+                  ' main_proc=', nodes%main_proc(i), &
+                  ' is_ghost=', (nodes%main_proc(i)-1 /= ispmd), &
+                  ' itab=', nodes%itab(i)
+                call flush(6)
+              end if
             end do
 
             allocate(ghost_gids(max(1, n_ghost_local)))
@@ -216,6 +226,13 @@
                 if (lidx > 0) then                                ! guard: gid must be local
                   if (nodes%main_proc(lidx)-1 == ispmd) &                 ! I own this node
                     send_cnt(j) = send_cnt(j) + 1
+                end if
+                ! DEBUG: trace UID 17474
+                if (gid == 17474) then
+                  write(6,'(a,i0,a,i0,a,i0,a,i0)') &
+                    '[DBG_17474_PH4] r=', ispmd, ' j=', j-1, &
+                    ' gid=', gid, ' lidx=', lidx
+                  call flush(6)
                 end if
               end do
             end do
@@ -342,5 +359,134 @@
           endif
 
         end subroutine spmd_rebuild_boundary
+
+!! \brief Merge the startup boundary with new-node entries after a split.
+!!
+!! \details After spmd_rebuild_boundary, pre-existing nodes may have moved
+!! to different boundary sections (e.g., a triple-rank node that was in
+!! rank-3 AND rank-0 sections at startup ends up only in rank-0 section
+!! based on MAIN_PROC ownership).  This breaks both the Parith/ON mechanical
+!! exchange and the NLOC exchange for those nodes.
+!!
+!! Fix: preserve the saved startup boundary for nodes with local ID ≤ numnod_old
+!! (pre-existing nodes), and append the new entries (local ID > numnod_old,
+!! new split nodes) from the freshly rebuilt boundary.
+!!
+!! The result replaces NODES%BOUNDARY_ADD and NODES%BOUNDARY in place.
+!!
+!! \param[inout] nodes           nodal arrays (BOUNDARY_ADD/BOUNDARY updated)
+!! \param[in]    numnod_old      local node count before the split
+!! \param[in]    nspmd           number of MPI ranks
+!! \param[in]    bnd_add_orig    saved startup BOUNDARY_ADD (2 × nspmd+1)
+!! \param[in]    bnd_orig        saved startup BOUNDARY (bnd_size_orig elements)
+!! \param[in]    bnd_size_orig   size of bnd_orig
+        subroutine merge_boundary_with_split(nodes, numnod_old, nspmd, &
+          bnd_add_orig, bnd_orig, bnd_size_orig)
+
+          use nodal_arrays_mod
+          implicit none
+
+          type(nodal_arrays_), intent(inout) :: nodes
+          integer, intent(in) :: numnod_old
+          integer, intent(in) :: nspmd
+          integer, intent(in) :: bnd_add_orig(2, nspmd + 1)
+          integer, intent(in) :: bnd_orig(bnd_size_orig)
+          integer, intent(in) :: bnd_size_orig
+
+          integer :: j, k, pos, new_size
+          integer :: orig_recv_start, orig_recv_end
+          integer :: orig_send_start, orig_send_end
+          integer :: new_recv_start, new_recv_end
+          integer :: new_send_start, new_send_end
+          integer :: cnt_recv_orig, cnt_recv_new
+          integer :: cnt_send_orig, cnt_send_new
+          integer, allocatable :: merged_bnd_add(:,:)
+          integer, allocatable :: merged_bnd(:)
+
+          ! Count total merged size and build merged BOUNDARY_ADD
+          allocate(merged_bnd_add(2, nspmd + 1))
+          merged_bnd_add(1, 1) = 1
+
+          do j = 1, nspmd
+            ! Original entries (pre-existing nodes, local ID ≤ numnod_old)
+            orig_recv_start = bnd_add_orig(1, j)
+            orig_recv_end   = bnd_add_orig(2, j) - 1
+            orig_send_start = bnd_add_orig(2, j)
+            orig_send_end   = bnd_add_orig(1, j + 1) - 1
+            cnt_recv_orig = max(0, orig_recv_end - orig_recv_start + 1)
+            cnt_send_orig = max(0, orig_send_end - orig_send_start + 1)
+
+            ! New entries (split nodes, local ID > numnod_old) from rebuilt boundary
+            new_recv_start = nodes%boundary_add(1, j)
+            new_recv_end   = nodes%boundary_add(2, j) - 1
+            new_send_start = nodes%boundary_add(2, j)
+            new_send_end   = nodes%boundary_add(1, j + 1) - 1
+
+            cnt_recv_new = 0
+            do k = new_recv_start, new_recv_end
+              if (nodes%boundary(k) > numnod_old) cnt_recv_new = cnt_recv_new + 1
+            end do
+            cnt_send_new = 0
+            do k = new_send_start, new_send_end
+              if (nodes%boundary(k) > numnod_old) cnt_send_new = cnt_send_new + 1
+            end do
+
+            merged_bnd_add(2, j)     = merged_bnd_add(1, j) + cnt_recv_orig + cnt_recv_new
+            merged_bnd_add(1, j + 1) = merged_bnd_add(2, j) + cnt_send_orig + cnt_send_new
+          end do
+          merged_bnd_add(2, nspmd + 1) = merged_bnd_add(1, nspmd + 1)
+
+          new_size = merged_bnd_add(1, nspmd + 1) - 1
+          allocate(merged_bnd(max(1, new_size)))
+
+          ! Fill merged boundary
+          do j = 1, nspmd
+            pos = merged_bnd_add(1, j)
+
+            ! Recv sub-block: original pre-existing entries
+            orig_recv_start = bnd_add_orig(1, j)
+            orig_recv_end   = bnd_add_orig(2, j) - 1
+            do k = orig_recv_start, orig_recv_end
+              merged_bnd(pos) = bnd_orig(k)
+              pos = pos + 1
+            end do
+
+            ! Recv sub-block: new split node entries
+            new_recv_start = nodes%boundary_add(1, j)
+            new_recv_end   = nodes%boundary_add(2, j) - 1
+            do k = new_recv_start, new_recv_end
+              if (nodes%boundary(k) > numnod_old) then
+                merged_bnd(pos) = nodes%boundary(k)
+                pos = pos + 1
+              end if
+            end do
+
+            ! Send sub-block: original pre-existing entries
+            orig_send_start = bnd_add_orig(2, j)
+            orig_send_end   = bnd_add_orig(1, j + 1) - 1
+            do k = orig_send_start, orig_send_end
+              merged_bnd(pos) = bnd_orig(k)
+              pos = pos + 1
+            end do
+
+            ! Send sub-block: new split node entries
+            new_send_start = nodes%boundary_add(2, j)
+            new_send_end   = nodes%boundary_add(1, j + 1) - 1
+            do k = new_send_start, new_send_end
+              if (nodes%boundary(k) > numnod_old) then
+                merged_bnd(pos) = nodes%boundary(k)
+                pos = pos + 1
+              end if
+            end do
+          end do
+
+          ! Replace NODES%BOUNDARY_ADD and NODES%BOUNDARY with merged versions
+          if (allocated(nodes%boundary_add)) deallocate(nodes%boundary_add)
+          if (allocated(nodes%boundary))     deallocate(nodes%boundary)
+          call move_alloc(merged_bnd_add, nodes%boundary_add)
+          call move_alloc(merged_bnd, nodes%boundary)
+          nodes%boundary_size = new_size
+
+        end subroutine merge_boundary_with_split
 
       end module spmd_rebuild_boundary_mod
