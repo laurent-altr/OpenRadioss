@@ -150,6 +150,7 @@
 ! ----------------------------------------------------------------------------------------------------------------------
           parent_start = 0
           parent_end   = 0
+          write(6,*) "detach node user id",node_uid
           !Nodes 1682 - 1728
           ! Step 1 — Extend IDXI to cover new_local_id regardless of whether the parent
           !          has non-local DOFs.  This must happen before the early-exit check so

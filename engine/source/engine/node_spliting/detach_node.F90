@@ -679,7 +679,7 @@
 !||    update_pon_mod            ../engine/source/engine/node_spliting/update_pon.F90
 !||====================================================================
         subroutine detach_node_from_shells(nodes, node_id, elements, shell_list, list_size, &
-            ispmd, n_recv, recv_procne)
+          ispmd, n_recv, recv_procne)
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Modules
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -721,7 +721,7 @@
 
           if(nodes%iparith > 0) then! /PARITH/ON
             call update_pon_shells(elements, list_size, shell_list, new_local_id, &
-                ispmd, n_recv, recv_procne)
+              ispmd, n_recv, recv_procne)
           end if
 
 
@@ -797,7 +797,7 @@
           allocate(recv_procne_owner(max(1, n_owner_contrib)))
           recv_procne_owner = owning_rank + 1
           call detach_node_from_shells(nodes, node_id, elements, shell_list, list_size, &
-              ispmd, n_owner_contrib, recv_procne_owner)
+            ispmd, n_owner_contrib, recv_procne_owner)
           deallocate(recv_procne_owner)
 
           if (nloc_dmg%imod > 0) then
@@ -858,7 +858,7 @@
           integer,             intent(in)    :: nspmd        !< number of MPI domains
           integer,             intent(in)    :: ispmd        !< local MPI rank (0-based)
           integer,             intent(in)  :: n_ghost_contrib !< ghost shells moving to N' (for f_detach correction in PARITH/ON)
-          integer, dimension(0:nspmd-1), intent(in)   :: ghost_contrib_per_rank !< per-rank breakdown of n_ghost_contrib
+          integer, dimension(0:nspmd-1), optional, intent(in)   :: ghost_contrib_per_rank !< per-rank breakdown of n_ghost_contrib
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Local variables
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -899,11 +899,11 @@
               end do
             end do
             call detach_node_from_shells(nodes, node_id, elements, shell_list, list_size, &
-                ispmd, n_pon_recv, pon_recv_procne)
+              ispmd, n_pon_recv, pon_recv_procne)
             deallocate(pon_recv_procne)
           else
             call detach_node_from_shells(nodes, node_id, elements, shell_list, list_size, &
-                ispmd, 0, empty_pon_recv)
+              ispmd, 0, empty_pon_recv)
           end if
 
           ! Update non-local damage structure for the new node
