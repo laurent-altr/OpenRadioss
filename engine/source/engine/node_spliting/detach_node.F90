@@ -785,8 +785,9 @@
 
           call extend_nodal_arrays(nodes, numnod + 1)
           call set_new_node_values(nodes, node_id)
-          ! Override: the new node is owned by owning_rank, not by this rank
-          nodes%MAIN_PROC(new_local_id) = owning_rank
+          ! Override: the new node is owned by owning_rank, not by this rank.
+          ! MAIN_PROC uses 1-based ranks (rank R → MAIN_PROC = R+1).
+          nodes%MAIN_PROC(new_local_id) = owning_rank + 1
           ! Mirror nodes are ghost copies; mark as not owned so output routines skip them
           nodes%WEIGHT(new_local_id) = 0
 

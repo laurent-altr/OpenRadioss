@@ -234,7 +234,8 @@
                 crack_info_list(i)%owning_rank /= -1) then
                 call extend_nodal_arrays(nodes, nodes%numnod + 1)
                 call set_new_node_values(nodes, crack_info_list(i)%parent_id)
-                nodes%MAIN_PROC(nodes%numnod + 1) = crack_info_list(i)%owning_rank
+                ! MAIN_PROC uses 1-based ranks (rank R → MAIN_PROC = R+1).
+                nodes%MAIN_PROC(nodes%numnod + 1) = crack_info_list(i)%owning_rank + 1
                 nodes%WEIGHT(nodes%numnod + 1) = 0
                 nodes%numnod = nodes%numnod + 1
                 numnod = nodes%numnod
@@ -447,7 +448,8 @@
                 ! nodglob is meaningful on every rank that holds N'
                 ! (same global index regardless of ownership)
                 nodes%nodglob(numnod0 + j) = numnodg0
-                nodes%main_proc(numnod0 + j) = current_owning_rank
+                ! MAIN_PROC uses 1-based ranks (rank R → MAIN_PROC = R+1).
+                nodes%main_proc(numnod0 + j) = current_owning_rank + 1
 
               end if
             end do

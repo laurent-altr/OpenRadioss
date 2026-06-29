@@ -66,7 +66,7 @@
 !! \param[in]  numnod           local number of nodes on this MPI rank
 !! \param[in]  nspmd            total number of MPI ranks
 !! \param[in]  ispmd            this rank's 0-based MPI rank
-!! \param[in]  main_proc(numnod) owning MPI rank (0-based) for each local node
+!! \param[in]  main_proc(numnod) owning MPI rank (1-based, 1..NSPMD) for each local node
 !! \param[in]  itab(numnod)     global unique node ID for each local node
 !! \param[out] boundary         flat list of local node indices grouped by rank;
 !!                              (re)allocated here, caller is responsible for
@@ -125,13 +125,13 @@
           ! ================================================================
           n_ghost_local = 0
           do i = 1, numnod
-            if (main_proc(i) /= ispmd) n_ghost_local = n_ghost_local + 1
+            if (main_proc(i) - 1 /= ispmd) n_ghost_local = n_ghost_local + 1
           end do
 
           allocate(ghost_gids(max(1, n_ghost_local)))
           k = 0
           do i = 1, numnod
-            if (main_proc(i) /= ispmd) then
+            if (main_proc(i) - 1 /= ispmd) then
               k = k + 1
               ghost_gids(k) = itab(i)
             end if
@@ -196,7 +196,7 @@
               gid  = all_ghost(k)
               lidx = g2l(gid)
               if (lidx > 0) then                                ! guard: gid must be local
-                if (main_proc(lidx) == ispmd) &                 ! I own this node
+                if (main_proc(lidx) - 1 == ispmd) &            ! I own this node
                   send_cnt(j) = send_cnt(j) + 1
               end if
             end do
@@ -217,7 +217,7 @@
               gid  = all_ghost(k)
               lidx = g2l(gid)
               if (lidx > 0) then                                ! guard: gid must be local
-                if (main_proc(lidx) == ispmd) then              ! I own this node
+                if (main_proc(lidx) - 1 == ispmd) then         ! I own this node
                   pos = pos + 1
                   send_buf(pos) = gid
                 end if
