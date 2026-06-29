@@ -88,7 +88,6 @@
           integer, intent(in)  :: numnod
           integer, intent(in)  :: nspmd
           integer, intent(in)  :: ispmd                     ! 0-based MPI rank
-!         integer, intent(in)  :: main_proc(numnod)         ! owning rank (0-based) per node
 !         integer, intent(in)  :: itab(numnod)
           type(nodal_arrays_), intent(inout)  :: nodes
 !         integer, allocatable, intent(out) :: boundary(:)

@@ -138,6 +138,14 @@
           integer, allocatable :: nb_detached_nodes(:), nb_detached_nodes_global(:)
           integer, allocatable :: permutation(:), processor(:), local_pos(:)
           logical, allocatable :: is_boundary_split(:)
+          ! Phase 1.5: Parith/ON contributions_count gather
+          integer :: n_pon_cracks_local, n_pon_cracks_total, kk, qr
+          integer :: n_owner_contrib_pon   ! Parith/ON-specific recv slot count (may differ from NLOC)
+          integer, allocatable :: pon_uid_local(:), pon_n_local(:)
+          integer, allocatable :: pon_uid_global(:), pon_n_global(:), pon_rank_global(:)
+          integer, allocatable :: pon_cnt(:), pon_cnt_global(:), pon_dsp(:)
+          integer, allocatable :: pon_ghost_contrib_per_rank(:) ! Parith/ON ghost recv counts per rank
+          integer, allocatable :: recv_pon_placeholder(:)       ! recv_procne for ghost placeholder Parith/ON slots
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Body
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -203,6 +211,107 @@
           end do
 
           ! ---------------------------------------------------------------
+          ! Phase 1.5: gather Parith/ON contributions_count from all ranks.
+          !
+          ! When a node N is split and a new node N' is created, the ADSKY
+          ! (Parith/ON skyline) of N' on the OWNER rank gets one local FSKY
+          ! row per shell corner at N' (contributions_count).  The GHOST
+          ! rank that mirrors N' as N'' must create the same number of RECV
+          ! FSKY rows so that REBUILD_PON_TABLES gives consistent FR_NBCC
+          ! on both ranks.
+          !
+          ! Previously n_owner_contrib was estimated from ghost-copied
+          ! shells (negative UIDs), which is ZERO when the owner's shells
+          ! are not ghost-copied to the ghost rank (e.g. both ranks have
+          ! independent local elements at the same boundary node).  This
+          ! led to FR_NBCC(1,ghost+1) on owner > FR_NBCC(2,owner+1) on
+          ! ghost → MPI buffer overflow in spmd_exch2_a_pon.
+          !
+          ! Fix: allgatherv actual corner counts so every rank knows the
+          ! correct ADSKY recv-slot target before calling detach_node /
+          ! mirror_node_split.
+          ! ---------------------------------------------------------------
+          n_pon_cracks_local = 0
+          n_pon_cracks_total = 0
+          if (nspmd > 1 .and. nodes%iparith > 0) then
+            do i = 1, size(crack_info_list)
+              if (.not. allocated(crack_info_list(i)%shell_uids)) cycle
+              if (crack_info_list(i)%owning_rank == -1) cycle
+              if (crack_info_list(i)%parent_id <= 0) cycle
+              local_n = 0
+              do j = 1, size(crack_info_list(i)%shell_uids)
+                if (crack_info_list(i)%shell_uids(j) > 0) local_n = local_n + 1
+              end do
+              if (local_n > 0) n_pon_cracks_local = n_pon_cracks_local + 1
+            end do
+
+            allocate(pon_uid_local(max(1, n_pon_cracks_local)))
+            allocate(pon_n_local(max(1, n_pon_cracks_local)))
+            pon_uid_local = 0
+            pon_n_local   = 0
+            kk = 0
+            do i = 1, size(crack_info_list)
+              if (.not. allocated(crack_info_list(i)%shell_uids)) cycle
+              if (crack_info_list(i)%owning_rank == -1) cycle
+              if (crack_info_list(i)%parent_id <= 0) cycle
+              local_n = 0
+              do j = 1, size(crack_info_list(i)%shell_uids)
+                if (crack_info_list(i)%shell_uids(j) > 0) local_n = local_n + 1
+              end do
+              if (local_n > 0) then
+                kk = kk + 1
+                pon_uid_local(kk) = crack_info_list(i)%parent_uid
+                ! Count corners at parent_id in all local shells: mirrors the
+                ! contributions_count that update_pon_shells will compute after
+                ! detach_node_from_shells moves those corners to new_local_id.
+                qr = 0
+                do j = 1, size(crack_info_list(i)%shell_uids)
+                  if (crack_info_list(i)%shell_uids(j) > 0) then
+                    do k = 1, 4
+                      if (element%shell%nodes(k, crack_info_list(i)%shell_uids(j)) == &
+                        crack_info_list(i)%parent_id) qr = qr + 1
+                    end do
+                  end if
+                end do
+                pon_n_local(kk) = qr
+              end if
+            end do
+
+            ! Gather counts-per-rank via allreduce(SUM) of a rank-indexed array
+            allocate(pon_cnt(nspmd))
+            allocate(pon_cnt_global(nspmd))
+            pon_cnt = 0
+            pon_cnt(ispmd + 1) = n_pon_cracks_local
+            call spmd_allreduce(pon_cnt, pon_cnt_global, nspmd, SPMD_SUM)
+            deallocate(pon_cnt)
+
+            allocate(pon_dsp(nspmd + 1))
+            pon_dsp(1) = 0
+            do p = 1, nspmd
+              pon_dsp(p + 1) = pon_dsp(p) + pon_cnt_global(p)
+            end do
+            n_pon_cracks_total = pon_dsp(nspmd + 1)
+
+            allocate(pon_uid_global(max(1, n_pon_cracks_total)))
+            allocate(pon_n_global(max(1, n_pon_cracks_total)))
+            allocate(pon_rank_global(max(1, n_pon_cracks_total)))
+            pon_uid_global  = 0
+            pon_n_global    = 0
+            pon_rank_global = 0
+            call spmd_allgatherv(pon_uid_local, n_pon_cracks_local, &
+              pon_uid_global, pon_cnt_global, pon_dsp)
+            call spmd_allgatherv(pon_n_local, n_pon_cracks_local, &
+              pon_n_global, pon_cnt_global, pon_dsp)
+            ! Annotate each gathered entry with the rank it came from (0-based)
+            do p = 1, nspmd
+              do kk = pon_dsp(p) + 1, pon_dsp(p + 1)
+                pon_rank_global(kk) = p - 1
+              end do
+            end do
+            deallocate(pon_uid_local, pon_n_local, pon_cnt_global, pon_dsp)
+          end if
+
+          ! ---------------------------------------------------------------
           ! Phase 2: local splits.
           ! weight=1 rank: full detach_node (owns new node N').
           ! weight=0 rank with local shells: mirror_node_split creates a
@@ -234,15 +343,35 @@
                 crack_info_list(i)%owning_rank /= -1) then
                 call extend_nodal_arrays(nodes, nodes%numnod + 1)
                 call set_new_node_values(nodes, crack_info_list(i)%parent_id)
-                nodes%MAIN_PROC(nodes%numnod + 1) = crack_info_list(i)%owning_rank
+                nodes%MAIN_PROC(nodes%numnod + 1) = crack_info_list(i)%owning_rank+1
                 nodes%WEIGHT(nodes%numnod + 1) = 0
                 nodes%numnod = nodes%numnod + 1
                 numnod = nodes%numnod
                 ! Keep elements%pon%sadsky in sync with nodes%numnod so that
                 ! subsequent update_pon_shells calls do not read adsky out of bounds.
-                ! The ghost placeholder has 0 shells, so we pass an empty list.
+                ! Ghost placeholder has 0 local shells but needs Parith/ON recv rows
+                ! matching the owner's local contribution count so REBUILD_PON_TABLES
+                ! gives consistent FR_NBCC (avoiding buffer overflow in spmd_exch2_a_pon).
                 if (nodes%iparith > 0) then
-                  call update_pon_shells(element, 0, empty_shells, numnod, ispmd, 0, empty_recv)
+                  n_owner_contrib_pon = 0
+                  if (n_pon_cracks_total > 0) then
+                    do kk = 1, n_pon_cracks_total
+                      if (pon_uid_global(kk) == crack_info_list(i)%parent_uid .and. &
+                        pon_rank_global(kk) == crack_info_list(i)%owning_rank) then
+                        n_owner_contrib_pon = pon_n_global(kk)
+                        exit
+                      end if
+                    end do
+                  end if
+                  if (n_owner_contrib_pon > 0) then
+                    allocate(recv_pon_placeholder(n_owner_contrib_pon))
+                    recv_pon_placeholder = crack_info_list(i)%owning_rank + 1
+                    call update_pon_shells(element, 0, empty_shells, numnod, ispmd, &
+                      n_owner_contrib_pon, recv_pon_placeholder)
+                    deallocate(recv_pon_placeholder)
+                  else
+                    call update_pon_shells(element, 0, empty_shells, numnod, ispmd, 0, empty_recv)
+                  end if
                 end if
                 ! Extend nloc_dmg%idxi to cover the ghost placeholder so that
                 ! subsequent detach_node calls find size(idxi) == nodes%numnod.
@@ -268,8 +397,7 @@
             end do
 
             if (crack_info_list(i)%weight == 1) then
-              ! Count ghost shells per rank (negative UIDs) for f_detach correction and
-              ! per-rank ADDCNE recv-slot allocation in detach_node_nloc step 8f.
+              ! Count ghost shells per rank (negative UIDs) — kept for NLOC usage.
               n_owner_contrib = 0
               allocate(ghost_contrib_per_rank(0:nspmd-1))
               ghost_contrib_per_rank = 0
@@ -286,23 +414,57 @@
                   end do
                 end if
               end do
-              call detach_node(nodes, crack_info_list(i)%parent_id, element, &
-                local_shells, local_n, &
-                npari, ninter, ipari, interf, nloc_dmg, nthread, nspmd, ispmd, &
-                n_owner_contrib, &
-                ghost_contrib_per_rank)
+              ! Build Parith/ON-specific ghost recv counts from communicated corner counts.
+              ! ghost_contrib_per_rank is kept as-is for NLOC (detach_node_nloc); the new
+              ! pon_ghost_contrib_per_rank is passed separately for the Parith/ON ADSKY slots
+              ! so that REBUILD_PON_TABLES sees consistent FR_NBCC on owner and ghost.
+              if (n_pon_cracks_total > 0) then
+                allocate(pon_ghost_contrib_per_rank(0:nspmd-1))
+                pon_ghost_contrib_per_rank = 0
+                do kk = 1, n_pon_cracks_total
+                  if (pon_uid_global(kk) == crack_info_list(i)%parent_uid .and. &
+                    pon_rank_global(kk) /= ispmd) then
+                    pon_ghost_contrib_per_rank(pon_rank_global(kk)) = pon_n_global(kk)
+                  end if
+                end do
+                call detach_node(nodes, crack_info_list(i)%parent_id, element, &
+                  local_shells, local_n, &
+                  npari, ninter, ipari, interf, nloc_dmg, nthread, nspmd, ispmd, &
+                  n_owner_contrib, &
+                  ghost_contrib_per_rank, pon_ghost_contrib_per_rank)
+                deallocate(pon_ghost_contrib_per_rank)
+              else
+                call detach_node(nodes, crack_info_list(i)%parent_id, element, &
+                  local_shells, local_n, &
+                  npari, ninter, ipari, interf, nloc_dmg, nthread, nspmd, ispmd, &
+                  n_owner_contrib, &
+                  ghost_contrib_per_rank)
+              end if
               deallocate(ghost_contrib_per_rank)
             else
-              ! Count owner-side shells (negative shell_uids = ghost copies of owner shells).
-              ! This equals the number of local ADDCNE entries owner N' will have,
-              ! so that N'_ghost can be given the same number of remote ADDCNE slots.
+              ! Compute NLOC n_owner_contrib (count of ghost-copied owner shells).
+              ! This is used for detach_node_nloc on the mirror (ghost) side.
               n_owner_contrib = 0
               do j = 1, size(crack_info_list(i)%shell_uids)
                 if (crack_info_list(i)%shell_uids(j) < 0) n_owner_contrib = n_owner_contrib + 1
               end do
+              ! Compute Parith/ON n_owner_contrib_pon from communicated corner count.
+              ! Kept separate from the NLOC n_owner_contrib so detach_node_nloc keeps
+              ! the old (ghost-copy based) count while only Parith/ON ADSKY gets the fix.
+              n_owner_contrib_pon = n_owner_contrib  ! default: same as NLOC
+              if (n_pon_cracks_total > 0) then
+                do kk = 1, n_pon_cracks_total
+                  if (pon_uid_global(kk) == crack_info_list(i)%parent_uid .and. &
+                    pon_rank_global(kk) == crack_info_list(i)%owning_rank) then
+                    n_owner_contrib_pon = pon_n_global(kk)
+                    exit
+                  end if
+                end do
+              end if
               call mirror_node_split(nodes, crack_info_list(i)%parent_id, element, &
                 local_shells, local_n, &
-                nloc_dmg, nthread, ispmd, nspmd, crack_info_list(i)%owning_rank, n_owner_contrib)
+                nloc_dmg, nthread, ispmd, nspmd, crack_info_list(i)%owning_rank, &
+                n_owner_contrib, n_owner_contrib_pon)
             end if
 
             numnod = nodes%numnod
@@ -312,6 +474,11 @@
 
             deallocate(local_shells)
           end do
+
+          ! Clean up Phase 1.5 allocatables
+          if (allocated(pon_uid_global))  deallocate(pon_uid_global)
+          if (allocated(pon_n_global))    deallocate(pon_n_global)
+          if (allocated(pon_rank_global)) deallocate(pon_rank_global)
 
           ! ---------------------------------------------------------------
           ! Phase 3: global gather of (parent_uid, owning_rank) pairs.
@@ -449,7 +616,7 @@
                 ! nodglob is meaningful on every rank that holds N'
                 ! (same global index regardless of ownership)
                 nodes%nodglob(numnod0 + j) = numnodg0
-                nodes%main_proc(numnod0 + j) = current_owning_rank
+                nodes%main_proc(numnod0 + j) = current_owning_rank+1
 
               end if
             end do

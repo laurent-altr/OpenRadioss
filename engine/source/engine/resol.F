@@ -5302,14 +5302,17 @@ C Init var parallel SMP
 c ========================================================================================
 C                                     node splitting
              IF(NLOC_DMG%IMOD>0) THEN
+               write(6,*) NCYCLE,"NUMNOD BEFORE",NUMNOD, numnodg
                numnod_old = numnod
                numnodm_old = numnodm
                nloc_nnod_old = NLOC_DMG%NNOD
                call nloc_shell_detach(nodes, element, interfaces, npari, ninter, ipari, numnod,
      .                  numnodg, numelc, ispmd, nspmd,
      .                  new_crack, nloc_dmg, nthread)
+               write(6,*) NCYCLE,"NUMNOD AFTER", NUMNOD, numnodg
 
 
+ 
                if(new_crack > 0) then
                  ! if at least 1 node has been detached, some data must be re-initialized
                  numnodm = numnodm_old + new_crack
@@ -5388,6 +5391,7 @@ C                                     node splitting
                  ENDIF
                  CALL ALLOCATE_OUTPUT_DATA(OUTPUT,NUMNOD)
                  LCNE0 = SIZE(ELEMENT%PON%PROCNE)
+                 LSKY= LCNE0
                  ! Reallocate skyline arrays after node split (NUMNOD has increased).
                  ! ADSKYI is dimensioned (0:NUMNOD+1) but was sized for the old NUMNOD.
                  IF(IPARIT > 0) THEN

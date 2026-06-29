@@ -748,7 +748,7 @@
 !!          owning_rank instead of copying from the parent. The UID is assigned later in the
 !!          global uid-sync phase of apply_crack.
         subroutine mirror_node_split(nodes, node_id, elements, shell_list, list_size, &
-          nloc_dmg, nthread, ispmd, nspmd, owning_rank, n_owner_contrib)
+          nloc_dmg, nthread, ispmd, nspmd, owning_rank, n_owner_contrib, n_owner_contrib_pon)
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Modules
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -770,12 +770,18 @@
           integer,             intent(in)    :: ispmd        !< local MPI rank (0-based)
           integer,             intent(in)    :: nspmd        !< number of MPI ranks
           integer,             intent(in)    :: owning_rank  !< rank that owns the new node (0-based)
-          integer,             intent(in)    :: n_owner_contrib !< number of owner N' local corners (= N'_ghost remote slots needed)
+          integer,             intent(in)    :: n_owner_contrib !< NLOC: ghost-copy-based recv slot count
+          !! \brief Parith/ON-specific recv slot count (communicated corner count from owner).
+          !! \details If present, this value (not n_owner_contrib) is used to size the Parith/ON
+          !!          ADSKY recv rows on the ghost rank.  n_owner_contrib is still passed to
+          !!          detach_node_nloc unchanged so non-local damage structures are unaffected.
+          integer, optional,   intent(in)    :: n_owner_contrib_pon
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Local variables
 ! ----------------------------------------------------------------------------------------------------------------------
           integer :: numnod
           integer :: new_local_id
+          integer :: n_pon_recv
           integer, allocatable :: recv_procne_owner(:)
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Body
@@ -786,18 +792,22 @@
           call extend_nodal_arrays(nodes, numnod + 1)
           call set_new_node_values(nodes, node_id)
           ! Override: the new node is owned by owning_rank, not by this rank
-          nodes%MAIN_PROC(new_local_id) = owning_rank
+          nodes%MAIN_PROC(new_local_id) = owning_rank + 1
           ! Mirror nodes are ghost copies; mark as not owned so output routines skip them
           nodes%WEIGHT(new_local_id) = 0
 
-          ! Ghost N' needs n_owner_contrib RECV slots so REBUILD_PON_TABLES creates a
-          ! symmetric RECV on this rank matching the owner's SEND of its local N' rows.
-          ! Without these slots, owner sends but ghost expects 0 bytes → MPI truncation
-          ! and wrong F(N') → wrong A/V/X on the ghost rank from the first post-split cycle.
-          allocate(recv_procne_owner(max(1, n_owner_contrib)))
+          ! n_pon_recv: how many Parith/ON ADSKY recv rows to create for N'_ghost.
+          ! Uses n_owner_contrib_pon (communicated from owner) when available; otherwise
+          ! falls back to n_owner_contrib (ghost-copy-based, used for NLOC).
+          if (present(n_owner_contrib_pon)) then
+            n_pon_recv = n_owner_contrib_pon
+          else
+            n_pon_recv = n_owner_contrib
+          end if
+          allocate(recv_procne_owner(max(1, n_pon_recv)))
           recv_procne_owner = owning_rank + 1
           call detach_node_from_shells(nodes, node_id, elements, shell_list, list_size, &
-            ispmd, n_owner_contrib, recv_procne_owner)
+            ispmd, n_pon_recv, recv_procne_owner)
           deallocate(recv_procne_owner)
 
           if (nloc_dmg%imod > 0) then
@@ -830,7 +840,8 @@
 !||    nodal_arrays_mod              ../common_source/modules/nodal_arrays.F90
 !||====================================================================
         subroutine detach_node(nodes, node_id, elements, shell_list, list_size, &
-          npari, ninter, ipari, interf, nloc_dmg, nthread, nspmd, ispmd, n_ghost_contrib, ghost_contrib_per_rank)
+          npari, ninter, ipari, interf, nloc_dmg, nthread, nspmd, ispmd, n_ghost_contrib, &
+          ghost_contrib_per_rank, pon_ghost_contrib_per_rank)
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Modules
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -858,7 +869,12 @@
           integer,             intent(in)    :: nspmd        !< number of MPI domains
           integer,             intent(in)    :: ispmd        !< local MPI rank (0-based)
           integer,             intent(in)  :: n_ghost_contrib !< ghost shells moving to N' (for f_detach correction in PARITH/ON)
-          integer, dimension(0:nspmd-1), optional, intent(in)   :: ghost_contrib_per_rank !< per-rank breakdown of n_ghost_contrib
+          integer, dimension(0:nspmd-1), optional, intent(in) :: ghost_contrib_per_rank !< per-rank breakdown for NLOC
+          !! \brief Parith/ON-specific per-rank ghost recv counts.
+          !! \details When present, overrides ghost_contrib_per_rank for the Parith/ON ADSKY
+          !!          recv-slot setup.  ghost_contrib_per_rank (NLOC counts) is still passed
+          !!          to detach_node_nloc unchanged so non-local damage is unaffected.
+          integer, dimension(0:nspmd-1), optional, intent(in) :: pon_ghost_contrib_per_rank
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Local variables
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -888,7 +904,23 @@
           i = node_id
           call set_new_node_values(nodes, i)
 
-          if (present(ghost_contrib_per_rank)) then
+          ! Choose which ghost recv counts to use for Parith/ON ADSKY slot allocation:
+          !   pon_ghost_contrib_per_rank (if present) gives the correct corner-count-based
+          !   values communicated via allgatherv; else fall back to ghost_contrib_per_rank.
+          if (present(pon_ghost_contrib_per_rank)) then
+            n_pon_recv = sum(pon_ghost_contrib_per_rank)
+            allocate(pon_recv_procne(n_pon_recv))
+            j_pon = 0
+            do r_idx = 0, nspmd-1
+              do i = 1, pon_ghost_contrib_per_rank(r_idx)
+                j_pon = j_pon + 1
+                pon_recv_procne(j_pon) = r_idx + 1
+              end do
+            end do
+            call detach_node_from_shells(nodes, node_id, elements, shell_list, list_size, &
+              ispmd, n_pon_recv, pon_recv_procne)
+            deallocate(pon_recv_procne)
+          else if (present(ghost_contrib_per_rank)) then
             n_pon_recv = sum(ghost_contrib_per_rank)
             allocate(pon_recv_procne(n_pon_recv))
             j_pon = 0
