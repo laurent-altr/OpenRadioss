@@ -1383,6 +1383,9 @@ C-------------------------------------------------------------------------------
 C GPU
               type(SHELLS_) :: SHELLS
               integer :: ipri
+
+
+              INTEGER IDBG_LID, IDBG_NLI, IDBG_CC, IDBG_I, IDBG_J
 C             
 
               call resol_alloc_phase1(rby6,dxancg,nb25_candt,nb25_impct,nb25_dst1,nb25_dst2,igrouc,igrounc, 
@@ -4488,10 +4491,71 @@ C
 
  22           CONTINUE
 
+
+!             IF(NLOC_DMG%IMOD > 0 .AND. NCYCLE >= 1775 .AND. NCYCLE <= 1782) THEN
+!               IDBG_LID = 0
+!               DO IDBG_I = 1, NUMNOD
+!                 IF(NODES%ITAB(IDBG_I) == 13550) THEN
+!                   IDBG_LID = IDBG_I
+!                   EXIT
+!                 END IF
+!               END DO
+!               IF(IDBG_LID > 0) THEN
+!                 IDBG_NLI = NLOC_DMG%IDXI(IDBG_LID)
+!                 WRITE(6,'(A,I6,A,I3,A,I6,A,I6)') '[DBG13550_PRE_EXCH] cyc=',
+!    .              NCYCLE,' r=',ISPMD,' lid=',IDBG_LID,' nli=',IDBG_NLI
+!                 IF(IDBG_NLI > 0) THEN
+!                   WRITE(6,'(A,I6,A,I3,A,I7,A,I7)') '[DBG13550_PRE_EXCH] cyc=',
+!    .                NCYCLE,' r=',ISPMD,' addcne_lo=',NLOC_DMG%ADDCNE(IDBG_NLI),
+!    .                ' addcne_hi=',NLOC_DMG%ADDCNE(IDBG_NLI+1)-1
+!                   DO IDBG_CC = NLOC_DMG%ADDCNE(IDBG_NLI),
+!    .                            NLOC_DMG%ADDCNE(IDBG_NLI+1)-1
+!                     WRITE(6,'(A,I6,A,I3,A,I7,A,I4)') '[DBG13550_PRE_EXCH] cyc=',
+!    .                  NCYCLE,' r=',ISPMD,' cc=',IDBG_CC,
+!    .                  ' proc=',NLOC_DMG%PROCNE(IDBG_CC)
+!                     DO IDBG_J = 1, NLOC_DMG%NDDMAX
+!                       WRITE(6,'(A,I6,A,I3,A,I7,A,I3,A,E14.6)')
+!    .                    '[DBG13550_PRE_EXCH] cyc=',NCYCLE,' r=',ISPMD,
+!    .                    ' cc=',IDBG_CC,' dof=',IDBG_J,
+!    .                    ' fsky=',NLOC_DMG%FSKY(IDBG_CC,IDBG_J)
+!                     END DO
+!                   END DO
+!                 END IF
+!               END IF
+!               CALL FLUSH(6)
+!             END IF
+
 !   Mpi communication for Nlocal option : parith/off
               IF(IPARIT /= 0.AND.NSPMD > 1.AND. NLOC_DMG%IMOD > 0)THEN
                 CALL SPMD_EXCH_SUB_PON(NLOC_DMG)
               ENDIF
+
+
+c             IF(NLOC_DMG%IMOD > 0 .AND. NCYCLE >= 1775 .AND. NCYCLE <= 1782) THEN
+c               IF(IDBG_LID > 0) THEN
+c                 IDBG_NLI = NLOC_DMG%IDXI(IDBG_LID)
+c                 IF(IDBG_NLI > 0) THEN
+c                   WRITE(6,'(A,I6,A,I3,A,I7,A,I7)') '[DBG13550_POST_EXCH] cyc=',
+c    .                NCYCLE,' r=',ISPMD,' addcne_lo=',NLOC_DMG%ADDCNE(IDBG_NLI),
+c    .                ' addcne_hi=',NLOC_DMG%ADDCNE(IDBG_NLI+1)-1
+c                   DO IDBG_CC = NLOC_DMG%ADDCNE(IDBG_NLI),
+c    .                            NLOC_DMG%ADDCNE(IDBG_NLI+1)-1
+c                     WRITE(6,'(A,I6,A,I3,A,I7,A,I4)') '[DBG13550_POST_EXCH] cyc=',
+c    .                  NCYCLE,' r=',ISPMD,' cc=',IDBG_CC,
+c    .                  ' proc=',NLOC_DMG%PROCNE(IDBG_CC)
+c                     DO IDBG_J = 1, NLOC_DMG%NDDMAX
+c                       WRITE(6,'(A,I6,A,I3,A,I7,A,I3,A,E14.6)')
+c    .                    '[DBG13550_POST_EXCH] cyc=',NCYCLE,' r=',ISPMD,
+c    .                    ' cc=',IDBG_CC,' dof=',IDBG_J,
+c    .                    ' fsky=',NLOC_DMG%FSKY(IDBG_CC,IDBG_J)
+c                     END DO
+c                   END DO
+c                   CALL FLUSH(6)
+c                 END IF
+c               END IF
+c             END IF
+
+
               IF(NSPMD > 1.AND. NINTLOADP > 0)THEN
                 LENR = NODES%BOUNDARY_ADD(1,NSPMD+1)-NODES%BOUNDARY_ADD(1,1)
                 CALL SPMD_EXCH_TAGNCONT(TAGNCONT,NODES%BOUNDARY_ADD ,NODES%BOUNDARY,LENR     )
@@ -4793,6 +4857,10 @@ C===============================================================================
               GRELTSK  = (ITSK+1)*NPSAV*NGPE/NTHREAD
               NODFTSK_2   = NODFT_ASSPAR(ITSK+1)
               NODLTSK_2   = NODLT_ASSPAR(ITSK+1)
+
+             write(6,*) NCYCLE,__LINE__,"ASSPAR4 CALL", NUMNOD, IPARIT
+             call flush(6)
+             call SPMD_BARRIER()
 
               IF(IPARIT==1)THEN
 
@@ -5249,9 +5317,7 @@ C                                     node splitting
                  ! Rebuild BOUNDARY and BOUNDARY_ADD from scratch using updated ownership.
                  ! This replaces the per-split extend_boundary_for_split incremental updates.
                  IF (NSPMD > 1) THEN
-                   CALL spmd_rebuild_boundary(NUMNOD, NSPMD, ISPMD, 
-     .               NODES%MAIN_PROC, NODES%ITAB, 
-     .               NODES%BOUNDARY, NODES%BOUNDARY_ADD, NODES%BOUNDARY_SIZE)
+                   CALL spmd_rebuild_boundary(NUMNOD, NSPMD, ISPMD,NODES) 
                    ! Rebuild non-local MPI boundary tables on ALL ranks because the
                    ! global BOUNDARY changed (even ranks with no local splits now have
                    ! stale FR_NBCC exchange counts due to mirror-node boundary changes).
@@ -5263,6 +5329,28 @@ C                                     node splitting
                    ! now that BOUNDARY/BOUNDARY_ADD reflect the new node ownership.
                    CALL init_ghost_shells(NODES, ELEMENT, ISPMD, NSPMD,
      .               NODES%BOUNDARY_ADD, NODES%BOUNDARY_SIZE, NODES%BOUNDARY)
+
+
+                   IF (IPARIT /= 0) THEN
+                     CALL ASSINIT(ELEMENT%PON%ADSKY,
+     .                 NODES%BOUNDARY_ADD, NODES%BOUNDARY,
+     .                 ELEMENT%PON%PROCNE, LISENDP, LIRECVP)
+                     IF (ALLOCATED(ELEMENT%PON%ISENDP))
+     .                 DEALLOCATE(ELEMENT%PON%ISENDP)
+                     IF (ALLOCATED(ELEMENT%PON%IRECVP))
+     .                 DEALLOCATE(ELEMENT%PON%IRECVP)
+                     ALLOCATE(ELEMENT%PON%ISENDP(
+     .                 MIN(LISENDP,1):LISENDP))
+                     ALLOCATE(ELEMENT%PON%IRECVP(
+     .                 MIN(LIRECVP,1):LIRECVP))
+                     CALL REBUILD_PON_TABLES(ELEMENT%PON%ADSKY,
+     .                 NODES%BOUNDARY_ADD, NODES%BOUNDARY,
+     .                 ELEMENT%PON%PROCNE, FR_NBCC,
+     .                 ELEMENT%PON%IADSDP, ELEMENT%PON%IADRCP,
+     .                 ELEMENT%PON%ISENDP, ELEMENT%PON%IRECVP)
+                   END IF
+
+
                  END IF
 #endif
                  CALL INIT_NODAL_STATE( IPARI,SHOOT_STRUCT,INTERFACES%INTBUF_TAB,NODES%BOUNDARY_ADD,NODES%BOUNDARY,
@@ -6830,6 +6918,35 @@ C-----------------------------------------------
                 IF (GLOB_THERM%ITHERM_FE > 0 )
      .             CALL TEMPUR(NODES%TEMP ,NODES%MCP,FTHE,NODFTSK,NODLTSK,NODES%WEIGHT,MCP_OFF,GLOB_THERM%HEAT_STORED)
 !$OMP END PARALLEL
+
+!C --- Debug instrumentation: node UID 13550 after NLOCAL_ACC ---
+!              IF(NLOC_DMG%IMOD > 0 .AND. NCYCLE >= 1775 .AND. NCYCLE <= 1782) THEN
+!                IF(IDBG_LID > 0) THEN
+!                  IDBG_NLI = NLOC_DMG%IDXI(IDBG_LID)
+!                  IF(IDBG_NLI > 0) THEN
+!                    WRITE(6,'(A,I6,A,I3,A,I6,A,I6)') '[DBG13550_FNL] cyc=',
+!     .                NCYCLE,' r=',ISPMD,' lid=',IDBG_LID,' nli=',IDBG_NLI
+!                    DO IDBG_J = NLOC_DMG%POSI(IDBG_NLI),
+!     .                           NLOC_DMG%POSI(IDBG_NLI+1)-1
+!                      WRITE(6,'(A,I6,A,I3,A,I7,A,E14.6)') '[DBG13550_FNL] cyc=',
+!     .                  NCYCLE,' r=',ISPMD,' pos=',IDBG_J,
+!     .                  ' fnl=',NLOC_DMG%FNL(IDBG_J,1)
+!                    END DO
+!                  END IF
+!                  WRITE(6,'(A,I6,A,I3,A,3E14.6)') '[DBG13550_ACC] cyc=',
+!     .              NCYCLE,' r=',ISPMD,' acc=',
+!     .              NODES%A(1,IDBG_LID),NODES%A(2,IDBG_LID),NODES%A(3,IDBG_LID)
+!                  WRITE(6,'(A,I6,A,I3,A,3E14.6)') '[DBG13550_VEL] cyc=',
+!     .              NCYCLE,' r=',ISPMD,' vel=',
+!     .              NODES%V(1,IDBG_LID),NODES%V(2,IDBG_LID),NODES%V(3,IDBG_LID)
+!                  WRITE(6,'(A,I6,A,I3,A,E14.6)') '[DBG13550_MS] cyc=',
+!     .              NCYCLE,' r=',ISPMD,' ms=',NODES%MS(IDBG_LID)
+!                  CALL FLUSH(6)
+!                END IF
+!              END IF
+
+
+
                 CALL PYTHON_END_OPENMP(PYTHON)
 
 C------------------------------------------

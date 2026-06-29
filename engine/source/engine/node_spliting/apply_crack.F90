@@ -284,7 +284,7 @@
                   k = -crack_info_list(i)%shell_uids(j)
                   do p = 1, nspmd
                     if (k >= element%ghost_shell%offset(p) .and. &
-                        k <  element%ghost_shell%offset(p+1)) then
+                      k <  element%ghost_shell%offset(p+1)) then
                       ghost_contrib_per_rank(p-1) = ghost_contrib_per_rank(p-1) + 1
                       exit
                     end if
@@ -294,8 +294,8 @@
               call detach_node(nodes, crack_info_list(i)%parent_id, element, &
                 local_shells, local_n, &
                 npari, ninter, ipari, interf, nloc_dmg, nthread, nspmd, ispmd, &
-                n_ghost_contrib=n_owner_contrib, &
-                ghost_contrib_per_rank=ghost_contrib_per_rank)
+                n_owner_contrib, &
+                ghost_contrib_per_rank)
               deallocate(ghost_contrib_per_rank)
             else
               ! Count owner-side shells (negative shell_uids = ghost copies of owner shells).
@@ -460,6 +460,8 @@
 
               p = processor(i)
               if (p == ispmd + 1) then
+                write(6,*) 'New node created on rank ', ispmd, ' for parent_uid=', current_parent, &
+                  ' new_uid=', old_max_uid, ' owning_rank=', current_owning_rank
                 ! This rank created a local N' for this parent
                 this_rank_created = .true.
                 j = local_pos(i)
@@ -494,6 +496,36 @@
             if (allocated(local_pos))         deallocate(local_pos)
             if (allocated(is_boundary_split)) deallocate(is_boundary_split)
           end if
+
+
+          do i = 1, nodes%numnod
+            if (nodes%itab(i) == 13550) then
+              write(*,'(a,i0,a,i0)') '[SPLIT][rank ', ispmd, '] DEBUG: node ', i, &
+                ' itab=', nodes%itab(i), ' itabm1=', nodes%itabm1(i)
+              !print all data
+
+              write(6,*) "IKINE: ", nodes%IKINE(i)
+              write(6,*) "MAIN_PROC: ", nodes%MAIN_PROC(i)
+              write(6,*) "WEIGHT: ", nodes%WEIGHT(i)
+              !write(6,*) "WEIGHT_MD: ", nodes%WEIGHT_MD(i)
+              !write(6,*) "ICODT: ", nodes%ICODT(i)
+              !write(6,*) "ICODR: ", nodes%ICODR(i)
+              !write(6,*) "ISKEW: ", nodes%ISKEW(i)
+              !write(6,*) "ICODE: ", nodes%ICODE(i)
+              ! write(6,*) "work_array_node: ", nodes%work_array_node(i)
+              write(6,*) "parent_node: ", nodes%itab(nodes%parent_node(i))
+              write(6,*) "parent_node weight)", nodes%WEIGHT(nodes%parent_node(i))
+              write(6,*) "nchilds: ", nodes%nchilds(i)
+              ! write(6,*) "nodglob: ", nodes%nodglob(i)
+              write(6,*) "KINET: ", nodes%KINET(i)
+              write(6,*) "ms: ", nodes%ms(i)
+              write(6,*) "ms0: ", nodes%ms0(i)
+              write(6,*) "X: ", nodes%X(1,i), nodes%X(2,i), nodes%X(3,i)
+              write(6,*) "V: ", nodes%V(1,i), nodes%V(2,i), nodes%V(3,i)
+              write(6,*) "A: ", nodes%A(1,i), nodes%A(2,i), nodes%A(3,i)
+              flush(6)
+            end if
+          end do
 
           ! Debug summary
           write(*,'(a,i0,a,i0,a,i0,a,i0)') &

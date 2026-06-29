@@ -458,6 +458,17 @@ C--------------------
      N             UY3     ,UY4     ,XL2     ,XL3     ,XL4     ,
      O             YL2     ,YL3     ,YL4     ,VL1     ,VL2     ,
      P             VL3     ,VL4     ,NEL     ,Z2      )
+
+      DO i = jft, jlt
+      IF(NGL(i) == 13054) THEN
+        write(6,"(a,9Z20)") "RR",R11(i),R12(i),R13(i),R21(i),R22(i),R23(i),R31(i),R32(i),R33(i)
+        write(6,"(a,4Z20)") "X",X(1,IXC(2,i)),X(1,IXC(3,i)),X(1,IXC(4,i)),X(1,IXC(5,i))                                                                                                                                                                   
+        write(6,"(a,4Z20)") "Y",X(2,IXC(2,i)),X(2,IXC(3,i)),X(2,IXC(4,i)),X(2,IXC(5,i))
+        write(6,"(a,4Z20)") "Z",X(2,IXC(2,i)),X(3,IXC(3,i)),X(3,IXC(4,i)),X(3,IXC(5,i))
+      ENDIF
+      enddo
+
+
 C
       CALL CNCOEF3B(JFT    ,JLT     ,PM      ,MAT     ,GEO     ,
      2              PID    ,AREA    ,SHF     ,THK0    ,
@@ -552,7 +563,6 @@ c-------------------------------------------
           NC4(I) = IXC(5,I)
         ENDDO
         DO K = 1,NDDL
-#include "vectorize.inc" 
           DO I=JFT,JLT
             INOD(1) = NLOC_DMG%IDXI(NC1(I))
             INOD(2) = NLOC_DMG%IDXI(NC2(I))
@@ -576,7 +586,6 @@ c-------------------------------------------
 !-------------------------------------------------------------------------------
       dtinv = dt1 / max(dt1**2,em20)  ! inverse of dt
       asrate = one   ! to be changed for default value
-#include "vectorize.inc"
       do i = 1,nel
         eps_k2 = (kxx(i)**2+kyy(i)**2+kxx(i)*kyy(i)+fourth*kxy(i)**2)
      .         * one_over_9*gbuf%thk(i)**2
@@ -723,6 +732,12 @@ c     Virtual internal forces of regularized non local ddl
 c--------------------------
       IF (INLOC > 0) THEN
         ! Warning : Y24 = PX1
+      DO i = jft, jlt
+      IF(NGL(i) == 13054) THEN
+        WRITE(*,*) "13054", I, MAT(I), PID(I), NGL(I)
+      ENDIF
+      enddo
+
         CALL CFINT_REG(
      1   NLOC_DMG,        VAR_REG,         GBUF%THK,        NEL,
      2   OFF,             AREA,            NC1,             NC2,
@@ -747,6 +762,9 @@ c-------------------------------
      4                    OFF  ,IPARTC,PARTSAV,KFTS  )
           END IF
         END IF
+
+
+
         CALL CZPROJ1(
      1            JFT    ,JLT    ,VQN    ,VQ     ,VF ,
      2            VM     ,PLAT   ,
