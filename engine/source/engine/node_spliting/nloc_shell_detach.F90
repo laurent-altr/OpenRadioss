@@ -35,11 +35,13 @@
 !||    nloc_shell_detach         ../engine/source/engine/node_spliting/nloc_shell_detach.F90
 !||--- calls      -----------------------------------------------------
 !||    apply_crack               ../engine/source/engine/node_spliting/apply_crack.F90
+!||    check_pon_consistency     ../engine/source/engine/node_spliting/check_pon_consistency.F90
 !||    detach_node               ../engine/source/engine/node_spliting/detach_node.F90
 !||    spmd_exchange_ghost_shells ../engine/source/engine/node_spliting/ghost_shells.F90
 !||    stlsort_int_int            ../common_source/tools/sort/cppsort.cpp
 !||--- uses       -----------------------------------------------------
 !||    apply_crack_mod            ../engine/source/engine/node_spliting/apply_crack.F90
+!||    check_pon_consistency_mod  ../engine/source/engine/node_spliting/check_pon_consistency.F90
 !||    connectivity_mod           ../common_source/modules/connectivity.F90
 !||    detach_node_mod            ../engine/source/engine/node_spliting/detach_node.F90
 !||    ghost_shells_mod           ../engine/source/engine/node_spliting/ghost_shells.F90
@@ -64,6 +66,7 @@
           use nlocal_reg_mod
           use umap_mod
           use apply_crack_mod, only: node_split_info, apply_crack
+          use check_pon_consistency_mod, only: check_pon_consistency
           implicit none
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Arguments
@@ -238,6 +241,8 @@
 
             call apply_crack(nodes, element, interf, npari, ninter, ipari, numnod, numnodg, &
               ispmd, nspmd, nloc_dmg, nthread, new_crack, crack_info_list)
+
+            call check_pon_consistency(nodes, element, ispmd)
           endif
 
           if (allocated(detach_shell))           deallocate(detach_shell)
