@@ -309,7 +309,12 @@ During `ddsplit`:
 
 `engine/source/engine/resol_init.F:1161` calls **`SPMD_SUB_BOUNDARIES`** (see §8.2) to
 derive the non-local communication tables from the generic SPMD boundary tables
-(`IAD_ELEM`/`FR_ELEM` of the mechanical problem).
+(`IAD_ELEM`/`FR_ELEM` of the mechanical problem). The startup call passes
+`NUMNOD` and `ITAB` as the last two arguments (`NUMNOD_OLD = NUMNOD` means "no
+node is new", so the startup behaviour is unchanged); after a node split the same
+routine is called again from `resol.F` with `NUMNOD_OLD` = the pre-split node
+count, so the new nodes can be enumerated in a globally consistent (ITAB-sorted)
+order — see §12.3 and `doc/NODE_SPLITING.md` §9.3.
 
 ### 6.3 Per-cycle workflow (`RESOL`)
 
@@ -326,25 +331,29 @@ from the current sources):
       └─ *FINT_REG: non-local forces → FNL(:,ITASK)  (Parith/OFF)
                                      → FSKY/STSKY     (Parith/ON)
 
-2. MPI exchange (Parith/ON only)                       resol.F:4491
+2. MPI exchange (Parith/ON only)                       resol.F:4537
    SPMD_EXCH_SUB_PON: exchange of boundary skyline slots FSKY/STSKY
 
 3. Force assembly (OpenMP parallel)
    ├─ Parith/OFF: ASSPAR_SUB_POFF reduces FNL/STIFNL over threads
-   │              (resol.F:4552, 4556) + NLOCAL_DTNODA (resol.F:4558)
+   │              (resol.F:4625, 4629) + NLOCAL_DTNODA (resol.F:4631)
    └─ Parith/ON : ASSPAR_SUB gathers FSKY→FNL(:,1), STSKY→STIFNL(:,1)
-                  in deterministic order (resol.F:4817, 4821)
-                  + NLOCAL_DTNODA (resol.F:4823)
+                  in deterministic order (resol.F:4894, 4898)
+                  + NLOCAL_DTNODA (resol.F:4900)
 
-4. Debug output (optional, /DEBUG/ACC)                 resol.F:4893
+4. Debug output (optional, /DEBUG/ACC)                 resol.F:4970
    SPMD_COLLECT_NLOCAL: gather FNL to proc 0 → *_NLOCAL_*.adb file
 
-5. MPI exchange (Parith/OFF only)                      resol.F:6721
+5. Node splitting (crack propagation)                  resol.F:~5315
+   NLOC_SHELL_DETACH + post-split table rebuilds — see §12 and
+   doc/NODE_SPLITING.md
+
+6. MPI exchange (Parith/OFF only)                      resol.F:6885
    SPMD_EXCH_SUB_POFF: sum FNL/STIFNL across domain boundaries
 
-6. NLOCAL_ACC   (resol.F:6768)  FNL := FNL / MASS        (accelerations)
-7. NLOCAL_VEL   (resol.F:8725)  VNL_OLD := VNL ; VNL += DT12·FNL ; FNL := 0
-8. NLOCAL_INCR  (resol.F:8822)  DNL := DT2·VNL ; UNL += DNL
+7. NLOCAL_ACC   (resol.F:6932)  FNL := FNL / MASS        (accelerations)
+8. NLOCAL_VEL   (resol.F:8951)  VNL_OLD := VNL ; VNL += DT12·FNL ; FNL := 0
+9. NLOCAL_INCR  (resol.F:9048)  DNL := DT2·VNL ; UNL += DNL
 ```
 
 The assembly/integration helpers are:
@@ -510,22 +519,24 @@ communications, but on the compact non-local numbering.
 
 | Routine | File | When | What |
 |---|---|---|---|
-| `SPMD_SUB_BOUNDARIES` | `engine/source/mpi/spmd_exch_sub.F:31` | Once, at `RESOL_INIT` | Builds the non-local boundary tables. |
-| `SPMD_EXCH_SUB_POFF` | `engine/source/mpi/spmd_exch_sub.F:230` | Every cycle, Parith/OFF | Sums `FNL` (+`STIFNL`) at domain boundaries. |
-| `SPMD_EXCH_SUB_PON` | `engine/source/mpi/spmd_exch_sub.F:394` | Every cycle, Parith/ON | Exchanges boundary **skyline slots** `FSKY` (+`STSKY`). |
+| `SPMD_SUB_BOUNDARIES` | `engine/source/mpi/spmd_exch_sub.F:31` | At `RESOL_INIT`, and again after every node-split cycle (§12.3) | Builds the non-local boundary tables. |
+| `SPMD_EXCH_SUB_POFF` | `engine/source/mpi/spmd_exch_sub.F:317` | Every cycle, Parith/OFF | Sums `FNL` (+`STIFNL`) at domain boundaries. |
+| `SPMD_EXCH_SUB_PON` | `engine/source/mpi/spmd_exch_sub.F:481` | Every cycle, Parith/ON | Exchanges boundary **skyline slots** `FSKY` (+`STSKY`). |
 | `SPMD_COLLECT_NLOCAL` | `engine/source/mpi/output/spmd_collect_nlocal.F` | On `/DEBUG/ACC` output cycles | Gathers the non-local field to proc 0 for `.adb` debug files. |
 | `SPMD_EXCH_R2R_NL` | `engine/source/mpi/r2r/spmd_exch_r2r_nl.F` | Rad2Rad coupling | Exchanges `FNL` at the coupling interface. |
 
 ### 8.2 `SPMD_SUB_BOUNDARIES` — communication table construction
 
-Called from `resol_init.F:1161`. From the *mechanical* boundary tables
-(`IAD_ELEM`/`FR_ELEM` of the global problem) it extracts the subset of nodes carrying
-non-local d.o.fs (via `IDXI`) and builds:
+Called from `resol_init.F:1161` (startup) and from the node-splitting block in
+`resol.F` (§12.3). Signature: `SPMD_SUB_BOUNDARIES(NLOC_DMG, IAD_ELEM, FR_ELEM,
+NUMNOD_OLD, ITAB)`. From the *mechanical* boundary tables (`IAD_ELEM`/`FR_ELEM`
+of the global problem) it extracts the subset of nodes carrying non-local d.o.fs
+(via `IDXI`) and builds:
 
 * the Parith/OFF tables `NLOC_DMG%IAD_ELEM`, `IAD_SIZE` (buffer sizes accounting for
   `NDDL` d.o.fs per node, doubled when stiffness is exchanged) and `FR_ELEM`
-  (`spmd_exch_sub.F:63–135`);
-* in Parith/ON (`spmd_exch_sub.F:139–217`), for each boundary non-local node it scans the
+  (`spmd_exch_sub.F:63–140`);
+* in Parith/ON (`spmd_exch_sub.F:146–310`), for each boundary non-local node it scans the
   attached elements through `ADDCNE`/`PROCNE` and classifies each skyline slot:
   * slot of a **locally owned** element → entry in `ISENDSP`/`FR_ELEM_S` (its value must
     be sent to the other domains sharing the node),
@@ -534,9 +545,17 @@ non-local d.o.fs (via `IDXI`) and builds:
 
   filling `IADSDP`, `IADRCP` and the counters `FR_NBCC`.
 
+The Parith/ON fill is **two-pass**: pre-existing non-local nodes
+(`INDX(NN) ≤ NUMNOD_OLD`) are enumerated in `FR_ELEM` order, then nodes created
+by node splitting (`INDX(NN) > NUMNOD_OLD`) are insertion-sorted by
+`ITAB(INDX(NN))` (global user id) so that the owner's SEND order matches the
+partner's RECV order on every rank. At startup `NUMNOD_OLD = NUMNOD`, so no node
+is "new" and the fill degenerates to the plain single-pass order. See
+`doc/NODE_SPLITING.md` §9.3 for the reproducibility bug this fixes.
+
 ### 8.3 `SPMD_EXCH_SUB_POFF` — Parith/OFF boundary reduction
 
-Called from `resol.F:6721`, after the thread assembly and before `NLOCAL_ACC`.
+Called from `resol.F:6885`, after the thread assembly and before `NLOCAL_ACC`.
 Classical non-blocking neighbor exchange:
 
 1. post `MPI_IRECV` for every domain with a non-empty buffer (sizes from `IAD_SIZE`);
@@ -553,7 +572,7 @@ precision, which is exactly what Parith/ON forbids, hence the second routine.
 
 ### 8.4 `SPMD_EXCH_SUB_PON` — Parith/ON skyline exchange
 
-Called from `resol.F:4491`, **before** the deterministic gather `ASSPAR_SUB`. Instead of
+Called from `resol.F:4537`, **before** the deterministic gather `ASSPAR_SUB`. Instead of
 exchanging sums, each domain exchanges the **individual element contributions**:
 
 1. `MPI_IRECV` of `FR_NBCC(2,P)` values per neighbor `P`;
@@ -564,13 +583,13 @@ exchanging sums, each domain exchanges the **individual element contributions**:
    `FSKY(IRECSP(J),L)` / `STSKY(IRECSP(J),L)`.
 
 After the exchange, every domain owns a complete skyline for its boundary nodes, and
-`ASSPAR_SUB` (`resol.F:4817`) sums the slots **in a fixed, decomposition-independent
+`ASSPAR_SUB` (`resol.F:4894`) sums the slots **in a fixed, decomposition-independent
 order**, guaranteeing bitwise reproducibility of the non-local forces — same design as the
 mechanical Parith/ON assembly.
 
 ### 8.5 `SPMD_COLLECT_NLOCAL` — debug/output gathering
 
-Called from `resol.F:4893` when `/DEBUG/ACC` is active and the model is non-local. Every
+Called from `resol.F:4970` when `/DEBUG/ACC` is active and the model is non-local. Every
 processor sends to processor 0 the pairs (global node number from `NODGLOB(INDX(I))`,
 first-d.o.f value of `FNL`); processor 0 merges them into a `NUMNODG`-long array and dumps
 a `ROOTNAME_NLOCAL_<run>_<cycle>.adb` text file (one line per node, value printed in
@@ -591,8 +610,8 @@ blocks when `NLOC_DMG%IMOD > 0`).
 | Aspect | Parith/OFF (`IPARIT = 0`) | Parith/ON (`IPARIT ≠ 0`) |
 |---|---|---|
 | Element assembly target | `FNL(:,ITASK)`, `STIFNL(:,ITASK)` per thread | Skyline `FSKY`, `STSKY`, one slot per element-node incidence |
-| Thread reduction | `ASSPAR_SUB_POFF` (`resol.F:4552`) | deterministic gather `ASSPAR_SUB` (`resol.F:4817`) |
-| MPI routine | `SPMD_EXCH_SUB_POFF` (`resol.F:6721`) | `SPMD_EXCH_SUB_PON` (`resol.F:4491`) |
+| Thread reduction | `ASSPAR_SUB_POFF` (`resol.F:4625`) | deterministic gather `ASSPAR_SUB` (`resol.F:4894`) |
+| MPI routine | `SPMD_EXCH_SUB_POFF` (`resol.F:6885`) | `SPMD_EXCH_SUB_PON` (`resol.F:4537`) |
 | MPI position | after assembly | **before** assembly |
 | MPI semantics | sum of nodal values | copy of individual element slots |
 | Reproducibility | not bitwise | bitwise, independent of `NSPMD`/`NTHREAD` |
@@ -709,51 +728,81 @@ must be patched.
 | `FSKY` / `STSKY` | Skyline force / stiffness accumulator | Extend; new entries zero |
 | `IADC` | Per-shell FSKY row indices | Update for shells in `shell_list` |
 
-### 12.3 Integration in `resol.F` — activating node splitting (~line 5236)
+### 12.3 Integration in `resol.F` — the node-splitting block (~line 5310)
 
-The node-splitting block in `resol.F` calls, in order:
+The node-splitting block in `resol.F` (guarded by `NLOC_DMG%IMOD > 0`, placed
+after force assembly and before `ACCELE`) calls, in order:
 
-1. `test_jc_shell_detach` — detect and perform splits (calls `detach_node` → `detach_node_nloc`)
-2. `INIT_NODAL_STATE` — re-initialise nodal boundary/state arrays for the new node
-3. `CHKINIT` (gated on ALE/deletion flags) — rebuild element-to-node connectivity skyline
-4. `ALLOCATE_OUTPUT_DATA` — extend output arrays for the new node
-5. `SPMD_SUB_BOUNDARIES(NLOC_DMG, NODES%BOUNDARY_ADD, NODES%BOUNDARY)` (gated on
-   `NSPMD > 1`) — rebuild the non-local MPI boundary tables after the split
+1. `nloc_shell_detach` — detect and perform all splits of the cycle (calls
+   `apply_crack` → `detach_node` / `mirror_node_split` → `detach_node_nloc`)
+2. If `new_crack > 0` and `NSPMD > 1`:
+   * `spmd_rebuild_boundary` + `merge_boundary_with_split` — rebuild
+     `NODES%BOUNDARY` / `BOUNDARY_ADD`, keeping the startup sections for
+     pre-existing nodes and appending the new split nodes
+   * `SPMD_SUB_BOUNDARIES(NLOC_DMG, NODES%BOUNDARY_ADD, NODES%BOUNDARY,
+     NUMNOD_OLD, NODES%ITAB)` — rebuild the non-local MPI boundary tables
+   * `init_ghost_shells` — refresh the ghost-shell mirror set
+   * `ASSINIT` + `REBUILD_PON_TABLES` (gated on `IPARIT /= 0`) — rebuild the
+     **mechanical** Parith/ON send/recv tables
+3. `INIT_NODAL_STATE` — re-initialise nodal boundary/state arrays for the new node
+4. `CHKINIT` (gated on ALE/deletion flags) — rebuild element-to-node connectivity
+   skyline (`ADDCNEL`/`CNEL`), then `ALLOCATE_OUTPUT_DATA`, skyline reallocation,
+   rigid-wall re-registration
 
-The post-processing block in `resol.F` (~line 5285) now contains:
+The actual `SPMD_SUB_BOUNDARIES` call (resol.F:~5352) is:
 
 ```fortran
-! Rebuild non-local SPMD boundary arrays (ISENDSP, IRECSP, etc.)
-! after the skyline topology changed due to node split.
-IF (NSPMD > 1 .AND. NLOC_DMG%IMOD > 0) THEN
-  CALL SPMD_SUB_BOUNDARIES(NLOC_DMG, NODES%BOUNDARY_ADD, NODES%BOUNDARY)
-ENDIF
+! Rebuild non-local MPI boundary tables with the merged boundary.
+IF (NLOC_DMG%IMOD > 0) THEN
+  CALL SPMD_SUB_BOUNDARIES(NLOC_DMG, NODES%BOUNDARY_ADD,
+    NODES%BOUNDARY, NUMNOD_OLD, NODES%ITAB)
+END IF
 ```
 
-This rebuilds `NLOC_DMG%IAD_ELEM`, `NLOC_DMG%IAD_SIZE`, and `NLOC_DMG%FR_ELEM` from
-the updated nodal boundary tables, so the non-local MPI state stays valid after the split.
+This rebuilds `NLOC_DMG%IAD_ELEM`, `IAD_SIZE`, `FR_ELEM` and (Parith/ON) the
+`ISENDSP`/`IRECSP`/`IADSDP`/`IADRCP`/`FR_NBCC` tables from the updated nodal
+boundary tables, so the non-local MPI state stays valid after the split. The
+`NUMNOD_OLD`/`ITAB` arguments drive the ITAB-sorted enumeration of the new nodes
+(§8.2); see `doc/NODE_SPLITING.md` §8–§9 for the full rebuild sequence and why
+the ordering matters.
 
 ### 12.4 `detach_node_nloc` — step-by-step implementation
 
 File: `engine/source/engine/node_spliting/detach_node_nloc.F90`.
-Called from `detach_node` immediately after `detach_node_from_shells`, before
+Called from `detach_node` (owner), `mirror_node_split` (ghost copy of the new
+node) and the ghost-placeholder branch of `apply_crack`, immediately after their
+mechanical counterparts (`detach_node_from_shells` / `update_pon_shells`), before
 `nodes%numnod` is incremented.
 
 **Signature:**
 
 ```fortran
 subroutine detach_node_nloc(nloc_dmg, old_local_id, new_local_id, &
-                             shell_list, list_size)
+    elements, shell_list, list_size, old_numnod, nthread, ispmd, nspmd_in, &
+    is_mirror, n_owner_contrib, n_ghost_contrib, ghost_contrib_per_rank)
   use nlocal_reg_mod
-  use my_alloc_mod
+  use connectivity_mod
   use extend_array_mod
   implicit none
-  type(nlocal_str_), intent(inout) :: nloc_dmg
-  integer,           intent(in)    :: old_local_id   ! local id of the split node
-  integer,           intent(in)    :: new_local_id   ! local id of the new node (= old numnod + 1)
-  integer,           intent(in)    :: list_size
-  integer,           intent(in)    :: shell_list(list_size)
+  type(nlocal_str_),   intent(inout) :: nloc_dmg
+  integer,             intent(in)    :: old_local_id   ! local id of the split node
+  integer,             intent(in)    :: new_local_id   ! local id of the new node (= old numnod + 1)
+  type(connectivity_), intent(in)    :: elements       ! shell connectivity (already repointed to new node)
+  integer,             intent(in)    :: list_size
+  integer,             intent(in)    :: shell_list(list_size)  ! LOCAL shells migrating to the new node
+  integer,             intent(in)    :: old_numnod, nthread, ispmd, nspmd_in
+  integer,             intent(in)    :: is_mirror       ! 0 = owner, 1 = mirror/placeholder rank
+  integer,             intent(in)    :: n_owner_contrib ! owner corner count (recv rows on mirror ranks)
+  integer,             intent(in)    :: n_ghost_contrib ! total remote corner count (recv rows on the owner)
+  integer,             intent(in)    :: ghost_contrib_per_rank(nspmd_in)
 ```
+
+The `is_mirror` / `n_owner_contrib` / `n_ghost_contrib` /
+`ghost_contrib_per_rank` arguments carry the PARITH/ON recv-row bookkeeping: as
+for the mechanical skyline (`doc/NODE_SPLITING.md` §6.5), the owner appends one
+recv row per remote contribution and each mirror/placeholder rank appends
+`n_owner_contrib` recv rows reserved for the owner, so that `FR_NBCC` stays
+symmetric across ranks.
 
 **Step-by-step logic:**
 
@@ -800,24 +849,29 @@ Step 8 — Skyline update (PARITH/ON only, if ADDCNE is allocated)
   new_nnod = nloc_dmg%nnod   ! already incremented
   Count n_contrib = number of (shell, corner) pairs in shell_list where the
   corner was old_local_id (now replaced by new_local_id in element connectivity).
+  n_recv = number of recv rows (MPI only): sum(ghost_contrib_per_rank) on the
+  owner, n_owner_contrib on mirror/placeholder ranks, 0 in mono.
 
   8a — Extend ADDCNE by 1:
     call extend_array(nloc_dmg%addcne, new_nnod, new_nnod+1)
-    nloc_dmg%addcne(new_nnod+1) = nloc_dmg%addcne(new_nnod) + n_contrib
+    nloc_dmg%addcne(new_nnod+1) = nloc_dmg%addcne(new_nnod) + n_contrib + n_recv
 
-  8b — Extend PROCNE by n_contrib and append entries:
+  8b — Extend PROCNE by n_contrib (+ recv rows) and append entries:
     old_lcne = nloc_dmg%lcne_nl
-    call extend_array(nloc_dmg%procne, old_lcne, old_lcne + n_contrib)
+    call extend_array(nloc_dmg%procne, old_lcne, old_lcne + n_contrib + n_recv)
     k = old_lcne + 1
     do i = 1, list_size
       shell_id = shell_list(i)
       do j = 1, 4
         if elements%shell%nodes(j, shell_id) == new_local_id:
-          nloc_dmg%procne(k) = ISPMD   ! local domain rank
+          nloc_dmg%procne(k) = ispmd + 1   ! 1-based local domain rank
           k = k + 1
       end do
     end do
-    nloc_dmg%lcne_nl = old_lcne + n_contrib
+    ! recv rows (MPI only): PROCNE = remote_rank + 1, reserved for the remote
+    ! rank's contribution — same convention as the mechanical skyline
+    ! (owner: one row per remote corner; mirror/placeholder: n_owner_contrib rows)
+    nloc_dmg%lcne_nl = old_lcne + n_contrib + n_recv
     ! NOTE: CNE is always size 0 and unused; do NOT extend it.
 
   8c — Extend FSKY and STSKY rows by n_contrib, zeroing new entries:
@@ -838,20 +892,22 @@ Step 8 — Skyline update (PARITH/ON only, if ADDCNE is allocated)
 ### 12.5 SPMD boundary arrays after a split
 
 The arrays `ISENDSP`, `IRECSP`, `IADSDP`, `IADRCP`, `FR_NBCC`, `FR_ELEM_S`,
-`FR_ELEM_R` are built by `SPMD_SUB_BOUNDARIES` / `SPMD_EXCH_SUB_PON` from `ADDCNE`,
-`PROCNE`, `IAD_ELEM`, `FR_ELEM`, and `POSI`. They must be **fully rebuilt** after the
+`FR_ELEM_R` are built by `SPMD_SUB_BOUNDARIES` from `ADDCNE`, `PROCNE`,
+`IAD_ELEM`, `FR_ELEM`, and `POSI`. They must be **fully rebuilt** after the
 split because the send/receive patterns depend on the global topology:
 
 ```fortran
 if (nloc_dmg%imod > 0 .and. nspmd > 1) then
-  call spmd_sub_boundaries(nloc_dmg, nodes%boundary_add, nodes%boundary)
+  call spmd_sub_boundaries(nloc_dmg, nodes%boundary_add, nodes%boundary, &
+                           numnod_old, nodes%itab)
 end if
 ```
 
-This call is placed in `resol.F` alongside the mechanical PON rebuild that happens after
-all node splits in a cycle (see commented block near line 5238). Localised patching is
+This call is placed in `resol.F` (~line 5352) alongside the mechanical PON rebuild
+that happens after all node splits in a cycle (§12.3). Localised patching is
 not feasible because the patterns depend on the global non-local node layout across all
-MPI domains.
+MPI domains. The new split nodes are enumerated in ITAB-sorted order so that all
+ranks build matching send/recv tables (§8.2).
 
 ### 12.6 Restart compatibility after a split
 
@@ -965,22 +1021,28 @@ crack_normal = crack_normal / norm2(crack_normal)   ! unit normal
 
 ### 13.4 Relationship with `nloc_shell_detach`
 
-The current implementation in `nloc_shell_detach.F90` already uses the **non-local
-field** `UNL` directly to build the shell damage indicator, instead of the older
-`dammx` / `OFF` path:
+The current implementation in `nloc_shell_detach.F90` does **not** yet use `UNL`
+(or any physical criterion) to select the splits: the detection stage is a
+**hard-coded demonstration list** of node/shell user ids, gated to fire once
+(the block is explicitly marked `THIS IS THE CODE SNIPPET TO REPLACE WITH A
+PHYSICAL CRITERION BASED ON THE NON-LOCAL DAMAGE FIELD`). The plumbing for a
+damage-driven criterion is in place — a per-shell normalised damage indicator
+(`detach_shell`) is built and exchanged across ranks for ghost shells via
+`spmd_exchange_ghost_shells` before the detection block runs.
+
+When the placeholder is replaced, the natural criterion is the one described in
+§13.1–13.3, and the two candidate damage sources compare as follows:
 
 | Criterion | Source | When available |
 |---|---|---|
 | `dammx` / `OFF` | Local failure flag in element buffer | After failure criterion is met (post-peak) |
 | `UNL` | Non-local regularised variable | From the onset of inelastic strains |
 
-This means the split trigger is now aligned with the regularised damage field, so node
-splitting can happen **before** the element actually fails. That better captures the
-damage-band geometry and avoids relying only on element deletion.
-
-What is still not derived from `UNL` is the **crack direction / split plane normal**: the
-current implementation still uses the shell-geometry eccentricity heuristic to choose
-which corner to detach. Section 13.2 above describes how to use `∇UNL` instead.
+Using `UNL` aligns the split trigger with the regularised damage field, so node
+splitting can happen **before** the element actually fails — better capturing the
+damage-band geometry and avoiding reliance on element deletion alone. The
+**crack direction / split plane normal** should likewise come from `∇UNL`
+(§13.2) rather than a shell-geometry heuristic.
 
 ---
 
@@ -990,7 +1052,7 @@ which corner to detach. Section 13.2 above describes how to use `∇UNL` instead
 |---|---|
 | Single domain (`NSPMD = 1`) | ✅ Fully functional — all MPI-gated calls are skipped |
 | Multi-domain, PARITH/OFF | ✅ Boundary tables are rebuilt after split |
-| Multi-domain, PARITH/ON | ✅ Boundary tables are rebuilt after split |
+| Multi-domain, PARITH/ON | ✅ Boundary tables are rebuilt after split; bitwise reproducibility requires the ITAB-sorted enumeration of the new nodes in **both** `REBUILD_PON_TABLES` (mechanical) and `SPMD_SUB_BOUNDARIES` (non-local) — see `doc/NODE_SPLITING.md` §9 |
 
 ### Individual issues
 
@@ -1008,7 +1070,8 @@ which corner to detach. Section 13.2 above describes how to use `∇UNL` instead
    solids (`IADS`) needs to be added when node splitting is extended to those element
    types.
 
-4. **Crack direction is not yet derived from `UNL`.**  The current `nloc_shell_detach`
-   implementation uses `UNL` to trigger splitting, but it still selects the corner to
-   detach from shell geometry rather than from a gradient of `UNL`.  Section 13 above
-   describes how to use `∇UNL` instead.
+4. **Split detection is a hard-coded placeholder.**  The current
+   `nloc_shell_detach` implementation selects the nodes and shells to split from a
+   hard-coded demonstration list (fired once), not from the damage field.  Neither
+   the trigger nor the crack direction is derived from `UNL` yet.  Section 13
+   above describes how to use `UNL` / `∇UNL` for both.

@@ -85,7 +85,7 @@ Key fields (selected; defined at lines 732–1003 of `elbufdef_mod.F90`):
 
 | Field | Description |
 |-------|-------------|
-| `off` | Element off-flag (0=active, 1=deleted/eroded) |
+| `off` | Element off-flag (`1`=active, `0`=deleted/eroded; `0<off<1` while ramping down during erosion) |
 | `eint` | Internal energy per element |
 | `rho` | Density |
 | `vol` | Volume |
@@ -156,7 +156,7 @@ Key fields:
 
 | Field | Description |
 |-------|-------------|
-| `off` | GP off-flag |
+| `off` | GP off-flag (same convention as `GBUF%off`: `1`=active, `0`=failed) |
 | `pla` | Cumulative plastic strain at this GP |
 | `wpla` | Work-equivalent plastic strain |
 | `sig` | Stress tensor (flat, 6 × NEL) |
@@ -183,7 +183,7 @@ Key fields:
 | `buf_eos_` | `BUFLY(IL)%EOS(IR,IS,IT)` | `var(:)` — EOS extra vars; `vartmp(:)` (integer temp array) |
 | `buf_visc_` | `BUFLY(IL)%VISC(IR,IS,IT)` | `var(:)` — viscosity law state |
 | `buf_prop_` | `BUFLY(IL)%PROP(IR,IS,IT)` | `var(:)`, `varn(:)` — property state |
-| `buf_nloc_` | `ELBUF_TAB(NG)%NLOC(IL,IN)` | `massth`, `unlth`, `vnlth`, `fnlth` — non-local shell wires |
+| `buf_nloc_` | `ELBUF_TAB(NG)%NLOC(IR,IS)` | `massth`, `unlth`, `vnlth`, `fnlth` — through-thickness non-local buffers (shells); `%NLOCTS(IR,IS)` for thick shells |
 | `buf_damp_range_` | `ELBUF_TAB(NG)%DAMP_RANGE` | `alpha(:)`, `tau(:)` — Maxwell damping parameters |
 
 ---
@@ -239,7 +239,7 @@ ELBUF_TAB(NG)                       ! group NG (1..NGROUP)
     %FAIL(IR,IS,IT)%floc(IF)%dam(IE)  ! failure model IF, damage, element IE
     %EOS(IR,IS,IT)%var(IEOS_VAR,IE)  ! EOS variable slot
   %INTLAY(ILAY)                     ! inter-ply layer ILAY (composites)
-  %NLOC(IL,IN)%unlth(:,:)          ! non-local wire nodes (shells)
+  %NLOC(IR,IS)%unlth(:,:)          ! through-thickness non-local buffer (shells)
   %DAMP_RANGE%alpha(ICOMP)         ! Maxwell damping component ICOMP
 ```
 

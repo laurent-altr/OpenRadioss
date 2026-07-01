@@ -14,7 +14,7 @@ of all element computations and are present in virtually every element kernel ca
 All elements in OpenRadioss are partitioned into **groups**. A group is a contiguous
 block of elements of the same type (solid, shell, beam, spring, …), sharing the
 same material law and property set, which are processed together in a vectorized loop
-of length at most `MVSIZ` (typically 256 elements, set from common block via `MVSIZ_MOD`).
+of length at most `MVSIZ` (platform-dependent, 129 on standard linux64 builds; see §1.4).
 
 The total number of groups is `NGROUP`. The Starter assigns elements to groups during
 the grouping pass (`SGRTAILS.F`, `CGRTAILS.F`, `PGRTAILS.F`, `TGRTAILS.F`,
@@ -23,8 +23,10 @@ the grouping pass (`SGRTAILS.F`, `CGRTAILS.F`, `PGRTAILS.F`, `TGRTAILS.F`,
 ### 1.2 `IPARG` — the group descriptor array
 
 `IPARG(NPARG, NGROUP)` is the integer parameter array describing every group.
-`NPARG = 100` (set in `starter/source/starter/starter0.F`, line 551).
-`IPARG` is stored in the `PARAM` common block (`engine/share/includes/param_c.inc`).
+`NPARG = 100` (set in `starter/source/starter/starter0.F`, line 551); the size
+variable `NPARG` itself lives in the `/PARAM/` common block
+(`engine/share/includes/param_c.inc`), while `IPARG` is an allocatable array
+passed as an argument through the call tree.
 
 **Well-defined slots (verified from `sgrtails.F`, `cgrtails.F`):**
 
@@ -72,9 +74,11 @@ which have their own dispatch tables.
 ### 1.4 `MVSIZ` — vectorization chunk size
 
 `MVSIZ` is the canonical inner-loop length used throughout the element kernels.
-It is defined in `MVSIZ_MOD` (`common_source/modules/`) and typically set to 256.
-Groups are subdivided into chunks of `MVSIZ` elements, iterated with
-`LFT = 1, LLT = MIN(LFT+MVSIZ-1, NEL)` style loops.
+It is a platform-dependent Fortran parameter defined in
+`engine/share/spe_inc/mvsiz_p.inc` (129 on the standard linux64/win64/macOS
+builds, other values for legacy vector machines) and re-exported by `MVSIZ_MOD`
+(`engine/share/spe_inc/mvsiz_mod.F90`). Groups are subdivided into chunks of
+`MVSIZ` elements, iterated with `LFT = 1, LLT = MIN(LFT+MVSIZ-1, NEL)` style loops.
 
 ---
 
@@ -192,13 +196,13 @@ The `NODES` variable is of type `nodal_arrays` (defined in
 | `NODES%A(3, NUMNOD)` | `my_real` | Nodal forces → accelerations |
 | `NODES%AR(3, NUMNOD)` | `my_real` | Nodal rotational forces → accelerations |
 | `NODES%MS(NUMNOD)` | `my_real` | Nodal translational mass |
-| `NODES%IN(NUMNOD)` | integer | Boundary condition fixity mask (translations) |
+| `NODES%IN(NUMNOD)` | `my_real` | Nodal rotational inertia (allocated with `IRODDL`) |
 | `NODES%STIFN(NUMNOD)` | `my_real` | Nodal stiffness (translational, for DT) |
 | `NODES%STIFR(NUMNOD)` | `my_real` | Nodal stiffness (rotational, for DT) |
 | `NODES%ITAB(NUMNOD)` | integer | User node ID for internal node I |
 | `NODES%ITABM1(2*NUMNOD)` | integer | Inverse: user → internal node ID (sorted pair array) |
 | `NODES%NODGLOB(NUMNOD)` | integer | Global (across MPI domains) internal node ID |
-| `NODES%WEIGHT(NUMNOD)` | `my_real` | MPI weight (1/number of domains owning this node) |
+| `NODES%WEIGHT(NUMNOD)` | integer | MPI ownership flag: 1 = owned by this domain, 0 = ghost copy |
 | `NODES%TEMP(NUMNOD)` | `my_real` | Nodal temperature (thermal coupling) |
 | `NODES%MCP(NUMNOD)` | `my_real` | Nodal heat capacity × mass (thermal) |
 
@@ -219,10 +223,11 @@ the `ACCELE` call divides by `NODES%MS`).
 ### 3.3 MPI domain boundary nodes
 
 In an MPI run, frontier (boundary) nodes are shared between domains. The exchange
-lists are in `NODES%BOUNDARY_ADD(1, NSPMD+1)` and `NODES%BOUNDARY(…)`, built
-during the Starter domain-decomposition pass. `NODES%WEIGHT` is `1/N` for a node
-shared by N domains; all domains accumulate forces then multiply by `WEIGHT` to
-avoid double-counting.
+lists are in `NODES%BOUNDARY_ADD(2, NSPMD+1)` and `NODES%BOUNDARY(…)`, built
+during the Starter domain-decomposition pass (see `doc/SPMD_documentation.md` §4
+for the exact layout). Each shared node is fully accumulated on every domain that
+holds it; `NODES%WEIGHT` (1 on the owning domain, 0 on the others) is used in
+global reductions and output so the node is counted exactly once.
 
 ---
 
@@ -242,7 +247,10 @@ avoid double-counting.
 ### Engine
 
 1. `LECTUR`/`LECSTAT`/`RDRESA` rebuild all arrays from restart files.
-2. `RESOL` uses them unchanged throughout the time loop; connectivity is read-only.
+2. `RESOL` uses them throughout the time loop; connectivity is normally read-only.
+   The exception is node splitting (crack propagation, `doc/NODE_SPLITING.md`):
+   when active, shell connectivity is repointed to newly created nodes and the
+   nodal arrays are extended at runtime (`extend_nodal_arrays`).
 3. After element failure (`DESACTI`), `IXS(1, IE)` may be negated or `ELBUF_TAB(NG)%GBUF%off(IE)` set to mark deletion.
 
 ---
@@ -268,3 +276,4 @@ avoid double-counting.
 - `doc/ELBUF_TAB_documentation.md` — element state buffer indexed by `NG`
 - `doc/ENGINE_TIME_LOOP_documentation.md` — how `FORINT` is called and `ACCELE` updates nodal arrays
 - `doc/SPMD_documentation.md` — frontier node exchange using `NODES%BOUNDARY*`
+- `doc/NODE_SPLITING.md` — runtime extension of nodal arrays and shell connectivity

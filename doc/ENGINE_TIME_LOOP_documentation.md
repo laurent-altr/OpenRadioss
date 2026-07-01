@@ -65,7 +65,7 @@ using `!$OMP PARALLEL` / `!$OMP END PARALLEL` blocks.
 
 ### 3.2 Per-cycle sequence
 
-Each cycle executes in this order. Line numbers are approximate (the file is 9729 lines).
+Each cycle executes in this order. Line numbers are approximate (the file is ~10000 lines).
 
 #### Step 0 — Sensor/activation/external forces (serial, line ~2700–2960)
 - Gather shell thickness for interface checking (`THICKVAR`)
@@ -132,7 +132,7 @@ END SELECT
 CALL FORINTP(TIMERS, …)        ! engine/source/elements/forintp.F
 ```
 
-#### Step 8 — Non-local MPI exchange (line ~4491)
+#### Step 8 — Non-local MPI exchange (line ~4537)
 ```
 CALL SPMD_EXCH_SUB_PON(NLOC_DMG)   ! non-local damage exchange (Parith/ON)
 ```
@@ -147,15 +147,24 @@ Two paths depending on `IPARIT` flag:
 | 1 (Parith/ON) | `SPMD_EXCH2_A_PON(…)` — skyline force assembly before exchange |
 
 After MPI exchange, the `!$OMP PARALLEL` section assembles Parith/ON skyline forces
-with `ASSPAR4` (line ~4800).
+with `ASSPAR4` (line ~4877).
 
-#### Step 10 — Acceleration (inside `!$OMP PARALLEL`, line ~6751)
+#### Step 9b — Node splitting (crack propagation, line ~5310)
+
+When non-local damage regularization is active (`NLOC_DMG%IMOD > 0`), the
+node-splitting block runs after force assembly and before `ACCELE`:
+`NLOC_SHELL_DETACH` detects and applies crack-propagation node splits, and, when
+nodes were split, the boundary lists, ghost shells, and Parith/ON send/recv
+tables are rebuilt (`SPMD_REBUILD_BOUNDARY`, `SPMD_SUB_BOUNDARIES`,
+`INIT_GHOST_SHELLS`, `REBUILD_PON_TABLES`). See `doc/NODE_SPLITING.md`.
+
+#### Step 10 — Acceleration (inside `!$OMP PARALLEL`, line ~6915)
 ```fortran
 CALL ACCELE(NODES%A, NODES%AR, NODES%V, NODES%MS, NODES%IN, …)
 ```
 Divides total nodal force `NODES%A` by nodal mass `NODES%MS` to get acceleration.
-`NODES%IN` is the nodal fixity (boundary condition) mask. Rotational acceleration
-uses `NODES%AR` and `NODES%IN`.
+Rotational acceleration divides the nodal moment `NODES%AR` by the nodal
+rotational inertia `NODES%IN`.
 
 Temperature update (thermal coupling):
 ```fortran
@@ -188,7 +197,7 @@ routines and stored in `NODES%STIFN` / `NODES%STIFR`). Then:
 - Global MPI minimum: implicit via `SPMD_EXCH_A` (STIFN/STIFR are in the exchange)
 - Final global `DT2 = min(DT2T_thread)` across threads and MPI domains
 
-#### Step 13 — Output (line ~8294)
+#### Step 13 — Output (line ~8520)
 ```
 CALL SORTIE_MAIN(TIMERS, PM, NODES%D, NODES%V, …, ELBUF_TAB, …)
 ```
@@ -203,7 +212,7 @@ It checks time triggers and calls:
 | `/PRINT/dt` | Stats file (`.sta`) | `GENSTAT` |
 | `/DYNAIN/dt` | Dynain restart | `GENDYNAIN` |
 
-Restart files (`_NNNN.rst`) are written by `CALL WRRESTP(…)` (line ~9282).
+Restart files (`_NNNN.rst`) are written by `CALL WRRESTP(…)` (line ~9547).
 
 #### Step 14 — Time advance and termination check
 ```fortran
@@ -234,6 +243,8 @@ RESOL (resol.F:579)
   ├── SPMD_EXCH_A / _EXCH2_A_PON  nodal force MPI assembly
   ├──[!$OMP PARALLEL]
   │   ├── ASSPAR4                Parith/ON skyline assembly (if IPARIT=1)
+  │   ├── NLOC_SHELL_DETACH      node splitting + table rebuilds (if NLOC_DMG%IMOD>0,
+  │   │                          see doc/NODE_SPLITING.md)
   │   ├── ACCELE                 F/M → acceleration
   │   ├── TEMPUR                 temperature integration  (if thermal)
   │   ├── [leapfrog inline]      V += DT*A; X += DT*V
@@ -269,7 +280,7 @@ RESOL (resol.F:579)
 | `NODES%X` | `my_real(3,NUMNOD)` | Nodal coordinates |
 | `NODES%D` | `my_real(3,NUMNOD)` | Nodal displacements |
 | `NODES%MS` | `my_real(NUMNOD)` | Nodal translational mass |
-| `NODES%IN` | integer `(NUMNOD)` | Boundary condition fixity mask |
+| `NODES%IN` | `my_real(NUMNOD)` | Nodal rotational inertia (used with `IRODDL`) |
 | `NODES%STIFN` | `my_real(NUMNOD)` | Nodal stiffness (for DT calc) |
 | `ELBUF_TAB` | `TYPE(ELBUF_STRUCT_)(NGROUP)` | Element state buffers |
 | `IPARG` | `integer(NPARG,NGROUP)` | Element group descriptors |
@@ -282,7 +293,7 @@ RESOL (resol.F:579)
 |------|------|
 | `engine/source/engine/radioss.F` | Program entry (40 lines) |
 | `engine/source/engine/radioss2.F` | Setup, input read, calls `RESOL` |
-| `engine/source/engine/resol.F` | THE main loop (9729 lines) |
+| `engine/source/engine/resol.F` | THE main loop (~10000 lines) |
 | `engine/source/engine/resol_init.F` | Per-cycle initialization inside `!$OMP PARALLEL` |
 | `engine/source/engine/resol_head.F` | Time-step print header |
 | `engine/source/engine/resol_alloc.F90` | Dynamic allocation for `RESOL` arrays |
@@ -303,3 +314,4 @@ RESOL (resol.F:579)
 - `doc/GROUPS_AND_CONNECTIVITY_documentation.md` — `IPARG`, `IXS`/`IXC`, nodal arrays
 - `doc/SPMD_documentation.md` — MPI force exchange routines
 - `doc/NLOCAL_STR_documentation.md` — non-local damage loop inside the cycle
+- `doc/NODE_SPLITING.md` — node splitting (crack propagation) inside the cycle

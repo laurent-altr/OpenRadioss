@@ -66,8 +66,8 @@ Frontier nodes (shared between domains) are tracked in the `NODES` structure
 |-------|------|---------|
 | `NODES%BOUNDARY_SIZE` | integer | Total number of frontier node entries |
 | `NODES%BOUNDARY(BOUNDARY_SIZE)` | integer | List of internal node indices that are frontier nodes (ordered by domain) |
-| `NODES%BOUNDARY_ADD(2, NSPMD+1)` | integer | CSR-style address array: `BOUNDARY_ADD(1,I)` is start and `BOUNDARY_ADD(2,I)` is end of frontier nodes shared with domain `I` within `BOUNDARY(:)` |
-| `NODES%WEIGHT(NUMNOD)` | `my_real` | `1/N` for a node shared by N domains; multiplied into forces after MPI exchange to avoid double-counting |
+| `NODES%BOUNDARY_ADD(2, NSPMD+1)` | integer | CSR-style address array: the block of frontier nodes shared with domain `I` is `BOUNDARY(BOUNDARY_ADD(1,I) : BOUNDARY_ADD(1,I+1)-1)`, itself split into a **recv** sub-block `BOUNDARY_ADD(1,I)..BOUNDARY_ADD(2,I)-1` and a **send** sub-block `BOUNDARY_ADD(2,I)..BOUNDARY_ADD(1,I+1)-1` |
+| `NODES%WEIGHT(NUMNOD)` | integer | Ownership flag: `1` = node owned by this domain, `0` = ghost copy; used to avoid double-counting shared nodes in global sums and output |
 | `NODES%global_boundary_nb` | integer | Number of globally unique frontier nodes |
 | `NODES%global_boundary(:)` | integer | Global node IDs of frontier nodes |
 
@@ -105,11 +105,12 @@ File: `engine/source/mpi/forces/spmd_exch_a.F`
 4. `MPI_WAITALL` — synchronize.
 5. Unpack `RBUF`: **add** received forces into local `A`, `AR`; **add** stiffnesses
    into `STIFN`, `STIFR`; **add** masses into `MS`.
-6. After unpacking, multiply all frontier node forces by `NODES%WEIGHT` (via the
-   `MSNF` and related arrays) to avoid double-counting.
 
 This is the simple, symmetric approach: every domain sends its local accumulated
-contribution and adds the neighbor's contribution.
+contribution and adds the neighbor's contribution, so every domain ends up with
+the complete sum for its frontier nodes. `NODES%WEIGHT` (the 0/1 ownership flag)
+is used elsewhere — in global reductions and output gathering — so each shared
+node is counted exactly once.
 
 ### 5.2 Parith/ON (`IPARIT = 1`) — `SPMD_EXCH2_A_PON`
 
@@ -124,18 +125,24 @@ to a single **skyline** entry in a fixed global ordering.
 - `FSKY(8, LSKY)` — skyline forces (8 components: 3 translational + 3 rotational + 2 extras)
 - `FSKYV(LSKY, 8)` — transposed layout variant used for vectorization
 - `FSKYM(LSKY)` — skyline mass
-- `LSKY` — number of skyline nodes (≤ NISKY; defined in `/PARIT/` common block)
+- `LSKY` — number of skyline rows, one per element-node contribution (defined in
+  the `/PARIT/` common block, `parit_c.inc`)
 
 **Algorithm:**
-1. Element kernels write their frontier contributions to skyline arrays (instead of
-   directly to `NODES%A`) by looking up the skyline index for each frontier node.
-2. `SPMD_EXCH2_A_PON` packs the skyline arrays and exchanges them via non-blocking
-   MPI (same ISend/IRecv pattern as Parith/OFF).
-3. The `ASSPAR4` subroutine (called inside `!$OMP PARALLEL` in `RESOL`, line ~4800)
-   scatters accumulated skyline forces back into `NODES%A` in a deterministic order.
+1. Element kernels write each of their nodal contributions into a private skyline
+   row (instead of accumulating directly into `NODES%A`), addressed by the
+   per-element back-pointers (`IADC` for shells).
+2. `SPMD_EXCH2_A_PON` packs the skyline rows owned locally and exchanges them via
+   non-blocking MPI (same ISend/IRecv pattern as Parith/OFF); received rows are
+   **written** (not summed) into slots reserved for the remote rank.
+3. The `ASSPAR4` subroutine (called inside `!$OMP PARALLEL` in `RESOL`, line ~4877)
+   sums each node's skyline rows into `NODES%A` in a deterministic order.
 
-The skyline lookup table (`PROCNE`, `ADDCNE`) is built during engine startup
-(`INIPAR`) and stored in `ELEMENT%PON%*` arrays (`parith_on_mod.F90`).
+The skyline addressing tables (`ADSKY`, `PROCNE`, `IADC`) are stored in
+`ELEMENT%PON%*` arrays (type `element_pon_`, `parith_on_mod.F90`) and come from
+the restart file; the send/recv tables (`ISENDP`/`IRECVP`/`FR_NBCC`) are built by
+`ASSADD2` (called once from `RESOL_INIT`) and rebuilt by `REBUILD_PON_TABLES`
+after a node split (see `doc/NODE_SPLITING.md`).
 
 ---
 
@@ -178,7 +185,7 @@ modules directly. The module also defines `SPMD_REAL8` (1 if double precision,
 | `anim/` | Animation gather: `SPMD_AGET_SECT` (cross-section results), `SPMD_AGETMSR` (sensors), `SPMD_ANIM_PLY_*` (composite ply animation) |
 | `elements/` | Element-level exchange: `SPMD_SPH` (SPH neighbor data: density, velocity, forces, gradients), `SPMD_EXCH_A_SCND*` (secondary force exchange) |
 | `fluid/` | CFD/multifluid: `SPMD_CFD` (numerous routines for ALE void neighbor exchange) |
-| `generic/` | Generic wrappers: `spmd_allgather.F90`, `spmd_alltoall.F90` |
+| `generic/` | Generic wrappers: `spmd_allgather.F90`, `spmd_alltoall.F90`, `spmd_alltoallv.F90` |
 | `implicit/` | Implicit solver exchange routines |
 | `init/` | Initialization: `inipar.F` (MPI setup), `init_global_boundary_list.F90` (builds `BOUNDARY`/`BOUNDARY_ADD`), `spmd_kill.F`, `spmd_mstop.F` |
 | `kinematic_conditions/` | Rigid body force exchange: `SPMD_EXCH_A_RB6*`, `SPMD_EXCH_A_RM6` |
@@ -191,7 +198,7 @@ modules directly. The module also defines `SPMD_REAL8` (1 if double precision,
 | `user_interface/` | Python element MPI sync |
 | `spmd_mod.F90` | Umbrella wrapper module (see §6) |
 | `python_spmd_mod.F90` | Python element state synchronization across domains |
-| `spmd_exch_sub.F` | `SPMD_EXCH_SUB_PON` — non-local damage exchange (Parith/ON path) |
+| `spmd_exch_sub.F` | Non-local damage exchange: `SPMD_SUB_BOUNDARIES` (table construction), `SPMD_EXCH_SUB_POFF` (Parith/OFF sum), `SPMD_EXCH_SUB_PON` (Parith/ON skyline slots) |
 | `get_mpi_operator.F90` | `get_mpi_operator_mod` — maps Fortran reduction type to `MPI_Op` |
 
 ---
@@ -250,3 +257,5 @@ The flag is read from the engine input deck (`radioss2.F` → `LECINP`) and stor
   domain boundary nodes
 - `doc/NLOCAL_STR_documentation.md` — non-local damage uses `SPMD_EXCH_SUB_PON`
   for cross-domain regularization
+- `doc/NODE_SPLITING.md` — how the Parith/ON skyline and the boundary/exchange
+  tables are extended and rebuilt when nodes are split at runtime

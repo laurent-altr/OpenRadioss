@@ -13,7 +13,7 @@ a brand-new node `N'`. The two nodes occupy the same position at the split cycle
 but are then free to separate.
 
 The hard part is doing this **without breaking `/PARITH/ON`**. With
-`IPARITH = iparith > 0`, OpenRadioss guarantees that nodal forces are summed in a
+`IPARIT > 0`, OpenRadioss guarantees that nodal forces are summed in a
 fixed, domain-decomposition-independent order so that results are **bitwise
 identical regardless of the number of MPI ranks**. This is implemented with the
 *skyline* arrays `FSKY` / `ADSKY` / `IADC` / `PROCNE`. When a node is split, room
@@ -106,8 +106,8 @@ and every FSKY row is claimed by at most one (element, corner)   (no aliasing)
 
 If this is violated, a corner writes a row that its node never reads (force
 lost), or a row read by the wrong node (force misattributed). This is exactly
-what `check_pon_consistency` audits, and the class of bug currently under
-investigation (see §9).
+what `check_pon_consistency` audits, and the class of bug diagnosed and fixed
+during the PARITH/ON bring-up of node splitting (post-mortem in §9).
 
 ### 2.4 SPMD reproducibility (why `PROCNE` exists)
 
@@ -628,12 +628,17 @@ After all splits of the cycle, the MPI descriptors must be regenerated because
 
 ---
 
-## 9. Consistency invariant and the current investigation
+## 9. Consistency invariant and the reproducibility bugs (post-mortem)
 
 The single most important invariant (from §2.3) is that **every local shell
 corner's `IADC` entry lies inside its node's `ADSKY` band, and every FSKY row is
 claimed exactly once**. `check_pon_consistency` (wired into `nloc_shell_detach`)
 audits this and prints `[PON_AUDIT] MISMATCH` / `FSKY_COLLISION` if broken.
+
+The rest of this section is a post-mortem of the two PARITH/ON reproducibility
+bugs found while bringing up node splitting under MPI. Both are **fixed** in the
+current sources (§9.2 in `assadd2.F`, §9.3 in `spmd_exch_sub.F`); the diagnosis
+is kept here because it documents *how* to trace this class of bug.
 
 ### Worked example (from `log_mpi.txt` / `log_mono.txt`)
 
@@ -655,8 +660,8 @@ Parent node uid `10711` splits into a new node uid `20024`.
     `13326c1 + 13413c4` in the **same order** as mono → bitwise identical **iff**
     the bands, `IADC`, `PROCNE` and send/recv tables are all consistent.
 
-The reported symptom is **wrong `A(20024)` only with 8 MPI, starting ~cycle 1805**.
-Tracing the FSKY contribution rows across `log_mono.txt` / `log_mpi.txt` gives a
+The reported symptom was **wrong `A(20024)` only with 8 MPI, starting ~cycle 1805**.
+Tracing the FSKY contribution rows across `log_mono.txt` / `log_mpi.txt` gave a
 precise, bitwise diagnosis:
 
 | Contribution (row) | mono vs MPI-local | verdict |
@@ -678,11 +683,11 @@ kinematics and makes its force diverge at 1805, then cascades.
 A directional, node-specific mismatch like this lives in the **post-split rebuild
 of the Parith/ON exchange tables** — `spmd_rebuild_boundary` /
 `merge_boundary_with_split` → `ASSINIT` → `REBUILD_PON_TABLES`
-(`ISENDP`/`IRECVP`/`IADSDP`/`IADRCP`/`FR_NBCC`) — most likely an **inconsistent
+(`ISENDP`/`IRECVP`/`IADSDP`/`IADRCP`/`FR_NBCC`) — an **inconsistent
 ordering/placement of the new node in the two ranks' rebuilt `BOUNDARY` lists**, so
-`SPMD_EXCH2_A_PON` pairs rank 5's recv slot for `20024` with the wrong rank 7 send
-slot. The recv counts (`FR_NBCC`) for the node are symmetric (1 send / 1 recv on
-each side), which points at *ordering* rather than *count*.
+`SPMD_EXCH2_A_PON` paired rank 5's recv slot for `20024` with the wrong rank 7 send
+slot. The recv counts (`FR_NBCC`) for the node were symmetric (1 send / 1 recv on
+each side), which pointed at *ordering* rather than *count* — confirmed in §9.1.
 
 ### 9.1 Confirmed root cause (`[EXCH_DBG]` table dump)
 
