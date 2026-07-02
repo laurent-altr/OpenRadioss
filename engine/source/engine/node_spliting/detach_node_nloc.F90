@@ -81,7 +81,8 @@
 !||====================================================================
         subroutine detach_node_nloc(nloc_dmg, old_local_id, new_local_id, &
           elements, shell_list, list_size, old_numnod, nthread, ispmd, nspmd_in, &
-          is_mirror, n_owner_contrib, n_ghost_contrib, ghost_contrib_per_rank)
+          is_mirror, n_owner_contrib, n_ghost_contrib, ghost_contrib_per_rank, &
+          mass_fraction)
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Modules
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -107,6 +108,11 @@
           integer,             intent(in), optional :: n_owner_contrib !< ghost rank: number of owner N' local corners (= N'_ghost remote slots needed)
           integer,             intent(in), optional :: n_ghost_contrib !< owner rank: number of ghost-node shells moving to N' (for f_detach correction)
           integer, dimension(0:nspmd_in-1), intent(in), optional :: ghost_contrib_per_rank !< owner rank: per-rank breakdown of n_ghost_contrib
+          real(kind=wp),       intent(in), optional :: mass_fraction !< area-weighted share of the parent non-local mass taken by the new node
+          !< (computed by apply_crack, identical on every rank).  When present, the child gets
+          !< mass_fraction and the parent keeps (1 - mass_fraction) so total mass is conserved.
+          !< When absent, the legacy behaviour applies: child gets the corner-count f_detach and
+          !< the parent mass is left unchanged.
           !integer,             intent(in), optional :: node_uid       !< global UID of the split node (for diagnostics)
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Local variables
@@ -138,7 +144,10 @@
           integer :: new_start       ! first FSKY row of new node's ADDCNE range (= old sentinel)
           real(kind=wp) :: f_retain  ! fraction of element corners retained by parent
           real(kind=wp) :: f_detach  ! fraction of element corners detached to child
+          real(kind=wp) :: f_mass    ! mass split fraction actually applied to MASS/MASS0
+          logical :: l_scale_parent  ! .true. when the parent mass keeps (1 - f_mass)
           real(kind=wp), parameter   :: ZERO = 0._wp
+          real(kind=wp), parameter   :: ONE  = 1._wp
           logical :: l_is_mirror              ! local copy of is_mirror flag
           integer :: n_owner_contrib_local   ! local copy of n_owner_contrib (0 if not present)
           integer :: owner_proc              ! PROCNE of ghost parent's remote entries (= owner_rank + 1)
@@ -255,17 +264,31 @@
             end if
           end if
 
+          ! Mass split fraction: prefer the area-weighted fraction computed once per
+          ! split by apply_crack (bitwise identical on every rank and in a 1-rank run);
+          ! fall back to the corner-count f_detach when not provided (legacy behaviour,
+          ! parent mass left unchanged).
+          if (present(mass_fraction)) then
+            f_mass = mass_fraction
+            l_scale_parent = .true.
+          else
+            f_mass = f_detach
+            l_scale_parent = .false.
+          end if
+
           ! UNL: both sides of the crack start with the same value — copy it.
           nloc_dmg%unl    (new_pos:new_pos+nddl-1) = nloc_dmg%unl    (old_pos:old_pos+nddl-1)
           ! DNL is overwritten by NLOCAL_INCR (DNL := DT2*VNL) before it is next read.
           nloc_dmg%dnl    (new_pos:new_pos+nddl-1) = ZERO
 
-          ! VNL/MASS/FNL for PARENT: leave unchanged.
+          ! VNL/FNL for PARENT: leave unchanged.  MASS for PARENT: scaled by
+          ! (1 - f_mass) below when the area-weighted mass_fraction is provided.
           !
           ! MPI consistency: in PARITH/ON the ghost copy of the parent node on remote
           ! ranks has the same VNL/MASS as the owner and receives the same FNL via the
           ! FSKY exchange.  NLOCAL_ACC and NLOCAL_VEL therefore compute identical VNL
-          ! updates on all ranks — no owner-only modification is needed.
+          ! updates on all ranks — every modification applied here must use the same
+          ! factor on every rank holding the parent (mass_fraction guarantees that).
           !
           ! Physical interpretation: the split takes effect for the NEXT cycle's FORINT
           ! (via IADC/ADDCNE updates below).  In the CURRENT cycle FNL was assembled from
@@ -277,10 +300,19 @@
           nloc_dmg%vnl    (new_pos:new_pos+nddl-1) = nloc_dmg%vnl    (old_pos:old_pos+nddl-1) * f_detach
           nloc_dmg%vnl_old(new_pos:new_pos+nddl-1) = nloc_dmg%vnl_old(old_pos:old_pos+nddl-1) * f_detach
 
-          ! Child node gets a proportional share of the non-local mass so that the total
-          ! mass is approximately conserved (parent keeps its original mass).
-          nloc_dmg%mass (new_pos:new_pos+nddl-1) = nloc_dmg%mass (old_pos:old_pos+nddl-1) * f_detach
-          nloc_dmg%mass0(new_pos:new_pos+nddl-1) = nloc_dmg%mass0(old_pos:old_pos+nddl-1) * f_detach
+          ! Child node gets the migrating share of the non-local mass.  With the
+          ! area-weighted mass_fraction the parent keeps the complement below, so the
+          ! total non-local mass is exactly conserved; in the legacy (fallback) path
+          ! the parent mass is left unchanged.
+          nloc_dmg%mass (new_pos:new_pos+nddl-1) = nloc_dmg%mass (old_pos:old_pos+nddl-1) * f_mass
+          nloc_dmg%mass0(new_pos:new_pos+nddl-1) = nloc_dmg%mass0(old_pos:old_pos+nddl-1) * f_mass
+          if (l_scale_parent) then
+            ! Every rank holding the parent applies the same factor (creating ranks
+            ! here, non-creating ranks in apply_crack Phase 5), so all MPI copies of
+            ! the parent stay bitwise consistent.
+            nloc_dmg%mass (old_pos:old_pos+nddl-1) = nloc_dmg%mass (old_pos:old_pos+nddl-1) * (ONE - f_mass)
+            nloc_dmg%mass0(old_pos:old_pos+nddl-1) = nloc_dmg%mass0(old_pos:old_pos+nddl-1) * (ONE - f_mass)
+          end if
 
           ! DEBUG: print split state for tracing MPI vs MONO divergence.
 !          write(6,'(a,i0,a,i0,a,l1,a,i0,a,i0,a,i0,a,i0,a,f8.5,a,f8.5,a,g13.6,a,g13.6,a,g13.6)') &

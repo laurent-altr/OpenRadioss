@@ -54,6 +54,194 @@
 
       contains
 
+!! \brief Area of a 4-node shell from the current nodal coordinates.
+!! \details Sum of the two triangles (n1,n2,n3) and (n1,n3,n4).  Degenerated quads
+!!          (triangles stored with node4 = node3) get a zero second triangle, so the
+!!          formula is valid for both true quads and degenerated ones.
+        function shell_area4(x, n1, n2, n3, n4) result(area)
+          use precision_mod, only: wp
+          implicit none
+          real(kind=wp), intent(in) :: x(:,:)   !< nodal coordinates (3, numnod)
+          integer,       intent(in) :: n1, n2, n3, n4 !< corner node local ids
+          real(kind=wp) :: area
+          real(kind=wp) :: u(3), v(3), c(3)
+          u = x(1:3, n2) - x(1:3, n1)
+          v = x(1:3, n3) - x(1:3, n1)
+          c(1) = u(2)*v(3) - u(3)*v(2)
+          c(2) = u(3)*v(1) - u(1)*v(3)
+          c(3) = u(1)*v(2) - u(2)*v(1)
+          area = 0.5_wp * sqrt(c(1)*c(1) + c(2)*c(2) + c(3)*c(3))
+          u = x(1:3, n3) - x(1:3, n1)
+          v = x(1:3, n4) - x(1:3, n1)
+          c(1) = u(2)*v(3) - u(3)*v(2)
+          c(2) = u(3)*v(1) - u(1)*v(3)
+          c(3) = u(1)*v(2) - u(2)*v(1)
+          area = area + 0.5_wp * sqrt(c(1)*c(1) + c(2)*c(2) + c(3)*c(3))
+        end function shell_area4
+
+!! \brief Area-weighted share of the parent nodal mass migrating to the new node.
+!! \details Enumerates every shell attached to the parent — local shells by scanning
+!!          the connectivity, remote shells through their ghost copies — and weights
+!!          each by (number of corners at the parent) x (shell area), which is the
+!!          lumped-mass contribution pattern of a 4-node shell (area/4 per corner, the
+!!          common 1/4 cancels).  Returns migrating_area / total_area, clamped away
+!!          from 0 and 1 so neither side of the crack is left massless.
+!!
+!!          Bitwise MPI/mono consistency: every shell area is computed once on the
+!!          shell's home rank (ghost copies receive the home value through
+!!          spmd_exchange_ghost_shells), and the sums run in ascending shell-user-id
+!!          order, so all ranks holding the parent — and a 1-rank run — compute the
+!!          exact same fraction.
+        function split_mass_fraction(element, parent_id, n_uids, shell_uids, &
+          numelc, shell_area, nghost, ghost_area) result(w)
+          use connectivity_mod
+          use precision_mod, only: wp
+          implicit none
+          type(connectivity_), intent(in) :: element     !< element connectivity (pre-split state)
+          integer,             intent(in) :: parent_id   !< local id of the node to split
+          integer,             intent(in) :: n_uids      !< size of shell_uids
+          integer,             intent(in) :: shell_uids(n_uids) !< signed shells migrating to N' (>0 local, <0 ghost index)
+          integer,             intent(in) :: numelc      !< number of local shells
+          real(kind=wp),       intent(in) :: shell_area(0:numelc) !< per-local-shell area
+          integer,             intent(in) :: nghost      !< number of ghost shells
+          real(kind=wp),       intent(in) :: ghost_area(*) !< per-ghost-shell area (from the home rank)
+          real(kind=wp) :: w
+
+          integer :: e, g, j, k, n_att, cnt, uid, tmp_uid
+          integer, allocatable :: att_uid(:)
+          real(kind=wp), allocatable :: att_area(:)
+          logical, allocatable :: att_mig(:)
+          real(kind=wp) :: tmp_area, a_tot, a_mig
+          logical :: tmp_mig
+          real(kind=wp), parameter :: w_min = 0.01_wp, w_max = 0.99_wp
+
+          w = 0.5_wp
+
+          ! Count the shells attached to the parent (local + ghost)
+          n_att = 0
+          do e = 1, numelc
+            if (any(element%shell%nodes(1:4, e) == parent_id)) n_att = n_att + 1
+          end do
+          do g = 1, nghost
+            if (any(element%ghost_shell%nodes(1:4, g) == parent_id)) n_att = n_att + 1
+          end do
+          if (n_att == 0) return
+
+          allocate(att_uid(n_att), att_area(n_att), att_mig(n_att))
+          k = 0
+          do e = 1, numelc
+            cnt = 0
+            do j = 1, 4
+              if (element%shell%nodes(j, e) == parent_id) cnt = cnt + 1
+            end do
+            if (cnt > 0) then
+              k = k + 1
+              att_uid(k)  = element%shell%user_id(e)
+              att_area(k) = real(cnt, wp) * shell_area(e)
+              att_mig(k)  = .false.
+            end if
+          end do
+          do g = 1, nghost
+            cnt = 0
+            do j = 1, 4
+              if (element%ghost_shell%nodes(j, g) == parent_id) cnt = cnt + 1
+            end do
+            if (cnt > 0) then
+              k = k + 1
+              att_uid(k)  = element%ghost_shell%uid(g)
+              att_area(k) = real(cnt, wp) * ghost_area(g)
+              att_mig(k)  = .false.
+            end if
+          end do
+
+          ! Mark the migrating shells (positive = local shell id, negative = ghost index)
+          do j = 1, n_uids
+            if (shell_uids(j) > 0) then
+              uid = element%shell%user_id(shell_uids(j))
+            else if (shell_uids(j) < 0) then
+              uid = element%ghost_shell%uid(-shell_uids(j))
+            else
+              cycle
+            end if
+            do k = 1, n_att
+              if (att_uid(k) == uid) then
+                att_mig(k) = .true.
+                exit
+              end if
+            end do
+          end do
+
+          ! Insertion sort by user id: the summation order must not depend on the
+          ! local/ghost storage layout of each rank
+          do k = 2, n_att
+            do j = k, 2, -1
+              if (att_uid(j) < att_uid(j-1)) then
+                tmp_uid = att_uid(j);   att_uid(j) = att_uid(j-1);   att_uid(j-1) = tmp_uid
+                tmp_area = att_area(j); att_area(j) = att_area(j-1); att_area(j-1) = tmp_area
+                tmp_mig = att_mig(j);   att_mig(j) = att_mig(j-1);   att_mig(j-1) = tmp_mig
+              else
+                exit
+              end if
+            end do
+          end do
+
+          a_tot = 0.0_wp
+          a_mig = 0.0_wp
+          do k = 1, n_att
+            a_tot = a_tot + att_area(k)
+            if (att_mig(k)) a_mig = a_mig + att_area(k)
+          end do
+
+          if (a_tot > 0.0_wp) w = min(max(a_mig / a_tot, w_min), w_max)
+          deallocate(att_uid, att_area, att_mig)
+        end function split_mass_fraction
+
+!! \brief Apply the parent side of a mass split on a rank that holds the parent
+!!        node but did not create the new node.
+!! \details Mirrors what set_new_node_values / detach_node_nloc do on the creating
+!!          ranks: the parent keeps (1 - w) of its mass, rotational inertia,
+!!          assembled force/moment and non-local mass.  Every rank holding the
+!!          parent must apply the same factor so all MPI copies stay consistent.
+        subroutine scale_parent_on_noncreating_rank(nodes, nloc_dmg, parent_uid, w)
+          use nodal_arrays_mod
+          use nlocal_reg_mod
+          use precision_mod, only: wp
+          implicit none
+          type(nodal_arrays_), intent(inout) :: nodes      !< nodal arrays
+          type(nlocal_str_),   intent(inout) :: nloc_dmg   !< non-local damage structure
+          integer,             intent(in)    :: parent_uid !< user id of the split parent node
+          real(kind=wp),       intent(in)    :: w          !< share taken by the (remote) new node
+          integer :: j, nl_idx, nl_pos, nl_nddl
+
+          j = get_local_node_id(nodes, parent_uid)
+          if (j <= 0) return
+
+          nodes%ms(j)  = nodes%ms(j)  * (1.0_wp - w)
+          nodes%ms0(j) = nodes%ms0(j) * (1.0_wp - w)
+          nodes%A(1:3,j)  = nodes%A(1:3,j)  * (1.0_wp - w)
+          nodes%AR(1:3,j) = nodes%AR(1:3,j) * (1.0_wp - w)
+          if (nodes%iroddl > 0) then
+            nodes%IN(j)  = nodes%IN(j)  * (1.0_wp - w)
+            nodes%IN0(j) = nodes%IN0(j) * (1.0_wp - w)
+          end if
+#ifdef MYREAL4
+          if (nodes%iparith == 0) then
+            nodes%ACC_DP(1:3,j) = nodes%ACC_DP(1:3,j) * (1.0_wp - w)
+          end if
+#endif
+          if (nloc_dmg%imod > 0) then
+            nl_idx = nloc_dmg%idxi(j)
+            if (nl_idx > 0) then
+              nl_pos  = nloc_dmg%posi(nl_idx)
+              nl_nddl = nloc_dmg%posi(nl_idx + 1) - nl_pos
+              nloc_dmg%mass (nl_pos:nl_pos+nl_nddl-1) = nloc_dmg%mass (nl_pos:nl_pos+nl_nddl-1) * (1.0_wp - w)
+              nloc_dmg%mass0(nl_pos:nl_pos+nl_nddl-1) = nloc_dmg%mass0(nl_pos:nl_pos+nl_nddl-1) * (1.0_wp - w)
+            end if
+          end if
+
+          nodes%nchilds(nodes%parent_node(j)) = nodes%nchilds(nodes%parent_node(j)) + 1
+        end subroutine scale_parent_on_noncreating_rank
+
 !! \brief Determine ownership and perform node splits for all entries in crack_info_list.
 !! \details For each entry:
 !!          1. Find the shell with the globally-smallest user id among the attached shells.
@@ -99,6 +287,7 @@
           use detach_node_nloc_mod
           use extend_array_mod
           use update_pon_mod, only : update_pon_shells
+          use ghost_shells_mod, only : spmd_exchange_ghost_shells
           use spmd_mod
           use precision_mod, only: wp
           implicit none
@@ -147,6 +336,13 @@
           integer, allocatable :: pon_cnt(:), pon_cnt_global(:), pon_dsp(:)
           integer, allocatable :: pon_ghost_contrib_per_rank(:) ! Parith/ON ghost recv counts per rank
           integer, allocatable :: recv_pon_placeholder(:)       ! recv_procne for ghost placeholder Parith/ON slots
+          ! Phase 1.6: area-weighted mass split fraction
+          integer :: numelc_loc, nghost
+          real(kind=wp), allocatable :: shell_area(:)      ! (0:numelc) per-local-shell area
+          real(kind=wp), allocatable :: ghost_shell_area(:) ! per-ghost-shell area (home-rank value)
+          real(kind=wp), allocatable :: w_split(:)         ! mass fraction per crack record
+          real(kind=wp), allocatable :: w_local_arr(:), w_global_arr(:) ! Phase 3 gather of w
+          real(kind=wp) :: current_w                       ! w of the Phase 4/5 group being processed
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Body
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -158,8 +354,10 @@
           local_new_count = 0
           allocate(detached_nodes_local(size(crack_info_list)))
           allocate(owning_ranks_local(size(crack_info_list)))
+          allocate(w_local_arr(size(crack_info_list)))
           detached_nodes_local = 0
           owning_ranks_local   = 0
+          w_local_arr          = 0.5_wp
 
           ! ---------------------------------------------------------------
           ! Phase 1: ownership determination (local, no MPI).
@@ -210,6 +408,50 @@
             end if
 
           end do
+
+          ! ---------------------------------------------------------------
+          ! Phase 1.6: area-weighted mass split fraction per record.
+          !
+          ! w_split(i) = (area of the shells migrating to N') /
+          !              (area of ALL shells attached to the parent),
+          ! computed on the pre-split connectivity.  It replaces the previous
+          ! fixed 50/50 split of the parent mass: the new node takes the share
+          ! of the lumped nodal mass carried by the shell area that migrates
+          ! with it, the parent keeps the complement.
+          !
+          ! Each local shell area is computed on its home rank and communicated
+          ! to the ghost copies (same channel as the damage exchange), and the
+          ! per-parent sums run in ascending shell-user-id order, so every rank
+          ! and a 1-rank run obtain the bitwise-identical fraction.
+          ! ---------------------------------------------------------------
+          numelc_loc = size(element%shell%nodes, 2)
+          nghost = 0
+          if (allocated(element%ghost_shell%uid)) nghost = size(element%ghost_shell%uid)
+          allocate(shell_area(0:numelc_loc))
+          shell_area = 0.0_wp
+          do i = 1, numelc_loc
+            shell_area(i) = shell_area4(nodes%X, &
+              element%shell%nodes(1, i), element%shell%nodes(2, i), &
+              element%shell%nodes(3, i), element%shell%nodes(4, i))
+          end do
+          allocate(ghost_shell_area(max(1, nghost)))
+          ghost_shell_area = 0.0_wp
+          if (nspmd > 1) then
+            call spmd_exchange_ghost_shells(element, ispmd, nspmd, 1, shell_area, ghost_shell_area)
+          end if
+
+          allocate(w_split(size(crack_info_list)))
+          w_split = 0.5_wp
+          do i = 1, size(crack_info_list)
+            if (.not. allocated(crack_info_list(i)%shell_uids)) cycle
+            if (size(crack_info_list(i)%shell_uids) == 0) cycle
+            if (crack_info_list(i)%parent_id <= 0) cycle
+            w_split(i) = split_mass_fraction(element, crack_info_list(i)%parent_id, &
+              size(crack_info_list(i)%shell_uids), crack_info_list(i)%shell_uids, &
+              numelc_loc, shell_area, nghost, ghost_shell_area)
+          end do
+          deallocate(shell_area)
+          deallocate(ghost_shell_area)
 
           ! ---------------------------------------------------------------
           ! Phase 1.5: gather Parith/ON contributions_count from all ranks.
@@ -352,7 +594,7 @@
               if (crack_info_list(i)%parent_id > 0 .and. &
                 crack_info_list(i)%owning_rank /= -1) then
                 call extend_nodal_arrays(nodes, nodes%numnod + 1)
-                call set_new_node_values(nodes, crack_info_list(i)%parent_id)
+                call set_new_node_values(nodes, crack_info_list(i)%parent_id, w_split(i))
                 nodes%MAIN_PROC(nodes%numnod + 1) = crack_info_list(i)%owning_rank+1
                 nodes%WEIGHT(nodes%numnod + 1) = 0
                 nodes%numnod = nodes%numnod + 1
@@ -362,6 +604,7 @@
                 ! Ghost placeholder has 0 local shells but needs Parith/ON recv rows
                 ! matching the owner's local contribution count so REBUILD_PON_TABLES
                 ! gives consistent FR_NBCC (avoiding buffer overflow in spmd_exch2_a_pon).
+                n_owner_contrib_pon = 0   ! also the (defined) default when iparith == 0
                 if (nodes%iparith > 0) then
                   n_owner_contrib_pon = 0
                   if (n_pon_cracks_total > 0) then
@@ -392,11 +635,13 @@
                 if (nloc_dmg%imod > 0) then
                   call detach_node_nloc(nloc_dmg, crack_info_list(i)%parent_id, numnod, &
                     element, empty_shells, 0, numnod - 1, nthread, ispmd, nspmd, &
-                    is_mirror=.true., n_owner_contrib=n_owner_contrib_pon)
+                    is_mirror=.true., n_owner_contrib=n_owner_contrib_pon, &
+                    mass_fraction=w_split(i))
                 end if
                 local_new_count = local_new_count + 1
                 detached_nodes_local(local_new_count) = crack_info_list(i)%parent_uid
                 owning_ranks_local(local_new_count)   = crack_info_list(i)%owning_rank
+                w_local_arr(local_new_count)          = w_split(i)
               end if
               cycle
             end if
@@ -483,14 +728,14 @@
                 call detach_node(nodes, crack_info_list(i)%parent_id, element, &
                   local_shells, local_n, &
                   npari, ninter, ipari, interf, nloc_dmg, nthread, nspmd, ispmd, &
-                  n_owner_contrib, &
+                  w_split(i), n_owner_contrib, &
                   ghost_contrib_per_rank, pon_ghost_contrib_per_rank)
                 deallocate(pon_ghost_contrib_per_rank)
               else
                 call detach_node(nodes, crack_info_list(i)%parent_id, element, &
                   local_shells, local_n, &
                   npari, ninter, ipari, interf, nloc_dmg, nthread, nspmd, ispmd, &
-                  n_owner_contrib, &
+                  w_split(i), n_owner_contrib, &
                   ghost_contrib_per_rank)
               end if
               deallocate(ghost_contrib_per_rank)
@@ -517,13 +762,14 @@
               call mirror_node_split(nodes, crack_info_list(i)%parent_id, element, &
                 local_shells, local_n, &
                 nloc_dmg, nthread, ispmd, nspmd, crack_info_list(i)%owning_rank, &
-                n_owner_contrib, n_owner_contrib_pon)
+                w_split(i), n_owner_contrib, n_owner_contrib_pon)
             end if
 
             numnod = nodes%numnod
             local_new_count = local_new_count + 1
             detached_nodes_local(local_new_count) = crack_info_list(i)%parent_uid
             owning_ranks_local(local_new_count)   = crack_info_list(i)%owning_rank
+            w_local_arr(local_new_count)          = w_split(i)
 
             deallocate(local_shells)
           end do
@@ -560,15 +806,23 @@
             displ_arr(i) = displ_arr(i-1) + nb_detached_nodes_global(i-1)
           end do
 
+          allocate(w_global_arr(max(total_new_nodes, 1)))
+          w_global_arr = 0.5_wp
           if (nspmd > 1) then
             call spmd_allgatherv(detached_nodes_local, local_new_count, &
               detached_nodes, nb_detached_nodes_global, displ_arr)
             call spmd_allgatherv(owning_ranks_local, local_new_count, &
               owning_ranks_global, nb_detached_nodes_global, displ_arr)
+            ! Gather the mass-split fraction of each created node so that ranks
+            ! holding the parent without creating N' (Phase 5) apply the same
+            ! (1 - w) factor as the creating ranks.
+            call spmd_allgatherv(w_local_arr, local_new_count, &
+              w_global_arr, nb_detached_nodes_global, displ_arr)
           else
             if (total_new_nodes > 0) then
               detached_nodes(1:total_new_nodes)      = detached_nodes_local(1:total_new_nodes)
               owning_ranks_global(1:total_new_nodes) = owning_ranks_local(1:total_new_nodes)
+              w_global_arr(1:total_new_nodes)        = w_local_arr(1:total_new_nodes)
             end if
           end if
 
@@ -630,22 +884,19 @@
 
             current_parent      = -1
             current_owning_rank = -1
+            current_w           = 0.5_wp
             this_rank_created   = .false.
 
             do ii = 1, k
               i = permutation(ii)  ! original index
 
               if (detached_nodes(ii) /= current_parent) then
-                ! Finalise the previous group: halve ms on non-creating ranks
+                ! Finalise the previous group: on non-creating ranks the parent
+                ! keeps (1 - w) of its mass/inertia/force (same factor as on the
+                ! creating ranks — see set_new_node_values / detach_node_nloc)
                 if (current_parent >= 0 .and. .not. this_rank_created) then
-                  j = get_local_node_id(nodes, current_parent)
-                  if (j > 0) then
-                    nodes%ms(j)  = nodes%ms(j)  / 2.0_wp
-                    nodes%ms0(j) = nodes%ms0(j) / 2.0_wp
-                    nodes%nchilds(nodes%parent_node(j)) = &
-                      nodes%nchilds(nodes%parent_node(j)) + 1
-
-                  end if
+                  call scale_parent_on_noncreating_rank(nodes, nloc_dmg, &
+                    current_parent, current_w)
                 end if
                 ! Open a new group
                 old_max_uid         = old_max_uid + 1
@@ -653,6 +904,7 @@
                 new_crack           = new_crack   + 1
                 current_parent      = detached_nodes(ii)
                 current_owning_rank = owning_ranks_global(i)
+                current_w           = w_global_arr(i)
                 this_rank_created   = .false.
               end if
 
@@ -676,14 +928,8 @@
 
             ! Finalise the last group
             if (current_parent >= 0 .and. .not. this_rank_created) then
-              j = get_local_node_id(nodes, current_parent)
-              if (j > 0) then
-                nodes%ms(j)  = nodes%ms(j)  / 2.0_wp
-                nodes%ms0(j) = nodes%ms0(j) / 2.0_wp
-                nodes%nchilds(nodes%parent_node(j)) = &
-                  nodes%nchilds(nodes%parent_node(j)) + 1
-
-              end if
+              call scale_parent_on_noncreating_rank(nodes, nloc_dmg, &
+                current_parent, current_w)
             end if
 
             nodes%max_uid = old_max_uid
@@ -707,6 +953,9 @@
           if (allocated(owning_ranks_local))        deallocate(owning_ranks_local)
           if (allocated(detached_nodes))            deallocate(detached_nodes)
           if (allocated(owning_ranks_global))       deallocate(owning_ranks_global)
+          if (allocated(w_split))                   deallocate(w_split)
+          if (allocated(w_local_arr))               deallocate(w_local_arr)
+          if (allocated(w_global_arr))              deallocate(w_global_arr)
 
         end subroutine apply_crack
 

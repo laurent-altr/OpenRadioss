@@ -572,11 +572,11 @@
 !||    constant_mod          ../common_source/modules/constant_mod.F
 !||    nodal_arrays_mod      ../common_source/modules/nodal_arrays.F90
 !||====================================================================
-        subroutine set_new_node_values(nodes,i)
+        subroutine set_new_node_values(nodes,i,mass_fraction)
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Modules
 ! ----------------------------------------------------------------------------------------------------------------------
-          USE constant_mod, only : TWO, EM20
+          USE constant_mod, only : ONE, EM20
           USE connectivity_mod
           USE nodal_arrays_mod
           implicit none
@@ -585,6 +585,9 @@
 ! ----------------------------------------------------------------------------------------------------------------------
           type(nodal_arrays_), intent(inout) :: nodes !< nodal arrays
           integer, intent(in) :: i                 !< id of the node to detach
+          real(kind=WP), intent(in) :: mass_fraction !< share of the parent mass/inertia/force taken by the new node
+          !< (area-weighted, computed by apply_crack; identical on every rank).  The parent keeps
+          !< the complement (1 - mass_fraction) so mass, inertia and assembled force are conserved.
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Local variables
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -610,24 +613,33 @@
 
           if(nodes%iroddl >0) then
             nodes%VR(1:3,numnod+1) = nodes%VR(1:3,i)
-            nodes%IN(numnod+1) = nodes%IN(i)
-            nodes%IN0(numnod+1) = nodes%IN0(i)
+            ! Rotational inertia is split like the mass (area-weighted); previously the
+            ! parent inertia was duplicated onto the child, creating inertia from nothing.
+            nodes%IN(numnod+1)  = nodes%IN(i)  * mass_fraction
+            nodes%IN(i)         = nodes%IN(i)  * (ONE - mass_fraction)
+            nodes%IN0(numnod+1) = nodes%IN0(i) * mass_fraction
+            nodes%IN0(i)        = nodes%IN0(i) * (ONE - mass_fraction)
             nodes%ICODR(numnod+1) = nodes%ICODR(i)
           end if
           if(nodes%sicodt_fac >0) nodes%ICODT(numnod+1) = nodes%ICODT(i)
           if(nodes%used_dr) then
             nodes%DR(1:3,numnod+1) = nodes%DR(1:3,i)
           end if
-          nodes%MS(numnod+1) = nodes%MS(i)  / TWO
-          nodes%MS(i)        = nodes%MS(i)  / TWO
-          nodes%MS0(numnod+1) = nodes%MS0(i) / TWO
-          nodes%MS0(i)        = nodes%MS0(i) / TWO
+          ! Area-weighted mass split: the new node takes the share of the parent lumped
+          ! mass corresponding to the attached-shell area that migrates with it; the
+          ! parent keeps the complement.  Total mass is conserved exactly.
+          nodes%MS(numnod+1) = nodes%MS(i)  * mass_fraction
+          nodes%MS(i)        = nodes%MS(i)  * (ONE - mass_fraction)
+          nodes%MS0(numnod+1) = nodes%MS0(i) * mass_fraction
+          nodes%MS0(i)        = nodes%MS0(i) * (ONE - mass_fraction)
 
 #ifdef MYREAL4
           nodes%DDP(1:3,numnod+1) = nodes%DDP(1:3,i)
           nodes%XDP(1:3,numnod+1) = nodes%XDP(1:3,i)
           if(nodes%iparith==0) then
-            nodes%ACC_DP(1:3,numnod+1) = nodes%ACC_DP(1:3,i)
+            ! double-precision force accumulator: split like A below
+            nodes%ACC_DP(1:3,numnod+1) = nodes%ACC_DP(1:3,i) * mass_fraction
+            nodes%ACC_DP(1:3,i)        = nodes%ACC_DP(1:3,i) * (ONE - mass_fraction)
           end if
 
 #endif
@@ -635,15 +647,24 @@
           nodes%WEIGHT_MD(numnod+1) = nodes%WEIGHT_MD(i)
           nodes%MAIN_PROC(numnod+1) = nodes%MAIN_PROC(i)
 
+          ! The assembled force/moment (A/AR still hold forces at this point; ACCELE runs
+          ! after the split) was accumulated over the full pre-split shell fan.  Splitting
+          ! it with the same fraction as the mass keeps the acceleration A/MS (and AR/IN)
+          ! continuous across the split cycle for both nodes, instead of amplifying it by
+          ! 1/mass_fraction on the child and 1/(1-mass_fraction) on the parent.
           if(nodes%iparith == 0) then
-            nodes%A(1:3,numnod+1) = nodes%A(1:3,i)
-            nodes%AR(1:3,numnod+1) = nodes%AR(1:3,i)
+            nodes%A(1:3,numnod+1)  = nodes%A(1:3,i)  * mass_fraction
+            nodes%A(1:3,i)         = nodes%A(1:3,i)  * (ONE - mass_fraction)
+            nodes%AR(1:3,numnod+1) = nodes%AR(1:3,i) * mass_fraction
+            nodes%AR(1:3,i)        = nodes%AR(1:3,i) * (ONE - mass_fraction)
             if(nodes%iroddl > 0) nodes%STIFR(numnod+1) = EM20
             nodes%VISCN(numnod+1) = nodes%VISCN(i)
             nodes%STIFN(numnod+1) = EM20  ! will be reaccumulated from elements next cycle
           else
-            nodes%A(1:3,numnod+1) = nodes%A(1:3,i)
-            nodes%AR(1:3,numnod+1) = nodes%AR(1:3,i)
+            nodes%A(1:3,numnod+1)  = nodes%A(1:3,i)  * mass_fraction
+            nodes%A(1:3,i)         = nodes%A(1:3,i)  * (ONE - mass_fraction)
+            nodes%AR(1:3,numnod+1) = nodes%AR(1:3,i) * mass_fraction
+            nodes%AR(1:3,i)        = nodes%AR(1:3,i) * (ONE - mass_fraction)
             nodes%STIFR(numnod+1) = EM20
             nodes%VISCN(numnod+1) = nodes%VISCN(i)
             nodes%STIFN(numnod+1) = EM20  ! will be reaccumulated from elements next cycle
@@ -748,7 +769,8 @@
 !!          owning_rank instead of copying from the parent. The UID is assigned later in the
 !!          global uid-sync phase of apply_crack.
         subroutine mirror_node_split(nodes, node_id, elements, shell_list, list_size, &
-          nloc_dmg, nthread, ispmd, nspmd, owning_rank, n_owner_contrib, n_owner_contrib_pon)
+          nloc_dmg, nthread, ispmd, nspmd, owning_rank, mass_fraction, &
+          n_owner_contrib, n_owner_contrib_pon)
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Modules
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -770,6 +792,7 @@
           integer,             intent(in)    :: ispmd        !< local MPI rank (0-based)
           integer,             intent(in)    :: nspmd        !< number of MPI ranks
           integer,             intent(in)    :: owning_rank  !< rank that owns the new node (0-based)
+          real(kind=WP),       intent(in)    :: mass_fraction !< area-weighted share of the parent mass taken by the new node
           integer,             intent(in)    :: n_owner_contrib !< NLOC: ghost-copy-based recv slot count
           !! \brief Parith/ON-specific recv slot count (communicated corner count from owner).
           !! \details If present, this value (not n_owner_contrib) is used to size the Parith/ON
@@ -790,7 +813,7 @@
           new_local_id = numnod + 1
 
           call extend_nodal_arrays(nodes, numnod + 1)
-          call set_new_node_values(nodes, node_id)
+          call set_new_node_values(nodes, node_id, mass_fraction)
           ! Override: the new node is owned by owning_rank, not by this rank
           nodes%MAIN_PROC(new_local_id) = owning_rank + 1
           ! Mirror nodes are ghost copies; mark as not owned so output routines skip them
@@ -815,7 +838,7 @@
           if (nloc_dmg%imod > 0) then
             call detach_node_nloc(nloc_dmg, node_id, new_local_id, &
               elements, shell_list, list_size, numnod, nthread, ispmd, nspmd, &
-              is_mirror=.true., n_owner_contrib=n_pon_recv)
+              is_mirror=.true., n_owner_contrib=n_pon_recv, mass_fraction=mass_fraction)
           end if
 
           nodes%numnod = nodes%numnod + 1
@@ -842,7 +865,8 @@
 !||    nodal_arrays_mod              ../common_source/modules/nodal_arrays.F90
 !||====================================================================
         subroutine detach_node(nodes, node_id, elements, shell_list, list_size, &
-          npari, ninter, ipari, interf, nloc_dmg, nthread, nspmd, ispmd, n_ghost_contrib, &
+          npari, ninter, ipari, interf, nloc_dmg, nthread, nspmd, ispmd, &
+          mass_fraction, n_ghost_contrib, &
           ghost_contrib_per_rank, pon_ghost_contrib_per_rank)
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Modules
@@ -870,6 +894,7 @@
           integer,             intent(in)    :: nthread      !< number of OpenMP threads
           integer,             intent(in)    :: nspmd        !< number of MPI domains
           integer,             intent(in)    :: ispmd        !< local MPI rank (0-based)
+          real(kind=WP),       intent(in)    :: mass_fraction !< area-weighted share of the parent mass taken by the new node
           integer,             intent(in)  :: n_ghost_contrib !< ghost shells moving to N' (for f_detach correction in PARITH/ON)
           integer, dimension(0:nspmd-1), optional, intent(in) :: ghost_contrib_per_rank !< per-rank breakdown for NLOC
           !! \brief Parith/ON-specific per-rank ghost recv counts.
@@ -904,7 +929,7 @@
           call extend_nodal_arrays(nodes, numnod + 1) ! allocates space for one more node (does not increment nodes%numnod)
 
           i = node_id
-          call set_new_node_values(nodes, i)
+          call set_new_node_values(nodes, i, mass_fraction)
 
           ! Choose which ghost recv counts to use for Parith/ON ADSKY slot allocation:
           !   pon_ghost_contrib_per_rank (if present) gives the correct corner-count-based
@@ -955,15 +980,18 @@
               call detach_node_nloc(nloc_dmg, node_id, new_local_id, &
                 elements, shell_list, list_size, numnod, nthread, ispmd, nspmd, &
                 n_ghost_contrib=sum(pon_ghost_contrib_per_rank), &
-                ghost_contrib_per_rank=pon_ghost_contrib_per_rank)
+                ghost_contrib_per_rank=pon_ghost_contrib_per_rank, &
+                mass_fraction=mass_fraction)
             else if (present(ghost_contrib_per_rank)) then
               call detach_node_nloc(nloc_dmg, node_id, new_local_id, &
                 elements, shell_list, list_size, numnod, nthread, ispmd, nspmd, &
                 n_ghost_contrib=n_ghost_contrib, &
-                ghost_contrib_per_rank=ghost_contrib_per_rank )
+                ghost_contrib_per_rank=ghost_contrib_per_rank, &
+                mass_fraction=mass_fraction)
             else
               call detach_node_nloc(nloc_dmg, node_id, new_local_id, &
-                elements, shell_list, list_size, numnod, nthread, ispmd, nspmd)
+                elements, shell_list, list_size, numnod, nthread, ispmd, nspmd, &
+                mass_fraction=mass_fraction)
             end if
           end if
 

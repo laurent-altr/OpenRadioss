@@ -715,8 +715,9 @@ must be patched.
 
 | Array | Meaning | Initialise new DOFs |
 |-------|---------|---------------------|
-| `MASS` / `MASS0` | Non-local mass (current / reference) | Copy from parent, then split both 50/50 |
-| `VNL`, `VNL_OLD`, `DNL`, `UNL` | Velocity, previous velocity, increment, cumulated variable | Copy from parent |
+| `MASS` / `MASS0` | Non-local mass (current / reference) | Child gets the area-weighted share `w`, parent keeps `1-w` (see `doc/NODE_SPLITING.md` §5.1.5) — total mass conserved |
+| `VNL`, `VNL_OLD` | Velocity, previous velocity | Child gets the corner-count fraction `f_detach` of the parent value |
+| `DNL`, `UNL` | Increment, cumulated variable | `UNL` copied from parent, `DNL` zeroed |
 | `FNL`, `STIFNL` | Force / stiffness accumulator | Zero |
 
 **Skyline connectivity (PARITH/ON only):**
@@ -779,7 +780,8 @@ mechanical counterparts (`detach_node_from_shells` / `update_pon_shells`), befor
 ```fortran
 subroutine detach_node_nloc(nloc_dmg, old_local_id, new_local_id, &
     elements, shell_list, list_size, old_numnod, nthread, ispmd, nspmd_in, &
-    is_mirror, n_owner_contrib, n_ghost_contrib, ghost_contrib_per_rank)
+    is_mirror, n_owner_contrib, n_ghost_contrib, ghost_contrib_per_rank, &
+    mass_fraction)
   use nlocal_reg_mod
   use connectivity_mod
   use extend_array_mod
@@ -795,6 +797,7 @@ subroutine detach_node_nloc(nloc_dmg, old_local_id, new_local_id, &
   integer,             intent(in)    :: n_owner_contrib ! owner corner count (recv rows on mirror ranks)
   integer,             intent(in)    :: n_ghost_contrib ! total remote corner count (recv rows on the owner)
   integer,             intent(in)    :: ghost_contrib_per_rank(nspmd_in)
+  real(kind=wp),       intent(in)    :: mass_fraction   ! (optional) area-weighted mass share of the new node
 ```
 
 The `is_mirror` / `n_owner_contrib` / `n_ghost_contrib` /
@@ -831,12 +834,14 @@ Step 6 — Extend DOF-space vectors by nddl
   new_pos = nloc_dmg%l_nloc + 1
   For each of MASS, MASS0, VNL, VNL_OLD, DNL, UNL:
     call extend_array(array, nloc_dmg%l_nloc, nloc_dmg%l_nloc + nddl)
-    array(new_pos : new_pos+nddl-1) = array(old_pos : old_pos+nddl-1)
-  ! Split mass equally (conserves total non-local mass)
-  nloc_dmg%mass (new_pos:new_pos+nddl-1) = nloc_dmg%mass (old_pos:old_pos+nddl-1) * HALF
-  nloc_dmg%mass0(new_pos:new_pos+nddl-1) = nloc_dmg%mass0(old_pos:old_pos+nddl-1) * HALF
-  nloc_dmg%mass (old_pos:old_pos+nddl-1) = nloc_dmg%mass (old_pos:old_pos+nddl-1) * HALF
-  nloc_dmg%mass0(old_pos:old_pos+nddl-1) = nloc_dmg%mass0(old_pos:old_pos+nddl-1) * HALF
+  UNL copied from parent; DNL zeroed; VNL/VNL_OLD scaled by the corner-count
+  fraction f_detach.
+  ! Split mass with the area-weighted fraction w = mass_fraction (conserves the
+  ! total non-local mass; same fraction as the mechanical MS split)
+  nloc_dmg%mass (new_pos:new_pos+nddl-1) = nloc_dmg%mass (old_pos:old_pos+nddl-1) * w
+  nloc_dmg%mass0(new_pos:new_pos+nddl-1) = nloc_dmg%mass0(old_pos:old_pos+nddl-1) * w
+  nloc_dmg%mass (old_pos:old_pos+nddl-1) = nloc_dmg%mass (old_pos:old_pos+nddl-1) * (1-w)
+  nloc_dmg%mass0(old_pos:old_pos+nddl-1) = nloc_dmg%mass0(old_pos:old_pos+nddl-1) * (1-w)
   For FNL (l_nloc, nthread) and STIFNL (l_nloc, nthread):
     call extend_array_2d(array, nloc_dmg%l_nloc, nthread, nloc_dmg%l_nloc+nddl, nthread)
     array(new_pos:new_pos+nddl-1, 1:nthread) = ZERO
@@ -1056,10 +1061,14 @@ damage-band geometry and avoiding reliance on element deletion alone. The
 
 ### Individual issues
 
-1. **Mass splitting is 50/50.**  `detach_node_nloc` splits the non-local mass equally
-   between the parent and the new node.  A more physically consistent approach would
-   weight the split by the volume fraction of elements remaining attached to each node
-   after the split.
+1. **Mass splitting is area-weighted.**  `detach_node_nloc` (and the mechanical
+   `set_new_node_values`) split the parent mass with the fraction of the
+   attached-shell **area** migrating to the new node, computed once per split by
+   `split_mass_fraction` in `apply_crack.F90` (see `doc/NODE_SPLITING.md`
+   §5.1.5).  The weighting assumes uniform `ρ·t` over the attached fan — a
+   further refinement would weight each shell by its actual `ρ·t·A` (needs
+   element-buffer access) and account for non-shell (solid/beam) contributions
+   to the nodal mass.
 
 2. **`CNE` array is never extended.**  `CNE` (element connectivity in skyline format) is
    always kept at size 0.  If any future code path reads `CNE` for the non-local nodes

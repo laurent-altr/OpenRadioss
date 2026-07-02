@@ -206,9 +206,11 @@ keeps any *unwritten* row at zero.
 
 Consequence: a split created at cycle `c` uses the **old** connectivity for the
 assembly at cycle `c`; the new node `N'` first receives its own element forces at
-cycle `c+1`. At the split cycle, `N'` inherits the parent's `A/AR/V/X` via
-`set_new_node_values` (§4.2), and the parent's mass is halved between `N` and
-`N'`.
+cycle `c+1`. At the split cycle, `N'` inherits the parent's `V/X` and an
+**area-weighted share `w`** of the parent's mass, inertia and assembled force
+(`MS/MS0`, `IN/IN0`, `A/AR`) via `set_new_node_values` (§4.2); the parent keeps
+the complement `1-w`. `w` is the fraction of the attached-shell area migrating
+to `N'` (§5.1.5).
 
 The orchestration block in `resol.F` (guarded by `NLOC_DMG%IMOD>0`) is:
 
@@ -250,8 +252,10 @@ Key per-node fields relevant to splitting:
 | Field | Meaning after split |
 |-------|---------------------|
 | `itab(N')` | user id of `N'` (assigned in the global UID phase, §5.4). Temporarily `max_uid`. |
-| `MS(N') , MS0(N')` | half of parent's mass (parent halved too). |
-| `X,V,D,A,AR,VR,...` | copied from parent. `STIFN/STIFR` reset to `EM20`. |
+| `MS(N') , MS0(N')` | area-weighted share `w` of the parent's mass; the parent keeps `1-w` (§5.1.5). |
+| `IN(N') , IN0(N')` | rotational inertia, split with the same fraction `w`. |
+| `A(N') , AR(N')` | `w` × parent's assembled force/moment (parent keeps `1-w`), so the acceleration `A/MS` stays continuous across the split cycle. |
+| `X,V,D,VR,...` | copied from parent. `STIFN/STIFR` reset to `EM20`. |
 | `WEIGHT(N')` | `1` if this rank owns `N'`, `0` if it is a ghost/mirror copy. |
 | `MAIN_PROC(N')` | owning rank + 1 (1-based). |
 | `parent_node(N')` | root of the split chain; `nchilds(root)` incremented. |
@@ -259,13 +263,16 @@ Key per-node fields relevant to splitting:
 
 ### 4.2 `set_new_node_values` (detach_node.F90)
 
-Copies kinematics/topology from the parent into the new slot and halves the mass:
+Copies kinematics/topology from the parent into the new slot and splits the
+mass, inertia and assembled force with the area-weighted fraction `w`
+(`mass_fraction` argument, computed in §5.1.5):
 
 ```fortran
 nodes%X(:,numnod+1)  = nodes%X(:,i)       ! same position as parent
 nodes%V(:,numnod+1)  = nodes%V(:,i)
-nodes%A(:,numnod+1)  = nodes%A(:,i)
-nodes%MS(numnod+1)   = nodes%MS(i)/2 ; nodes%MS(i) = nodes%MS(i)/2
+nodes%MS(numnod+1)   = nodes%MS(i)*w   ; nodes%MS(i) = nodes%MS(i)*(1-w)
+nodes%IN(numnod+1)   = nodes%IN(i)*w   ; nodes%IN(i) = nodes%IN(i)*(1-w)   ! iroddl
+nodes%A(:,numnod+1)  = nodes%A(:,i)*w  ; nodes%A(:,i) = nodes%A(:,i)*(1-w) ! keeps A/MS continuous
 nodes%STIFN(numnod+1)= EM20               ! reaccumulated from elements next cycle
 nodes%WEIGHT(numnod+1)= 1                 ! overridden to 0 for mirror/placeholder
 nodes%parent_node(numnod+1)= root(i) ; nodes%nchilds(root)+ = 1
@@ -342,6 +349,43 @@ Because every rank sharing the parent has ghost copies of the others' shells,
 **all ranks independently compute the same owner** — no communication needed.
 This deterministic choice is what makes the later ADSKY ordering reproducible.
 
+### 5.1.5 Phase 1.6 — area-weighted mass split fraction
+
+For each record, `split_mass_fraction` computes the share `w` of the parent's
+lumped nodal mass that migrates to `N'`:
+
+```
+w = Σ (corners_at_parent · area) over MIGRATING shells (local + ghost)
+    ─────────────────────────────────────────────────────────────────
+    Σ (corners_at_parent · area) over ALL attached shells (local + ghost)
+```
+
+clamped to `[0.01, 0.99]` so neither side of the crack is left massless
+(fallback `0.5` if no attached shell is found). This replaces the former fixed
+50/50 split: a node whose migrating fan carries 1/3 of the attached area hands
+over 1/3 of its mass, which matches the lumped-mass pattern of 4-node shells
+(each shell contributes `ρ·t·A/4` per corner; assuming uniform `ρ·t` over the
+fan, the `ρ·t/4` factor cancels).
+
+`w` must be **bitwise identical** on every rank holding the parent (the parent
+and child masses of shared nodes must stay identical across ranks) and equal to
+the 1-rank value. Two ingredients guarantee this:
+
+* each shell's area is computed **once, on its home rank**, from `nodes%X`
+  (identical on all ranks under `/PARITH/ON`), and shipped to the other ranks'
+  ghost copies through `spmd_exchange_ghost_shells` — the same channel used for
+  the damage exchange;
+* the numerator/denominator sums are accumulated in **ascending shell-user-id
+  order** (insertion sort), so the floating-point summation order does not
+  depend on each rank's local/ghost storage layout.
+
+The fraction is applied on the creating ranks by `set_new_node_values`
+(mechanical mass/inertia/force, §4.2) and `detach_node_nloc` (non-local mass,
+§6.7), and on ranks that hold the parent without creating `N'` by
+`scale_parent_on_noncreating_rank` in Phase 5 (§5.4) — every holder of the
+parent applies the same `1-w` factor. `w` is part of the Phase-3 allgather so
+non-creating ranks receive it.
+
 ### 5.2 Phase 1.5 — communicate corner counts (Parith/ON)
 
 The owner rank of `N'` will create one **local** FSKY row per shell corner landing
@@ -376,9 +420,12 @@ them one consistent user id:
    (`old_max_uid+1`, consistent everywhere because `max_uid` was allreduce-maxed
    first). Write `itab/itabm1/nodglob/main_proc` on each rank that holds a local
    `N'`. `new_crack` counts **unique** splits; `numnodg` grows by that amount.
-3. **Phase 5**: a rank that holds the parent but did **not** create `N'` halves the
-   parent's `MS/MS0` (the halving on creating ranks already happened in
-   `set_new_node_values`), keeping total mass conserved.
+3. **Phase 5**: a rank that holds the parent but did **not** create `N'` scales the
+   parent's `MS/MS0` (and `IN/IN0`, `A/AR`, non-local `MASS/MASS0`) by `1-w`
+   via `scale_parent_on_noncreating_rank` — the same factor the creating ranks
+   already applied in `set_new_node_values` / `detach_node_nloc` — keeping the
+   parent bitwise identical on every rank and the total mass conserved. The
+   fraction `w` of each split travels with the Phase-3 allgather.
 
 ---
 
@@ -533,8 +580,9 @@ parent is a non-local node):
 1. **Node-index tables** — extend `IDXI` (by one local id), `INDX` (append the new
    local id), and `POSI` (append `L_NLOC + NDDL + 1`); increment `NNOD`, `L_NLOC`.
 2. **DOF-space vectors** — extend `VNL/UNL/DNL/MASS/MASS0/…` by `NDDL`, copying the
-   parent's DOF values into the child; split the non-local `MASS` between parent and
-   child; zero the `FNL/STIFNL` accumulators for the new DOFs.
+   parent's DOF values into the child; split the non-local `MASS/MASS0` between
+   parent (`1-w`) and child (`w`) with the same area-weighted fraction as the
+   mechanical mass (§5.1.5); zero the `FNL/STIFNL` accumulators for the new DOFs.
 3. **Skyline (PARITH/ON)** — extend `ADDCNE` by one node, append `PROCNE` rows
    (`ISPMD+1` for local contributions, `remote+1` for recv rows — exactly the
    mechanical convention), grow `FSKY/STSKY`, and reassign `IADC` for the migrated
@@ -808,7 +856,9 @@ resol.F (per cycle, after ASSPAR4)
    │  │   │   └─ detach_node_nloc
    │  │   └─ (placeholder)                   weight=0, no local shells
    │  │       └─ update_pon_shells + detach_node_nloc (recv rows only)
-   │  └─ (Phase 3-5) spmd_allgatherv + stlsort_int_int + de-dup UID, halve parent mass
+   │  ├─ (Phase 1.6) split_mass_fraction: area-weighted mass share w (§5.1.5)
+   │  └─ (Phase 3-5) spmd_allgatherv (uids, ranks, w) + stlsort_int_int + de-dup UID,
+   │                 scale parent mass by 1-w on non-creating ranks
    └─ check_pon_consistency                  audit IADC ⊂ ADSKY, FSKY row aliasing
    (back in resol.F, if new_crack>0 and NSPMD>1)
    ├─ spmd_rebuild_boundary / merge_boundary_with_split
