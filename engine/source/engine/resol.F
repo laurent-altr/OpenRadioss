@@ -3627,6 +3627,18 @@ C===============================================================================
 
               ENDIF
 C--- // 3N ------------------------------
+              IF(GPU == 1) THEN
+C     GPU SHELL: launch async pipeline BEFORE contact and CPU element
+C     work so that GPU kernels execute while INTFOP8 + FORINTC + FORINT
+C     run on the CPU.  Must NOT depend on NINTER: the GPU pipeline reads
+C     only NODES%X/V/VR and is required on every cycle, otherwise
+C     gpu_shell_sync_scatter collects zero forces and a zero element dt.
+C     Results are collected later by gpu_shell_sync_scatter.
+                CALL STARTIME(TIMERS,TIMER_GPU_SHELL)
+                CALL gpu_shell_launch_async(NODES,SHELLS,DT1)
+                CALL STOPTIME(TIMERS,TIMER_GPU_SHELL)
+              ENDIF
+C--- // 3N ------------------------------
 C       INTERFACES WITH VOID OPENING
 C----------------------------------------
               IF(NINTER/=0) THEN
@@ -3665,17 +3677,6 @@ C----------------------------------------
                   NELTST = NELTSTT
                   ITYPTST= ITYPTSTT
                 ENDIF
-
-             IF(GPU == 1) THEN
-C     GPU SHELL: launch async pipeline BEFORE CPU element work
-C     so that GPU kernels execute while FORINTC + FORINT run on CPU.
-C     Results are collected later by gpu_shell_sync_scatter.
-                CALL STARTIME(TIMERS,TIMER_GPU_SHELL)
-                CALL gpu_shell_launch_async(NODES,SHELLS,DT1)
-                CALL STOPTIME(TIMERS,TIMER_GPU_SHELL)
-              ENDIF
-
-
 
 C=======================================================================================
 C                                     PARALLEL SECTION (SMP)

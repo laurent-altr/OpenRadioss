@@ -130,8 +130,10 @@
           real(WP), dimension(:), pointer :: stifr => null() !< Nodal rotational stiffness
           ! Temporary per-element ALDT² buffer for async download (legacy)
           real(WP), dimension(:), allocatable :: aldt_sq
-          ! Result scalar for GPU min-dt reduction (written by shell_gpu_min_dt)
-          real(WP) :: dt_min_result = 0.0d0
+          ! Result scalar for GPU min-dt reduction (written by shell_gpu_min_dt).
+          ! Initialized to +huge so that an SU whose reduction never ran can
+          ! never drag DT2T down to zero in gpu_shell_sync_scatter.
+          real(WP) :: dt_min_result = 1.0d30
           ! IP state arrays [NPT*NUMELC]
           real(WP), dimension(:), allocatable :: sigxx    !< Stress xx
           real(WP), dimension(:), allocatable :: sigyy    !< Stress yy

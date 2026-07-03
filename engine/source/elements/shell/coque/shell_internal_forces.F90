@@ -281,8 +281,11 @@
             end do
           end if
 
-          ! Reduce DT2T with the GPU element time step
-          if (SHELLS%reduce_elem_dt .and. dt_gpu_min < dt2t) then
+          ! Reduce DT2T with the GPU element time step.
+          ! dt_gpu_min > 0 guards against a reduction that never ran
+          ! (e.g. launch skipped): a stale/unset result must not zero DT2T.
+          if (SHELLS%reduce_elem_dt .and. dt_gpu_min > 0.0_WP &
+            .and. dt_gpu_min < dt2t) then
             if (icall-1 <= 5) then
               write(6,"(A,ES12.4,A,ES12.4)") &
               &" [GPU] dt_elem_min = ", dt_gpu_min, " reducing dt2t from ", dt2t
