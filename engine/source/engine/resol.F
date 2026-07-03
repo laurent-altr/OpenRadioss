@@ -2625,6 +2625,28 @@ C
 C===========================================================================
 C                 BEGINNING OF EXPLICIT ITERATION LOOP
 C===========================================================================
+              IF(GPU == 1 .AND. .NOT.GPU_SHELL_AVAILABLE) THEN
+C     -gpu was requested but this executable was built without the CUDA
+C     kernels (WITH_CUDA undefined, e.g. non NVIDIA-HPC-SDK build): the
+C     shell_gpu_mod stubs would silently produce ZERO shell forces and
+C     a broken element time step (dt_min_result never written).
+C     Fall back to the standard CPU path instead.
+                IF(ISPMD == 0) THEN
+                  WRITE(IOUT,*)
+     .  ' ** WARNING: -gpu REQUESTED BUT THIS EXECUTABLE WAS BUILT'
+                  WRITE(IOUT,*)
+     .  ' ** WITHOUT CUDA SUPPORT: SHELL GPU OFFLOAD IS DISABLED,'
+                  WRITE(IOUT,*)
+     .  ' ** FALLING BACK TO THE CPU ELEMENT PATH'
+                  WRITE(ISTDO,*)
+     .  ' ** WARNING: -gpu REQUESTED BUT THIS EXECUTABLE WAS BUILT'
+                  WRITE(ISTDO,*)
+     .  ' ** WITHOUT CUDA SUPPORT: SHELL GPU OFFLOAD IS DISABLED,'
+                  WRITE(ISTDO,*)
+     .  ' ** FALLING BACK TO THE CPU ELEMENT PATH'
+                ENDIF
+                GPU = 0
+              ENDIF
               IF(GPU == 1) THEN
                CALL FORINTC_PREPARE_GPU( GPU, SHELLS, NUMELC,
      .           PM , NPROPM,       GEO, NPROPG,  

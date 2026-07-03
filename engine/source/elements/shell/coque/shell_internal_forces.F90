@@ -655,6 +655,26 @@
               ! For the GPU (no SMS/JSMS), this simplifies to:
               !   NODADT==0 AND IDTMIN3/=0  ↔  compute_sti==2
               SHELLS%reduce_elem_dt = (i_compute_sti == 2)
+              ! Diagnostic: show the time-step configuration seen by the GPU
+              ! path so a missing element-dt reduction is directly visible
+              ! in the output instead of failing silently.
+              write(6,"(A,I3,A,I2,A,I2,A,I2,A,I3,A,I2,A,L2,A,ES12.4)") &
+              &" [GPU-DT-CFG] SU=", SU, &
+              &"  NODADT=", NODADT_IN, &
+              &"  IDT1SH=", IDT1SH_IN, &
+              &"  IDTMINS=", IDTMINS_IN, &
+              &"  IDTMIN3=", IDTMIN3_IN, &
+              &"  compute_sti=", i_compute_sti, &
+              &"  reduce_elem_dt=", SHELLS%reduce_elem_dt, &
+              &"  dtfac=", DTFAC1_3
+              if (.not. SHELLS%reduce_elem_dt) then
+                write(6,"(A)") &
+                &" [GPU-DT-CFG] WARNING: GPU element-dt reduction is DISABLED"//&
+                &" for this configuration (see flags above)."
+                write(6,"(A)") &
+                &" [GPU-DT-CFG]          Offloaded shell groups will NOT"//&
+                &" constrain the time step (CPU CDT3 is bypassed)."
+              end if
               ! Set IHBE for non-uniform GAMA in hourglass computation
               call shell_gpu_set_ihbe(SHELLS%LAW2(SU)%handle, SHELLS%LAW2(SU)%ihbe)
               write(6,*) "Completed allocation of GPU data for super-group ", SU

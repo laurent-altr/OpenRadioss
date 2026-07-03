@@ -277,6 +277,19 @@
         public :: shell_gpu_global_pin_host
         public :: shell_gpu_set_global
 
+        ! .true. when the executable was built with the CUDA kernels
+        ! (WITH_CUDA defined, .cu files compiled), .false. when only the
+        ! no-op stubs below are linked.  The engine MUST check this flag
+        ! before enabling the -gpu code path: running the stubs would
+        ! silently produce zero shell forces and a broken element
+        ! time step (dt_min_result never written).
+        public :: gpu_shell_available
+#ifdef WITH_CUDA
+        logical, parameter :: gpu_shell_available = .true.
+#else
+        logical, parameter :: gpu_shell_available = .false.
+#endif
+
 #ifdef WITH_CUDA
         ! ======================================================================================================================
         !                                                   INTERFACES

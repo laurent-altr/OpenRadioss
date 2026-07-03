@@ -102,6 +102,40 @@ Gating (`FORINTC_PREPARE_GPU`), mirroring `CDT3`:
 
 ## Findings of the time-step investigation (2026-07)
 
+### Bug found and fixed: `-gpu` on a non-CUDA build silently ran no-op stubs
+
+This one reproduces the broken element time step on **any** deck — with or
+without contact interfaces.
+
+The `.cu` files are compiled **only** when the CMake variable `gpu_cc` is
+defined, which only the `cmake_linux*_nvidia.txt` toolchains do. With any
+other toolchain (gfortran, ifx, ifort, AOCC) the CUDA sources are silently
+dropped and `shell_gpu_mod.F90` links its `#else` branch: **empty stub
+subroutines**. The stub header claimed *"they are never called at runtime
+because the GPU code path is guarded by the gpu_shell_available flag"* —
+but **no such flag existed anywhere**. Running such an executable with
+`-gpu`:
+
+- `FORINTC_PREPARE_GPU` runs normally (pure Fortran) and `FORINTC`
+  **skips every offloaded shell group** (the skip only tests the `-gpu`
+  command-line flag, not the build),
+- all `shell_gpu_*` calls are no-ops: no forces, and
+  `dt_min_result` is never written → `DT2T` collapses to `0.0`
+  (before the hardening below) on the very first cycle,
+- deceptively, all the Fortran-side `[GPU-CFG]`/`[GPU]` prints still
+  appear — only the C-side `[GPU-GLOBAL] Created global handle` banner
+  is missing. **Check for that banner to know whether the build really
+  has CUDA.**
+
+Fixes applied:
+
+1. `shell_gpu_mod.F90`: the `gpu_shell_available` logical parameter now
+   actually exists (`.true.` only when `WITH_CUDA` is defined).
+2. `resol.F`: before `FORINTC_PREPARE_GPU`, if `-gpu` was requested on a
+   non-CUDA executable, a warning is written to the listing and stdout and
+   `GPU` is reset to 0 — the run falls back to the full CPU path instead
+   of silently producing zero forces and a zero time step.
+
 ### Bug found and fixed: launch was nested inside `IF(NINTER/=0)`
 
 `CALL gpu_shell_launch_async` in `resol.F` sat **inside** the
@@ -155,11 +189,20 @@ launched on those decks. Fixes applied:
   would be computed on **both** CPU and GPU (double forces). Keep the two
   conditions in sync.
 
-### Debug aids
+### Debug aids — read these lines in the output first
 
-- First 5 cycles print `[GPU] dt_elem_min = ... reducing dt2t from ...`;
-  every 100 cycles `[GPU-DT] CYC=... dt_min=...`. If `dt_min` shows `0.0`
-  the reduction never ran; if it shows `~1e30` no element passed the
-  `OFF>0` filter (or `reduce_elem_dt` is false).
-- `[GPU-CFG]` (first cycle) lists SU sizes; `fort.700` logs super-group
-  splits.
+1. `[GPU-GLOBAL] Created global handle: NUMNOD=...` — printed by the CUDA
+   driver (C code). **If it is missing, the executable has no CUDA support**
+   and (since the fix) the engine falls back to CPU with a warning.
+2. `[GPU-DT-CFG] SU=.. NODADT=.. IDT1SH=.. IDTMINS=.. IDTMIN3=..
+   compute_sti=.. reduce_elem_dt=..` — printed at init. If
+   `reduce_elem_dt=F`, the offloaded shells will **not** constrain DT2T:
+   check the flags (`/DT/NODA` sets NODADT, `/DT1/SHELL` sets IDT1SH,
+   `/DT/NODA/AMS` sets IDTMINS=2). An explicit warning is printed in that
+   case.
+3. First 5 cycles: `[GPU] dt_elem_min = ... reducing dt2t from ...`;
+   every 100 cycles `[GPU-DT] CYC=... dt_min=...`. If `dt_min` shows `0.0`
+   the reduction never ran; if it shows `~1e30`/`~1e308` either no element
+   passed the `OFF>0` filter or `reduce_elem_dt` is false.
+4. `[GPU-CFG]` (first cycle) lists SU sizes; `fort.700` logs super-group
+   splits.
