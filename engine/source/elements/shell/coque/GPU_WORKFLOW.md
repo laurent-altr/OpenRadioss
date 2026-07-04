@@ -178,11 +178,19 @@ launched on those decks. Fixes applied:
 - **`IDTMIN(3)` actions are not implemented on the GPU**: element deletion
   (`/DT/SHELL/DEL`, IDTMIN=2), stop (IDTMIN=1/5), constant-dt small-strain
   switch (IDTMIN=3) are silently skipped for offloaded groups.
-- **`IDT1SH==1` (`/DT1/SHELL`) and AMS (`IDTMINS==2`) decks**: CPU `CDT3`
-  still reduces DT2T with the mass/stiffness formula
-  `DT = DTFAC1(3)*sqrt(0.5*MAS/STI)`; the GPU maps these to
-  `compute_sti=1` with `reduce_elem_dt=.false.` → no element dt at all.
-  Do not use those options with `-gpu` for now.
+- **`IDT1SH==1` (`/DT1/SHELL`) and AMS (`/DT/AMS`, `IDTMINS==2`) decks**:
+  CPU `CDT3` still reduces DT2T with the mass/stiffness formula
+  `DT = DTFAC1(3)*sqrt(0.5*MAS/STI)` (or the AMS variant with DTFACS and
+  the DMELC added mass); the GPU maps these to `compute_sti=1` with
+  `reduce_elem_dt=.false.` → no element dt at all, silently.
+  **Since 2026-07 the engine detects this configuration in `resol.F`
+  (`NODADT==0 .AND. (IDT1SH==1 .OR. IDTMINS==2)`), prints a warning and
+  disables the GPU offload entirely** — correct CPU results instead of an
+  unconstrained time step. Implementing the mass/stiffness reduction on
+  GPU (K3 already computes the per-element STI for `compute_sti==1`, it
+  would need to be stored to a device array and fed to a second min-dt
+  kernel variant together with `MAS = VOL00*RHO`) is the path to
+  re-enabling these decks.
 - `GBUF%DT` (`G_DT`/`DTEL`, used by `/ANIM/ELEM/DT`) is not filled on GPU.
 - `FORINTC`'s skip condition checks `ICRACK3D==0 .AND. ACTIFXFEM==0` but
   `FORINTC_PREPARE_GPU`'s selection does not — a group with those active
@@ -201,8 +209,19 @@ launched on those decks. Fixes applied:
    `/DT/NODA/AMS` sets IDTMINS=2). An explicit warning is printed in that
    case.
 3. First 5 cycles: `[GPU] dt_elem_min = ... reducing dt2t from ...`;
-   every 100 cycles `[GPU-DT] CYC=... dt_min=...`. If `dt_min` shows `0.0`
-   the reduction never ran; if it shows `~1e30`/`~1e308` either no element
-   passed the `OFF>0` filter or `reduce_elem_dt` is false.
+   every 100 cycles `[GPU-DT] CYC=... dt_min=...`. Interpretation of
+   `dt_min`:
+   - `1.797693E+308` (= `huge(WP)`): the per-SU results were **never
+     collected** — `reduce_elem_dt=F` (check the `[GPU-DT-CFG]` line and
+     its WARNING) or every SU has `numelc=0` (nothing offloaded, check
+     `[GPU-CFG]`). With `reduce_elem_dt=F` the offloaded shells place NO
+     constraint on DT2T.
+   - `1.000000E+30`: the reduction was collected but the kernel found no
+     element passing the `OFF>0 / ALDT²>0 / SSP>0` filters (or the kernel
+     result was never written — stub build, see above).
+   - `0.0`: legacy failure mode before the hardening — the D2H target was
+     never written and the 0.0 initial value zeroed DT2T.
+   - anything else: a real element dt; compare it with the shell dt of the
+     CPU reference run — they should match closely.
 4. `[GPU-CFG]` (first cycle) lists SU sizes; `fort.700` logs super-group
    splits.

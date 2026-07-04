@@ -2647,6 +2647,30 @@ C     Fall back to the standard CPU path instead.
                 ENDIF
                 GPU = 0
               ENDIF
+              IF(GPU == 1 .AND. NODADT == 0 .AND.
+     .           (IDT1SH == 1 .OR. IDTMINS == 2)) THEN
+C     With NODADT=0 and /DT1/SHELL (IDT1SH=1) or AMS (IDTMINS=2), the
+C     CPU CDT3 reduces DT2T with the mass/stiffness (or AMS) formula.
+C     The GPU min-dt reduction only implements the standard
+C     DTFAC*ALDT/SSP formula: offloading these configurations would
+C     leave the shell element time step unconstrained.  Disable the
+C     GPU offload and fall back to the CPU element path.
+                IF(ISPMD == 0) THEN
+                  WRITE(IOUT,*)
+     .  ' ** WARNING: -gpu IS NOT SUPPORTED WITH /DT1/SHELL OR'
+                  WRITE(IOUT,*)
+     .  ' ** /DT/AMS ELEMENT TIME STEP: SHELL GPU OFFLOAD IS'
+                  WRITE(IOUT,*)
+     .  ' ** DISABLED, FALLING BACK TO THE CPU ELEMENT PATH'
+                  WRITE(ISTDO,*)
+     .  ' ** WARNING: -gpu IS NOT SUPPORTED WITH /DT1/SHELL OR'
+                  WRITE(ISTDO,*)
+     .  ' ** /DT/AMS ELEMENT TIME STEP: SHELL GPU OFFLOAD IS'
+                  WRITE(ISTDO,*)
+     .  ' ** DISABLED, FALLING BACK TO THE CPU ELEMENT PATH'
+                ENDIF
+                GPU = 0
+              ENDIF
               IF(GPU == 1) THEN
                CALL FORINTC_PREPARE_GPU( GPU, SHELLS, NUMELC,
      .           PM , NPROPM,       GEO, NPROPG,  
