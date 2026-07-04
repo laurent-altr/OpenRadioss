@@ -203,6 +203,8 @@
           ! Diagnostic variables for controlling element
           integer  :: dt_min_su, dt_min_j, dt_min_ngl
           real(WP) :: dt_min_aldt, dt_min_ssp, dt_min_area
+          ! Host-side fallback / cross-check of the GPU min-dt reduction
+          real(WP) :: dt_host, dt_host_min
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   BODY
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -253,9 +255,35 @@
           ! ==================================================================
           ! STEP 3: Collect min-dt from GPU reduction per SU
           ! ==================================================================
+          if (icall <= 3) then
+            write(6,"(A,I4,A,L2)") &
+            &" [GPU-DT-RAW] NSU=", NSU, &
+            &"  reduce_elem_dt=", SHELLS%reduce_elem_dt
+            if (.not. SHELLS%reduce_elem_dt) then
+              write(6,"(A)") &
+              &" [GPU-DT-RAW] reduce_elem_dt=F: element-dt collection is"//&
+              &" SKIPPED (dt_min stays huge). Check [GPU-DT-CFG] flags."
+            end if
+          end if
           do SU = 1, NSU
             if (SHELLS%LAW2(SU)%numelc > 0) then
               if (SHELLS%reduce_elem_dt) then
+                ! First cycles: dump the raw per-SU reduction results so a
+                ! broken chain is directly visible in the output
+                ! (NaN, 1e30 = no element passed the kernel filters,
+                !  1e30 unchanged from init = result never written).
+                if (icall <= 3) then
+                  write(6,"(A,I4,A,I8,A,ES14.6,A,ES14.6)") &
+                  &" [GPU-DT-RAW] SU=", SU, &
+                  &"  numelc=", SHELLS%LAW2(SU)%numelc, &
+                  &"  dtfac=", SHELLS%LAW2(SU)%dtfac, &
+                  &"  dt_min_result=", SHELLS%LAW2(SU)%dt_min_result
+                end if
+                if (SHELLS%LAW2(SU)%dt_min_result /= &
+                  SHELLS%LAW2(SU)%dt_min_result) then
+                  write(6,"(A,I4)") &
+                  &" [GPU-DT-RAW] WARNING: dt_min_result is NaN for SU=", SU
+                end if
                 if (SHELLS%LAW2(SU)%dt_min_result < dt_gpu_min) then
                   dt_gpu_min = SHELLS%LAW2(SU)%dt_min_result
                   dt_min_su  = SU
@@ -268,9 +296,70 @@
             end if
           end do
 
+          ! ==================================================================
+          ! STEP 3b: Host-side fallback / cross-check.
+          !   If the GPU reduction did not deliver a plausible element dt
+          !   (never collected, NaN, or >= 1e29 sentinel), recompute the
+          !   min element dt on the host from the same device data:
+          !   ALDT2 lives in d_STI (written by Kernel 1) and is downloaded
+          !   per SU; SSP and OFF have host copies from initialization.
+          !   This keeps the element time step CORRECT while the kernel-side
+          !   problem is investigated, and prints both values for comparison.
+          ! ==================================================================
+          if (SHELLS%reduce_elem_dt .and. &
+            .not. (dt_gpu_min > 0.0_WP .and. dt_gpu_min < 1.0e29_WP)) then
+            dt_host_min = huge(1.0_WP)
+            do SU = 1, NSU
+              if (SHELLS%LAW2(SU)%numelc <= 0) cycle
+              if (.not. allocated(SHELLS%LAW2(SU)%aldt_sq)) &
+                allocate(SHELLS%LAW2(SU)%aldt_sq(SHELLS%LAW2(SU)%numelc))
+              call shell_gpu_download_aldt_sq(SHELLS%LAW2(SU)%handle, &
+                SHELLS%LAW2(SU)%aldt_sq)
+              do j = 1, SHELLS%LAW2(SU)%numelc
+                if (SHELLS%LAW2(SU)%el_off(j) > 0.0_WP .and. &
+                  SHELLS%LAW2(SU)%aldt_sq(j) > 1.0e-20_WP .and. &
+                  SHELLS%LAW2(SU)%el_ssp(j) > 1.0e-20_WP) then
+                  dt_host = SHELLS%LAW2(SU)%dtfac &
+                    * sqrt(SHELLS%LAW2(SU)%aldt_sq(j)) &
+                    / SHELLS%LAW2(SU)%el_ssp(j)
+                  if (dt_host < dt_host_min) then
+                    dt_host_min = dt_host
+                    dt_min_su   = SU
+                    dt_min_j    = j
+                    dt_min_aldt = sqrt(SHELLS%LAW2(SU)%aldt_sq(j))
+                    dt_min_ssp  = SHELLS%LAW2(SU)%el_ssp(j)
+                  end if
+                end if
+              end do
+            end do
+            if (icall <= 3 .or. mod(icall-1,100) == 0) then
+              write(6,"(A,ES14.6,A,ES14.6,A)") &
+              &" [GPU-DT-HOST] GPU reduction unusable (", dt_gpu_min, &
+              &"), host-side min element dt = ", dt_host_min, &
+              &"  -> using host value"
+            end if
+            if (dt_host_min < 1.0e29_WP) then
+              dt_gpu_min = dt_host_min
+            else if (icall <= 3) then
+              ! Even the host finds no eligible element: dump the first
+              ! entries of the inputs to see which filter rejects them.
+              do SU = 1, min(NSU, 1)
+                if (SHELLS%LAW2(SU)%numelc <= 0) cycle
+                do j = 1, min(SHELLS%LAW2(SU)%numelc, 5)
+                  write(6,"(A,I2,A,I6,A,ES14.6,A,ES14.6,A,ES14.6)") &
+                  &" [GPU-DT-HOST] SU=", SU, "  elem=", j, &
+                  &"  ALDT2=", SHELLS%LAW2(SU)%aldt_sq(j), &
+                  &"  SSP=",   SHELLS%LAW2(SU)%el_ssp(j), &
+                  &"  OFF=",   SHELLS%LAW2(SU)%el_off(j)
+                end do
+              end do
+            end if
+          end if
+
           ! Download internal energy from GPU and accumulate into PARTSAV
           if(ipri > 0) then
             do SU = 1, NSU
+              if (SHELLS%LAW2(SU)%numelc <= 0) cycle
               call shell_gpu_download_energy(SHELLS%LAW2(SU)%handle, SHELLS%LAW2(SU)%eint)
               do j = 1, SHELLS%LAW2(SU)%numelc
                 eint_total = SHELLS%LAW2(SU)%eint(j) &

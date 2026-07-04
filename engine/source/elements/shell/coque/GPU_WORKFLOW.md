@@ -208,20 +208,39 @@ launched on those decks. Fixes applied:
    check the flags (`/DT/NODA` sets NODADT, `/DT1/SHELL` sets IDT1SH,
    `/DT/NODA/AMS` sets IDTMINS=2). An explicit warning is printed in that
    case.
-3. First 5 cycles: `[GPU] dt_elem_min = ... reducing dt2t from ...`;
+3. First 3 cycles: `[GPU-DT-RAW] NSU=..., reduce_elem_dt=..` and one
+   `[GPU-DT-RAW] SU=.. numelc=.. dtfac=.. dt_min_result=..` line per SU:
+   this is the **raw reduction result before any collection logic** and
+   pinpoints the failing stage directly. A NaN result is reported
+   explicitly (NaN fails every `<` comparison, so it would otherwise
+   silently leave `dt_min` at huge).
+4. First 5 cycles: `[GPU] dt_elem_min = ... reducing dt2t from ...`;
    every 100 cycles `[GPU-DT] CYC=... dt_min=...`. Interpretation of
    `dt_min`:
    - `1.797693E+308` (= `huge(WP)`): the per-SU results were **never
-     collected** — `reduce_elem_dt=F` (check the `[GPU-DT-CFG]` line and
-     its WARNING) or every SU has `numelc=0` (nothing offloaded, check
-     `[GPU-CFG]`). With `reduce_elem_dt=F` the offloaded shells place NO
-     constraint on DT2T.
-   - `1.000000E+30`: the reduction was collected but the kernel found no
-     element passing the `OFF>0 / ALDT²>0 / SSP>0` filters (or the kernel
-     result was never written — stub build, see above).
+     collected** — `reduce_elem_dt=F` (check `[GPU-DT-CFG]`/`[GPU-DT-RAW]`),
+     every SU has `numelc=0` (nothing offloaded, check `[GPU-CFG]`), or
+     `dt_min_result` is NaN. Note: even a completely broken reduction
+     kernel cannot produce this value by itself — the memset init is
+     ~1.38e306 and the thread default is 1e30, both of which WOULD be
+     collected.
+   - `1.000000E+30`: collected, but the kernel found no element passing
+     the `OFF>0 / ALDT²>0 / SSP>0` filters (or the result was never
+     written — stub build, see above; the Fortran init is 1e30).
+   - `~1.382e+306`: the kernel launched but no block wrote a result
+     (memset init value) — kernel launch failure.
    - `0.0`: legacy failure mode before the hardening — the D2H target was
      never written and the 0.0 initial value zeroed DT2T.
    - anything else: a real element dt; compare it with the shell dt of the
      CPU reference run — they should match closely.
+5. **Host-side fallback (STEP 3b in `gpu_shell_sync_scatter`)**: whenever
+   `reduce_elem_dt=T` but the collected value is not a plausible dt, the
+   host downloads ALDT² (`shell_gpu_download_aldt_sq`, same `d_STI` data
+   the kernel reads) and recomputes the min element dt itself, uses it for
+   DT2T, and prints `[GPU-DT-HOST] GPU reduction unusable (...), host-side
+   min element dt = ...`. If even the host finds no eligible element it
+   dumps the first ALDT²/SSP/OFF entries so the offending input array is
+   identified. The element time step therefore stays correct even while
+   the reduction kernel is being debugged.
 4. `[GPU-CFG]` (first cycle) lists SU sizes; `fort.700` logs super-group
    splits.
