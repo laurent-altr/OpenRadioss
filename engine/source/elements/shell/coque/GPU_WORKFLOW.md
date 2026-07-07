@@ -4,6 +4,10 @@ This document describes the CUDA offload of the internal-force computation for
 4-node shells using material law 2, and records the findings of the
 investigation into the **elemental time step** (2026-07).
 
+> High-level documentation of the port (scope, build, run, architecture,
+> limitations, change log) lives in [`GPU.md`](../../../../../GPU.md) at the
+> repository root; this file is the detailed workflow / debugging reference.
+
 ## Files
 
 | File | Role |
