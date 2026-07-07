@@ -130,8 +130,10 @@
           real(WP), dimension(:), pointer :: stifr => null() !< Nodal rotational stiffness
           ! Temporary per-element ALDT² buffer for async download (legacy)
           real(WP), dimension(:), allocatable :: aldt_sq
-          ! Result scalar for GPU min-dt reduction (written by shell_gpu_min_dt)
-          real(WP) :: dt_min_result = 0.0d0
+          ! Result scalar for GPU min-dt reduction (written by shell_gpu_min_dt).
+          ! Initialized to +huge so that an SU whose reduction never ran can
+          ! never drag DT2T down to zero in gpu_shell_sync_scatter.
+          real(WP) :: dt_min_result = 1.0d30
           ! IP state arrays [NPT*NUMELC]
           real(WP), dimension(:), allocatable :: sigxx    !< Stress xx
           real(WP), dimension(:), allocatable :: sigyy    !< Stress yy
@@ -274,6 +276,19 @@
         public :: shell_gpu_global_wait_su
         public :: shell_gpu_global_pin_host
         public :: shell_gpu_set_global
+
+        ! .true. when the executable was built with the CUDA kernels
+        ! (WITH_CUDA defined, .cu files compiled), .false. when only the
+        ! no-op stubs below are linked.  The engine MUST check this flag
+        ! before enabling the -gpu code path: running the stubs would
+        ! silently produce zero shell forces and a broken element
+        ! time step (dt_min_result never written).
+        public :: gpu_shell_available
+#ifdef WITH_CUDA
+        logical, parameter :: gpu_shell_available = .true.
+#else
+        logical, parameter :: gpu_shell_available = .false.
+#endif
 
 #ifdef WITH_CUDA
         ! ======================================================================================================================

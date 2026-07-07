@@ -2625,6 +2625,52 @@ C
 C===========================================================================
 C                 BEGINNING OF EXPLICIT ITERATION LOOP
 C===========================================================================
+              IF(GPU == 1 .AND. .NOT.GPU_SHELL_AVAILABLE) THEN
+C     -gpu was requested but this executable was built without the CUDA
+C     kernels (WITH_CUDA undefined, e.g. non NVIDIA-HPC-SDK build): the
+C     shell_gpu_mod stubs would silently produce ZERO shell forces and
+C     a broken element time step (dt_min_result never written).
+C     Fall back to the standard CPU path instead.
+                IF(ISPMD == 0) THEN
+                  WRITE(IOUT,*)
+     .  ' ** WARNING: -gpu REQUESTED BUT THIS EXECUTABLE WAS BUILT'
+                  WRITE(IOUT,*)
+     .  ' ** WITHOUT CUDA SUPPORT: SHELL GPU OFFLOAD IS DISABLED,'
+                  WRITE(IOUT,*)
+     .  ' ** FALLING BACK TO THE CPU ELEMENT PATH'
+                  WRITE(ISTDO,*)
+     .  ' ** WARNING: -gpu REQUESTED BUT THIS EXECUTABLE WAS BUILT'
+                  WRITE(ISTDO,*)
+     .  ' ** WITHOUT CUDA SUPPORT: SHELL GPU OFFLOAD IS DISABLED,'
+                  WRITE(ISTDO,*)
+     .  ' ** FALLING BACK TO THE CPU ELEMENT PATH'
+                ENDIF
+                GPU = 0
+              ENDIF
+              IF(GPU == 1 .AND. NODADT == 0 .AND.
+     .           (IDT1SH == 1 .OR. IDTMINS == 2)) THEN
+C     With NODADT=0 and /DT1/SHELL (IDT1SH=1) or AMS (IDTMINS=2), the
+C     CPU CDT3 reduces DT2T with the mass/stiffness (or AMS) formula.
+C     The GPU min-dt reduction only implements the standard
+C     DTFAC*ALDT/SSP formula: offloading these configurations would
+C     leave the shell element time step unconstrained.  Disable the
+C     GPU offload and fall back to the CPU element path.
+                IF(ISPMD == 0) THEN
+                  WRITE(IOUT,*)
+     .  ' ** WARNING: -gpu IS NOT SUPPORTED WITH /DT1/SHELL OR'
+                  WRITE(IOUT,*)
+     .  ' ** /DT/AMS ELEMENT TIME STEP: SHELL GPU OFFLOAD IS'
+                  WRITE(IOUT,*)
+     .  ' ** DISABLED, FALLING BACK TO THE CPU ELEMENT PATH'
+                  WRITE(ISTDO,*)
+     .  ' ** WARNING: -gpu IS NOT SUPPORTED WITH /DT1/SHELL OR'
+                  WRITE(ISTDO,*)
+     .  ' ** /DT/AMS ELEMENT TIME STEP: SHELL GPU OFFLOAD IS'
+                  WRITE(ISTDO,*)
+     .  ' ** DISABLED, FALLING BACK TO THE CPU ELEMENT PATH'
+                ENDIF
+                GPU = 0
+              ENDIF
               IF(GPU == 1) THEN
                CALL FORINTC_PREPARE_GPU( GPU, SHELLS, NUMELC,
      .           PM , NPROPM,       GEO, NPROPG,  
@@ -3627,6 +3673,18 @@ C===============================================================================
 
               ENDIF
 C--- // 3N ------------------------------
+              IF(GPU == 1) THEN
+C     GPU SHELL: launch async pipeline BEFORE contact and CPU element
+C     work so that GPU kernels execute while INTFOP8 + FORINTC + FORINT
+C     run on the CPU.  Must NOT depend on NINTER: the GPU pipeline reads
+C     only NODES%X/V/VR and is required on every cycle, otherwise
+C     gpu_shell_sync_scatter collects zero forces and a zero element dt.
+C     Results are collected later by gpu_shell_sync_scatter.
+                CALL STARTIME(TIMERS,TIMER_GPU_SHELL)
+                CALL gpu_shell_launch_async(NODES,SHELLS,DT1)
+                CALL STOPTIME(TIMERS,TIMER_GPU_SHELL)
+              ENDIF
+C--- // 3N ------------------------------
 C       INTERFACES WITH VOID OPENING
 C----------------------------------------
               IF(NINTER/=0) THEN
@@ -3665,17 +3723,6 @@ C----------------------------------------
                   NELTST = NELTSTT
                   ITYPTST= ITYPTSTT
                 ENDIF
-
-             IF(GPU == 1) THEN
-C     GPU SHELL: launch async pipeline BEFORE CPU element work
-C     so that GPU kernels execute while FORINTC + FORINT run on CPU.
-C     Results are collected later by gpu_shell_sync_scatter.
-                CALL STARTIME(TIMERS,TIMER_GPU_SHELL)
-                CALL gpu_shell_launch_async(NODES,SHELLS,DT1)
-                CALL STOPTIME(TIMERS,TIMER_GPU_SHELL)
-              ENDIF
-
-
 
 C=======================================================================================
 C                                     PARALLEL SECTION (SMP)
