@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "openradioss-index": {
+      "command": "uv",
+      "args": ["run", "--script", "scripts/code_index_mcp.py"]
+    }
+  }
+}
