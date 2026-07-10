@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # /// script
 # requires-python = ">=3.10"
-# dependencies = ["mcp"]
+# dependencies = ["mcp", "pypdf"]
 # ///
 """OpenRadioss local code-index MCP server.
 
@@ -31,6 +31,19 @@ Refresh is manual: call the `reindex` MCP tool (or rerun with --build)
 after pulling or editing sources. Reindexing is incremental (mtime/size
 based) unless a full rebuild is requested.
 
+Optionally, the Altair Radioss manuals (PDF links in README.md) can be
+ingested into the same database so keyword/card documentation is
+searchable next to the code:
+
+    uv run --script scripts/code_index_mcp.py --add-docs
+        # downloads and ingests the Reference Guide, User Guide and
+        # Theory Manual from the URLs in README.md (one-time, ~10 min)
+    uv run --script scripts/code_index_mcp.py --add-docs /path/to/manual.pdf
+        # ingest a local PDF instead (e.g. behind a strict proxy)
+
+Downloaded PDFs are cached in .code_index_docs/ (gitignored); extracted
+text lives only in the local database -- nothing is committed.
+
 MCP tools exposed:
     find_symbol      - where is SUBROUTINE/FUNCTION/MODULE/C function X defined?
     get_callers      - who calls X / uses module X? (from the CI-maintained
@@ -39,6 +52,8 @@ MCP tools exposed:
     find_references  - exact call/use sites (file:line) of X
     search_code      - FTS5 full-text search over the source
     file_outline     - all symbols defined in one file
+    search_manual    - FTS5 search over the ingested manual PDFs
+    get_manual_page  - full extracted text of one manual page
     index_status     - index freshness and row counts
     reindex          - incremental (or full) re-index
 """
@@ -86,6 +101,14 @@ EXT_LANG = {
 FORTRAN_LANGS = ("fortran_fixed", "fortran_free", "fortran_inc")
 
 MAX_LIMIT = 200  # hard cap for every tool's `limit` parameter
+
+# Manual PDFs linked from README.md ("Help Documentation in pdf form").
+DEFAULT_DOC_URLS = (
+    "https://2022.help.altair.com/2022/simulation/pdfs/radopen/AltairRadioss_2022_ReferenceGuide.pdf",
+    "https://2022.help.altair.com/2022/simulation/pdfs/radopen/AltairRadioss_2022_UserGuide.pdf",
+    "https://2022.help.altair.com/2022/simulation/pdfs/radopen/AltairRadioss_2022_TheoryManual.pdf",
+)
+DOC_CACHE_DIR = REPO_ROOT / ".code_index_docs"
 
 
 def log(msg: str) -> None:
@@ -338,6 +361,13 @@ CREATE TABLE IF NOT EXISTS content(
   id INTEGER PRIMARY KEY, file_id INTEGER NOT NULL,
   line_no INTEGER NOT NULL, text TEXT NOT NULL);
 CREATE INDEX IF NOT EXISTS idx_content_file ON content(file_id);
+CREATE TABLE IF NOT EXISTS docs(
+  id INTEGER PRIMARY KEY, source TEXT UNIQUE NOT NULL, title TEXT NOT NULL,
+  pages INTEGER NOT NULL, ingested_at REAL NOT NULL);
+CREATE TABLE IF NOT EXISTS doc_pages(
+  id INTEGER PRIMARY KEY, doc_id INTEGER NOT NULL,
+  page INTEGER NOT NULL, text TEXT NOT NULL);
+CREATE INDEX IF NOT EXISTS idx_doc_pages_doc ON doc_pages(doc_id);
 """
 
 _FTS_DDL = """
@@ -348,6 +378,13 @@ CREATE TRIGGER IF NOT EXISTS content_ai AFTER INSERT ON content BEGIN
   INSERT INTO fts(rowid, text) VALUES (new.id, new.text); END;
 CREATE TRIGGER IF NOT EXISTS content_ad AFTER DELETE ON content BEGIN
   INSERT INTO fts(fts, rowid, text) VALUES('delete', old.id, old.text); END;
+CREATE VIRTUAL TABLE IF NOT EXISTS fts_docs USING fts5(
+  text, content='doc_pages', content_rowid='id',
+  tokenize="unicode61 tokenchars '_'");
+CREATE TRIGGER IF NOT EXISTS doc_pages_ai AFTER INSERT ON doc_pages BEGIN
+  INSERT INTO fts_docs(rowid, text) VALUES (new.id, new.text); END;
+CREATE TRIGGER IF NOT EXISTS doc_pages_ad AFTER DELETE ON doc_pages BEGIN
+  INSERT INTO fts_docs(fts_docs, rowid, text) VALUES('delete', old.id, old.text); END;
 """
 
 
@@ -541,6 +578,92 @@ def build_index(conn: sqlite3.Connection, repo_root: Path,
 
 
 # ---------------------------------------------------------------------------
+# Manual (PDF) ingestion
+# ---------------------------------------------------------------------------
+
+def _fetch_pdf(source: str) -> Path:
+    """Return a local path for `source` (URL -> cached download, else path)."""
+    if not source.lower().startswith(("http://", "https://")):
+        p = Path(source).expanduser().resolve()
+        if not p.is_file():
+            raise FileNotFoundError(f"no such PDF: {source}")
+        return p
+    import urllib.request
+
+    DOC_CACHE_DIR.mkdir(exist_ok=True)
+    dest = DOC_CACHE_DIR / source.rsplit("/", 1)[-1]
+    if dest.exists() and dest.stat().st_size > 0:
+        log(f"Using cached {dest.name}")
+        return dest
+    log(f"Downloading {source} ...")
+    req = urllib.request.Request(source, headers={"User-Agent": "Mozilla/5.0"})
+    tmp = dest.with_suffix(".part")
+    with urllib.request.urlopen(req, timeout=120) as resp, open(tmp, "wb") as f:
+        while True:
+            chunk = resp.read(1 << 20)
+            if not chunk:
+                break
+            f.write(chunk)
+    tmp.rename(dest)
+    log(f"Downloaded {dest.name} ({dest.stat().st_size >> 20} MB)")
+    return dest
+
+
+def ingest_docs(conn: sqlite3.Connection, sources: list[str]) -> dict:
+    """Extract text from manual PDFs into docs/doc_pages (+ fts_docs)."""
+    try:
+        from pypdf import PdfReader
+    except ImportError:
+        raise SystemExit(
+            "pypdf is required for --add-docs: pip install pypdf "
+            "(or run the script via 'uv run --script')"
+        )
+    t0 = time.time()
+    ingested = []
+    for source in sources:
+        try:
+            pdf_path = _fetch_pdf(source)
+        except Exception as exc:
+            log(f"SKIPPED {source}: {exc}")
+            log("  (download the PDF manually and pass its local path)")
+            continue
+        title = pdf_path.stem
+        log(f"Extracting text from {pdf_path.name} ...")
+        reader = PdfReader(pdf_path)
+        row = conn.execute("SELECT id FROM docs WHERE source=?", (title,)).fetchone()
+        if row:
+            conn.execute("DELETE FROM doc_pages WHERE doc_id=?", (row[0],))
+            conn.execute("DELETE FROM docs WHERE id=?", (row[0],))
+        cur = conn.execute(
+            "INSERT INTO docs(source, title, pages, ingested_at) VALUES (?,?,?,?)",
+            (title, title, len(reader.pages), time.time()),
+        )
+        doc_id = cur.lastrowid
+        n = 0
+        for page_no, page in enumerate(reader.pages, 1):
+            try:
+                text = page.extract_text() or ""
+            except Exception:
+                text = ""
+            text = text.strip()
+            if text:
+                conn.execute(
+                    "INSERT INTO doc_pages(doc_id, page, text) VALUES (?,?,?)",
+                    (doc_id, page_no, text),
+                )
+                n += 1
+            if page_no % 500 == 0:
+                conn.commit()
+                log(f"  {pdf_path.name}: {page_no}/{len(reader.pages)} pages...")
+        conn.commit()
+        log(f"  {pdf_path.name}: {n} non-empty pages indexed")
+        ingested.append({"title": title, "pages": n})
+    stats = {"ingested": ingested, "seconds": round(time.time() - t0, 1)}
+    log(f"Manual ingestion done: {stats}")
+    return stats
+
+
+# ---------------------------------------------------------------------------
 # Query helpers (shared by the CLI and the MCP tools)
 # ---------------------------------------------------------------------------
 
@@ -718,6 +841,61 @@ def q_file_outline(conn, path):
     }
 
 
+def q_search_manual(conn, has_fts, query, doc_filter=None, limit=10):
+    limit = _clamp(limit)
+    args: list = []
+    if has_fts:
+        sql = (
+            "SELECT d.title, p.page, snippet(fts_docs, 0, '>>', '<<', ' ... ', 32)"
+            " FROM fts_docs JOIN doc_pages p ON p.id = fts_docs.rowid"
+            " JOIN docs d ON d.id = p.doc_id WHERE fts_docs MATCH ?"
+        )
+        args.append(query)
+    else:
+        sql = (
+            "SELECT d.title, p.page, substr(p.text, 1, 300)"
+            " FROM doc_pages p JOIN docs d ON d.id = p.doc_id"
+            " WHERE p.text LIKE ?"
+        )
+        args.append(f"%{query}%")
+    if doc_filter:
+        sql += " AND d.title LIKE ?"
+        args.append(f"%{doc_filter}%")
+    if has_fts:
+        sql += " ORDER BY rank"
+    sql += " LIMIT ?"
+    args.append(limit + 1)
+    try:
+        rows = conn.execute(sql, args).fetchall()
+    except sqlite3.OperationalError as exc:
+        return {"error": f"bad FTS5 query ({exc}); syntax: word, \"a phrase\","
+                         " a AND b, a OR b, a NOT b, prefix*"}
+    ndocs = conn.execute("SELECT COUNT(*) FROM docs").fetchone()[0]
+    if ndocs == 0:
+        return {"error": "no manuals ingested yet -- run: "
+                         "uv run --script scripts/code_index_mcp.py --add-docs"}
+    return {
+        "hits": [
+            {"doc": r[0], "page": r[1], "snippet": r[2][:400]}
+            for r in rows[:limit]
+        ],
+        "truncated": len(rows) > limit,
+    }
+
+
+def q_get_manual_page(conn, doc, page):
+    row = conn.execute(
+        "SELECT p.text, d.title FROM doc_pages p JOIN docs d ON d.id = p.doc_id"
+        " WHERE d.title LIKE ? AND p.page = ?",
+        (f"%{doc}%", int(page)),
+    ).fetchone()
+    if row is None:
+        titles = [t for (t,) in conn.execute("SELECT title FROM docs")]
+        return {"error": f"no page {page} in a doc matching '{doc}'",
+                "available_docs": titles}
+    return {"doc": row[1], "page": int(page), "text": row[0][:20000]}
+
+
 def q_index_status(conn, has_fts):
     built = conn.execute("SELECT value FROM meta WHERE key='built_at'").fetchone()
     counts = {
@@ -742,6 +920,10 @@ def q_index_status(conn, has_fts):
         "indexed_lines": counts["content"],
         "stale_files": stale,
         "fts5": has_fts,
+        "manuals": [
+            {"title": t, "pages": p}
+            for t, p in conn.execute("SELECT title, pages FROM docs")
+        ],
     }
 
 
@@ -839,6 +1021,38 @@ def make_server():
             conn.close()
 
     @mcp.tool()
+    def search_manual(query: str, doc_filter: str | None = None,
+                      limit: int = 10) -> dict:
+        """Full-text search over the ingested Radioss manuals (Reference
+        Guide, User Guide, Theory Manual PDFs linked in README.md).
+
+        Use this for input-deck keyword/card semantics (e.g. what the fields
+        of /MAT/LAW36 or /INTER/TYPE7 mean), solver options and theory.
+        Keywords tokenize at slashes, so query "MAT LAW36" or the phrase
+        '"MAT LAW36"' rather than /MAT/LAW36. `doc_filter` narrows to one
+        manual by title substring (e.g. 'Reference' or 'Theory'). Returns
+        page-level snippets; fetch full pages with get_manual_page.
+        Manuals must be ingested once via: --add-docs (see the errors this
+        tool returns if nothing is ingested yet).
+        """
+        conn, has_fts = _open_ready()
+        try:
+            return q_search_manual(conn, has_fts, query, doc_filter, limit)
+        finally:
+            conn.close()
+
+    @mcp.tool()
+    def get_manual_page(doc: str, page: int) -> dict:
+        """Return the full extracted text of one manual page. `doc` is a
+        title substring (e.g. 'Reference'); `page` from search_manual hits.
+        Fetch adjacent pages if a card description continues across pages."""
+        conn, _ = _open_ready()
+        try:
+            return q_get_manual_page(conn, doc, page)
+        finally:
+            conn.close()
+
+    @mcp.tool()
     def index_status() -> dict:
         """Report index freshness: row counts, build time, and `stale_files`
         (files changed on disk since indexing -- if > 0, call reindex)."""
@@ -878,6 +1092,9 @@ def main() -> None:
                     help="full rebuild of the index and exit")
     ap.add_argument("--stats", action="store_true",
                     help="print index status as JSON and exit")
+    ap.add_argument("--add-docs", nargs="*", metavar="URL_OR_PDF",
+                    help="ingest manual PDFs and exit; with no argument, "
+                         "downloads the manuals linked in README.md")
     ap.add_argument("--db", type=Path, default=None,
                     help=f"index database path (default: {DB_PATH})")
     args = ap.parse_args()
@@ -888,6 +1105,11 @@ def main() -> None:
     if args.build or args.rebuild:
         conn, _ = connect(DB_PATH)
         build_index(conn, REPO_ROOT, full=args.rebuild)
+        conn.close()
+        return
+    if args.add_docs is not None:
+        conn, _ = connect(DB_PATH)
+        ingest_docs(conn, args.add_docs or list(DEFAULT_DOC_URLS))
         conn.close()
         return
     if args.stats:

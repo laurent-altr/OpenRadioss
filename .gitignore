@@ -41,3 +41,4 @@ extlib.zip
 *.s
 *.backup
 .code_index.db*
+.code_index_docs/
