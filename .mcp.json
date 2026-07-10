@@ -1,6 +1,7 @@
 {
   "mcpServers": {
     "openradioss-index": {
+      "type": "stdio",
       "command": "python3",
       "args": ["scripts/code_index_mcp.py"]
     }
