@@ -31,13 +31,18 @@ Refresh is manual: call the `reindex` MCP tool (or rerun with --build)
 after pulling or editing sources. Reindexing is incremental (mtime/size
 based) unless a full rebuild is requested.
 
-Optionally, the Altair Radioss manuals (PDF links in README.md) can be
-ingested into the same database so keyword/card documentation is
-searchable next to the code:
+Optionally, the Radioss user documentation can be ingested into the
+same database so keyword/card documentation is searchable next to the
+code:
 
     uv run --script scripts/code_index_mcp.py --add-docs
-        # downloads and ingests the Reference Guide, User Guide and
-        # Theory Manual from the URLs in README.md (one-time, ~10 min)
+        # crawls the starter/engine keyword pages of the online help
+        # (help.altair.com) and downloads the PDF manuals linked in
+        # README.md (one-time, ~10-20 min)
+    uv run --script scripts/code_index_mcp.py --add-docs \
+        https://help.altair.com/hwsolvers/rad/topics/solvers/rad/starter_input_r.htm
+        # crawl a single keyword index page: every page it links to in
+        # its <section> blocks is fetched and indexed individually
     uv run --script scripts/code_index_mcp.py --add-docs /path/to/manual.pdf
         # ingest a local PDF instead (e.g. behind a strict proxy)
 
@@ -67,6 +72,7 @@ import re
 import sqlite3
 import sys
 import time
+from html.parser import HTMLParser
 from pathlib import Path
 
 # ---------------------------------------------------------------------------
@@ -102,13 +108,20 @@ FORTRAN_LANGS = ("fortran_fixed", "fortran_free", "fortran_inc")
 
 MAX_LIMIT = 200  # hard cap for every tool's `limit` parameter
 
-# Manual PDFs linked from README.md ("Help Documentation in pdf form").
+# Manual sources: the online help keyword indexes (preferred -- clean
+# per-keyword pages with URLs) and the PDF manuals linked from README.md.
 DEFAULT_DOC_URLS = (
+    # Starter input keywords index; every /KEYWORD page is linked from it.
+    "https://help.altair.com/hwsolvers/rad/topics/solvers/rad/starter_input_r.htm",
+    # Engine input keywords index.
+    "https://help.altair.com/hwsolvers/rad/topics/solvers/rad/engine_input_r.htm",
     "https://2022.help.altair.com/2022/simulation/pdfs/radopen/AltairRadioss_2022_ReferenceGuide.pdf",
     "https://2022.help.altair.com/2022/simulation/pdfs/radopen/AltairRadioss_2022_UserGuide.pdf",
     "https://2022.help.altair.com/2022/simulation/pdfs/radopen/AltairRadioss_2022_TheoryManual.pdf",
 )
 DOC_CACHE_DIR = REPO_ROOT / ".code_index_docs"
+CRAWL_DELAY_S = 0.2      # politeness delay between page fetches
+CRAWL_MAX_PAGES = 3000   # safety cap per index page
 
 
 def log(msg: str) -> None:
@@ -366,7 +379,8 @@ CREATE TABLE IF NOT EXISTS docs(
   pages INTEGER NOT NULL, ingested_at REAL NOT NULL);
 CREATE TABLE IF NOT EXISTS doc_pages(
   id INTEGER PRIMARY KEY, doc_id INTEGER NOT NULL,
-  page INTEGER NOT NULL, text TEXT NOT NULL);
+  page INTEGER NOT NULL, text TEXT NOT NULL,
+  title TEXT, url TEXT);
 CREATE INDEX IF NOT EXISTS idx_doc_pages_doc ON doc_pages(doc_id);
 """
 
@@ -414,6 +428,12 @@ def connect(db_path: Path) -> tuple[sqlite3.Connection, bool]:
             conn.execute("PRAGMA synchronous=NORMAL")
             conn.execute("PRAGMA busy_timeout=10000")
     conn.executescript(_DDL)
+    # Columns added after the first release; no-op on up-to-date DBs.
+    for col in ("title", "url"):
+        try:
+            conn.execute(f"ALTER TABLE doc_pages ADD COLUMN {col} TEXT")
+        except sqlite3.OperationalError:
+            pass
     has_fts = True
     try:
         conn.executescript(_FTS_DDL)
@@ -578,8 +598,158 @@ def build_index(conn: sqlite3.Connection, repo_root: Path,
 
 
 # ---------------------------------------------------------------------------
-# Manual (PDF) ingestion
+# Manual ingestion (online help HTML pages and PDF manuals)
 # ---------------------------------------------------------------------------
+
+class _HtmlText(HTMLParser):
+    """Extract readable text, the page <h1>/<title>, and in-section links."""
+
+    _SKIP = frozenset({"script", "style", "nav", "header", "footer", "head"})
+    _BLOCK = frozenset({"p", "div", "li", "tr", "table", "section", "br",
+                        "h1", "h2", "h3", "h4", "h5", "h6", "ul", "ol", "dt", "dd"})
+
+    def __init__(self):
+        super().__init__(convert_charrefs=True)
+        self.parts: list[str] = []
+        self.links: list[str] = []          # hrefs found inside <section>
+        self.all_links: list[str] = []      # every href on the page
+        self.title = ""
+        self._skip_depth = 0
+        self._section_depth = 0
+        self._in_h1 = self._in_title = False
+
+    def handle_starttag(self, tag, attrs):
+        if tag in self._SKIP:
+            self._skip_depth += 1
+        elif tag == "section":
+            self._section_depth += 1
+        elif tag == "a":
+            href = dict(attrs).get("href")
+            if href:
+                self.all_links.append(href)
+                if self._section_depth:
+                    self.links.append(href)
+        elif tag == "h1" and not self.title:
+            self._in_h1 = True
+        elif tag == "title":
+            self._in_title = True
+        elif tag in ("td", "th"):
+            self.parts.append(" ")
+        if tag in self._BLOCK:
+            self.parts.append("\n")
+
+    def handle_endtag(self, tag):
+        if tag in self._SKIP and self._skip_depth:
+            self._skip_depth -= 1
+        elif tag == "section" and self._section_depth:
+            self._section_depth -= 1
+        elif tag == "h1":
+            self._in_h1 = False
+        elif tag == "title":
+            self._in_title = False
+
+    def handle_data(self, data):
+        if self._skip_depth:
+            return
+        if self._in_h1 or (self._in_title and not self.title):
+            t = data.strip()
+            if t:
+                self.title = t
+        self.parts.append(data)
+
+    def text(self) -> str:
+        lines = [" ".join(seg.split()) for seg in "".join(self.parts).split("\n")]
+        return "\n".join(ln for ln in lines if ln)
+
+
+def _fetch_url(url: str) -> str:
+    """Fetch a text resource (http(s) or file://) as a decoded string."""
+    import urllib.request
+
+    req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+    with urllib.request.urlopen(req, timeout=60) as resp:
+        return resp.read().decode("utf-8", errors="replace")
+
+
+def _parse_html(raw: str) -> _HtmlText:
+    parser = _HtmlText()
+    parser.feed(raw)
+    return parser
+
+
+def _replace_doc(conn: sqlite3.Connection, source: str, title: str,
+                 pages: int) -> int:
+    row = conn.execute("SELECT id FROM docs WHERE source=?", (source,)).fetchone()
+    if row:
+        conn.execute("DELETE FROM doc_pages WHERE doc_id=?", (row[0],))
+        conn.execute("DELETE FROM docs WHERE id=?", (row[0],))
+    cur = conn.execute(
+        "INSERT INTO docs(source, title, pages, ingested_at) VALUES (?,?,?,?)",
+        (source, title, pages, time.time()),
+    )
+    return cur.lastrowid
+
+
+def ingest_html_index(conn: sqlite3.Connection, index_url: str) -> dict:
+    """Crawl a keyword index page (e.g. starter_input_r.htm): fetch every
+    page it links to inside <section> elements and index one row per page."""
+    from urllib.parse import urljoin, urldefrag
+
+    if not index_url.lower().startswith(("http://", "https://", "file://")):
+        index_url = Path(index_url).expanduser().resolve().as_uri()
+
+    log(f"Fetching index page {index_url} ...")
+    idx = _parse_html(_fetch_url(index_url))
+    # Keyword links live in the page's <section> blocks (e.g. the
+    # starter_input_r__..._section_* section); fall back to every link.
+    candidates = idx.links or idx.all_links
+    seen: set[str] = set()
+    targets: list[str] = []
+    for href in candidates:
+        url = urldefrag(urljoin(index_url, href))[0]
+        base = url.rsplit("/", 1)[-1]
+        if not base.endswith((".htm", ".html")):
+            continue
+        # Stay in the same directory as the index page: keyword topics are
+        # siblings; anything else is site navigation.
+        if url.rsplit("/", 1)[0] != index_url.rsplit("/", 1)[0]:
+            continue
+        if url == index_url or url in seen:
+            continue
+        seen.add(url)
+        targets.append(url)
+    targets = targets[:CRAWL_MAX_PAGES]
+    if not targets:
+        log(f"SKIPPED {index_url}: no keyword links found")
+        return {"title": index_url, "pages": 0}
+
+    title = index_url.rsplit("/", 1)[-1].rsplit(".", 1)[0]
+    log(f"Crawling {len(targets)} pages linked from {title} ...")
+    doc_id = _replace_doc(conn, index_url, title, len(targets))
+    n = 0
+    for i, url in enumerate(targets, 1):
+        try:
+            page = _parse_html(_fetch_url(url))
+        except Exception as exc:
+            log(f"  failed {url}: {exc}")
+            continue
+        text = page.text()
+        if text:
+            n += 1
+            conn.execute(
+                "INSERT INTO doc_pages(doc_id, page, text, title, url)"
+                " VALUES (?,?,?,?,?)",
+                (doc_id, n, text, page.title or url.rsplit("/", 1)[-1], url),
+            )
+        if i % 100 == 0:
+            conn.commit()
+            log(f"  {i}/{len(targets)} pages...")
+        if CRAWL_DELAY_S and index_url.startswith(("http://", "https://")):
+            time.sleep(CRAWL_DELAY_S)
+    conn.execute("UPDATE docs SET pages=? WHERE id=?", (n, doc_id))
+    conn.commit()
+    log(f"  {title}: {n} keyword pages indexed")
+    return {"title": title, "pages": n}
 
 def _fetch_pdf(source: str) -> Path:
     """Return a local path for `source` (URL -> cached download, else path)."""
@@ -609,55 +779,56 @@ def _fetch_pdf(source: str) -> Path:
     return dest
 
 
-def ingest_docs(conn: sqlite3.Connection, sources: list[str]) -> dict:
-    """Extract text from manual PDFs into docs/doc_pages (+ fts_docs)."""
+def ingest_pdf(conn: sqlite3.Connection, source: str) -> dict:
+    """Extract text from one manual PDF, one row per page."""
     try:
         from pypdf import PdfReader
     except ImportError:
         raise SystemExit(
-            "pypdf is required for --add-docs: pip install pypdf "
+            "pypdf is required to ingest PDFs: pip install pypdf "
             "(or run the script via 'uv run --script')"
         )
+    pdf_path = _fetch_pdf(source)
+    title = pdf_path.stem
+    log(f"Extracting text from {pdf_path.name} ...")
+    reader = PdfReader(pdf_path)
+    doc_id = _replace_doc(conn, title, title, len(reader.pages))
+    n = 0
+    for page_no, page in enumerate(reader.pages, 1):
+        try:
+            text = (page.extract_text() or "").strip()
+        except Exception:
+            text = ""
+        if text:
+            conn.execute(
+                "INSERT INTO doc_pages(doc_id, page, text) VALUES (?,?,?)",
+                (doc_id, page_no, text),
+            )
+            n += 1
+        if page_no % 500 == 0:
+            conn.commit()
+            log(f"  {pdf_path.name}: {page_no}/{len(reader.pages)} pages...")
+    conn.commit()
+    log(f"  {pdf_path.name}: {n} non-empty pages indexed")
+    return {"title": title, "pages": n}
+
+
+def ingest_docs(conn: sqlite3.Connection, sources: list[str]) -> dict:
+    """Ingest manual sources: .htm/.html index pages are crawled (one row
+    per linked keyword page), .pdf files are extracted page by page."""
     t0 = time.time()
     ingested = []
     for source in sources:
+        is_html = source.split("#")[0].lower().endswith((".htm", ".html"))
         try:
-            pdf_path = _fetch_pdf(source)
+            if is_html:
+                ingested.append(ingest_html_index(conn, source))
+            else:
+                ingested.append(ingest_pdf(conn, source))
         except Exception as exc:
             log(f"SKIPPED {source}: {exc}")
-            log("  (download the PDF manually and pass its local path)")
-            continue
-        title = pdf_path.stem
-        log(f"Extracting text from {pdf_path.name} ...")
-        reader = PdfReader(pdf_path)
-        row = conn.execute("SELECT id FROM docs WHERE source=?", (title,)).fetchone()
-        if row:
-            conn.execute("DELETE FROM doc_pages WHERE doc_id=?", (row[0],))
-            conn.execute("DELETE FROM docs WHERE id=?", (row[0],))
-        cur = conn.execute(
-            "INSERT INTO docs(source, title, pages, ingested_at) VALUES (?,?,?,?)",
-            (title, title, len(reader.pages), time.time()),
-        )
-        doc_id = cur.lastrowid
-        n = 0
-        for page_no, page in enumerate(reader.pages, 1):
-            try:
-                text = page.extract_text() or ""
-            except Exception:
-                text = ""
-            text = text.strip()
-            if text:
-                conn.execute(
-                    "INSERT INTO doc_pages(doc_id, page, text) VALUES (?,?,?)",
-                    (doc_id, page_no, text),
-                )
-                n += 1
-            if page_no % 500 == 0:
-                conn.commit()
-                log(f"  {pdf_path.name}: {page_no}/{len(reader.pages)} pages...")
-        conn.commit()
-        log(f"  {pdf_path.name}: {n} non-empty pages indexed")
-        ingested.append({"title": title, "pages": n})
+            log("  (if the URL is unreachable from this machine, download it"
+                " manually and pass a local path)")
     stats = {"ingested": ingested, "seconds": round(time.time() - t0, 1)}
     log(f"Manual ingestion done: {stats}")
     return stats
@@ -846,14 +1017,15 @@ def q_search_manual(conn, has_fts, query, doc_filter=None, limit=10):
     args: list = []
     if has_fts:
         sql = (
-            "SELECT d.title, p.page, snippet(fts_docs, 0, '>>', '<<', ' ... ', 32)"
+            "SELECT d.title, p.page, snippet(fts_docs, 0, '>>', '<<', ' ... ', 32),"
+            " p.title, p.url"
             " FROM fts_docs JOIN doc_pages p ON p.id = fts_docs.rowid"
             " JOIN docs d ON d.id = p.doc_id WHERE fts_docs MATCH ?"
         )
         args.append(query)
     else:
         sql = (
-            "SELECT d.title, p.page, substr(p.text, 1, 300)"
+            "SELECT d.title, p.page, substr(p.text, 1, 300), p.title, p.url"
             " FROM doc_pages p JOIN docs d ON d.id = p.doc_id"
             " WHERE p.text LIKE ?"
         )
@@ -874,18 +1046,21 @@ def q_search_manual(conn, has_fts, query, doc_filter=None, limit=10):
     if ndocs == 0:
         return {"error": "no manuals ingested yet -- run: "
                          "uv run --script scripts/code_index_mcp.py --add-docs"}
-    return {
-        "hits": [
-            {"doc": r[0], "page": r[1], "snippet": r[2][:400]}
-            for r in rows[:limit]
-        ],
-        "truncated": len(rows) > limit,
-    }
+    hits = []
+    for r in rows[:limit]:
+        hit = {"doc": r[0], "page": r[1], "snippet": r[2][:400]}
+        if r[3]:
+            hit["title"] = r[3]
+        if r[4]:
+            hit["url"] = r[4]
+        hits.append(hit)
+    return {"hits": hits, "truncated": len(rows) > limit}
 
 
 def q_get_manual_page(conn, doc, page):
     row = conn.execute(
-        "SELECT p.text, d.title FROM doc_pages p JOIN docs d ON d.id = p.doc_id"
+        "SELECT p.text, d.title, p.title, p.url FROM doc_pages p"
+        " JOIN docs d ON d.id = p.doc_id"
         " WHERE d.title LIKE ? AND p.page = ?",
         (f"%{doc}%", int(page)),
     ).fetchone()
@@ -893,7 +1068,12 @@ def q_get_manual_page(conn, doc, page):
         titles = [t for (t,) in conn.execute("SELECT title FROM docs")]
         return {"error": f"no page {page} in a doc matching '{doc}'",
                 "available_docs": titles}
-    return {"doc": row[1], "page": int(page), "text": row[0][:20000]}
+    result = {"doc": row[1], "page": int(page), "text": row[0][:20000]}
+    if row[2]:
+        result["title"] = row[2]
+    if row[3]:
+        result["url"] = row[3]
+    return result
 
 
 def q_index_status(conn, has_fts):
@@ -1023,17 +1203,19 @@ def make_server():
     @mcp.tool()
     def search_manual(query: str, doc_filter: str | None = None,
                       limit: int = 10) -> dict:
-        """Full-text search over the ingested Radioss manuals (Reference
-        Guide, User Guide, Theory Manual PDFs linked in README.md).
+        """Full-text search over the ingested Radioss documentation:
+        the online-help keyword pages (one entry per starter/engine
+        keyword, with title and URL) and/or the PDF manuals.
 
         Use this for input-deck keyword/card semantics (e.g. what the fields
         of /MAT/LAW36 or /INTER/TYPE7 mean), solver options and theory.
         Keywords tokenize at slashes, so query "MAT LAW36" or the phrase
         '"MAT LAW36"' rather than /MAT/LAW36. `doc_filter` narrows to one
-        manual by title substring (e.g. 'Reference' or 'Theory'). Returns
-        page-level snippets; fetch full pages with get_manual_page.
-        Manuals must be ingested once via: --add-docs (see the errors this
-        tool returns if nothing is ingested yet).
+        source by title substring (e.g. 'starter_input', 'engine_input',
+        'Reference', 'Theory'). Returns snippets with page numbers (and
+        keyword page titles/URLs for online-help hits); fetch full text
+        with get_manual_page. Docs must be ingested once via: --add-docs
+        (see the error this tool returns if nothing is ingested yet).
         """
         conn, has_fts = _open_ready()
         try:
@@ -1043,9 +1225,11 @@ def make_server():
 
     @mcp.tool()
     def get_manual_page(doc: str, page: int) -> dict:
-        """Return the full extracted text of one manual page. `doc` is a
-        title substring (e.g. 'Reference'); `page` from search_manual hits.
-        Fetch adjacent pages if a card description continues across pages."""
+        """Return the full extracted text of one documentation page. `doc`
+        is a source-title substring (e.g. 'starter_input' or 'Reference');
+        `page` comes from search_manual hits. For online-help sources one
+        page = one keyword topic; for PDFs fetch adjacent pages if a card
+        description continues across pages."""
         conn, _ = _open_ready()
         try:
             return q_get_manual_page(conn, doc, page)
