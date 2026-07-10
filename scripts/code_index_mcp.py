@@ -1300,20 +1300,24 @@ def main() -> None:
     if args.db:
         DB_PATH = args.db.resolve()
 
+    # CLI actions; several flags may be combined in one run.
+    ran_action = False
     if args.build or args.rebuild:
         conn, _ = connect(DB_PATH)
         build_index(conn, REPO_ROOT, full=args.rebuild)
         conn.close()
-        return
+        ran_action = True
     if args.add_docs is not None:
         conn, _ = connect(DB_PATH)
         ingest_docs(conn, args.add_docs or list(DEFAULT_DOC_URLS))
         conn.close()
-        return
+        ran_action = True
     if args.stats:
         conn, has_fts = _open_ready()
         print(json.dumps(q_index_status(conn, has_fts), indent=2))
         conn.close()
+        ran_action = True
+    if ran_action:
         return
 
     # Serving mode. Everything below goes to stderr: stdout is the MCP
