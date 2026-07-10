@@ -36,18 +36,17 @@ same database so keyword/card documentation is searchable next to the
 code:
 
     uv run --script scripts/code_index_mcp.py --add-docs
-        # crawls the starter/engine keyword pages of the online help
-        # (help.altair.com) and downloads the PDF manuals linked in
-        # README.md (one-time, ~10-20 min)
+        # crawls the starter and engine keyword pages of the online help
+        # (help.altair.com), one entry per keyword, with a progress bar
     uv run --script scripts/code_index_mcp.py --add-docs \
         https://help.altair.com/hwsolvers/rad/topics/solvers/rad/starter_input_r.htm
         # crawl a single keyword index page: every page it links to in
         # its <section> blocks is fetched and indexed individually
     uv run --script scripts/code_index_mcp.py --add-docs /path/to/manual.pdf
-        # ingest a local PDF instead (e.g. behind a strict proxy)
+        # ingest a manually downloaded PDF manual (PDFs are never
+        # downloaded by the script; see the links in README.md)
 
-Downloaded PDFs are cached in .code_index_docs/ (gitignored); extracted
-text lives only in the local database -- nothing is committed.
+Extracted text lives only in the local database -- nothing is committed.
 
 MCP tools exposed:
     find_symbol      - where is SUBROUTINE/FUNCTION/MODULE/C function X defined?
@@ -108,18 +107,14 @@ FORTRAN_LANGS = ("fortran_fixed", "fortran_free", "fortran_inc")
 
 MAX_LIMIT = 200  # hard cap for every tool's `limit` parameter
 
-# Manual sources: the online help keyword indexes (preferred -- clean
-# per-keyword pages with URLs) and the PDF manuals linked from README.md.
+# Default manual sources: the online help keyword indexes (clean
+# per-keyword pages with titles and URLs).
 DEFAULT_DOC_URLS = (
     # Starter input keywords index; every /KEYWORD page is linked from it.
     "https://help.altair.com/hwsolvers/rad/topics/solvers/rad/starter_input_r.htm",
     # Engine input keywords index.
     "https://help.altair.com/hwsolvers/rad/topics/solvers/rad/engine_input_r.htm",
-    "https://2022.help.altair.com/2022/simulation/pdfs/radopen/AltairRadioss_2022_ReferenceGuide.pdf",
-    "https://2022.help.altair.com/2022/simulation/pdfs/radopen/AltairRadioss_2022_UserGuide.pdf",
-    "https://2022.help.altair.com/2022/simulation/pdfs/radopen/AltairRadioss_2022_TheoryManual.pdf",
 )
-DOC_CACHE_DIR = REPO_ROOT / ".code_index_docs"
 CRAWL_WORKERS = 4        # parallel page fetches (keep modest: shared site)
 CRAWL_MAX_PAGES = 3000   # safety cap per index page
 FETCH_TIMEOUT_S = 30     # per-request timeout (connect + stalled reads)
@@ -755,54 +750,45 @@ def ingest_html_index(conn: sqlite3.Connection, index_url: str) -> dict:
                         (doc_id, n, text,
                          page.title or url.rsplit("/", 1)[-1], url),
                     )
+            _progress(i, len(targets), t0)
             if i % 25 == 0:
                 conn.commit()
-                rate = i / max(time.time() - t0, 0.001)
-                eta = int((len(targets) - i) / rate)
-                log(f"  {i}/{len(targets)} pages ({rate:.1f}/s, ~{eta}s left)")
     conn.execute("UPDATE docs SET pages=? WHERE id=?", (n, doc_id))
     conn.commit()
     log(f"  {title}: {n} keyword pages indexed"
         + (f", {failed} failed" if failed else ""))
     return {"title": title, "pages": n}
 
-def _fetch_pdf(source: str) -> Path:
-    """Return a local path for `source` (URL -> cached download, else path)."""
-    if not source.lower().startswith(("http://", "https://")):
-        p = Path(source).expanduser().resolve()
-        if not p.is_file():
-            raise FileNotFoundError(f"no such PDF: {source}")
-        return p
-    import urllib.request
+def _local_pdf(source: str) -> Path:
+    """PDFs are ingested from local files only (no downloading)."""
+    if source.lower().startswith(("http://", "https://")):
+        raise ValueError(
+            "PDF downloading is not supported; download the file with your "
+            "browser and pass its local path to --add-docs"
+        )
+    p = Path(source).expanduser().resolve()
+    if not p.is_file():
+        raise FileNotFoundError(f"no such PDF: {source}")
+    return p
 
-    DOC_CACHE_DIR.mkdir(exist_ok=True)
-    dest = DOC_CACHE_DIR / source.rsplit("/", 1)[-1]
-    if dest.exists() and dest.stat().st_size > 0:
-        log(f"Using cached {dest.name}")
-        return dest
-    log(f"Downloading {source} ...")
-    req = urllib.request.Request(source, headers={"User-Agent": "Mozilla/5.0"})
-    tmp = dest.with_suffix(".part")
-    done = 0
-    with urllib.request.urlopen(req, timeout=FETCH_TIMEOUT_S) as resp, \
-            open(tmp, "wb") as f:
-        total = int(resp.headers.get("Content-Length") or 0)
-        while True:
-            chunk = resp.read(1 << 20)
-            if not chunk:
-                break
-            f.write(chunk)
-            done += len(chunk)
-            if done % (16 << 20) < (1 << 20):
-                pct = f" ({100 * done // total}%)" if total else ""
-                log(f"  {dest.name}: {done >> 20} MB{pct}")
-    tmp.rename(dest)
-    log(f"Downloaded {dest.name} ({dest.stat().st_size >> 20} MB)")
-    return dest
+
+def _progress(done: int, total: int, t0: float, unit: str = "pages") -> None:
+    """Render an in-place progress bar on a TTY; periodic lines otherwise."""
+    rate = done / max(time.time() - t0, 1e-3)
+    eta = int((total - done) / rate) if rate > 0 else 0
+    if sys.stderr.isatty():
+        width = 30
+        filled = int(width * done / max(total, 1))
+        bar = "#" * filled + "-" * (width - filled)
+        print(f"\r  [{bar}] {done}/{total} {unit} {rate:5.1f}/s ETA {eta:4d}s",
+              end="\n" if done >= total else "", file=sys.stderr, flush=True)
+    elif done % 50 == 0 or done >= total:
+        log(f"  {done}/{total} {unit} ({rate:.1f}/s, ~{eta}s left)")
 
 
 def ingest_pdf(conn: sqlite3.Connection, source: str) -> dict:
     """Extract text from one manual PDF, one row per page."""
+    pdf_path = _local_pdf(source)
     try:
         from pypdf import PdfReader
     except ImportError:
@@ -810,12 +796,12 @@ def ingest_pdf(conn: sqlite3.Connection, source: str) -> dict:
             "pypdf is required to ingest PDFs: pip install pypdf "
             "(or run the script via 'uv run --script')"
         )
-    pdf_path = _fetch_pdf(source)
     title = pdf_path.stem
     log(f"Extracting text from {pdf_path.name} ...")
     reader = PdfReader(pdf_path)
     doc_id = _replace_doc(conn, title, title, len(reader.pages))
     n = 0
+    t0 = time.time()
     for page_no, page in enumerate(reader.pages, 1):
         try:
             text = (page.extract_text() or "").strip()
@@ -827,9 +813,9 @@ def ingest_pdf(conn: sqlite3.Connection, source: str) -> dict:
                 (doc_id, page_no, text),
             )
             n += 1
+        _progress(page_no, len(reader.pages), t0)
         if page_no % 500 == 0:
             conn.commit()
-            log(f"  {pdf_path.name}: {page_no}/{len(reader.pages)} pages...")
     conn.commit()
     log(f"  {pdf_path.name}: {n} non-empty pages indexed")
     return {"title": title, "pages": n}
@@ -1299,8 +1285,10 @@ def main() -> None:
     ap.add_argument("--stats", action="store_true",
                     help="print index status as JSON and exit")
     ap.add_argument("--add-docs", nargs="*", metavar="URL_OR_PDF",
-                    help="ingest manual PDFs and exit; with no argument, "
-                         "downloads the manuals linked in README.md")
+                    help="ingest documentation and exit: .htm/.html keyword "
+                         "index URLs are crawled, .pdf paths are extracted "
+                         "locally (never downloaded); with no argument, "
+                         "crawls the online-help keyword indexes")
     ap.add_argument("--db", type=Path, default=None,
                     help=f"index database path (default: {DB_PATH})")
     args = ap.parse_args()
