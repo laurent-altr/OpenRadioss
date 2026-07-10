@@ -120,8 +120,9 @@ DEFAULT_DOC_URLS = (
     "https://2022.help.altair.com/2022/simulation/pdfs/radopen/AltairRadioss_2022_TheoryManual.pdf",
 )
 DOC_CACHE_DIR = REPO_ROOT / ".code_index_docs"
-CRAWL_DELAY_S = 0.2      # politeness delay between page fetches
+CRAWL_WORKERS = 4        # parallel page fetches (keep modest: shared site)
 CRAWL_MAX_PAGES = 3000   # safety cap per index page
+FETCH_TIMEOUT_S = 30     # per-request timeout (connect + stalled reads)
 
 
 def log(msg: str) -> None:
@@ -667,7 +668,7 @@ def _fetch_url(url: str) -> str:
     import urllib.request
 
     req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
-    with urllib.request.urlopen(req, timeout=60) as resp:
+    with urllib.request.urlopen(req, timeout=FETCH_TIMEOUT_S) as resp:
         return resp.read().decode("utf-8", errors="replace")
 
 
@@ -724,31 +725,45 @@ def ingest_html_index(conn: sqlite3.Connection, index_url: str) -> dict:
         return {"title": index_url, "pages": 0}
 
     title = index_url.rsplit("/", 1)[-1].rsplit(".", 1)[0]
-    log(f"Crawling {len(targets)} pages linked from {title} ...")
+    log(f"Crawling {len(targets)} pages linked from {title} "
+        f"({CRAWL_WORKERS} parallel fetches, {FETCH_TIMEOUT_S}s timeout)...")
     doc_id = _replace_doc(conn, index_url, title, len(targets))
-    n = 0
-    for i, url in enumerate(targets, 1):
+
+    from concurrent.futures import ThreadPoolExecutor
+
+    def fetch(url: str):
         try:
-            page = _parse_html(_fetch_url(url))
+            return url, _parse_html(_fetch_url(url)), None
         except Exception as exc:
-            log(f"  failed {url}: {exc}")
-            continue
-        text = page.text()
-        if text:
-            n += 1
-            conn.execute(
-                "INSERT INTO doc_pages(doc_id, page, text, title, url)"
-                " VALUES (?,?,?,?,?)",
-                (doc_id, n, text, page.title or url.rsplit("/", 1)[-1], url),
-            )
-        if i % 100 == 0:
-            conn.commit()
-            log(f"  {i}/{len(targets)} pages...")
-        if CRAWL_DELAY_S and index_url.startswith(("http://", "https://")):
-            time.sleep(CRAWL_DELAY_S)
+            return url, None, exc
+
+    n = failed = 0
+    t0 = time.time()
+    with ThreadPoolExecutor(max_workers=CRAWL_WORKERS) as pool:
+        # executor.map keeps index order, so page numbers stay stable.
+        for i, (url, page, exc) in enumerate(pool.map(fetch, targets), 1):
+            if exc is not None:
+                failed += 1
+                log(f"  failed {url}: {exc}")
+            else:
+                text = page.text()
+                if text:
+                    n += 1
+                    conn.execute(
+                        "INSERT INTO doc_pages(doc_id, page, text, title, url)"
+                        " VALUES (?,?,?,?,?)",
+                        (doc_id, n, text,
+                         page.title or url.rsplit("/", 1)[-1], url),
+                    )
+            if i % 25 == 0:
+                conn.commit()
+                rate = i / max(time.time() - t0, 0.001)
+                eta = int((len(targets) - i) / rate)
+                log(f"  {i}/{len(targets)} pages ({rate:.1f}/s, ~{eta}s left)")
     conn.execute("UPDATE docs SET pages=? WHERE id=?", (n, doc_id))
     conn.commit()
-    log(f"  {title}: {n} keyword pages indexed")
+    log(f"  {title}: {n} keyword pages indexed"
+        + (f", {failed} failed" if failed else ""))
     return {"title": title, "pages": n}
 
 def _fetch_pdf(source: str) -> Path:
@@ -768,12 +783,19 @@ def _fetch_pdf(source: str) -> Path:
     log(f"Downloading {source} ...")
     req = urllib.request.Request(source, headers={"User-Agent": "Mozilla/5.0"})
     tmp = dest.with_suffix(".part")
-    with urllib.request.urlopen(req, timeout=120) as resp, open(tmp, "wb") as f:
+    done = 0
+    with urllib.request.urlopen(req, timeout=FETCH_TIMEOUT_S) as resp, \
+            open(tmp, "wb") as f:
+        total = int(resp.headers.get("Content-Length") or 0)
         while True:
             chunk = resp.read(1 << 20)
             if not chunk:
                 break
             f.write(chunk)
+            done += len(chunk)
+            if done % (16 << 20) < (1 << 20):
+                pct = f" ({100 * done // total}%)" if total else ""
+                log(f"  {dest.name}: {done >> 20} MB{pct}")
     tmp.rename(dest)
     log(f"Downloaded {dest.name} ({dest.stat().st_size >> 20} MB)")
     return dest
