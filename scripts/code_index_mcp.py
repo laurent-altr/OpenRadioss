@@ -15,9 +15,13 @@ Quick start (from the repo root):
     uv run --script scripts/code_index_mcp.py --rebuild   # build the index (~1-2 min)
     uv run --script scripts/code_index_mcp.py             # run the MCP server (stdio)
 
-Without uv:
+Note: with no flags the script runs an MCP *server* that waits silently
+for a client on stdin -- it is normally launched by Claude Code (via
+.mcp.json), not by hand. Also, the first `uv run` resolves and downloads
+the dependencies from PyPI, which needs network access and can take a
+moment; if PyPI is blocked on your machine, use pip instead:
 
-    pip install mcp
+    pip install mcp pypdf
     python3 scripts/code_index_mcp.py --rebuild
     python3 scripts/code_index_mcp.py
 
@@ -1312,6 +1316,28 @@ def main() -> None:
         conn.close()
         return
 
+    # Serving mode. Everything below goes to stderr: stdout is the MCP
+    # transport and must stay clean.
+    built = None
+    if DB_PATH.exists():
+        try:
+            conn, _ = connect(DB_PATH)
+            built = conn.execute(
+                "SELECT value FROM meta WHERE key='built_at'"
+            ).fetchone()
+            conn.close()
+        except sqlite3.Error:
+            pass
+    log(f"openradioss-index MCP server: serving on stdio (db: {DB_PATH})")
+    if built is None:
+        log("  index not built yet -- the first tool call will build it"
+            " (~1-2 min), or run with --build beforehand")
+    if sys.stdin.isatty():
+        log("  NOTE: this process is meant to be launched by an MCP client"
+            " (e.g. Claude Code via .mcp.json).")
+        log("  Started from a terminal it just waits for a client on stdin"
+            " -- it is not hung. Ctrl+C to exit.")
+        log("  Did you mean: --build, --stats, --add-docs or --help?")
     make_server().run()
 
 
