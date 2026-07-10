@@ -12,23 +12,25 @@ caller/callee navigation and code search instead of repeated greps.
 
 Quick start (from the repo root):
 
-    uv run --script scripts/code_index_mcp.py --rebuild   # build the index (~1-2 min)
-    uv run --script scripts/code_index_mcp.py             # run the MCP server (stdio)
+    pip install mcp                                  # once (pypdf too, if
+                                                     # you ingest PDF manuals)
+    python3 scripts/code_index_mcp.py --build        # build the index (~1-2 min)
 
 Note: with no flags the script runs an MCP *server* that waits silently
-for a client on stdin -- it is normally launched by Claude Code (via
-.mcp.json), not by hand. Also, the first `uv run` resolves and downloads
-the dependencies from PyPI, which needs network access and can take a
-moment; if PyPI is blocked on your machine, use pip instead:
+for a client on stdin -- it is normally launched by the AI tool (Claude
+Code reads the committed .mcp.json), not by hand.
 
-    pip install mcp pypdf
-    python3 scripts/code_index_mcp.py --rebuild
-    python3 scripts/code_index_mcp.py
+Alternatively, uv users can skip the pip install; the PEP 723 header lets
+uv fetch the dependencies automatically:
+
+    uv run --script scripts/code_index_mcp.py --build
 
 Claude Code picks the server up automatically from the committed .mcp.json
-at the repo root. To register manually:
+at the repo root (which launches it with python3). Other MCP clients
+register it the same way, e.g. GitHub Copilot CLI:
 
-    claude mcp add openradioss-index -- uv run --script scripts/code_index_mcp.py
+    copilot mcp add openradioss-index --tools '*' -- \
+        python3 /abs/path/to/OpenRadioss/scripts/code_index_mcp.py
 
 The index is stored in .code_index.db at the repo root (gitignored).
 Refresh is manual: call the `reindex` MCP tool (or rerun with --build)
@@ -1124,7 +1126,14 @@ def q_index_status(conn, has_fts):
 # ---------------------------------------------------------------------------
 
 def make_server():
-    from mcp.server.fastmcp import FastMCP
+    try:
+        from mcp.server.fastmcp import FastMCP
+    except ImportError:
+        log("ERROR: the 'mcp' Python package is not installed.")
+        log("  Fix:  pip install mcp")
+        log("  (or run the script with uv, which installs it automatically:")
+        log("   uv run --script scripts/code_index_mcp.py)")
+        sys.exit(1)
 
     mcp = FastMCP("openradioss-index")
 
