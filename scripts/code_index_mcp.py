@@ -1288,6 +1288,11 @@ def make_server():
 
 def main() -> None:
     global DB_PATH
+    if sys.version_info < (3, 10):
+        log(f"ERROR: Python >= 3.10 is required to run this server"
+            f" (this is Python {sys.version.split()[0]}).")
+        log("  Point the launcher at a newer interpreter, e.g. python3.11.")
+        sys.exit(1)
     ap = argparse.ArgumentParser(
         description="OpenRadioss code-index MCP server "
                     "(default: serve MCP over stdio)")
