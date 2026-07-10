@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "openradioss-index": {
+      "type": "stdio",
+      "command": "sh",
+      "args": ["scripts/code_index_mcp.sh"]
+    }
+  }
+}
