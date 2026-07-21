@@ -801,7 +801,12 @@ C-----------------------------------------------
               use shell_internal_forces_mod
               use shell_gpu_mod
               use spmd_profiler_mod, only: spmd_profile_begin,
-     .                                    spmd_profile_end
+     .          spmd_profile_end,
+     .          PROF_INIT, PROF_KIN, PROF_CONTACT, PROF_ALEFOR,
+     .          PROF_PREELEM, PROF_ELEMENT, PROF_SPH_NLOC,
+     .          PROF_EXFOR, PROF_ASM, PROF_CONTPOST, PROF_RBODY,
+     .          PROF_DTSTEP, PROF_IO, PROF_VELUPD, PROF_OUTPUT,
+     .          PROF_POSTOUT, PROF_INTEG, PROF_RESTART
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -1564,6 +1569,7 @@ C-----------------------------------------------
               !initialisation timer resol
               IF (IMON>0) THEN
                 CALL STARTIME(TIMERS,TIMER_RESOL)
+              call spmd_profile_begin(PROF_INIT)
               ENDIF
 C INTERFACES RENUM
               RNUM_SIZ=NUMNOD
@@ -2918,6 +2924,8 @@ C-------------------------------------------------------------------
 C-------------------------------------------------------------------
 C       EXTERNAL FORCES
 C-------------------------------------------------------------------
+              call spmd_profile_end(PROF_INIT)
+              call spmd_profile_begin(PROF_KIN)
               IF (NCONLD/=0 .AND. IMPL_S/=1) THEN
                 CALL TRACE_IN(10,0,ZERO)
                 IF (IMON>0) CALL STARTIME(TIMERS,TIMER_KIN)
@@ -3113,6 +3121,7 @@ C
                 IF (IMONM > 0) CALL STOPTIME(TIMERS,50)
               ENDIF
               IF (IMON>0) CALL STOPTIME(TIMERS,6)
+              call spmd_profile_end(PROF_KIN)
 C
               IF (NFLOW>0) THEN
                 CALL FLOW0(OUTPUT,IFLOW, RFLOW,   WIFLOW, WRFLOW, NODES%X,
@@ -3125,6 +3134,7 @@ C
 C----------------------------------------
 C      MPI COMMUNICATION BEFORE SORTING
 C----------------------------------------
+              call spmd_profile_begin(PROF_CONTACT)
               IF (IMON>0) CALL STARTIME(TIMERS,13)
               IF (IMONM > 0) CALL STARTIME(TIMERS,24)
               IF(NSPMD>1)THEN
@@ -3327,7 +3337,6 @@ C--------------------------------------------------------
               IF(NINTER25 /= 0)THEN
 
                 IF(NSPMD > 1)THEN
-                  call spmd_profile_begin(-3010)
                   IF (IMON>0) CALL STARTIME(TIMERS,TIMER_EXFOR)
                   CALL SPMD_EXCH_I25(IPARI    ,INTERFACES%INTBUF_TAB       ,NODES%ITAB  ,
      *                               NODES%BOUNDARY_ADD ,NODES%BOUNDARY ,INTLIST ,NBINTC,
@@ -3336,7 +3345,8 @@ C--------------------------------------------------------
      *                               NODES%BOUNDARY_ADD ,NODES%BOUNDARY ,INTLIST ,NBINTC,
      *                               IAD_I25  ,FR_I25  ,SFR_I25 ,2     )
                   IF (IMON>0) CALL STOPTIME(TIMERS,TIMER_EXFOR)
-                  call spmd_profile_end(-3010)
+              call spmd_profile_end(PROF_CONTACT)
+              call spmd_profile_begin(PROF_ALEFOR)
                 END IF
 
               END IF
@@ -3669,6 +3679,8 @@ C----------------------------------------
               IF(NINTER/=0) THEN
 
                 CALL TRACE_IN(4,1,ZERO)
+              call spmd_profile_end(PROF_ALEFOR)
+                call spmd_profile_begin(PROF_CONTACT)
                 IF (IMON>0) CALL STARTIME(TIMERS,TIMER_CONTSORT)
 
                 DT2TT = DT2T
@@ -3782,7 +3794,6 @@ C INTERFACE 25 - Communication IRTLM, TIME_S, etc :: Reception
 C--------------------------------------------------------
                 IF(NSPMD > 1)THEN
                   IF(NINTER25 /= 0)THEN
-                    call spmd_profile_begin(-3010)
                     IF (IMON>0) CALL STARTIME(TIMERS,TIMER_EXFOR)
                     CALL SPMD_EXCH_I25(IPARI    ,INTERFACES%INTBUF_TAB,NODES%ITAB  ,
      *                                 NODES%BOUNDARY_ADD ,NODES%BOUNDARY ,INTLIST ,NBINTC,
@@ -3791,7 +3802,6 @@ C--------------------------------------------------------
      *                                 NODES%BOUNDARY_ADD ,NODES%BOUNDARY ,INTLIST ,NBINTC,
      *                                 IAD_I25  ,FR_I25  ,SFR_I25 ,4     )
                     IF (IMON>0) CALL STOPTIME(TIMERS,TIMER_EXFOR)
-                    call spmd_profile_end(-3010)
                   ENDIF
                 END IF
 C========================================================================================
@@ -3903,7 +3913,6 @@ C===============================================================================
 C
                 IF (IMON>0) THEN
                   CALL STOPTIME(TIMERS,TIMER_CONTFOR)
-                  call spmd_profile_begin(-3010)
                   CALL STARTIME(TIMERS,TIMER_EXFOR)
                 ENDIF
                 IF (IMONM > 0) CALL STARTIME(TIMERS,21)
@@ -3967,7 +3976,6 @@ C
                   END IF
                 ENDIF
                 IF (IMON>0) CALL STOPTIME(TIMERS,TIMER_EXFOR)
-                  call spmd_profile_end(-3010)
                 IF (IMONM > 0) CALL STOPTIME(TIMERS,21)
 
                 CALL TRACE_OUT(4)
@@ -3983,6 +3991,8 @@ C--------------------------------------------------------
      *                             INT24E2EUSE )
 
                 IF (IMON>0) CALL STOPTIME(TIMERS,TIMER_CONTFOR)
+                call spmd_profile_end(PROF_CONTACT)
+              call spmd_profile_begin(PROF_PREELEM)
               ENDIF
 C--------------------------------------------------------
 C INTERFACE 21 - Communication of heat flux
@@ -4092,6 +4102,8 @@ C---- // GROUPS ----------------
 C     INTERNAL FORCES OF SHELLS, 3-NODE SHELLS
 C-------------------------------
               CALL TRACE_IN(14,0,ZERO)
+              call spmd_profile_end(PROF_PREELEM)
+              call spmd_profile_begin(PROF_ELEMENT)
               IF (IMON>0) CALL STARTIME(TIMERS,TIMER_ELEMENT)
 C -------------------------------------------------------------------
 C   User Libraries get the possibility to use GET_U_NOD_X & GET_U_NOD_V in user elements properties (Solids & Springs)
@@ -4259,6 +4271,8 @@ C
               CALL PYTHON_END_OPENMP(PYTHON)
               CALL TRACE_OUT(14)
               IF (IMON>0) CALL STOPTIME(TIMERS,TIMER_ELEMENT)
+              call spmd_profile_end(PROF_ELEMENT)
+              call spmd_profile_begin(PROF_SPH_NLOC)
 
               IF(GPU == 1) THEN
 C     Compute print-flag for GPU shell sync: same logic as FORINTC IPRI.
@@ -4481,7 +4495,6 @@ C----------------------------------------
                     CALL SPMD_BARRIER()
                     CALL STOPTIME(TIMERS,59)
                   ENDIF
-                  call spmd_profile_begin(-3010)
                   IF (IMON>0) CALL STARTIME(TIMERS,TIMER_EXFOR)
                   IF (IMONM > 0) CALL STARTIME(TIMERS,22)
 C
@@ -4514,7 +4527,6 @@ C
 C
                   IF (IMON>0) THEN
                     CALL STOPTIME(TIMERS,TIMER_EXFOR)
-                  call spmd_profile_end(-3010)
                     IF (IMONM > 0) CALL STOPTIME(TIMERS,22)
                   ENDIF
                 ENDIF
@@ -4675,7 +4687,8 @@ C===============================================================================
               INT18KINE=-IABS(INT18KINE)
 
               IF(NSPMD>1)THEN
-                call spmd_profile_begin(-3010)
+              call spmd_profile_end(PROF_SPH_NLOC)
+                call spmd_profile_begin(PROF_EXFOR)
                 IF (IMON>0) CALL STARTIME(TIMERS,TIMER_EXFOR)
                 IF (IPARIT==0) THEN
                   LENGTH =  4 + IRODDL*4
@@ -4790,7 +4803,7 @@ C
 C
                 ENDIF
                 IF (IMON>0) CALL STOPTIME(TIMERS,TIMER_EXFOR)
-                call spmd_profile_end(-3010)
+                call spmd_profile_end(PROF_EXFOR)
               ENDIF
 ! shooting node, send
               IF (N2D/=0.AND.IDEL7==2) THEN
@@ -4807,6 +4820,7 @@ C       PARITH/ON ASSEMBLY OF FORCES AFTER COMMUNICATION
 C-------------------------------------
               CALL TRACE_IN(15,0,ZERO)
 
+              call spmd_profile_begin(PROF_ASM)
               IF (IMON>0) CALL STARTIME(TIMERS,TIMER_ASM)
 c     Parallel update of crack
               IF(ICRACK3D > 0 .AND. NSPMD > 1) CALL SPMD_MAX_XFE_I(NLEVSET)
@@ -4911,7 +4925,9 @@ C
 C
               IF(IPARIT==1) DEALLOCATE( FSKY_L )
               IF (IMON>0) CALL STOPTIME(TIMERS,TIMER_ASM)
+              call spmd_profile_end(PROF_ASM)
               CALL TRACE_OUT(15)
+              call spmd_profile_begin(PROF_CONTPOST)
 C========================================================================================
 C                                    NON PARALLEL SECTION (SMP)
 C========================================================================================
@@ -5468,7 +5484,9 @@ C  ---------------------------------------------------------
 C  ---------------------------------------------------------
               IDEL7NOK=0
               IF (IMON>0) CALL STOPTIME(TIMERS,TIMER_CONTFOR)
+              call spmd_profile_end(PROF_CONTPOST)
 C
+              call spmd_profile_begin(PROF_RBODY)
 C========================================================================================
 C                                     NON PARALLEL SECTION (SMP)
 C========================================================================================
@@ -5908,6 +5926,8 @@ C----------------------------------------------------------
               IMSCH=0
 !              
               IF (FLG_DAMP_FUNCT==1) THEN
+              call spmd_profile_end(PROF_RBODY)
+              call spmd_profile_begin(PROF_DTSTEP)
                 CALL DAMPING_FUNCT_INI(DAMPR, NRDAMP, NDAMP,   TT,IRODDL)
               ENDIF
               IF (FLG_DTNODAMP==1) THEN
@@ -6485,7 +6505,8 @@ C       EXTERNAL WORK OF CONCENTRATED LOADS
 C========================================================================================
 C                                     PARALLEL SECTION (SMP)
 C========================================================================================
-              call spmd_profile_begin(-3007)
+              call spmd_profile_end(PROF_DTSTEP)
+              call spmd_profile_begin(PROF_IO)
               IF (IMON>0) CALL STARTIME(TIMERS,TIMER_IO)
 
               CALL PYTHON_BEGIN_OPENMP(PYTHON)
@@ -6510,9 +6531,10 @@ C-----------------------------------------------
 
 !$OMP END PARALLEL
               CALL PYTHON_END_OPENMP(PYTHON)
+              call spmd_profile_end(PROF_IO)
+
 
               IF (IMON>0) CALL STOPTIME(TIMERS,TIMER_IO)
-              call spmd_profile_end(-3007)
 C-----------------------------------------------
 C     SELECTIVE MASS SCALING
 C-----------------------------------------------
@@ -6610,6 +6632,7 @@ C===============================================================================
 C                                     PARALLEL SECTION (SMP)
 C========================================================================================
                 CALL PYTHON_BEGIN_OPENMP(PYTHON)
+                call spmd_profile_begin(PROF_ANIM)
 !$OMP PARALLEL PRIVATE(ITSK,NODFTSK,NODLTSK)
                 ITSK = OMP_GET_THREAD_NUM()
                 NODFTSK   = 1+ITSK*NUMNOD/ NTHREAD
@@ -6635,7 +6658,6 @@ C---      // N/3 ---------------------------------------
 C         INTERNAL FORCES (ANIM)
 C-----------------------------------------------
                   IF (ISECUT/=0) THEN
-                    call spmd_profile_begin(-3007)
                     IF (IMON>0) CALL STARTIME(TIMERS,TIMER_IO)
                     CALL SECTION_IO (
      1              NSTRF,NODES%D,NODES%DR,NODES%V,NODES%VR,FSAV(1,1+NINTER+NRWALL+NRBODY),
@@ -6644,16 +6666,18 @@ C-----------------------------------------------
      4              RG_CUT ,IAD_CUT       ,FR_CUT,NODES%WEIGHT_MD,IOLDSECT,
      5              SENSORS%STABSEN,SENSORS%SFSAV,SENSORS%TABSENSOR,SENSORS%FSAV, OUTPUT%TH%WFEXT)
                     IF(IMON>0) CALL STOPTIME(TIMERS,TIMER_IO)
-                    call spmd_profile_end(-3007)
                   ENDIF
                 ENDIF ! ILAG+IALE+IEULER/=0
 
 !$OMP END PARALLEL
                 CALL PYTHON_END_OPENMP(PYTHON)
+                call spmd_profile_end(PROF_ANIM)
 
                 IF (IMON>0) CALL STOPTIME(TIMERS,TIMER_INTEG)
 C-----------------------------------------------
                 IF (ILAG+IALE+IEULER/=0)THEN
+                CALL spmd_profile_begin(PROF_RBY)
+
                   IF(IMON>0) CALL STARTIME(TIMERS,TIMER_KIN)
                   IF(IMONM > 0) CALL STARTIME(TIMERS,40)
 
@@ -6673,6 +6697,8 @@ C===============================================================================
 
                   IF(IMON>0) CALL STOPTIME(TIMERS,TIMER_KIN)
                   IF(IMONM > 0) CALL STOPTIME(TIMERS,40)
+                  CALL spmd_profile_end(PROF_RBY)
+
                 ENDIF  ! ILAG+IALE+IEULER/=0
 C========================================================================================
 C-----  RBE2 Bilan crrection
@@ -6693,6 +6719,7 @@ C
                   IF(IMON>0) CALL STOPTIME(TIMERS,TIMER_KIN)
                   IF(IMONM > 0) CALL STOPTIME(TIMERS,40)
                 ENDIF
+
 C--------------------
 C       SENSOR //  IN IMPLICIT
 C-----------------------------------------------
@@ -6707,6 +6734,7 @@ C-----------------------------------------------
                 ENDIF
 c
                 IF (NSENSOR > 0 .AND. INCONV == 1) THEN
+                  call spmd_profile_begin(PROF_SENSOR)
                   CALL SENSOR_ENER_SAV(NSENSOR,SENSORS%SENSOR_TAB ,PARTSAV ,PARTSAV2)
                   ! -------------------------------
                   ! pre-computation and mpi communication for type 16 sensor
@@ -6736,7 +6764,7 @@ c
 c
                   ! check activation condition of logical sensors hierarchy
                   CALL SENSOR_LOGICAL(SENSORS)
-
+                  call spmd_profile_end(PROF_SENSOR)
                 ENDIF
                 GOTO 111
               ENDIF
@@ -6770,6 +6798,7 @@ C-----------------------------------------------
 C         SPH SMOOTHING OF VELOCITIES
 C-----------------------------------------------
                 IF ((NUMSPH/=0).OR.(SOL2SPH_FLAG==1)) THEN
+                  call spmd_profile_begin(PROF_SPH)
 C------------------------
 C           Conservative smoothing of velocities
 C------------------------
@@ -6832,6 +6861,7 @@ C Init var parallel SMP
 
 !$OMP END PARALLEL
                   CALL PYTHON_END_OPENMP(PYTHON)
+                  call spmd_profile_end(PROF_SPH)
 
                 ENDIF  ! (NUMSPH/=0).OR.(SOL2SPH_FLAG==1)
 C========================================================================================
@@ -6866,6 +6896,7 @@ C                                     PARALLEL SECTION (SMP)
 C========================================================================================
 
                 CALL PYTHON_BEGIN_OPENMP(PYTHON)
+                call spmd_profile_begin(PROF_ACC)
 !$OMP PARALLEL PRIVATE(ITSK,NODFTSK,NODLTSK,NODFT_NL,NODLT_NL)
                 ITSK = OMP_GET_THREAD_NUM()
                 NODFTSK   = 1+ITSK*NUMNOD/ NTHREAD
@@ -6930,6 +6961,7 @@ C-----------------------------------------------
      .             CALL TEMPUR(NODES%TEMP ,NODES%MCP,FTHE,NODFTSK,NODLTSK,NODES%WEIGHT,MCP_OFF,GLOB_THERM%HEAT_STORED)
 !$OMP END PARALLEL
                 CALL PYTHON_END_OPENMP(PYTHON)
+                call spmd_profile_end(PROF_ACC)
 
 C------------------------------------------
 C       DT_DC for thick-shell
@@ -6977,6 +7009,7 @@ C-----------------------------------------------
 C  INLETS,OUTLETS.
 C-----------------------------------------------
                 IF(NSPHIO/=0)THEN
+                  call spmd_profile_begin(PROF_SPH)
 C globalize NSPHACT in NSPHACTG
                   NSPHACTG = NSPHACT
 
@@ -7029,7 +7062,6 @@ C----------------------------------------------
 C========================================================================================
 C                                     PARALLEL SECTION (SMP)
 C========================================================================================
-                call spmd_profile_begin(-3007)
                 IF (IMON>0) CALL STARTIME(TIMERS,TIMER_IO)
 
                 IF(COMPTREAC/=0.AND.(IMPL_S==0 .OR. INCONV==1)) THEN
@@ -7060,6 +7092,7 @@ C------------------------------
 C         GRAVITE / ACCEL. BASE
 C------------------------------
                 IF(NGRAV/=0.AND.IDTMINS==0.AND.IDTMINS_INT==0) THEN
+                  call spmd_profile_begin(PROF_KINCOND)
                   IF (IMON>0) CALL STARTIME(TIMERS,TIMER_KIN)
                   IF (IMONM > 0) CALL STARTIME(TIMERS,46)
 
@@ -7165,6 +7198,7 @@ C       EXTERNAL FORCES ADDITIONAL CONTRIBUTIONS  before adding in A other kinem
 C         (ANIM, OUTP, H3D)
 C-----------------------------------------------
                 IF (IMON>0) CALL STARTIME(TIMERS,TIMER_IO)
+                call spmd_profile_begin(PROF_ANIM)
                 CALL PYTHON_BEGIN_OPENMP(PYTHON)
 !$OMP PARALLEL PRIVATE(ITSK,NODFTSK,NODLTSK)
                 ITSK = OMP_GET_THREAD_NUM()
@@ -7173,8 +7207,8 @@ C-----------------------------------------------
                 CALL FORANI3(OUTPUT,NODES%A,NODES%MS,NODFTSK,NODLTSK,H3D_DATA)
 !$OMP END PARALLEL
                 CALL PYTHON_END_OPENMP(PYTHON)
+                CALL spmd_profile_end(PROF_ANIM)
                 IF (IMON>0) CALL STOPTIME(TIMERS,TIMER_IO)
-                call spmd_profile_end(-3007)
 
 C========================================================================================
 C                                     NON PARALLEL SECTION (SMP)
@@ -7185,6 +7219,7 @@ C         INTERFACE ALE
 C----------------------
                 IERR=0
                 IF(NINTER/=0.AND.IALE/=0)THEN
+                  call spmd_profile_begin(PROF_ALE)
                   IF(ISPMD==0)THEN
                     IF (IMON>0) THEN
                       CALL STARTIME(TIMERS,6)
@@ -7204,6 +7239,7 @@ C----------------------
                     call spmd_xv_inter_type1(numnod, NODES%BOUNDARY_SIZE, ispmd, nspmd, NODES%BOUNDARY_ADD, NODES%BOUNDARY,
      1                                       nodes%a, nodes%v, ninter, ipari, npari)
                   ENDIF
+                  call spmd_profie_end(PROF_ALE)
                 ENDIF
                 IF(IERR == 1)CALL ARRET(2)
 
@@ -7250,6 +7286,7 @@ C----------------------
 C----- // ----------------------
 C         BOUNDARY CONDITIONS
 C-------------------------------
+                call spmd_profile_begin(PROF_BCS)
                 IF (IMON>0) CALL STARTIME(TIMERS,TIMER_KIN)
                 IF (IMONM > 0) CALL STARTIME(TIMERS,42)
 
@@ -7281,6 +7318,7 @@ C---
                   CALL STOPTIME(TIMERS,42)
                   CALL STARTIME(TIMERS,43)
                 END IF
+                call spmd_profile_end(PROF_BCS)
 C========================================================================================
 C                                     PARALLEL SECTION (SMP)
 C========================================================================================
@@ -7336,7 +7374,6 @@ C===============================================================================
 C                                     PARALLEL SECTION (SMP)
 C========================================================================================
 
-              call spmd_profile_begin(-3007)
               IF (IMON>0) CALL STARTIME(TIMERS,TIMER_IO)
 
 !$OMP PARALLEL PRIVATE(ITSK,NODFTSK,NODLTSK)
@@ -7457,6 +7494,7 @@ C-----------------------------------------------
               IF (IMON>0) CALL STARTIME(TIMERS,TIMER_IO)
 
               IF(COMPTREAC/=0.AND.(IMPL_S==0 .OR. INCONV==1)) THEN
+                call spmd_profile_begin(PROF_ANIM)
 
                 CALL PYTHON_BEGIN_OPENMP(PYTHON)
 !$OMP PARALLEL PRIVATE(ITSK,NODFTSK,NODLTSK)
@@ -7474,6 +7512,7 @@ C-----------------------------------------------
                 CALL REACTION_FORCES_2(NODFTSK,NODLTSK,NODES%A,NODES%AR,NODES%MS,NODES%IN,FREAC,IFLAG)
 
 !$OMP END PARALLEL
+                call spmd_profile_end(PROF_ANIM)
                 CALL PYTHON_END_OPENMP(PYTHON)
 
               END IF
@@ -7588,7 +7627,6 @@ C----------------------------------------------
               END IF
 
               IF (IMON>0) CALL STOPTIME(TIMERS,TIMER_IO)
-              call spmd_profile_end(-3007)
 
 C========================================================================================
 C                                     PARALLEL SECTION (SMP)
@@ -7661,7 +7699,6 @@ C--------------------------
               ENDIF
 C---------------
               IF(ISECUT/=0)THEN
-                call spmd_profile_begin(-3007)
                 IF (IMON>0) CALL STARTIME(TIMERS,TIMER_IO)
                 CALL SECTION_IO (
      1            NSTRF,NODES%D,NODES%DR,NODES%V,NODES%VR,FSAV(1,1+NINTER+NRWALL+NRBODY),
@@ -7670,7 +7707,8 @@ C---------------
      4            RG_CUT ,IAD_CUT       ,FR_CUT,NODES%WEIGHT_MD,IOLDSECT,
      5            SENSORS%STABSEN,SENSORS%SFSAV,SENSORS%TABSENSOR ,SENSORS%FSAV ,OUTPUT%TH%WFEXT )
                 IF(IMON>0) CALL STOPTIME(TIMERS,TIMER_IO)
-                call spmd_profile_end(-3007)
+              call spmd_profile_end(PROF_IO)
+              call spmd_profile_begin(PROF_VELUPD)
               ENDIF
 
 C-----------------------------------------------------
@@ -8322,7 +8360,8 @@ C===============================================================================
 C                                     PARALLEL SECTION (SMP)
 C========================================================================================
 
-              call spmd_profile_begin(-3007)
+              call spmd_profile_end(PROF_VELUPD)
+              call spmd_profile_begin(PROF_OUTPUT)
               IF (IMON>0) CALL STARTIME(TIMERS,TIMER_IO)
 
               IF(COMPTREAC/=0.AND.(IMPL_S==0 .OR. INCONV==1)) THEN
@@ -8343,7 +8382,6 @@ C-----------------------------------------------
               END IF
 
               IF (IMON>0) CALL STOPTIME(TIMERS,TIMER_IO)
-              call spmd_profile_end(-3007)
 C========================================================================================
 C                                     PARALLEL SECTION (SMP)
 C========================================================================================
@@ -8378,7 +8416,6 @@ C--------------------------------------------------
               IF(NTMP==1)THEN
 C--------------------------------------------------
                 IF (IMON>0) THEN
-                  call spmd_profile_begin(-3007)
                   CALL STARTIME(TIMERS,TIMER_IO)
                 ENDIF
                 CALL TRACE_IN(5,0,ZERO)
@@ -8589,7 +8626,8 @@ c
 C------------
                 IF (IMON>0) THEN
                   CALL STOPTIME(TIMERS,TIMER_IO)
-                  call spmd_profile_end(-3007)
+              call spmd_profile_end(PROF_OUTPUT)
+              call spmd_profile_begin(PROF_POSTOUT)
                 ENDIF
               ENDIF
               IF (IMPDEB==1.AND.IMCONV==0) THEN
@@ -8843,6 +8881,8 @@ C------------------------------------------
 C         SYNCHRONIZATION ON V TT AND NCYCLE (implicit)
 C----------------------------
 
+              call spmd_profile_end(PROF_POSTOUT)
+                call spmd_profile_begin(PROF_INTEG)
                 IF(IMON>0) CALL STARTIME(TIMERS,TIMER_INTEG)
 
 C========================================================================================
@@ -9040,6 +9080,7 @@ C===============================================================================
                   CALL PYTHON_END_OPENMP(PYTHON)
 
                   IF(IMON>0) CALL STOPTIME(TIMERS,TIMER_INTEG)
+                call spmd_profile_end(PROF_INTEG)
                 ENDIF
               ENDIF
               CALL PYTHON_SYNC(PYTHON%CONTEXT)
@@ -9366,7 +9407,7 @@ C--- //0 ----------------
               ENDIF
 
               IF (BOOL_RESTART) THEN
-                call spmd_profile_begin(-3007)
+                call spmd_profile_begin(PROF_RESTART)
                 IF(IMON>0) CALL STARTIME(TIMERS,TIMER_IO)
 
                 IF (GLOB_THERM%IDT_THERM == 1)CALL BCSDTTH_COPY(NODES%ICODT, NODES%ICODR, ICODT0, ICODR0, 2)
@@ -9456,7 +9497,7 @@ C--- //0 ----------------
                 ENDIF
 
                 IF(IMON>0) CALL STOPTIME(TIMERS,TIMER_IO)
-                call spmd_profile_end(-3007)
+                call spmd_profile_end(PROF_RESTART)
               END IF
 
               IF (STOP_OR_ADD_CYCLE==1)   THEN

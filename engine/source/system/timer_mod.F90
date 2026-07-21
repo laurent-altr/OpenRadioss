@@ -443,7 +443,6 @@
 !||    my_etime                         ../engine/source/system/machine.F
 !||====================================================================
         subroutine startime(t,event)
-          use spmd_profiler_mod
           implicit none
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Arguments
@@ -464,9 +463,6 @@
           call system_clock(t%clockini(event))
           if(t%clockini(event)< 0 ) call system_clock(t%clockini(event))
 #endif
-          if (event /= TIMER_IO .and. event /= TIMER_EXFOR) then
-            call spmd_profile_begin(-3000-event)
-          end if
           return
         end subroutine startime
 
@@ -555,7 +551,6 @@
 !||    my_etime                         ../engine/source/system/machine.F
 !||====================================================================
         subroutine stoptime(t,event)
-          use spmd_profiler_mod
           implicit none
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Arguments
@@ -591,9 +586,6 @@
           secs = secs/clockrate
 #endif
           t%realtime(event)=t%realtime(event)+secs
-          if (event /= TIMER_IO .and. event /= TIMER_EXFOR) then
-            call spmd_profile_end(-3000-event)
-          end if
 
           return
         end subroutine stoptime
