@@ -106,6 +106,30 @@ void spmd_profiler_complete_requests(const int* requests, const int* count,
  */
 void spmd_profiler_flush(void);
 
+/*!
+ * \brief Begin a named user section for profiling.
+ *
+ * If a section is already active, it is auto-closed first.
+ * User sections are suspended by MPI calls (spmd_in/spmd_out) and
+ * automatically resumed after the MPI call completes.
+ *
+ * \param tag       User-chosen tag (use values <= -3000 to avoid MPI tag collision).
+ * \param name      Human-readable section name (e.g. "force_assembly").
+ *                  May be NULL; falls back to "section (tag=N)".
+ * \param name_len  Number of valid characters in \p name.
+ */
+void spmd_profiler_section_begin(const int* tag, const char* name, const int* name_len);
+
+/*!
+ * \brief End the active user section.
+ *
+ * Emits the final segment of the section. No-op if no section is active.
+ *
+ * \param tag  Must match the tag passed to section_begin (currently unused,
+ *             reserved for future validation).
+ */
+void spmd_profiler_section_end(const int* tag);
+
 #ifdef __cplusplus
 }
 #endif

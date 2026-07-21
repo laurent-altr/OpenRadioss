@@ -50,6 +50,7 @@
 #ifdef SPMD_PROFILE
         !> C++ back-end — declared private so callers use the Fortran wrappers.
         private :: spmd_profiler_init_c, spmd_profiler_flush_c
+        private :: spmd_profiler_section_begin_c, spmd_profiler_section_end_c
 
         interface
           subroutine spmd_profiler_init_c(rank) &
@@ -61,6 +62,20 @@
           subroutine spmd_profiler_flush_c() &
             bind(c, name="spmd_profiler_flush")
           end subroutine spmd_profiler_flush_c
+
+          subroutine spmd_profiler_section_begin_c(tag, name, name_len) &
+            bind(c, name="spmd_profiler_section_begin")
+            import :: c_int, c_char
+            integer(c_int), intent(in) :: tag
+            character(kind=c_char), intent(in) :: name(*)
+            integer(c_int), intent(in) :: name_len
+          end subroutine spmd_profiler_section_begin_c
+
+          subroutine spmd_profiler_section_end_c(tag) &
+            bind(c, name="spmd_profiler_section_end")
+            import :: c_int
+            integer(c_int), intent(in) :: tag
+          end subroutine spmd_profiler_section_end_c
         end interface
 #endif
 
@@ -98,5 +113,49 @@
           call spmd_profiler_flush_c()
 #endif
         end subroutine spmd_profiler_flush
+
+! ======================================================================================================================
+!! \brief Begin a named user section for profiling.
+!! \details If a section is already active, it is auto-closed first.
+!!          User sections are suspended by MPI calls (spmd_in/spmd_out) and
+!!          automatically resumed after the MPI call completes.
+!!          Use tags <= -3000 to avoid collision with MPI tags.
+        subroutine spmd_profile_begin(tag, name)
+          implicit none
+          integer, intent(in) :: tag
+          character(len=*), intent(in), optional :: name
+#ifdef SPMD_PROFILE
+          integer(c_int) :: tag_c, name_len_c
+          character(kind=c_char), dimension(65) :: name_c
+          integer :: i, n
+
+          tag_c = int(tag, c_int)
+          if (present(name)) then
+            n = min(len_trim(name), 64)
+            do i = 1, n
+              name_c(i) = name(i:i)
+            end do
+            name_c(n+1) = c_null_char
+            name_len_c = int(n, c_int)
+          else
+            name_c(1) = c_null_char
+            name_len_c = 0_c_int
+          end if
+          call spmd_profiler_section_begin_c(tag_c, name_c, name_len_c)
+#endif
+        end subroutine spmd_profile_begin
+
+! ======================================================================================================================
+!! \brief End the active user section.
+!! \details Emits the final segment. No-op if no section is active.
+        subroutine spmd_profile_end(tag)
+          implicit none
+          integer, intent(in) :: tag
+#ifdef SPMD_PROFILE
+          integer(c_int) :: tag_c
+          tag_c = int(tag, c_int)
+          call spmd_profiler_section_end_c(tag_c)
+#endif
+        end subroutine spmd_profile_end
 
       end module spmd_profiler_mod

@@ -170,7 +170,8 @@
         use spmd_comm_world_mod, only: SPMD_COMM_WORLD, SPMD_REQUEST_NULL
         use spmd_operator_mod,   only: SPMD_MAX, SPMD_MIN, SPMD_SUM, SPMD_PROD
         use get_mpi_operator_mod, only: get_mpi_operator
-        use spmd_profiler_mod,   only: spmd_profiler_init, spmd_profiler_flush
+        use spmd_profiler_mod,   only: spmd_profiler_init, spmd_profiler_flush, &
+          spmd_profile_begin, spmd_profile_end
         use spmd_error_mod,      only: spmd_in, spmd_out
 
         ! Point-to-point
@@ -251,6 +252,7 @@
         public :: SPMD_COMM_WORLD
         public :: SPMD_MAX, SPMD_MIN, SPMD_SUM, SPMD_PROD, get_mpi_operator
         public :: spmd_profiler_init, spmd_profiler_flush
+        public :: spmd_profile_begin, spmd_profile_end
         public :: spmd_in, spmd_out
 
         ! Point-to-point

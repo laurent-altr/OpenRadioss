@@ -199,6 +199,12 @@ static std::unordered_map<int, PendingRequest>     g_request_table;
 static bool                                        g_initialized  = false;
 static ProfileMode                                 g_mode         = MODE_TRACE;
 
+/* User section state — one active section at a time, suspendable by MPI calls */
+static bool        g_section_active = false;
+static int         g_section_tag    = 0;
+static std::string g_section_name;
+static double      g_section_begin  = 0.0;  /* start of current (or resumed) segment */
+
 static void lazy_init()
 {
     if (g_initialized) return;
@@ -212,6 +218,38 @@ static void lazy_init()
         g_timeline.reserve(65536);
     }
     g_initialized = true;
+}
+
+/* ---------------------------------------------------------------------- */
+/* Helper: emit one segment for the active user section                    */
+/* ---------------------------------------------------------------------- */
+
+static void emit_section_segment(double t_end)
+{
+    if (!g_section_active) return;
+    double dur = t_end - g_section_begin;
+    if (dur < 0.0) dur = 0.0;
+
+    if (g_mode == MODE_TRACE) {
+        SpmdEntry e;
+        e.tag       = g_section_tag;
+        e.name      = g_section_name;
+        e.t_begin   = g_section_begin;
+        e.t_end     = t_end;
+        e.peer_rank = -2;
+        e.msg_tag   = -2;
+        g_timeline.push_back(e);
+    } else {
+        TagStats& s = g_stats[g_section_name];
+        if (s.count == 0) {
+            s.tag  = g_section_tag;
+            s.name = g_section_name;
+        }
+        s.count++;
+        s.total_s += dur;
+        if (dur < s.min_s) s.min_s = dur;
+        if (dur > s.max_s) s.max_s = dur;
+    }
 }
 
 /* ---------------------------------------------------------------------- */
@@ -380,6 +418,12 @@ void spmd_profiler_record_in(const int* tag, const char* name, const int* name_l
                               const int* peer_rank, const int* msg_tag)
 {
     lazy_init();
+
+    /* Suspend active user section: emit its segment up to now */
+    if (g_section_active) {
+        emit_section_segment(MPI_Wtime());
+    }
+
     g_active_tag     = *tag;
     g_active_peer    = peer_rank ? *peer_rank : -2;
     g_active_msgtag  = msg_tag  ? *msg_tag   : -2;
@@ -429,6 +473,44 @@ void spmd_profiler_record_out(const int* tag)
         if (dur < s.min_s) s.min_s = dur;
         if (dur > s.max_s) s.max_s = dur;
     }
+
+    /* Resume active user section: restart its segment from now */
+    if (g_section_active) {
+        g_section_begin = MPI_Wtime();
+    }
+
+    (void)tag;
+}
+
+void spmd_profiler_section_begin(const int* tag, const char* name, const int* name_len)
+{
+    lazy_init();
+    const double t_now = MPI_Wtime();
+
+    /* Auto-close previous section if still active */
+    if (g_section_active) {
+        emit_section_segment(t_now);
+    }
+
+    /* Start new section */
+    g_section_active = true;
+    g_section_tag    = *tag;
+    g_section_begin  = t_now;
+
+    if (name && *name_len > 0) {
+        g_section_name.assign(name, static_cast<std::size_t>(*name_len));
+    } else {
+        char buf[48];
+        std::snprintf(buf, sizeof(buf), "section (tag=%d)", *tag);
+        g_section_name = buf;
+    }
+}
+
+void spmd_profiler_section_end(const int* tag)
+{
+    if (!g_initialized || !g_section_active) return;
+    emit_section_segment(MPI_Wtime());
+    g_section_active = false;
     (void)tag;
 }
 
