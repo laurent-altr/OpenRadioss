@@ -21,11 +21,11 @@
 !Copyright>        software under a commercial license.  Contact Siemens to discuss further if the
 !Copyright>        commercial version may interest you: 
 !Copyright>        https://www.siemens.com/en-us/products/simcenter/mechanical-simulation/radioss/.
-      module spmd_wait_mod
+      module spmd_waitany_mod
         use, intrinsic :: iso_c_binding
         implicit none
 
-        integer, parameter, public :: TAG_WAIT = -8
+        integer, parameter, public :: TAG_WAITANY = -10
 
 #ifdef SPMD_PROFILE
         interface
@@ -38,53 +38,58 @@
         end interface
 #endif
 
-        !> \brief Interface for spmd_wait, a wrapper for MPI_WAIT
-        interface spmd_wait
-          module procedure spmd_wait_req
-        end interface spmd_wait
+        !> \brief Interface for spmd_waitany, a wrapper for MPI_WAITANY
+        interface spmd_waitany
+          module procedure spmd_waitany_req
+        end interface spmd_waitany
 
       contains
 
 ! ======================================================================================================================
-!>  \brief Wait on an MPI request
-        subroutine spmd_wait_req(request, status, tag)
+!>  \brief Wait for any request in an array of MPI requests
+        subroutine spmd_waitany_req(requests, req_count, index, status, tag)
           use spmd_error_mod, only: spmd_in, spmd_out
           implicit none
 #include "spmd.inc"
-          integer, intent(inout) :: request
+          integer, intent(in) :: req_count
+          integer, intent(inout) :: requests(req_count)
+          integer, intent(out) :: index
           integer, intent(inout), optional :: status(MPI_STATUS_SIZE)
           integer, intent(in), optional :: tag
           integer :: ierr
           integer :: tag_local
           integer :: local_status(MPI_STATUS_SIZE)
 #ifdef SPMD_PROFILE
-          integer(c_int) :: saved_request
+          integer(c_int) :: saved_requests(req_count)
 #endif
 
           if (present(tag)) then
             tag_local = tag
           else
-            tag_local = TAG_WAIT
+            tag_local = TAG_WAITANY
           end if
 
 #ifdef MPI
 #ifdef SPMD_PROFILE
-          saved_request = int(request, c_int)
+          saved_requests = int(requests, c_int)
 #endif
-          call spmd_in(tag_local, "MPI_Wait")
+          call spmd_in(tag_local, "MPI_Waitany")
           if (present(status)) then
-            call MPI_Wait(request, status, ierr)
+            call MPI_Waitany(req_count, requests, index, status, ierr)
           else
-            call MPI_Wait(request, local_status, ierr)
+            call MPI_Waitany(req_count, requests, index, local_status, ierr)
           end if
           call spmd_out(tag_local, ierr)
 #ifdef SPMD_PROFILE
-          call spmd_profiler_complete_request_c(saved_request, MPI_Wtime())
+          if (index >= 1 .and. index <= req_count) then
+            call spmd_profiler_complete_request_c(saved_requests(index), MPI_Wtime())
+          end if
 #endif
 #else
-          request = 0
+          index = 0
+          requests = 0
           if (present(status)) status = 0
 #endif
-        end subroutine spmd_wait_req
+        end subroutine spmd_waitany_req
 
-      end module spmd_wait_mod
+      end module spmd_waitany_mod

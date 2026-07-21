@@ -21,70 +21,54 @@
 !Copyright>        software under a commercial license.  Contact Siemens to discuss further if the
 !Copyright>        commercial version may interest you: 
 !Copyright>        https://www.siemens.com/en-us/products/simcenter/mechanical-simulation/radioss/.
-      module spmd_wait_mod
-        use, intrinsic :: iso_c_binding
+      module spmd_waitsome_mod
         implicit none
 
-        integer, parameter, public :: TAG_WAIT = -8
+        integer, parameter, public :: TAG_WAITSOME = -33
 
-#ifdef SPMD_PROFILE
-        interface
-          subroutine spmd_profiler_complete_request_c(request, t_end) &
-            bind(c, name="spmd_profiler_complete_request")
-            import :: c_int, c_double
-            integer(c_int), intent(in) :: request
-            real(c_double), intent(in) :: t_end
-          end subroutine spmd_profiler_complete_request_c
-        end interface
-#endif
-
-        !> \brief Interface for spmd_wait, a wrapper for MPI_WAIT
-        interface spmd_wait
-          module procedure spmd_wait_req
-        end interface spmd_wait
+        !> \brief Interface for spmd_waitsome, a wrapper for MPI_WAITSOME
+        interface spmd_waitsome
+          module procedure spmd_waitsome_req
+        end interface spmd_waitsome
 
       contains
 
 ! ======================================================================================================================
-!>  \brief Wait on an MPI request
-        subroutine spmd_wait_req(request, status, tag)
+!>  \brief Wait for completion of some requests
+        subroutine spmd_waitsome_req(requests, req_count, outcount, indices, statuses, tag)
           use spmd_error_mod, only: spmd_in, spmd_out
           implicit none
 #include "spmd.inc"
-          integer, intent(inout) :: request
-          integer, intent(inout), optional :: status(MPI_STATUS_SIZE)
+          integer, intent(in) :: req_count
+          integer, intent(inout) :: requests(req_count)
+          integer, intent(out) :: outcount
+          integer, intent(out) :: indices(req_count)
+          integer, intent(inout), optional :: statuses(MPI_STATUS_SIZE, req_count)
           integer, intent(in), optional :: tag
           integer :: ierr
           integer :: tag_local
-          integer :: local_status(MPI_STATUS_SIZE)
-#ifdef SPMD_PROFILE
-          integer(c_int) :: saved_request
-#endif
+          integer :: local_statuses(MPI_STATUS_SIZE, req_count)
 
           if (present(tag)) then
             tag_local = tag
           else
-            tag_local = TAG_WAIT
+            tag_local = TAG_WAITSOME
           end if
 
 #ifdef MPI
-#ifdef SPMD_PROFILE
-          saved_request = int(request, c_int)
-#endif
-          call spmd_in(tag_local, "MPI_Wait")
-          if (present(status)) then
-            call MPI_Wait(request, status, ierr)
+          call spmd_in(tag_local, "MPI_Waitsome")
+          if (present(statuses)) then
+            call MPI_Waitsome(req_count, requests, outcount, indices, statuses, ierr)
           else
-            call MPI_Wait(request, local_status, ierr)
+            call MPI_Waitsome(req_count, requests, outcount, indices, local_statuses, ierr)
           end if
           call spmd_out(tag_local, ierr)
-#ifdef SPMD_PROFILE
-          call spmd_profiler_complete_request_c(saved_request, MPI_Wtime())
-#endif
 #else
-          request = 0
-          if (present(status)) status = 0
+          outcount = 0
+          indices = 0
+          requests = 0
+          if (present(statuses)) statuses = 0
 #endif
-        end subroutine spmd_wait_req
+        end subroutine spmd_waitsome_req
 
-      end module spmd_wait_mod
+      end module spmd_waitsome_mod

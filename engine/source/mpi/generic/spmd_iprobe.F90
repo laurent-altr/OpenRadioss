@@ -21,70 +21,59 @@
 !Copyright>        software under a commercial license.  Contact Siemens to discuss further if the
 !Copyright>        commercial version may interest you: 
 !Copyright>        https://www.siemens.com/en-us/products/simcenter/mechanical-simulation/radioss/.
-      module spmd_wait_mod
-        use, intrinsic :: iso_c_binding
+      module spmd_iprobe_mod
+        use spmd_comm_world_mod, only: SPMD_COMM_WORLD
         implicit none
 
-        integer, parameter, public :: TAG_WAIT = -8
+        integer, parameter, public :: TAG_IPROBE = -27
 
-#ifdef SPMD_PROFILE
-        interface
-          subroutine spmd_profiler_complete_request_c(request, t_end) &
-            bind(c, name="spmd_profiler_complete_request")
-            import :: c_int, c_double
-            integer(c_int), intent(in) :: request
-            real(c_double), intent(in) :: t_end
-          end subroutine spmd_profiler_complete_request_c
-        end interface
-#endif
-
-        !> \brief Interface for spmd_wait, a wrapper for MPI_WAIT
-        interface spmd_wait
-          module procedure spmd_wait_req
-        end interface spmd_wait
+        !> \brief Interface for spmd_iprobe, a wrapper for MPI_IPROBE
+        interface spmd_iprobe
+          module procedure spmd_iprobe_basic
+        end interface spmd_iprobe
 
       contains
 
 ! ======================================================================================================================
-!>  \brief Wait on an MPI request
-        subroutine spmd_wait_req(request, status, tag)
+!>  \brief Non-blocking probe
+        subroutine spmd_iprobe_basic(source, tag, flag, status, comm, trace_tag)
           use spmd_error_mod, only: spmd_in, spmd_out
           implicit none
 #include "spmd.inc"
-          integer, intent(inout) :: request
+          integer, intent(in) :: source, tag
+          logical, intent(out) :: flag
           integer, intent(inout), optional :: status(MPI_STATUS_SIZE)
-          integer, intent(in), optional :: tag
-          integer :: ierr
+          integer, intent(in), optional :: comm
+          integer, intent(in), optional :: trace_tag
+          integer :: ierr, used_comm
           integer :: tag_local
           integer :: local_status(MPI_STATUS_SIZE)
-#ifdef SPMD_PROFILE
-          integer(c_int) :: saved_request
-#endif
 
-          if (present(tag)) then
-            tag_local = tag
+          if (present(trace_tag)) then
+            tag_local = trace_tag
           else
-            tag_local = TAG_WAIT
+            tag_local = TAG_IPROBE
           end if
 
 #ifdef MPI
-#ifdef SPMD_PROFILE
-          saved_request = int(request, c_int)
-#endif
-          call spmd_in(tag_local, "MPI_Wait")
-          if (present(status)) then
-            call MPI_Wait(request, status, ierr)
+          call spmd_in(tag_local, "MPI_Iprobe")
+          if (present(comm)) then
+            used_comm = comm
           else
-            call MPI_Wait(request, local_status, ierr)
+            used_comm = SPMD_COMM_WORLD
           end if
+
+          if (present(status)) then
+            call MPI_Iprobe(source, tag, used_comm, flag, status, ierr)
+          else
+            call MPI_Iprobe(source, tag, used_comm, flag, local_status, ierr)
+          end if
+
           call spmd_out(tag_local, ierr)
-#ifdef SPMD_PROFILE
-          call spmd_profiler_complete_request_c(saved_request, MPI_Wtime())
-#endif
 #else
-          request = 0
+          flag = .false.
           if (present(status)) status = 0
 #endif
-        end subroutine spmd_wait_req
+        end subroutine spmd_iprobe_basic
 
-      end module spmd_wait_mod
+      end module spmd_iprobe_mod

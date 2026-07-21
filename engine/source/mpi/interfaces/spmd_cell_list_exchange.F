@@ -274,7 +274,7 @@ C-----------------------------------------------
             ENDIF
             TOTAL_RCV_SIZE = 0
             do ijk=1,sort_comm(nin)%request_r_nb
-              call spmd_waitany(sort_comm(nin)%request_r_nb,sort_comm(nin)%request_r,index_r,status)         
+              call spmd_waitany(sort_comm(nin)%request_r,sort_comm(nin)%request_r_nb,index_r,status)         
               i = sort_comm(nin)%index_r(index_r)
             enddo
             do i=1,sort_comm(nin)%proc_number
@@ -293,7 +293,7 @@ C-----------------------------------------------
             ENDDO
 
             do ijk=1,sort_comm(nin)%request_s_nb
-              call spmd_waitany(sort_comm(nin)%request_s_nb,sort_comm(nin)%request_s,index_r,status)
+              call spmd_waitany(sort_comm(nin)%request_s,sort_comm(nin)%request_s_nb,index_r,status)
             enddo
 
             TOTAL_SEND_SIZE = SORT_COMM(NIN)%SIZE_CELL_LIST(1)

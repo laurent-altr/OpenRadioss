@@ -21,70 +21,51 @@
 !Copyright>        software under a commercial license.  Contact Siemens to discuss further if the
 !Copyright>        commercial version may interest you: 
 !Copyright>        https://www.siemens.com/en-us/products/simcenter/mechanical-simulation/radioss/.
-      module spmd_wait_mod
-        use, intrinsic :: iso_c_binding
+      module spmd_test_mod
         implicit none
 
-        integer, parameter, public :: TAG_WAIT = -8
+        integer, parameter, public :: TAG_TEST = -29
 
-#ifdef SPMD_PROFILE
-        interface
-          subroutine spmd_profiler_complete_request_c(request, t_end) &
-            bind(c, name="spmd_profiler_complete_request")
-            import :: c_int, c_double
-            integer(c_int), intent(in) :: request
-            real(c_double), intent(in) :: t_end
-          end subroutine spmd_profiler_complete_request_c
-        end interface
-#endif
-
-        !> \brief Interface for spmd_wait, a wrapper for MPI_WAIT
-        interface spmd_wait
-          module procedure spmd_wait_req
-        end interface spmd_wait
+        !> \brief Interface for spmd_test, a wrapper for MPI_TEST
+        interface spmd_test
+          module procedure spmd_test_req
+        end interface spmd_test
 
       contains
 
 ! ======================================================================================================================
-!>  \brief Wait on an MPI request
-        subroutine spmd_wait_req(request, status, tag)
+!>  \brief Test for completion of a request
+        subroutine spmd_test_req(request, flag, status, tag)
           use spmd_error_mod, only: spmd_in, spmd_out
           implicit none
 #include "spmd.inc"
           integer, intent(inout) :: request
+          logical, intent(out) :: flag
           integer, intent(inout), optional :: status(MPI_STATUS_SIZE)
           integer, intent(in), optional :: tag
           integer :: ierr
           integer :: tag_local
           integer :: local_status(MPI_STATUS_SIZE)
-#ifdef SPMD_PROFILE
-          integer(c_int) :: saved_request
-#endif
 
           if (present(tag)) then
             tag_local = tag
           else
-            tag_local = TAG_WAIT
+            tag_local = TAG_TEST
           end if
 
 #ifdef MPI
-#ifdef SPMD_PROFILE
-          saved_request = int(request, c_int)
-#endif
-          call spmd_in(tag_local, "MPI_Wait")
+          call spmd_in(tag_local, "MPI_Test")
           if (present(status)) then
-            call MPI_Wait(request, status, ierr)
+            call MPI_Test(request, flag, status, ierr)
           else
-            call MPI_Wait(request, local_status, ierr)
+            call MPI_Test(request, flag, local_status, ierr)
           end if
           call spmd_out(tag_local, ierr)
-#ifdef SPMD_PROFILE
-          call spmd_profiler_complete_request_c(saved_request, MPI_Wtime())
-#endif
 #else
+          flag = .true.
           request = 0
           if (present(status)) status = 0
 #endif
-        end subroutine spmd_wait_req
+        end subroutine spmd_test_req
 
-      end module spmd_wait_mod
+      end module spmd_test_mod

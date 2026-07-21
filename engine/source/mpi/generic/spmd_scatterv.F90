@@ -21,376 +21,370 @@
 !Copyright>        software under a commercial license.  Contact Siemens to discuss further if the
 !Copyright>        commercial version may interest you: 
 !Copyright>        https://www.siemens.com/en-us/products/simcenter/mechanical-simulation/radioss/.
-      module spmd_alltoallv_mod
+      module spmd_scatterv_mod
         use spmd_comm_world_mod, only: SPMD_COMM_WORLD
         implicit none
 
-        integer, parameter, public :: TAG_ALLTOALLV = -15
+        integer, parameter, public :: TAG_SCATTERV = -22
 
-        !> \brief Interface for spmd_alltoallv, a wrapper for MPI_ALLTOALLV
-        interface spmd_alltoallv
-          module procedure spmd_alltoallv_reals
-          module procedure spmd_alltoallv_ints
-          module procedure spmd_alltoallv_doubles
-          module procedure spmd_alltoallv_reals2d
-          module procedure spmd_alltoallv_ints2d
-          module procedure spmd_alltoallv_doubles2d
-          module procedure spmd_alltoallv_real
-          module procedure spmd_alltoallv_int
-          module procedure spmd_alltoallv_double
-        end interface spmd_alltoallv
+        !> \brief Interface for spmd_scatterv, a wrapper for MPI_SCATTERV
+        interface spmd_scatterv
+          module procedure spmd_scatterv_reals
+          module procedure spmd_scatterv_ints
+          module procedure spmd_scatterv_doubles
+          module procedure spmd_scatterv_reals2d
+          module procedure spmd_scatterv_ints2d
+          module procedure spmd_scatterv_doubles2d
+          module procedure spmd_scatterv_real
+          module procedure spmd_scatterv_int
+          module procedure spmd_scatterv_double
+        end interface spmd_scatterv
 
       contains
 
 ! ======================================================================================================================
-!>  \brief Alltoallv of real       array
-        subroutine spmd_alltoallv_reals(sendbuf, sendcounts, sdispls, recvbuf, recvcounts, rdispls, comm, tag)
+!>  \brief Scatterv of real       array
+        subroutine spmd_scatterv_reals(sendbuf, buf_count, sendcounts, displs, recvbuf, recvcount, root, comm, tag)
           use spmd_error_mod, only: spmd_in, spmd_out
           implicit none
 #include "spmd.inc"
           real, dimension(:), intent(in) :: sendbuf
-          integer, intent(in) :: sendcounts(:), sdispls(:)
+          integer, intent(in) :: buf_count
+          integer, intent(in) :: sendcounts(:), displs(:)
           real, dimension(:), intent(inout) :: recvbuf
-          integer, intent(in) :: recvcounts(:), rdispls(:)
+          integer, intent(in) :: recvcount, root
           integer, intent(in), optional :: comm
-          integer, intent(in), optional :: tag ! for spmd_in/out
+          integer, intent(in), optional :: tag
           integer :: ierr, used_comm
           integer :: tag_local
 
           if (present(tag)) then
             tag_local = tag
           else
-            tag_local = TAG_ALLTOALLV
+            tag_local = TAG_SCATTERV
           end if
 
 #ifdef MPI
-          call spmd_in(tag_local, "MPI_Alltoallv")
-
+          call spmd_in(tag_local, "MPI_Scatterv")
           if (present(comm)) then
             used_comm = comm
           else
             used_comm = SPMD_COMM_WORLD
           end if
 
-          call MPI_Alltoallv(sendbuf, sendcounts, sdispls, MPI_REAL, &
-            recvbuf, recvcounts, rdispls, MPI_REAL, used_comm, ierr)
+          call MPI_Scatterv(sendbuf, sendcounts, displs, MPI_REAL, recvbuf, recvcount, MPI_REAL, root, used_comm, ierr)
 
           call spmd_out(tag_local, ierr)
 #else
-          continue
+          if (recvcount > 0) recvbuf(1:recvcount) = sendbuf(1:recvcount)
 #endif
-        end subroutine spmd_alltoallv_reals
+        end subroutine spmd_scatterv_reals
 
 ! ======================================================================================================================
-!>  \brief Alltoallv of integer       array
-        subroutine spmd_alltoallv_ints(sendbuf, sendcounts, sdispls, recvbuf, recvcounts, rdispls, comm, tag)
+!>  \brief Scatterv of integer       array
+        subroutine spmd_scatterv_ints(sendbuf, buf_count, sendcounts, displs, recvbuf, recvcount, root, comm, tag)
           use spmd_error_mod, only: spmd_in, spmd_out
           implicit none
 #include "spmd.inc"
           integer, dimension(:), intent(in) :: sendbuf
-          integer, intent(in) :: sendcounts(:), sdispls(:)
+          integer, intent(in) :: buf_count
+          integer, intent(in) :: sendcounts(:), displs(:)
           integer, dimension(:), intent(inout) :: recvbuf
-          integer, intent(in) :: recvcounts(:), rdispls(:)
+          integer, intent(in) :: recvcount, root
           integer, intent(in), optional :: comm
-          integer, intent(in), optional :: tag ! for spmd_in/out
+          integer, intent(in), optional :: tag
           integer :: ierr, used_comm
           integer :: tag_local
 
           if (present(tag)) then
             tag_local = tag
           else
-            tag_local = TAG_ALLTOALLV
+            tag_local = TAG_SCATTERV
           end if
 
 #ifdef MPI
-          call spmd_in(tag_local, "MPI_Alltoallv")
-
+          call spmd_in(tag_local, "MPI_Scatterv")
           if (present(comm)) then
             used_comm = comm
           else
             used_comm = SPMD_COMM_WORLD
           end if
 
-          call MPI_Alltoallv(sendbuf, sendcounts, sdispls, MPI_INTEGER, &
-            recvbuf, recvcounts, rdispls, MPI_INTEGER, used_comm, ierr)
+          call MPI_Scatterv(sendbuf, sendcounts, displs, MPI_INTEGER, recvbuf, recvcount, MPI_INTEGER, root, used_comm, ierr)
 
           call spmd_out(tag_local, ierr)
 #else
-          continue
+          if (recvcount > 0) recvbuf(1:recvcount) = sendbuf(1:recvcount)
 #endif
-        end subroutine spmd_alltoallv_ints
+        end subroutine spmd_scatterv_ints
 
 ! ======================================================================================================================
-!>  \brief Alltoallv of double precision       array
-        subroutine spmd_alltoallv_doubles(sendbuf, sendcounts, sdispls, recvbuf, recvcounts, rdispls, comm, tag)
+!>  \brief Scatterv of double precision       array
+        subroutine spmd_scatterv_doubles(sendbuf, buf_count, sendcounts, displs, recvbuf, recvcount, root, comm, tag)
           use spmd_error_mod, only: spmd_in, spmd_out
           implicit none
 #include "spmd.inc"
           double precision, dimension(:), intent(in) :: sendbuf
-          integer, intent(in) :: sendcounts(:), sdispls(:)
+          integer, intent(in) :: buf_count
+          integer, intent(in) :: sendcounts(:), displs(:)
           double precision, dimension(:), intent(inout) :: recvbuf
-          integer, intent(in) :: recvcounts(:), rdispls(:)
+          integer, intent(in) :: recvcount, root
           integer, intent(in), optional :: comm
-          integer, intent(in), optional :: tag ! for spmd_in/out
+          integer, intent(in), optional :: tag
           integer :: ierr, used_comm
           integer :: tag_local
 
           if (present(tag)) then
             tag_local = tag
           else
-            tag_local = TAG_ALLTOALLV
+            tag_local = TAG_SCATTERV
           end if
 
 #ifdef MPI
-          call spmd_in(tag_local, "MPI_Alltoallv")
-
+          call spmd_in(tag_local, "MPI_Scatterv")
           if (present(comm)) then
             used_comm = comm
           else
             used_comm = SPMD_COMM_WORLD
           end if
 
-          call MPI_Alltoallv(sendbuf, sendcounts, sdispls, MPI_DOUBLE_PRECISION, &
-            recvbuf, recvcounts, rdispls, MPI_DOUBLE_PRECISION, used_comm, ierr)
+          call MPI_Scatterv(sendbuf, sendcounts, displs, MPI_DOUBLE_PRECISION, recvbuf, recvcount, MPI_DOUBLE_PRECISION, root,&
+          & used_comm, ierr)
 
           call spmd_out(tag_local, ierr)
 #else
-          continue
+          if (recvcount > 0) recvbuf(1:recvcount) = sendbuf(1:recvcount)
 #endif
-        end subroutine spmd_alltoallv_doubles
+        end subroutine spmd_scatterv_doubles
 
 ! ======================================================================================================================
-!>  \brief Alltoallv of real       array
-        subroutine spmd_alltoallv_reals2d(sendbuf, sendcounts, sdispls, recvbuf, recvcounts, rdispls, comm, tag)
+!>  \brief Scatterv of real       array
+        subroutine spmd_scatterv_reals2d(sendbuf, buf_count, sendcounts, displs, recvbuf, recvcount, root, comm, tag)
           use spmd_error_mod, only: spmd_in, spmd_out
           implicit none
 #include "spmd.inc"
           real, dimension(:,:), intent(in) :: sendbuf
-          integer, intent(in) :: sendcounts(:), sdispls(:)
+          integer, intent(in) :: buf_count
+          integer, intent(in) :: sendcounts(:), displs(:)
           real, dimension(:), intent(inout) :: recvbuf
-          integer, intent(in) :: recvcounts(:), rdispls(:)
+          integer, intent(in) :: recvcount, root
           integer, intent(in), optional :: comm
-          integer, intent(in), optional :: tag ! for spmd_in/out
+          integer, intent(in), optional :: tag
           integer :: ierr, used_comm
           integer :: tag_local
 
           if (present(tag)) then
             tag_local = tag
           else
-            tag_local = TAG_ALLTOALLV
+            tag_local = TAG_SCATTERV
           end if
 
 #ifdef MPI
-          call spmd_in(tag_local, "MPI_Alltoallv")
-
+          call spmd_in(tag_local, "MPI_Scatterv")
           if (present(comm)) then
             used_comm = comm
           else
             used_comm = SPMD_COMM_WORLD
           end if
 
-          call MPI_Alltoallv(sendbuf, sendcounts, sdispls, MPI_REAL, &
-            recvbuf, recvcounts, rdispls, MPI_REAL, used_comm, ierr)
+          call MPI_Scatterv(sendbuf, sendcounts, displs, MPI_REAL, recvbuf, recvcount, MPI_REAL, root, used_comm, ierr)
 
           call spmd_out(tag_local, ierr)
 #else
-          continue
+          if (recvcount > 0) recvbuf(1:recvcount) = sendbuf(1:recvcount)
 #endif
-        end subroutine spmd_alltoallv_reals2d
+        end subroutine spmd_scatterv_reals2d
 
 ! ======================================================================================================================
-!>  \brief Alltoallv of integer       array
-        subroutine spmd_alltoallv_ints2d(sendbuf, sendcounts, sdispls, recvbuf, recvcounts, rdispls, comm, tag)
+!>  \brief Scatterv of integer       array
+        subroutine spmd_scatterv_ints2d(sendbuf, buf_count, sendcounts, displs, recvbuf, recvcount, root, comm, tag)
           use spmd_error_mod, only: spmd_in, spmd_out
           implicit none
 #include "spmd.inc"
           integer, dimension(:,:), intent(in) :: sendbuf
-          integer, intent(in) :: sendcounts(:), sdispls(:)
+          integer, intent(in) :: buf_count
+          integer, intent(in) :: sendcounts(:), displs(:)
           integer, dimension(:), intent(inout) :: recvbuf
-          integer, intent(in) :: recvcounts(:), rdispls(:)
+          integer, intent(in) :: recvcount, root
           integer, intent(in), optional :: comm
-          integer, intent(in), optional :: tag ! for spmd_in/out
+          integer, intent(in), optional :: tag
           integer :: ierr, used_comm
           integer :: tag_local
 
           if (present(tag)) then
             tag_local = tag
           else
-            tag_local = TAG_ALLTOALLV
+            tag_local = TAG_SCATTERV
           end if
 
 #ifdef MPI
-          call spmd_in(tag_local, "MPI_Alltoallv")
-
+          call spmd_in(tag_local, "MPI_Scatterv")
           if (present(comm)) then
             used_comm = comm
           else
             used_comm = SPMD_COMM_WORLD
           end if
 
-          call MPI_Alltoallv(sendbuf, sendcounts, sdispls, MPI_INTEGER, &
-            recvbuf, recvcounts, rdispls, MPI_INTEGER, used_comm, ierr)
+          call MPI_Scatterv(sendbuf, sendcounts, displs, MPI_INTEGER, recvbuf, recvcount, MPI_INTEGER, root, used_comm, ierr)
 
           call spmd_out(tag_local, ierr)
 #else
-          continue
+          if (recvcount > 0) recvbuf(1:recvcount) = sendbuf(1:recvcount)
 #endif
-        end subroutine spmd_alltoallv_ints2d
+        end subroutine spmd_scatterv_ints2d
 
 ! ======================================================================================================================
-!>  \brief Alltoallv of double precision       array
-        subroutine spmd_alltoallv_doubles2d(sendbuf, sendcounts, sdispls, recvbuf, recvcounts, rdispls, comm, tag)
+!>  \brief Scatterv of double precision       array
+        subroutine spmd_scatterv_doubles2d(sendbuf, buf_count, sendcounts, displs, recvbuf, recvcount, root, comm, tag)
           use spmd_error_mod, only: spmd_in, spmd_out
           implicit none
 #include "spmd.inc"
           double precision, dimension(:,:), intent(in) :: sendbuf
-          integer, intent(in) :: sendcounts(:), sdispls(:)
+          integer, intent(in) :: buf_count
+          integer, intent(in) :: sendcounts(:), displs(:)
           double precision, dimension(:), intent(inout) :: recvbuf
-          integer, intent(in) :: recvcounts(:), rdispls(:)
+          integer, intent(in) :: recvcount, root
           integer, intent(in), optional :: comm
-          integer, intent(in), optional :: tag ! for spmd_in/out
+          integer, intent(in), optional :: tag
           integer :: ierr, used_comm
           integer :: tag_local
 
           if (present(tag)) then
             tag_local = tag
           else
-            tag_local = TAG_ALLTOALLV
+            tag_local = TAG_SCATTERV
           end if
 
 #ifdef MPI
-          call spmd_in(tag_local, "MPI_Alltoallv")
-
+          call spmd_in(tag_local, "MPI_Scatterv")
           if (present(comm)) then
             used_comm = comm
           else
             used_comm = SPMD_COMM_WORLD
           end if
 
-          call MPI_Alltoallv(sendbuf, sendcounts, sdispls, MPI_DOUBLE_PRECISION, &
-            recvbuf, recvcounts, rdispls, MPI_DOUBLE_PRECISION, used_comm, ierr)
+          call MPI_Scatterv(sendbuf, sendcounts, displs, MPI_DOUBLE_PRECISION, recvbuf, recvcount, MPI_DOUBLE_PRECISION, root,&
+          & used_comm, ierr)
 
           call spmd_out(tag_local, ierr)
 #else
-          continue
+          if (recvcount > 0) recvbuf(1:recvcount) = sendbuf(1:recvcount)
 #endif
-        end subroutine spmd_alltoallv_doubles2d
+        end subroutine spmd_scatterv_doubles2d
 
 ! ======================================================================================================================
-!>  \brief Alltoallv of real       scalar
-        subroutine spmd_alltoallv_real(sendbuf, sendcounts, sdispls, recvbuf, recvcounts, rdispls, comm, tag)
+!>  \brief Scatterv of real       scalar
+        subroutine spmd_scatterv_real(sendbuf, buf_count, sendcounts, displs, recvbuf, recvcount, root, comm, tag)
           use spmd_error_mod, only: spmd_in, spmd_out
           implicit none
 #include "spmd.inc"
           real,  intent(in) :: sendbuf
-          integer, intent(in) :: sendcounts(:), sdispls(:)
+          integer, intent(in) :: buf_count
+          integer, intent(in) :: sendcounts(:), displs(:)
           real, dimension(:), intent(inout) :: recvbuf
-          integer, intent(in) :: recvcounts(:), rdispls(:)
+          integer, intent(in) :: recvcount, root
           integer, intent(in), optional :: comm
-          integer, intent(in), optional :: tag ! for spmd_in/out
+          integer, intent(in), optional :: tag
           integer :: ierr, used_comm
           integer :: tag_local
 
           if (present(tag)) then
             tag_local = tag
           else
-            tag_local = TAG_ALLTOALLV
+            tag_local = TAG_SCATTERV
           end if
 
 #ifdef MPI
-          call spmd_in(tag_local, "MPI_Alltoallv")
-
+          call spmd_in(tag_local, "MPI_Scatterv")
           if (present(comm)) then
             used_comm = comm
           else
             used_comm = SPMD_COMM_WORLD
           end if
 
-          call MPI_Alltoallv(sendbuf, sendcounts, sdispls, MPI_REAL, &
-            recvbuf, recvcounts, rdispls, MPI_REAL, used_comm, ierr)
+          call MPI_Scatterv(sendbuf, sendcounts, displs, MPI_REAL, recvbuf, recvcount, MPI_REAL, root, used_comm, ierr)
 
           call spmd_out(tag_local, ierr)
 #else
-          continue
+          if (recvcount > 0) recvbuf(1:recvcount) = sendbuf(1:recvcount)
 #endif
-        end subroutine spmd_alltoallv_real
+        end subroutine spmd_scatterv_real
 
 ! ======================================================================================================================
-!>  \brief Alltoallv of integer       scalar
-        subroutine spmd_alltoallv_int(sendbuf, sendcounts, sdispls, recvbuf, recvcounts, rdispls, comm, tag)
+!>  \brief Scatterv of integer       scalar
+        subroutine spmd_scatterv_int(sendbuf, buf_count, sendcounts, displs, recvbuf, recvcount, root, comm, tag)
           use spmd_error_mod, only: spmd_in, spmd_out
           implicit none
 #include "spmd.inc"
           integer,  intent(in) :: sendbuf
-          integer, intent(in) :: sendcounts(:), sdispls(:)
+          integer, intent(in) :: buf_count
+          integer, intent(in) :: sendcounts(:), displs(:)
           integer, dimension(:), intent(inout) :: recvbuf
-          integer, intent(in) :: recvcounts(:), rdispls(:)
+          integer, intent(in) :: recvcount, root
           integer, intent(in), optional :: comm
-          integer, intent(in), optional :: tag ! for spmd_in/out
+          integer, intent(in), optional :: tag
           integer :: ierr, used_comm
           integer :: tag_local
 
           if (present(tag)) then
             tag_local = tag
           else
-            tag_local = TAG_ALLTOALLV
+            tag_local = TAG_SCATTERV
           end if
 
 #ifdef MPI
-          call spmd_in(tag_local, "MPI_Alltoallv")
-
+          call spmd_in(tag_local, "MPI_Scatterv")
           if (present(comm)) then
             used_comm = comm
           else
             used_comm = SPMD_COMM_WORLD
           end if
 
-          call MPI_Alltoallv(sendbuf, sendcounts, sdispls, MPI_INTEGER, &
-            recvbuf, recvcounts, rdispls, MPI_INTEGER, used_comm, ierr)
+          call MPI_Scatterv(sendbuf, sendcounts, displs, MPI_INTEGER, recvbuf, recvcount, MPI_INTEGER, root, used_comm, ierr)
 
           call spmd_out(tag_local, ierr)
 #else
-          continue
+          if (recvcount > 0) recvbuf(1:recvcount) = sendbuf(1:recvcount)
 #endif
-        end subroutine spmd_alltoallv_int
+        end subroutine spmd_scatterv_int
 
 ! ======================================================================================================================
-!>  \brief Alltoallv of double precision       scalar
-        subroutine spmd_alltoallv_double(sendbuf, sendcounts, sdispls, recvbuf, recvcounts, rdispls, comm, tag)
+!>  \brief Scatterv of double precision       scalar
+        subroutine spmd_scatterv_double(sendbuf, buf_count, sendcounts, displs, recvbuf, recvcount, root, comm, tag)
           use spmd_error_mod, only: spmd_in, spmd_out
           implicit none
 #include "spmd.inc"
           double precision,  intent(in) :: sendbuf
-          integer, intent(in) :: sendcounts(:), sdispls(:)
+          integer, intent(in) :: buf_count
+          integer, intent(in) :: sendcounts(:), displs(:)
           double precision, dimension(:), intent(inout) :: recvbuf
-          integer, intent(in) :: recvcounts(:), rdispls(:)
+          integer, intent(in) :: recvcount, root
           integer, intent(in), optional :: comm
-          integer, intent(in), optional :: tag ! for spmd_in/out
+          integer, intent(in), optional :: tag
           integer :: ierr, used_comm
           integer :: tag_local
 
           if (present(tag)) then
             tag_local = tag
           else
-            tag_local = TAG_ALLTOALLV
+            tag_local = TAG_SCATTERV
           end if
 
 #ifdef MPI
-          call spmd_in(tag_local, "MPI_Alltoallv")
-
+          call spmd_in(tag_local, "MPI_Scatterv")
           if (present(comm)) then
             used_comm = comm
           else
             used_comm = SPMD_COMM_WORLD
           end if
 
-          call MPI_Alltoallv(sendbuf, sendcounts, sdispls, MPI_DOUBLE_PRECISION, &
-            recvbuf, recvcounts, rdispls, MPI_DOUBLE_PRECISION, used_comm, ierr)
+          call MPI_Scatterv(sendbuf, sendcounts, displs, MPI_DOUBLE_PRECISION, recvbuf, recvcount, MPI_DOUBLE_PRECISION, root,&
+          & used_comm, ierr)
 
           call spmd_out(tag_local, ierr)
 #else
-          continue
+          if (recvcount > 0) recvbuf(1:recvcount) = sendbuf(1:recvcount)
 #endif
-        end subroutine spmd_alltoallv_double
+        end subroutine spmd_scatterv_double
 
-      end module spmd_alltoallv_mod
+      end module spmd_scatterv_mod
