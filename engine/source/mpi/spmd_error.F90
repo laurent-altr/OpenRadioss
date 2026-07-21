@@ -21,7 +21,6 @@
 !Copyright>        software under a commercial license.  Contact Siemens to discuss further if the
 !Copyright>        commercial version may interest you: 
 !Copyright>        https://www.siemens.com/en-us/products/simcenter/mechanical-simulation/radioss/.
-#define DEBUG_SPMD
 !||====================================================================
 !||    spmd_error_mod            ../engine/source/mpi/spmd_error.F90
 !||--- called by ------------------------------------------------------
@@ -108,7 +107,6 @@
           end function c_system
         end interface
 
-#ifdef SPMD_PROFILE
         !> Profiler hooks — implemented in spmd_profiler.cpp
         interface
           subroutine spmd_profiler_record_in_c(tag, name, name_len, peer_rank, msg_tag) &
@@ -148,7 +146,6 @@
             real(c_double), intent(in) :: t_end
           end subroutine spmd_profiler_complete_requests_c
         end interface
-#endif
 
       contains
 
@@ -271,6 +268,7 @@
 !>  \param peer  Optional peer rank: destination for sends, source for recvs.
 !>               When provided, enables arrow drawing in the trace visualizer.
         subroutine spmd_in(tag, name, peer)
+          use spmd_profiler_mod, only: spmd_profiling_enabled
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Implicit none
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -284,40 +282,37 @@
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Local variables
 ! ----------------------------------------------------------------------------------------------------------------------
-#ifdef SPMD_PROFILE
           integer(c_int) :: tag_c, name_len_c, peer_c, msgtag_c
           character(kind=c_char), dimension(65) :: name_c
           integer :: i, n
-#endif
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Body
 ! ----------------------------------------------------------------------------------------------------------------------
-#ifdef SPMD_PROFILE
-          tag_c = int(tag, c_int)
-          if (present(name)) then
-            n = min(len_trim(name), 64)
-            do i = 1, n
-              name_c(i) = name(i:i)
-            end do
-            name_c(n+1) = c_null_char
-            name_len_c = int(n, c_int)
-          else
-            name_c(1) = c_null_char
-            name_len_c = 0_c_int
+          if (spmd_profiling_enabled) then
+            tag_c = int(tag, c_int)
+            if (present(name)) then
+              n = min(len_trim(name), 64)
+              do i = 1, n
+                name_c(i) = name(i:i)
+              end do
+              name_c(n+1) = c_null_char
+              name_len_c = int(n, c_int)
+            else
+              name_c(1) = c_null_char
+              name_len_c = 0_c_int
+            end if
+            if (present(peer)) then
+              peer_c = int(peer, c_int)
+            else
+              peer_c = -2_c_int
+            end if
+            if (tag >= 0) then
+              msgtag_c = int(tag, c_int)
+            else
+              msgtag_c = -2_c_int
+            end if
+            call spmd_profiler_record_in_c(tag_c, name_c, name_len_c, peer_c, msgtag_c)
           end if
-          if (present(peer)) then
-            peer_c = int(peer, c_int)
-          else
-            peer_c = -2_c_int
-          end if
-          ! msg_tag is the MPI message tag (positive tag = same as the SPMD tag here)
-          if (tag >= 0) then
-            msgtag_c = int(tag, c_int)
-          else
-            msgtag_c = -2_c_int
-          end if
-          call spmd_profiler_record_in_c(tag_c, name_c, name_len_c, peer_c, msgtag_c)
-#endif
 #ifdef DEBUG_SPMD
           ! call print_traceback()
           if (present(name)) then
@@ -402,6 +397,7 @@
 !||====================================================================
         subroutine spmd_out(tag, ierr)
           use spmd_comm_world_mod, only: SPMD_COMM_WORLD
+          use spmd_profiler_mod, only: spmd_profiling_enabled
 ! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Implicit none
 ! ----------------------------------------------------------------------------------------------------------------------
@@ -413,17 +409,17 @@
           integer, intent(in) :: tag !< Tag of the the MPI call
           integer, intent(in) :: ierr !< error of the MPI call
 ! ----------------------------------------------------------------------------------------------------------------------
-! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Local variables
 ! ----------------------------------------------------------------------------------------------------------------------
           integer :: ierror
+          integer(c_int) :: tag_c
+! ----------------------------------------------------------------------------------------------------------------------
 !                                                   Body
 ! ----------------------------------------------------------------------------------------------------------------------
-#ifdef SPMD_PROFILE
-          integer(c_int) :: tag_c
-          tag_c = int(tag, c_int)
-          call spmd_profiler_record_out_c(tag_c)
-#endif
+          if (spmd_profiling_enabled) then
+            tag_c = int(tag, c_int)
+            call spmd_profiler_record_out_c(tag_c)
+          end if
 #ifdef MPI
           if(ierr /= MPI_SUCCESS) then
             write(6,*) "MPI error: ", ierr," at ",tag

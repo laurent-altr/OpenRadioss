@@ -26,28 +26,29 @@
 !||
 !||    Fortran interface to the C++ SPMD profiler (spmd_profiler.cpp).
 !||
-!||    Usage
-!||    -----
-!||    Compile with  -DSPMD_PROFILE  to activate profiling.
-!||    Without the flag, all subroutines are compiled as no-ops so that
-!||    application code does not need any #ifdef guards at call sites.
+!||    Profiling is controlled at runtime via spmd_profiling_enabled.
+!||    Call spmd_profiler_init(rank) to enable, or set
+!||    spmd_profiling_enabled = .true. directly.
+!||    All subroutines are no-ops when profiling is disabled (~1 ns overhead).
 !||
 !||    Typical use (before MPI_Finalize):
 !||
-!||      use spmd_mod   ! or: use spmd_profiler_mod directly
+!||      use spmd_mod
+!||      call spmd_profiler_init(rank)  ! enables profiling
 !||      ...
-!||      call spmd_profiler_flush()   ! writes spmd_timeline_rank_NNNNN.json
+!||      call spmd_profiler_flush()     ! writes spmd_timeline_rank_NNNNN.spmd
 !||      call MPI_Finalize(ierr)
-!||
-!||    For explicit initialisation (optional — profiler auto-inits):
-!||
-!||      call spmd_profiler_init(rank)
 !||====================================================================
       module spmd_profiler_mod
         use, intrinsic :: iso_c_binding
         implicit none
 
-#ifdef SPMD_PROFILE
+
+
+
+        !> Runtime profiling flag — set to .true. to enable profiling
+        logical, public, save :: spmd_profiling_enabled = .false.
+
         !> C++ back-end — declared private so callers use the Fortran wrappers.
         private :: spmd_profiler_init_c, spmd_profiler_flush_c
         private :: spmd_profiler_section_begin_c, spmd_profiler_section_end_c
@@ -77,41 +78,29 @@
             integer(c_int), intent(in) :: tag
           end subroutine spmd_profiler_section_end_c
         end interface
-#endif
 
       contains
 
-!||====================================================================
-!||    spmd_profiler_init   spmd_profiler_mod.F90
-!||
-!||    Initialise the profiler and set the rank used in the output file
-!||    name.  Optional: the profiler auto-initialises on the first
-!||    spmd_profiler_record_in call by querying MPI_COMM_WORLD.
-!||====================================================================
+! ======================================================================================================================
+!! \brief Initialise the profiler, set the rank, and enable profiling.
         subroutine spmd_profiler_init(rank)
           implicit none
           integer, intent(in) :: rank
-#ifdef SPMD_PROFILE
           integer(c_int) :: rank_c
+
           rank_c = int(rank, c_int)
           call spmd_profiler_init_c(rank_c)
-#endif
+          spmd_profiling_enabled = .true.
         end subroutine spmd_profiler_init
 
-!||====================================================================
-!||    spmd_profiler_flush   spmd_profiler_mod.F90
-!||
-!||    Write the collected timeline to  spmd_timeline_rank_NNNNN.json
-!||    and clear the in-memory buffer.
-!||
-!||    Must be called BEFORE MPI_Finalize (MPI_Wtime is no longer valid
-!||    after finalization).
-!||====================================================================
+! ======================================================================================================================
+!! \brief Write the collected timeline and clear the in-memory buffer.
+!!        Must be called BEFORE MPI_Finalize.
         subroutine spmd_profiler_flush()
           implicit none
-#ifdef SPMD_PROFILE
+
+          if (.not. spmd_profiling_enabled) return
           call spmd_profiler_flush_c()
-#endif
         end subroutine spmd_profiler_flush
 
 ! ======================================================================================================================
@@ -120,20 +109,49 @@
 !!          User sections are suspended by MPI calls (spmd_in/spmd_out) and
 !!          automatically resumed after the MPI call completes.
 !!          Use tags <= -3000 to avoid collision with MPI tags.
+!CONTSORT      -3002
+!ELEMENT       -3003
+!KIN           -3004
+!INTEG         -3005
+!P0            -3006
+!IO            -3007
+!CONTFOR       -3008
+!ASM           -3009
+!EXFOR         -3010
+
         subroutine spmd_profile_begin(tag, name)
           implicit none
           integer, intent(in) :: tag
           character(len=*), intent(in), optional :: name
-#ifdef SPMD_PROFILE
           integer(c_int) :: tag_c, name_len_c
           character(kind=c_char), dimension(65) :: name_c
+          character(len=32) :: local_name
           integer :: i, n
 
+          if (.not. spmd_profiling_enabled) return
           tag_c = int(tag, c_int)
+
           if (present(name)) then
-            n = min(len_trim(name), 64)
+            local_name = name
+          else
+            select case (tag)
+             case (-3002); local_name = "CONTSORT"
+             case (-3003); local_name = "ELEMENT"
+             case (-3004); local_name = "KIN"
+             case (-3005); local_name = "INTEG"
+             case (-3006); local_name = "P0"
+             case (-3007); local_name = "IO"
+             case (-3008); local_name = "CONTFOR"
+             case (-3009); local_name = "ASM"
+             case (-3010); local_name = "EXFOR"
+             case default; local_name = " "
+            end select
+          end if
+
+          n = min(len_trim(local_name), 64)
+          if (n > 0) then
             do i = 1, n
-              name_c(i) = name(i:i)
+              name_c(i) = local_name(i:i)
             end do
             name_c(n+1) = c_null_char
             name_len_c = int(n, c_int)
@@ -142,7 +160,6 @@
             name_len_c = 0_c_int
           end if
           call spmd_profiler_section_begin_c(tag_c, name_c, name_len_c)
-#endif
         end subroutine spmd_profile_begin
 
 ! ======================================================================================================================
@@ -151,11 +168,11 @@
         subroutine spmd_profile_end(tag)
           implicit none
           integer, intent(in) :: tag
-#ifdef SPMD_PROFILE
           integer(c_int) :: tag_c
+
+          if (.not. spmd_profiling_enabled) return
           tag_c = int(tag, c_int)
           call spmd_profiler_section_end_c(tag_c)
-#endif
         end subroutine spmd_profile_end
 
       end module spmd_profiler_mod

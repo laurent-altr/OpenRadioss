@@ -32,10 +32,10 @@
  *      int32_t   rank
  *      double    t_origin   (MPI_Wtime() of the first recorded event)
  *
- *    Per-event record (12 bytes, repeated N times):
+ *    Per-event record (56 bytes, repeated N times):
  *      int32_t   tag          (negative = SPMD collective; positive = user MPI tag)
- *      uint32_t  t_begin_us   (microseconds since t_origin; wraps at ~71 min)
- *      uint32_t  duration_us  (microseconds; capped at UINT32_MAX)
+ *      uint64_t  t_begin_ns   (nanoseconds since t_origin)
+ *      uint32_t  duration_ns  (nanoseconds; capped at UINT32_MAX ≈ 4.3 s)
  *
  *  Convert to Chrome Trace JSON for viewing:
  *
@@ -83,17 +83,17 @@
 #pragma pack(push, 1)
 struct SpmdFileHeader {
     char     magic[4];  /* "SPMD"                                          */
-    uint8_t  version;   /* 3 (v1:12B records; v2:44B; v3:52B)             */
+    uint8_t  version;   /* 4 (v1:12B; v2:44B; v3:52B µs; v4:56B ns+u64) */
     uint8_t  pad[3];    /* {0,0,0}                                         */
     int32_t  rank;
     double   t_origin;  /* MPI_Wtime() of first recorded event (absolute)  */
 };
 
-/* Version 3 record: tag + timing + name + peer_rank + msg_tag             */
+/* Version 4 record: tag + timing (nanoseconds) + name + peer_rank + msg_tag */
 struct SpmdBinaryRecord {
     int32_t  tag;
-    uint32_t t_begin_us;    /* µs since t_origin; wraps at 2^32 µs ≈ 71 min */
-    uint32_t duration_us;
+    uint64_t t_begin_ns;    /* ns since t_origin; wraps at 2^64 ns (centuries) */
+    uint32_t duration_ns;   /* nanoseconds; capped at UINT32_MAX ≈ 4.3 s    */
     char     name[32];      /* null-padded human-readable name               */
     int32_t  peer_rank;     /* dest for sends, source for recvs; -2 = N/A   */
     int32_t  msg_tag;       /* actual MPI P2P message tag; -2 = N/A         */
@@ -298,10 +298,10 @@ static void flush_trace()
     }
 #endif
 
-    /* Header — version 3 */
+    /* Header — version 4 (nanosecond resolution) */
     SpmdFileHeader hdr;
     std::memcpy(hdr.magic, "SPMD", 4);
-    hdr.version  = 3;
+    hdr.version  = 4;
     hdr.pad[0] = hdr.pad[1] = hdr.pad[2] = 0;
     hdr.rank     = g_rank;
     hdr.t_origin = g_timeline[0].t_begin;
@@ -317,17 +317,16 @@ static void flush_trace()
         std::memset(&rec, 0, sizeof(rec));
         rec.tag = e.tag;
 
-        double offset_us = (e.t_begin - hdr.t_origin) * 1.0e6;
-        double dur_us    = (e.t_end   - e.t_begin)    * 1.0e6;
+        double offset_ns = (e.t_begin - hdr.t_origin) * 1.0e9;
+        double dur_ns    = (e.t_end   - e.t_begin)    * 1.0e9;
 
-        rec.t_begin_us  = static_cast<uint32_t>(
-            offset_us < 0.0 ? 0u :
-            offset_us > 4294967295.0 ? 4294967295u :
-            static_cast<uint32_t>(offset_us));
-        rec.duration_us = static_cast<uint32_t>(
-            dur_us < 0.0 ? 0u :
-            dur_us > 4294967295.0 ? 4294967295u :
-            static_cast<uint32_t>(dur_us));
+        rec.t_begin_ns  = static_cast<uint64_t>(
+            offset_ns < 0.0 ? 0ull :
+            static_cast<uint64_t>(offset_ns));
+        rec.duration_ns = static_cast<uint32_t>(
+            dur_ns < 0.0 ? 0u :
+            dur_ns > 4294967295.0 ? 4294967295u :
+            static_cast<uint32_t>(dur_ns));
 
         /* Store name (null-padded, 32 bytes) */
         std::string nm = resolve_name(e.tag, e.name);

@@ -23,9 +23,9 @@
 !Copyright>        https://www.siemens.com/en-us/products/simcenter/mechanical-simulation/radioss/.
       module spmd_irecv_mod
         use, intrinsic :: iso_c_binding
+        use spmd_profiler_mod, only: spmd_profiling_enabled
         implicit none
 
-#ifdef SPMD_PROFILE
         interface
           subroutine spmd_profiler_register_request_c(request, peer_rank, msg_tag, is_recv) &
             bind(c, name="spmd_profiler_register_request")
@@ -33,7 +33,6 @@
             integer(c_int), intent(in) :: request, peer_rank, msg_tag, is_recv
           end subroutine spmd_profiler_register_request_c
         end interface
-#endif
 
         !> \brief Interface for spmd_irecv, a wrapper for MPI_IRECV
         interface spmd_irecv
@@ -70,10 +69,10 @@
             call MPI_Irecv(buf, buf_count, MPI_REAL, source, tag, SPMD_COMM_WORLD, request, ierr)
           end if
           call spmd_out(tag, ierr)
-#ifdef SPMD_PROFILE
-          call spmd_profiler_register_request_c(int(request,c_int), int(source,c_int), &
-            int(tag,c_int), 1_c_int)
-#endif
+          if (spmd_profiling_enabled) then
+            call spmd_profiler_register_request_c(int(request,c_int), int(source,c_int), &
+              int(tag,c_int), 1_c_int)
+          end if
 #else
           request = 0
 #endif
@@ -99,10 +98,10 @@
             call MPI_Irecv(buf, buf_count, MPI_INTEGER, source, tag, SPMD_COMM_WORLD, request, ierr)
           end if
           call spmd_out(tag, ierr)
-#ifdef SPMD_PROFILE
-          call spmd_profiler_register_request_c(int(request,c_int), int(source,c_int), &
-            int(tag,c_int), 1_c_int)
-#endif
+          if (spmd_profiling_enabled) then
+            call spmd_profiler_register_request_c(int(request,c_int), int(source,c_int), &
+              int(tag,c_int), 1_c_int)
+          end if
 #else
           request = 0
 #endif
@@ -128,10 +127,10 @@
             call MPI_Irecv(buf, buf_count, MPI_DOUBLE_PRECISION, source, tag, SPMD_COMM_WORLD, request, ierr)
           end if
           call spmd_out(tag, ierr)
-#ifdef SPMD_PROFILE
-          call spmd_profiler_register_request_c(int(request,c_int), int(source,c_int), &
-            int(tag,c_int), 1_c_int)
-#endif
+          if (spmd_profiling_enabled) then
+            call spmd_profiler_register_request_c(int(request,c_int), int(source,c_int), &
+              int(tag,c_int), 1_c_int)
+          end if
 #else
           request = 0
 #endif
@@ -157,10 +156,10 @@
             call MPI_Irecv(buf, buf_count, MPI_REAL, source, tag, SPMD_COMM_WORLD, request, ierr)
           end if
           call spmd_out(tag, ierr)
-#ifdef SPMD_PROFILE
-          call spmd_profiler_register_request_c(int(request,c_int), int(source,c_int), &
-            int(tag,c_int), 1_c_int)
-#endif
+          if (spmd_profiling_enabled) then
+            call spmd_profiler_register_request_c(int(request,c_int), int(source,c_int), &
+              int(tag,c_int), 1_c_int)
+          end if
 #else
           request = 0
 #endif
@@ -186,10 +185,10 @@
             call MPI_Irecv(buf, buf_count, MPI_INTEGER, source, tag, SPMD_COMM_WORLD, request, ierr)
           end if
           call spmd_out(tag, ierr)
-#ifdef SPMD_PROFILE
-          call spmd_profiler_register_request_c(int(request,c_int), int(source,c_int), &
-            int(tag,c_int), 1_c_int)
-#endif
+          if (spmd_profiling_enabled) then
+            call spmd_profiler_register_request_c(int(request,c_int), int(source,c_int), &
+              int(tag,c_int), 1_c_int)
+          end if
 #else
           request = 0
 #endif
@@ -215,10 +214,10 @@
             call MPI_Irecv(buf, buf_count, MPI_DOUBLE_PRECISION, source, tag, SPMD_COMM_WORLD, request, ierr)
           end if
           call spmd_out(tag, ierr)
-#ifdef SPMD_PROFILE
-          call spmd_profiler_register_request_c(int(request,c_int), int(source,c_int), &
-            int(tag,c_int), 1_c_int)
-#endif
+          if (spmd_profiling_enabled) then
+            call spmd_profiler_register_request_c(int(request,c_int), int(source,c_int), &
+              int(tag,c_int), 1_c_int)
+          end if
 #else
           request = 0
 #endif
@@ -244,10 +243,10 @@
             call MPI_Irecv(buf, buf_count, MPI_REAL, source, tag, SPMD_COMM_WORLD, request, ierr)
           end if
           call spmd_out(tag, ierr)
-#ifdef SPMD_PROFILE
-          call spmd_profiler_register_request_c(int(request,c_int), int(source,c_int), &
-            int(tag,c_int), 1_c_int)
-#endif
+          if (spmd_profiling_enabled) then
+            call spmd_profiler_register_request_c(int(request,c_int), int(source,c_int), &
+              int(tag,c_int), 1_c_int)
+          end if
 #else
           request = 0
 #endif
@@ -273,10 +272,10 @@
             call MPI_Irecv(buf, buf_count, MPI_INTEGER, source, tag, SPMD_COMM_WORLD, request, ierr)
           end if
           call spmd_out(tag, ierr)
-#ifdef SPMD_PROFILE
-          call spmd_profiler_register_request_c(int(request,c_int), int(source,c_int), &
-            int(tag,c_int), 1_c_int)
-#endif
+          if (spmd_profiling_enabled) then
+            call spmd_profiler_register_request_c(int(request,c_int), int(source,c_int), &
+              int(tag,c_int), 1_c_int)
+          end if
 #else
           request = 0
 #endif
@@ -302,10 +301,10 @@
             call MPI_Irecv(buf, buf_count, MPI_DOUBLE_PRECISION, source, tag, SPMD_COMM_WORLD, request, ierr)
           end if
           call spmd_out(tag, ierr)
-#ifdef SPMD_PROFILE
-          call spmd_profiler_register_request_c(int(request,c_int), int(source,c_int), &
-            int(tag,c_int), 1_c_int)
-#endif
+          if (spmd_profiling_enabled) then
+            call spmd_profiler_register_request_c(int(request,c_int), int(source,c_int), &
+              int(tag,c_int), 1_c_int)
+          end if
 #else
           request = 0
 #endif

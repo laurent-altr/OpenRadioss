@@ -23,11 +23,11 @@
 !Copyright>        https://www.siemens.com/en-us/products/simcenter/mechanical-simulation/radioss/.
       module spmd_waitall_mod
         use, intrinsic :: iso_c_binding
+        use spmd_profiler_mod, only: spmd_profiling_enabled
         implicit none
 
         integer, parameter, public :: TAG_WAITALL = -9
 
-#ifdef SPMD_PROFILE
         interface
           subroutine spmd_profiler_complete_requests_c(requests, count, t_end) &
             bind(c, name="spmd_profiler_complete_requests")
@@ -37,7 +37,6 @@
             real(c_double), intent(in) :: t_end
           end subroutine spmd_profiler_complete_requests_c
         end interface
-#endif
 
         !> \brief Interface for spmd_waitall, a wrapper for MPI_WAITALL
         interface spmd_waitall
@@ -59,9 +58,7 @@
           integer :: ierr
           integer :: tag_local
           integer :: local_statuses(MPI_STATUS_SIZE, req_count)
-#ifdef SPMD_PROFILE
           integer(c_int) :: saved_requests(req_count)
-#endif
 
           if (present(tag)) then
             tag_local = tag
@@ -70,9 +67,9 @@
           end if
 
 #ifdef MPI
-#ifdef SPMD_PROFILE
-          saved_requests = int(requests, c_int)
-#endif
+          if (spmd_profiling_enabled) then
+            saved_requests = int(requests, c_int)
+          end if
           call spmd_in(tag_local, "MPI_Waitall")
           if (present(statuses)) then
             call MPI_Waitall(req_count, requests, statuses, ierr)
@@ -80,10 +77,10 @@
             call MPI_Waitall(req_count, requests, local_statuses, ierr)
           end if
           call spmd_out(tag_local, ierr)
-#ifdef SPMD_PROFILE
-          call spmd_profiler_complete_requests_c(saved_requests, int(req_count,c_int), &
-            MPI_Wtime())
-#endif
+          if (spmd_profiling_enabled) then
+            call spmd_profiler_complete_requests_c(saved_requests, int(req_count,c_int), &
+              MPI_Wtime())
+          end if
 #else
           requests = 0
           if (present(statuses)) statuses = 0

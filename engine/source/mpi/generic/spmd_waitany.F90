@@ -23,11 +23,11 @@
 !Copyright>        https://www.siemens.com/en-us/products/simcenter/mechanical-simulation/radioss/.
       module spmd_waitany_mod
         use, intrinsic :: iso_c_binding
+        use spmd_profiler_mod, only: spmd_profiling_enabled
         implicit none
 
         integer, parameter, public :: TAG_WAITANY = -10
 
-#ifdef SPMD_PROFILE
         interface
           subroutine spmd_profiler_complete_request_c(request, t_end) &
             bind(c, name="spmd_profiler_complete_request")
@@ -36,7 +36,6 @@
             real(c_double), intent(in) :: t_end
           end subroutine spmd_profiler_complete_request_c
         end interface
-#endif
 
         !> \brief Interface for spmd_waitany, a wrapper for MPI_WAITANY
         interface spmd_waitany
@@ -59,9 +58,7 @@
           integer :: ierr
           integer :: tag_local
           integer :: local_status(MPI_STATUS_SIZE)
-#ifdef SPMD_PROFILE
           integer(c_int) :: saved_requests(req_count)
-#endif
 
           if (present(tag)) then
             tag_local = tag
@@ -70,9 +67,9 @@
           end if
 
 #ifdef MPI
-#ifdef SPMD_PROFILE
-          saved_requests = int(requests, c_int)
-#endif
+          if (spmd_profiling_enabled) then
+            saved_requests = int(requests, c_int)
+          end if
           call spmd_in(tag_local, "MPI_Waitany")
           if (present(status)) then
             call MPI_Waitany(req_count, requests, index, status, ierr)
@@ -80,11 +77,11 @@
             call MPI_Waitany(req_count, requests, index, local_status, ierr)
           end if
           call spmd_out(tag_local, ierr)
-#ifdef SPMD_PROFILE
-          if (index >= 1 .and. index <= req_count) then
-            call spmd_profiler_complete_request_c(saved_requests(index), MPI_Wtime())
+          if (spmd_profiling_enabled) then
+            if (index >= 1 .and. index <= req_count) then
+              call spmd_profiler_complete_request_c(saved_requests(index), MPI_Wtime())
+            end if
           end if
-#endif
 #else
           index = 0
           requests = 0
