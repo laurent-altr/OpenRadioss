@@ -1571,8 +1571,8 @@ C-----------------------------------------------
               !initialisation timer resol
               IF (IMON>0) THEN
                 CALL STARTIME(TIMERS,TIMER_RESOL)
-              call spmd_profile_begin(PROF_INIT)
               ENDIF
+              call spmd_profile_begin(PROF_INIT)
 C INTERFACES RENUM
               RNUM_SIZ=NUMNOD
               ALLOCATE(RENUM(RNUM_SIZ))
@@ -7050,6 +7050,7 @@ C--- //0 ----------------
                   IF (IMONM > 0) CALL STOPTIME(TIMERS,48)
                   IF (IMON>0) CALL STOPTIME(TIMERS,6)
                 ENDIF
+                IF(NSPHIO/=0) call spmd_profile_end(PROF_SPH)
 
 C-----------------------------------------------
 C Multidomains : resynchronization of accelerations in SPH
@@ -7133,6 +7134,7 @@ C----------------------
                   END IF
                   IF (IMON>0) CALL STOPTIME(TIMERS,46)
                   IF (IMONM > 0) CALL STOPTIME(TIMERS,TIMER_KIN)
+                  call spmd_profile_end(PROF_KINCOND)
                 ENDIF
 C----------------------
 C         /BCS/CYCLIC
@@ -8628,10 +8630,10 @@ c
 C------------
                 IF (IMON>0) THEN
                   CALL STOPTIME(TIMERS,TIMER_IO)
-              call spmd_profile_end(PROF_OUTPUT)
-              call spmd_profile_begin(PROF_POSTOUT)
                 ENDIF
               ENDIF
+              call spmd_profile_end(PROF_OUTPUT)
+              call spmd_profile_begin(PROF_POSTOUT)
               IF (IMPDEB==1.AND.IMCONV==0) THEN
                 IF (NCYCLE>=NDEB0.AND.NCYCLE<=NDEB1) THEN
                   IF ((IRAD2R==1).AND.(IRESP==1)) THEN

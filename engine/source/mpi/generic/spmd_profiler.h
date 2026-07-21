@@ -16,6 +16,13 @@
  *  Stats mode (SPMD_PROFILE_MODE=stats):
  *    One compact JSON summary per rank (count/total/min/max per tag):
  *      spmd_stats_rank_NNNNN.json
+ *
+ *  Threading
+ *  ---------
+ *  The profiler is NOT thread-safe: it records into unsynchronized global
+ *  state.  Every entry point below (and every SPMD wrapper call while
+ *  profiling is enabled, since the wrappers call spmd_in/spmd_out) must be
+ *  made outside of OpenMP parallel regions, or by a single task only.
  */
 #ifndef SPMD_PROFILER_H
 #define SPMD_PROFILER_H
@@ -102,7 +109,8 @@ void spmd_profiler_complete_requests(const int* requests, const int* count,
  * \brief Write the timeline to disk and clear the in-memory buffer.
  *
  * Must be called before MPI_Finalize (MPI_Wtime becomes invalid after
- * finalization).  Output file: spmd_timeline_rank_NNNNN.json.
+ * finalization).  Output file: spmd_timeline_rank_NNNNN.spmd[.gz]
+ * (trace mode) or spmd_stats_rank_NNNNN.json (stats mode).
  */
 void spmd_profiler_flush(void);
 
@@ -125,8 +133,10 @@ void spmd_profiler_section_begin(const int* tag, const char* name, const int* na
  *
  * Emits the final segment of the section. No-op if no section is active.
  *
- * \param tag  Must match the tag passed to section_begin (currently unused,
- *             reserved for future validation).
+ * \param tag  Must match the tag passed to section_begin.  On mismatch the
+ *             active section is closed anyway, and a warning is printed to
+ *             stderr (limited to the first 10 occurrences) so pairing bugs
+ *             in the instrumentation are visible.
  */
 void spmd_profiler_section_end(const int* tag);
 

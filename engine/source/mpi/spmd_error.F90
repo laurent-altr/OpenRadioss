@@ -267,6 +267,9 @@
 !>               be distinguished even when they share the same message tag.
 !>  \param peer  Optional peer rank: destination for sends, source for recvs.
 !>               When provided, enables arrow drawing in the trace visualizer.
+!>  \note  The profiler back-end is not thread-safe: with profiling enabled,
+!>         wrapped MPI calls must be made outside of OpenMP parallel regions,
+!>         or by a single task only.
         subroutine spmd_in(tag, name, peer)
           use spmd_profiler_mod, only: spmd_profiling_enabled
 ! ----------------------------------------------------------------------------------------------------------------------
