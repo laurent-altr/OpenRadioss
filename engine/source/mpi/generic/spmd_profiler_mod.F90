@@ -31,6 +31,11 @@
 !||    spmd_profiling_enabled = .true. directly.
 !||    All subroutines are no-ops when profiling is disabled (~1 ns overhead).
 !||
+!||    THREADING: the profiler is NOT thread-safe (unsynchronized global
+!||    state in spmd_profiler.cpp).  spmd_profile_begin/spmd_profile_end —
+!||    and any SPMD wrapper call while profiling is enabled — must be made
+!||    outside of OpenMP parallel regions, or by a single task only.
+!||
 !||    Typical use (before MPI_Finalize):
 !||
 !||      use spmd_mod
@@ -141,6 +146,8 @@
 !!          User sections are suspended by MPI calls (spmd_in/spmd_out) and
 !!          automatically resumed after the MPI call completes.
 !!          Use tags <= -3000 to avoid collision with MPI tags.
+!!          Must be called outside of OpenMP parallel regions, or by a
+!!          single task only (the profiler is not thread-safe).
 !CONTSORT      -3002
 !ELEMENT       -3003
 !KIN           -3004

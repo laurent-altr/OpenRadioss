@@ -27,15 +27,25 @@
  *
  *    Header (20 bytes):
  *      char[4]   magic      = "SPMD"
- *      uint8_t   version    = 1
+ *      uint8_t   version    = 5
  *      uint8_t   pad[3]     = {0,0,0}
  *      int32_t   rank
  *      double    t_origin   (MPI_Wtime() of the first recorded event)
  *
- *    Per-event record (56 bytes, repeated N times):
+ *    Per-event record (60 bytes, repeated N times):
  *      int32_t   tag          (negative = SPMD collective; positive = user MPI tag)
  *      uint64_t  t_begin_ns   (nanoseconds since t_origin)
- *      uint32_t  duration_ns  (nanoseconds; capped at UINT32_MAX ≈ 4.3 s)
+ *      uint64_t  duration_ns  (nanoseconds, no cap)
+ *      char[32]  name         (null-padded human-readable name)
+ *      int32_t   peer_rank    (dest for sends, source for recvs; -2 = N/A)
+ *      int32_t   msg_tag      (actual MPI P2P message tag; -2 = N/A)
+ *
+ *  Threading
+ *  ---------
+ *  The profiler keeps unsynchronized global state: it is NOT thread-safe.
+ *  All entry points (record_in/record_out via the SPMD wrappers, the
+ *  section begin/end calls, request registration and flush) must be called
+ *  outside of OpenMP parallel regions, or by a single task only.
  *
  *  Convert to Chrome Trace JSON for viewing:
  *
@@ -83,17 +93,17 @@
 #pragma pack(push, 1)
 struct SpmdFileHeader {
     char     magic[4];  /* "SPMD"                                          */
-    uint8_t  version;   /* 4 (v1:12B; v2:44B; v3:52B µs; v4:56B ns+u64) */
+    uint8_t  version;   /* 5 (v1:12B; v2:44B; v3:52B µs; v4:56B; v5:60B)   */
     uint8_t  pad[3];    /* {0,0,0}                                         */
     int32_t  rank;
     double   t_origin;  /* MPI_Wtime() of first recorded event (absolute)  */
 };
 
-/* Version 4 record: tag + timing (nanoseconds) + name + peer_rank + msg_tag */
+/* Version 5 record: tag + timing (nanoseconds) + name + peer_rank + msg_tag */
 struct SpmdBinaryRecord {
     int32_t  tag;
     uint64_t t_begin_ns;    /* ns since t_origin; wraps at 2^64 ns (centuries) */
-    uint32_t duration_ns;   /* nanoseconds; capped at UINT32_MAX ≈ 4.3 s    */
+    uint64_t duration_ns;   /* nanoseconds, no cap                           */
     char     name[32];      /* null-padded human-readable name               */
     int32_t  peer_rank;     /* dest for sends, source for recvs; -2 = N/A   */
     int32_t  msg_tag;       /* actual MPI P2P message tag; -2 = N/A         */
@@ -298,10 +308,10 @@ static void flush_trace()
     }
 #endif
 
-    /* Header — version 4 (nanosecond resolution) */
+    /* Header — version 5 (nanosecond resolution, 64-bit duration) */
     SpmdFileHeader hdr;
     std::memcpy(hdr.magic, "SPMD", 4);
-    hdr.version  = 4;
+    hdr.version  = 5;
     hdr.pad[0] = hdr.pad[1] = hdr.pad[2] = 0;
     hdr.rank     = g_rank;
     hdr.t_origin = g_timeline[0].t_begin;
@@ -323,10 +333,9 @@ static void flush_trace()
         rec.t_begin_ns  = static_cast<uint64_t>(
             offset_ns < 0.0 ? 0ull :
             static_cast<uint64_t>(offset_ns));
-        rec.duration_ns = static_cast<uint32_t>(
-            dur_ns < 0.0 ? 0u :
-            dur_ns > 4294967295.0 ? 4294967295u :
-            static_cast<uint32_t>(dur_ns));
+        rec.duration_ns = static_cast<uint64_t>(
+            dur_ns < 0.0 ? 0ull :
+            static_cast<uint64_t>(dur_ns));
 
         /* Store name (null-padded, 32 bytes) */
         std::string nm = resolve_name(e.tag, e.name);
@@ -508,9 +517,23 @@ void spmd_profiler_section_begin(const int* tag, const char* name, const int* na
 void spmd_profiler_section_end(const int* tag)
 {
     if (!g_initialized || !g_section_active) return;
+    if (*tag != g_section_tag) {
+        /* Mismatched begin/end pairing in the instrumentation: the active
+           section is closed anyway (auto-close semantics), but warn so the
+           pairing bug is visible instead of silently mislabeling time. */
+        static int warn_count = 0;
+        if (warn_count < 10) {
+            std::fprintf(stderr,
+                "spmd_profiler: rank %d: section_end(tag=%d) does not match "
+                "active section '%s' (tag=%d)\n",
+                g_rank, *tag, g_section_name.c_str(), g_section_tag);
+            if (++warn_count == 10)
+                std::fprintf(stderr,
+                    "spmd_profiler: further section mismatch warnings suppressed\n");
+        }
+    }
     emit_section_segment(MPI_Wtime());
     g_section_active = false;
-    (void)tag;
 }
 
 void spmd_profiler_register_request(const int* request, const int* peer_rank,
