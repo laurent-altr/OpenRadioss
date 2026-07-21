@@ -806,7 +806,9 @@ C-----------------------------------------------
      .          PROF_PREELEM, PROF_ELEMENT, PROF_SPH_NLOC,
      .          PROF_EXFOR, PROF_ASM, PROF_CONTPOST, PROF_RBODY,
      .          PROF_DTSTEP, PROF_IO, PROF_VELUPD, PROF_OUTPUT,
-     .          PROF_POSTOUT, PROF_INTEG, PROF_RESTART
+     .          PROF_POSTOUT, PROF_INTEG, PROF_RESTART,
+     .          PROF_ACC, PROF_ALE, PROF_ANIM, PROF_BCS,
+     .          PROF_KINCOND, PROF_RBY, PROF_SENSOR, PROF_SPH
 C-----------------------------------------------
 C   I m p l i c i t   T y p e s
 C-----------------------------------------------
@@ -7239,7 +7241,7 @@ C----------------------
                     call spmd_xv_inter_type1(numnod, NODES%BOUNDARY_SIZE, ispmd, nspmd, NODES%BOUNDARY_ADD, NODES%BOUNDARY,
      1                                       nodes%a, nodes%v, ninter, ipari, npari)
                   ENDIF
-                  call spmd_profie_end(PROF_ALE)
+                  call spmd_profile_end(PROF_ALE)
                 ENDIF
                 IF(IERR == 1)CALL ARRET(2)
 
