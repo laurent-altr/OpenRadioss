@@ -283,6 +283,12 @@ Also consult these project documentation files (added in the current `HEAD` comm
   - Confirms policy: call `SPMD_*` wrappers from `SPMD_MOD` (not raw `MPI_*` in solver code).
   - Read this first for exchange ordering, reproducibility, communicator/rank logic, and MPI-side performance/debug work.
 
+- `doc/SPH_documentation.md`:
+  - Use for the SPH (Smoothed Particle Hydrodynamics) solver: particle data model (`KXSP`, `IXSP`, `SPBUF`, the phase-reused `WA`, `WACOMP`, `STAB`), the `SPHPREP`/`FORINTP` execution pipeline, and the neighbour search (`sptrivox`/`spbuc3`/`spclasv`).
+  - Documents the physics formulas: cubic B-spline kernel, Randles-Libersky kernel renormalization, continuity density, artificial viscosity, tensile-instability stabilization, variable smoothing length, and the SPH time step.
+  - Explains two frequently misunderstood points: the neighbour *relation* is explicitly symmetrized (`spbuc3.F`, `C SYMETRISE VOISINS`), but the *forces* are deliberately **not** pairwise antisymmetric because of per-particle renormalization; and the force loop is pure **gather**.
+  - Read this first for `/SPHCEL`, `/PROP/TYPE34`, `/SPHGLO`, `/SPHBCS` behaviour, neighbour-list overflow (`KVOISPH`) or `h`-adaptation bugs, SPH material-law compatibility, and any SPH GPU/porting or performance work.
+
 When working on a feature that touches multiple areas (for example non-local + node splitting + PARITH/ON), read all related docs above before editing.
 
 ---
