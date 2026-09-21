@@ -131,18 +131,21 @@ For each open PR, the script:
 3. Fetches the recorded base commit and exact PR head from the canonical GitHub
   repository.
 4. Checks out the PR head temporarily and builds complete local per-file diffs.
-5. Selects a review path from the total diff size (not file count).
+5. Selects a review path from the changed-file count (with a diff-size safety
+   valve for pathological cases).
 6. Extracts or recovers a marked publishable summary.
 7. Writes a dry-run report or posts a review bound to the reviewed head commit.
 8. Restores the original branch or detached revision, including after errors.
 
-PRs are tiered by **total diff size in characters**, not file count:
+PRs are tiered primarily by **changed-file count**, since chunked review loses
+cross-file context and is far less reliable than a single full-context call,
+even when that call covers a sizeable diff:
 
-- **Small** (`--small-pr-diff-size`, default 8,000 chars): a single call with
+- **Small** (`--small-pr-files`, default 10 files): a single call with
   `--small-pr-model`, full PR context.
-- **Medium** (up to `--medium-pr-diff-size`, default 40,000 chars): a single
-  call with `--medium-pr-model`, still full PR context.
-- **Large** (above `--medium-pr-diff-size`): changed files are grouped into
+- **Medium** (up to `--medium-pr-files`, default 20 files): a single call with
+  `--medium-pr-model`, still full PR context.
+- **Large** (above `--medium-pr-files`): changed files are grouped into
   size-bounded chunks (`--scout-chunk-size`, default 15,000 chars; a single
   file larger than the budget still gets its own chunk — files are never
   split). Each chunk is scouted in parallel with `--large-file-model`
@@ -150,6 +153,14 @@ PRs are tiered by **total diff size in characters**, not file count:
   cross-file awareness), then all chunk findings are independently
   re-verified and combined against the full patches by
   `--synthesis-model`.
+
+A PR within the small/medium file-count range still falls back to the chunked
+large-PR path if its total diff size exceeds `--max-single-call-diff-size`
+(default 150,000 chars) — a safety valve for the rare PR with very few files
+but an enormous diff (e.g. a large generated/data file), so a single call
+never gets an unreasonably large prompt. Diff size alone (e.g. an 11-file PR
+with a merely bulky diff from tests or generated data) is not a reason to
+chunk; file count is.
 
 PRs whose total diff size exceeds `--max-review-diff-size` (default 400,000
 chars) are skipped entirely; this replaces the old fixed 50-file cutoff so

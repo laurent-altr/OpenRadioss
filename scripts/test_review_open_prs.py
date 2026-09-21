@@ -35,6 +35,7 @@ from review_open_prs import (
     review_pr,
     resolve_review_target,
     run_command,
+    should_chunk_review,
     total_diff_size,
     OPENRADIOSS_GIT_URL,
     SIGNATURE,
@@ -564,8 +565,9 @@ class ReviewScriptTests(unittest.TestCase):
 
         result = review_pr(
             self.pr,
-            small_pr_diff_size=20,
-            medium_pr_diff_size=1000,
+            small_pr_files=1,
+            medium_pr_files=2,
+            max_single_call_diff_size=1000,
             scout_chunk_size=1000,
             small_pr_model="small-model",
             medium_pr_model="medium-model",
@@ -583,8 +585,9 @@ class ReviewScriptTests(unittest.TestCase):
         )
         review_pr(
             self.pr,
-            small_pr_diff_size=20,
-            medium_pr_diff_size=1000,
+            small_pr_files=1,
+            medium_pr_files=2,
+            max_single_call_diff_size=1000,
             scout_chunk_size=1000,
             small_pr_model="small-model",
             medium_pr_model="medium-model",
@@ -595,6 +598,76 @@ class ReviewScriptTests(unittest.TestCase):
         )
         self.assertEqual(len(calls), 2)
         self.assertIn("medium-model", calls[-1])
+
+    def test_few_files_with_large_diff_stays_single_call_below_safety_valve(self):
+        """A PR like #5287 (11 files, ~86k raw diff chars) must not be chunked."""
+        self.pr.files = [
+            {"filename": f"f{i}.F90", "status": "added", "patch": "x" * 8_000}
+            for i in range(11)
+        ]
+        calls = []
+
+        def fake_runner(command, input_text=None):
+            calls.append(command)
+            return "No findings."
+
+        result = review_pr(
+            self.pr,
+            small_pr_files=10,
+            medium_pr_files=20,
+            max_single_call_diff_size=150_000,
+            scout_chunk_size=15_000,
+            small_pr_model="small-model",
+            medium_pr_model="medium-model",
+            large_file_model="scout-model",
+            synthesis_model="synthesis-model",
+            max_workers=2,
+            command_runner=fake_runner,
+        )
+        self.assertEqual(result, "No findings.")
+        self.assertEqual(len(calls), 1, "should be a single full-context call, not chunked")
+        self.assertIn("medium-model", calls[-1])
+
+    def test_few_files_with_pathological_diff_still_chunks_via_safety_valve(self):
+        self.pr.files = [
+            {"filename": "generated.json", "status": "added", "patch": "x" * 200_000},
+        ]
+        calls = []
+
+        def fake_runner(command, input_text=None):
+            calls.append(command)
+            model = command[command.index("--model") + 1]
+            return f"Findings from {model}"
+
+        result = review_pr(
+            self.pr,
+            small_pr_files=10,
+            medium_pr_files=20,
+            max_single_call_diff_size=150_000,
+            scout_chunk_size=15_000,
+            small_pr_model="small-model",
+            medium_pr_model="medium-model",
+            large_file_model="scout-model",
+            synthesis_model="synthesis-model",
+            max_workers=2,
+            command_runner=fake_runner,
+        )
+        self.assertEqual(result, "Findings from synthesis-model")
+        self.assertGreaterEqual(len(calls), 2, "should fall back to chunked scout/synthesis")
+
+    def test_should_chunk_review_uses_file_count_and_size_safety_valve(self):
+        few_small_files = [{"patch": "x" * 100} for _ in range(5)]
+        self.assertFalse(
+            should_chunk_review(few_small_files, medium_pr_files=20, max_single_call_diff_size=150_000)
+        )
+        many_small_files = [{"patch": "x" * 100} for _ in range(25)]
+        self.assertTrue(
+            should_chunk_review(many_small_files, medium_pr_files=20, max_single_call_diff_size=150_000)
+        )
+        few_huge_files = [{"patch": "x" * 200_000} for _ in range(2)]
+        self.assertTrue(
+            should_chunk_review(few_huge_files, medium_pr_files=20, max_single_call_diff_size=150_000)
+        )
 
     def test_large_pr_scouts_chunks_in_parallel_and_synthesizes_with_original_patches(self):
         self.pr.files.append(
@@ -610,8 +683,9 @@ class ReviewScriptTests(unittest.TestCase):
 
         result = review_pr(
             self.pr,
-            small_pr_diff_size=1,
-            medium_pr_diff_size=1,
+            small_pr_files=0,
+            medium_pr_files=0,
+            max_single_call_diff_size=1,
             scout_chunk_size=1,
             small_pr_model="small-model",
             medium_pr_model="medium-model",
@@ -659,8 +733,9 @@ class ReviewScriptTests(unittest.TestCase):
             medium_pr_model="medium-model",
             large_file_model="scout-model",
             synthesis_model="synthesis-model",
-            small_pr_diff_size=8_000,
-            medium_pr_diff_size=40_000,
+            small_pr_files=10,
+            medium_pr_files=20,
+            max_single_call_diff_size=150_000,
             scout_chunk_size=15_000,
             max_review_diff_size=400_000,
             min_confidence=6,

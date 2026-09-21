@@ -31,6 +31,7 @@ POLISHED_REVIEW_END = "<!-- openradioss-copilot-polished-review:end -->"
 OPENRADIOSS_REPOSITORY = "OpenRadioss/OpenRadioss"
 OPENRADIOSS_GIT_URL = "https://github.com/OpenRadioss/OpenRadioss.git"
 DEFAULT_MAX_REVIEW_DIFF_SIZE = 400_000
+DEFAULT_MAX_SINGLE_CALL_DIFF_SIZE = 150_000
 DEFAULT_COPILOT_HEARTBEAT_SECONDS = 60
 REVIEW_TOOL_PATHS = frozenset(
     {
@@ -506,6 +507,24 @@ def exceeds_diff_size_ceiling(pr: PullRequest, max_diff_size: int) -> bool:
     return total_diff_size(pr.files) > max_diff_size
 
 
+def should_chunk_review(
+    files: list[dict[str, Any]],
+    *,
+    medium_pr_files: int,
+    max_single_call_diff_size: int,
+) -> bool:
+    """Decide whether a PR needs chunked scout/synthesis review.
+
+    File count is the primary signal: a PR is small/medium enough for a
+    single full-context call as long as it has few enough files, even if its
+    raw diff text is large (e.g. generated/data files inflate char count
+    without adding real complexity). Chunking only loses cross-file context,
+    so it is reserved for PRs with many files, or the rare case of very few
+    files with a pathologically large diff (the size safety valve).
+    """
+    return len(files) > medium_pr_files or total_diff_size(files) > max_single_call_diff_size
+
+
 def format_comment(comment: dict[str, Any]) -> str:
     author = comment.get("user", {}).get("login") or "unknown"
     location = ""
@@ -635,8 +654,9 @@ def invoke_copilot(
 def review_pr(
     pr: PullRequest,
     *,
-    small_pr_diff_size: int,
-    medium_pr_diff_size: int,
+    small_pr_files: int,
+    medium_pr_files: int,
+    max_single_call_diff_size: int,
     scout_chunk_size: int,
     small_pr_model: str,
     medium_pr_model: str,
@@ -649,8 +669,11 @@ def review_pr(
     denied_tools: list[str] | None = None,
 ) -> str:
     files = review_files if review_files is not None else changed_files(pr)
-    pr_diff_size = total_diff_size(files)
-    if pr_diff_size > medium_pr_diff_size:
+    if should_chunk_review(
+        files,
+        medium_pr_files=medium_pr_files,
+        max_single_call_diff_size=max_single_call_diff_size,
+    ):
         if max_workers < 1:
             raise RuntimeError("max_workers must be at least 1")
         if scout_chunk_size < 1:
@@ -716,7 +739,7 @@ def review_pr(
             command_runner,
             denied_tools=denied_tools,
         )
-    model = small_pr_model if pr_diff_size <= small_pr_diff_size else medium_pr_model
+    model = small_pr_model if len(files) <= small_pr_files else medium_pr_model
     print(f"PR #{pr.number}: reviewing complete PR with {model}", flush=True)
     return invoke_copilot(
         build_prompt(
@@ -901,16 +924,23 @@ def parse_args() -> argparse.Namespace:
         help="Final cross-file synthesis model for large PRs",
     )
     parser.add_argument(
-        "--small-pr-diff-size",
+        "--small-pr-files",
         type=int,
-        default=8_000,
-        help="Maximum total diff characters for the small tier (default: %(default)s)",
+        default=10,
+        help="Maximum changed-file count for the small tier (default: %(default)s)",
     )
     parser.add_argument(
-        "--medium-pr-diff-size",
+        "--medium-pr-files",
         type=int,
-        default=40_000,
-        help="Total diff characters above which chunked scouting is used (default: %(default)s)",
+        default=20,
+        help="Changed-file count above which chunked scouting is used (default: %(default)s)",
+    )
+    parser.add_argument(
+        "--max-single-call-diff-size",
+        type=int,
+        default=DEFAULT_MAX_SINGLE_CALL_DIFF_SIZE,
+        help="Safety valve: total diff characters above which chunked scouting is used even if the "
+        "file count is within --medium-pr-files (default: %(default)s)",
     )
     parser.add_argument(
         "--scout-chunk-size",
@@ -979,18 +1009,21 @@ def main() -> int:
     except RuntimeError as error:
         print(f"ERROR: {error}", file=sys.stderr)
         return 2
-    if not 0 < args.small_pr_diff_size < args.medium_pr_diff_size:
+    if not 0 < args.small_pr_files < args.medium_pr_files:
         print(
-            "ERROR: diff-size thresholds must satisfy 0 < --small-pr-diff-size < --medium-pr-diff-size",
+            "ERROR: file-count thresholds must satisfy 0 < --small-pr-files < --medium-pr-files",
             file=sys.stderr,
         )
+        return 2
+    if args.max_single_call_diff_size < 1:
+        print("ERROR: --max-single-call-diff-size must be at least 1", file=sys.stderr)
         return 2
     if args.scout_chunk_size < 1:
         print("ERROR: --scout-chunk-size must be at least 1", file=sys.stderr)
         return 2
-    if args.max_review_diff_size < args.medium_pr_diff_size:
+    if args.max_review_diff_size < args.max_single_call_diff_size:
         print(
-            "ERROR: --max-review-diff-size must be at least --medium-pr-diff-size",
+            "ERROR: --max-review-diff-size must be at least --max-single-call-diff-size",
             file=sys.stderr,
         )
         return 2
@@ -1052,7 +1085,11 @@ def main() -> int:
                 with pull_request_checkout(pr, command_runner):
                     review_files = local_review_files(pr, command_runner)
                     progress_callback = None
-                    if args.dry_run and total_diff_size(review_files) > args.medium_pr_diff_size:
+                    if args.dry_run and should_chunk_review(
+                        review_files,
+                        medium_pr_files=args.medium_pr_files,
+                        max_single_call_diff_size=args.max_single_call_diff_size,
+                    ):
                         report_path = start_dry_run_report(pr, args.output_dir)
                         progress_callback = lambda filename, finding: append_dry_run_scout(
                             report_path,
@@ -1061,8 +1098,9 @@ def main() -> int:
                         )
                     body = review_pr(
                         pr,
-                        small_pr_diff_size=args.small_pr_diff_size,
-                        medium_pr_diff_size=args.medium_pr_diff_size,
+                        small_pr_files=args.small_pr_files,
+                        medium_pr_files=args.medium_pr_files,
+                        max_single_call_diff_size=args.max_single_call_diff_size,
                         scout_chunk_size=args.scout_chunk_size,
                         small_pr_model=args.small_pr_model,
                         medium_pr_model=args.medium_pr_model,
