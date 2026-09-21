@@ -126,19 +126,50 @@ the job condition. The script also queries the PR check rollup before review.
 For each open PR, the script:
 
 1. Loads GitHub metadata, checks, review history, and discussion.
-2. Skips drafts, failed or incomplete checks, PRs above the file limit, and
-   content already reviewed by the bot.
+2. Skips drafts, failed or incomplete checks, PRs above the total diff-size
+   limit, and content already reviewed by the bot.
 3. Fetches the recorded base commit and exact PR head from the canonical GitHub
   repository.
 4. Checks out the PR head temporarily and builds complete local per-file diffs.
-5. Selects a review path from the changed-file count.
+5. Selects a review path from the total diff size (not file count).
 6. Extracts or recovers a marked publishable summary.
 7. Writes a dry-run report or posts a review bound to the reviewed head commit.
 8. Restores the original branch or detached revision, including after errors.
 
-Small PRs use `--small-pr-model`. Medium PRs use `--medium-pr-model`. Large PRs
-run parallel per-file scouts with `--large-file-model`, then verify and combine
-their findings with `--synthesis-model`.
+PRs are tiered by **total diff size in characters**, not file count:
+
+- **Small** (`--small-pr-diff-size`, default 8,000 chars): a single call with
+  `--small-pr-model`, full PR context.
+- **Medium** (up to `--medium-pr-diff-size`, default 40,000 chars): a single
+  call with `--medium-pr-model`, still full PR context.
+- **Large** (above `--medium-pr-diff-size`): changed files are grouped into
+  size-bounded chunks (`--scout-chunk-size`, default 15,000 chars; a single
+  file larger than the budget still gets its own chunk — files are never
+  split). Each chunk is scouted in parallel with `--large-file-model`
+  (multiple files per call, plus a manifest of every changed filename for
+  cross-file awareness), then all chunk findings are independently
+  re-verified and combined against the full patches by
+  `--synthesis-model`.
+
+PRs whose total diff size exceeds `--max-review-diff-size` (default 400,000
+chars) are skipped entirely; this replaces the old fixed 50-file cutoff so
+that ordinary large PRs (many files, moderate total diff size) are reviewed
+via more chunks instead of being skipped outright.
+
+Findings are required to include a `Confidence: N/10` field. After synthesis,
+findings with a parsed confidence below `--min-confidence` (default 6) are
+dropped automatically before publishing, as a deterministic safety net against
+false positives independent of model behavior; unparseable rows are kept
+rather than silently dropped, and a response with no recognizable findings
+table is left unchanged.
+
+Large-PR scouting and synthesis default to `claude-opus-5` (previously
+`claude-haiku-4.5` for scouts and `claude-sonnet-5` for synthesis). This
+trades cost for accuracy: each large PR now issues one `claude-opus-5` call
+per chunk plus one for synthesis, instead of one cheap call per file. Chunking
+by diff size (rather than one file per scout) also gives each scout call
+cross-file context, which is what curbed the false positives seen with the
+old per-file/haiku scouting.
 
 ## Monitoring long reviews
 
@@ -157,16 +188,18 @@ python scripts/review_open_prs.py --heartbeat-seconds 30
 python scripts/review_open_prs.py --heartbeat-seconds 0
 ```
 
-For large PRs, scout completions appear independently. In dry-run mode their
-intermediate results are appended to the report as they finish.
+For large PRs, chunk scout completions appear independently. In dry-run mode
+their intermediate results are appended to the report as they finish.
 
 ## Safety controls
 
 - `--force` reviews matching content again; it does not bypass draft, CI, or
-  file-count eligibility checks.
+  diff-size eligibility checks.
 - Repeat `--deny-tool TOOL` to remove Copilot tools from the default tool set.
 - Missing or malformed publication markers are recovered with
   `--polisher-model`. If recovery fails, nothing is posted.
+- `--min-confidence` (default 6) drops low-confidence findings after synthesis;
+  set to `0` to disable this filter.
 - The GitHub tokens used by `gh` and GitHub Actions are always removed from the
   Copilot environment; use a separate `COPILOT_GITHUB_TOKEN`.
 

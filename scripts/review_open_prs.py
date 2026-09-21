@@ -12,6 +12,7 @@ import argparse
 import hashlib
 import json
 import os
+import re
 import subprocess
 import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -29,7 +30,7 @@ POLISHED_REVIEW_START = "<!-- openradioss-copilot-polished-review:start -->"
 POLISHED_REVIEW_END = "<!-- openradioss-copilot-polished-review:end -->"
 OPENRADIOSS_REPOSITORY = "OpenRadioss/OpenRadioss"
 OPENRADIOSS_GIT_URL = "https://github.com/OpenRadioss/OpenRadioss.git"
-MAX_REVIEW_FILES = 50
+DEFAULT_MAX_REVIEW_DIFF_SIZE = 400_000
 DEFAULT_COPILOT_HEARTBEAT_SECONDS = 60
 REVIEW_TOOL_PATHS = frozenset(
     {
@@ -471,8 +472,38 @@ def local_review_files(
     return files
 
 
-def has_too_many_files(pr: PullRequest) -> bool:
-    return len(pr.files) > MAX_REVIEW_FILES
+def diff_size(item: dict[str, Any]) -> int:
+    return len(str(item.get("patch") or ""))
+
+
+def total_diff_size(files: list[dict[str, Any]]) -> int:
+    return sum(diff_size(item) for item in files)
+
+
+def chunk_files_by_size(files: list[dict[str, Any]], chunk_size_budget: int) -> list[list[dict[str, Any]]]:
+    """Group files into chunks bounded by chunk_size_budget characters.
+
+    Files are never split across chunks: a single file larger than the
+    budget becomes its own chunk.
+    """
+    chunks: list[list[dict[str, Any]]] = []
+    current: list[dict[str, Any]] = []
+    current_size = 0
+    for item in files:
+        item_size = diff_size(item)
+        if current and current_size + item_size > chunk_size_budget:
+            chunks.append(current)
+            current = []
+            current_size = 0
+        current.append(item)
+        current_size += item_size
+    if current:
+        chunks.append(current)
+    return chunks
+
+
+def exceeds_diff_size_ceiling(pr: PullRequest, max_diff_size: int) -> bool:
+    return total_diff_size(pr.files) > max_diff_size
 
 
 def format_comment(comment: dict[str, Any]) -> str:
@@ -562,7 +593,12 @@ def build_prompt(pr: PullRequest, patches: list[tuple[str, str]], purpose: str) 
         "Do not use these markers anywhere else in your response.",
         "Only the marked summary will be published; all text outside it is private intermediate reasoning.",
         "The summary must contain only actionable correctness, regression, security, or testability findings.",
-        "For each finding include the file and line or hunk, severity, impact, and a concise recommended fix.",
+        "Only include a finding after independently verifying it against the actual patches or repository; "
+        "do not guess about code you have not seen, and do not report anything you cannot substantiate.",
+        "Present findings as a markdown table with exactly these columns, in order: "
+        "Severity, File, Lines, Issue, Confidence.",
+        "The Confidence column must contain only an integer from 1 to 10 formatted exactly as `N/10`, "
+        "reflecting how certain you are this is a real, actionable defect after verification.",
         "Use a professional, concise tone and do not include an unnecessary conclusion.",
         "When there are no findings, the marked review must be exactly: No findings.",
     ]
@@ -599,8 +635,9 @@ def invoke_copilot(
 def review_pr(
     pr: PullRequest,
     *,
-    small_pr_threshold: int,
-    large_pr_threshold: int,
+    small_pr_diff_size: int,
+    medium_pr_diff_size: int,
+    scout_chunk_size: int,
     small_pr_model: str,
     medium_pr_model: str,
     large_file_model: str,
@@ -612,43 +649,56 @@ def review_pr(
     denied_tools: list[str] | None = None,
 ) -> str:
     files = review_files if review_files is not None else changed_files(pr)
-    if len(pr.files) > large_pr_threshold:
+    pr_diff_size = total_diff_size(files)
+    if pr_diff_size > medium_pr_diff_size:
         if max_workers < 1:
             raise RuntimeError("max_workers must be at least 1")
-        findings = [""] * len(files)
+        if scout_chunk_size < 1:
+            raise RuntimeError("scout_chunk_size must be at least 1")
+        chunks = chunk_files_by_size(files, scout_chunk_size)
+        findings = [""] * len(chunks)
+        manifest = "\n".join(f"- {item['filename']}" for item in files)
 
-        def review_file(index: int, item: dict[str, Any]) -> tuple[int, str]:
+        def review_chunk(index: int, chunk: list[dict[str, Any]]) -> tuple[int, str, str]:
+            chunk_filenames = ", ".join(item["filename"] for item in chunk)
             print(
-                f"PR #{pr.number}: reviewing file {index}/{len(files)} "
-                f"{item['filename']} with {large_file_model}",
+                f"PR #{pr.number}: reviewing chunk {index}/{len(chunks)} "
+                f"({len(chunk)} file(s): {chunk_filenames}) with {large_file_model}",
                 flush=True,
             )
             finding = invoke_copilot(
                 build_prompt(
                     pr,
-                    [(item["filename"], item.get("patch", ""))],
-                    "Scout this file for candidate defects. Check repository context when needed.",
+                    [
+                        *((item["filename"], item.get("patch", "")) for item in chunk),
+                        ("Full PR changed-file manifest (for awareness only)", manifest),
+                    ],
+                    "Scout these files for candidate defects. Files outside this chunk are reviewed "
+                    "separately by other scouts; use the manifest only to know what else changed. "
+                    "Check repository context when needed. If you cannot verify a finding using only "
+                    "these patches, the manifest, and repository tools, lower its confidence or omit it "
+                    "- do not guess about code you have not seen.",
                 ),
                 large_file_model,
                 command_runner,
                 denied_tools=denied_tools,
             )
-            return index - 1, finding
+            return index - 1, chunk_filenames, finding
 
-        with ThreadPoolExecutor(max_workers=min(max_workers, len(files))) as executor:
+        with ThreadPoolExecutor(max_workers=min(max_workers, len(chunks))) as executor:
             futures = [
-                executor.submit(review_file, index, item)
-                for index, item in enumerate(files, start=1)
+                executor.submit(review_chunk, index, chunk)
+                for index, chunk in enumerate(chunks, start=1)
             ]
             for future in as_completed(futures):
-                index, finding = future.result()
+                index, chunk_filenames, finding = future.result()
                 findings[index] = finding
                 if progress_callback is not None:
-                    progress_callback(files[index]["filename"], finding)
+                    progress_callback(chunk_filenames, finding)
 
         scout_findings = "\n\n".join(
-            f"### Scout for {item['filename']}\n{finding}"
-            for item, finding in zip(files, findings)
+            f"### Scout findings for chunk covering: {', '.join(item['filename'] for item in chunk)}\n{finding}"
+            for chunk, finding in zip(chunks, findings)
         )
         print(f"PR #{pr.number}: synthesizing cross-file review with {synthesis_model}", flush=True)
         return invoke_copilot(
@@ -656,16 +706,17 @@ def review_pr(
                 pr,
                 [
                     *((item["filename"], item.get("patch", "")) for item in files),
-                    ("Haiku scout findings", scout_findings),
+                    ("Scout findings from chunked review", scout_findings),
                 ],
-                "Perform the final cross-file review. Verify every scout candidate against the original "
-                "patches and repository, reject false positives, and find defects spanning files.",
+                "Perform the final cross-file review. Independently re-derive each scout candidate from "
+                "the original patches and repository before including it; reject anything you cannot "
+                "independently confirm, and also look for defects spanning files or chunks.",
             ),
             synthesis_model,
             command_runner,
             denied_tools=denied_tools,
         )
-    model = small_pr_model if len(pr.files) <= small_pr_threshold else medium_pr_model
+    model = small_pr_model if pr_diff_size <= small_pr_diff_size else medium_pr_model
     print(f"PR #{pr.number}: reviewing complete PR with {model}", flush=True)
     return invoke_copilot(
         build_prompt(
@@ -701,6 +752,55 @@ def append_dry_run_scout(report_path: Path, filename: str, finding: str) -> None
     print(f"\nDRY RUN scout for {filename}:\n{finding}\n", flush=True)
 
 
+CONFIDENCE_CELL_PATTERN = re.compile(r"(\d+)\s*/\s*10")
+TABLE_SEPARATOR_ROW_PATTERN = re.compile(r"^\s*\|[\s:|-]+\|\s*$")
+
+
+def filter_low_confidence_findings(body: str, threshold: int) -> str:
+    """Drop markdown-table finding rows whose Confidence cell is below threshold.
+
+    This is a deterministic safety net independent of model behavior: it only
+    acts on a well-formed `| ... | Confidence | ... |` table. Any row whose
+    Confidence cell cannot be parsed is kept as-is rather than silently
+    dropped, and a body without a recognizable table is returned unchanged.
+    """
+    lines = body.splitlines()
+    header_index = None
+    confidence_column = None
+    for index, line in enumerate(lines):
+        stripped = line.strip()
+        if not stripped.startswith("|"):
+            continue
+        cells = [cell.strip() for cell in stripped.strip("|").split("|")]
+        for column_index, cell in enumerate(cells):
+            if cell.lower() == "confidence":
+                header_index, confidence_column = index, column_index
+                break
+        if header_index is not None:
+            break
+    if header_index is None:
+        return body
+
+    separator_index = header_index + 1
+    if separator_index >= len(lines) or not TABLE_SEPARATOR_ROW_PATTERN.match(lines[separator_index]):
+        return body
+
+    kept_rows = []
+    row_index = separator_index + 1
+    while row_index < len(lines) and lines[row_index].strip().startswith("|"):
+        row = lines[row_index]
+        cells = [cell.strip() for cell in row.strip().strip("|").split("|")]
+        confidence_cell = cells[confidence_column] if confidence_column < len(cells) else ""
+        match = CONFIDENCE_CELL_PATTERN.search(confidence_cell)
+        if match is None or int(match.group(1)) >= threshold:
+            kept_rows.append(row)
+        row_index += 1
+
+    if not kept_rows:
+        return "No findings."
+    return "\n".join([*lines[: separator_index + 1], *kept_rows, *lines[row_index:]])
+
+
 def submit_review(
     repo: str,
     pr: PullRequest,
@@ -709,6 +809,7 @@ def submit_review(
     polisher_model: str,
     output_dir: str = "review_reports",
     denied_tools: list[str] | None = None,
+    min_confidence: int = 0,
 ) -> str | None:
     log(f"PR #{pr.number}: extracting publishable review summary")
     review_body, is_polished = extract_polished_review(body)
@@ -731,6 +832,11 @@ def submit_review(
         log(f"PR #{pr.number}: recovered a valid publishable summary")
     else:
         log(f"PR #{pr.number}: publishable summary extracted")
+    if min_confidence > 0:
+        filtered_body = filter_low_confidence_findings(review_body, min_confidence)
+        if filtered_body != review_body:
+            log(f"PR #{pr.number}: filtered findings below confidence {min_confidence}/10")
+        review_body = filtered_body
     github_user = gh_json(repo, ["api", "user"])["login"]
     signed_body = (
         f"{SIGNATURE}\n"
@@ -786,25 +892,44 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--medium-pr-model", default="claude-opus-5", help="Model for PRs in the medium tier")
     parser.add_argument(
         "--large-file-model",
-        default="claude-haiku-4.5",
-        help="Parallel per-file scout model for large PRs",
+        default="claude-opus-5",
+        help="Parallel per-chunk scout model for large PRs",
     )
     parser.add_argument(
         "--synthesis-model",
-        default="claude-sonnet-5",
+        default="claude-opus-5",
         help="Final cross-file synthesis model for large PRs",
     )
     parser.add_argument(
-        "--small-pr-threshold",
+        "--small-pr-diff-size",
         type=int,
-        default=10,
-        help="Maximum file count for the small tier (default: %(default)s)",
+        default=8_000,
+        help="Maximum total diff characters for the small tier (default: %(default)s)",
     )
     parser.add_argument(
-        "--large-pr-threshold",
+        "--medium-pr-diff-size",
         type=int,
-        default=20,
-        help="File count above which parallel scouting is used (default: %(default)s)",
+        default=40_000,
+        help="Total diff characters above which chunked scouting is used (default: %(default)s)",
+    )
+    parser.add_argument(
+        "--scout-chunk-size",
+        type=int,
+        default=15_000,
+        help="Maximum diff characters per scout chunk for large PRs; files are never split (default: %(default)s)",
+    )
+    parser.add_argument(
+        "--max-review-diff-size",
+        type=int,
+        default=DEFAULT_MAX_REVIEW_DIFF_SIZE,
+        help="Total diff characters above which a PR is skipped entirely (default: %(default)s)",
+    )
+    parser.add_argument(
+        "--min-confidence",
+        type=int,
+        default=6,
+        help="Drop findings with a parsed Confidence below this value (1-10); 0 disables filtering "
+        "(default: %(default)s)",
     )
     parser.add_argument(
         "--max-workers",
@@ -854,11 +979,23 @@ def main() -> int:
     except RuntimeError as error:
         print(f"ERROR: {error}", file=sys.stderr)
         return 2
-    if not 0 < args.small_pr_threshold < args.large_pr_threshold <= MAX_REVIEW_FILES:
+    if not 0 < args.small_pr_diff_size < args.medium_pr_diff_size:
         print(
-            f"ERROR: thresholds must satisfy 0 < small < large <= {MAX_REVIEW_FILES}",
+            "ERROR: diff-size thresholds must satisfy 0 < --small-pr-diff-size < --medium-pr-diff-size",
             file=sys.stderr,
         )
+        return 2
+    if args.scout_chunk_size < 1:
+        print("ERROR: --scout-chunk-size must be at least 1", file=sys.stderr)
+        return 2
+    if args.max_review_diff_size < args.medium_pr_diff_size:
+        print(
+            "ERROR: --max-review-diff-size must be at least --medium-pr-diff-size",
+            file=sys.stderr,
+        )
+        return 2
+    if args.min_confidence < 0:
+        print("ERROR: --min-confidence cannot be negative", file=sys.stderr)
         return 2
     if args.max_workers < 1:
         print("ERROR: --max-workers must be at least 1", file=sys.stderr)
@@ -891,9 +1028,10 @@ def main() -> int:
             if not checks_passed(pr):
                 log(f"Skipping #{pr.number}: checks are not all successful")
                 continue
-            if has_too_many_files(pr):
+            if exceeds_diff_size_ceiling(pr, args.max_review_diff_size):
                 log(
-                    f"Skipping #{pr.number}: {len(pr.files)} changed files exceeds the {MAX_REVIEW_FILES}-file limit",
+                    f"Skipping #{pr.number}: total diff size {total_diff_size(pr.files)} chars "
+                    f"exceeds the {args.max_review_diff_size}-char limit",
                 )
                 continue
 
@@ -914,7 +1052,7 @@ def main() -> int:
                 with pull_request_checkout(pr, command_runner):
                     review_files = local_review_files(pr, command_runner)
                     progress_callback = None
-                    if args.dry_run and len(pr.files) > args.large_pr_threshold:
+                    if args.dry_run and total_diff_size(review_files) > args.medium_pr_diff_size:
                         report_path = start_dry_run_report(pr, args.output_dir)
                         progress_callback = lambda filename, finding: append_dry_run_scout(
                             report_path,
@@ -923,8 +1061,9 @@ def main() -> int:
                         )
                     body = review_pr(
                         pr,
-                        small_pr_threshold=args.small_pr_threshold,
-                        large_pr_threshold=args.large_pr_threshold,
+                        small_pr_diff_size=args.small_pr_diff_size,
+                        medium_pr_diff_size=args.medium_pr_diff_size,
+                        scout_chunk_size=args.scout_chunk_size,
                         small_pr_model=args.small_pr_model,
                         medium_pr_model=args.medium_pr_model,
                         large_file_model=args.large_file_model,
@@ -943,6 +1082,7 @@ def main() -> int:
                         args.polisher_model,
                         args.output_dir,
                         denied_tools=args.deny_tool,
+                        min_confidence=args.min_confidence,
                     )
                 outcome = "dry-run report ready" if args.dry_run else "review submitted"
                 log(f"PR #{pr.number}: {outcome}; previous checkout restored")

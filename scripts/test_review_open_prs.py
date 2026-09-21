@@ -16,11 +16,13 @@ from review_open_prs import (
     checks_passed,
     content_fingerprint,
     build_polishing_prompt,
+    chunk_files_by_size,
+    exceeds_diff_size_ceiling,
     extract_polished_review,
     append_dry_run_scout,
     dry_run_report_path,
+    filter_low_confidence_findings,
     has_signed_review,
-    has_too_many_files,
     invoke_copilot,
     github_event_pull_request_number,
     list_pull_requests,
@@ -33,6 +35,7 @@ from review_open_prs import (
     review_pr,
     resolve_review_target,
     run_command,
+    total_diff_size,
     OPENRADIOSS_GIT_URL,
     SIGNATURE,
     start_dry_run_report,
@@ -216,11 +219,14 @@ class ReviewScriptTests(unittest.TestCase):
         self.pr.checks = []
         self.assertFalse(checks_passed(self.pr))
 
-    def test_review_file_limit_skips_only_prs_above_fifty_files(self):
-        self.pr.files *= 50
-        self.assertFalse(has_too_many_files(self.pr))
-        self.pr.files.append({"filename": "overflow.F90", "status": "modified", "patch": ""})
-        self.assertTrue(has_too_many_files(self.pr))
+    def test_review_file_limit_skips_only_prs_above_the_diff_size_ceiling(self):
+        self.pr.files = [
+            {"filename": f"file{i}.F90", "status": "modified", "patch": "x" * 100}
+            for i in range(10)
+        ]
+        self.assertFalse(exceeds_diff_size_ceiling(self.pr, max_diff_size=2_000))
+        self.pr.files.append({"filename": "overflow.F90", "status": "modified", "patch": "x" * 2_000})
+        self.assertTrue(exceeds_diff_size_ceiling(self.pr, max_diff_size=2_000))
 
     def test_legacy_signed_review_is_bound_to_head_sha(self):
         self.pr.reviews = [{"body": SIGNATURE, "commit": {"oid": "old"}}]
@@ -558,8 +564,9 @@ class ReviewScriptTests(unittest.TestCase):
 
         result = review_pr(
             self.pr,
-            small_pr_threshold=1,
-            large_pr_threshold=20,
+            small_pr_diff_size=20,
+            medium_pr_diff_size=1000,
+            scout_chunk_size=1000,
             small_pr_model="small-model",
             medium_pr_model="medium-model",
             large_file_model="scout-model",
@@ -576,8 +583,9 @@ class ReviewScriptTests(unittest.TestCase):
         )
         review_pr(
             self.pr,
-            small_pr_threshold=1,
-            large_pr_threshold=20,
+            small_pr_diff_size=20,
+            medium_pr_diff_size=1000,
+            scout_chunk_size=1000,
             small_pr_model="small-model",
             medium_pr_model="medium-model",
             large_file_model="scout-model",
@@ -588,7 +596,7 @@ class ReviewScriptTests(unittest.TestCase):
         self.assertEqual(len(calls), 2)
         self.assertIn("medium-model", calls[-1])
 
-    def test_large_pr_scouts_in_parallel_and_synthesizes_with_original_patches(self):
+    def test_large_pr_scouts_chunks_in_parallel_and_synthesizes_with_original_patches(self):
         self.pr.files.append(
             {"filename": "b.F90", "status": "modified", "patch": "@@ -2 +2 @@\n-old\n+new"}
         )
@@ -602,8 +610,9 @@ class ReviewScriptTests(unittest.TestCase):
 
         result = review_pr(
             self.pr,
-            small_pr_threshold=1,
-            large_pr_threshold=1,
+            small_pr_diff_size=1,
+            medium_pr_diff_size=1,
+            scout_chunk_size=1,
             small_pr_model="small-model",
             medium_pr_model="medium-model",
             large_file_model="scout-model",
@@ -620,7 +629,23 @@ class ReviewScriptTests(unittest.TestCase):
         synthesis_prompt = synthesis_call[1]
         self.assertIn("--- a.F90 ---", synthesis_prompt)
         self.assertIn("--- b.F90 ---", synthesis_prompt)
-        self.assertIn("--- Haiku scout findings ---", synthesis_prompt)
+        self.assertIn("--- Scout findings from chunked review ---", synthesis_prompt)
+
+    def test_chunk_files_by_size_never_splits_a_file(self):
+        files = [
+            {"filename": "a.F90", "patch": "x" * 10},
+            {"filename": "b.F90", "patch": "x" * 10},
+            {"filename": "c.F90", "patch": "x" * 30},
+        ]
+        chunks = chunk_files_by_size(files, chunk_size_budget=25)
+        self.assertEqual(
+            [[item["filename"] for item in chunk] for chunk in chunks],
+            [["a.F90", "b.F90"], ["c.F90"]],
+        )
+
+    def test_total_diff_size_sums_patch_lengths(self):
+        files = [{"patch": "abc"}, {"patch": "de"}, {"patch": None}]
+        self.assertEqual(total_diff_size(files), 5)
 
     def test_main_forces_review_inside_checkout_and_forwards_parity_options(self):
         self.pr.reviews = [
@@ -634,8 +659,11 @@ class ReviewScriptTests(unittest.TestCase):
             medium_pr_model="medium-model",
             large_file_model="scout-model",
             synthesis_model="synthesis-model",
-            small_pr_threshold=10,
-            large_pr_threshold=20,
+            small_pr_diff_size=8_000,
+            medium_pr_diff_size=40_000,
+            scout_chunk_size=15_000,
+            max_review_diff_size=400_000,
+            min_confidence=6,
             max_workers=3,
             polisher_model="polisher-model",
             heartbeat_seconds=60,
@@ -672,6 +700,57 @@ class ReviewScriptTests(unittest.TestCase):
         submit.assert_called_once()
         self.assertEqual(submit.call_args.args[5], "custom-reports")
         self.assertEqual(submit.call_args.kwargs["denied_tools"], ["shell"])
+        self.assertEqual(submit.call_args.kwargs["min_confidence"], 6)
+
+    def test_filter_low_confidence_findings_drops_rows_below_threshold(self):
+        body = (
+            "| # | Severity | File | Lines | Issue | Confidence |\n"
+            "|---|----------|------|-------|-------|------------|\n"
+            "| 1 | HIGH | a.F90 | 1-2 | Real bug | 8/10 |\n"
+            "| 2 | LOW | b.F90 | 3 | Speculative | 3/10 |\n"
+        )
+        filtered = filter_low_confidence_findings(body, threshold=6)
+        self.assertIn("Real bug", filtered)
+        self.assertNotIn("Speculative", filtered)
+
+    def test_filter_low_confidence_findings_collapses_to_no_findings_when_all_dropped(self):
+        body = (
+            "| # | Severity | File | Lines | Issue | Confidence |\n"
+            "|---|----------|------|-------|-------|------------|\n"
+            "| 1 | LOW | b.F90 | 3 | Speculative | 3/10 |\n"
+        )
+        self.assertEqual(filter_low_confidence_findings(body, threshold=6), "No findings.")
+
+    def test_filter_low_confidence_findings_keeps_unparseable_rows_and_bodies(self):
+        unparseable_row = (
+            "| # | Severity | File | Lines | Issue | Confidence |\n"
+            "|---|----------|------|-------|-------|------------|\n"
+            "| 1 | HIGH | a.F90 | 1-2 | Real bug | unknown |\n"
+        )
+        self.assertIn("Real bug", filter_low_confidence_findings(unparseable_row, threshold=6))
+        self.assertEqual(filter_low_confidence_findings("No findings.", threshold=6), "No findings.")
+
+    def test_submit_review_applies_confidence_filter_before_signing(self):
+        self.pr.head_sha = "abc123"
+        body = (
+            "<!-- openradioss-copilot-polished-review:start -->\n"
+            "| # | Severity | File | Lines | Issue | Confidence |\n"
+            "|---|----------|------|-------|-------|------------|\n"
+            "| 1 | LOW | b.F90 | 3 | Speculative | 3/10 |\n"
+            "<!-- openradioss-copilot-polished-review:end -->"
+        )
+        with TemporaryDirectory() as directory:
+            with patch("review_open_prs.gh_json", return_value={"login": "review-bot"}):
+                report_path = submit_review(
+                    "OpenRadioss/OpenRadioss",
+                    self.pr,
+                    body,
+                    dry_run=True,
+                    polisher_model="polisher-model",
+                    output_dir=directory,
+                    min_confidence=6,
+                )
+            self.assertIn("No findings.", Path(report_path).read_text(encoding="utf-8"))
 
 
 if __name__ == "__main__":
