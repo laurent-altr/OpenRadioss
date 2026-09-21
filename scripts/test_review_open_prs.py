@@ -339,12 +339,15 @@ class ReviewScriptTests(unittest.TestCase):
             ),
         ):
             response = run_command(
-                ["copilot", "--model", "review-model", "--prompt", "Review this"],
+                ["copilot", "--model", "review-model"],
+                input_text="Review this",
                 copilot_heartbeat_seconds=60,
             )
 
         self.assertEqual(response, "review response")
         self.assertEqual(process.calls, 2)
+        self.assertEqual(popen.call_args.args[0], ["copilot", "--model", "review-model"])
+        self.assertEqual(popen.call_args.kwargs["stdin"], subprocess.PIPE)
         copilot_environment = popen.call_args.kwargs["env"]
         self.assertNotIn("GH_TOKEN", copilot_environment)
         self.assertNotIn("GITHUB_TOKEN", copilot_environment)
@@ -593,7 +596,7 @@ class ReviewScriptTests(unittest.TestCase):
         progress = []
 
         def fake_runner(command, input_text=None):
-            calls.append(command)
+            calls.append((command, input_text))
             model = command[command.index("--model") + 1]
             return f"Findings from {model}"
 
@@ -613,8 +616,8 @@ class ReviewScriptTests(unittest.TestCase):
         self.assertEqual(result, "Findings from synthesis-model")
         self.assertEqual(len(calls), 3)
         self.assertEqual(len(progress), 2)
-        synthesis_call = next(call for call in calls if "synthesis-model" in call)
-        synthesis_prompt = synthesis_call[-1]
+        synthesis_call = next(call for call in calls if call[0][call[0].index("--model") + 1] == "synthesis-model")
+        synthesis_prompt = synthesis_call[1]
         self.assertIn("--- a.F90 ---", synthesis_prompt)
         self.assertIn("--- b.F90 ---", synthesis_prompt)
         self.assertIn("--- Haiku scout findings ---", synthesis_prompt)

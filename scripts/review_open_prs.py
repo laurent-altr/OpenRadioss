@@ -586,10 +586,10 @@ def invoke_copilot(
         "--disable-builtin-mcps",
     ]
     command.extend(f"--deny-tool={tool}" for tool in denied_tools or [])
-    command.extend(["--model", model, "--prompt", prompt])
+    command.extend(["--model", model])
     denied_description = ", ".join(denied_tools or []) or "none"
     log(f"Copilot: starting model={model}; denied tools={denied_description}")
-    response = command_runner(command, input_text=None).strip()
+    response = command_runner(command, input_text=prompt).strip()
     if not response:
         raise RuntimeError(f"Copilot returned an empty response for model {model}")
     log(f"Copilot: model={model} completed; response captured for summary extraction")
