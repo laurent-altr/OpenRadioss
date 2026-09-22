@@ -126,6 +126,183 @@ C----------------------------------------------
         FSH(I) = MAX(ONE,FSH(I))
         COEFI(I) =ONE_OVER_12 
       ENDDO
+C
+C     WARNING FOR TYPE 18:
+C     TIN has both physical and numerical effects. It is assembled into
+C     nodal rotational inertia IN and part inertia PARTSAV; STIR is
+C     assembled into STIFR. Its section terms are lumped physical inertia,
+C     while ONEP2, PHII, and the COEFI switch add numerical inertia.
+C     Thus a change to TIN affects rotational dynamics, not only timestep.
+C
+C     Historical intent: commit 63da9099f0 (October 2023) introduced the
+C     TYPE 18 KPHI override and COEFI switch together, completing engine
+C     commit c0ec1b679f, titled "improvement on robustness of beam".
+C     The extra inertia is therefore part of a deliberate robustness
+C     change, consistent with avoiding a restrictive rotational timestep.
+C     The commits do not explain the abrupt threshold or establish that
+C     its discontinuity was intended or assessed. Numerical stabilization
+C     is intentional; the jump is not a physical section transition.
+C
+C     Let B=MAX(TIYY,TIZZ), F=FACDT=A*L**2/(12*B),
+C     Q=RHO*L*B/TWO, and BETA=ONEP2**3=1.728. Define the existing
+C     polar-inertia floor INPOL=RHO*L*TIXX/TWO. With COEFI=ONE_OVER_12,
+C     the inertia before PHII and the polar-inertia floor is
+C
+C       TIN0=Q*(ONE+BETA*F).
+C
+C     TYPE 18 overwrites KPHI with MAX(ONE,TWELVE*F), but currently keeps
+C     PHII from the generic beam formula. For F > ONE it switches COEFI
+C     from ONE_OVER_12 to ONE, multiplying the length-dependent inertia
+C     term by TWELVE. PHII is applied only for F < ONE. Hence PHII is not
+C     coupled to the TYPE 18 KPHI, and TIN is discontinuous at F=ONE.
+C
+C     Example: a 20 mm square section represented by four 100 mm2
+C     subareas at (RYI,RZI)=(+/-5,+/-5) mm gives AREA=400 mm2 and
+C     TIYY=TIZZ=13333.333 mm4. For AL=20 mm, FACDT=ONE. In single
+C     precision, the adjacent lengths 19.99999809 and 20.00000191 mm
+C     select different COEFI values; the last bits of FACDT depend on
+C     arithmetic evaluation. With steel density 7.85E-6 kg/mm3 and
+C     E/G=2.6, a standalone Fortran reproduction confirms that TIN jumps
+C     from about 2.8553 to 22.7504 kg mm2 per beam end, a factor of 7.97.
+C     The mathematical discontinuity also exists in double precision.
+C
+C     A continuous correction can be derived by requiring consistency
+C     between the initial, unscaled timestep estimates. Define
+C
+C       DAMPFAC=SQRT(ONE+DMP**2)-DMP,
+C       SROT=MAX(G*TIXX,KPHI*E*B),
+C       SSP=MAX(EM20,PM(27,IMAT)).
+C
+C     PMASS contributes STIR=SROT/(L*DAMPFAC**2). The unscaled DTNODA
+C     rotational estimate is SQRT(TWO*IN/STIFR); for this beam-end
+C     contribution alone it is DTN=SQRT(TWO*TIN/STIR). DT1LAWP gives
+C     DTE=DAMPFAC*L/SSP for TYPE 18. Requiring DTN >= DTE gives
+C
+C       TIN_TARGET=HALF*L*SROT/(SSP*SSP).
+C
+C     DAMPFAC cancels. This is the exact minimum for these estimates,
+C     not a unique physical inertia or a general stability proof. The
+C     independent DTFAC1(11) and DTFAC1(5) user factors are excluded;
+C     comparing scaled estimates would multiply the target by
+C     (DTFAC1(5)/DTFAC1(11))**2 for positive factors.
+C
+C     For the example with SSP**2=E/RHO, current DTN/DTE is about 0.477
+C     just below F=ONE and 1.346 just above it. Nodal timestep control
+C     can therefore reduce the timestep or add inertia; element timestep
+C     control can raise a stability concern. These estimator comparisons
+C     alone do not demonstrate divergence of a complete model. Connected
+C     elements, constraints, and the selected timestep controls matter.
+C
+C     Proposed TYPE 18 implementation: keep COEFI=ONE_OVER_12, do not apply
+C     the PHII inherited from the generic KPHI, remove the KPHI > TWELVE
+C     switch, and preserve both the physical/ONEP2 term and polar floor:
+C
+C       TIN=MAX(TIN0,INPOL,TIN_TARGET).
+C
+C     This uses the torsional/bending stiffness and sound speed of the
+C     estimates. For valid, continuously varying inputs, KPHI, TIN_TARGET,
+C     and final TIN are continuous. For SSP**2=E/RHO with bending
+C     controlling, TIN_TARGET=Q*KPHI; the example gives 12.56 kg mm2.
+C     Other beam types should retain their current treatment.
+C
+C     If the historical BETA robustness margin must also multiply the
+C     required inertia, use
+C
+C       MARGIN=(ONE+BETA*F)/(ONE+F),
+C       TIN=MAX(TIN0,INPOL,MARGIN*TIN_TARGET).
+C
+C     For SSP**2=E/RHO with bending controlling, this is equivalent to
+C     multiplying TIN0 by PHII=MAX(ONE,KPHI/(ONE+F)) for all F, then
+C     applying INPOL. It gives 17.1318 kg mm2 in the example. MARGIN lies
+C     between ONE and BETA, but the final DTN/DTE need not be bounded by
+C     SQRT(BETA): for this square section at L=2 mm, INPOL dominates and
+C     DTN/DTE=SQRT(TWO). MARGIN is an explicit robustness policy, not a
+C     requirement of the consistency derivation. Both variants retain
+C     numerical inertia and change the current dynamic response.
+C
+C     Robustness/timestep tradeoff for the example near F=ONE, assuming
+C     SSP**2=E/RHO and bending controlling (unscaled estimates):
+C
+C       Formulation                  TIN per end (kg mm2)    DTN/DTE
+C       Current, just below F=ONE           2.8553             0.477
+C       Current, just above F=ONE          22.7504             1.346
+C       Proposed minimum target           12.5600             1.000
+C       Proposed target with margin       17.1318             1.168
+C
+C     The minimum target preserves the initial consistency objective:
+C     this beam-end rotational estimate is not smaller than DTE. It does
+C     not preserve all historical timestep headroom; reducing inertia
+C     above the old threshold reduces the corresponding DTN estimate.
+C     The margin variant retains an explicit extra inertia cushion, but
+C     still gives less headroom immediately above F=ONE than the old
+C     switch (1.168 versus 1.346 in the example).
+C
+C     For SSP**2=E/RHO with bending controlling, the margin variant and
+C     old F > ONE branch have the same leading behavior as F grows:
+C
+C       TIN_OLD    ~ TWELVE*BETA*Q*F,
+C       TIN_MARGIN ~ TWELVE*BETA*Q*F.
+C
+C     The margin variant is therefore the more conservative candidate
+C     relative to the minimum target when retaining the historical
+C     robustness intent matters; it does not reproduce the old inertia
+C     exactly. Neither variant guarantees unchanged stability or actual
+C     global timestep. Matching these estimates is not a stability proof.
+C
+C     Validation scope: ordinary engine PDLEN3 uses the same KPHI-based
+C     rotational stiffness, but its AMS elementary-timestep branch uses
+C     FOUR instead of KPHI. The initial target alone does not validate
+C     that branch or subsequent large-deformation behavior. Before
+C     adopting either variant, check threshold sweeps in both precisions,
+C     rotational dynamics and energy, nodal versus element timestep
+C     control, and AMS. The reproduction above checks the arithmetic,
+C     not full-solver stability or regression behavior.
+C
+C     PROPOSED CODE (MARGIN VARIANT; NOT ACTIVE OR SOLVER-VALIDATED):
+C     Add the following declaration to the local variables. To activate
+C     a code line below, replace its leading C with a space, retaining
+C     column 6 for continuation lines.
+C
+C     my_real :: SSP,SROT,TIN_TARGET,MARGIN
+C
+C     Replace the TYPE 18 override and the entire MASSE ELEMENT /2 loop
+C     below with these two blocks; do not execute both old and new code.
+C     The preceding loop still initializes COEFI=ONE_OVER_12 for all
+C     elements. No change is needed to later assembly or thermal code.
+C
+C     IF (IGTYP == 18) THEN
+C       DO I=LFT,LLT
+C         FSH(I) = ONE
+C         KPHI(I) = MAX(ONE,TWELVE*FACDT(I))
+C       ENDDO
+C     ENDIF
+C
+C     DO I=LFT,LLT
+C       LL = ONEP2*AL(I)
+C       EMS(I)=RHO(I)*AL(I)*AREA(I)*HALF
+C       TIN(I)=ONEP2*EMS(I)*LL**2*COEFI(I)+RHO(I)*(AL(I)*HALF)
+C    .       * MAX(TIYY(I),TIZZ(I))
+C       IF (IGTYP == 18) THEN
+C         E = PM(20,IMAT)
+C         G = PM(22,IMAT)
+C         BB = MAX(TIYY(I),TIZZ(I))
+C         SSP = MAX(EM20,PM(27,IMAT))
+C         SROT = MAX(G*TIXX(I),KPHI(I)*E*BB)
+C         TIN_TARGET = HALF*AL(I)*SROT/(SSP*SSP)
+C         MARGIN = (ONE+ONEP2**3*FACDT(I))/(ONE+FACDT(I))
+C         TIN(I) = MAX(TIN(I),MARGIN*TIN_TARGET)
+C       ELSE
+C         IF (FACDT(I)<ONE) TIN(I)=PHII(I)*TIN(I)
+C       ENDIF
+C       TIN(I)=MAX(TIN(I),RHO(I)*AL(I)/TWO*TIXX(I))
+C     ENDDO
+C
+C     This bypasses generic PHII only for TYPE 18, retains the polar
+C     floor, and leaves other beam types unchanged. For the minimum-
+C     target variant instead, replace the MARGIN assignment with
+C
+C         MARGIN = ONE
+C
       IF (IGTYP == 18) THEN
          DO I=LFT,LLT
            FSH(I) = ONE
