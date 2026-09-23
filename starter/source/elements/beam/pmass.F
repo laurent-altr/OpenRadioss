@@ -71,6 +71,7 @@ C-----------------------------------------------
       my_real :: XX,YY,ZZ,XY,YZ,ZX,STI, E, G, AA, BB, ARI,INI,RYI,RZI,STIR, DMP, SL2I, LL,TEMP0
       my_real :: RHO(MVSIZ), EMS(MVSIZ),COEFI(MVSIZ),TIN(MVSIZ), TIXX(MVSIZ), TIYY(MVSIZ), TIZZ(MVSIZ),RHOCP(MVSIZ)
       my_real :: FACDT(MVSIZ), PHII(MVSIZ),KPHI(MVSIZ),CST,PHMAX,PHMIN,FSH(MVSIZ)
+      my_real :: SSP,SROT,TIN_TARGET,MARGIN
 C=======================================================================
       IPY = 200  
       IPZ = 300  
@@ -127,11 +128,12 @@ C----------------------------------------------
         COEFI(I) =ONE_OVER_12 
       ENDDO
 C
-C     WARNING FOR TYPE 18:
+C     TYPE 18 ROTATIONAL INERTIA:
 C     TIN has both physical and numerical effects. It is assembled into
 C     nodal rotational inertia IN and part inertia PARTSAV; STIR is
 C     assembled into STIFR. Its section terms are lumped physical inertia,
-C     while ONEP2, PHII, and the COEFI switch add numerical inertia.
+C     while ONEP2 and the consistency target with margin add numerical
+C     inertia. Other beam types retain their existing PHII treatment.
 C     Thus a change to TIN affects rotational dynamics, not only timestep.
 C
 C     Historical intent: commit 63da9099f0 (October 2023) introduced the
@@ -150,11 +152,11 @@ C     the inertia before PHII and the polar-inertia floor is
 C
 C       TIN0=Q*(ONE+BETA*F).
 C
-C     TYPE 18 overwrites KPHI with MAX(ONE,TWELVE*F), but currently keeps
-C     PHII from the generic beam formula. For F > ONE it switches COEFI
-C     from ONE_OVER_12 to ONE, multiplying the length-dependent inertia
-C     term by TWELVE. PHII is applied only for F < ONE. Hence PHII is not
-C     coupled to the TYPE 18 KPHI, and TIN is discontinuous at F=ONE.
+C     The former TYPE 18 treatment overwrote KPHI with MAX(ONE,TWELVE*F),
+C     but kept PHII from the generic beam formula. For F > ONE it switched
+C     COEFI from ONE_OVER_12 to ONE, multiplying the length-dependent
+C     inertia term by TWELVE. PHII was applied only for F < ONE. Thus PHII
+C     was not coupled to the TYPE 18 KPHI, and TIN was discontinuous at F=ONE.
 C
 C     Example: a 20 mm square section represented by four 100 mm2
 C     subareas at (RYI,RZI)=(+/-5,+/-5) mm gives AREA=400 mm2 and
@@ -162,8 +164,9 @@ C     TIYY=TIZZ=13333.333 mm4. For AL=20 mm, FACDT=ONE. In single
 C     precision, the adjacent lengths 19.99999809 and 20.00000191 mm
 C     select different COEFI values; the last bits of FACDT depend on
 C     arithmetic evaluation. With steel density 7.85E-6 kg/mm3 and
-C     E/G=2.6, a standalone Fortran reproduction confirms that TIN jumps
-C     from about 2.8553 to 22.7504 kg mm2 per beam end, a factor of 7.97.
+C     E/G=2.6, a standalone Fortran reproduction of the former code shows
+C     that TIN jumps from about 2.8553 to 22.7504 kg mm2 per beam end,
+C     a factor of 7.97.
 C     The mathematical discontinuity also exists in double precision.
 C
 C     A continuous correction can be derived by requiring consistency
@@ -186,16 +189,16 @@ C     independent DTFAC1(11) and DTFAC1(5) user factors are excluded;
 C     comparing scaled estimates would multiply the target by
 C     (DTFAC1(5)/DTFAC1(11))**2 for positive factors.
 C
-C     For the example with SSP**2=E/RHO, current DTN/DTE is about 0.477
+C     For the example with SSP**2=E/RHO, the former DTN/DTE was about 0.477
 C     just below F=ONE and 1.346 just above it. Nodal timestep control
 C     can therefore reduce the timestep or add inertia; element timestep
 C     control can raise a stability concern. These estimator comparisons
 C     alone do not demonstrate divergence of a complete model. Connected
 C     elements, constraints, and the selected timestep controls matter.
 C
-C     Proposed TYPE 18 implementation: keep COEFI=ONE_OVER_12, do not apply
-C     the PHII inherited from the generic KPHI, remove the KPHI > TWELVE
-C     switch, and preserve both the physical/ONEP2 term and polar floor:
+C     TYPE 18 keeps COEFI=ONE_OVER_12, bypasses the PHII inherited from
+C     the generic KPHI, and removes the KPHI > TWELVE switch. The minimum
+C     consistency correction would preserve the base and polar floor as
 C
 C       TIN=MAX(TIN0,INPOL,TIN_TARGET).
 C
@@ -205,8 +208,8 @@ C     and final TIN are continuous. For SSP**2=E/RHO with bending
 C     controlling, TIN_TARGET=Q*KPHI; the example gives 12.56 kg mm2.
 C     Other beam types should retain their current treatment.
 C
-C     If the historical BETA robustness margin must also multiply the
-C     required inertia, use
+C     The implemented variant also retains a BETA-based robustness margin
+C     on the required inertia:
 C
 C       MARGIN=(ONE+BETA*F)/(ONE+F),
 C       TIN=MAX(TIN0,INPOL,MARGIN*TIN_TARGET).
@@ -217,17 +220,17 @@ C     applying INPOL. It gives 17.1318 kg mm2 in the example. MARGIN lies
 C     between ONE and BETA, but the final DTN/DTE need not be bounded by
 C     SQRT(BETA): for this square section at L=2 mm, INPOL dominates and
 C     DTN/DTE=SQRT(TWO). MARGIN is an explicit robustness policy, not a
-C     requirement of the consistency derivation. Both variants retain
-C     numerical inertia and change the current dynamic response.
+C     requirement of the consistency derivation. Both formulations retain
+C     numerical inertia and change the former dynamic response.
 C
 C     Robustness/timestep tradeoff for the example near F=ONE, assuming
 C     SSP**2=E/RHO and bending controlling (unscaled estimates):
 C
 C       Formulation                  TIN per end (kg mm2)    DTN/DTE
-C       Current, just below F=ONE           2.8553             0.477
-C       Current, just above F=ONE          22.7504             1.346
-C       Proposed minimum target           12.5600             1.000
-C       Proposed target with margin       17.1318             1.168
+C       Former, just below F=ONE            2.8553             0.477
+C       Former, just above F=ONE           22.7504             1.346
+C       Minimum target (reference)        12.5600             1.000
+C       Implemented target with margin    17.1318             1.168
 C
 C     The minimum target preserves the initial consistency objective:
 C     this beam-end rotational estimate is not smaller than DTE. It does
@@ -252,74 +255,50 @@ C
 C     Validation scope: ordinary engine PDLEN3 uses the same KPHI-based
 C     rotational stiffness, but its AMS elementary-timestep branch uses
 C     FOUR instead of KPHI. The initial target alone does not validate
-C     that branch or subsequent large-deformation behavior. Before
-C     adopting either variant, check threshold sweeps in both precisions,
+C     that branch or subsequent large-deformation behavior. Full-solver
+C     validation must check threshold sweeps in both precisions,
 C     rotational dynamics and energy, nodal versus element timestep
 C     control, and AMS. The reproduction above checks the arithmetic,
 C     not full-solver stability or regression behavior.
 C
-C     PROPOSED CODE (MARGIN VARIANT; NOT ACTIVE OR SOLVER-VALIDATED):
-C     Add the following declaration to the local variables. To activate
-C     a code line below, replace its leading C with a space, retaining
-C     column 6 for continuation lines.
-C
-C     my_real :: SSP,SROT,TIN_TARGET,MARGIN
-C
-C     Replace the TYPE 18 override and the entire MASSE ELEMENT /2 loop
-C     below with these two blocks; do not execute both old and new code.
-C     The preceding loop still initializes COEFI=ONE_OVER_12 for all
-C     elements. No change is needed to later assembly or thermal code.
-C
-C     IF (IGTYP == 18) THEN
-C       DO I=LFT,LLT
-C         FSH(I) = ONE
-C         KPHI(I) = MAX(ONE,TWELVE*FACDT(I))
-C       ENDDO
-C     ENDIF
-C
-C     DO I=LFT,LLT
-C       LL = ONEP2*AL(I)
-C       EMS(I)=RHO(I)*AL(I)*AREA(I)*HALF
-C       TIN(I)=ONEP2*EMS(I)*LL**2*COEFI(I)+RHO(I)*(AL(I)*HALF)
-C    .       * MAX(TIYY(I),TIZZ(I))
-C       IF (IGTYP == 18) THEN
-C         E = PM(20,IMAT)
-C         G = PM(22,IMAT)
-C         BB = MAX(TIYY(I),TIZZ(I))
-C         SSP = MAX(EM20,PM(27,IMAT))
-C         SROT = MAX(G*TIXX(I),KPHI(I)*E*BB)
-C         TIN_TARGET = HALF*AL(I)*SROT/(SSP*SSP)
-C         MARGIN = (ONE+ONEP2**3*FACDT(I))/(ONE+FACDT(I))
-C         TIN(I) = MAX(TIN(I),MARGIN*TIN_TARGET)
-C       ELSE
-C         IF (FACDT(I)<ONE) TIN(I)=PHII(I)*TIN(I)
-C       ENDIF
-C       TIN(I)=MAX(TIN(I),RHO(I)*AL(I)/TWO*TIXX(I))
-C     ENDDO
-C
-C     This bypasses generic PHII only for TYPE 18, retains the polar
-C     floor, and leaves other beam types unchanged. For the minimum-
-C     target variant instead, replace the MARGIN assignment with
-C
-C         MARGIN = ONE
+C     Guard: apply the target only for positive stiffness and positive
+C     material sound speed. Otherwise retain TIN0 and the polar floor;
+C     there is no consistency guarantee for a nonpositive sound speed.
+C     This includes zero-stiffness void beams. For positive sound speed,
+C     retain the DT1LAWP floor, but divide by SSP twice instead of forming
+C     SSP*SSP: EM20**2 is subnormal in single precision and can become zero
+C     with flush-to-zero enabled. The guard is not material validation.
 C
       IF (IGTYP == 18) THEN
-         DO I=LFT,LLT
-           FSH(I) = ONE
-           KPHI(I) = MAX(ONE,TWELVE*FACDT(I))  
-           IF (KPHI(I) > TWELVE ) COEFI(I) =ONE 
-         ENDDO
-      END IF
+        DO I=LFT,LLT
+          FSH(I) = ONE
+          KPHI(I) = MAX(ONE,TWELVE*FACDT(I))
+        ENDDO
+      ENDIF
 C----------------------------------------------
 C     MASSE ELEMENT /2
 C----------------------------------------------
       DO I=LFT,LLT
-       LL = ONEP2*AL(I)
-       EMS(I)=RHO(I)*AL(I)*AREA(I)* HALF
-       TIN(I)=ONEP2*EMS(I)*LL**2*COEFI(I) + RHO(I)*(AL(I)*HALF)
+        LL = ONEP2*AL(I)
+        EMS(I)=RHO(I)*AL(I)*AREA(I)* HALF
+        TIN(I)=ONEP2*EMS(I)*LL**2*COEFI(I) + RHO(I)*(AL(I)*HALF)
      .       * MAX(TIYY(I),TIZZ(I))
-       IF (FACDT(I)<ONE) TIN(I)=PHII(I)*TIN(I)
-       TIN(I)= MAX(TIN(I),RHO(I)*AL(I)/TWO*TIXX(I))
+        IF (IGTYP == 18) THEN
+          E = PM(20,IMAT)
+          G = PM(22,IMAT)
+          BB = MAX(TIYY(I),TIZZ(I))
+          SROT = MAX(G*TIXX(I),KPHI(I)*E*BB)
+          SSP = PM(27,IMAT)
+          IF (SROT > ZERO .AND. SSP > ZERO) THEN
+            SSP = MAX(EM20,SSP)
+            TIN_TARGET = (HALF*AL(I)/SSP)*(SROT/SSP)
+            MARGIN = (ONE+ONEP2**3*FACDT(I))/(ONE+FACDT(I))
+            TIN(I) = MAX(TIN(I),MARGIN*TIN_TARGET)
+          ENDIF
+        ELSE
+          IF (FACDT(I)<ONE) TIN(I)=PHII(I)*TIN(I)
+        ENDIF
+        TIN(I)= MAX(TIN(I),RHO(I)*AL(I)/TWO*TIXX(I))
       ENDDO
        IF( JTHE > 0 ) THEN
            DO I=LFT,LLT
